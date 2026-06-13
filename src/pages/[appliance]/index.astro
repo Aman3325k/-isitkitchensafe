@@ -1,0 +1,180 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import itemsData from '../../data/items.json';
+
+export function getStaticPaths() {
+  const uniqueAppliances = [...new Set(itemsData.map(item => item.appliance))];
+  return uniqueAppliances.map(app => ({
+    params: { appliance: app }
+  }));
+}
+
+const { appliance } = Astro.params;
+
+// Helper to format appliance names
+function formatAppliance(app: string) {
+  if (app === 'airfryer') return 'Air Fryer';
+  return app.charAt(0).toUpperCase() + app.slice(1);
+}
+
+const formattedAppliance = formatAppliance(appliance);
+const applianceItems = itemsData.filter(item => item.appliance === appliance);
+
+// SEO details
+const pageTitle = `${formattedAppliance} Kitchen Safety Guides | Is It Kitchen Safe?`;
+const pageDescription = `Browse all safety guides for the ${formattedAppliance}. Find out which kitchenware, containers, and ingredients can be safely put in the ${formattedAppliance}.`;
+
+// Color definitions for each appliance section hero banner
+const bannerStyles: Record<string, { bg: string; text: string; subText: string }> = {
+  dishwasher: {
+    bg: 'bg-signature-forest',
+    text: 'text-on-primary',
+    subText: 'text-white/80'
+  },
+  microwave: {
+    bg: 'bg-signature-coral',
+    text: 'text-on-primary',
+    subText: 'text-white/80'
+  },
+  freezer: {
+    bg: 'bg-signature-cream',
+    text: 'text-ink',
+    subText: 'text-muted'
+  },
+  oven: {
+    bg: 'bg-signature-peach',
+    text: 'text-ink',
+    subText: 'text-muted'
+  },
+  dryer: {
+    bg: 'bg-signature-mint',
+    text: 'text-ink',
+    subText: 'text-muted'
+  },
+  airfryer: {
+    bg: 'bg-signature-yellow',
+    text: 'text-ink',
+    subText: 'text-muted'
+  },
+  refrigerator: {
+    bg: 'bg-signature-mustard',
+    text: 'text-on-primary',
+    subText: 'text-white/80'
+  }
+};
+
+const styles = bannerStyles[appliance] || { bg: 'bg-surface-soft', text: 'text-ink', subText: 'text-muted' };
+---
+
+<Layout title={pageTitle} description={pageDescription}>
+  <!-- Hero Section -->
+  <section class={`${styles.bg} ${styles.text} py-[64px] md:py-[80px]`}>
+    <div class="max-w-[1280px] mx-auto px-6">
+      <nav class="flex gap-2 text-[13px] opacity-75 mb-6" aria-label="Breadcrumb">
+        <a href="/" class="hover:underline">Home</a>
+        <span>/</span>
+        <span class="font-medium">{formattedAppliance}</span>
+      </nav>
+      
+      <h1 class="text-display-lg font-medium tracking-tight mb-4">
+        {formattedAppliance} Safety Guides
+      </h1>
+      <p class={`${styles.subText} text-body-md max-w-2xl leading-relaxed`}>
+        Explore the safety guidelines and rules for putting containers, food items, and cooking materials into the {formattedAppliance}. Check individual items below for comprehensive detailed reviews.
+      </p>
+    </div>
+  </section>
+
+  <!-- Items Grid Section -->
+  <section class="max-w-[1280px] mx-auto px-6 py-[96px]">
+    <div class="flex flex-col md:flex-row md:items-end justify-between border-b border-hairline pb-8 mb-12">
+      <div>
+        <h2 class="text-display-md text-ink tracking-tight mb-2">Tested Items ({applianceItems.length})</h2>
+        <p class="text-body-md text-muted">A complete list of everyday kitchen items evaluated for {formattedAppliance} use.</p>
+      </div>
+      
+      <!-- Static Quick Filter (Client-side search on this page) -->
+      <div class="mt-6 md:mt-0 flex gap-3 max-w-[320px] w-full">
+        <input 
+          type="text" 
+          id="filter-input"
+          placeholder={`Search ${formattedAppliance} items...`}
+          class="w-full h-10 px-3 py-2 bg-canvas text-ink text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
+        />
+      </div>
+    </div>
+
+    <!-- Items Grid -->
+    <div id="items-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {applianceItems.map(item => (
+        <div 
+          class="item-card bg-canvas border border-hairline rounded-md p-6 flex flex-col justify-between shadow-xs transition-all hover:border-border-strong"
+          data-name={item.item.toLowerCase()}
+        >
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-caption text-muted uppercase tracking-wider text-xs">{formattedAppliance}</span>
+              {item.safe === 'yes' && <span class="badge-yes">YES</span>}
+              {item.safe === 'no' && <span class="badge-no">NO</span>}
+              {item.safe === 'depends' && <span class="badge-depends">DEPENDS</span>}
+            </div>
+            
+            <h3 class="text-title-sm text-ink mb-3">
+              Can You Put {item.item} in the {formattedAppliance}?
+            </h3>
+            
+            <p class="text-body-md text-body leading-relaxed mb-6">
+              {item.shortAnswer}
+            </p>
+          </div>
+          
+          <a 
+            href={`/${item.appliance}/${item.slug}`} 
+            class="text-link text-[14px] font-medium hover:text-link-active transition-colors flex items-center gap-1 group mt-4"
+          >
+            Read safety details <span class="group-hover:translate-x-0.5 transition-transform">&rarr;</span>
+          </a>
+        </div>
+      ))}
+    </div>
+
+    <!-- No results message -->
+    <div id="no-results" class="hidden text-center py-12">
+      <p class="text-title-md text-muted">No items match your search.</p>
+    </div>
+  </section>
+
+  <!-- Client-side filtering script -->
+  <script is:inline>
+    const filterInput = document.getElementById('filter-input');
+    const itemsGrid = document.getElementById('items-grid');
+    const noResults = document.getElementById('no-results');
+
+    if (filterInput && itemsGrid) {
+      const cards = itemsGrid.getElementsByClassName('item-card');
+      
+      filterInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim().toLowerCase();
+        let matches = 0;
+        
+        for (let i = 0; i < cards.length; i++) {
+          const card = cards[i];
+          const name = card.getAttribute('data-name');
+          
+          if (name.includes(query)) {
+            card.style.display = '';
+            matches++;
+          } else {
+            card.style.display = 'none';
+          }
+        }
+        
+        if (matches === 0) {
+          noResults.classList.remove('hidden');
+        } else {
+          noResults.classList.add('hidden');
+        }
+      });
+    }
+  </script>
+</Layout>

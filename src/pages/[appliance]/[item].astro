@@ -1,0 +1,182 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import itemsData from '../../data/items.json';
+
+export function getStaticPaths() {
+  return itemsData.map((item) => {
+    return {
+      params: {
+        appliance: item.appliance,
+        item: item.slug
+      },
+      props: {
+        data: item
+      }
+    };
+  });
+}
+
+interface Props {
+  data: typeof itemsData[number];
+}
+
+const { data } = Astro.props;
+
+// Helper to format appliance names
+function formatAppliance(app: string) {
+  if (app === 'airfryer') return 'Air Fryer';
+  return app.charAt(0).toUpperCase() + app.slice(1);
+}
+
+const formattedAppliance = formatAppliance(data.appliance);
+
+// Get details for related items
+const relatedItems = itemsData.filter(item => data.relatedItems.includes(item.slug));
+
+// SEO title and description
+const pageTitle = `Can You Put ${data.item} in the ${formattedAppliance}? | Is It Kitchen Safe?`;
+const pageDescription = `Find out if it is safe to put ${data.item} in the ${formattedAppliance}. Read the quick answer, safety warnings, kitchen tips, and FAQs.`;
+---
+
+<Layout title={pageTitle} description={pageDescription} faqs={data.faqs}>
+  <article class="max-w-[800px] mx-auto px-6 py-[48px] md:py-[64px]">
+    <!-- Breadcrumbs -->
+    <nav class="flex gap-2 text-muted text-[13px] mb-8" aria-label="Breadcrumb">
+      <a href="/" class="hover:text-ink transition-colors">Home</a>
+      <span>/</span>
+      <a href={`/${data.appliance}`} class="hover:text-ink transition-colors">{formattedAppliance}</a>
+      <span>/</span>
+      <span class="text-ink font-medium">{data.item}</span>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="mb-10 text-center md:text-left">
+      <span class="text-caption text-muted uppercase tracking-wider text-xs block mb-2">{formattedAppliance} Guide</span>
+      <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-6 leading-tight">
+        Can You Put a {data.item} in the {formattedAppliance}?
+      </h1>
+
+      <!-- Trust Signal Badge (Above the fold) -->
+      <div class="inline-flex items-center gap-3">
+        {data.safe === 'yes' && (
+          <div class="badge-yes px-6 py-2 text-sm">
+            <span class="mr-1.5">✓</span> YES
+          </div>
+        )}
+        {data.safe === 'no' && (
+          <div class="badge-no px-6 py-2 text-sm">
+            <span class="mr-1.5">✗</span> NO
+          </div>
+        )}
+        {data.safe === 'depends' && (
+          <div class="badge-depends px-6 py-2 text-sm">
+            <span class="mr-1.5">⚠</span> DEPENDS
+          </div>
+        )}
+      </div>
+    </header>
+
+    <!-- Quick Answer & Explanation Card (Cream callout or dark card depending on safety) -->
+    <section class="mb-12">
+      <div class={`p-8 rounded-lg ${
+        data.safe === 'yes' ? 'bg-[#f4faf6] border border-[#39bf45]/20' : 
+        data.safe === 'no' ? 'bg-signature-cream/50 border border-signature-cream' : 
+        'bg-[#fefcf3] border border-signature-yellow/20'
+      }`}>
+        <h2 class="text-title-sm text-ink font-medium mb-3">Quick Answer</h2>
+        <p class="text-title-md font-normal leading-relaxed text-ink mb-4">
+          {data.shortAnswer}
+        </p>
+        <div class="border-t border-hairline my-4 opacity-50"></div>
+        <h3 class="text-caption text-muted mb-2">Safety Explanation</h3>
+        <p class="text-body-md text-body leading-relaxed">
+          {data.reason}
+        </p>
+      </div>
+    </section>
+
+    <!-- Tips and Warnings (Split column layout) -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+      <!-- Tips -->
+      <div class="bg-surface-soft rounded-md p-6 border border-hairline/50">
+        <h2 class="text-title-sm text-ink font-medium mb-4 flex items-center gap-2">
+          <span class="text-success text-lg">💡</span> Best Kitchen Tips
+        </h2>
+        <ul class="flex flex-col gap-3">
+          {data.tips.map(tip => (
+            <li class="text-body-md text-body flex gap-2.5 items-start leading-relaxed">
+              <span class="text-success text-xs mt-1">•</span>
+              <span>{tip}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Warnings -->
+      <div class="bg-surface-soft rounded-md p-6 border border-hairline/50">
+        <h2 class="text-title-sm text-ink font-medium mb-4 flex items-center gap-2">
+          <span class="text-signature-coral text-lg">⚠️</span> Warnings & Risks
+        </h2>
+        <ul class="flex flex-col gap-3">
+          {data.warnings.map(warning => (
+            <li class="text-body-md text-body flex gap-2.5 items-start leading-relaxed">
+              <span class="text-signature-coral text-xs mt-1">•</span>
+              <span>{warning}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- FAQ Section (Native Interactive Accordion) -->
+    <section class="border-t border-hairline pt-12 mb-16">
+      <h2 class="text-title-lg text-ink font-medium tracking-tight mb-8">Frequently Asked Questions</h2>
+      <div class="flex flex-col">
+        {data.faqs.map(faq => (
+          <details class="group border-b border-hairline py-5">
+            <summary class="flex items-center justify-between text-title-sm text-ink font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none">
+              <span>{faq.question}</span>
+              <span class="text-muted group-open:rotate-180 transition-transform duration-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </span>
+            </summary>
+            <div class="mt-4 text-body-md text-body leading-relaxed pl-1">
+              {faq.answer}
+            </div>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <!-- Related Items (Internal linking) -->
+    <section class="border-t border-hairline pt-12">
+      <h2 class="text-title-lg text-ink font-medium tracking-tight mb-8">Related Kitchen Items</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {relatedItems.map(item => (
+          <a 
+            href={`/${item.appliance}/${item.slug}`} 
+            class="bg-canvas border border-hairline hover:border-border-strong rounded-md p-5 flex flex-col justify-between shadow-xs transition-colors active:scale-[0.98]"
+          >
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-[11px] text-muted uppercase tracking-wider">{formatAppliance(item.appliance)}</span>
+                {item.safe === 'yes' && <span class="badge-yes text-[10px] px-2 py-0.5">YES</span>}
+                {item.safe === 'no' && <span class="badge-no text-[10px] px-2 py-0.5">NO</span>}
+                {item.safe === 'depends' && <span class="badge-depends text-[10px] px-2 py-0.5">DEPENDS</span>}
+              </div>
+              <h3 class="text-title-sm text-ink font-medium mb-1">
+                {item.item}
+              </h3>
+              <p class="text-[13px] text-muted line-clamp-2 leading-relaxed">
+                {item.shortAnswer}
+              </p>
+            </div>
+            <span class="text-[12px] font-medium text-link mt-4 block">Read guide &rarr;</span>
+          </a>
+        ))}
+      </div>
+    </section>
+  </article>
+</Layout>
