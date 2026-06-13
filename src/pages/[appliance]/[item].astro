@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import itemsData from '../../data/items.json';
+import { generateMetaDescription, getUniqueSafetyAnalysis } from '../../utils/seoHelper.js';
 
 export function getStaticPaths() {
   return itemsData.map((item) => {
@@ -35,39 +36,12 @@ const relatedItems = itemsData.filter(item => data.relatedItems.includes(item.sl
 
 const formattedAnswer = data.safe.toUpperCase(); // "YES", "NO", or "DEPENDS"
 
-// Helper to generate precise meta description between 150-160 characters
-function generateMetaDescription(item: string, appliance: string, answer: string, shortAnswer: string) {
-  let desc = `Can you put ${item} in the ${appliance}? The answer is ${answer}. ${shortAnswer}`;
-  desc = desc.replace(/\s+/g, ' ').trim();
-  
-  if (desc.length > 160) {
-    return desc.substring(0, 157) + '...';
-  }
-  
-  const promo = " Get the complete breakdown of safety warnings, expert kitchen tips, and detailed appliance FAQs here.";
-  desc = (desc + promo).replace(/\s+/g, ' ').trim();
-  if (desc.length > 160) {
-    return desc.substring(0, 157) + '...';
-  }
-  
-  if (desc.length < 150) {
-    const pad = " Learn how to protect your kitchen utensils and appliances from damage.";
-    desc = (desc + pad).replace(/\s+/g, ' ').trim();
-  }
-  
-  if (desc.length > 160) {
-    return desc.substring(0, 160);
-  }
-  
-  while (desc.length < 150) {
-    desc += "!";
-  }
-  return desc;
-}
-
 // SEO title and description
 const pageTitle = `Can You Put ${data.item} in the ${formattedAppliance}? | IsItKitchenSafe`;
 const pageDescription = generateMetaDescription(data.item, formattedAppliance, formattedAnswer, data.shortAnswer);
+
+// Dynamic unique safety analysis
+const uniqueAnalysis = getUniqueSafetyAnalysis(data.item, formattedAppliance, data.safe, data.shortAnswer, data.tips, data.warnings);
 ---
 
 <Layout title={pageTitle} description={pageDescription} faqs={data.faqs}>
@@ -122,6 +96,11 @@ const pageDescription = generateMetaDescription(data.item, formattedAppliance, f
         <div class="border-t border-hairline my-4 opacity-50"></div>
         <h3 class="text-caption text-muted mb-2">Detailed Safety Explanation</h3>
         {data.reason.split('\n\n').map(para => (
+          <p class="text-body-md text-body leading-relaxed mb-4">
+            {para}
+          </p>
+        ))}
+        {uniqueAnalysis.map(para => (
           <p class="text-body-md text-body leading-relaxed mb-4 last:mb-0">
             {para}
           </p>

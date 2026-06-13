@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import refreezeData from '../../data/refreeze.json';
+import { generateMetaDescription, getUniqueSafetyAnalysis } from '../../utils/seoHelper.js';
 
 export function getStaticPaths() {
   return refreezeData.map((item) => {
@@ -22,41 +23,14 @@ interface Props {
 const { data } = Astro.props;
 const formattedAnswer = data.safe.toUpperCase(); // "YES", "NO", "DEPENDS"
 
-// Helper to generate precise meta description between 150-160 characters
-function generateMetaDescription(item: string, appliance: string, answer: string, shortAnswer: string) {
-  let desc = `Can you put ${item} in the ${appliance}? The answer is ${answer}. ${shortAnswer}`;
-  desc = desc.replace(/\s+/g, ' ').trim();
-  
-  if (desc.length > 160) {
-    return desc.substring(0, 157) + '...';
-  }
-  
-  const promo = " Get the complete breakdown of safety warnings, expert kitchen tips, and detailed appliance FAQs here.";
-  desc = (desc + promo).replace(/\s+/g, ' ').trim();
-  if (desc.length > 160) {
-    return desc.substring(0, 157) + '...';
-  }
-  
-  if (desc.length < 150) {
-    const pad = " Learn how to protect your kitchen utensils and appliances from damage.";
-    desc = (desc + pad).replace(/\s+/g, ' ').trim();
-  }
-  
-  if (desc.length > 160) {
-    return desc.substring(0, 160);
-  }
-  
-  while (desc.length < 150) {
-    desc += "!";
-  }
-  return desc;
-}
-
 const pageTitle = `Can You Put ${data.item} in the Freezer? | IsItKitchenSafe`;
 const pageDescription = generateMetaDescription(data.item, "Freezer", formattedAnswer, data.shortAnswer);
 
 // Get related items
 const relatedItems = refreezeData.filter(item => data.relatedItems.includes(item.slug));
+
+// Dynamic unique safety analysis
+const uniqueAnalysis = getUniqueSafetyAnalysis(data.item, "Freezer", data.safe, data.shortAnswer, data.instructions, data.warnings);
 ---
 
 <Layout title={pageTitle} description={pageDescription} faqs={data.faqs}>
@@ -126,6 +100,11 @@ const relatedItems = refreezeData.filter(item => data.relatedItems.includes(item
         <div class="border-t border-hairline my-4 opacity-50"></div>
         <h3 class="text-caption text-muted mb-2 font-semibold uppercase tracking-wider text-xs">Full Safety Breakdown</h3>
         {data.reason.split('\n\n').map(para => (
+          <p class="text-body-md text-body leading-relaxed mb-4">
+            {para}
+          </p>
+        ))}
+        {uniqueAnalysis.map(para => (
           <p class="text-body-md text-body leading-relaxed mb-4 last:mb-0">
             {para}
           </p>

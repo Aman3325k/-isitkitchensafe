@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import whatHappensData from '../../data/what-happens.json';
+import { generateMetaDescription, getUniqueSafetyAnalysis } from '../../utils/seoHelper.js';
 
 export function getStaticPaths() {
   return whatHappensData.map((item) => {
@@ -97,36 +98,6 @@ const { item, appliance } = parseScenario(data.slug);
 const mappedSafe = data.dangerLevel === 'safe' ? 'yes' : data.dangerLevel === 'caution' ? 'depends' : 'no';
 const formattedAnswer = mappedSafe.toUpperCase();
 
-// Helper to generate precise meta description between 150-160 characters
-function generateMetaDescription(item: string, appliance: string, answer: string, shortAnswer: string) {
-  let desc = `Can you put ${item} in the ${appliance}? The answer is ${answer}. ${shortAnswer}`;
-  desc = desc.replace(/\s+/g, ' ').trim();
-  
-  if (desc.length > 160) {
-    return desc.substring(0, 157) + '...';
-  }
-  
-  const promo = " Get the complete breakdown of safety warnings, expert kitchen tips, and detailed appliance FAQs here.";
-  desc = (desc + promo).replace(/\s+/g, ' ').trim();
-  if (desc.length > 160) {
-    return desc.substring(0, 157) + '...';
-  }
-  
-  if (desc.length < 150) {
-    const pad = " Learn how to protect your kitchen utensils and appliances from damage.";
-    desc = (desc + pad).replace(/\s+/g, ' ').trim();
-  }
-  
-  if (desc.length > 160) {
-    return desc.substring(0, 160);
-  }
-  
-  while (desc.length < 150) {
-    desc += "!";
-  }
-  return desc;
-}
-
 const pageTitle = `Can You Put ${item} in the ${appliance}? | IsItKitchenSafe`;
 const pageDescription = generateMetaDescription(item, appliance, formattedAnswer, data.shortAnswer);
 
@@ -136,6 +107,9 @@ const relatedItems = whatHappensData.filter(i => data.relatedItems.includes(i.sl
 // Danger details variables
 const dangerValue = data.dangerLevel === 'dangerous' ? 9 : data.dangerLevel === 'caution' ? 5 : 2;
 const dangerBarColor = data.dangerLevel === 'dangerous' ? 'bg-[#ef4444]' : data.dangerLevel === 'caution' ? 'bg-[#eab308]' : 'bg-[#22c55e]';
+
+// Dynamic unique safety analysis
+const uniqueAnalysis = getUniqueSafetyAnalysis(item, appliance, mappedSafe, data.shortAnswer, data.actions, data.prevention);
 ---
 
 <Layout title={pageTitle} description={pageDescription} faqs={data.faqs}>
@@ -213,6 +187,11 @@ const dangerBarColor = data.dangerLevel === 'dangerous' ? 'bg-[#ef4444]' : data.
         <div class="border-t border-hairline my-4 opacity-50"></div>
         <h3 class="text-caption text-muted mb-2 font-semibold uppercase tracking-wider text-xs">Full Scenario Breakdown</h3>
         {data.reason.split('\n\n').map(para => (
+          <p class="text-body-md text-body leading-relaxed mb-4">
+            {para}
+          </p>
+        ))}
+        {uniqueAnalysis.map(para => (
           <p class="text-body-md text-body leading-relaxed mb-4 last:mb-0">
             {para}
           </p>
