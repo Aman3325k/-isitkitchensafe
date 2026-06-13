@@ -1,0 +1,137 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import howLongData from '../../data/how-long.json';
+
+const uniqueLocations = [...new Set(howLongData.map(item => item.location))];
+
+function formatLocation(loc: string) {
+  if (loc === 'fridge') return 'Refrigerator';
+  if (loc === 'counter') return 'Countertop';
+  return loc.charAt(0).toUpperCase() + loc.slice(1);
+}
+
+const pageTitle = "Food Shelf Life & Storage Duration Guides | IsItKitchenSafe";
+const pageDescription = "Explore food storage safety guidelines. Find out exactly how long raw meat, cooked leftovers, dairy, fruits, and vegetables last in the refrigerator, freezer, or pantry.";
+
+const indexFaqs = [
+  {
+    question: "Where do these food storage times come from?",
+    answer: "Our storage recommendations are based on USDA food safety guidelines, FDA regulations, and food science standards for preventing bacterial growth and maintaining quality."
+  },
+  {
+    question: "What is the bacterial Danger Zone?",
+    answer: "The Danger Zone is the temperature range between 40°F and 140°F. Bacteria grow rapidly in this range. Refrigerators should be kept below 40°F and freezers at 0°F."
+  }
+];
+---
+
+<Layout title={pageTitle} description={pageDescription} faqs={indexFaqs}>
+  <!-- Hero Section -->
+  <section class="bg-signature-forest text-on-primary py-[64px] md:py-[80px]">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <nav class="flex gap-2 text-[13px] opacity-75 mb-6" aria-label="Breadcrumb">
+        <a href="/" class="hover:underline">Home</a>
+        <span>/</span>
+        <span class="font-medium">How Long Does It Last</span>
+      </nav>
+      
+      <h1 class="text-display-lg font-medium tracking-tight mb-4">
+        Food Shelf Life & Storage Guides
+      </h1>
+      <p class="text-white/80 text-body-md max-w-2xl leading-relaxed">
+        Search and browse safety storage guidelines for raw meats, dairy products, leftovers, fruits, and vegetables. Know exactly when to discard food to keep your family safe.
+      </p>
+    </div>
+  </section>
+
+  <!-- Items Grid Section -->
+  <section class="max-w-[1280px] mx-auto px-6 py-[96px]">
+    <div class="flex flex-col md:flex-row md:items-end justify-between border-b border-hairline pb-8 mb-12">
+      <div>
+        <h2 class="text-display-md text-ink tracking-tight mb-2">Tested Items ({howLongData.length})</h2>
+        <p class="text-body-md text-muted">Real USDA-backed storage guidelines for everyday ingredients.</p>
+      </div>
+      
+      <!-- Filter Input -->
+      <div class="mt-6 md:mt-0 flex gap-3 max-w-[320px] w-full">
+        <input 
+          type="text" 
+          id="filter-input"
+          placeholder="Search items (e.g. Chicken)..."
+          class="w-full h-10 px-3 py-2 bg-canvas text-ink text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
+        />
+      </div>
+    </div>
+
+    <!-- Items Grid -->
+    <div id="items-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {howLongData.map(item => (
+        <div 
+          class="item-card bg-canvas border border-hairline rounded-md p-6 flex flex-col justify-between shadow-xs transition-all hover:border-border-strong"
+          data-name={item.item.toLowerCase()}
+        >
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-caption text-muted uppercase tracking-wider text-xs">{formatLocation(item.location)}</span>
+              <span class="badge-time">LASTS {item.duration.toUpperCase()}</span>
+            </div>
+            
+            <h3 class="text-title-sm text-ink mb-3">
+              Can You Put {item.item} in the {formatLocation(item.location)}?
+            </h3>
+            
+            <p class="text-body-md text-body leading-relaxed mb-6">
+              {item.shortAnswer}
+            </p>
+          </div>
+          
+          <a 
+            href={`/how-long/${item.slug}`} 
+            class="text-link text-[14px] font-medium hover:text-link-active transition-colors flex items-center gap-1 group mt-4"
+          >
+            Read storage details <span class="group-hover:translate-x-0.5 transition-transform">&rarr;</span>
+          </a>
+        </div>
+      ))}
+    </div>
+
+    <!-- No results message -->
+    <div id="no-results" class="hidden text-center py-12">
+      <p class="text-title-md text-muted">No items match your search.</p>
+    </div>
+  </section>
+
+  <!-- Client-side filtering script -->
+  <script is:inline>
+    const filterInput = document.getElementById('filter-input');
+    const itemsGrid = document.getElementById('items-grid');
+    const noResults = document.getElementById('no-results');
+
+    if (filterInput && itemsGrid) {
+      const cards = itemsGrid.getElementsByClassName('item-card');
+      
+      filterInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim().toLowerCase();
+        let matches = 0;
+        
+        for (let i = 0; i < cards.length; i++) {
+          const card = cards[i];
+          const name = card.getAttribute('data-name');
+          
+          if (name.includes(query)) {
+            card.style.display = '';
+            matches++;
+          } else {
+            card.style.display = 'none';
+          }
+        }
+        
+        if (matches === 0) {
+          noResults.classList.remove('hidden');
+        } else {
+          noResults.classList.add('hidden');
+        }
+      });
+    }
+  </script>
+</Layout>

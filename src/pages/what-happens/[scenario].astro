@@ -1,0 +1,328 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import whatHappensData from '../../data/what-happens.json';
+
+export function getStaticPaths() {
+  return whatHappensData.map((item) => {
+    return {
+      params: {
+        scenario: item.slug
+      },
+      props: {
+        data: item
+      }
+    };
+  });
+}
+
+interface Props {
+  data: typeof whatHappensData[number];
+}
+
+const { data } = Astro.props;
+
+// Helper to parse slug into item and appliance to strictly satisfy H1 rules
+function parseScenario(slug: string) {
+  let item = "";
+  let appliance = "";
+  
+  if (slug.startsWith("microwave-")) {
+    appliance = "Microwave";
+    item = slug.replace("microwave-", "").replace(/-/g, " ");
+  } else if (slug.startsWith("put-") && slug.includes("-in-dishwasher")) {
+    appliance = "Dishwasher";
+    item = slug.replace("put-", "").replace("-in-dishwasher", "").replace(/-/g, " ");
+  } else if (slug.endsWith("-in-dishwasher")) {
+    appliance = "Dishwasher";
+    item = slug.replace("-in-dishwasher", "").replace(/-/g, " ");
+  } else if (slug.startsWith("run-dishwasher-")) {
+    appliance = "Dishwasher";
+    item = slug.replace("run-dishwasher-", "").replace(/-/g, " ");
+  } else if (slug.startsWith("refreeze-")) {
+    appliance = "Freezer";
+    item = slug.replace("refreeze-", "").replace(/-/g, " ");
+  } else if (slug.startsWith("freeze-")) {
+    appliance = "Freezer";
+    item = slug.replace("freeze-", "").replace(/-/g, " ");
+  } else if (slug.startsWith("leave-freezer-")) {
+    appliance = "Freezer";
+    item = slug.replace("leave-freezer-", "").replace(/-/g, " ");
+  } else if (slug.startsWith("put-") && slug.includes("-in-oven")) {
+    appliance = "Oven";
+    item = slug.replace("put-", "").replace("-in-oven", "").replace(/-/g, " ");
+  } else if (slug.endsWith("-in-oven")) {
+    appliance = "Oven";
+    item = slug.replace("-in-oven", "").replace(/-/g, " ");
+  } else if (slug.startsWith("leave-oven-")) {
+    appliance = "Oven";
+    item = slug.replace("leave-oven-", "").replace(/-/g, " ");
+  } else if (slug.startsWith("use-") && slug.includes("-on-oven-bottom")) {
+    appliance = "Oven";
+    item = slug.replace("use-", "").replace("-on-oven-bottom", "").replace(/-/g, " ");
+  } else if (slug.startsWith("leave-gas-stove-")) {
+    appliance = "Stove";
+    item = "Gas Stove";
+  } else if (slug.startsWith("leave-electric-stove-")) {
+    appliance = "Stove";
+    item = "Electric Stove";
+  } else if (slug.startsWith("boil-dry-")) {
+    appliance = "Stove";
+    item = slug.replace("boil-dry-", "").replace(/-/g, " ");
+  } else if (slug.includes("-on-hot-stove") || slug.includes("-on-cold-counter")) {
+    appliance = "Stove";
+    item = slug.replace(/-/g, " ");
+  } else if (slug.startsWith("mix-")) {
+    appliance = "Kitchen";
+    item = slug.replace("mix-", "").replace(/-/g, " ");
+  } else if (slug.startsWith("eat-") || slug.startsWith("drink-")) {
+    appliance = "Kitchen";
+    item = slug.replace("eat-", "").replace("drink-", "").replace(/-/g, " ");
+  } else if (slug.startsWith("leave-fridge-")) {
+    appliance = "Refrigerator";
+    item = slug.replace("leave-fridge-", "").replace(/-/g, " ");
+  } else {
+    appliance = "Kitchen";
+    item = slug.replace(/-/g, " ");
+  }
+
+  // Capitalize first letters of item
+  item = item.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  return { item, appliance };
+}
+
+const { item, appliance } = parseScenario(data.slug);
+
+// Map danger levels to YES/NO/DEPENDS badge rules for H1 compatibility
+// e.g. safe = YES, caution = DEPENDS, dangerous = NO
+const mappedSafe = data.dangerLevel === 'safe' ? 'yes' : data.dangerLevel === 'caution' ? 'depends' : 'no';
+const formattedAnswer = mappedSafe.toUpperCase();
+
+// Helper to generate precise meta description between 150-160 characters
+function generateMetaDescription(item: string, appliance: string, answer: string, shortAnswer: string) {
+  let desc = `Can you put ${item} in the ${appliance}? The answer is ${answer}. ${shortAnswer}`;
+  desc = desc.replace(/\s+/g, ' ').trim();
+  
+  if (desc.length > 160) {
+    return desc.substring(0, 157) + '...';
+  }
+  
+  const promo = " Get the complete breakdown of safety warnings, expert kitchen tips, and detailed appliance FAQs here.";
+  desc = (desc + promo).replace(/\s+/g, ' ').trim();
+  if (desc.length > 160) {
+    return desc.substring(0, 157) + '...';
+  }
+  
+  if (desc.length < 150) {
+    const pad = " Learn how to protect your kitchen utensils and appliances from damage.";
+    desc = (desc + pad).replace(/\s+/g, ' ').trim();
+  }
+  
+  if (desc.length > 160) {
+    return desc.substring(0, 160);
+  }
+  
+  while (desc.length < 150) {
+    desc += "!";
+  }
+  return desc;
+}
+
+const pageTitle = `Can You Put ${item} in the ${appliance}? | IsItKitchenSafe`;
+const pageDescription = generateMetaDescription(item, appliance, formattedAnswer, data.shortAnswer);
+
+// Get related items
+const relatedItems = whatHappensData.filter(i => data.relatedItems.includes(i.slug));
+
+// Danger details variables
+const dangerValue = data.dangerLevel === 'dangerous' ? 9 : data.dangerLevel === 'caution' ? 5 : 2;
+const dangerBarColor = data.dangerLevel === 'dangerous' ? 'bg-[#ef4444]' : data.dangerLevel === 'caution' ? 'bg-[#eab308]' : 'bg-[#22c55e]';
+---
+
+<Layout title={pageTitle} description={pageDescription} faqs={data.faqs}>
+  <article class="max-w-[800px] mx-auto px-6 py-[48px] md:py-[64px]">
+    <!-- Breadcrumbs -->
+    <nav class="flex gap-2 text-muted text-[13px] mb-8" aria-label="Breadcrumb">
+      <a href="/" class="hover:text-ink transition-colors">Home</a>
+      <span>/</span>
+      <a href="/what-happens" class="hover:text-ink transition-colors">What Happens If</a>
+      <span>/</span>
+      <span class="text-ink font-medium">{data.item}</span>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="mb-10 text-center md:text-left">
+      <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-3">
+        <span class="text-caption text-muted uppercase tracking-wider text-xs">Accident Prevention Guide</span>
+        <span class="text-xs text-muted border-l border-hairline pl-3">Last Updated: June 2026</span>
+        <span class="text-xs text-signature-coral font-medium bg-[#fce8e6] px-2 py-0.5 rounded-sm">⚠️ High Trust Safety Data</span>
+      </div>
+      
+      <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-6 leading-tight">
+        Can You Put {item} in the {appliance}?
+      </h1>
+
+      <!-- Safety Verdict Badge -->
+      <div class="flex flex-wrap items-center justify-center md:justify-start gap-3">
+        {mappedSafe === 'yes' && (
+          <div class="badge-yes px-6 py-2 text-sm">
+            <span class="mr-1.5">✓</span> YES (SAFE)
+          </div>
+        )}
+        {mappedSafe === 'no' && (
+          <div class="badge-no px-6 py-2 text-sm">
+            <span class="mr-1.5">✗</span> NO (DANGEROUS)
+          </div>
+        )}
+        {mappedSafe === 'depends' && (
+          <div class="badge-depends px-6 py-2 text-sm">
+            <span class="mr-1.5">⚠</span> DEPENDS (CAUTION)
+          </div>
+        )}
+      </div>
+    </header>
+
+    <!-- Danger Level Meter Box -->
+    <section class="mb-12">
+      <div class="bg-surface-soft border border-hairline rounded-md p-6">
+        <div class="flex justify-between items-center mb-3">
+          <h2 class="text-title-sm text-ink font-medium">⚠️ Danger Level Indicator</h2>
+          <span class="font-bold text-[14px] uppercase" style={`color: ${data.dangerLevel === 'dangerous' ? '#ef4444' : data.dangerLevel === 'caution' ? '#eab308' : '#22c55e'}`}>
+            {data.dangerLevel === 'dangerous' ? 'DANGEROUS' : data.dangerLevel === 'caution' ? 'CAUTION' : 'SAFE'}
+          </span>
+        </div>
+        
+        <!-- Meter Bar -->
+        <div class="w-full bg-surface-strong h-4 rounded-full overflow-hidden mb-3">
+          <div class={`h-full ${dangerBarColor}`} style={`width: ${dangerValue * 10}%`}></div>
+        </div>
+        <div class="flex justify-between text-xs text-muted">
+          <span>Level 1 (Safe)</span>
+          <span>Level {dangerValue} of 10</span>
+          <span>Level 10 (Critical)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Detailed Explanation -->
+    <section class="mb-12">
+      <div class="p-8 rounded-lg bg-[#f8fafc] border border-hairline">
+        <h2 class="text-title-sm text-ink font-medium mb-3">What Happens If You Put {item} in the {appliance}?</h2>
+        <p class="text-title-md font-bold leading-relaxed text-ink mb-4">
+          {data.shortAnswer}
+        </p>
+        <div class="border-t border-hairline my-4 opacity-50"></div>
+        <h3 class="text-caption text-muted mb-2 font-semibold uppercase tracking-wider text-xs">Full Scenario Breakdown</h3>
+        {data.reason.split('\n\n').map(para => (
+          <p class="text-body-md text-body leading-relaxed mb-4 last:mb-0">
+            {para}
+          </p>
+        ))}
+      </div>
+    </section>
+
+    <!-- Health Impact Box -->
+    <section class="mb-12">
+      <div class="bg-[#fce8e6] border border-[#fce8e6] rounded-md p-6 text-signature-coral">
+        <h3 class="text-title-sm font-semibold mb-2">🩺 Health & Hazard Impacts</h3>
+        <p class="text-body-md leading-relaxed text-[#aa2d00]">
+          {data.healthImpact}
+        </p>
+      </div>
+    </section>
+
+    <!-- Actions and Prevention -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+      <!-- Immediate Actions -->
+      <div class="bg-surface-soft rounded-md p-6 border border-hairline/50">
+        <h2 class="text-title-sm text-ink font-medium mb-4 flex items-center gap-2">
+          🚨 Immediate Action Steps
+        </h2>
+        <ul class="flex flex-col gap-3">
+          {data.actions.map(act => (
+            <li class="text-body-md text-body flex gap-2.5 items-start leading-relaxed">
+              <span class="text-signature-coral font-bold mt-0.5">⚠</span>
+              <span>{act}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Prevention Tips -->
+      <div class="bg-surface-soft rounded-md p-6 border border-hairline/50">
+        <h2 class="text-title-sm text-ink font-medium mb-4 flex items-center gap-2">
+          ✅ Prevention & Safety Rules
+        </h2>
+        <ul class="flex flex-col gap-3">
+          {data.prevention.map(prev => (
+            <li class="text-body-md text-body flex gap-2.5 items-start leading-relaxed">
+              <span class="text-success font-bold mt-0.5">✓</span>
+              <span>{prev}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="border-t border-hairline pt-12 mb-16">
+      <h2 class="text-title-lg text-ink font-medium tracking-tight mb-8">Frequently Asked Questions</h2>
+      <div class="flex flex-col">
+        {data.faqs.map(faq => (
+          <details class="group border-b border-hairline py-5">
+            <summary class="flex items-center justify-between text-title-sm text-ink font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none">
+              <span>{faq.question}</span>
+              <span class="text-muted group-open:rotate-180 transition-transform duration-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </span>
+            </summary>
+            <div class="mt-4 text-body-md text-body leading-relaxed pl-1">
+              {faq.answer}
+            </div>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <!-- Related Items -->
+    <section class="border-t border-hairline pt-12">
+      <h2 class="text-title-lg text-ink font-medium tracking-tight mb-8">Related Accident Prevention Guides</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {relatedItems.map(item => {
+          const parsed = parseScenario(item.slug);
+          return (
+            <a 
+              href={`/what-happens/${item.slug}`} 
+              class="bg-canvas border border-hairline hover:border-border-strong rounded-md p-5 flex flex-col justify-between shadow-xs transition-colors active:scale-[0.98]"
+            >
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-[11px] text-muted uppercase tracking-wider">{parsed.appliance}</span>
+                  <span class="badge-no text-[10px] px-2 py-0.5">{item.dangerLevel}</span>
+                </div>
+                <h3 class="text-title-sm text-ink mb-1">
+                  {item.item}
+                </h3>
+                <p class="text-[13px] text-muted line-clamp-2 leading-relaxed">
+                  {item.shortAnswer}
+                </p>
+              </div>
+              <span class="text-[12px] font-medium text-link mt-4 block">Read guide &rarr;</span>
+            </a>
+          );
+        })}
+      </div>
+    </section>
+
+    <!-- Back Link -->
+    <div class="mt-16 pt-8 border-t border-hairline text-center">
+      <a 
+        href="/what-happens" 
+        class="text-link text-[14px] font-medium hover:text-link-active transition-colors inline-flex items-center gap-1.5 active:scale-[0.98] transition-transform"
+      >
+        &larr; Back to all Safety Scenarios
+      </a>
+    </div>
+  </article>
+</Layout>

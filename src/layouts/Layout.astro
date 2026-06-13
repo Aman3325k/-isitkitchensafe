@@ -1,5 +1,10 @@
 ---
 import '../styles/global.css';
+import itemsData from '../data/items.json';
+import howLongData from '../data/how-long.json';
+import washingMachineData from '../data/washing-machine.json';
+import refreezeData from '../data/refreeze.json';
+import whatHappensData from '../data/what-happens.json';
 
 interface Props {
   title: string;
@@ -12,11 +17,44 @@ const { title, description, faqs } = Astro.props;
 // Auto-generate canonical URL
 const canonicalUrl = new URL(Astro.url.pathname, 'https://isitkitchensafe.com').href.replace(/\/$/, '');
 
-// Helper to format appliance names
+// Helper to format appliance and path names
 function formatAppliance(app: string) {
   if (app === 'airfryer') return 'Air Fryer';
+  if (app === 'how-long') return 'Shelf Life';
+  if (app === 'washing-machine') return 'Washing Machine';
+  if (app === 'refreeze') return 'Refreeze Safety';
+  if (app === 'what-happens') return 'What Happens If';
   return app.charAt(0).toUpperCase() + app.slice(1);
 }
+
+// Combined Search Index for Global Search
+const searchItems = [
+  ...itemsData.map(item => ({
+    name: item.item,
+    category: formatAppliance(item.appliance),
+    url: `/${item.appliance}/${item.slug}`
+  })),
+  ...howLongData.map(item => ({
+    name: `${item.item} Shelf Life`,
+    category: 'Shelf Life',
+    url: `/how-long/${item.slug}`
+  })),
+  ...washingMachineData.map(item => ({
+    name: `${item.item} Washing`,
+    category: 'Washing Machine',
+    url: `/washing-machine/${item.slug}`
+  })),
+  ...refreezeData.map(item => ({
+    name: `${item.item} Refreezing`,
+    category: 'Refreeze Safety',
+    url: `/refreeze/${item.slug}`
+  })),
+  ...whatHappensData.map(item => ({
+    name: item.item,
+    category: 'What Happens If',
+    url: `/what-happens/${item.slug}`
+  }))
+];
 
 // Generate FAQ JSON-LD Schema
 const faqSchema = faqs && faqs.length > 0 ? {
@@ -74,7 +112,7 @@ if (pathSegments.length > 0) {
       "item": `https://isitkitchensafe.com/${appSlug}`
     });
   } else {
-    const pageName = pathSegments[0].charAt(0).toUpperCase() + pathSegments[0].slice(1);
+    const pageName = formatAppliance(pathSegments[0]);
     breadcrumbItems.push({
       "@type": "ListItem",
       "position": 2,
@@ -190,31 +228,56 @@ const appliances = [
   <body class="bg-canvas text-body font-sans selection:bg-signature-cream selection:text-ink min-h-screen flex flex-col">
     <!-- Header -->
     <header class="h-[64px] border-b border-hairline bg-canvas sticky top-0 z-50">
-      <div class="max-w-[1280px] mx-auto px-6 h-full flex items-center justify-between">
+      <div class="max-w-[1280px] mx-auto px-6 h-full flex items-center justify-between gap-4">
         <!-- Logo -->
-        <a href="/" class="flex items-center gap-2 group" id="site-logo">
+        <a href="/" class="flex items-center gap-2 group shrink-0" id="site-logo">
           <span class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-on-primary font-display font-medium text-lg transition-transform group-active:scale-95">✓</span>
           <span class="text-ink font-display font-medium text-[16px] md:text-[18px] tracking-tight">Is It Kitchen Safe?</span>
         </a>
 
+        <!-- Global Search Bar in Header -->
+        <form id="global-search-form" class="relative flex-grow max-w-[200px] sm:max-w-[280px] mx-2">
+          <input 
+            type="text" 
+            id="global-search-input" 
+            placeholder="Search safety guides..." 
+            list="global-search-items"
+            autocomplete="off"
+            class="w-full h-9 px-3 py-1.5 bg-canvas text-ink text-[13px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
+          />
+          <datalist id="global-search-items">
+            {searchItems.map(entry => (
+              <option value={`${entry.name} (${entry.category})`} data-url={entry.url} />
+            ))}
+          </datalist>
+        </form>
+
         <!-- Desktop Navigation -->
-        <nav class="hidden lg:flex items-center gap-6" id="desktop-nav">
-          {appliances.map(app => (
-            <a 
-              href={`/${app.slug}`} 
-              class="text-body hover:text-ink text-[14px] font-normal transition-colors"
-            >
-              {app.name}
-            </a>
-          ))}
-          <a href="/about" class="text-muted hover:text-ink text-[14px] font-normal transition-colors border-l border-hairline pl-4">About</a>
+        <nav class="hidden xl:flex items-center gap-4 shrink-0" id="desktop-nav">
+          <div class="flex items-center gap-3 border-r border-hairline pr-3">
+            {appliances.map(app => (
+              <a 
+                href={`/${app.slug}`} 
+                class="text-body hover:text-ink text-[13px] font-normal transition-colors"
+              >
+                {app.name}
+              </a>
+            ))}
+          </div>
+          <div class="flex items-center gap-3 pr-2">
+            <a href="/how-long" class="text-body hover:text-ink text-[13px] font-normal transition-colors">Shelf Life</a>
+            <a href="/washing-machine" class="text-body hover:text-ink text-[13px] font-normal transition-colors">Washing</a>
+            <a href="/refreeze" class="text-body hover:text-ink text-[13px] font-normal transition-colors">Refreezing</a>
+            <a href="/what-happens" class="text-body hover:text-ink text-[13px] font-normal transition-colors">What Happens</a>
+          </div>
+          <a href="/about" class="text-muted hover:text-ink text-[13px] font-normal transition-colors border-l border-hairline pl-3">About</a>
         </nav>
 
         <!-- Mobile Menu Toggle Button (Client-side interactivity using raw JS) -->
         <button 
           type="button"
           id="mobile-menu-toggle"
-          class="lg:hidden p-2 text-ink hover:bg-surface-soft rounded-md active:scale-95 transition-transform"
+          class="xl:hidden p-2 text-ink hover:bg-surface-soft rounded-md active:scale-95 transition-transform shrink-0"
           aria-label="Toggle Menu"
         >
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -227,7 +290,7 @@ const appliances = [
     <!-- Mobile Navigation Panel (Full screen overlay as per DESIGN.md: collapses to full sheet) -->
     <div 
       id="mobile-menu"
-      class="fixed inset-0 bg-canvas z-40 transform translate-x-full transition-transform duration-300 lg:hidden flex flex-col pt-20 px-6"
+      class="fixed inset-0 bg-canvas z-40 transform translate-x-full transition-transform duration-300 xl:hidden flex flex-col pt-16 px-6 overflow-y-auto pb-8"
     >
       <button 
         type="button"
@@ -239,16 +302,29 @@ const appliances = [
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
-      <nav class="flex flex-col gap-6 text-center text-lg mt-8">
-        {appliances.map(app => (
-          <a 
-            href={`/${app.slug}`} 
-            class="text-ink font-display font-medium text-xl py-2 border-b border-surface-soft active:bg-surface-soft rounded-md transition-colors"
-          >
-            {app.name}
-          </a>
-        ))}
-        <div class="border-t border-hairline my-4"></div>
+      <nav class="flex flex-col gap-4 text-center mt-6">
+        <span class="text-xs uppercase tracking-wider text-muted font-bold block mb-1">Appliances</span>
+        <div class="grid grid-cols-2 gap-2 mb-4">
+          {appliances.map(app => (
+            <a 
+              href={`/${app.slug}`} 
+              class="text-ink font-display font-medium text-sm py-2 bg-surface-soft active:bg-surface-strong rounded-md transition-colors"
+            >
+              {app.name}
+            </a>
+          ))}
+        </div>
+
+        <div class="border-t border-hairline my-2"></div>
+        <span class="text-xs uppercase tracking-wider text-muted font-bold block mb-1">Categories</span>
+        <div class="grid grid-cols-2 gap-2 mb-4">
+          <a href="/how-long" class="text-ink font-display font-medium text-sm py-2 bg-surface-soft active:bg-surface-strong rounded-md transition-colors">Shelf Life</a>
+          <a href="/washing-machine" class="text-ink font-display font-medium text-sm py-2 bg-surface-soft active:bg-surface-strong rounded-md transition-colors">Washing</a>
+          <a href="/refreeze" class="text-ink font-display font-medium text-sm py-2 bg-surface-soft active:bg-surface-strong rounded-md transition-colors">Refreeze Safety</a>
+          <a href="/what-happens" class="text-ink font-display font-medium text-sm py-2 bg-surface-soft active:bg-surface-strong rounded-md transition-colors">What Happens</a>
+        </div>
+
+        <div class="border-t border-hairline my-2"></div>
         <a href="/about" class="text-body font-normal py-2 active:bg-surface-soft rounded-md transition-colors">About Us</a>
         <a href="/contact" class="text-body font-normal py-2 active:bg-surface-soft rounded-md transition-colors">Contact</a>
         <a href="/privacy" class="text-body font-normal py-2 active:bg-surface-soft rounded-md transition-colors">Privacy Policy</a>
@@ -319,8 +395,8 @@ const appliances = [
       </div>
     </footer>
 
-    <!-- Client-side navigation toggle -->
-    <script is:inline>
+    <!-- Client-side navigation toggle and global search -->
+    <script define:vars={{ searchItems }}>
       const toggleBtn = document.getElementById('mobile-menu-toggle');
       const closeBtn = document.getElementById('mobile-menu-close');
       const mobileMenu = document.getElementById('mobile-menu');
@@ -334,6 +410,64 @@ const appliances = [
       if (closeBtn && mobileMenu) {
         closeBtn.addEventListener('click', () => {
           mobileMenu.classList.add('translate-x-full');
+        });
+      }
+
+      // Global Search Redirect logic
+      const searchForm = document.getElementById('global-search-form');
+      const searchInput = document.getElementById('global-search-input');
+
+      if (searchForm && searchInput) {
+        searchForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const rawValue = searchInput.value.trim().toLowerCase();
+          if (!rawValue) return;
+
+          // 1. Try exact match on item name
+          let match = searchItems.find(item => item.name.toLowerCase() === rawValue);
+
+          // 2. Try matching the full value that datalist might output (e.g. "Hydro Flask (Dishwasher)")
+          if (!match) {
+            match = searchItems.find(item => {
+              const displayVal = `${item.name} (${item.category})`.toLowerCase();
+              return displayVal === rawValue;
+            });
+          }
+
+          // 3. Try partial match on item name
+          if (!match) {
+            match = searchItems.find(item => item.name.toLowerCase().includes(rawValue));
+          }
+
+          // 4. Try matching category names
+          if (!match) {
+            const categoryMap = {
+              'dishwasher': '/dishwasher',
+              'microwave': '/microwave',
+              'freezer': '/freezer',
+              'oven': '/oven',
+              'dryer': '/dryer',
+              'air fryer': '/airfryer',
+              'airfryer': '/airfryer',
+              'refrigerator': '/refrigerator',
+              'fridge': '/refrigerator',
+              'shelf life': '/how-long',
+              'how long': '/how-long',
+              'washing machine': '/washing-machine',
+              'refreeze': '/refreeze',
+              'what happens': '/what-happens'
+            };
+            if (categoryMap[rawValue]) {
+              window.location.href = categoryMap[rawValue];
+              return;
+            }
+          }
+
+          if (match) {
+            window.location.href = match.url;
+          } else {
+            alert(`No direct match found for "${searchInput.value}". Please use the suggestions list or check spelling.`);
+          }
         });
       }
     </script>

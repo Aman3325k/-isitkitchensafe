@@ -1,0 +1,240 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import refreezeData from '../../data/refreeze.json';
+
+export function getStaticPaths() {
+  return refreezeData.map((item) => {
+    return {
+      params: {
+        item: item.slug
+      },
+      props: {
+        data: item
+      }
+    };
+  });
+}
+
+interface Props {
+  data: typeof refreezeData[number];
+}
+
+const { data } = Astro.props;
+const formattedAnswer = data.safe.toUpperCase(); // "YES", "NO", "DEPENDS"
+
+// Helper to generate precise meta description between 150-160 characters
+function generateMetaDescription(item: string, appliance: string, answer: string, shortAnswer: string) {
+  let desc = `Can you put ${item} in the ${appliance}? The answer is ${answer}. ${shortAnswer}`;
+  desc = desc.replace(/\s+/g, ' ').trim();
+  
+  if (desc.length > 160) {
+    return desc.substring(0, 157) + '...';
+  }
+  
+  const promo = " Get the complete breakdown of safety warnings, expert kitchen tips, and detailed appliance FAQs here.";
+  desc = (desc + promo).replace(/\s+/g, ' ').trim();
+  if (desc.length > 160) {
+    return desc.substring(0, 157) + '...';
+  }
+  
+  if (desc.length < 150) {
+    const pad = " Learn how to protect your kitchen utensils and appliances from damage.";
+    desc = (desc + pad).replace(/\s+/g, ' ').trim();
+  }
+  
+  if (desc.length > 160) {
+    return desc.substring(0, 160);
+  }
+  
+  while (desc.length < 150) {
+    desc += "!";
+  }
+  return desc;
+}
+
+const pageTitle = `Can You Put ${data.item} in the Freezer? | IsItKitchenSafe`;
+const pageDescription = generateMetaDescription(data.item, "Freezer", formattedAnswer, data.shortAnswer);
+
+// Get related items
+const relatedItems = refreezeData.filter(item => data.relatedItems.includes(item.slug));
+---
+
+<Layout title={pageTitle} description={pageDescription} faqs={data.faqs}>
+  <article class="max-w-[800px] mx-auto px-6 py-[48px] md:py-[64px]">
+    <!-- Breadcrumbs -->
+    <nav class="flex gap-2 text-muted text-[13px] mb-8" aria-label="Breadcrumb">
+      <a href="/" class="hover:text-ink transition-colors">Home</a>
+      <span>/</span>
+      <a href="/refreeze" class="hover:text-ink transition-colors">Refreezing</a>
+      <span>/</span>
+      <span class="text-ink font-medium">{data.item}</span>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="mb-10 text-center md:text-left">
+      <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-3">
+        <span class="text-caption text-muted uppercase tracking-wider text-xs">Refreeze Safety Guide</span>
+        <span class="text-xs text-muted border-l border-hairline pl-3">Last Updated: June 2026</span>
+        <span class="text-xs text-success font-medium bg-[#e6f4ea] px-2 py-0.5 rounded-sm">✓ USDA/FDA Guidelines</span>
+      </div>
+      
+      <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-6 leading-tight">
+        Can You Put {data.item} in the Freezer?
+      </h1>
+
+      <!-- Safety Verdict Badge -->
+      <div class="inline-flex items-center gap-3">
+        {data.safe === 'yes' && (
+          <div class="badge-yes px-6 py-2 text-sm">
+            <span class="mr-1.5">✓</span> YES
+          </div>
+        )}
+        {data.safe === 'no' && (
+          <div class="badge-no px-6 py-2 text-sm">
+            <span class="mr-1.5">✗</span> NO
+          </div>
+        )}
+        {data.safe === 'depends' && (
+          <div class="badge-depends px-6 py-2 text-sm">
+            <span class="mr-1.5">⚠</span> DEPENDS
+          </div>
+        )}
+      </div>
+    </header>
+
+    <!-- Prominent Safety Warning Box (Red) for unsafe items -->
+    {data.safe === 'no' && (
+      <section class="mb-12">
+        <div class="bg-red-50 border border-red-200 rounded-md p-6 text-red-900">
+          <h2 class="text-title-sm font-semibold mb-2 flex items-center gap-2">
+            🚨 CRITICAL SAFETY WARNING: DO NOT REFREEZE
+          </h2>
+          <p class="text-[14px] leading-relaxed">
+            Refreezing {data.item} after it has thawed can be highly dangerous. This is because bacteria multiply rapidly at room temperature. Refreezing does not kill bacteria; it only pauses them, increasing the risk of food poisoning when subsequently consumed.
+          </p>
+        </div>
+      </section>
+    )}
+
+    <!-- Detailed Explanation -->
+    <section class="mb-12">
+      <div class="p-8 rounded-lg bg-[#f8fafc] border border-hairline">
+        <h2 class="text-title-sm text-ink font-medium mb-3">Is It Safe to Refreeze {data.item}?</h2>
+        <p class="text-title-md font-bold leading-relaxed text-ink mb-4">
+          {data.shortAnswer}
+        </p>
+        <div class="border-t border-hairline my-4 opacity-50"></div>
+        <h3 class="text-caption text-muted mb-2 font-semibold uppercase tracking-wider text-xs">Full Safety Breakdown</h3>
+        {data.reason.split('\n\n').map(para => (
+          <p class="text-body-md text-body leading-relaxed mb-4 last:mb-0">
+            {para}
+          </p>
+        ))}
+      </div>
+    </section>
+
+    <!-- Did you know / Fun fact -->
+    <section class="mb-12">
+      <div class="bg-surface-soft border border-hairline rounded-md p-6">
+        <h3 class="text-title-sm text-ink font-medium mb-2">💡 Did You Know?</h3>
+        <p class="text-body-md text-body leading-relaxed">
+          Refreezing meat thawed on the counter or in warm water is highly unsafe. Always thaw food inside the refrigerator to keep it below 40°F, ensuring it stays outside the bacterial growth Danger Zone.
+        </p>
+      </div>
+    </section>
+
+    <!-- Instructions and Warnings -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+      <!-- Instructions -->
+      <div class="bg-surface-soft rounded-md p-6 border border-hairline/50">
+        <h2 class="text-title-sm text-ink font-medium mb-4 flex items-center gap-2">
+          📋 Recommended Steps
+        </h2>
+        <ul class="flex flex-col gap-3">
+          {data.instructions.map(inst => (
+            <li class="text-body-md text-body flex gap-2.5 items-start leading-relaxed">
+              <span class="text-success font-bold mt-0.5">✓</span>
+              <span>{inst}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Warnings -->
+      <div class="bg-surface-soft rounded-md p-6 border border-hairline/50">
+        <h2 class="text-title-sm text-ink font-medium mb-4 flex items-center gap-2">
+          ⚠ Safety Warnings
+        </h2>
+        <ul class="flex flex-col gap-3">
+          {data.warnings.map(warn => (
+            <li class="text-body-md text-body flex gap-2.5 items-start leading-relaxed">
+              <span class="text-signature-coral font-bold mt-0.5">⚠</span>
+              <span>{warn}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="border-t border-hairline pt-12 mb-16">
+      <h2 class="text-title-lg text-ink font-medium tracking-tight mb-8">Frequently Asked Questions</h2>
+      <div class="flex flex-col">
+        {data.faqs.map(faq => (
+          <details class="group border-b border-hairline py-5">
+            <summary class="flex items-center justify-between text-title-sm text-ink font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none">
+              <span>{faq.question}</span>
+              <span class="text-muted group-open:rotate-180 transition-transform duration-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </span>
+            </summary>
+            <div class="mt-4 text-body-md text-body leading-relaxed pl-1">
+              {faq.answer}
+            </div>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <!-- Related Items -->
+    <section class="border-t border-hairline pt-12">
+      <h2 class="text-title-lg text-ink font-medium tracking-tight mb-8">Related Refreezing Guides</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {relatedItems.map(item => (
+          <a 
+            href={`/refreeze/${item.slug}`} 
+            class="bg-canvas border border-hairline hover:border-border-strong rounded-md p-5 flex flex-col justify-between shadow-xs transition-colors active:scale-[0.98]"
+          >
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-[11px] text-muted uppercase tracking-wider">Refreeze Guide</span>
+                {item.safe === 'yes' && <span class="badge-yes text-[10px] px-2 py-0.5">YES</span>}
+                {item.safe === 'no' && <span class="badge-no text-[10px] px-2 py-0.5">NO</span>}
+                {item.safe === 'depends' && <span class="badge-depends text-[10px] px-2 py-0.5">DEPENDS</span>}
+              </div>
+              <h3 class="text-title-sm text-ink mb-1">
+                {item.item}
+              </h3>
+              <p class="text-[13px] text-muted line-clamp-2 leading-relaxed">
+                {item.shortAnswer}
+              </p>
+            </div>
+            <span class="text-[12px] font-medium text-link mt-4 block">Read guide &rarr;</span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <!-- Back Link -->
+    <div class="mt-16 pt-8 border-t border-hairline text-center">
+      <a 
+        href="/refreeze" 
+        class="text-link text-[14px] font-medium hover:text-link-active transition-colors inline-flex items-center gap-1.5 active:scale-[0.98] transition-transform"
+      >
+        &larr; Back to all Refreeze Guides
+      </a>
+    </div>
+  </article>
+</Layout>
