@@ -1,10 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import itemsData from '../data/items.json';
-import howLongData from '../data/how-long.json';
-import washingMachineData from '../data/washing-machine.json';
-import refreezeData from '../data/refreeze.json';
-import whatHappensData from '../data/what-happens.json';
 
 // Popular items to showcase on the homepage
 const popularCombos = [
@@ -24,43 +20,11 @@ const popularItems = itemsData.filter(item =>
   popularCombos.some(combo => combo.slug === item.slug && combo.appliance === item.appliance)
 );
 
-// Helper to format appliance names for datalist
+// Helper to format appliance names for output
 function formatAppliance(app: string) {
   if (app === 'airfryer') return 'Air Fryer';
-  if (app === 'how-long') return 'Shelf Life';
-  if (app === 'washing-machine') return 'Washing Machine';
-  if (app === 'refreeze') return 'Refreeze Safety';
-  if (app === 'what-happens') return 'What Happens If';
   return app.charAt(0).toUpperCase() + app.slice(1);
 }
-
-const searchItems = [
-  ...itemsData.map(item => ({
-    name: item.item,
-    appliance: formatAppliance(item.appliance),
-    url: `/${item.appliance}/${item.slug}`
-  })),
-  ...howLongData.map(item => ({
-    name: `${item.item} Shelf Life`,
-    appliance: 'Shelf Life',
-    url: `/how-long/${item.slug}`
-  })),
-  ...washingMachineData.map(item => ({
-    name: `${item.item} Washing`,
-    appliance: 'Washing Machine',
-    url: `/washing-machine/${item.slug}`
-  })),
-  ...refreezeData.map(item => ({
-    name: `${item.item} Refreezing`,
-    appliance: 'Refreeze Safety',
-    url: `/refreeze/${item.slug}`
-  })),
-  ...whatHappensData.map(item => ({
-    name: item.item,
-    appliance: 'What Happens If',
-    url: `/what-happens/${item.slug}`
-  }))
-];
 
 const appliances = [
   { 
@@ -116,10 +80,11 @@ const appliances = [
     slug: 'refrigerator', 
     desc: 'Should you store potatoes, onions, honey, or tomatoes in the cold?',
     bgColor: 'bg-signature-mustard', 
-    textColor: 'text-on-primary',
+    textColor: 'text-ink',
     badgeColor: 'bg-[#fce8e6] text-signature-coral'
   }
 ];
+
 const homeFaqs = [
   {
     question: "What is IsItKitchenSafe?",
@@ -160,14 +125,10 @@ const homeFaqs = [
             placeholder="Type an item (e.g. Hydro Flask, Chicken, Memory Foam)..." 
             list="search-items"
             autocomplete="off"
+            aria-label="Search items"
             class="w-full h-11 px-4 py-3 bg-canvas text-ink text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
           />
-          <!-- Datalist holding all 870 items -->
-          <datalist id="search-items">
-            {searchItems.map(entry => (
-              <option value={`${entry.name} (${entry.appliance})`} data-url={entry.url} />
-            ))}
-          </datalist>
+          <datalist id="search-items"></datalist>
         </div>
         <button 
           type="submit" 
@@ -384,62 +345,96 @@ const homeFaqs = [
     </div>
   </section>
 
-  <script define:vars={{ searchItems }}>
-    const searchForm = document.getElementById('search-form');
-    const searchInput = document.getElementById('search-input');
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchForm = document.getElementById('search-form') as HTMLFormElement | null;
+      const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
+      const datalist = document.getElementById('search-items') as HTMLDataListElement | null;
+      let searchIndex: Array<{ name: string; appliance: string; url: string }> | null = null;
+      let isFetching = false;
 
-    if (searchForm && searchInput) {
-      searchForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const rawValue = searchInput.value.trim().toLowerCase();
-        if (!rawValue) return;
+      const populateDatalist = (items: typeof searchIndex) => {
+        if (!datalist || !items) return;
+        datalist.innerHTML = items.map(entry => 
+          `<option value="${entry.name} (${entry.appliance})" data-url="${entry.url}"></option>`
+        ).join('');
+      };
 
-        // 1. Try exact match on item name
-        let match = searchItems.find(item => item.name.toLowerCase() === rawValue);
-
-        // 2. Try matching the full value that datalist might output (e.g. "Hydro Flask (dishwasher)")
-        if (!match) {
-          match = searchItems.find(item => {
-            const displayVal = `${item.name} (${item.appliance})`.toLowerCase();
-            return displayVal === rawValue;
-          });
-        }
-
-        // 3. Try partial match on item name
-        if (!match) {
-          match = searchItems.find(item => item.name.toLowerCase().includes(rawValue));
-        }
-
-        // 4. Try matching appliance and category names
-        if (!match) {
-          const applianceMap = {
-            'dishwasher': '/dishwasher',
-            'microwave': '/microwave',
-            'freezer': '/freezer',
-            'oven': '/oven',
-            'dryer': '/dryer',
-            'air fryer': '/airfryer',
-            'airfryer': '/airfryer',
-            'refrigerator': '/refrigerator',
-            'fridge': '/refrigerator',
-            'shelf life': '/how-long',
-            'how long': '/how-long',
-            'washing machine': '/washing-machine',
-            'refreeze': '/refreeze',
-            'what happens': '/what-happens'
-          };
-          if (applianceMap[rawValue]) {
-            window.location.href = applianceMap[rawValue];
-            return;
+      const loadSearchIndex = async () => {
+        if (searchIndex || isFetching) return;
+        isFetching = true;
+        try {
+          const response = await fetch('/search-index.json');
+          if (response.ok) {
+            const rawIndex = await response.json();
+            searchIndex = rawIndex.map((entry: any) => ({
+              name: entry.name,
+              appliance: entry.category,
+              url: entry.url
+            }));
+            populateDatalist(searchIndex);
           }
+        } catch (e) {
+          // Silently fail to maintain UX
+        } finally {
+          isFetching = false;
         }
+      };
 
-        if (match) {
-          window.location.href = match.url;
-        } else {
-          alert(`We couldn't find a direct guide for "${searchInput.value}". Please select from the suggestions list or browse by category below!`);
-        }
-      });
-    }
+      if (searchInput) {
+        searchInput.addEventListener('focus', loadSearchIndex);
+        searchInput.addEventListener('input', loadSearchIndex);
+      }
+
+      if (searchForm && searchInput) {
+        searchForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const rawValue = searchInput.value.trim().toLowerCase();
+          if (!rawValue || !searchIndex) return;
+
+          let match = searchIndex.find(item => item.name.toLowerCase() === rawValue);
+
+          if (!match) {
+            match = searchIndex.find(item => {
+              const displayVal = `${item.name} (${item.appliance})`.toLowerCase();
+              return displayVal === rawValue;
+            });
+          }
+
+          if (!match) {
+            match = searchIndex.find(item => item.name.toLowerCase().includes(rawValue));
+          }
+
+          if (!match) {
+            const applianceMap: Record<string, string> = {
+              'dishwasher': '/dishwasher',
+              'microwave': '/microwave',
+              'freezer': '/freezer',
+              'oven': '/oven',
+              'dryer': '/dryer',
+              'air fryer': '/airfryer',
+              'airfryer': '/airfryer',
+              'refrigerator': '/refrigerator',
+              'fridge': '/refrigerator',
+              'shelf life': '/how-long',
+              'how long': '/how-long',
+              'washing machine': '/washing-machine',
+              'refreeze': '/refreeze',
+              'what happens': '/what-happens'
+            };
+            if (applianceMap[rawValue]) {
+              window.location.href = applianceMap[rawValue];
+              return;
+            }
+          }
+
+          if (match) {
+            window.location.href = match.url;
+          } else {
+            alert(`We couldn't find a direct guide for "${searchInput.value}". Please select from the suggestions list or browse by category below!`);
+          }
+        });
+      }
+    });
   </script>
 </Layout>

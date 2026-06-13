@@ -1,10 +1,5 @@
 ---
 import '../styles/global.css';
-import itemsData from '../data/items.json';
-import howLongData from '../data/how-long.json';
-import washingMachineData from '../data/washing-machine.json';
-import refreezeData from '../data/refreeze.json';
-import whatHappensData from '../data/what-happens.json';
 
 interface Props {
   title: string;
@@ -26,35 +21,6 @@ function formatAppliance(app: string) {
   if (app === 'what-happens') return 'What Happens If';
   return app.charAt(0).toUpperCase() + app.slice(1);
 }
-
-// Combined Search Index for Global Search
-const searchItems = [
-  ...itemsData.map(item => ({
-    name: item.item,
-    category: formatAppliance(item.appliance),
-    url: `/${item.appliance}/${item.slug}`
-  })),
-  ...howLongData.map(item => ({
-    name: `${item.item} Shelf Life`,
-    category: 'Shelf Life',
-    url: `/how-long/${item.slug}`
-  })),
-  ...washingMachineData.map(item => ({
-    name: `${item.item} Washing`,
-    category: 'Washing Machine',
-    url: `/washing-machine/${item.slug}`
-  })),
-  ...refreezeData.map(item => ({
-    name: `${item.item} Refreezing`,
-    category: 'Refreeze Safety',
-    url: `/refreeze/${item.slug}`
-  })),
-  ...whatHappensData.map(item => ({
-    name: item.item,
-    category: 'What Happens If',
-    url: `/what-happens/${item.slug}`
-  }))
-];
 
 // Generate FAQ JSON-LD Schema
 const defaultFaqs = [
@@ -195,20 +161,18 @@ const appliances = [
 <!doctype html>
 <html lang="en">
   <head>
+    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
+    <link rel="preconnect" href="https://www.google-analytics.com" crossorigin />
     {import.meta.env.PROD && (
       <>
         <!-- Google tag (gtag.js) -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-N3LZSB37ED" is:inline></script>
-        <script is:inline>
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-N3LZSB37ED');
-        </script>
+        <script is:inline>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-N3LZSB37ED');</script>
       </>
     )}
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#181d26" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23181d26'/><text y='75' font-size='70' x='15' fill='white'>✓</text></svg>">
     <meta name="generator" content={Astro.generator} />
     
@@ -266,13 +230,10 @@ const appliances = [
             placeholder="Search safety guides..." 
             list="global-search-items"
             autocomplete="off"
+            aria-label="Search safety guides"
             class="w-full h-9 px-3 py-1.5 bg-canvas text-ink text-[13px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
           />
-          <datalist id="global-search-items">
-            {searchItems.map(entry => (
-              <option value={`${entry.name} (${entry.category})`} data-url={entry.url} />
-            ))}
-          </datalist>
+          <datalist id="global-search-items"></datalist>
         </form>
 
         <!-- Desktop Navigation -->
@@ -296,21 +257,21 @@ const appliances = [
           <a href="/about" class="text-muted hover:text-ink text-[13px] font-normal transition-colors border-l border-hairline pl-3">About</a>
         </nav>
 
-        <!-- Mobile Menu Toggle Button (Client-side interactivity using raw JS) -->
+        <!-- Mobile Menu Toggle Button -->
         <button 
           type="button"
           id="mobile-menu-toggle"
           class="xl:hidden p-2 text-ink hover:bg-surface-soft rounded-md active:scale-95 transition-transform shrink-0"
           aria-label="Toggle Menu"
         >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
       </div>
     </header>
 
-    <!-- Mobile Navigation Panel (Full screen overlay as per DESIGN.md: collapses to full sheet) -->
+    <!-- Mobile Navigation Panel -->
     <div 
       id="mobile-menu"
       class="fixed inset-0 bg-canvas z-40 transform translate-x-full transition-transform duration-300 xl:hidden flex flex-col pt-16 px-6 overflow-y-auto pb-8"
@@ -321,7 +282,7 @@ const appliances = [
         class="absolute top-4 right-6 p-2 text-ink hover:bg-surface-soft rounded-md"
         aria-label="Close Menu"
       >
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
@@ -424,81 +385,109 @@ const appliances = [
       </div>
     </footer>
 
-    <!-- Client-side navigation toggle and global search -->
-    <script define:vars={{ searchItems }}>
-      const toggleBtn = document.getElementById('mobile-menu-toggle');
-      const closeBtn = document.getElementById('mobile-menu-close');
-      const mobileMenu = document.getElementById('mobile-menu');
+    <!-- Client-side navigation toggle and global search index load -->
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const toggleBtn = document.getElementById('mobile-menu-toggle');
+        const closeBtn = document.getElementById('mobile-menu-close');
+        const mobileMenu = document.getElementById('mobile-menu');
 
-      if (toggleBtn && mobileMenu) {
-        toggleBtn.addEventListener('click', () => {
-          mobileMenu.classList.remove('translate-x-full');
-        });
-      }
+        if (toggleBtn && mobileMenu) {
+          toggleBtn.addEventListener('click', () => {
+            mobileMenu.classList.remove('translate-x-full');
+          });
+        }
 
-      if (closeBtn && mobileMenu) {
-        closeBtn.addEventListener('click', () => {
-          mobileMenu.classList.add('translate-x-full');
-        });
-      }
+        if (closeBtn && mobileMenu) {
+          closeBtn.addEventListener('click', () => {
+            mobileMenu.classList.add('translate-x-full');
+          });
+        }
 
-      // Global Search Redirect logic
-      const searchForm = document.getElementById('global-search-form');
-      const searchInput = document.getElementById('global-search-input');
+        const searchForm = document.getElementById('global-search-form') as HTMLFormElement | null;
+        const searchInput = document.getElementById('global-search-input') as HTMLInputElement | null;
+        const datalist = document.getElementById('global-search-items') as HTMLDataListElement | null;
+        let searchIndex: Array<{ name: string; category: string; url: string }> | null = null;
+        let isFetching = false;
 
-      if (searchForm && searchInput) {
-        searchForm.addEventListener('submit', (e) => {
-          e.preventDefault();
-          const rawValue = searchInput.value.trim().toLowerCase();
-          if (!rawValue) return;
+        const populateDatalist = (items: typeof searchIndex) => {
+          if (!datalist || !items) return;
+          datalist.innerHTML = items.map(entry => 
+            `<option value="${entry.name} (${entry.category})" data-url="${entry.url}"></option>`
+          ).join('');
+        };
 
-          // 1. Try exact match on item name
-          let match = searchItems.find(item => item.name.toLowerCase() === rawValue);
-
-          // 2. Try matching the full value that datalist might output (e.g. "Hydro Flask (Dishwasher)")
-          if (!match) {
-            match = searchItems.find(item => {
-              const displayVal = `${item.name} (${item.category})`.toLowerCase();
-              return displayVal === rawValue;
-            });
-          }
-
-          // 3. Try partial match on item name
-          if (!match) {
-            match = searchItems.find(item => item.name.toLowerCase().includes(rawValue));
-          }
-
-          // 4. Try matching category names
-          if (!match) {
-            const categoryMap = {
-              'dishwasher': '/dishwasher',
-              'microwave': '/microwave',
-              'freezer': '/freezer',
-              'oven': '/oven',
-              'dryer': '/dryer',
-              'air fryer': '/airfryer',
-              'airfryer': '/airfryer',
-              'refrigerator': '/refrigerator',
-              'fridge': '/refrigerator',
-              'shelf life': '/how-long',
-              'how long': '/how-long',
-              'washing machine': '/washing-machine',
-              'refreeze': '/refreeze',
-              'what happens': '/what-happens'
-            };
-            if (categoryMap[rawValue]) {
-              window.location.href = categoryMap[rawValue];
-              return;
+        const loadSearchIndex = async () => {
+          if (searchIndex || isFetching) return;
+          isFetching = true;
+          try {
+            const response = await fetch('/search-index.json');
+            if (response.ok) {
+              searchIndex = await response.json();
+              populateDatalist(searchIndex);
             }
+          } catch (e) {
+            // Silently fail to maintain UX
+          } finally {
+            isFetching = false;
           }
+        };
 
-          if (match) {
-            window.location.href = match.url;
-          } else {
-            alert(`No direct match found for "${searchInput.value}". Please use the suggestions list or check spelling.`);
-          }
-        });
-      }
+        if (searchInput) {
+          searchInput.addEventListener('focus', loadSearchIndex);
+          searchInput.addEventListener('input', loadSearchIndex);
+        }
+
+        if (searchForm && searchInput) {
+          searchForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const rawValue = searchInput.value.trim().toLowerCase();
+            if (!rawValue || !searchIndex) return;
+
+            let match = searchIndex.find(item => item.name.toLowerCase() === rawValue);
+
+            if (!match) {
+              match = searchIndex.find(item => {
+                const displayVal = `${item.name} (${item.category})`.toLowerCase();
+                return displayVal === rawValue;
+              });
+            }
+
+            if (!match) {
+              match = searchIndex.find(item => item.name.toLowerCase().includes(rawValue));
+            }
+
+            if (!match) {
+              const categoryMap: Record<string, string> = {
+                'dishwasher': '/dishwasher',
+                'microwave': '/microwave',
+                'freezer': '/freezer',
+                'oven': '/oven',
+                'dryer': '/dryer',
+                'air fryer': '/airfryer',
+                'airfryer': '/airfryer',
+                'refrigerator': '/refrigerator',
+                'fridge': '/refrigerator',
+                'shelf life': '/how-long',
+                'how long': '/how-long',
+                'washing machine': '/washing-machine',
+                'refreeze': '/refreeze',
+                'what happens': '/what-happens'
+              };
+              if (categoryMap[rawValue]) {
+                window.location.href = categoryMap[rawValue];
+                return;
+              }
+            }
+
+            if (match) {
+              window.location.href = match.url;
+            } else {
+              alert(`No direct match found for "${searchInput.value}". Please use the suggestions list or check spelling.`);
+            }
+          });
+        }
+      });
     </script>
   </body>
 </html>

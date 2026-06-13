@@ -32,7 +32,18 @@ function formatAppliance(app: string) {
 const formattedAppliance = formatAppliance(data.appliance);
 
 // Get details for related items
-const relatedItems = itemsData.filter(item => data.relatedItems.includes(item.slug));
+let relatedItems = itemsData.filter(item => data.relatedItems.includes(item.slug) && item.appliance === data.appliance);
+if (relatedItems.length < 3) {
+  const otherApps = itemsData.filter(item => data.relatedItems.includes(item.slug) && item.appliance !== data.appliance);
+  const existingSlugs = new Set(relatedItems.map(i => i.slug));
+  for (const item of otherApps) {
+    if (!existingSlugs.has(item.slug)) {
+      relatedItems.push(item);
+      existingSlugs.add(item.slug);
+    }
+  }
+}
+relatedItems = relatedItems.slice(0, 3);
 
 const formattedAnswer = data.safe.toUpperCase(); // "YES", "NO", or "DEPENDS"
 
@@ -150,7 +161,7 @@ const uniqueAnalysis = getUniqueSafetyAnalysis(data.item, formattedAppliance, da
             <summary class="flex items-center justify-between text-title-sm text-ink font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none">
               <span>{faq.question}</span>
               <span class="text-muted group-open:rotate-180 transition-transform duration-200">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </span>
