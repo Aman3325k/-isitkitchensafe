@@ -12,6 +12,12 @@ const { title, description, faqs } = Astro.props;
 // Auto-generate canonical URL
 const canonicalUrl = new URL(Astro.url.pathname, 'https://isitkitchensafe.com').href.replace(/\/$/, '');
 
+// Helper to format appliance names
+function formatAppliance(app: string) {
+  if (app === 'airfryer') return 'Air Fryer';
+  return app.charAt(0).toUpperCase() + app.slice(1);
+}
+
 // Generate FAQ JSON-LD Schema
 const faqSchema = faqs && faqs.length > 0 ? {
   "@context": "https://schema.org",
@@ -31,7 +37,7 @@ const isHome = Astro.url.pathname === '/' || Astro.url.pathname === '';
 const siteSchema = isHome ? {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  "name": "Is It Kitchen Safe?",
+  "name": "IsItKitchenSafe",
   "url": "https://isitkitchensafe.com",
   "potentialAction": {
     "@type": "SearchAction",
@@ -42,6 +48,83 @@ const siteSchema = isHome ? {
     "query-input": "required name=search_term_string"
   }
 } : null;
+
+// Generate BreadcrumbList JSON-LD Schema
+const pathSegments = Astro.url.pathname.split('/').filter(Boolean);
+const breadcrumbItems = [
+  {
+    "@type": "ListItem",
+    "position": 1,
+    "name": "Home",
+    "item": "https://isitkitchensafe.com"
+  }
+];
+
+if (pathSegments.length > 0) {
+  const isAppliancePage = pathSegments.length === 1;
+  const isItemPage = pathSegments.length === 2;
+  
+  if (isAppliancePage || isItemPage) {
+    const appSlug = pathSegments[0];
+    const appName = formatAppliance(appSlug);
+    breadcrumbItems.push({
+      "@type": "ListItem",
+      "position": 2,
+      "name": appName,
+      "item": `https://isitkitchensafe.com/${appSlug}`
+    });
+  } else {
+    const pageName = pathSegments[0].charAt(0).toUpperCase() + pathSegments[0].slice(1);
+    breadcrumbItems.push({
+      "@type": "ListItem",
+      "position": 2,
+      "name": pageName,
+      "item": `https://isitkitchensafe.com/${pathSegments[0]}`
+    });
+  }
+  
+  if (isItemPage) {
+    const itemSlug = pathSegments[1];
+    const itemName = itemSlug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    breadcrumbItems.push({
+      "@type": "ListItem",
+      "position": 3,
+      "name": itemName,
+      "item": `https://isitkitchensafe.com/${pathSegments[0]}/${itemSlug}`
+    });
+  }
+}
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": breadcrumbItems
+};
+
+// Generate Article JSON-LD Schema
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": title.split(' | ')[0],
+  "description": description,
+  "image": "https://isitkitchensafe.com/favicon.svg",
+  "author": {
+    "@type": "Organization",
+    "name": "IsItKitchenSafe",
+    "url": "https://isitkitchensafe.com"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IsItKitchenSafe",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://isitkitchensafe.com/favicon.svg"
+    }
+  },
+  "datePublished": "2026-06-13T12:00:00Z",
+  "dateModified": "2026-06-13T12:00:00Z",
+  "mainEntityOfPage": canonicalUrl
+};
 
 const appliances = [
   { name: 'Dishwasher', slug: 'dishwasher' },
@@ -92,6 +175,8 @@ const appliances = [
     {siteSchema && (
       <script type="application/ld+json" set:html={JSON.stringify(siteSchema)} />
     )}
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
 
     <!-- Google Analytics Placeholder -->
     <script is:inline src="https://www.googletagmanager.com/gtag/js?id=G-PLACEHOLDER" async></script>
