@@ -1,0 +1,249 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import comparisonsData from '../../data/comparisons.json';
+
+const pageTitle = "Kitchen Safety Comparisons | IsItKitchenSafe";
+const pageDescription = "Compare kitchen safety rules, appliance guidelines, cooking methods, and food storage side-by-side. Read expert USDA/FDA-aligned comparisons.";
+
+// Category human-readable name mapping
+const categoryNames: Record<string, string> = {
+  "cooking-method": "Cooking Methods",
+  "container-material": "Containers & Materials",
+  "food-storage": "Food Storage",
+  "appliance-safety": "Appliance Safety"
+};
+
+// Group comparisons by category
+const categories = ["cooking-method", "container-material", "food-storage", "appliance-safety"];
+const groupedComparisons = categories.reduce((acc, cat) => {
+  acc[cat] = comparisonsData.filter(c => c.category === cat);
+  return acc;
+}, {} as Record<string, typeof comparisonsData>);
+
+// FAQ schema for the index page
+const compareFaqs = [
+  {
+    question: "Why compare kitchen safety guidelines?",
+    answer: "Comparing appliances, cooking techniques, and container materials side-by-side helps prevent accidental damage, chemical contamination, and foodborne illness by clarifying the precise physical limits of each material or method."
+  },
+  {
+    question: "What is the source of these safety comparison recommendations?",
+    answer: "All recommendations are compiled directly from USDA food safety guidelines, FDA materials standards, and official kitchen appliance manufacturer manuals."
+  },
+  {
+    question: "How do I know if an item is microwave or dishwasher safe?",
+    answer: "Check the bottom of your container for the standard safety icons (wavy lines for microwave, water droplets/racks for dishwasher) or consult our comparison charts for general material guidelines."
+  }
+];
+---
+
+<Layout title={pageTitle} description={pageDescription} faqs={compareFaqs}>
+  <div class="bg-canvas min-h-screen">
+    <!-- Hero Header Section -->
+    <section class="border-b border-hairline py-[64px] md:py-[80px]">
+      <div class="max-w-[1280px] mx-auto px-6 text-center md:text-left">
+        <nav class="flex justify-center md:justify-start gap-2 text-muted text-[13px] mb-6 animate-fade-in" aria-label="Breadcrumb">
+          <a href="/" class="hover:text-ink transition-colors">Home</a>
+          <span>/</span>
+          <span class="text-ink font-medium">Compare</span>
+        </nav>
+
+        <h1 class="text-display-lg md:text-display-xl font-medium tracking-tight text-ink mb-4">
+          Kitchen Safety Comparisons
+        </h1>
+        <p class="text-body-md text-muted max-w-[680px] leading-relaxed">
+          Compare kitchen appliances, storage containers, food safety rules, and cooking methods side-by-side. Make informed decisions backed by USDA, FDA, and manufacturer guidelines.
+        </p>
+      </div>
+    </section>
+
+    <!-- Search & Filter Controls -->
+    <section class="border-b border-hairline py-8 bg-surface-soft/40">
+      <div class="max-w-[1280px] mx-auto px-6 flex flex-col md:flex-row gap-6 justify-between items-center">
+        <!-- Search Input -->
+        <div class="relative w-full md:max-w-[400px]">
+          <input 
+            type="text" 
+            id="compare-search"
+            placeholder="Search comparisons (e.g. foil, air fryer)..." 
+            aria-label="Search comparisons"
+            class="w-full h-11 px-4 py-3 bg-canvas text-ink text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
+          />
+          <span class="absolute right-3 top-3 text-muted text-[13px] pointer-events-none" id="search-count">
+            50 matches
+          </span>
+        </div>
+
+        <!-- Category Filters -->
+        <div class="flex flex-wrap gap-2 justify-center md:justify-end w-full md:w-auto" id="filter-buttons">
+          <button 
+            data-filter="all"
+            class="px-4 py-2 bg-primary text-on-primary text-[13px] font-medium rounded-lg border-none cursor-pointer transition-colors select-none active:scale-95"
+          >
+            All Categories
+          </button>
+          {categories.map(cat => (
+            <button 
+              data-filter={cat}
+              class="px-4 py-2 bg-canvas text-body hover:text-ink text-[13px] font-medium border border-hairline rounded-lg cursor-pointer transition-colors select-none active:scale-95"
+            >
+              {categoryNames[cat]}
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Comparisons Grid -->
+    <section class="max-w-[1280px] mx-auto px-6 py-12">
+      <div id="no-results-msg" class="hidden text-center py-12">
+        <p class="text-lg font-medium text-ink mb-2">No matching comparisons found</p>
+        <p class="text-sm text-muted">Try adjusting your search keywords or resetting filters.</p>
+      </div>
+
+      <div id="comparisons-container" class="flex flex-col gap-12">
+        {categories.map(cat => (
+          <div data-category-section={cat} class="category-section">
+            <h2 class="text-title-lg font-bold text-ink mb-6 pb-2 border-b border-hairline">
+              {categoryNames[cat]}
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {groupedComparisons[cat].map(item => {
+                // Determine Winner Badge display text and color classes
+                let winnerText = "Depends";
+                let winnerClass = "bg-surface-strong text-muted";
+                if (item.winner === "item1") {
+                  winnerText = `${item.item1} Wins`;
+                  winnerClass = "bg-[#e6f4ea] text-success font-medium";
+                } else if (item.winner === "item2") {
+                  winnerText = `${item.item2} Wins`;
+                  winnerClass = "bg-[#e6f4ea] text-success font-medium";
+                }
+                
+                return (
+                  <a 
+                    href={`/compare/${item.slug}`} 
+                    class="compare-card block border border-hairline rounded-lg p-6 bg-canvas hover:border-border-strong hover:shadow-sm transition-all text-decoration-none"
+                    data-search-term={`${item.item1.toLowerCase()} ${item.item2.toLowerCase()} ${item.slug.replace(/-/g, ' ')}`}
+                  >
+                    <div class="flex items-center justify-between text-xs text-muted font-bold uppercase tracking-wider mb-4">
+                      <span>{categoryNames[cat]}</span>
+                      <span class={`px-2.5 py-1 rounded-pill text-[11px] ${winnerClass}`}>
+                        {winnerText}
+                      </span>
+                    </div>
+
+                    <!-- Mini comparison layout with VS divider between two boxes -->
+                    <div class="flex items-center justify-between border border-hairline rounded-lg overflow-hidden bg-surface-soft/40 mb-4 h-16">
+                      <div class="flex-1 px-3 py-2 text-center flex items-center justify-center h-full">
+                        <span class="font-medium text-ink text-[13px] line-clamp-2 leading-snug">{item.item1}</span>
+                      </div>
+                      <div class="px-2.5 py-1 bg-primary text-on-primary text-[10px] font-bold font-display uppercase tracking-wider shrink-0 select-none">
+                        VS
+                      </div>
+                      <div class="flex-1 px-3 py-2 text-center flex items-center justify-center h-full">
+                        <span class="font-medium text-ink text-[13px] line-clamp-2 leading-snug">{item.item2}</span>
+                      </div>
+                    </div>
+
+                    <p class="text-body-md text-muted line-clamp-2 leading-relaxed text-[13px]">
+                      {item.verdict}
+                    </p>
+                    
+                    <div class="mt-4 flex items-center gap-1 text-[13px] text-link font-medium">
+                      <span>Read side-by-side comparison</span>
+                      <span class="text-[11px]">→</span>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  </div>
+</Layout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('compare-search') as HTMLInputElement | null;
+    const filterButtons = document.querySelectorAll('#filter-buttons button');
+    const cards = document.querySelectorAll('.compare-card');
+    const sections = document.querySelectorAll('.category-section');
+    const searchCountSpan = document.getElementById('search-count');
+    const noResultsMsg = document.getElementById('no-results-msg');
+    
+    let currentFilter = 'all';
+    let searchQuery = '';
+
+    const filterComparisons = () => {
+      let visibleCount = 0;
+
+      sections.forEach(section => {
+        const sectionCat = section.getAttribute('data-category-section');
+        const sectionCards = section.querySelectorAll('.compare-card');
+        let sectionVisibleCards = 0;
+
+        sectionCards.forEach(card => {
+          const searchTerm = card.getAttribute('data-search-term') || '';
+          const matchesSearch = searchTerm.includes(searchQuery);
+          const matchesCategory = currentFilter === 'all' || sectionCat === currentFilter;
+
+          if (matchesSearch && matchesCategory) {
+            card.classList.remove('hidden');
+            sectionVisibleCards++;
+            visibleCount++;
+          } else {
+            card.classList.add('hidden');
+          }
+        });
+
+        // Hide the whole section if no cards are visible inside it
+        if (sectionVisibleCards > 0) {
+          section.classList.remove('hidden');
+        } else {
+          section.classList.add('hidden');
+        }
+      });
+
+      // Update match count badge
+      if (searchCountSpan) {
+        searchCountSpan.textContent = `${visibleCount} match${visibleCount !== 1 ? 'es' : ''}`;
+      }
+
+      // Show/hide empty state
+      if (visibleCount === 0) {
+        noResultsMsg?.classList.remove('hidden');
+      } else {
+        noResultsMsg?.classList.add('hidden');
+      }
+    };
+
+    // Handle search input
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        searchQuery = searchInput.value.trim().toLowerCase();
+        filterComparisons();
+      });
+    }
+
+    // Handle filter buttons
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Reset active state for all buttons
+        filterButtons.forEach(b => {
+          b.classList.remove('bg-primary', 'text-on-primary');
+          b.classList.add('bg-canvas', 'text-body', 'border', 'border-hairline');
+        });
+
+        // Add active state to clicked button
+        btn.classList.remove('bg-canvas', 'text-body', 'border', 'border-hairline');
+        btn.classList.add('bg-primary', 'text-on-primary');
+
+        currentFilter = btn.getAttribute('data-filter') || 'all';
+        filterComparisons();
+      });
+    });
+  });
+</script>

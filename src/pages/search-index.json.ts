@@ -3,6 +3,7 @@ import howLongData from '../data/how-long.json';
 import washingMachineData from '../data/washing-machine.json';
 import refreezeData from '../data/refreeze.json';
 import whatHappensData from '../data/what-happens.json';
+import comparisonsData from '../data/comparisons.json';
 
 function formatAppliance(app: string) {
   if (app === 'airfryer') return 'Air Fryer';
@@ -38,6 +39,11 @@ const searchItems = [
     name: item.item,
     category: 'What Happens If',
     url: `/what-happens/${item.slug}`
+  })),
+  ...comparisonsData.map(item => ({
+    name: `${item.item1} vs ${item.item2}`,
+    category: 'Compare',
+    url: `/compare/${item.slug}`
   }))
 ];
 
