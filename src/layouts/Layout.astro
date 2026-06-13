@@ -5,9 +5,19 @@ interface Props {
   title: string;
   description: string;
   faqs?: Array<{ question: string; answer: string }>;
+  excludeArticleSchema?: boolean;
+  excludeFaqSchema?: boolean;
+  excludeBreadcrumbSchema?: boolean;
 }
 
-const { title, description, faqs } = Astro.props;
+const { 
+  title, 
+  description, 
+  faqs, 
+  excludeArticleSchema = false,
+  excludeFaqSchema = false,
+  excludeBreadcrumbSchema = false
+} = Astro.props;
 
 // Auto-generate canonical URL
 const canonicalUrl = new URL(Astro.url.pathname, 'https://isitkitchensafe.com').href.replace(/\/$/, '');
@@ -64,11 +74,26 @@ const siteSchema = isHome ? {
     "@type": "SearchAction",
     "target": {
       "@type": "EntryPoint",
-      "urlTemplate": "https://isitkitchensafe.com/?q={search_term_string}"
+      "urlTemplate": "https://isitkitchensafe.com/search?q={search_term_string}"
     },
     "query-input": "required name=search_term_string"
   }
 } : null;
+
+// Generate SiteLinksSearchBox schema
+const siteLinksSearchBoxSchema = {
+  "@context": "https://schema.org",
+  "@type": "SiteLinksSearchBox",
+  "url": "https://isitkitchensafe.com",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "https://isitkitchensafe.com/search?q={search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  }
+};
 
 // Generate BreadcrumbList JSON-LD Schema
 const pathSegments = Astro.url.pathname.split('/').filter(Boolean);
@@ -181,6 +206,8 @@ const appliances = [
     <meta name="title" content={title} />
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
+    <link rel="alternate" hreflang="en" href={canonicalUrl} />
+    <link rel="alternate" hreflang="x-default" href={canonicalUrl} />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -200,14 +227,19 @@ const appliances = [
     <meta name="twitter:image" content="https://isitkitchensafe.com/og-image.png" />
 
     <!-- Schema Markup -->
-    {faqSchema && (
+    {!excludeFaqSchema && faqSchema && (
       <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
     )}
     {siteSchema && (
       <script type="application/ld+json" set:html={JSON.stringify(siteSchema)} />
     )}
-    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
-    <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(siteLinksSearchBoxSchema)} />
+    {!excludeBreadcrumbSchema && breadcrumbSchema && (
+      <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+    )}
+    {!excludeArticleSchema && articleSchema && (
+      <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+    )}
 
     <!-- Dynamic Slot for Page-Specific Head Content -->
     <slot name="head" />

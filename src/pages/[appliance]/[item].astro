@@ -67,9 +67,36 @@ const pageDescription = generateMetaDescription(data.item, formattedAppliance, f
 
 // Dynamic unique safety analysis
 const uniqueAnalysis = getUniqueSafetyAnalysis(data.item, formattedAppliance, data.safe, data.shortAnswer, data.tips, data.warnings);
+
+const speakableSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": [".quick-answer", ".short-answer", "h1"]
+  }
+};
+
+const howToSchema = (data.safe === 'yes' || data.safe === 'depends') ? {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": `How to safely put ${data.item} in the ${formattedAppliance}`,
+  "description": data.shortAnswer,
+  "step": data.tips.map((tip, idx) => ({
+    "@type": "HowToStep",
+    "position": idx + 1,
+    "text": tip
+  }))
+} : null;
 ---
 
 <Layout title={pageTitle} description={pageDescription} faqs={data.faqs}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(speakableSchema)} />
+    {howToSchema && (
+      <script type="application/ld+json" set:html={JSON.stringify(howToSchema)} />
+    )}
+  </Fragment>
   <article class="max-w-[800px] mx-auto px-6 py-[48px] md:py-[64px]">
     <!-- Breadcrumbs -->
     <nav class="flex gap-2 text-muted text-[13px] mb-8" aria-label="Breadcrumb">
@@ -90,17 +117,17 @@ const uniqueAnalysis = getUniqueSafetyAnalysis(data.item, formattedAppliance, da
       <!-- Trust Signal Badge (Above the fold) -->
       <div class="inline-flex items-center gap-3">
         {data.safe === 'yes' && (
-          <div class="badge-yes px-6 py-2 text-sm">
+          <div class="badge-yes quick-answer px-6 py-2 text-sm">
             <span class="mr-1.5">✓</span> YES
           </div>
         )}
         {data.safe === 'no' && (
-          <div class="badge-no px-6 py-2 text-sm">
+          <div class="badge-no quick-answer px-6 py-2 text-sm">
             <span class="mr-1.5">✗</span> NO
           </div>
         )}
         {data.safe === 'depends' && (
-          <div class="badge-depends px-6 py-2 text-sm">
+          <div class="badge-depends quick-answer px-6 py-2 text-sm">
             <span class="mr-1.5">⚠</span> DEPENDS
           </div>
         )}
@@ -115,7 +142,7 @@ const uniqueAnalysis = getUniqueSafetyAnalysis(data.item, formattedAppliance, da
         'bg-[#fefcf3] border border-signature-yellow/20'
       }`}>
         <h2 class="text-title-sm text-ink font-medium mb-3">Quick Verdict: Can You Put {data.item} in the {formattedAppliance}?</h2>
-        <p class="text-title-md font-bold leading-relaxed text-ink mb-4">
+        <p class="short-answer text-title-md font-bold leading-relaxed text-ink mb-4">
           {data.shortAnswer}
         </p>
         <div class="border-t border-hairline my-4 opacity-50"></div>
