@@ -43,7 +43,7 @@ const comparisons = [
       { question: "Can you boil water in an air fryer?", answer: "No. Air fryers are designed for dry heat. Trying to boil water can damage the appliance and cause severe steam burns." }
     ],
     relatedComparisons: ["air-fryer-vs-oven", "microwave-vs-oven", "microwave-vs-toaster-oven", "microwave-vs-air-fryer-reheating"],
-    relatedItems: ["/airfryer/parchment-paper", "/microwave/aluminum-foil"]
+    relatedItems: ["/airfryer/parchment-paper-airfryer", "/microwave/aluminum-foil"]
   },
   {
     slug: "air-fryer-vs-oven",
@@ -85,7 +85,7 @@ const comparisons = [
       { question: "Can I use aluminum foil in both?", answer: "Yes. Aluminum foil is safe to use in both ovens and air fryers, provided it is secured and does not contact the heating elements." }
     ],
     relatedComparisons: ["air-fryer-vs-microwave", "microwave-vs-oven", "air-fryer-vs-convection-oven", "air-fryer-vs-oven-frozen-food"],
-    relatedItems: ["/airfryer/parchment-paper", "/oven/parchment-paper"]
+    relatedItems: ["/airfryer/parchment-paper-airfryer", "/oven/parchment-paper"]
   },
   {
     slug: "microwave-vs-oven",
@@ -169,7 +169,7 @@ const comparisons = [
       { question: "Does air fried food taste like deep fried food?", answer: "It tastes similar to oven-baked food with a crispy skin. It lacks the rich flavor profile that comes from hot oil absorption." }
     ],
     relatedComparisons: ["air-fryer-vs-oven", "air-fryer-vs-convection-oven", "air-fryer-vs-grill", "air-fryer-vs-microwave"],
-    relatedItems: ["/airfryer/parchment-paper", "/dishwasher/chefs-knife"]
+    relatedItems: ["/airfryer/parchment-paper-airfryer", "/dishwasher/chefs-knife"]
   },
   {
     slug: "slow-cooker-vs-instant-pot",
@@ -295,7 +295,7 @@ const comparisons = [
       { question: "Do convection ovens require special pans?", answer: "Low-sided pans are best to allow the circulating air to reach the food. Avoid high-sided ceramic dishes if you want maximum crispiness." }
     ],
     relatedComparisons: ["air-fryer-vs-oven", "air-fryer-vs-microwave", "air-fryer-vs-deep-fryer", "air-fryer-vs-grill"],
-    relatedItems: ["/airfryer/parchment-paper", "/oven/parchment-paper"]
+    relatedItems: ["/airfryer/parchment-paper-airfryer", "/oven/parchment-paper"]
   },
   {
     slug: "steaming-vs-boiling",
@@ -463,7 +463,7 @@ const comparisons = [
       { question: "Is grilling healthier than air frying?", answer: "Both are healthy cooking methods that let fat drain away. Grilling over open flames can create char (PAHs and HCAs), which should be consumed in moderation." }
     ],
     relatedComparisons: ["air-fryer-vs-oven", "grilling-vs-broiling", "air-fryer-vs-deep-fryer", "air-fryer-vs-grill"],
-    relatedItems: ["/airfryer/foil", "/freezer/raw-chicken"]
+    relatedItems: ["/airfryer/aluminum-foil", "/freezer/raw-chicken"]
   },
   {
     slug: "pressure-cooker-vs-slow-cooker",
@@ -589,7 +589,7 @@ const comparisons = [
       { question: "Is it safe to reheat food multiple times?", answer: "According to USDA guidelines, you should only reheat leftovers once. Repeated heating and cooling cycles allow bacteria to multiply." }
     ],
     relatedComparisons: ["air-fryer-vs-microwave", "microwave-vs-toaster-oven", "microwave-vs-oven-reheating-pizza", "air-fryer-vs-microwave-nuggets"],
-    relatedItems: ["/microwave/aluminum-foil", "/airfryer/parchment-paper"]
+    relatedItems: ["/microwave/aluminum-foil", "/airfryer/parchment-paper-airfryer"]
   },
   {
     slug: "oven-vs-toaster-oven",
@@ -1307,7 +1307,7 @@ const comparisons = [
       { question: "Why does freezer chicken get white spots?", answer: "These are freezer burn spots caused by exposure to air. The food is still safe to eat, but the texture will be dry and woody." }
     ],
     relatedComparisons: ["freezer-vs-fridge-leftovers", "raw-vs-cooked-freezing", "air-fryer-vs-oven-chicken", "fridge-vs-freezer-chicken"],
-    relatedItems: ["/freezer/raw-chicken", "/refrigerator/raw-chicken"]
+    relatedItems: ["/freezer/raw-chicken", "/refrigerator/chicken-breast"]
   },
   {
     slug: "fridge-vs-counter-avocado",
@@ -1517,7 +1517,7 @@ const comparisons = [
       { question: "Why does cooked chicken taste weird after freezing?", answer: "This is caused by warmed-over flavor (WOF), which is the oxidation of fatty acids in the meat. Air exposure in the freezer accelerates this process." }
     ],
     relatedComparisons: ["fridge-vs-freezer-chicken", "freezer-vs-fridge-leftovers", "vacuum-seal-vs-regular-freezer", "raw-vs-cooked-freezing"],
-    relatedItems: ["/freezer/raw-chicken", "/refrigerator/raw-chicken"]
+    relatedItems: ["/freezer/raw-chicken", "/refrigerator/chicken-breast"]
   },
   {
     slug: "fridge-vs-pantry-potatoes",
@@ -1771,7 +1771,7 @@ const comparisons = [
       { question: "Does air frying dry out chicken breasts?", answer: "Because it cooks fast, it actually seals in moisture. However, if overcooked by even a few minutes, chicken breasts will dry out quickly." }
     ],
     relatedComparisons: ["air-fryer-vs-oven", "fridge-vs-freezer-chicken", "air-fryer-vs-oven-frozen-food", "air-fryer-vs-oven-chicken"],
-    relatedItems: ["/freezer/raw-chicken", "/refrigerator/raw-chicken"]
+    relatedItems: ["/freezer/raw-chicken", "/refrigerator/chicken-breast"]
   },
   {
     slug: "microwave-vs-stovetop-reheating",
@@ -1855,7 +1855,7 @@ const comparisons = [
       { question: "How do you freeze soup without breaking glass?", answer: "Use wide-mouth tempered jars, fill only 90% full to leave room for liquid expansion, and let it cool completely before freezing." }
     ],
     relatedComparisons: ["fridge-vs-freezer-chicken", "raw-vs-cooked-freezing", "ziploc-vs-container-freezer", "freezer-vs-fridge-leftovers"],
-    relatedItems: ["/refrigerator/raw-chicken", "/freezer/raw-chicken"]
+    relatedItems: ["/refrigerator/chicken-breast", "/freezer/raw-chicken"]
   },
   {
     slug: "dishwasher-vs-sterilizer",
@@ -1981,7 +1981,7 @@ const comparisons = [
       { question: "Can I cook frozen raw meat in the air fryer?", answer: "Yes, but ensure it is cooked in a single layer and check the internal temperature to verify it is fully cooked to the center." }
     ],
     relatedComparisons: ["air-fryer-vs-oven", "air-fryer-vs-microwave-nuggets", "air-fryer-vs-oven-chicken", "air-fryer-vs-oven-frozen-food"],
-    relatedItems: ["/airfryer/parchment-paper", "/freezer/raw-chicken"]
+    relatedItems: ["/airfryer/parchment-paper-airfryer", "/freezer/raw-chicken"]
   },
   {
     slug: "stovetop-vs-oven-cooking",
@@ -2107,7 +2107,7 @@ const comparisons = [
       { question: "Can I cook raw homemade nuggets in the air fryer?", answer: "Yes. Bread raw chicken breast chunks and air fry at 370°F for 10-12 minutes, verifying they reach 165°F inside." }
     ],
     relatedComparisons: ["air-fryer-vs-microwave-reheating", "air-fryer-vs-oven-frozen-food", "air-fryer-vs-microwave", "air-fryer-vs-microwave-nuggets"],
-    relatedItems: ["/airfryer/parchment-paper", "/microwave/aluminum-foil"]
+    relatedItems: ["/airfryer/parchment-paper-airfryer", "/microwave/aluminum-foil"]
   }
 ];
 

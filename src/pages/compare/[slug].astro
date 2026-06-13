@@ -1,6 +1,11 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import comparisonsData from '../../data/comparisons.json';
+import itemsData from '../../data/items.json';
+import howLongData from '../../data/how-long.json';
+import refreezeData from '../../data/refreeze.json';
+import washingData from '../../data/washing-machine.json';
+import { normalizeItemName } from '../../utils/linkingHelper.js';
 
 export async function getStaticPaths() {
   return comparisonsData.map(item => ({
@@ -72,10 +77,20 @@ function getMetaDescription(i1: string, i2: string, win: string, verd: string) {
 const pageTitle = `${item1} vs ${item2}: Which Is Better? | IsItKitchenSafe`;
 const pageDescription = getMetaDescription(item1, item2, winner, verdict);
 
-// Find related comparison objects for linking
-const relatedComparisonObjects = comparisonsData.filter(c => 
-  relatedComparisons.includes(c.slug)
-).slice(0, 4);
+// Find related comparison objects for linking (ensuring 4 related comparison pages)
+let relatedComparisonObjects = comparisonsData.filter(c => 
+  relatedComparisons.includes(c.slug) && c.slug !== slug
+);
+if (relatedComparisonObjects.length < 4) {
+  const extraComps = comparisonsData.filter(c => 
+    c.slug !== slug && !relatedComparisons.includes(c.slug)
+  );
+  for (const c of extraComps) {
+    if (relatedComparisonObjects.length >= 4) break;
+    relatedComparisonObjects.push(c);
+  }
+}
+relatedComparisonObjects = relatedComparisonObjects.slice(0, 4);
 
 // Format related item paths nicely
 function formatItemLinkText(url: string) {
@@ -85,6 +100,58 @@ function formatItemLinkText(url: string) {
   const itm = parts[1].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   return `${itm} in the ${app} Guide`;
 }
+
+// Resolve item1 and item2 URLs dynamically to guarantee they are linked
+function resolveItemPageUrl(itemName: string) {
+  const norm = normalizeItemName(itemName);
+  const match = itemsData.find(i => normalizeItemName(i.item) === norm);
+  if (match) return `/${match.appliance}/${match.slug}`;
+  
+  const hlMatch = howLongData.find(h => normalizeItemName(h.item) === norm);
+  if (hlMatch) return `/how-long/${hlMatch.slug}`;
+  
+  const rfMatch = refreezeData.find(r => normalizeItemName(r.item) === norm);
+  if (rfMatch) return `/refreeze/${rfMatch.slug}`;
+  
+  const wMatch = washingData.find(w => normalizeItemName(w.item) === norm);
+  if (wMatch) return `/washing-machine/${wMatch.slug}`;
+  
+  return null;
+}
+
+const item1Url = resolveItemPageUrl(item1);
+const item2Url = resolveItemPageUrl(item2);
+const individualGuides: { name: string; url: string }[] = [];
+if (item1Url) individualGuides.push({ name: item1, url: item1Url });
+if (item2Url) individualGuides.push({ name: item2, url: item2Url });
+
+if (relatedItems) {
+  relatedItems.forEach(url => {
+    if (!individualGuides.some(g => g.url === url)) {
+      individualGuides.push({ name: formatItemLinkText(url), url });
+    }
+  });
+}
+
+// Find relevant how-long or refreeze guides for both items
+const preservationGuides: { name: string; url: string; label: string }[] = [];
+const addPreservationGuide = (name: string, url: string, label: string) => {
+  if (!preservationGuides.some(g => g.url === url)) {
+    preservationGuides.push({ name, url, label });
+  }
+};
+
+const item1Norm = normalizeItemName(item1);
+const item1Hl = howLongData.find(h => normalizeItemName(h.item) === item1Norm);
+if (item1Hl) addPreservationGuide(`How Long Does ${item1Hl.item} Last?`, `/how-long/${item1Hl.slug}`, 'Shelf Life');
+const item1Rf = refreezeData.find(r => normalizeItemName(r.item) === item1Norm);
+if (item1Rf) addPreservationGuide(`Can You Refreeze ${item1Rf.item}?`, `/refreeze/${item1Rf.slug}`, 'Refreezing');
+
+const item2Norm = normalizeItemName(item2);
+const item2Hl = howLongData.find(h => normalizeItemName(h.item) === item2Norm);
+if (item2Hl) addPreservationGuide(`How Long Does ${item2Hl.item} Last?`, `/how-long/${item2Hl.slug}`, 'Shelf Life');
+const item2Rf = refreezeData.find(r => normalizeItemName(r.item) === item2Norm);
+if (item2Rf) addPreservationGuide(`Can You Refreeze ${item2Rf.item}?`, `/refreeze/${item2Rf.slug}`, 'Refreezing');
 
 // Schemas
 const pageCanonical = `https://isitkitchensafe.com/compare/${slug}`;
@@ -355,18 +422,36 @@ const faqSchema = {
         </div>
       </section>
 
-      <!-- Related Item Pages Grid -->
-      {relatedItems && relatedItems.length > 0 && (
+      <!-- Compared Individual Item Guides Grid -->
+      {individualGuides.length > 0 && (
         <section class="mb-12 border-t border-hairline pt-8">
-          <h2 class="text-title-lg font-bold text-ink mb-6">Related Appliance Guides</h2>
+          <h2 class="text-title-lg font-bold text-ink mb-6">Compare Individual Safety Guides</h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {relatedItems.map(url => (
+            {individualGuides.map(g => (
               <a 
-                href={url}
-                class="flex items-center justify-between p-4 border border-hairline rounded-lg hover:border-border-strong hover:bg-surface-soft/40 transition-all text-decoration-none text-ink font-medium text-[13.5px]"
+                href={g.url}
+                class="flex items-center justify-between p-4 border border-hairline rounded-lg hover:border-border-strong hover:bg-surface-soft/40 transition-all text-decoration-none text-ink font-medium text-[13.5px] shadow-xs"
               >
-                <span>{formatItemLinkText(url)}</span>
+                <span>{g.name.includes('Guide') ? g.name : `${g.name} Safety Guide`}</span>
                 <span class="text-link text-xs">Read Guide →</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <!-- Relevant Preservation & Food Storage Guides -->
+      {preservationGuides.length > 0 && (
+        <section class="mb-12 border-t border-hairline pt-8">
+          <h2 class="text-title-lg font-bold text-ink mb-6">Shelf Life & Food Preservation Guides</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {preservationGuides.map(g => (
+              <a 
+                href={g.url}
+                class="flex items-center justify-between p-4 border border-hairline rounded-lg hover:border-border-strong hover:bg-surface-soft/40 transition-all text-decoration-none text-ink font-medium text-[13.5px] shadow-xs"
+              >
+                <span>{g.name}</span>
+                <span class="text-xs text-muted font-normal bg-[#e6f4ea] px-2 py-0.5 rounded-sm">{g.label}</span>
               </a>
             ))}
           </div>

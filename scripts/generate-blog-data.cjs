@@ -261,7 +261,7 @@ const blogData = [
     ],
     "relatedTools": [
       { "name": "Is a Hydro Flask Dishwasher Safe?", "url": "/dishwasher/hydroflask" },
-      { "name": "Can You Put Cast Iron in the Dishwasher?", "url": "/dishwasher/cast-iron" },
+      { "name": "Can You Put Cast Iron in the Dishwasher?", "url": "/dishwasher/cast-iron-skillet" },
       { "name": "Dishwashing Chef's Knives Guide", "url": "/dishwasher/chefs-knife" },
       { "name": "Is a Wooden Spoon Dishwasher Safe?", "url": "/dishwasher/wooden-spoon" }
     ]
@@ -344,7 +344,7 @@ const blogData = [
     "relatedTools": [
       { "name": "Is Parchment Paper Safe in Air Fryer?", "url": "/airfryer/parchment-paper-airfryer" },
       { "name": "Using Foil in an Air Fryer Guide", "url": "/airfryer/aluminum-foil-airfryer" },
-      { "name": "Glass Bowl in Air Fryer Safety", "url": "/airfryer/glass-bowl-airfryer" }
+      { "name": "Glass Bowl in Air Fryer Safety", "url": "/airfryer/glass-bowl" }
     ]
   },
   {
@@ -429,7 +429,7 @@ const blogData = [
       }
     ],
     "relatedTools": [
-      { "name": "Freezer Chicken Safety Guide", "url": "/freezer/chicken" },
+      { "name": "Freezer Chicken Safety Guide", "url": "/freezer/raw-chicken" },
       { "name": "Can You Refreeze Chicken?", "url": "/refreeze/chicken" },
       { "name": "What Happens If You Freeze Hot Food?", "url": "/what-happens/freeze-hot-food" }
     ]
@@ -513,7 +513,7 @@ const blogData = [
       { "name": "Refrigerating Potatoes Guide", "url": "/refrigerator/potatoes" },
       { "name": "Storing Tomatoes in Fridge", "url": "/refrigerator/tomatoes" },
       { "name": "Can You Refrigerate Onions?", "url": "/refrigerator/onions" },
-      { "name": "Shelf Life of Bananas on Counter", "url": "/how-long/bananas-counter" }
+      { "name": "Shelf Life of Bananas on Counter", "url": "/how-long/bananas-in-counter" }
     ]
   },
   {
@@ -692,10 +692,10 @@ const blogData = [
       }
     ],
     "relatedTools": [
-      { "name": "Shelf Life of Cooked Chicken", "url": "/how-long/cooked-chicken-fridge" },
-      { "name": "How Long Does Rice Last?", "url": "/how-long/cooked-rice-fridge" },
-      { "name": "Pizza Storage Guidelines", "url": "/how-long/pizza-fridge" },
-      { "name": "Storing Cooked Soup Safely", "url": "/how-long/soup-fridge" }
+      { "name": "Shelf Life of Cooked Chicken", "url": "/how-long/cooked-chicken-in-fridge" },
+      { "name": "How Long Does Rice Last?", "url": "/how-long/cooked-rice-in-fridge" },
+      { "name": "Pizza Storage Guidelines", "url": "/how-long/pizza-in-fridge" },
+      { "name": "Storing Cooked Soup Safely", "url": "/how-long/soup-in-fridge" }
     ]
   },
   {

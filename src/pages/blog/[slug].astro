@@ -1,6 +1,9 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import blogData from '../../data/blog.json';
+import itemsData from '../../data/items.json';
+import comparisonsData from '../../data/comparisons.json';
+import { injectInlineLinks } from '../../utils/linkingHelper.js';
 
 export function getStaticPaths() {
   return blogData.map((article) => {
@@ -20,6 +23,57 @@ interface Props {
 }
 
 const { article } = Astro.props;
+
+// 1. Process inline linking (minimum 10 relevant item links)
+const linksInjected = new Set();
+const linkCountRef = { count: 0 };
+
+const itemsToMatch = itemsData.map(i => ({
+  name: i.item,
+  slug: i.slug,
+  appliance: i.appliance,
+  url: `/${i.appliance}/${i.slug}`
+})).sort((a, b) => b.name.length - a.name.length);
+
+const linkedIntro = injectInlineLinks(article.intro, itemsToMatch, linksInjected, linkCountRef);
+const linkedSections = article.sections.map(sec => {
+  const linkedContent = injectInlineLinks(sec.content, itemsToMatch, linksInjected, linkCountRef);
+  let linkedBoxText = sec.boxText;
+  if (linkedBoxText) {
+    linkedBoxText = injectInlineLinks(linkedBoxText, itemsToMatch, linksInjected, linkCountRef);
+  }
+  return {
+    ...sec,
+    content: linkedContent,
+    boxText: linkedBoxText
+  };
+});
+const linkedConclusion = injectInlineLinks(article.conclusion, itemsToMatch, linksInjected, linkCountRef);
+
+// Fallback resources if inline matches are under 10
+const fallbackGuides = [];
+if (linkCountRef.count < 10) {
+  const needed = 10 - linkCountRef.count;
+  for (const item of itemsToMatch) {
+    if (fallbackGuides.length >= needed) break;
+    if (!linksInjected.has(item.url)) {
+      fallbackGuides.push(item);
+      linksInjected.add(item.url);
+      linkCountRef.count++;
+    }
+  }
+}
+
+// 2. Select 3 related blog articles
+const relatedArticles = blogData.filter(a => a.slug !== article.slug).slice(0, 3);
+
+// 3. Select relevant comparisons
+const relevantComparisons = comparisonsData.filter(c => 
+  article.title.toLowerCase().includes(c.item1.toLowerCase()) || 
+  article.title.toLowerCase().includes(c.item2.toLowerCase()) ||
+  article.intro.toLowerCase().includes(c.item1.toLowerCase()) ||
+  article.intro.toLowerCase().includes(c.item2.toLowerCase())
+).slice(0, 3);
 
 // SEO title and description
 const pageTitle = `${article.title} | IsItKitchenSafe`;
@@ -68,17 +122,13 @@ const pageDescription = article.excerpt;
       <!-- Left side: Main Article Content -->
       <div class="lg:col-span-3 flex flex-col gap-8">
         <!-- Intro Paragraph -->
-        <p class="text-[16px] md:text-[18px] text-body leading-relaxed font-normal">
-          {article.intro}
-        </p>
+        <p class="text-[16px] md:text-[18px] text-body leading-relaxed font-normal" set:html={linkedIntro}></p>
 
         <!-- Sections -->
-        {article.sections.map((section) => (
+        {linkedSections.map((section) => (
           <section class="border-t border-hairline pt-8">
             <h2 class="text-2xl font-bold text-ink mb-4">{section.title}</h2>
-            <p class="text-body-md text-body leading-relaxed mb-6">
-              {section.content}
-            </p>
+            <p class="text-body-md text-body leading-relaxed mb-6" set:html={section.content}></p>
 
             <!-- Callout Box depending on type -->
             {section.boxText && (
@@ -97,7 +147,7 @@ const pageDescription = article.excerpt;
                       {section.type === 'warning' ? 'Critical Warning' :
                        section.type === 'success' || section.type === 'fact' ? 'Science Fact' : 'Safety Tip'}
                     </strong>
-                    {section.boxText}
+                    <span set:html={section.boxText} />
                   </div>
                 </div>
               </div>
@@ -105,12 +155,27 @@ const pageDescription = article.excerpt;
           </section>
         ))}
 
+        <!-- Fallback Guides Section (to guarantee 10-link minimum) -->
+        {fallbackGuides.length > 0 && (
+          <section class="border-t border-hairline pt-8">
+            <div class="bg-surface-soft border border-hairline rounded-md p-6">
+              <h3 class="text-title-sm text-ink font-medium mb-3">📖 Referenced Appliance Safety Guides</h3>
+              <p class="text-body-md text-muted mb-4 text-[13.5px]">Learn more about kitchen and appliance safety rules for these related items:</p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {fallbackGuides.map(g => (
+                  <a href={g.url} class="text-[13px] text-link hover:underline font-medium">
+                    Can you put {g.name.toLowerCase()} in the {g.appliance === 'airfryer' ? 'air fryer' : g.appliance}? &rarr;
+                  </a>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         <!-- Conclusion -->
         <section class="border-t border-hairline pt-8 bg-surface-soft/40 p-6 rounded-lg">
           <h2 class="text-2xl font-bold text-ink mb-4">Conclusion</h2>
-          <p class="text-body-md text-body leading-relaxed">
-            {article.conclusion}
-          </p>
+          <p class="text-body-md text-body leading-relaxed" set:html={linkedConclusion}></p>
         </section>
 
         <!-- FAQ Section -->
@@ -170,6 +235,25 @@ const pageDescription = article.excerpt;
           </ul>
         </div>
 
+        <!-- Relevant Comparisons Link Box -->
+        {relevantComparisons.length > 0 && (
+          <div class="border border-hairline rounded-lg p-6 bg-canvas shadow-xs">
+            <h3 class="text-title-sm text-ink font-bold mb-4">Related Comparisons</h3>
+            <ul class="flex flex-col gap-3">
+              {relevantComparisons.map((c) => (
+                <li>
+                  <a 
+                    href={`/compare/${c.slug}`} 
+                    class="text-[13px] text-link hover:underline font-medium leading-normal block"
+                  >
+                    {c.item1} vs {c.item2} Guide &rarr;
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <!-- Safety Pledge Trust Signals -->
         <div class="border border-hairline rounded-lg p-6 bg-[#fcfbfa]">
           <h4 class="text-xs uppercase tracking-wider text-muted font-bold mb-2">Our Safety Policy</h4>
@@ -185,5 +269,29 @@ const pageDescription = article.excerpt;
         </div>
       </aside>
     </div>
+
+    <!-- Related Blog Articles Section -->
+    <section class="border-t border-hairline pt-12 mt-12">
+      <h2 class="text-2xl font-bold text-ink mb-8">Related Blog Articles</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {relatedArticles.map((art) => (
+          <a 
+            href={`/blog/${art.slug}`} 
+            class="group bg-canvas border border-hairline hover:border-border-strong rounded-lg p-6 flex flex-col justify-between shadow-xs transition-colors active:scale-[0.98]"
+          >
+            <div>
+              <span class="text-caption text-muted text-xs block mb-2">{art.date}</span>
+              <h3 class="text-title-sm text-ink font-bold mb-3 leading-snug group-hover:text-link transition-colors">
+                {art.title}
+              </h3>
+              <p class="text-[13px] text-muted line-clamp-3 leading-relaxed">
+                {art.excerpt}
+              </p>
+            </div>
+            <span class="text-[12px] font-medium text-link mt-4 block">Read article &rarr;</span>
+          </a>
+        ))}
+      </div>
+    </section>
   </article>
 </Layout>

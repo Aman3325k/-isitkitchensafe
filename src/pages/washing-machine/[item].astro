@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import washingMachineData from '../../data/washing-machine.json';
 import { generateMetaDescription, getUniqueSafetyAnalysis } from '../../utils/seoHelper.js';
+import { resolveAllGuidesForItem, getPeopleAlsoAsk, getRelatedCategoriesForItem } from '../../utils/linkingHelper.js';
 
 export function getStaticPaths() {
   return washingMachineData.map((item) => {
@@ -27,7 +28,31 @@ const pageTitle = `Can You Put ${data.item} in the Washing Machine? | IsItKitche
 const pageDescription = generateMetaDescription(data.item, "Washing Machine", formattedAnswer, data.shortAnswer);
 
 // Get related items
-const relatedItems = washingMachineData.filter(item => data.relatedItems.includes(item.slug)).slice(0, 3);
+let relatedItems = washingMachineData.filter(item => data.relatedItems.includes(item.slug) && item.slug !== data.slug);
+if (relatedItems.length < 5) {
+  const sameSafeItems = washingMachineData.filter(item => item.safe === data.safe && item.slug !== data.slug && !data.relatedItems.includes(item.slug));
+  const existingSlugs = new Set(relatedItems.map(i => i.slug));
+  for (const item of sameSafeItems) {
+    if (relatedItems.length >= 5) break;
+    if (!existingSlugs.has(item.slug)) {
+      relatedItems.push(item);
+      existingSlugs.add(item.slug);
+    }
+  }
+}
+if (relatedItems.length < 5) {
+  const anyItems = washingMachineData.filter(item => item.slug !== data.slug && !relatedItems.some(ri => ri.slug === item.slug));
+  for (const item of anyItems) {
+    if (relatedItems.length >= 5) break;
+    relatedItems.push(item);
+  }
+}
+relatedItems = relatedItems.slice(0, 5);
+
+const allGuides = resolveAllGuidesForItem(data.item, data.slug);
+const currentPath = `/washing-machine/${data.slug}`;
+const paaList = getPeopleAlsoAsk(data.item, data.slug, allGuides, data.relatedItems);
+const relatedCategories = getRelatedCategoriesForItem(data.item, data.slug, currentPath, allGuides);
 
 // Dynamic unique safety analysis
 const uniqueAnalysis = getUniqueSafetyAnalysis(data.item, "Washing Machine", data.safe, data.shortAnswer, data.instructions, data.warnings);
@@ -188,8 +213,68 @@ const uniqueAnalysis = getUniqueSafetyAnalysis(data.item, "Washing Machine", dat
       </div>
     </section>
 
+    <!-- Direct Cross-linking Guides Box -->
+    {(allGuides.applianceGuides.length > 0 || allGuides.howLongGuides.length > 0 || allGuides.refreezeGuides.length > 0 || allGuides.whatHappensGuides.length > 0 || allGuides.comparisonGuides.length > 0) && (
+      <section class="mb-12 border-t border-hairline pt-12">
+        <h2 class="text-title-lg text-ink font-medium tracking-tight mb-6">Cross-Reference Safety Guides for {data.item}</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {allGuides.applianceGuides.map(g => (
+            <a href={g.url} class="p-4 bg-canvas border border-hairline rounded-md hover:border-border-strong text-body-md text-link flex justify-between items-center transition-colors shadow-xs">
+              <span class="font-medium">🔌 Appliance: {g.appliance.toUpperCase()}</span>
+              <span class="text-xs text-muted">Read guide &rarr;</span>
+            </a>
+          ))}
+          {allGuides.howLongGuides.map(g => (
+            <a href={g.url} class="p-4 bg-canvas border border-hairline rounded-md hover:border-border-strong text-body-md text-link flex justify-between items-center transition-colors shadow-xs">
+              <span class="font-medium">⏱ Shelf Life: {g.duration}</span>
+              <span class="text-xs text-muted">Read guide &rarr;</span>
+            </a>
+          ))}
+          {allGuides.refreezeGuides.map(g => (
+            <a href={g.url} class="p-4 bg-canvas border border-hairline rounded-md hover:border-border-strong text-body-md text-link flex justify-between items-center transition-colors shadow-xs">
+              <span class="font-medium">❄️ Refreezing Safety Rules</span>
+              <span class="text-xs text-muted">Read guide &rarr;</span>
+            </a>
+          ))}
+          {allGuides.whatHappensGuides.map(g => (
+            <a href={g.url} class="p-4 bg-canvas border border-hairline rounded-md hover:border-border-strong text-body-md text-link flex justify-between items-center transition-colors shadow-xs">
+              <span class="font-medium">⚠️ Accident Hazards & Danger</span>
+              <span class="text-xs text-muted">Read guide &rarr;</span>
+            </a>
+          ))}
+          {allGuides.comparisonGuides.map(g => (
+            <a href={g.url} class="p-4 bg-canvas border border-hairline rounded-md hover:border-border-strong text-body-md text-link flex justify-between items-center transition-colors shadow-xs">
+              <span class="font-medium">⚔️ Comparison: {g.item1} vs {g.item2}</span>
+              <span class="text-xs text-muted">Compare &rarr;</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- People Also Ask Section -->
+    <section class="border-t border-hairline pt-12 mb-16">
+      <h2 class="text-title-lg text-ink font-medium tracking-tight mb-8">People Also Ask</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {paaList.map(paa => (
+          <a 
+            href={paa.url} 
+            class="bg-canvas border border-hairline hover:border-border-strong rounded-md p-5 flex flex-col justify-between shadow-xs transition-colors active:scale-[0.98]"
+          >
+            <div>
+              <span class="text-[11px] text-muted uppercase tracking-wider block mb-2">Related Question</span>
+              <h3 class="text-title-sm text-ink mb-2 leading-snug">
+                {paa.question}
+              </h3>
+            </div>
+            <span class="text-[12px] font-medium text-link mt-4 block">View Answer &rarr;</span>
+          </a>
+        ))}
+      </div>
+    </section>
+
     <!-- Related Items -->
-    <section class="border-t border-hairline pt-12">
+    <section class="border-t border-hairline pt-12 mb-16">
       <h2 class="text-title-lg text-ink font-medium tracking-tight mb-8">Related Washing Guides</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {relatedItems.map(item => (
@@ -217,8 +302,25 @@ const uniqueAnalysis = getUniqueSafetyAnalysis(data.item, "Washing Machine", dat
       </div>
     </section>
 
+    <!-- Related Categories Section -->
+    {relatedCategories.length > 0 && (
+      <section class="border-t border-hairline pt-12 mb-12">
+        <h2 class="text-title-lg text-ink font-medium tracking-tight mb-6 font-display">Explore Related Safety Categories</h2>
+        <div class="flex flex-wrap gap-3">
+          {relatedCategories.map(cat => (
+            <a 
+              href={cat.url}
+              class="px-4 py-2 bg-surface-soft border border-hairline rounded-full text-[13px] font-medium text-ink hover:border-border-strong transition-colors"
+            >
+              {cat.name} &rarr;
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
     <!-- Back Link -->
-    <div class="mt-16 pt-8 border-t border-hairline text-center">
+    <div class="mt-12 pt-8 border-t border-hairline text-center">
       <a 
         href="/washing-machine" 
         class="text-link text-[14px] font-medium hover:text-link-active transition-colors inline-flex items-center gap-1.5 active:scale-[0.98] transition-transform"
