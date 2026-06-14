@@ -189,11 +189,30 @@ const appliances = [
     <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
     <link rel="preconnect" href="https://www.google-analytics.com" crossorigin />
     {import.meta.env.PROD && (
-      <>
-        <!-- Google tag (gtag.js) -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-N3LZSB37ED" is:inline></script>
-        <script is:inline>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-N3LZSB37ED');</script>
-      </>
+      <script is:inline>
+        (function() {
+          function loadGA4() {
+            var scriptEl = document.createElement('script');
+            scriptEl.async = true;
+            scriptEl.src = 'https://www.googletagmanager.com/gtag/js?id=G-N3LZSB37ED';
+            document.head.appendChild(scriptEl);
+
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-N3LZSB37ED');
+          }
+
+          var consent = localStorage.getItem('cookie-consent');
+          if (consent === 'accepted') {
+            loadGA4();
+          } else if (!consent) {
+            window.addEventListener('cookie-consent-accepted', function() {
+              loadGA4();
+            });
+          }
+        })();
+      </script>
     )}
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -263,9 +282,15 @@ const appliances = [
             list="global-search-items"
             autocomplete="off"
             aria-label="Search safety guides"
-            class="w-full h-9 px-3 py-1.5 bg-canvas text-ink text-[13px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
+            class="w-full h-9 pl-3 pr-8 py-1.5 bg-canvas text-ink text-[13px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
           />
           <datalist id="global-search-items"></datalist>
+          <div id="global-search-loading" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2">
+            <svg class="animate-spin h-3.5 w-3.5 text-muted" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
         </form>
 
         <!-- Desktop Navigation -->
@@ -451,6 +476,7 @@ const appliances = [
         const searchForm = document.getElementById('global-search-form') as HTMLFormElement | null;
         const searchInput = document.getElementById('global-search-input') as HTMLInputElement | null;
         const datalist = document.getElementById('global-search-items') as HTMLDataListElement | null;
+        const searchLoading = document.getElementById('global-search-loading');
         let searchIndex: Array<{ name: string; category: string; url: string }> | null = null;
         let isFetching = false;
 
@@ -464,6 +490,7 @@ const appliances = [
         const loadSearchIndex = async () => {
           if (searchIndex || isFetching) return;
           isFetching = true;
+          if (searchLoading) searchLoading.classList.remove('hidden');
           try {
             const response = await fetch('/search-index.json');
             if (response.ok) {
@@ -474,6 +501,7 @@ const appliances = [
             // Silently fail to maintain UX
           } finally {
             isFetching = false;
+            if (searchLoading) searchLoading.classList.add('hidden');
           }
         };
 
@@ -535,6 +563,64 @@ const appliances = [
           });
         }
       });
+    </script>
+
+    <!-- Cookie Consent Banner -->
+    <div id="cookie-consent-banner" class="fixed bottom-4 left-4 right-4 md:left-auto md:max-w-md bg-canvas border border-hairline shadow-lg rounded-lg p-6 z-[100] hidden transition-all duration-300 transform translate-y-4 opacity-0">
+      <h3 class="text-title-sm text-ink font-semibold mb-2">🍪 Cookie Consent</h3>
+      <p class="text-[13px] text-body mb-4 leading-relaxed">
+        We use cookies to analyze website traffic and optimize your site experience. By clicking "Accept", you agree to our use of cookies as described in our <a href="/privacy" class="text-link hover:underline">Privacy Policy</a>.
+      </p>
+      <div class="flex justify-end gap-3 text-xs">
+        <button id="cookie-decline-btn" class="px-4 py-2 bg-canvas text-ink border border-hairline rounded-md hover:bg-surface-soft cursor-pointer transition-colors font-medium">
+          Decline
+        </button>
+        <button id="cookie-accept-btn" class="px-4 py-2 bg-primary text-on-primary rounded-md hover:bg-primary-active cursor-pointer transition-colors font-medium">
+          Accept
+        </button>
+      </div>
+    </div>
+
+    <script is:inline>
+      (function() {
+        var banner = document.getElementById('cookie-consent-banner');
+        var acceptBtn = document.getElementById('cookie-accept-btn');
+        var declineBtn = document.getElementById('cookie-decline-btn');
+
+        if (!banner || !acceptBtn || !declineBtn) return;
+
+        var consent = localStorage.getItem('cookie-consent');
+
+        if (!consent) {
+          // Show the banner with a slight delay for smooth animation
+          setTimeout(function() {
+            banner.classList.remove('hidden');
+            // Force reflow
+            banner.offsetHeight;
+            banner.classList.remove('translate-y-4', 'opacity-0');
+            banner.classList.add('translate-y-0', 'opacity-100');
+          }, 800);
+        }
+
+        acceptBtn.addEventListener('click', function() {
+          localStorage.setItem('cookie-consent', 'accepted');
+          hideBanner();
+          window.dispatchEvent(new CustomEvent('cookie-consent-accepted'));
+        });
+
+        declineBtn.addEventListener('click', function() {
+          localStorage.setItem('cookie-consent', 'declined');
+          hideBanner();
+        });
+
+        function hideBanner() {
+          banner.classList.remove('translate-y-0', 'opacity-100');
+          banner.classList.add('translate-y-4', 'opacity-0');
+          setTimeout(function() {
+            banner.classList.add('hidden');
+          }, 300);
+        }
+      })();
     </script>
   </body>
 </html>

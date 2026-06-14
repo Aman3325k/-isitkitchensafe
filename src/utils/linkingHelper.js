@@ -94,10 +94,12 @@ export function resolveAllGuidesForItem(item, slug) {
   whatHappensData.forEach(wh => {
     const whNorm = normalizeItemName(wh.item);
     if (whNorm.includes(norm) || wh.slug.includes(baseSlug) || norm.includes(whNorm)) {
+      const parsed = parseScenario(wh.slug);
       results.whatHappensGuides.push({
         url: `/what-happens/${wh.slug}`,
-        title: `What Happens If You Put ${wh.item} in the Appliance?`,
+        title: `What Happens If You ${wh.item}?`,
         item: wh.item,
+        appliance: parsed.appliance,
         dangerLevel: wh.dangerLevel
       });
     }
@@ -118,6 +120,75 @@ export function resolveAllGuidesForItem(item, slug) {
   return results;
 }
 
+// Helper to parse slug into item and appliance
+function parseScenario(slug) {
+  let item = "";
+  let appliance = "";
+  
+  if (slug.startsWith("microwave-")) {
+    appliance = "Microwave";
+    item = slug.replace("microwave-", "").replace(/-/g, " ");
+  } else if (slug.startsWith("put-") && slug.includes("-in-dishwasher")) {
+    appliance = "Dishwasher";
+    item = slug.replace("put-", "").replace("-in-dishwasher", "").replace(/-/g, " ");
+  } else if (slug.endsWith("-in-dishwasher")) {
+    appliance = "Dishwasher";
+    item = slug.replace("-in-dishwasher", "").replace(/-/g, " ");
+  } else if (slug.startsWith("run-dishwasher-")) {
+    appliance = "Dishwasher";
+    item = slug.replace("run-dishwasher-", "").replace(/-/g, " ");
+  } else if (slug.startsWith("refreeze-")) {
+    appliance = "Freezer";
+    item = slug.replace("refreeze-", "").replace(/-/g, " ");
+  } else if (slug.startsWith("freeze-")) {
+    appliance = "Freezer";
+    item = slug.replace("freeze-", "").replace(/-/g, " ");
+  } else if (slug.startsWith("leave-freezer-")) {
+    appliance = "Freezer";
+    item = slug.replace("leave-freezer-", "").replace(/-/g, " ");
+  } else if (slug.startsWith("put-") && slug.includes("-in-oven")) {
+    appliance = "Oven";
+    item = slug.replace("put-", "").replace("-in-oven", "").replace(/-/g, " ");
+  } else if (slug.endsWith("-in-oven")) {
+    appliance = "Oven";
+    item = slug.replace("-in-oven", "").replace(/-/g, " ");
+  } else if (slug.startsWith("leave-oven-")) {
+    appliance = "Oven";
+    item = slug.replace("leave-oven-", "").replace(/-/g, " ");
+  } else if (slug.startsWith("use-") && slug.includes("-on-oven-bottom")) {
+    appliance = "Oven";
+    item = slug.replace("use-", "").replace("-on-oven-bottom", "").replace(/-/g, " ");
+  } else if (slug.startsWith("leave-gas-stove-")) {
+    appliance = "Stove";
+    item = "Gas Stove";
+  } else if (slug.startsWith("leave-electric-stove-")) {
+    appliance = "Stove";
+    item = "Electric Stove";
+  } else if (slug.startsWith("boil-dry-")) {
+    appliance = "Stove";
+    item = slug.replace("boil-dry-", "").replace(/-/g, " ");
+  } else if (slug.includes("-on-hot-stove") || slug.includes("-on-cold-counter")) {
+    appliance = "Stove";
+    item = slug.replace(/-/g, " ");
+  } else if (slug.startsWith("mix-")) {
+    appliance = "Kitchen";
+    item = slug.replace("mix-", "").replace(/-/g, " ");
+  } else if (slug.startsWith("eat-") || slug.startsWith("drink-")) {
+    appliance = "Kitchen";
+    item = slug.replace("eat-", "").replace("drink-", "").replace(/-/g, " ");
+  } else if (slug.startsWith("leave-fridge-")) {
+    appliance = "Refrigerator";
+    item = slug.replace("leave-fridge-", "").replace(/-/g, " ");
+  } else {
+    appliance = "Kitchen";
+    item = slug.replace(/-/g, " ");
+  }
+
+  // Capitalize first letters of item
+  item = item.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  return { item, appliance };
+}
+
 // Generate PAA questions & links dynamically
 export function getPeopleAlsoAsk(item, slug, allGuides, relatedSlugs) {
   const paa = [];
@@ -126,7 +197,8 @@ export function getPeopleAlsoAsk(item, slug, allGuides, relatedSlugs) {
   const addQuestion = (q, url) => {
     if (paa.length >= 3) return;
     if (addedUrls.has(url)) return;
-    paa.push({ question: q, url });
+    const cleanQ = q.replace(/\?+/g, '?');
+    paa.push({ question: cleanQ, url });
     addedUrls.add(url);
   };
 
@@ -144,7 +216,8 @@ export function getPeopleAlsoAsk(item, slug, allGuides, relatedSlugs) {
   // 3. Look for whatHappensGuides
   allGuides.whatHappensGuides.forEach(g => {
     // Clean up title
-    let action = g.title.replace('What Happens: ', '').replace('What Happens If You Put ', '').replace('What Happens If You ', '');
+    let action = g.title.replace('What Happens: ', '').replace('What Happens If You ', '');
+    action = action.replace(/\?+$/, '');
     action = action.charAt(0).toLowerCase() + action.slice(1);
     addQuestion(`What happens if you ${action}?`, g.url);
   });
@@ -184,7 +257,8 @@ export function getPeopleAlsoAsk(item, slug, allGuides, relatedSlugs) {
           const loc = relItem.location === 'fridge' ? 'refrigerator' : relItem.location === 'freezer' ? 'freezer' : 'countertop';
           addQuestion(`How long does ${relItem.item.toLowerCase()} last in the ${loc}?`, `/how-long/${relItem.slug}`);
         } else if (relItem.dangerLevel) {
-          addQuestion(`What happens if you use ${relItem.item.toLowerCase()}?`, `/what-happens/${relItem.slug}`);
+          const verbPhrase = relItem.item.toLowerCase();
+          addQuestion(`What happens if you ${verbPhrase}?`, `/what-happens/${relItem.slug}`);
         } else if (relItem.safe !== undefined) {
           const isWashing = washingData.some(w => w.slug === relItem.slug);
           if (isWashing) {
