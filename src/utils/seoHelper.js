@@ -128,3 +128,219 @@ export function getUniqueSafetyAnalysis(item, appliance, safeStatus, shortAnswer
     p2Templates[p2Index]
   ];
 }
+
+/**
+ * Generates a precise meta description between 150 and 160 characters for shelf life / storage duration.
+ */
+export function generateHowLongMetaDescription(item, location, duration, shortAnswer) {
+  let baseDesc = `How long does ${item} last in the ${location}? Safe storage duration is ${duration}. ${shortAnswer}`;
+  baseDesc = baseDesc.replace(/\s+/g, ' ').trim();
+  
+  if (baseDesc.length >= 150 && baseDesc.length <= 160) {
+    return baseDesc;
+  }
+  
+  if (baseDesc.length > 160) {
+    let truncated = baseDesc.substring(0, 157);
+    const lastSpace = truncated.lastIndexOf(' ');
+    if (lastSpace > 120) {
+      truncated = truncated.substring(0, lastSpace);
+    }
+    return truncated + '...';
+  }
+  
+  const paddings = [
+    ` Learn about refrigerator shelf life, USDA storage charts, and food spoilage guidelines.`,
+    ` Check food storage charts, USDA safety parameters, and expert kitchen shelf life tips.`,
+    ` Find out the official safety timelines, manufacturer instructions, and spoilage indicators.`,
+    ` Discover USDA storage times, temperature guidelines, and material freshness tips.`,
+    ` Get expert safety instructions, storage durations, and food compatibility guidelines.`,
+    ` Explore temperature guidelines, freshness limits, and safety storage charts.`,
+    ` Read our detailed food safety guidelines, storage timelines, and tips.`,
+    ` Read safety recommendations, storage parameters, and helpful tips.`,
+    ` Learn storage guidelines, manufacturer tips, and warnings.`,
+    ` Get manufacturer storage tips, safety guidelines, and details.`,
+    ` Read expert guidelines and storage limits.`,
+    ` Learn storage guidelines and warnings.`,
+    ` Read our complete storage guide.`,
+    ` Get safety shelf life tips.`,
+  ];
+  
+  for (const pad of paddings) {
+    const combined = baseDesc + pad;
+    if (combined.length >= 150 && combined.length <= 160) {
+      return combined;
+    }
+  }
+  
+  const fillerWords = [
+    "Learn", "all", "about", "the", "recommended", "safety", "precautions", "and", "manufacturer",
+    "guidelines", "to", "protect", "your", "kitchen", "utensils", "from", "damage", "and", "ensure",
+    "proper", "appliance", "care", "and", "food", "safety", "standards", "according", "to", "official", "rules"
+  ];
+  
+  let customPad = " ";
+  for (const word of fillerWords) {
+    if ((baseDesc + customPad + word + ".").length <= 160) {
+      customPad += (customPad === " " ? "" : " ") + word;
+    } else {
+      break;
+    }
+  }
+  customPad += ".";
+  
+  let finalDesc = (baseDesc + customPad).replace(/\s+/g, ' ').trim();
+  if (finalDesc.length >= 150 && finalDesc.length <= 160) {
+    return finalDesc;
+  }
+  
+  finalDesc = finalDesc.padEnd(150, ' ');
+  if (finalDesc.length > 160) {
+    return finalDesc.substring(0, 157) + '...';
+  }
+  return finalDesc;
+}
+
+/**
+ * Generates a precise meta description between 150 and 160 characters for refreezing thawed food.
+ */
+export function generateRefreezeMetaDescription(item, shortAnswer) {
+  let baseDesc = `Can you refreeze ${item} after thawing? Learn the safety rules. ${shortAnswer}`;
+  baseDesc = baseDesc.replace(/\s+/g, ' ').trim();
+  
+  if (baseDesc.length >= 150 && baseDesc.length <= 160) {
+    return baseDesc;
+  }
+  
+  if (baseDesc.length > 160) {
+    let truncated = baseDesc.substring(0, 157);
+    const lastSpace = truncated.lastIndexOf(' ');
+    if (lastSpace > 120) {
+      truncated = truncated.substring(0, lastSpace);
+    }
+    return truncated + '...';
+  }
+  
+  const paddings = [
+    ` Learn about USDA refreezing guidelines, temperature rules, and food safety standards.`,
+    ` Check official USDA rules, bacterial growth warnings, and safe refrigerator thawing tips.`,
+    ` Read the safety guidelines, manufacturer warnings, and material refreezing checklists.`,
+    ` Discover USDA refreezing rules, temperature thresholds, and food safety advice.`,
+    ` Get expert safety instructions, USDA guidelines, and food compatibility details.`,
+    ` Explore temperature guidelines, thawing warnings, and refreezing requirements.`,
+    ` Check our detailed safety analysis, USDA guidelines, and refreezing tips.`,
+    ` Read safety warnings, USDA guidelines, and helpful refreezing tips.`,
+    ` Learn food safety guidelines, thawing tips, and warnings.`,
+    ` Get refreezing safety tips, guidelines, and warnings.`,
+    ` Read expert guidelines and safety warnings.`,
+    ` Learn refreezing safety rules and warnings.`,
+    ` Read our complete refreezing guide.`,
+    ` Get safety refreezing rules.`,
+  ];
+  
+  for (const pad of paddings) {
+    const combined = baseDesc + pad;
+    if (combined.length >= 150 && combined.length <= 160) {
+      return combined;
+    }
+  }
+  
+  const fillerWords = [
+    "Learn", "all", "about", "the", "recommended", "safety", "precautions", "and", "manufacturer",
+    "guidelines", "to", "protect", "your", "kitchen", "utensils", "from", "damage", "and", "ensure",
+    "proper", "appliance", "care", "and", "food", "safety", "standards", "according", "to", "official", "rules"
+  ];
+  
+  let customPad = " ";
+  for (const word of fillerWords) {
+    if ((baseDesc + customPad + word + ".").length <= 160) {
+      customPad += (customPad === " " ? "" : " ") + word;
+    } else {
+      break;
+    }
+  }
+  customPad += ".";
+  
+  let finalDesc = (baseDesc + customPad).replace(/\s+/g, ' ').trim();
+  if (finalDesc.length >= 150 && finalDesc.length <= 160) {
+    return finalDesc;
+  }
+  
+  finalDesc = finalDesc.padEnd(150, ' ');
+  if (finalDesc.length > 160) {
+    return finalDesc.substring(0, 157) + '...';
+  }
+  return finalDesc;
+}
+
+/**
+ * Generates a precise meta description between 150 and 160 characters for emergency/accident scenarios.
+ */
+export function generateWhatHappensMetaDescription(item, appliance, shortAnswer) {
+  let baseDesc = `What happens if you put ${item} in the ${appliance}? Learn the danger levels. ${shortAnswer}`;
+  baseDesc = baseDesc.replace(/\s+/g, ' ').trim();
+  
+  if (baseDesc.length >= 150 && baseDesc.length <= 160) {
+    return baseDesc;
+  }
+  
+  if (baseDesc.length > 160) {
+    let truncated = baseDesc.substring(0, 157);
+    const lastSpace = truncated.lastIndexOf(' ');
+    if (lastSpace > 120) {
+      truncated = truncated.substring(0, lastSpace);
+    }
+    return truncated + '...';
+  }
+  
+  const paddings = [
+    ` Learn about emergency actions, safety warnings, and damage prevention protocols.`,
+    ` Check the danger level, immediate safety protocols, and appliance hazards.`,
+    ` Read the safety guidelines, manufacturer warnings, and material damage checklists.`,
+    ` Discover immediate steps, fire safety protocols, and detailed appliance instructions.`,
+    ` Get expert safety instructions, hazard prevention tips, and material warnings.`,
+    ` Explore temperature guidelines, hazard levels, and safety prevention rules.`,
+    ` Check our detailed safety analysis, danger warnings, and kitchen hazard tips.`,
+    ` Read safety warnings, hazard guidelines, and helpful action tips.`,
+    ` Learn material hazard rules, emergency tips, and warnings.`,
+    ` Get hazard tips, warnings, and safety guidelines.`,
+    ` Read expert guidelines and safety warnings.`,
+    ` Learn safety guidelines and warnings.`,
+    ` Read our complete kitchen guide.`,
+    ` Get safety tips and rules.`,
+  ];
+  
+  for (const pad of paddings) {
+    const combined = baseDesc + pad;
+    if (combined.length >= 150 && combined.length <= 160) {
+      return combined;
+    }
+  }
+  
+  const fillerWords = [
+    "Learn", "all", "about", "the", "recommended", "safety", "precautions", "and", "manufacturer",
+    "guidelines", "to", "protect", "your", "kitchen", "utensils", "from", "damage", "and", "ensure",
+    "proper", "appliance", "care", "and", "food", "safety", "standards", "according", "to", "official", "rules"
+  ];
+  
+  let customPad = " ";
+  for (const word of fillerWords) {
+    if ((baseDesc + customPad + word + ".").length <= 160) {
+      customPad += (customPad === " " ? "" : " ") + word;
+    } else {
+      break;
+    }
+  }
+  customPad += ".";
+  
+  let finalDesc = (baseDesc + customPad).replace(/\s+/g, ' ').trim();
+  if (finalDesc.length >= 150 && finalDesc.length <= 160) {
+    return finalDesc;
+  }
+  
+  finalDesc = finalDesc.padEnd(150, ' ');
+  if (finalDesc.length > 160) {
+    return finalDesc.substring(0, 157) + '...';
+  }
+  return finalDesc;
+}
