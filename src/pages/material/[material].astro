@@ -1,0 +1,221 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { CATEGORIES, getCategoryItemsAndStats, getLatestDataModifiedTime } from '../../utils/materialCategories';
+
+export function getStaticPaths() {
+  return CATEGORIES.map(cat => ({
+    params: { material: cat.id },
+    props: { categoryId: cat.id }
+  }));
+}
+
+interface Props {
+  categoryId: string;
+}
+
+const { categoryId } = Astro.props;
+
+const stats = getCategoryItemsAndStats(categoryId);
+if (!stats) {
+  throw new Error(`Invalid material category: ${categoryId}`);
+}
+
+const { category, totalItemsTested, safePercentage, mostCommonRisk, items } = stats;
+
+const pageTitle = `${category.displayName} Appliance Safety Guide | IsItKitchenSafe`;
+const pageDescription = `Are ${category.displayName} items safe in the dishwasher, microwave, oven, or freezer? View safety stats, risks, and a full safety comparison table for ${totalItemsTested} items.`;
+
+const lastModifiedTime = getLatestDataModifiedTime();
+const formattedLastVerified = lastModifiedTime.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+});
+
+const isWashingBased = categoryId === 'fabric' || categoryId === 'footwear';
+const columns = isWashingBased 
+  ? [
+      { id: 'washing-machine', label: 'Washing Machine' },
+      { id: 'dryer', label: 'Dryer' }
+    ]
+  : [
+      { id: 'dishwasher', label: 'Dishwasher' },
+      { id: 'microwave', label: 'Microwave' },
+      { id: 'oven', label: 'Oven' },
+      { id: 'freezer', label: 'Freezer' }
+    ];
+
+// Generate dynamic cross-linking links
+const relatedMaterials = category.relatedIds
+  .map(id => CATEGORIES.find(c => c.id === id))
+  .filter((c): c is typeof CATEGORIES[number] => c !== undefined);
+
+// Upgraded Schema markup
+const itemListSchema = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": `Appliance Safety Comparison for ${category.displayName}`,
+  "description": `Detailed safety guidelines and comparisons for ${category.displayName} items.`,
+  "numberOfItems": items.length,
+  "itemListElement": items.map((item, idx) => ({
+    "@type": "ListItem",
+    "position": idx + 1,
+    "item": {
+      "@type": "Thing",
+      "name": item.name,
+      "url": `https://isitkitchensafe.com${Object.values(item.appliances)[0]?.url || ''}`,
+      "additionalProperty": Object.entries(item.appliances).map(([appName, appInfo]) => ({
+        "@type": "PropertyValue",
+        "name": `${appName}Safe`,
+        "value": appInfo.safe.toUpperCase()
+      }))
+    }
+  }))
+};
+---
+
+<Layout title={pageTitle} description={pageDescription}>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(itemListSchema)} />
+  </Fragment>
+
+  <!-- Breadcrumbs -->
+  <div class="bg-surface-soft border-b border-hairline py-4">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <nav class="flex gap-2 text-muted text-[13px]" aria-label="Breadcrumb">
+        <a href="/" class="hover:text-ink transition-colors">Home</a>
+        <span>/</span>
+        <a href="/material" class="hover:text-ink transition-colors">Materials</a>
+        <span>/</span>
+        <span class="text-ink font-medium">{category.displayName}</span>
+      </nav>
+    </div>
+  </div>
+
+  <article class="max-w-[1280px] mx-auto px-6 py-[48px] md:py-[64px]">
+    <!-- Header -->
+    <header class="mb-10 text-center md:text-left">
+      <span class="text-caption text-muted uppercase tracking-wider text-xs block mb-2">Material Safety Guide</span>
+      <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-4">
+        Appliance Safety for {category.displayName}
+      </h1>
+      <p class="text-body-md text-muted text-lg leading-relaxed max-w-[800px]">
+        {category.description} Read below for aggregated material science safety concerns and the complete item comparison table.
+      </p>
+    </header>
+
+    <!-- Quick Stats Block -->
+    <section class="mb-12">
+      <div class="bg-surface-soft border border-hairline rounded-lg p-6 md:p-8">
+        <h2 class="text-title-sm text-ink font-medium mb-6">Material Verification Stats</h2>
+        <dl class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-[14px]">
+          <div class="bg-canvas border border-hairline/60 rounded-md p-5 shadow-xs">
+            <dt class="text-caption text-muted uppercase tracking-wider text-[11px] block mb-1">Total Items Tested</dt>
+            <dd class="text-ink text-[18px] font-semibold">{totalItemsTested} items</dd>
+          </div>
+          <div class="bg-canvas border border-hairline/60 rounded-md p-5 shadow-xs">
+            <dt class="text-caption text-muted uppercase tracking-wider text-[11px] block mb-1">
+              {isWashingBased ? 'Wash-Safe Rate' : 'Dishwasher-Safe Rate'}
+            </dt>
+            <dd class="text-ink text-[18px] font-semibold">{safePercentage}% safe</dd>
+          </div>
+          <div class="bg-canvas border border-hairline/60 rounded-md p-5 shadow-xs lg:col-span-2">
+            <dt class="text-caption text-muted uppercase tracking-wider text-[11px] block mb-1">Primary Safety Risk</dt>
+            <dd class="text-signature-coral text-[15px] font-semibold leading-snug">{mostCommonRisk}</dd>
+          </div>
+        </dl>
+        <div class="mt-6 border-t border-hairline/60 pt-4 flex items-center justify-between text-xs text-muted">
+          <span>Freshness verified by IsItKitchenSafe Editorial Team</span>
+          <span>Data last verified: <strong class="text-ink font-medium">{formattedLastVerified}</strong></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Comparison Table Section -->
+    <section class="mb-16">
+      <h2 class="text-title-lg text-ink font-medium tracking-tight mb-6">{category.displayName} Safety Comparison Table</h2>
+      <div class="border border-hairline rounded-lg overflow-hidden shadow-xs bg-canvas">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <caption class="sr-only">Appliance safety comparison ratings for {category.displayName} items</caption>
+            <thead>
+              <tr class="bg-surface-soft border-b border-hairline text-ink text-[13px] font-semibold">
+                <th scope="col" class="py-4 px-6 font-medium">Item Name</th>
+                {columns.map(col => (
+                  <th scope="col" class="py-4 px-6 font-medium text-center">{col.label}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {items.map(item => (
+                <tr class="border-b border-hairline last:border-0 hover:bg-surface-soft/40 transition-colors text-[14px]">
+                  <th scope="row" class="py-4 px-6 font-medium text-ink">
+                    {(() => {
+                      const firstApp = Object.values(item.appliances)[0];
+                      return firstApp ? (
+                        <a href={firstApp.url} class="text-link hover:underline">
+                          {item.name}
+                        </a>
+                      ) : (
+                        item.name
+                      );
+                    })()}
+                  </th>
+                  {columns.map(col => {
+                    const status = item.appliances[col.id];
+                    return (
+                      <td class="py-4 px-6 text-center">
+                        {status ? (
+                          <a 
+                            href={status.url} 
+                            class={`inline-flex items-center justify-center font-bold px-3 py-1 rounded-full text-[11px] tracking-wide uppercase select-none transition-colors border ${
+                              status.safe === 'yes' ? 'bg-[#22c55e]/10 text-[#22c55e] border-[#22c55e]/20 hover:bg-[#22c55e]/20' : 
+                              status.safe === 'no' ? 'bg-[#ef4444]/10 text-[#ef4444] border-[#ef4444]/20 hover:bg-[#ef4444]/20' : 
+                              'bg-[#eab308]/10 text-[#eab308] border-[#eab308]/20 hover:bg-[#eab308]/20'
+                            }`}
+                          >
+                            {status.safe === 'yes' ? '✓ YES' : status.safe === 'no' ? '✗ NO' : '⚠ DEPENDS'}
+                          </a>
+                        ) : (
+                          <span class="text-muted/50">—</span>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Related Materials Cross-Linking -->
+    <section class="border-t border-hairline pt-12">
+      <h2 class="text-title-md text-ink font-medium tracking-tight mb-6">You might also want to check:</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        {relatedMaterials.map(rel => {
+          const isDark = rel.styling.includes('text-white');
+          return (
+            <a 
+              href={`/material/${rel.id}`} 
+              class={`${rel.styling} border rounded-lg p-6 flex flex-col justify-between min-h-[140px] shadow-sm transition-transform active:scale-[0.98]`}
+            >
+              <div>
+                <h3 class={`text-title-sm font-medium tracking-tight mb-2 ${isDark ? 'text-white' : 'text-ink'}`}>
+                  {rel.displayName}
+                </h3>
+                <p class={`text-[12px] leading-relaxed mb-4 ${isDark ? 'text-white/80' : 'text-muted'}`}>
+                  {rel.description.split('.')[0]}.
+                </p>
+              </div>
+              <span class={`text-[12px] font-medium underline underline-offset-4 flex items-center gap-1 ${isDark ? 'text-white' : 'text-link'}`}>
+                Compare safety &rarr;
+              </span>
+            </a>
+          );
+        })}
+      </div>
+    </section>
+  </article>
+</Layout>
