@@ -23,3 +23,6 @@ npm run dev
 ```sh
 npm run build
 ```
+
+## SEO Investigation
+A technical SEO investigation was conducted regarding a sudden drop in GSC traffic on July 14-15. See [SEO_INVESTIGATION_STATUS.md](SEO_INVESTIGATION_STATUS.md) for full details and findings.
