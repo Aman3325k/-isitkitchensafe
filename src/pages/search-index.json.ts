@@ -18,32 +18,38 @@ const searchItems = [
   ...itemsData.map(item => ({
     name: item.item,
     category: formatAppliance(item.appliance),
-    url: `/${item.appliance}/${item.slug}`
+    url: `/${item.appliance}/${item.slug}`,
+    keywords: [item.slug.replace(/-/g, ' '), item.appliance, item.material || ''].join(' ').toLowerCase()
   })),
   ...howLongData.map(item => ({
     name: `${item.item} Shelf Life`,
     category: 'Shelf Life',
-    url: `/how-long/${item.slug}`
+    url: `/how-long/${item.slug}`,
+    keywords: [item.slug.replace(/-/g, ' '), 'how long', 'shelf life', 'fridge', 'refrigerator'].join(' ').toLowerCase()
   })),
   ...washingMachineData.map(item => ({
     name: `${item.item} Washing`,
     category: 'Washing Machine',
-    url: `/washing-machine/${item.slug}`
+    url: `/washing-machine/${item.slug}`,
+    keywords: [item.slug.replace(/-/g, ' '), 'washing machine', 'wash'].join(' ').toLowerCase()
   })),
   ...refreezeData.map(item => ({
     name: `${item.item} Refreezing`,
     category: 'Refreeze Safety',
-    url: `/refreeze/${item.slug}`
+    url: `/refreeze/${item.slug}`,
+    keywords: [item.slug.replace(/-/g, ' '), 'refreeze', 'thawed', 'freezer'].join(' ').toLowerCase()
   })),
   ...whatHappensData.map(item => ({
     name: item.item,
     category: 'What Happens If',
-    url: `/what-happens/${item.slug}`
+    url: `/what-happens/${item.slug}`,
+    keywords: [item.slug.replace(/-/g, ' '), 'what happens'].join(' ').toLowerCase()
   })),
   ...comparisonsData.map(item => ({
     name: `${item.item1} vs ${item.item2}`,
     category: 'Compare',
-    url: `/compare/${item.slug}`
+    url: `/compare/${item.slug}`,
+    keywords: [item.item1, item.item2, item.slug.replace(/-/g, ' '), 'compare', 'vs'].join(' ').toLowerCase()
   }))
 ];
 

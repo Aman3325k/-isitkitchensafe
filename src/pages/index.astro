@@ -160,6 +160,9 @@ const homeFaqs = [
           Check Safety
         </button>
       </form>
+      <div id="search-error" class="hidden w-full max-w-[600px] mt-4 text-left p-4 bg-red-50 text-red-800 border border-red-200 rounded-md text-[14px]">
+        No direct match found for "<span id="search-error-term"></span>". Please try searching for something else, or browse our categories below.
+      </div>
     </div>
   </section>
 
@@ -403,7 +406,10 @@ const homeFaqs = [
       const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
       const datalist = document.getElementById('search-items') as HTMLDataListElement | null;
       const searchLoading = document.getElementById('search-loading');
-      let searchIndex: Array<{ name: string; appliance: string; url: string }> | null = null;
+      const searchError = document.getElementById('search-error');
+      const searchErrorTerm = document.getElementById('search-error-term');
+      
+      let searchIndex: Array<{ name: string; appliance: string; url: string; keywords: string }> | null = null;
       let isFetching = false;
 
       const populateDatalist = (items: typeof searchIndex) => {
@@ -413,10 +419,14 @@ const homeFaqs = [
         ).join('');
       };
 
-      const loadSearchIndex = async () => {
-        if (searchIndex || isFetching) return;
+      const loadSearchIndex = async (): Promise<boolean> => {
+        if (searchIndex) return true;
+        if (isFetching) return false;
+        
         isFetching = true;
         if (searchLoading) searchLoading.classList.remove('hidden');
+        if (searchError) searchError.classList.add('hidden');
+        
         try {
           const response = await fetch('/search-index.json');
           if (response.ok) {
@@ -424,17 +434,72 @@ const homeFaqs = [
             searchIndex = rawIndex.map((entry: any) => ({
               name: entry.name,
               appliance: entry.category,
-              url: entry.url
+              url: entry.url,
+              keywords: entry.keywords || ''
             }));
             populateDatalist(searchIndex);
+            return true;
           }
         } catch (e) {
-          // Silently fail to maintain UX
+          console.error("Failed to load search index", e);
         } finally {
           isFetching = false;
           if (searchLoading) searchLoading.classList.add('hidden');
         }
+        return false;
       };
+
+      const performSearch = (query: string) => {
+        if (!query || !searchIndex) return;
+        
+        const rawValue = query.toLowerCase().trim();
+        
+        // Hide error initially
+        if (searchError) searchError.classList.add('hidden');
+        
+        // Exact match by name
+        let match = searchIndex.find(item => item.name.toLowerCase() === rawValue);
+
+        // Exact match by name (Appliance) format from datalist
+        if (!match) {
+          match = searchIndex.find(item => {
+            const displayVal = `${item.name} (${item.appliance})`.toLowerCase();
+            return displayVal === rawValue;
+          });
+        }
+
+        // Substring match on name
+        if (!match) {
+          match = searchIndex.find(item => item.name.toLowerCase().includes(rawValue));
+        }
+        
+        // Substring match on keywords
+        if (!match) {
+          match = searchIndex.find(item => item.keywords && item.keywords.includes(rawValue));
+        }
+
+        if (match) {
+          window.location.href = match.url;
+        } else {
+          // Show inline error
+          if (searchError && searchErrorTerm) {
+            searchErrorTerm.textContent = query;
+            searchError.classList.remove('hidden');
+          }
+        }
+      };
+
+      // Load index immediately in case there's a URL query
+      loadSearchIndex().then((loaded) => {
+        if (loaded) {
+          const params = new URLSearchParams(window.location.search);
+          const q = params.get('q');
+          if (q && searchInput) {
+            searchInput.value = q;
+            performSearch(q);
+          }
+        }
+      });
 
       if (searchInput) {
         searchInput.addEventListener('focus', loadSearchIndex);
@@ -442,52 +507,15 @@ const homeFaqs = [
       }
 
       if (searchForm && searchInput) {
-        searchForm.addEventListener('submit', (e) => {
+        searchForm.addEventListener('submit', async (e) => {
           e.preventDefault();
-          const rawValue = searchInput.value.trim().toLowerCase();
-          if (!rawValue || !searchIndex) return;
-
-          let match = searchIndex.find(item => item.name.toLowerCase() === rawValue);
-
-          if (!match) {
-            match = searchIndex.find(item => {
-              const displayVal = `${item.name} (${item.appliance})`.toLowerCase();
-              return displayVal === rawValue;
-            });
+          const query = searchInput.value;
+          if (!query) return;
+          
+          if (!searchIndex) {
+            await loadSearchIndex();
           }
-
-          if (!match) {
-            match = searchIndex.find(item => item.name.toLowerCase().includes(rawValue));
-          }
-
-          if (!match) {
-            const applianceMap: Record<string, string> = {
-              'dishwasher': '/dishwasher',
-              'microwave': '/microwave',
-              'freezer': '/freezer',
-              'oven': '/oven',
-              'dryer': '/dryer',
-              'air fryer': '/airfryer',
-              'airfryer': '/airfryer',
-              'refrigerator': '/refrigerator',
-              'fridge': '/refrigerator',
-              'shelf life': '/how-long',
-              'how long': '/how-long',
-              'washing machine': '/washing-machine',
-              'refreeze': '/refreeze',
-              'what happens': '/what-happens'
-            };
-            if (applianceMap[rawValue]) {
-              window.location.href = applianceMap[rawValue];
-              return;
-            }
-          }
-
-          if (match) {
-            window.location.href = match.url;
-          } else {
-            alert(`We couldn't find a direct guide for "${searchInput.value}". Please select from the suggestions list or browse by category below!`);
-          }
+          performSearch(query);
         });
       }
     });
