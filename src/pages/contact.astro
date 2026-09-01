@@ -73,7 +73,11 @@ const contactFaqs = [
         ></textarea>
       </div>
 
+      <!-- Honeypot -->
+      <input type="text" name="b_name" id="b_name" style="display:none" tabindex="-1" autocomplete="off" />
+
       <button 
+        id="submit-btn"
         type="submit" 
         class="btn-primary mt-2"
       >
@@ -90,22 +94,56 @@ const contactFaqs = [
         Thank you for reaching out. We have received your inquiry and will review it as soon as possible.
       </p>
     </div>
+
+    <!-- Error Message Container -->
+    <div id="error-message" class="hidden bg-red-50 border border-red-200 rounded-md p-6 mt-8">
+      <h3 class="text-title-sm text-red-800 font-medium mb-2 flex items-center gap-1.5">
+        <span>✗</span> Failed to send message
+      </h3>
+      <p id="error-text" class="text-[13px] text-red-700 leading-relaxed">
+        Something went wrong. Please try again later.
+      </p>
+    </div>
   </section>
 
   <script is:inline>
     const form = document.getElementById('contact-form');
     const successMsg = document.getElementById('success-message');
+    const errorMsg = document.getElementById('error-message');
+    const errorText = document.getElementById('error-text');
+    const submitBtn = document.getElementById('submit-btn');
 
-    if (form && successMsg) {
-      form.addEventListener('submit', (e) => {
+    if (form && successMsg && errorMsg) {
+      form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // Hide the form and show the success message
-        form.classList.add('hidden');
-        successMsg.classList.remove('hidden');
+        const formData = new FormData(form);
+        const originalBtnText = submitBtn.innerText;
+        submitBtn.innerText = 'Sending...';
+        submitBtn.disabled = true;
+        errorMsg.classList.add('hidden');
         
-        // Optionally scroll to success message
-        successMsg.scrollIntoView({ behavior: 'smooth' });
+        try {
+          const response = await fetch('/api/contact', {
+            method: 'POST',
+            body: formData
+          });
+
+          const result = await response.json().catch(() => ({ success: false, message: 'Invalid response from server.' }));
+
+          if (response.ok && result.success) {
+            form.classList.add('hidden');
+            successMsg.classList.remove('hidden');
+            successMsg.scrollIntoView({ behavior: 'smooth' });
+          } else {
+            throw new Error(result.message || 'Unknown error occurred.');
+          }
+        } catch (err) {
+          errorText.innerText = err.message || 'There was a network error. Please try again later.';
+          errorMsg.classList.remove('hidden');
+          submitBtn.innerText = originalBtnText;
+          submitBtn.disabled = false;
+        }
       });
     }
   </script>
