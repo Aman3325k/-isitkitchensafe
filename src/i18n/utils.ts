@@ -53,3 +53,54 @@ export function useTranslatedPath(lang: SupportedLanguage) {
     return `/${l}${normalized === '/' ? '/' : normalized}`;
   };
 }
+
+/**
+ * Returns the grammatically correct preposition + article + appliance name for each locale.
+ * E.g.
+ * en: 'dishwasher' -> 'in the Dishwasher'
+ * es: 'dishwasher' -> 'en el Lavavajillas'
+ * es: 'dryer'      -> 'en la Secadora'
+ * pt: 'dishwasher' -> 'na Lava-Louças'
+ * pt: 'microwave'  -> 'no Micro-ondas'
+ */
+export function getApplianceIn(appliance: string, lang: SupportedLanguage = 'en'): string {
+  const norm = (appliance || '').toLowerCase().replace(/[-_\s]/g, '');
+
+  const map: Record<SupportedLanguage, Record<string, string>> = {
+    en: {
+      dishwasher: 'in the Dishwasher',
+      microwave: 'in the Microwave',
+      freezer: 'in the Freezer',
+      oven: 'in the Oven',
+      dryer: 'in the Dryer',
+      airfryer: 'in the Air Fryer',
+      refrigerator: 'in the Refrigerator',
+      washingmachine: 'in the Washing Machine',
+    },
+    es: {
+      dishwasher: 'en el Lavavajillas',
+      microwave: 'en el Microondas',
+      freezer: 'en el Congelador',
+      oven: 'en el Horno',
+      dryer: 'en la Secadora',
+      airfryer: 'en la Freidora de Aire',
+      refrigerator: 'en el Refrigerador',
+      washingmachine: 'en la Lavadora',
+    },
+    pt: {
+      dishwasher: 'na Lava-Louças',
+      microwave: 'no Micro-ondas',
+      freezer: 'no Freezer',
+      oven: 'no Forno',
+      dryer: 'na Secadora',
+      airfryer: 'na Fritadeira sem Óleo',
+      refrigerator: 'na Geladeira',
+      washingmachine: 'na Máquina de Lavar',
+    },
+  };
+
+  if (map[lang]?.[norm]) {
+    return map[lang][norm];
+  }
+  return `in the ${appliance}`;
+}

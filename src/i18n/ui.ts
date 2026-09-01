@@ -154,7 +154,7 @@ export const ui = {
     // Page Section Headers & Labels
     'page.guideSuffix': 'Guía',
     'page.canYouPut': '¿Se puede meter',
-    'page.inThe': 'en el/la',
+    'page.inThe': 'en el',
     'page.quickVerdict': 'Veredicto Rápido',
     'page.materialComposition': 'Composición del Material',
     'page.primaryRisk': 'Riesgo Principal de Seguridad',
@@ -251,7 +251,7 @@ export const ui = {
     // Page Section Headers & Labels
     'page.guideSuffix': 'Guia',
     'page.canYouPut': 'Pode colocar',
-    'page.inThe': 'no(a)',
+    'page.inThe': 'no',
     'page.quickVerdict': 'Veredito Rápido',
     'page.materialComposition': 'Composição do Material',
     'page.primaryRisk': 'Principal Risco de Segurança',
