@@ -250,6 +250,11 @@ const appliances = [
     <slot name="head" />
   </head>
   <body class="bg-canvas text-body font-sans selection:bg-signature-cream selection:text-ink min-h-screen flex flex-col">
+    <!-- Skip to Content Link -->
+    <a href="#main-content" class="absolute left-0 top-0 -translate-y-full focus:translate-y-0 bg-primary text-on-primary px-4 py-2 font-medium transition-transform z-[200] rounded-br-md">
+      Skip to main content
+    </a>
+
     <!-- Header -->
     <header class="h-[64px] border-b border-hairline bg-canvas sticky top-0 z-50">
       <div class="max-w-[1280px] mx-auto px-6 h-full flex items-center justify-between gap-4">
@@ -277,6 +282,7 @@ const appliances = [
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
           </div>
+          <div id="global-search-error" class="hidden absolute top-full left-0 w-full mt-1 bg-surface-soft border border-hairline text-[12px] text-error p-2 rounded-sm shadow-sm z-50" aria-live="polite"></div>
         </form>
 
         <!-- Desktop Navigation -->
@@ -325,6 +331,8 @@ const appliances = [
           id="mobile-menu-toggle"
           class="xl:hidden p-2 text-ink hover:bg-surface-soft rounded-md active:scale-95 transition-transform shrink-0"
           aria-label="Toggle Menu"
+          aria-expanded="false"
+          aria-controls="mobile-menu"
         >
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -336,7 +344,11 @@ const appliances = [
     <!-- Mobile Navigation Panel -->
     <div 
       id="mobile-menu"
-      class="fixed inset-0 bg-canvas z-60 transform translate-x-full transition-transform duration-300 xl:hidden flex flex-col pt-16 px-6 overflow-y-auto pb-8"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Mobile Navigation"
+      class="fixed inset-0 bg-canvas z-[60] transform translate-x-full transition-transform duration-300 xl:hidden flex flex-col pt-16 px-6 overflow-y-auto pb-8"
+      aria-hidden="true"
     >
       <button 
         type="button"
@@ -380,7 +392,7 @@ const appliances = [
     </div>
 
     <!-- Main Content -->
-    <main class="flex-grow">
+    <main id="main-content" class="flex-grow">
       <slot />
     </main>
 
@@ -475,12 +487,20 @@ const appliances = [
         if (toggleBtn && mobileMenu) {
           toggleBtn.addEventListener('click', () => {
             mobileMenu.classList.remove('translate-x-full');
+            toggleBtn.setAttribute('aria-expanded', 'true');
+            mobileMenu.setAttribute('aria-hidden', 'false');
+            if (closeBtn) closeBtn.focus();
           });
         }
 
         if (closeBtn && mobileMenu) {
           closeBtn.addEventListener('click', () => {
             mobileMenu.classList.add('translate-x-full');
+            if (toggleBtn) {
+              toggleBtn.setAttribute('aria-expanded', 'false');
+              toggleBtn.focus();
+            }
+            mobileMenu.setAttribute('aria-hidden', 'true');
           });
         }
 
@@ -548,7 +568,11 @@ const appliances = [
 
         if (searchInput) {
           searchInput.addEventListener('focus', loadSearchIndex);
-          searchInput.addEventListener('input', loadSearchIndex);
+          searchInput.addEventListener('input', () => {
+            loadSearchIndex();
+            const searchError = document.getElementById('global-search-error');
+            if (searchError) searchError.classList.add('hidden');
+          });
         }
 
         if (searchForm && searchInput) {
@@ -597,9 +621,15 @@ const appliances = [
             }
 
             if (match) {
+              const searchError = document.getElementById('global-search-error');
+              if (searchError) searchError.classList.add('hidden');
               window.location.href = match.url;
             } else {
-              alert(`No direct match found for "${searchInput.value}". Please use the suggestions list or check spelling.`);
+              const searchError = document.getElementById('global-search-error');
+              if (searchError) {
+                searchError.textContent = `No match found for "${searchInput.value}". Please use suggestions or check spelling.`;
+                searchError.classList.remove('hidden');
+              }
             }
           });
         }
