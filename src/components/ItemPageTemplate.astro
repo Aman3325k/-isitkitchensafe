@@ -1,0 +1,397 @@
+---
+import Layout from '../layouts/Layout.astro';
+import itemsData from '../data/items.json';
+import { generateMetaDescription, getUniqueSafetyAnalysis } from '../utils/seoHelper.js';
+import { resolveAllGuidesForItem, getPeopleAlsoAsk, getRelatedCategoriesForItem } from '../utils/linkingHelper.js';
+import { getCategoryForMaterial } from '../utils/materialCategories';
+import { useTranslations, useTranslatedPath } from '../i18n/utils';
+import type { SupportedLanguage } from '../i18n/ui';
+
+interface Props {
+  data: any;
+  lang?: SupportedLanguage;
+  availableLocales?: SupportedLanguage[];
+}
+
+const { data, lang = 'en', availableLocales } = Astro.props;
+
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+
+// Format appliance name
+const appKey = `appliance.${data.appliance}` as any;
+const formattedAppliance = t(appKey) || (data.appliance.charAt(0).toUpperCase() + data.appliance.slice(1));
+
+// Get details for related items (minimum 5 related item pages)
+let relatedItems = itemsData.filter(item => data.relatedItems?.includes(item.slug) && item.slug !== data.slug);
+if (relatedItems.length < 5) {
+  const sameApplianceItems = itemsData.filter(item => item.appliance === data.appliance && item.slug !== data.slug && !data.relatedItems?.includes(item.slug));
+  const existingSlugs = new Set(relatedItems.map(i => i.slug));
+  for (const item of sameApplianceItems) {
+    if (relatedItems.length >= 5) break;
+    if (!existingSlugs.has(item.slug)) {
+      relatedItems.push(item);
+      existingSlugs.add(item.slug);
+    }
+  }
+}
+if (relatedItems.length < 5) {
+  const anyItems = itemsData.filter(item => item.slug !== data.slug && !relatedItems.some(ri => ri.slug === item.slug));
+  for (const item of anyItems) {
+    if (relatedItems.length >= 5) break;
+    relatedItems.push(item);
+  }
+}
+relatedItems = relatedItems.slice(0, 5);
+
+const allGuides = resolveAllGuidesForItem(data.item, data.slug);
+const currentPath = translatePath(`/${data.appliance}/${data.slug}`);
+const paaList = getPeopleAlsoAsk(data.item, data.slug, allGuides, data.relatedItems || []);
+const relatedCategories = getRelatedCategoriesForItem(data.item, data.slug, currentPath, allGuides);
+
+const formattedAnswer = data.safe.toUpperCase(); // "YES", "NO", or "DEPENDS"
+
+// SEO title and description
+let pageTitle = `Can You Put ${data.item} in the ${formattedAppliance}? | IsItKitchenSafe`;
+let pageDescription = data.shortAnswer;
+
+if (lang === 'es') {
+  pageTitle = `¿Se puede meter ${data.item} en el/la ${formattedAppliance}? | ¿Es Seguro en la Cocina?`;
+  pageDescription = `${data.shortAnswer} Descubre advertencias de seguridad, consejos de cocina y reglas de compatibilidad.`;
+} else if (lang === 'pt') {
+  pageTitle = `Pode colocar ${data.item} no(a) ${formattedAppliance}? | É Seguro na Cozinha?`;
+  pageDescription = `${data.shortAnswer} Saiba mais sobre avisos de segurança, dicas de cozinha e regras de compatibilidade.`;
+} else {
+  pageDescription = generateMetaDescription(data.item, formattedAppliance, formattedAnswer, data.shortAnswer);
+}
+
+// Dynamic unique safety analysis for English (fallback empty for other locales where not generated)
+const uniqueAnalysis = lang === 'en' 
+  ? getUniqueSafetyAnalysis(data.item, formattedAppliance, data.safe, data.shortAnswer, data.tips, data.warnings) 
+  : [];
+
+const speakableSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": [".quick-answer", ".short-answer", "h1"]
+  }
+};
+
+const howToSchema = (data.safe === 'yes' || data.safe === 'depends') ? {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": `${t('page.canYouPut')} ${data.item} ${t('page.inThe')} ${formattedAppliance}`,
+  "description": data.shortAnswer,
+  "step": data.tips.map((tip: string, idx: number) => ({
+    "@type": "HowToStep",
+    "position": idx + 1,
+    "text": tip
+  }))
+} : null;
+
+const localeCode = lang === 'es' ? 'es-ES' : lang === 'pt' ? 'pt-BR' : 'en-US';
+const reviewedDate = new Date().toLocaleDateString(localeCode, {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+});
+---
+
+<Layout title={pageTitle} description={pageDescription} faqs={data.faqs} lang={lang} availableLocales={availableLocales}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(speakableSchema)} />
+    {howToSchema && (
+      <script type="application/ld+json" set:html={JSON.stringify(howToSchema)} />
+    )}
+  </Fragment>
+  <article class="max-w-[800px] mx-auto px-6 py-[48px] md:py-[64px]">
+    <!-- Breadcrumbs -->
+    <nav class="flex gap-2 text-muted text-[13px] mb-8" aria-label="Breadcrumb">
+      <a href={translatePath('/')} class="hover:text-ink transition-colors">{t('nav.home')}</a>
+      <span>/</span>
+      <a href={translatePath(`/${data.appliance}`)} class="hover:text-ink transition-colors">{formattedAppliance}</a>
+      <span>/</span>
+      <span class="text-ink font-medium">{data.item}</span>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="mb-10 text-center md:text-left">
+      <span class="text-caption text-muted uppercase tracking-wider text-xs block mb-2">{formattedAppliance} {t('page.guideSuffix')}</span>
+      <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-6 leading-tight">
+        {t('page.canYouPut')} {data.item} {t('page.inThe')} {formattedAppliance}?
+      </h1>
+
+      <!-- Trust Signal Badge (Above the fold) -->
+      <div class="inline-flex items-center gap-3">
+        {data.safe === 'yes' && (
+          <div class="badge-yes quick-answer px-6 py-2 text-sm">
+            <span class="mr-1.5">✓</span> {t('verdict.yes')}
+          </div>
+        )}
+        {data.safe === 'no' && (
+          <div class="badge-no quick-answer px-6 py-2 text-sm">
+            <span class="mr-1.5">✗</span> {t('verdict.no')}
+          </div>
+        )}
+        {data.safe === 'depends' && (
+          <div class="badge-depends quick-answer px-6 py-2 text-sm">
+            <span class="mr-1.5">⚠</span> {t('verdict.depends')}
+          </div>
+        )}
+      </div>
+    </header>
+
+    <!-- Quick Answer & Explanation Card -->
+    <section class="mb-12">
+      <div class={`p-8 rounded-lg ${
+        data.safe === 'yes' ? 'bg-success-bg border border-success-border/20' : 
+        data.safe === 'no' ? 'bg-error-bg border border-error-border/20' : 
+        'bg-warning-bg border border-warning-border/20'
+      }`}>
+        <h2 class="text-title-sm text-ink font-medium mb-3">{t('page.quickVerdict')}: {t('page.canYouPut')} {data.item} {t('page.inThe')} {formattedAppliance}?</h2>
+        <p class="short-answer text-title-md font-bold leading-relaxed text-ink mb-4">
+          {data.shortAnswer}
+        </p>
+        
+        {data.material ? (
+          <div>
+            <div class="border-t border-hairline my-4 opacity-50"></div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 my-6">
+              <div class="bg-canvas/60 border border-hairline rounded-md p-4 shadow-xs">
+                <span class="text-caption text-muted uppercase tracking-wider text-[11px] block mb-1">{t('page.materialComposition')}</span>
+                {(() => {
+                  const catSlug = getCategoryForMaterial(data.material);
+                  return catSlug ? (
+                    <a href={translatePath(`/material/${catSlug}`)} class="text-link hover:underline font-semibold text-[15px]">
+                      {data.material}
+                    </a>
+                  ) : (
+                    <strong class="text-ink text-[15px] font-semibold">{data.material}</strong>
+                  );
+                })()}
+              </div>
+              <div class="bg-canvas/60 border border-hairline rounded-md p-4 shadow-xs">
+                <span class="text-caption text-muted uppercase tracking-wider text-[11px] block mb-1">{t('page.primaryRisk')}</span>
+                <strong class="text-signature-coral text-[15px] font-semibold">{data.keyRisk}</strong>
+              </div>
+              <div class="bg-canvas/60 border border-hairline rounded-md p-4 shadow-xs">
+                <span class="text-caption text-muted uppercase tracking-wider text-[11px] block mb-1">{t('page.safetyInstruction')}</span>
+                <strong class="text-success text-[15px] font-semibold">{data.tip}</strong>
+              </div>
+            </div>
+            <div class="border-t border-hairline my-4 opacity-50"></div>
+            <details class="group py-2">
+              <summary class="flex items-center justify-between text-body-md text-ink font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none">
+                <span>{t('page.readDetailedBreakdown')}</span>
+                <span class="text-muted group-open:rotate-180 transition-transform duration-200">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </span>
+              </summary>
+              <div class="mt-4 text-body-md text-body leading-relaxed pl-1">
+                <p class="mb-4 font-medium">{data.learnMore}</p>
+                {data.reason.split('\n\n').map((para: string) => (
+                  <p class="mb-4">
+                    {para}
+                  </p>
+                ))}
+                {uniqueAnalysis.map((para: string) => (
+                  <p class="mb-4 last:mb-0">
+                    {para}
+                  </p>
+                ))}
+              </div>
+            </details>
+          </div>
+        ) : (
+          <div>
+            <div class="border-t border-hairline my-4 opacity-50"></div>
+            <h3 class="text-caption text-muted mb-2">{t('page.detailedExplanation')}</h3>
+            {data.reason.split('\n\n').map((para: string) => (
+              <p class="text-body-md text-body leading-relaxed mb-4">
+                {para}
+              </p>
+            ))}
+            {uniqueAnalysis.map((para: string) => (
+              <p class="text-body-md text-body leading-relaxed mb-4 last:mb-0">
+                {para}
+              </p>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+
+    <!-- Tips and Warnings -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+      <!-- Tips -->
+      <div class="bg-surface-soft rounded-md p-6 border border-hairline/50">
+        <h2 class="text-title-sm text-ink font-medium mb-4 flex items-center gap-2">
+          💡 {t('page.crucialTips')} - {data.item} & {formattedAppliance}
+        </h2>
+        <ul class="flex flex-col gap-3">
+          {data.tips.map((tip: string) => (
+            <li class="text-body-md text-body flex gap-2.5 items-start leading-relaxed">
+              <span class="text-success font-bold mt-0.5">✓</span>
+              <span>{tip}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Warnings -->
+      <div class="bg-surface-soft rounded-md p-6 border border-hairline/50">
+        <h2 class="text-title-sm text-ink font-medium mb-4 flex items-center gap-2">
+          ⚠️ {t('page.majorWarnings')}
+        </h2>
+        <ul class="flex flex-col gap-3">
+          {data.specific_warning && (
+            <li class="text-body-md text-ink font-semibold flex gap-2.5 items-start leading-relaxed bg-signature-coral/10 p-3 rounded-md border border-signature-coral/30">
+              <span class="text-signature-coral font-bold mt-0.5">⚠</span>
+              <span>{data.specific_warning}</span>
+            </li>
+          )}
+          {data.warnings.map((warning: string) => (
+            <li class="text-body-md text-body flex gap-2.5 items-start leading-relaxed">
+              <span class="text-signature-coral font-bold mt-0.5">⚠</span>
+              <span>{warning}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- Editorial Byline Block -->
+    <div class="bg-surface-soft border border-hairline rounded-md p-4 mb-12 flex flex-wrap items-center justify-between gap-4 text-xs text-muted">
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center justify-center bg-success/10 text-success w-5 h-5 rounded-full font-bold text-[10px]">✓</span>
+        <span>{t('page.verifiedExpert')} &bull; <a href={translatePath('/about/')} class="hover:underline font-semibold text-ink">{t('footer.about')}</a></span>
+      </div>
+      <div>
+        <span>{t('page.lastVerified')}: {reviewedDate}</span>
+      </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <section class="border-t border-hairline pt-12 mb-16">
+      <h2 class="text-title-lg text-ink font-medium tracking-tight mb-8">{t('page.faqTitle')}</h2>
+      <div class="flex flex-col">
+        {data.faqs.map((faq: { question: string; answer: string }) => (
+          <details class="group border-b border-hairline py-5">
+            <summary class="flex items-center justify-between text-title-sm text-ink font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none">
+              <span>{faq.question}</span>
+              <span class="text-muted group-open:rotate-180 transition-transform duration-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </span>
+            </summary>
+            <div class="mt-4 text-body-md text-body leading-relaxed pl-1">
+              {faq.answer}
+            </div>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <!-- Direct Cross-linking Guides Box -->
+    {lang === 'en' && (allGuides.howLongGuides.length > 0 || allGuides.refreezeGuides.length > 0 || allGuides.whatHappensGuides.length > 0 || allGuides.comparisonGuides.length > 0) && (
+      <section class="mb-12 border-t border-hairline pt-12">
+        <h2 class="text-title-lg text-ink font-medium tracking-tight mb-6">Cross-Reference Safety Guides for {data.item}</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {allGuides.howLongGuides.map((g: any) => (
+            <a href={g.url} class="p-4 bg-canvas border border-hairline rounded-md hover:border-border-strong text-body-md text-link flex justify-between items-center transition-colors shadow-xs">
+              <span class="font-medium">⏱ Shelf Life: {g.duration}</span>
+              <span class="text-xs text-muted">Read guide &rarr;</span>
+            </a>
+          ))}
+          {allGuides.refreezeGuides.map((g: any) => (
+            <a href={g.url} class="p-4 bg-canvas border border-hairline rounded-md hover:border-border-strong text-body-md text-link flex justify-between items-center transition-colors shadow-xs">
+              <span class="font-medium">❄️ Refreezing Safety Rules</span>
+              <span class="text-xs text-muted">Read guide &rarr;</span>
+            </a>
+          ))}
+          {allGuides.whatHappensGuides.map((g: any) => (
+            <a href={g.url} class="p-4 bg-canvas border border-hairline rounded-md hover:border-border-strong text-body-md text-link flex justify-between items-center transition-colors shadow-xs">
+              <span class="font-medium">⚠️ Accident Hazards & Danger</span>
+              <span class="text-xs text-muted">Read guide &rarr;</span>
+            </a>
+          ))}
+          {allGuides.comparisonGuides.map((g: any) => (
+            <a href={g.url} class="p-4 bg-canvas border border-hairline rounded-md hover:border-border-strong text-body-md text-link flex justify-between items-center transition-colors shadow-xs">
+              <span class="font-medium">⚔️ Comparison: {g.item1} vs {g.item2}</span>
+              <span class="text-xs text-muted">Compare &rarr;</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- People Also Ask Section -->
+    {lang === 'en' && paaList.length > 0 && (
+      <section class="border-t border-hairline pt-12 mb-16">
+        <h2 class="text-title-lg text-ink font-medium tracking-tight mb-8">{t('page.peopleAlsoAsk')}</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {paaList.map((paa: any) => (
+            <a 
+              href={paa.url} 
+              class="bg-canvas border border-hairline hover:border-border-strong rounded-md p-5 flex flex-col justify-between shadow-xs transition-colors active:scale-[0.98]"
+            >
+              <div>
+                <span class="text-[11px] text-muted uppercase tracking-wider block mb-2">Related Question</span>
+                <h3 class="text-title-sm text-ink mb-2 leading-snug">
+                  {paa.question}
+                </h3>
+              </div>
+              <span class="text-[12px] font-medium text-link mt-4 block">View Answer &rarr;</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Related Items (English) -->
+    {lang === 'en' && relatedItems.length > 0 && (
+      <section class="border-t border-hairline pt-12 mb-16">
+        <h2 class="text-title-lg text-ink font-medium tracking-tight mb-8">{t('page.relatedGuides')}</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {relatedItems.map((item: any) => (
+            <a 
+              href={translatePath(`/${item.appliance}/${item.slug}`)} 
+              class="bg-canvas border border-hairline hover:border-border-strong rounded-md p-5 flex flex-col justify-between shadow-xs transition-colors active:scale-[0.98]"
+            >
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-[11px] text-muted uppercase tracking-wider">{item.appliance}</span>
+                  {item.safe === 'yes' && <span class="badge-yes text-[10px] px-2 py-0.5">{t('verdict.yes')}</span>}
+                  {item.safe === 'no' && <span class="badge-no text-[10px] px-2 py-0.5">{t('verdict.no')}</span>}
+                  {item.safe === 'depends' && <span class="badge-depends text-[10px] px-2 py-0.5">{t('verdict.depends')}</span>}
+                </div>
+                <h3 class="text-title-sm text-ink mb-1">
+                  {item.item}
+                </h3>
+                <p class="text-[13px] text-muted line-clamp-2 leading-relaxed">
+                  {item.shortAnswer}
+                </p>
+              </div>
+              <span class="text-[12px] font-medium text-link mt-4 block">Read guide &rarr;</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Back to Appliance Link -->
+    <div class="mt-12 pt-8 border-t border-hairline text-center">
+      <a 
+        href={translatePath(`/${data.appliance}`)} 
+        class="text-link text-[14px] font-medium hover:text-link-active transition-colors inline-flex items-center gap-1.5 active:scale-[0.98] transition-transform"
+      >
+        &larr; {t('home.viewAll')} {formattedAppliance} {t('page.guideSuffix')}
+      </a>
+    </div>
+  </article>
+</Layout>

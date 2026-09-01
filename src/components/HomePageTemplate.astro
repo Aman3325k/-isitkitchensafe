@@ -1,0 +1,523 @@
+---
+import Layout from '../layouts/Layout.astro';
+import itemsData from '../data/items.json';
+import itemsEs from '../data/items.es.json';
+import itemsPt from '../data/items.pt.json';
+import { useTranslations, useTranslatedPath } from '../i18n/utils';
+import type { SupportedLanguage } from '../i18n/ui';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+
+// Format appliance names
+function formatAppliance(app: string) {
+  const appKey = `appliance.${app}` as any;
+  return t(appKey) || (app.charAt(0).toUpperCase() + app.slice(1));
+}
+
+// Localized content definitions for appliances
+const applianceData: Record<string, { desc: Record<SupportedLanguage, string>; bg: string; text: string }> = {
+  dishwasher: {
+    desc: {
+      en: 'Can you wash cast iron, vacuum flasks, and blender lids?',
+      es: '¿Se pueden lavar sartenes de hierro, botellas térmicas y tapas de licuadora?',
+      pt: 'Pode lavar ferro fundido, garrafas térmicas e tampas de liquidificador?'
+    },
+    bg: 'bg-signature-forest',
+    text: 'text-on-primary'
+  },
+  microwave: {
+    desc: {
+      en: 'Is Styrofoam, aluminum foil, or paper plates safe to heat?',
+      es: '¿Es seguro calentar unicel/porexpán, papel aluminio o platos de cartón?',
+      pt: 'É seguro aquecer isopor, papel alumínio ou pratos descartáveis?'
+    },
+    bg: 'bg-signature-coral',
+    text: 'text-on-primary'
+  },
+  freezer: {
+    desc: {
+      en: 'What happens if you freeze milk, avocados, or carbonated soda?',
+      es: '¿Qué pasa si congelas leche, aguacates o bebidas con gas?',
+      pt: 'O que acontece ao congelar leite, abacates ou refrigerantes com gás?'
+    },
+    bg: 'bg-signature-cream',
+    text: 'text-ink'
+  },
+  oven: {
+    desc: {
+      en: 'Baking with parchment paper, wax paper, glass, or plastic?',
+      es: '¿Hornear con papel manteca/vegetal, papel encerado o vidrio?',
+      pt: 'Assar com papel manteiga, papel vegetal, vidro ou plástico?'
+    },
+    bg: 'bg-signature-peach',
+    text: 'text-ink'
+  },
+  dryer: {
+    desc: {
+      en: 'Will shoes, Crocs, pillows, or wool shrink in the dryer?',
+      es: '¿Se encogen los zapatos, Crocs, almohadas o prendas de lana en la secadora?',
+      pt: 'Calçados, Crocs, travesseiros ou lã encolhem na secadora?'
+    },
+    bg: 'bg-signature-mint',
+    text: 'text-ink'
+  },
+  airfryer: {
+    desc: {
+      en: 'Can you use foil, parchment paper, or cook raw chicken?',
+      es: '¿Se puede usar papel aluminio, papel de horno o cocinar pollo crudo?',
+      pt: 'Pode usar papel alumínio, papel manteiga ou assar frango cru?'
+    },
+    bg: 'bg-signature-yellow',
+    text: 'text-ink'
+  },
+  refrigerator: {
+    desc: {
+      en: 'Should you store potatoes, onions, honey, or tomatoes in the cold?',
+      es: '¿Se deben guardar papas/patatas, cebollas, miel o tomates en el frío?',
+      pt: 'Deve guardar batatas, cebolas, mel ou tomates na geladeira?'
+    },
+    bg: 'bg-signature-mustard',
+    text: 'text-ink'
+  }
+};
+
+const appliances = [
+  { slug: 'dishwasher', name: t('appliance.dishwasher') },
+  { slug: 'microwave', name: t('appliance.microwave') },
+  { slug: 'freezer', name: t('appliance.freezer') },
+  { slug: 'oven', name: t('appliance.oven') },
+  { slug: 'dryer', name: t('appliance.dryer') },
+  { slug: 'airfryer', name: t('appliance.airfryer') },
+  { slug: 'refrigerator', name: t('appliance.refrigerator') }
+].map(app => ({
+  ...app,
+  desc: applianceData[app.slug]?.desc[lang] || applianceData[app.slug]?.desc.en,
+  bgColor: applianceData[app.slug]?.bg || 'bg-surface-soft',
+  textColor: applianceData[app.slug]?.text || 'text-ink'
+}));
+
+// Popular test showcase items
+const currentItemsDataset = lang === 'es' ? itemsEs : lang === 'pt' ? itemsPt : itemsData;
+const popularItems = currentItemsDataset.slice(0, 6);
+
+const homeFaqs = lang === 'es' ? [
+  {
+    question: "¿Qué es IsItKitchenSafe?",
+    answer: "IsItKitchenSafe es una base de datos de consulta estática que ayuda a determinar rápidamente si los utensilios, recipientes y alimentos de uso diario se pueden colocar de forma segura en distintos electrodomésticos."
+  },
+  {
+    question: "¿Qué electrodomésticos se cubren en este sitio?",
+    answer: "Cubrimos siete electrodomésticos principales: lavavajillas, microondas, congelador, horno, secadora, freidora de aire y refrigerador."
+  },
+  {
+    question: "¿Cómo se verifica la información de seguridad?",
+    answer: "Nuestras recomendaciones se compilan a partir de pautas de ciencia de materiales, manuales oficiales de fabricantes, normas de seguridad alimentaria y principios fundamentales de seguridad en la cocina."
+  }
+] : lang === 'pt' ? [
+  {
+    question: "O que é o IsItKitchenSafe?",
+    answer: "O IsItKitchenSafe é uma base de referência rápida que ajuda a descobrir se recipientes, utensílios de cozinha e alimentos podem ser usados com segurança em eletrodomésticos."
+  },
+  {
+    question: "Quais eletrodomésticos são abordados no site?",
+    answer: "Cobrimos sete eletrodomésticos principais: máquina de lavar louça, micro-ondas, freezer, forno, secadora, fritadeira sem óleo (air fryer) e geladeira."
+  },
+  {
+    question: "Como as informações de segurança são verificadas?",
+    answer: "Nossas diretrizes são elaboradas com base em manuais oficiais de fabricantes, diretrizes de ciência dos materiais e normas internacionais de segurança alimentar."
+  }
+] : [
+  {
+    question: "What is IsItKitchenSafe?",
+    answer: "IsItKitchenSafe is a static reference database that helps home cooks quickly determine whether everyday kitchenware, containers, and food items can be safely used in various household appliances."
+  },
+  {
+    question: "Which appliances are covered on this site?",
+    answer: "We cover seven major kitchen appliances: the dishwasher, microwave, freezer, oven, dryer, air fryer, and refrigerator."
+  },
+  {
+    question: "How is the safety information verified?",
+    answer: "Our recommendations are compiled from material science guidelines, official manufacturer manuals (such as Yeti, Pyrex, and Hydro Flask), FDA safety standards, and kitchen safety principles."
+  }
+];
+
+let metaTitle = "IsItKitchenSafe - Quick Safety Guides for Kitchen Appliances";
+let metaDesc = `Search and browse 2,000+ kitchen safety guides. Find out if you can put cookware, containers, or ingredients in the microwave, dishwasher, freezer, and oven.`;
+
+if (lang === 'es') {
+  metaTitle = "¿Es Seguro en la Cocina? - Guías de Seguridad para Electrodomésticos";
+  metaDesc = "Respuestas rápidas y verificadas para saber si puedes meter recipientes, utensilios y alimentos en el microondas, lavavajillas, horno, freidora de aire y más.";
+} else if (lang === 'pt') {
+  metaTitle = "É Seguro na Cozinha? - Guias Rápidos de Segurança para Eletrodomésticos";
+  metaDesc = "Descubra se você pode colocar utensílios, recipientes e alimentos no micro-ondas, lava-louças, freezer, forno e fritadeira sem óleo.";
+}
+---
+
+<Layout 
+  title={metaTitle} 
+  description={metaDesc}
+  faqs={homeFaqs}
+  excludeArticleSchema={true}
+  lang={lang}
+  availableLocales={['en', 'es', 'pt']}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": t('nav.siteTitle'),
+      "url": "https://isitkitchensafe.com",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://isitkitchensafe.com/search?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    })} />
+  </Fragment>
+
+  <!-- Hero Section -->
+  <section class="bg-canvas border-b border-hairline py-[80px] md:py-[96px]">
+    <div class="max-w-[800px] mx-auto px-6 text-center flex flex-col items-center">
+      <h1 class="text-display-lg md:text-display-xl font-medium tracking-tight text-ink mb-6">
+        {t('home.heroTitle')}
+      </h1>
+      <p class="text-body-md text-muted max-w-[580px] mb-8 leading-relaxed">
+        {t('home.heroSubtitle')}
+      </p>
+
+      <!-- Static Search Bar -->
+      <form id="search-form" class="w-full max-w-[600px] flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-grow">
+          <input 
+            type="text" 
+            id="search-input" 
+            placeholder={t('home.searchPlaceholder')} 
+            list="search-items"
+            autocomplete="off"
+            aria-label={t('nav.searchAria')}
+            class="w-full h-11 pl-4 pr-10 py-3 bg-canvas text-ink text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
+          />
+          <datalist id="search-items"></datalist>
+          <div id="search-loading" class="hidden absolute right-3.5 top-1/2 -translate-y-1/2">
+            <svg class="animate-spin h-5 w-5 text-muted" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+        </div>
+        <button 
+          type="submit" 
+          class="h-11 px-6 bg-primary hover:bg-primary-active text-on-primary text-[14px] font-medium rounded-sm border-none cursor-pointer flex items-center justify-center transition-colors select-none"
+        >
+          {lang === 'es' ? 'Verificar Seguridad' : lang === 'pt' ? 'Verificar Segurança' : 'Check Safety'}
+        </button>
+      </form>
+      <div id="search-error" class="hidden w-full max-w-[600px] mt-4 text-left p-4 bg-error-bg text-error border border-error/30 rounded-md text-[14px]">
+        {t('nav.searchNoResults')} "<span id="search-error-term"></span>".
+      </div>
+    </div>
+  </section>
+
+  <!-- Browse by Appliance -->
+  <section class="max-w-[1280px] mx-auto px-6 pt-[96px] pb-12">
+    <div class="mb-12">
+      <h2 class="text-display-md text-ink tracking-tight mb-3">{t('home.exploreAppliances')}</h2>
+      <p class="text-body-md text-muted">
+        {lang === 'es' ? 'Selecciona un electrodoméstico para explorar todas las reglas de seguridad.' : lang === 'pt' ? 'Selecione um eletrodoméstico para ver todas as regras de segurança.' : 'Select an appliance to explore all safety guides and rules.'}
+      </p>
+    </div>
+
+    <!-- Responsive Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {appliances.map(app => (
+        <a 
+          href={translatePath(`/${app.slug}`)} 
+          class={`${app.bgColor} ${app.textColor} rounded-lg p-8 flex flex-col justify-between min-h-[200px] shadow-sm transition-transform active:scale-[0.98] border border-transparent`}
+        >
+          <div>
+            <span class="text-caption font-semibold tracking-wider uppercase opacity-75 mb-2 block">{app.name} {t('page.guideSuffix')}</span>
+            <h3 class="text-title-lg font-medium tracking-tight mb-3">{app.name}</h3>
+            <p class="text-body-md opacity-85 leading-relaxed mb-6">{app.desc}</p>
+          </div>
+          <span class="text-[14px] font-medium underline underline-offset-4 flex items-center gap-1">
+            {t('home.viewAll')} &rarr;
+          </span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- Browse by Safety Category -->
+  <section class="max-w-[1280px] mx-auto px-6 pb-[96px]">
+    <div class="mb-12 border-t border-hairline pt-[96px]">
+      <h2 class="text-display-md text-ink tracking-tight mb-3">{t('home.safetyDirectories')}</h2>
+      <p class="text-body-md text-muted">
+        {lang === 'es' ? 'Explora directorios de almacenamiento, cuidado de materiales y prevención de accidentes.' : lang === 'pt' ? 'Explore diretórios de conservação, cuidados com materiais e prevenção de acidentes.' : 'Explore shelf life, material cleaning, and prevention guidelines.'}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <a 
+        href={translatePath('/how-long')} 
+        class="bg-signature-forest text-on-primary rounded-lg p-8 flex flex-col justify-between min-h-[220px] shadow-sm transition-transform active:scale-[0.98] border border-transparent"
+      >
+        <div>
+          <span class="text-caption font-semibold tracking-wider uppercase opacity-75 mb-2 block">{t('footer.shelfLife')}</span>
+          <h3 class="text-title-lg font-medium tracking-tight mb-3">{t('nav.howLong')}</h3>
+          <p class="text-body-md opacity-85 leading-relaxed mb-6">
+            {lang === 'es' ? '¿Cuánto tiempo duran las carnes, sobras y lácteos en la nevera, congelador o despensa?' : lang === 'pt' ? 'Quanto tempo carnes, sobras e laticínios duram na geladeira ou freezer?' : 'How long do raw meats, leftovers, dairy, and produce stay safe in the fridge, freezer, or pantry?'}
+          </p>
+        </div>
+        <span class="text-[14px] font-medium underline underline-offset-4 flex items-center gap-1">
+          {t('home.viewAll')} &rarr;
+        </span>
+      </a>
+
+      <a 
+        href={translatePath('/washing-machine')} 
+        class="bg-signature-coral text-on-primary rounded-lg p-8 flex flex-col justify-between min-h-[220px] shadow-sm transition-transform active:scale-[0.98] border border-transparent"
+      >
+        <div>
+          <span class="text-caption font-semibold tracking-wider uppercase opacity-75 mb-2 block">{t('footer.washingMachine')}</span>
+          <h3 class="text-title-lg font-medium tracking-tight mb-3">{t('nav.washingMachine')}</h3>
+          <p class="text-body-md opacity-85 leading-relaxed mb-6">
+            {lang === 'es' ? '¿Se pueden lavar zapatillas, almohadas o prendas delicadas en la lavadora?' : lang === 'pt' ? 'Pode lavar tênis, travesseiros ou roupas delicadas na máquina de lavar?' : 'Can you wash sneakers, pillows, bedding, or down jackets in the washing machine?'}
+          </p>
+        </div>
+        <span class="text-[14px] font-medium underline underline-offset-4 flex items-center gap-1">
+          {t('home.viewAll')} &rarr;
+        </span>
+      </a>
+
+      <a 
+        href={translatePath('/refreeze')} 
+        class="bg-signature-cream text-ink rounded-lg p-8 flex flex-col justify-between min-h-[220px] shadow-sm transition-transform active:scale-[0.98] border border-transparent"
+      >
+        <div>
+          <span class="text-caption font-semibold tracking-wider uppercase opacity-75 mb-2 block">{t('footer.refreeze')}</span>
+          <h3 class="text-title-lg font-medium tracking-tight mb-3">{t('nav.refreeze')}</h3>
+          <p class="text-body-md opacity-85 leading-relaxed mb-6">
+            {lang === 'es' ? '¿Es seguro recongelar pollo, carne o lácteos una vez descongelados?' : lang === 'pt' ? 'É seguro recongelar frango, carne ou leite depois de descongelados?' : 'Is it safe to refreeze chicken, beef, or dairy once thawed? Get the absolute USDA safety rules.'}
+          </p>
+        </div>
+        <span class="text-[14px] font-medium underline underline-offset-4 flex items-center gap-1 text-ink">
+          {t('home.viewAll')} &rarr;
+        </span>
+      </a>
+
+      <a 
+        href={translatePath('/what-happens')} 
+        class="bg-surface-dark text-on-dark rounded-lg p-8 flex flex-col justify-between min-h-[220px] shadow-sm transition-transform active:scale-[0.98] border border-transparent"
+      >
+        <div>
+          <span class="text-caption font-semibold tracking-wider uppercase opacity-75 mb-2 block">{t('footer.emergencyScenarios')}</span>
+          <h3 class="text-title-lg font-medium tracking-tight mb-3">{t('nav.whatHappens')}</h3>
+          <p class="text-body-md opacity-85 leading-relaxed mb-6">
+            {lang === 'es' ? 'Descubre los riesgos y consecuencias de meter metal al microondas o dejar el horno encendido.' : lang === 'pt' ? 'Descubra os riscos e consequências de colocar metal no micro-ondas ou esquecer o forno ligado.' : 'Explore the danger levels and physical results of microwaving foil, leaving ovens on, or mixing chemicals.'}
+          </p>
+        </div>
+        <span class="text-[14px] font-medium underline underline-offset-4 flex items-center gap-1 text-white">
+          {t('home.viewAll')} &rarr;
+        </span>
+      </a>
+
+      <a 
+        href={translatePath('/compare')} 
+        class="bg-signature-yellow text-ink rounded-lg p-8 flex flex-col justify-between min-h-[220px] shadow-sm transition-transform active:scale-[0.98] border border-transparent"
+      >
+        <div>
+          <span class="text-caption font-semibold tracking-wider uppercase opacity-75 mb-2 block">{t('footer.compare')}</span>
+          <h3 class="text-title-lg font-medium tracking-tight mb-3">{t('nav.compare')}</h3>
+          <p class="text-body-md opacity-85 leading-relaxed mb-6">
+            {lang === 'es' ? 'Comparativas directas de seguridad (aluminio vs papel vegetal, hierro fundido vs acero).' : lang === 'pt' ? 'Comparações diretas de segurança (papel alumínio vs papel manteiga, ferro vs inox).' : 'Side-by-side kitchen safety reviews (e.g. foil vs parchment paper, cast iron vs stainless steel).'}
+          </p>
+        </div>
+        <span class="text-[14px] font-medium underline underline-offset-4 flex items-center gap-1 text-ink">
+          {t('home.viewAll')} &rarr;
+        </span>
+      </a>
+
+      <a 
+        href={translatePath('/material')} 
+        class="bg-signature-mint text-ink rounded-lg p-8 flex flex-col justify-between min-h-[220px] shadow-sm transition-transform active:scale-[0.98] border border-transparent"
+      >
+        <div>
+          <span class="text-caption font-semibold tracking-wider uppercase opacity-75 mb-2 block">{t('footer.materialHubs')}</span>
+          <h3 class="text-title-lg font-medium tracking-tight mb-3">{t('nav.material')}</h3>
+          <p class="text-body-md opacity-85 leading-relaxed mb-6">
+            {lang === 'es' ? 'Guías completas de seguridad para metales, plásticos, vidrios, cerámicas y silicona.' : lang === 'pt' ? 'Guias completos de segurança para metais, plásticos, vidros, cerâmica e silicone.' : 'Deep dives and guides examining metals, polymers, glass, ceramic, and silicone safety.'}
+          </p>
+        </div>
+        <span class="text-[14px] font-medium underline underline-offset-4 flex items-center gap-1 text-ink">
+          {t('home.viewAll')} &rarr;
+        </span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Showcase Guides -->
+  {popularItems.length > 0 && (
+    <section class="bg-surface-soft border-t border-b border-hairline py-[96px]">
+      <div class="max-w-[1280px] mx-auto px-6">
+        <div class="mb-12 text-center md:text-left">
+          <h2 class="text-display-md text-ink tracking-tight mb-3">
+            {lang === 'es' ? 'Guías Destacadas de Seguridad' : lang === 'pt' ? 'Guias em Destaque de Segurança' : 'Frequently Searched Questions'}
+          </h2>
+          <p class="text-body-md text-muted">
+            {lang === 'es' ? 'Respuestas inmediatas a dudas cotidianas en la cocina.' : lang === 'pt' ? 'Respostas rápidas para dúvidas comuns na cozinha.' : 'Get immediate answers to some of the most common kitchen safety dilemmas.'}
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {popularItems.map((item: any) => (
+            <div class="bg-canvas border border-hairline rounded-md p-6 flex flex-col justify-between shadow-xs transition-shadow">
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <span class="text-caption text-muted uppercase tracking-wider text-xs">{formatAppliance(item.appliance)}</span>
+                  {item.safe === 'yes' && <span class="badge-yes">{t('verdict.yes')}</span>}
+                  {item.safe === 'no' && <span class="badge-no">{t('verdict.no')}</span>}
+                  {item.safe === 'depends' && <span class="badge-depends">{t('verdict.depends')}</span>}
+                </div>
+                <h3 class="text-title-sm text-ink mb-3">
+                  {t('page.canYouPut')} {item.item} {t('page.inThe')} {formatAppliance(item.appliance)}?
+                </h3>
+                <p class="text-body-md text-body leading-relaxed mb-6">
+                  {item.shortAnswer}
+                </p>
+              </div>
+              <a 
+                href={translatePath(`/${item.appliance}/${item.slug}`)} 
+                class="text-link text-[14px] font-medium hover:text-link-active transition-colors flex items-center gap-1 group"
+              >
+                {t('page.readDetailedBreakdown')} <span class="group-hover:translate-x-0.5 transition-transform">&rarr;</span>
+              </a>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchForm = document.getElementById('search-form') as HTMLFormElement | null;
+      const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
+      const datalist = document.getElementById('search-items') as HTMLDataListElement | null;
+      const searchLoading = document.getElementById('search-loading');
+      const searchError = document.getElementById('search-error');
+      const searchErrorTerm = document.getElementById('search-error-term');
+      
+      let searchIndex: Array<{ name: string; appliance: string; url: string; keywords: string }> | null = null;
+      let isFetching = false;
+
+      const populateDatalist = (items: typeof searchIndex) => {
+        if (!datalist || !items) return;
+        datalist.innerHTML = items.map(entry => 
+          `<option value="${entry.name} (${entry.appliance})" data-url="${entry.url}"></option>`
+        ).join('');
+      };
+
+      const loadSearchIndex = async (): Promise<boolean> => {
+        if (searchIndex) return true;
+        if (isFetching) return false;
+        
+        isFetching = true;
+        if (searchLoading) searchLoading.classList.remove('hidden');
+        if (searchError) searchError.classList.add('hidden');
+        
+        try {
+          const response = await fetch('/search-index.json');
+          if (response.ok) {
+            const rawIndex = await response.json();
+            searchIndex = rawIndex.map((entry: any) => ({
+              name: entry.name,
+              appliance: entry.category,
+              url: entry.url,
+              keywords: entry.keywords || ''
+            }));
+            populateDatalist(searchIndex);
+            return true;
+          }
+        } catch (e) {
+          console.error("Failed to load search index", e);
+        } finally {
+          isFetching = false;
+          if (searchLoading) searchLoading.classList.add('hidden');
+        }
+        return false;
+      };
+
+      const performSearch = (query: string) => {
+        if (!query || query.trim() === '' || !searchIndex) return;
+        
+        const rawValue = query.toLowerCase().trim();
+        if (searchError) searchError.classList.add('hidden');
+        
+        let match = searchIndex.find(item => item.name.toLowerCase() === rawValue);
+
+        if (!match) {
+          match = searchIndex.find(item => {
+            const displayVal = `${item.name} (${item.appliance})`.toLowerCase();
+            return displayVal === rawValue;
+          });
+        }
+
+        if (!match) {
+          match = searchIndex.find(item => item.name.toLowerCase().includes(rawValue));
+        }
+        
+        if (!match) {
+          match = searchIndex.find(item => item.keywords && item.keywords.includes(rawValue));
+        }
+
+        if (match) {
+          window.location.href = match.url;
+        } else {
+          if (searchError && searchErrorTerm) {
+            searchErrorTerm.textContent = query;
+            searchError.classList.remove('hidden');
+          }
+        }
+      };
+
+      loadSearchIndex().then((loaded) => {
+        if (loaded) {
+          const params = new URLSearchParams(window.location.search);
+          const q = params.get('q');
+          if (q && q.trim() !== '' && searchInput) {
+            searchInput.value = q;
+            performSearch(q);
+          }
+        }
+      });
+
+      if (searchInput) {
+        searchInput.addEventListener('focus', loadSearchIndex);
+        searchInput.addEventListener('input', loadSearchIndex);
+      }
+
+      if (searchForm && searchInput) {
+        searchForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const query = searchInput.value;
+          if (!query) return;
+          
+          if (!searchIndex) {
+            await loadSearchIndex();
+          }
+          performSearch(query);
+        });
+      }
+    });
+  </script>
+</Layout>
