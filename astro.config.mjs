@@ -7,6 +7,13 @@ export default defineConfig({
   site: 'https://isitkitchensafe.com',
   output: 'static',
   trailingSlash: 'always',
+  i18n: {
+    defaultLocale: 'en',
+    locales: ['en', 'es', 'pt'],
+    routing: {
+      prefixDefaultLocale: false,
+    },
+  },
   integrations: [sitemap()],
   vite: {
     plugins: [tailwindcss()],
