@@ -1,0 +1,356 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import itemsEs from '../../../data/items.es.json';
+import itemsPt from '../../../data/items.pt.json';
+import itemsData from '../../../data/items.json';
+import { useTranslations, useTranslatedPath, getApplianceIn, getApplianceUrl } from '../../../i18n/utils';
+import type { SupportedLanguage } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  const paths: Array<{
+    params: { lang: string; appliance: string };
+    props: { lang: SupportedLanguage; appliance: string; items: any[]; availableLocales: SupportedLanguage[] };
+  }> = [];
+
+  const esAppliances = [...new Set(itemsEs.map(i => i.appliance))];
+  const ptAppliances = [...new Set(itemsPt.map(i => i.appliance))];
+
+  esAppliances.forEach(app => {
+    const items = itemsEs.filter(i => i.appliance === app);
+    const availableLocales: SupportedLanguage[] = ['en', 'es'];
+    if (ptAppliances.includes(app)) availableLocales.push('pt');
+    paths.push({
+      params: { lang: 'es', appliance: app },
+      props: { lang: 'es', appliance: app, items, availableLocales }
+    });
+  });
+
+  ptAppliances.forEach(app => {
+    const items = itemsPt.filter(i => i.appliance === app);
+    const availableLocales: SupportedLanguage[] = ['en', 'pt'];
+    if (esAppliances.includes(app)) availableLocales.push('es');
+    paths.push({
+      params: { lang: 'pt', appliance: app },
+      props: { lang: 'pt', appliance: app, items, availableLocales }
+    });
+  });
+
+  return paths;
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  appliance: string;
+  items: any[];
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, appliance, items: applianceItems, availableLocales } = Astro.props;
+
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+
+// Helper to format appliance names
+function formatApplianceName(app: string) {
+  const appKey = `appliance.${app}` as any;
+  return t(appKey) || (app.charAt(0).toUpperCase() + app.slice(1));
+}
+
+const formattedAppliance = formatApplianceName(appliance);
+const applianceInPhrase = getApplianceIn(appliance, lang);
+
+// Color definitions for each appliance section hero banner
+const bannerStyles: Record<string, { bg: string; text: string; subText: string }> = {
+  dishwasher: {
+    bg: 'bg-signature-forest',
+    text: 'text-on-primary',
+    subText: 'text-white/80'
+  },
+  microwave: {
+    bg: 'bg-signature-coral',
+    text: 'text-on-primary',
+    subText: 'text-white/80'
+  },
+  freezer: {
+    bg: 'bg-signature-cream',
+    text: 'text-ink',
+    subText: 'text-muted'
+  },
+  oven: {
+    bg: 'bg-signature-peach',
+    text: 'text-ink',
+    subText: 'text-muted'
+  },
+  dryer: {
+    bg: 'bg-signature-mint',
+    text: 'text-ink',
+    subText: 'text-muted'
+  },
+  airfryer: {
+    bg: 'bg-signature-yellow',
+    text: 'text-ink',
+    subText: 'text-muted'
+  },
+  refrigerator: {
+    bg: 'bg-signature-mustard',
+    text: 'text-ink',
+    subText: 'text-muted'
+  }
+};
+
+const styles = bannerStyles[appliance] || { bg: 'bg-surface-soft', text: 'text-ink', subText: 'text-muted' };
+
+const applianceFaqs: Record<SupportedLanguage, Record<string, Array<{ question: string; answer: string }>>> = {
+  es: {
+    dishwasher: [
+      {
+        question: `¿Qué artículos nunca deben meterse al lavavajillas?`,
+        answer: `Los recipientes y utensilios de hierro fundido, cuchillos de chef profesionales, tablas de cortar de madera, vajilla de cobre y cristal fino nunca deben lavarse en el lavavajillas.`
+      },
+      {
+        question: `¿Por qué el calor y la humedad dañan los utensilios en el lavavajillas?`,
+        answer: `La alta temperatura del agua y el ciclo de secado deforman plásticos y maderas, mientras que los detergentes abrasivos eliminan los recubrimientos antiadherentes y oxidan los metales.`
+      }
+    ],
+    microwave: [
+      {
+        question: `¿Se puede meter metal al microondas?`,
+        answer: `No, las láminas de metal y el papel de aluminio reflejan las microondas, acumulando carga eléctrica hasta generar chispas peligrosas que pueden provocar incendios o dañar el magnetrón.`
+      },
+      {
+        question: `¿Por qué explotan algunos alimentos en el microondas?`,
+        answer: `Los alimentos con cáscara o piel hermética, como los huevos enteros o las papas sin pinchar, atrapan el vapor de agua a medida que se calienta, aumentando la presión interna hasta explotar.`
+      }
+    ]
+  },
+  pt: {
+    dishwasher: [
+      {
+        question: `Quais itens nunca devem ir na máquina de lavar louça?`,
+        answer: `Panelas de ferro fundido, facas profissionais, tábuas de corte de madeira, panelas de cobre e cristais delicados nunca devem ser lavados na máquina.`
+      },
+      {
+        question: `Por que o calor e a umidade danificam itens não seguros?`,
+        answer: `A alta temperatura da água e o ciclo de secagem deformam plásticos e madeira, enquanto os detergentes fortes desgastam camadas antiaderentes e oxidam metais.`
+      }
+    ],
+    microwave: [
+      {
+        question: `Pode colocar metal no micro-ondas?`,
+        answer: `Não, folhas de metal e papel alumínio refletem as micro-ondas, gerando faíscas que podem causar incêndios ou queimar o aparelho.`
+      },
+      {
+        question: `Por que alguns alimentos explodem no micro-ondas?`,
+        answer: `Alimentos com casca grossa ou membrana, como ovos crus ou batatas, acumulam vapor interno com o calor rápido até estourarem pela pressão.`
+      }
+    ]
+  },
+  en: {} as any
+};
+
+const categoryDescriptions: Record<SupportedLanguage, Record<string, string>> = {
+  es: {
+    dishwasher: "Explora todas las guías de seguridad para el Lavavajillas. Descubre qué vajilla, recipientes e ingredientes son aptos para el lavavajillas según normas de seguridad.",
+    microwave: "Explora todas las guías de seguridad para el Microondas. Descubre qué recipientes, materiales y alimentos son seguros de calentar sin riesgos de incendio.",
+    freezer: "Explora todas las guías de seguridad para el Congelador. Conoce qué recipientes y alimentos se pueden congelar sin romperse ni perder textura.",
+    oven: "Explora todas las guías de seguridad para el Horno. Conoce qué recipientes y materiales soportan altas temperaturas de horneado.",
+    dryer: "Explora todas las guías de seguridad para la Secadora. Aprende qué telas, calzados y prendas no se encogen ni se dañan.",
+    airfryer: "Explora todas las guías de seguridad para la Freidora de Aire. Aprende qué accesorios y alimentos son aptos para cocinar con aire caliente.",
+    refrigerator: "Explora todas las guías de seguridad para el Refrigerador. Descubre qué alimentos y recipientes se conservan mejor en frío."
+  },
+  pt: {
+    dishwasher: "Confira todos os guias de segurança para a Lava-Louças. Descubra quais utensílios, recipientes e materiais são seguros para lavar na máquina.",
+    microwave: "Confira todos os guias de segurança para o Micro-ondas. Saiba quais recipientes, materiais e alimentos podem ser aquecidos com total segurança.",
+    freezer: "Confira todos os guias de segurança para o Freezer. Saiba o que pode ser congelado sem estragar alimentos ou quebrar potes.",
+    oven: "Confira todos os guias de segurança para o Forno. Descubra quais materiais e recipientes aguentam altas temperaturas de cozimento.",
+    dryer: "Confira todos os guias de segurança para a Secadora. Saiba quais roupas, calçados e tecidos podem secar sem encolher.",
+    airfryer: "Confira todos os guias de segurança para a Fritadeira sem Óleo. Aprenda quais acessórios e alimentos podem ir na air fryer.",
+    refrigerator: "Confira todos os guias de segurança para a Geladeira. Descubra como armazenar potes e alimentos para maior durabilidade."
+  },
+  en: {} as any
+};
+
+const pageTitle = lang === 'es' 
+  ? `Guías de Seguridad para ${formattedAppliance} | ¿Es Seguro en la Cocina?`
+  : `Guias de Segurança para ${formattedAppliance} | É Seguro na Cozinha?`;
+
+const pageDescription = categoryDescriptions[lang]?.[appliance] || (
+  lang === 'es'
+    ? `Explora todas las guías de seguridad para ${formattedAppliance}. Descubre qué artículos se pueden meter de forma segura.`
+    : `Explore todos os guias de segurança para ${formattedAppliance}. Descubra quais itens podem ser colocados com segurança.`
+);
+
+const faqs = applianceFaqs[lang]?.[appliance] || [];
+---
+
+<Layout 
+  title={pageTitle} 
+  description={pageDescription} 
+  faqs={faqs} 
+  excludeArticleSchema={true}
+  lang={lang}
+  availableLocales={availableLocales}
+>
+  <!-- Hero Section -->
+  <section class={`${styles.bg} ${styles.text} py-[64px] md:py-[80px]`}>
+    <div class="max-w-[1280px] mx-auto px-6">
+      <nav class="flex gap-2 text-[13px] opacity-75 mb-6" aria-label="Breadcrumb">
+        <a href={translatePath('/')} class="hover:underline">{t('nav.home')}</a>
+        <span>/</span>
+        <span class="font-medium">{formattedAppliance}</span>
+      </nav>
+      
+      <h1 class="text-display-lg font-medium tracking-tight mb-4">
+        {lang === 'es' ? `Guías de Seguridad: ${formattedAppliance}` : `Guias de Segurança: ${formattedAppliance}`}
+      </h1>
+      <p class={`${styles.subText} text-body-md max-w-2xl leading-relaxed`}>
+        {pageDescription}
+      </p>
+    </div>
+  </section>
+
+  <!-- Items Grid Section -->
+  <section class="max-w-[1280px] mx-auto px-6 py-[96px]">
+    <div class="flex flex-col md:flex-row md:items-end justify-between border-b border-hairline pb-8 mb-12">
+      <div>
+        <h2 class="text-display-md text-ink tracking-tight mb-2">
+          {lang === 'es' ? `Artículos Evaluados (${applianceItems.length})` : `Itens Avaliados (${applianceItems.length})`}
+        </h2>
+        <p class="text-body-md text-muted">
+          {lang === 'es' ? `Lista completa de artículos cotidianos analizados para ${formattedAppliance}.` : `Lista completa de itens cotidianos analisados para ${formattedAppliance}.`}
+        </p>
+      </div>
+      
+      <!-- Static Quick Filter -->
+      <div class="mt-6 md:mt-0 flex gap-3 max-w-[320px] w-full">
+        <input 
+          type="text" 
+          id="filter-input"
+          placeholder={lang === 'es' ? `Buscar artículos de ${formattedAppliance}...` : `Pesquisar itens de ${formattedAppliance}...`}
+          aria-label={lang === 'es' ? `Buscar artículos de ${formattedAppliance}` : `Pesquisar itens de ${formattedAppliance}`}
+          class="w-full h-11 px-3 py-2 bg-canvas text-ink text-[16px] md:text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
+        />
+      </div>
+    </div>
+
+    <!-- Items Grid -->
+    <div id="items-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {applianceItems.map((item: any) => (
+        <div 
+          class="item-card bg-canvas border border-hairline rounded-md p-6 flex flex-col justify-between shadow-xs transition-all hover:border-border-strong"
+          data-name={item.item.toLowerCase()}
+        >
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-caption text-muted uppercase tracking-wider text-xs">{formattedAppliance}</span>
+              {item.safe === 'yes' && <span class="badge-yes">{t('verdict.yes')}</span>}
+              {item.safe === 'no' && <span class="badge-no">{t('verdict.no')}</span>}
+              {item.safe === 'depends' && <span class="badge-depends">{t('verdict.depends')}</span>}
+            </div>
+            
+            <h3 class="text-title-sm text-ink mb-3">
+              {t('page.canYouPut')} {item.item} {applianceInPhrase}?
+            </h3>
+            
+            <p class="text-body-md text-body leading-relaxed mb-6">
+              {item.shortAnswer}
+            </p>
+          </div>
+          
+          <a 
+            href={`/${lang}/${item.appliance}/${item.slug}`} 
+            class="text-link text-[14px] font-medium hover:text-link-active transition-colors flex items-center gap-1 group mt-4"
+          >
+            {t('page.readDetailedBreakdown')} <span class="group-hover:translate-x-0.5 transition-transform">&rarr;</span>
+          </a>
+        </div>
+      ))}
+    </div>
+
+    <!-- No results message -->
+    <div id="no-results" class="hidden text-center py-12">
+      <p class="text-title-md text-muted">
+        {lang === 'es' ? 'No se encontraron artículos que coincidan con tu búsqueda.' : 'Nenhum item encontrado para sua pesquisa.'}
+      </p>
+    </div>
+  </section>
+
+  <!-- Related Categories Section -->
+  <section class="border-t border-hairline bg-surface-soft/40 py-16">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <h2 class="text-title-lg text-ink font-medium tracking-tight mb-8">
+        {lang === 'es' ? 'Categorías y Electrodomésticos Relacionados' : 'Categorias e Eletrodomésticos Relacionados'}
+      </h2>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        {['dishwasher', 'microwave', 'freezer', 'oven', 'dryer', 'airfryer', 'refrigerator']
+          .filter(app => app !== appliance)
+          .map(app => (
+            <a href={getApplianceUrl(app, lang)} class="p-5 bg-canvas border border-hairline rounded-md hover:border-border-strong shadow-xs text-decoration-none transition-colors active:scale-[0.98] block">
+              <span class="text-xs uppercase tracking-wider text-muted font-bold block mb-1">
+                {lang === 'es' ? 'Guía de Electrodoméstico' : 'Guia de Eletrodoméstico'}
+              </span>
+              <h3 class="text-title-sm text-ink mb-1 font-medium">{formatApplianceName(app)}</h3>
+              <span class="text-xs text-link">{t('home.viewAll')} &rarr;</span>
+            </a>
+          ))
+        }
+        
+        <a href="/how-long" class="p-5 bg-canvas border border-hairline rounded-md hover:border-border-strong shadow-xs text-decoration-none transition-colors active:scale-[0.98] block">
+          <span class="text-xs uppercase tracking-wider text-muted font-bold block mb-1">{t('footer.shelfLife')}</span>
+          <h3 class="text-title-sm text-ink mb-1 font-medium">{t('nav.howLong')}</h3>
+          <span class="text-xs text-link">{t('home.viewAll')} &rarr;</span>
+        </a>
+        <a href="/refreeze" class="p-5 bg-canvas border border-hairline rounded-md hover:border-border-strong shadow-xs text-decoration-none transition-colors active:scale-[0.98] block">
+          <span class="text-xs uppercase tracking-wider text-muted font-bold block mb-1">{t('footer.refreeze')}</span>
+          <h3 class="text-title-sm text-ink mb-1 font-medium">{t('nav.refreeze')}</h3>
+          <span class="text-xs text-link">{t('home.viewAll')} &rarr;</span>
+        </a>
+        <a href="/washing-machine" class="p-5 bg-canvas border border-hairline rounded-md hover:border-border-strong shadow-xs text-decoration-none transition-colors active:scale-[0.98] block">
+          <span class="text-xs uppercase tracking-wider text-muted font-bold block mb-1">{t('footer.washingMachine')}</span>
+          <h3 class="text-title-sm text-ink mb-1 font-medium">{t('nav.washingMachine')}</h3>
+          <span class="text-xs text-link">{t('home.viewAll')} &rarr;</span>
+        </a>
+        <a href="/what-happens" class="p-5 bg-canvas border border-hairline rounded-md hover:border-border-strong shadow-xs text-decoration-none transition-colors active:scale-[0.98] block">
+          <span class="text-xs uppercase tracking-wider text-muted font-bold block mb-1">{t('footer.emergencyScenarios')}</span>
+          <h3 class="text-title-sm text-ink mb-1 font-medium">{t('nav.whatHappens')}</h3>
+          <span class="text-xs text-link">{t('home.viewAll')} &rarr;</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Client-side filtering script -->
+  <script is:inline>
+    const filterInput = document.getElementById('filter-input');
+    const itemsGrid = document.getElementById('items-grid');
+    const noResults = document.getElementById('no-results');
+
+    if (filterInput && itemsGrid) {
+      const cards = itemsGrid.getElementsByClassName('item-card');
+      
+      filterInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim().toLowerCase();
+        let matches = 0;
+        
+        for (let i = 0; i < cards.length; i++) {
+          const card = cards[i];
+          const name = card.getAttribute('data-name');
+          
+          if (name && name.includes(query)) {
+            card.classList.remove('hidden');
+            matches++;
+          } else {
+            card.classList.add('hidden');
+          }
+        }
+        
+        if (matches === 0) {
+          noResults.classList.remove('hidden');
+        } else {
+          noResults.classList.add('hidden');
+        }
+      });
+    }
+  </script>
+</Layout>
