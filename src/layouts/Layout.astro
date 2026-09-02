@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
 import { getLatestDataModifiedTime } from '../utils/materialCategories';
-import { getLangFromUrl, useTranslations, useTranslatedPath, getPathWithoutLocale } from '../i18n/utils';
+import { getLangFromUrl, useTranslations, useTranslatedPath, getPathWithoutLocale, getApplianceUrl, getLocalizedUrl } from '../i18n/utils';
 import type { SupportedLanguage } from '../i18n/ui';
 import LanguagePicker from '../components/LanguagePicker.astro';
 
@@ -14,6 +14,7 @@ interface Props {
   excludeBreadcrumbSchema?: boolean;
   availableLocales?: SupportedLanguage[];
   lang?: SupportedLanguage;
+  is404?: boolean;
 }
 
 const { 
@@ -24,7 +25,8 @@ const {
   excludeFaqSchema = false,
   excludeBreadcrumbSchema = false,
   availableLocales,
-  lang
+  lang,
+  is404 = false
 } = Astro.props;
 
 const currentLang = lang || getLangFromUrl(Astro.url);
@@ -92,7 +94,7 @@ const breadcrumbItems = [
     "@type": "ListItem",
     "position": 1,
     "name": t('nav.home'),
-    "item": new URL(translatePath('/'), 'https://isitkitchensafe.com').href
+    "item": new URL(currentLang === 'en' ? '/' : `/${currentLang}/`, 'https://isitkitchensafe.com').href
   }
 ];
 
@@ -107,7 +109,7 @@ if (pathSegments.length > 0) {
       "@type": "ListItem",
       "position": 2,
       "name": appName,
-      "item": new URL(translatePath(`/${appSlug}`), 'https://isitkitchensafe.com').href
+      "item": new URL(getApplianceUrl(appSlug, currentLang), 'https://isitkitchensafe.com').href
     });
   } else {
     const pageName = formatAppliance(pathSegments[0]);
@@ -115,7 +117,7 @@ if (pathSegments.length > 0) {
       "@type": "ListItem",
       "position": 2,
       "name": pageName,
-      "item": new URL(translatePath(`/${pathSegments[0]}`), 'https://isitkitchensafe.com').href
+      "item": new URL(`/${pathSegments[0]}/`, 'https://isitkitchensafe.com').href
     });
   }
   
@@ -126,7 +128,7 @@ if (pathSegments.length > 0) {
       "@type": "ListItem",
       "position": 3,
       "name": itemName,
-      "item": new URL(translatePath(`/${pathSegments[0]}/${itemSlug}`), 'https://isitkitchensafe.com').href
+      "item": new URL(getLocalizedUrl(`/${pathSegments[0]}/${itemSlug}/`, currentLang), 'https://isitkitchensafe.com').href
     });
   }
 }
@@ -233,15 +235,21 @@ const appliances = [
     <title>{title}</title>
     <meta name="title" content={title} />
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonicalUrl} />
-    {activeLocales.map((loc) => (
-      <link 
-        rel="alternate" 
-        hreflang={loc} 
-        href={new URL(translatePath(basePath, loc), 'https://isitkitchensafe.com').href} 
-      />
-    ))}
-    <link rel="alternate" hreflang="x-default" href={englishUrl} />
+    {is404 || Astro.url.pathname.includes('404') ? (
+      <meta name="robots" content="noindex, nofollow" />
+    ) : (
+      <>
+        <link rel="canonical" href={canonicalUrl} />
+        {activeLocales.map((loc) => (
+          <link 
+            rel="alternate" 
+            hreflang={loc} 
+            href={new URL(getLocalizedUrl(basePath, loc), 'https://isitkitchensafe.com').href} 
+          />
+        ))}
+        <link rel="alternate" hreflang="x-default" href={englishUrl} />
+      </>
+    )}
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -281,15 +289,15 @@ const appliances = [
 
     <!-- Header -->
     <header class="h-[64px] border-b border-hairline bg-canvas sticky top-0 z-50">
-      <div class="max-w-[1280px] mx-auto px-6 h-full flex items-center justify-between gap-4">
+      <div class="max-w-[1280px] mx-auto px-3 sm:px-6 h-full flex items-center justify-between gap-2 sm:gap-4">
         <!-- Logo -->
-        <a href={translatePath('/')} class="flex items-center gap-2 group shrink-0" id="site-logo">
-          <span class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-on-primary font-display font-medium text-lg transition-transform group-active:scale-95">✓</span>
-          <span class="text-ink font-display font-medium text-[16px] md:text-[18px] tracking-tight">{t('nav.siteTitle')}</span>
+        <a href={translatePath('/')} class="flex items-center gap-2 group shrink-0" id="site-logo" aria-label={t('nav.siteTitle')}>
+          <span class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-on-primary font-display font-medium text-lg transition-transform group-active:scale-95 shrink-0">✓</span>
+          <span class="text-ink font-display font-medium text-[16px] md:text-[18px] tracking-tight hidden sm:inline">{t('nav.siteTitle')}</span>
         </a>
 
         <!-- Global Search Bar in Header -->
-        <form id="global-search-form" class="relative flex-grow max-w-[200px] sm:max-w-[280px] mx-2">
+        <form id="global-search-form" class="relative flex-grow min-w-0 max-w-[200px] sm:max-w-[280px] mx-1 sm:mx-2">
           <input 
             type="text" 
             id="global-search-input" 
@@ -297,7 +305,7 @@ const appliances = [
             list="global-search-items"
             autocomplete="off"
             aria-label={t('nav.searchAria')}
-            class="w-full h-9 pl-3 pr-8 py-1.5 bg-canvas text-ink text-[13px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
+            class="w-full h-10 md:h-9 pl-3 pr-8 py-2 md:py-1.5 bg-canvas text-ink text-[16px] md:text-[13px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
           />
           <datalist id="global-search-items"></datalist>
           <div id="global-search-loading" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2">
@@ -311,34 +319,36 @@ const appliances = [
 
         <!-- Desktop Navigation -->
         <nav class="hidden xl:flex items-center gap-4 shrink-0" id="desktop-nav">
-          <div class="flex items-center gap-3 border-r border-hairline pr-3">
+          <div class="flex items-center gap-3 2xl:border-r border-hairline pr-3">
             {appliances.map(app => (
               <a 
-                href={translatePath(`/${app.slug}`)} 
+                href={getApplianceUrl(app.slug, currentLang)} 
                 class="text-body hover:text-ink text-[13px] font-normal transition-colors"
               >
                 {app.name}
               </a>
             ))}
           </div>
-          <div class="flex items-center gap-3 pr-2">
-            <a href={translatePath('/compare')} class="text-body hover:text-ink text-[13px] font-normal transition-colors">{t('nav.compare')}</a>
-            <a href={translatePath('/material')} class="text-body hover:text-ink text-[13px] font-normal transition-colors">{t('nav.material')}</a>
-            <a href={translatePath('/how-long')} class="text-body hover:text-ink text-[13px] font-normal transition-colors">{t('nav.howLong')}</a>
-            <a href={translatePath('/washing-machine')} class="text-body hover:text-ink text-[13px] font-normal transition-colors">{t('nav.washingMachine')}</a>
-            <a href={translatePath('/refreeze')} class="text-body hover:text-ink text-[13px] font-normal transition-colors">{t('nav.refreeze')}</a>
-            <a href={translatePath('/what-happens')} class="text-body hover:text-ink text-[13px] font-normal transition-colors">{t('nav.whatHappens')}</a>
+          <div class="hidden 2xl:flex items-center gap-3 pr-2">
+            <a href="/compare" class="text-body hover:text-ink text-[13px] font-normal transition-colors">{t('nav.compare')}</a>
+            <a href="/material" class="text-body hover:text-ink text-[13px] font-normal transition-colors">{t('nav.material')}</a>
+            <a href="/how-long" class="text-body hover:text-ink text-[13px] font-normal transition-colors">{t('nav.howLong')}</a>
+            <a href="/washing-machine" class="text-body hover:text-ink text-[13px] font-normal transition-colors">{t('nav.washingMachine')}</a>
+            <a href="/refreeze" class="text-body hover:text-ink text-[13px] font-normal transition-colors">{t('nav.refreeze')}</a>
+            <a href="/what-happens" class="text-body hover:text-ink text-[13px] font-normal transition-colors">{t('nav.whatHappens')}</a>
           </div>
-          <a href={translatePath('/about/')} class="text-muted hover:text-ink text-[13px] font-normal transition-colors border-l border-hairline pl-3">{t('nav.about')}</a>
+          <a href="/about/" class="text-muted hover:text-ink text-[13px] font-normal transition-colors border-l border-hairline pl-3">{t('nav.about')}</a>
         </nav>
 
-        <div class="flex items-center gap-2 shrink-0">
-          <LanguagePicker />
+        <div class="flex items-center gap-1 sm:gap-2 shrink-0">
+          <div class="hidden sm:block">
+            <LanguagePicker />
+          </div>
           <!-- Theme Toggle Button -->
           <button
             type="button"
             id="theme-toggle"
-            class="p-2 text-ink hover:bg-surface-soft rounded-md active:scale-95 transition-all cursor-pointer shrink-0"
+            class="min-w-[44px] min-h-[44px] p-2.5 flex items-center justify-center text-ink hover:bg-surface-soft rounded-md active:scale-95 transition-all cursor-pointer shrink-0"
             aria-label={t('nav.themeToggle')}
           >
             <!-- Sun Icon (visible in dark mode) -->
@@ -353,9 +363,9 @@ const appliances = [
 
           <!-- Mobile Menu Toggle Button -->
           <button 
-            type="button"
+            type="button" 
             id="mobile-menu-toggle"
-            class="xl:hidden p-2 text-ink hover:bg-surface-soft rounded-md active:scale-95 transition-transform shrink-0"
+            class="xl:hidden min-w-[44px] min-h-[44px] p-2.5 flex items-center justify-center text-ink hover:bg-surface-soft rounded-md active:scale-95 transition-transform shrink-0"
             aria-label={t('nav.menuToggle')}
             aria-expanded="false"
             aria-controls="mobile-menu"
@@ -374,13 +384,13 @@ const appliances = [
       role="dialog"
       aria-modal="true"
       aria-label="Mobile Navigation"
-      class="fixed inset-0 bg-canvas z-[60] transform translate-x-full transition-transform duration-300 xl:hidden flex flex-col pt-16 px-6 overflow-y-auto pb-8"
+      class="fixed inset-0 bg-canvas z-[60] transform translate-x-full transition-transform duration-300 xl:hidden flex flex-col pt-16 px-6 overflow-y-auto pb-8 hidden"
       aria-hidden="true"
     >
       <button 
         type="button" 
         id="mobile-menu-close"
-        class="absolute top-4 right-6 p-2 text-ink hover:bg-surface-soft rounded-md"
+        class="absolute top-4 right-6 min-w-[44px] min-h-[44px] p-2.5 flex items-center justify-center text-ink hover:bg-surface-soft rounded-md active:scale-95 transition-transform cursor-pointer"
         aria-label={t('nav.closeMenu')}
       >
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -392,11 +402,11 @@ const appliances = [
           <LanguagePicker />
         </div>
         <span class="text-xs uppercase tracking-wider text-muted font-bold block mb-1">{t('footer.applianceGuides')}</span>
-        <div class="grid grid-cols-2 gap-2 mb-4">
+        <div class="grid grid-cols-2 gap-2.5 mb-4">
           {appliances.map(app => (
             <a 
-              href={translatePath(`/${app.slug}`)} 
-              class="text-ink font-display font-medium text-sm py-2 bg-surface-soft active:bg-surface-strong rounded-md transition-colors"
+              href={getApplianceUrl(app.slug, currentLang)} 
+              class="text-ink font-display font-medium text-sm min-h-[44px] py-2.5 px-2 flex items-center justify-center bg-surface-soft active:bg-surface-strong rounded-md transition-colors"
             >
               {app.name}
             </a>
@@ -405,19 +415,19 @@ const appliances = [
 
         <div class="border-t border-hairline my-2"></div>
         <span class="text-xs uppercase tracking-wider text-muted font-bold block mb-1">{t('footer.safetyDirectories')}</span>
-        <div class="grid grid-cols-2 gap-2 mb-4">
-          <a href={translatePath('/compare')} class="text-ink font-display font-medium text-sm py-2 bg-surface-soft active:bg-surface-strong rounded-md transition-colors col-span-2">{t('footer.compare')}</a>
-          <a href={translatePath('/material')} class="text-ink font-display font-medium text-sm py-2 bg-surface-soft active:bg-surface-strong rounded-md transition-colors col-span-2">{t('footer.materialHubs')}</a>
-          <a href={translatePath('/how-long')} class="text-ink font-display font-medium text-sm py-2 bg-surface-soft active:bg-surface-strong rounded-md transition-colors">{t('footer.shelfLife')}</a>
-          <a href={translatePath('/washing-machine')} class="text-ink font-display font-medium text-sm py-2 bg-surface-soft active:bg-surface-strong rounded-md transition-colors">{t('footer.washingMachine')}</a>
-          <a href={translatePath('/refreeze')} class="text-ink font-display font-medium text-sm py-2 bg-surface-soft active:bg-surface-strong rounded-md transition-colors">{t('footer.refreeze')}</a>
-          <a href={translatePath('/what-happens')} class="text-ink font-display font-medium text-sm py-2 bg-surface-soft active:bg-surface-strong rounded-md transition-colors">{t('footer.emergencyScenarios')}</a>
+        <div class="grid grid-cols-2 gap-2.5 mb-4">
+          <a href="/compare" class="text-ink font-display font-medium text-sm min-h-[44px] py-2.5 px-2 flex items-center justify-center bg-surface-soft active:bg-surface-strong rounded-md transition-colors col-span-2">{t('footer.compare')}</a>
+          <a href="/material" class="text-ink font-display font-medium text-sm min-h-[44px] py-2.5 px-2 flex items-center justify-center bg-surface-soft active:bg-surface-strong rounded-md transition-colors col-span-2">{t('footer.materialHubs')}</a>
+          <a href="/how-long" class="text-ink font-display font-medium text-sm min-h-[44px] py-2.5 px-2 flex items-center justify-center bg-surface-soft active:bg-surface-strong rounded-md transition-colors">{t('footer.shelfLife')}</a>
+          <a href="/washing-machine" class="text-ink font-display font-medium text-sm min-h-[44px] py-2.5 px-2 flex items-center justify-center bg-surface-soft active:bg-surface-strong rounded-md transition-colors">{t('footer.washingMachine')}</a>
+          <a href="/refreeze" class="text-ink font-display font-medium text-sm min-h-[44px] py-2.5 px-2 flex items-center justify-center bg-surface-soft active:bg-surface-strong rounded-md transition-colors">{t('footer.refreeze')}</a>
+          <a href="/what-happens" class="text-ink font-display font-medium text-sm min-h-[44px] py-2.5 px-2 flex items-center justify-center bg-surface-soft active:bg-surface-strong rounded-md transition-colors">{t('footer.emergencyScenarios')}</a>
         </div>
 
         <div class="border-t border-hairline my-2"></div>
-        <a href={translatePath('/about/')} class="text-body font-normal py-2 active:bg-surface-soft rounded-md transition-colors">{t('footer.about')}</a>
-        <a href={translatePath('/contact/')} class="text-body font-normal py-2 active:bg-surface-soft rounded-md transition-colors">{t('footer.contact')}</a>
-        <a href={translatePath('/privacy/')} class="text-body font-normal py-2 active:bg-surface-soft rounded-md transition-colors">{t('footer.privacy')}</a>
+        <a href="/about/" class="text-body font-normal min-h-[44px] py-2.5 px-3 flex items-center justify-center active:bg-surface-soft rounded-md transition-colors">{t('footer.about')}</a>
+        <a href="/contact/" class="text-body font-normal min-h-[44px] py-2.5 px-3 flex items-center justify-center active:bg-surface-soft rounded-md transition-colors">{t('footer.contact')}</a>
+        <a href="/privacy/" class="text-body font-normal min-h-[44px] py-2.5 px-3 flex items-center justify-center active:bg-surface-soft rounded-md transition-colors">{t('footer.privacy')}</a>
       </nav>
     </div>
 
@@ -444,7 +454,7 @@ const appliances = [
           <ul class="flex flex-col gap-2.5">
             {appliances.map(app => (
               <li>
-                <a href={translatePath(`/${app.slug}`)} class="text-muted hover:text-ink text-[14px] transition-colors">{app.name} {t('page.guideSuffix')}</a>
+                <a href={getApplianceUrl(app.slug, currentLang)} class="text-muted hover:text-ink text-[14px] transition-colors">{app.name} {t('page.guideSuffix')}</a>
               </li>
             ))}
           </ul>
@@ -454,19 +464,19 @@ const appliances = [
           <h3 class="text-ink font-semibold text-[14px] uppercase tracking-wider mb-4">{t('footer.safetyDirectories')}</h3>
           <ul class="flex flex-col gap-2.5">
             <li>
-              <a href={translatePath('/material')} class="text-muted hover:text-ink text-[14px] transition-colors">{t('footer.materialHubs')}</a>
+              <a href="/material" class="text-muted hover:text-ink text-[14px] transition-colors">{t('footer.materialHubs')}</a>
             </li>
             <li>
-              <a href={translatePath('/how-long')} class="text-muted hover:text-ink text-[14px] transition-colors">{t('footer.shelfLife')}</a>
+              <a href="/how-long" class="text-muted hover:text-ink text-[14px] transition-colors">{t('footer.shelfLife')}</a>
             </li>
             <li>
-              <a href={translatePath('/refreeze')} class="text-muted hover:text-ink text-[14px] transition-colors">{t('footer.refreeze')}</a>
+              <a href="/refreeze" class="text-muted hover:text-ink text-[14px] transition-colors">{t('footer.refreeze')}</a>
             </li>
             <li>
-              <a href={translatePath('/washing-machine')} class="text-muted hover:text-ink text-[14px] transition-colors">{t('footer.washingMachine')}</a>
+              <a href="/washing-machine" class="text-muted hover:text-ink text-[14px] transition-colors">{t('footer.washingMachine')}</a>
             </li>
             <li>
-              <a href={translatePath('/what-happens')} class="text-muted hover:text-ink text-[14px] transition-colors">{t('footer.emergencyScenarios')}</a>
+              <a href="/what-happens" class="text-muted hover:text-ink text-[14px] transition-colors">{t('footer.emergencyScenarios')}</a>
             </li>
           </ul>
         </div>
@@ -475,25 +485,25 @@ const appliances = [
           <h3 class="text-ink font-semibold text-[14px] uppercase tracking-wider mb-4">{t('footer.resourcesLegal')}</h3>
           <ul class="flex flex-col gap-2.5">
             <li>
-              <a href={translatePath('/blog')} class="text-muted hover:text-ink text-[14px] transition-colors font-medium">{t('footer.blog')}</a>
+              <a href="/blog" class="text-muted hover:text-ink text-[14px] transition-colors font-medium">{t('footer.blog')}</a>
             </li>
             <li>
-              <a href={translatePath('/compare')} class="text-muted hover:text-ink text-[14px] transition-colors font-medium font-display">{t('footer.compare')}</a>
+              <a href="/compare" class="text-muted hover:text-ink text-[14px] transition-colors font-medium font-display">{t('footer.compare')}</a>
             </li>
             <li>
-              <a href={translatePath('/sitemap-page')} class="text-muted hover:text-ink text-[14px] transition-colors">{t('footer.sitemap')}</a>
+              <a href="/sitemap-page" class="text-muted hover:text-ink text-[14px] transition-colors">{t('footer.sitemap')}</a>
             </li>
             <li>
-              <a href={translatePath('/about/')} class="text-muted hover:text-ink text-[14px] transition-colors">{t('footer.about')}</a>
+              <a href="/about/" class="text-muted hover:text-ink text-[14px] transition-colors">{t('footer.about')}</a>
             </li>
             <li>
-              <a href={translatePath('/contact/')} class="text-muted hover:text-ink text-[14px] transition-colors">{t('footer.contact')}</a>
+              <a href="/contact/" class="text-muted hover:text-ink text-[14px] transition-colors">{t('footer.contact')}</a>
             </li>
             <li>
-              <a href={translatePath('/privacy/')} class="text-muted hover:text-ink text-[14px] transition-colors">{t('footer.privacy')}</a>
+              <a href="/privacy/" class="text-muted hover:text-ink text-[14px] transition-colors">{t('footer.privacy')}</a>
             </li>
             <li>
-              <a href={translatePath('/terms/')} class="text-muted hover:text-ink text-[14px] transition-colors">{t('footer.terms')}</a>
+              <a href="/terms/" class="text-muted hover:text-ink text-[14px] transition-colors">{t('footer.terms')}</a>
             </li>
           </ul>
         </div>
@@ -514,35 +524,49 @@ const appliances = [
         const closeBtn = document.getElementById('mobile-menu-close');
         const mobileMenu = document.getElementById('mobile-menu');
 
+        let isTransitioning = false;
+
+        const openMenu = () => {
+          if (isTransitioning || !mobileMenu) return;
+          mobileMenu.classList.remove('hidden');
+          void mobileMenu.offsetWidth;
+          mobileMenu.classList.remove('translate-x-full');
+          toggleBtn?.setAttribute('aria-expanded', 'true');
+          mobileMenu.setAttribute('aria-hidden', 'false');
+          document.body.classList.add('overflow-hidden');
+          if (closeBtn) closeBtn.focus();
+        };
+
+        const closeMenu = () => {
+          if (isTransitioning || !mobileMenu) return;
+          isTransitioning = true;
+          mobileMenu.classList.add('translate-x-full');
+          if (toggleBtn) {
+            toggleBtn.setAttribute('aria-expanded', 'false');
+            toggleBtn.focus();
+          }
+          mobileMenu.setAttribute('aria-hidden', 'true');
+          document.body.classList.remove('overflow-hidden');
+          setTimeout(() => {
+            if (mobileMenu.classList.contains('translate-x-full')) {
+              mobileMenu.classList.add('hidden');
+            }
+            isTransitioning = false;
+          }, 310);
+        };
+
         if (toggleBtn && mobileMenu) {
-          toggleBtn.addEventListener('click', () => {
-            mobileMenu.classList.remove('translate-x-full');
-            toggleBtn.setAttribute('aria-expanded', 'true');
-            mobileMenu.setAttribute('aria-hidden', 'false');
-            if (closeBtn) closeBtn.focus();
-          });
+          toggleBtn.addEventListener('click', openMenu);
         }
 
         if (closeBtn && mobileMenu) {
-          closeBtn.addEventListener('click', () => {
-            mobileMenu.classList.add('translate-x-full');
-            if (toggleBtn) {
-              toggleBtn.setAttribute('aria-expanded', 'false');
-              toggleBtn.focus();
-            }
-            mobileMenu.setAttribute('aria-hidden', 'true');
-          });
+          closeBtn.addEventListener('click', closeMenu);
         }
 
         if (mobileMenu) {
           mobileMenu.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-              mobileMenu.classList.add('translate-x-full');
-              if (toggleBtn) {
-                toggleBtn.setAttribute('aria-expanded', 'false');
-                toggleBtn.focus();
-              }
-              mobileMenu.setAttribute('aria-hidden', 'true');
+              closeMenu();
               return;
             }
 
