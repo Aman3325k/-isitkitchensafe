@@ -1,10 +1,9 @@
 ---
 import { languages, type SupportedLanguage } from '../i18n/ui';
-import { getLangFromUrl, getPathWithoutLocale, useTranslatedPath } from '../i18n/utils';
+import { getLangFromUrl, getLocalizedUrl } from '../i18n/utils';
 
 const currentLang = getLangFromUrl(Astro.url);
-const basePath = getPathWithoutLocale(Astro.url.pathname);
-const translatePath = useTranslatedPath(currentLang);
+const currentPath = Astro.url.pathname;
 
 const languageLabels: Record<SupportedLanguage, { short: string; label: string; flag: string }> = {
   en: { short: 'EN', label: 'English', flag: '🇺🇸' },
@@ -13,37 +12,37 @@ const languageLabels: Record<SupportedLanguage, { short: string; label: string; 
 };
 ---
 
-<div class="relative inline-block text-left" id="language-picker-container">
+<div class="relative inline-block text-left language-picker-container" data-language-picker>
   <button
     type="button"
-    id="language-picker-button"
-    class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[13px] font-medium text-ink bg-surface-soft hover:bg-surface-strong border border-hairline rounded-md transition-colors cursor-pointer"
+    class="language-picker-button inline-flex items-center gap-1.5 px-3 py-2 min-h-[44px] text-[13px] font-medium text-ink bg-surface-soft hover:bg-surface-strong border border-hairline rounded-md transition-colors cursor-pointer"
     aria-expanded="false"
     aria-haspopup="true"
     aria-label="Select Language"
+    data-picker-button
   >
     <span class="text-xs">{languageLabels[currentLang].flag}</span>
     <span class="tracking-wide uppercase font-semibold text-[12px]">{languageLabels[currentLang].short}</span>
-    <svg class="w-3.5 h-3.5 text-muted transition-transform duration-200" id="language-picker-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg class="language-picker-arrow w-3.5 h-3.5 text-muted transition-transform duration-200" data-picker-arrow fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
     </svg>
   </button>
 
   <!-- Dropdown menu -->
   <div
-    id="language-picker-dropdown"
-    class="hidden absolute right-0 mt-1.5 w-36 rounded-md bg-canvas border border-hairline shadow-lg py-1 z-50 ring-1 ring-black/5"
+    class="language-picker-dropdown hidden absolute right-0 mt-1.5 w-44 rounded-md bg-canvas border border-hairline shadow-lg py-1 z-50 ring-1 ring-black/5"
     role="menu"
     aria-orientation="vertical"
     tabindex="-1"
+    data-picker-dropdown
   >
     {(Object.keys(languages) as SupportedLanguage[]).map((lang) => {
       const isCurrent = lang === currentLang;
-      const targetUrl = translatePath(basePath, lang);
+      const targetUrl = getLocalizedUrl(currentPath, lang);
       return (
         <a
           href={targetUrl}
-          class={`flex items-center justify-between px-3 py-2 text-[13px] transition-colors ${
+          class={`flex items-center justify-between px-3.5 py-3 min-h-[44px] text-[14px] transition-colors ${
             isCurrent
               ? 'bg-primary text-on-primary font-medium'
               : 'text-body hover:text-ink hover:bg-surface-soft'
@@ -52,11 +51,11 @@ const languageLabels: Record<SupportedLanguage, { short: string; label: string; 
           tabindex="-1"
           hreflang={lang}
         >
-          <span class="flex items-center gap-2">
-            <span class="text-xs">{languageLabels[lang].flag}</span>
+          <span class="flex items-center gap-2.5">
+            <span class="text-sm">{languageLabels[lang].flag}</span>
             <span>{languageLabels[lang].label}</span>
           </span>
-          {isCurrent && <span class="text-xs">✓</span>}
+          {isCurrent && <span class="text-xs font-bold">✓</span>}
         </a>
       );
     })}
@@ -64,43 +63,62 @@ const languageLabels: Record<SupportedLanguage, { short: string; label: string; 
 </div>
 
 <script>
-  function setupLanguagePicker() {
-    const btn = document.getElementById('language-picker-button');
-    const menu = document.getElementById('language-picker-dropdown');
-    const arrow = document.getElementById('language-picker-arrow');
+  function setupLanguagePickers() {
+    const containers = document.querySelectorAll<HTMLElement>('[data-language-picker]');
 
-    if (!btn || !menu) return;
+    containers.forEach((container) => {
+      const btn = container.querySelector<HTMLButtonElement>('[data-picker-button]');
+      const menu = container.querySelector<HTMLElement>('[data-picker-dropdown]');
+      const arrow = container.querySelector<SVGElement>('[data-picker-arrow]');
 
-    const toggleDropdown = (open?: boolean) => {
-      const isExpanded = btn.getAttribute('aria-expanded') === 'true';
-      const shouldOpen = open !== undefined ? open : !isExpanded;
-      btn.setAttribute('aria-expanded', String(shouldOpen));
-      if (shouldOpen) {
-        menu.classList.remove('hidden');
-        arrow?.classList.add('rotate-180');
-      } else {
-        menu.classList.add('hidden');
-        arrow?.classList.remove('rotate-180');
-      }
-    };
+      if (!btn || !menu) return;
 
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleDropdown();
-    });
+      const toggleDropdown = (open?: boolean) => {
+        const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+        const shouldOpen = open !== undefined ? open : !isExpanded;
+        btn.setAttribute('aria-expanded', String(shouldOpen));
+        if (shouldOpen) {
+          menu.classList.remove('hidden');
+          arrow?.classList.add('rotate-180');
+        } else {
+          menu.classList.add('hidden');
+          arrow?.classList.remove('rotate-180');
+        }
+      };
 
-    document.addEventListener('click', (e) => {
-      if (!btn.contains(e.target as Node) && !menu.contains(e.target as Node)) {
-        toggleDropdown(false);
-      }
-    });
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        // Close other open language pickers first
+        containers.forEach((other) => {
+          if (other !== container) {
+            const otherBtn = other.querySelector<HTMLButtonElement>('[data-picker-button]');
+            const otherMenu = other.querySelector<HTMLElement>('[data-picker-dropdown]');
+            const otherArrow = other.querySelector<SVGElement>('[data-picker-arrow]');
+            otherBtn?.setAttribute('aria-expanded', 'false');
+            otherMenu?.classList.add('hidden');
+            otherArrow?.classList.remove('rotate-180');
+          }
+        });
+        toggleDropdown();
+      });
 
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        toggleDropdown(false);
-      }
+      document.addEventListener('click', (e) => {
+        if (!container.contains(e.target as Node)) {
+          toggleDropdown(false);
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          toggleDropdown(false);
+        }
+      });
     });
   }
 
-  document.addEventListener('DOMContentLoaded', setupLanguagePicker);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupLanguagePickers);
+  } else {
+    setupLanguagePickers();
+  }
 </script>
