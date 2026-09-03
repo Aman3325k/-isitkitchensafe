@@ -13,9 +13,11 @@ function formatCategory(app: string, lang: string) {
   if (lang === 'es') {
     if (app === 'dishwasher') return 'Lavavajillas';
     if (app === 'microwave') return 'Microondas';
+    if (app === 'oven') return 'Horno';
   } else if (lang === 'pt') {
     if (app === 'dishwasher') return 'Lava-Louças';
     if (app === 'microwave') return 'Micro-ondas';
+    if (app === 'oven') return 'Forno';
   }
   return app.charAt(0).toUpperCase() + app.slice(1);
 }
