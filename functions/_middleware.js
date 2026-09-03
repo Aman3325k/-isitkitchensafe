@@ -6,7 +6,13 @@ export async function onRequest(context) {
   const isHtml = !url.pathname.includes('.') || url.pathname.endsWith('.html');
   
   if (!isGet || !isHtml) {
-    return context.next();
+    const res = await context.next();
+    if (url.hostname.endsWith('.pages.dev')) {
+      const response = new Response(res.body, res);
+      response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+      return response;
+    }
+    return res;
   }
 
   const country = request.cf?.country || request.headers.get('cf-ipcountry');
@@ -59,6 +65,10 @@ export async function onRequest(context) {
   } else {
     response = new Response(response.body, response);
     response.headers.set('x-region-cache-status', 'HIT');
+  }
+  
+  if (url.hostname.endsWith('.pages.dev')) {
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow');
   }
   
   return response;

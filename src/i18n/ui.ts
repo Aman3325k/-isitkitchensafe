@@ -104,6 +104,12 @@ export const ui = {
     'footer.terms': 'Terms & Conditions',
     'footer.allRights': 'All rights reserved.',
     'footer.disclaimer': 'Disclaimer: The safety guidelines provided on this website are for informational purposes only. Always consult your appliance\'s manufacturer manual.',
+
+    // Cookie Consent Banner
+    'cookie.title': '🍪 Cookie Consent',
+    'cookie.message': 'We use cookies to analyze website traffic and optimize your site experience. By clicking "Accept", you agree to our use of cookies as described in our',
+    'cookie.accept': 'Accept',
+    'cookie.decline': 'Decline',
   },
   es: {
     // Navigation & Global Header
@@ -200,6 +206,12 @@ export const ui = {
     'footer.terms': 'Términos y Condiciones',
     'footer.allRights': 'Todos los derechos reservados.',
     'footer.disclaimer': 'Descargo de responsabilidad: Las pautas de seguridad proporcionadas en este sitio web son solo para fines informativos. Consulta siempre el manual del fabricante de tu electrodoméstico.',
+
+    // Cookie Consent Banner
+    'cookie.title': '🍪 Consentimiento de Cookies',
+    'cookie.message': 'Utilizamos cookies para analizar el tráfico del sitio web y optimizar tu experiencia. Al hacer clic en "Aceptar", aceptas nuestro uso de cookies como se describe en nuestra',
+    'cookie.accept': 'Aceptar',
+    'cookie.decline': 'Rechazar',
   },
   pt: {
     // Navigation & Global Header
@@ -296,6 +308,12 @@ export const ui = {
     'footer.terms': 'Termos e Condições',
     'footer.allRights': 'Todos os direitos reservados.',
     'footer.disclaimer': 'Aviso legal: As diretrizes de segurança fornecidas neste site são apenas para fins informativos. Sempre consulte o manual do fabricante do seu eletrodoméstico.',
+
+    // Cookie Consent Banner
+    'cookie.title': '🍪 Consentimento de Cookies',
+    'cookie.message': 'Utilizamos cookies para analisar o tráfego do site e otimizar sua experiência. Ao clicar em "Aceitar", você concorda com o uso de cookies conforme descrito em nossa',
+    'cookie.accept': 'Aceitar',
+    'cookie.decline': 'Recusar',
   },
 } as const;
 
