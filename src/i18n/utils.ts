@@ -63,9 +63,9 @@ export function isDirectoryTranslatedInLocale(section: string, lang: SupportedLa
 export function getDirectoryUrl(section: string, lang: SupportedLanguage = 'en'): string {
   const clean = section.replace(/^\/+|\/+$/g, '');
   if (lang === 'en' || !isDirectoryTranslatedInLocale(clean, lang)) {
-    return `/${clean}`;
+    return `/${clean}/`;
   }
-  return `/${lang}/${clean}`;
+  return `/${lang}/${clean}/`;
 }
 
 /**
