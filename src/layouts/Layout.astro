@@ -297,7 +297,12 @@ const appliances = [
         </a>
 
         <!-- Global Search Bar in Header -->
-        <form id="global-search-form" class="relative flex-grow min-w-0 max-w-[200px] sm:max-w-[280px] mx-1 sm:mx-2">
+        <form 
+          id="global-search-form" 
+          class="relative flex-grow min-w-0 max-w-[200px] sm:max-w-[280px] mx-1 sm:mx-2"
+          data-search-path={currentLang === 'en' ? '/search-index.json' : `/${currentLang}/search-index.json`}
+          data-lang={currentLang}
+        >
           <input 
             type="text" 
             id="global-search-input" 
@@ -626,6 +631,8 @@ const appliances = [
         const searchInput = document.getElementById('global-search-input') as HTMLInputElement | null;
         const datalist = document.getElementById('global-search-items') as HTMLDataListElement | null;
         const searchLoading = document.getElementById('global-search-loading');
+        const searchPath = searchForm?.dataset.searchPath || '/search-index.json';
+        const searchLang = searchForm?.dataset.lang || 'en';
         let searchIndex: Array<{ name: string; category: string; url: string }> | null = null;
         let isFetching = false;
 
@@ -641,7 +648,7 @@ const appliances = [
           isFetching = true;
           if (searchLoading) searchLoading.classList.remove('hidden');
           try {
-            const response = await fetch('/search-index.json');
+            const response = await fetch(searchPath);
             if (response.ok) {
               searchIndex = await response.json();
               populateDatalist(searchIndex);
@@ -683,27 +690,56 @@ const appliances = [
             }
 
             if (!match) {
-              const categoryMap: Record<string, string> = {
-                'dishwasher': '/dishwasher',
-                'microwave': '/microwave',
-                'freezer': '/freezer',
-                'oven': '/oven',
-                'dryer': '/dryer',
-                'air fryer': '/airfryer',
-                'airfryer': '/airfryer',
-                'refrigerator': '/refrigerator',
-                'fridge': '/refrigerator',
-                'shelf life': '/how-long',
-                'how long': '/how-long',
-                'washing machine': '/washing-machine',
-                'refreeze': '/refreeze',
-                'what happens': '/what-happens',
-                'compare': '/compare',
-                'comparison': '/compare',
-                'comparisons': '/compare'
+              const categoryMapEn: Record<string, string> = {
+                'dishwasher': '/dishwasher/',
+                'microwave': '/microwave/',
+                'freezer': '/freezer/',
+                'oven': '/oven/',
+                'dryer': '/dryer/',
+                'air fryer': '/airfryer/',
+                'airfryer': '/airfryer/',
+                'refrigerator': '/refrigerator/',
+                'fridge': '/refrigerator/',
+                'shelf life': '/how-long/',
+                'how long': '/how-long/',
+                'washing machine': '/washing-machine/',
+                'refreeze': '/refreeze/',
+                'what happens': '/what-happens/',
+                'compare': '/compare/',
+                'comparison': '/compare/',
+                'comparisons': '/compare/'
               };
-              if (categoryMap[rawValue]) {
-                window.location.href = categoryMap[rawValue];
+
+              // AGENT-GENERATED KEYWORDS — NEEDS NATIVE SPEAKER REVIEW BEFORE RELYING ON THIS FOR PRODUCTION SEARCH ACCURACY
+              const categoryMapEs: Record<string, string> = {
+                'lavavajillas': '/es/dishwasher/',
+                'lavaplatos': '/es/dishwasher/',
+                'dishwasher': '/es/dishwasher/',
+                'microondas': '/es/microwave/',
+                'microwave': '/es/microwave/'
+              };
+
+              // AGENT-GENERATED KEYWORDS — NEEDS NATIVE SPEAKER REVIEW BEFORE RELYING ON THIS FOR PRODUCTION SEARCH ACCURACY
+              const categoryMapPt: Record<string, string> = {
+                'lava-louças': '/pt/dishwasher/',
+                'lava louças': '/pt/dishwasher/',
+                'lavaloucas': '/pt/dishwasher/',
+                'dishwasher': '/pt/dishwasher/',
+                'micro-ondas': '/pt/microwave/',
+                'microondas': '/pt/microwave/',
+                'micro ondas': '/pt/microwave/',
+                'microwave': '/pt/microwave/'
+              };
+
+              const categoryMaps: Record<string, Record<string, string>> = {
+                en: categoryMapEn,
+                es: categoryMapEs,
+                pt: categoryMapPt
+              };
+
+              const activeCategoryMap = categoryMaps[searchLang] || categoryMapEn;
+              if (activeCategoryMap[rawValue]) {
+                window.location.href = activeCategoryMap[rawValue];
                 return;
               }
             }
