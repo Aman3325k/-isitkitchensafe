@@ -41,6 +41,33 @@ export function getApplianceUrl(appliance: string, lang: SupportedLanguage = 'en
   return `/${lang}/${appliance}/`;
 }
 
+const esDirectories = new Set<string>([]);
+const ptDirectories = new Set<string>([]);
+
+/**
+ * Checks whether a safety directory section has translated content in the given locale.
+ */
+export function isDirectoryTranslatedInLocale(section: string, lang: SupportedLanguage): boolean {
+  if (lang === 'en') return true;
+  const clean = section.replace(/^\/+|\/+$/g, '');
+  if (lang === 'es') return esDirectories.has(clean);
+  if (lang === 'pt') return ptDirectories.has(clean);
+  return false;
+}
+
+/**
+ * Returns the proper URL for a safety directory section.
+ * If the section is translated in `lang`, returns `/${lang}/${clean}`.
+ * If not translated, falls back cleanly to the canonical English directory `/${clean}`.
+ */
+export function getDirectoryUrl(section: string, lang: SupportedLanguage = 'en'): string {
+  const clean = section.replace(/^\/+|\/+$/g, '');
+  if (lang === 'en' || !isDirectoryTranslatedInLocale(clean, lang)) {
+    return `/${clean}`;
+  }
+  return `/${lang}/${clean}`;
+}
+
 /**
  * Extracts the current locale from a URL pathname.
  * E.g. /es/dishwasher/hydroflask -> 'es', /dishwasher/hydroflask -> 'en'
