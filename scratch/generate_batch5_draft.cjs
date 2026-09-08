@@ -1,0 +1,421 @@
+const fs = require('fs');
+
+const batch5Translations = {
+  es: [
+    {
+      item: "Batata Dulce",
+      appliance: "freezer",
+      slug: "sweet-potato",
+      safe: "yes",
+      shortAnswer: "Sí, puedes congelar batata dulce de forma segura.",
+      reason: "Congelar batata dulce a 0 °F (-18 °C) detiene la actividad enzimática y la proliferación microbiana, conservando el alimento de manera indefinida. No obstante, la pérdida de humedad por el aire frío del congelador puede causar quemaduras por frío que alteran el sabor y la textura, por lo que un envasado hermético adecuado es esencial.",
+      tips: [
+        "Extrae todo el aire de las bolsas para congelar antes de sellarlas para prevenir quemaduras por frío.",
+        "Anota la fecha y el nombre del alimento en el envase antes de llevarlo al congelador.",
+        "Deja enfriar los alimentos cocinados a temperatura ambiente o en el refrigerador antes de congelarlos."
+      ],
+      warnings: [
+        "Introducir alimentos calientes eleva la temperatura interna del congelador, arriesgando la proliferación bacteriana en alimentos vecinos.",
+        "No congeles alimentos en el empaque delgado del supermercado, ya que no ofrece sellado hermético contra el aire frío."
+      ],
+      faqs: [
+        {
+          question: "¿Se pueden congelar batatas dulces crudas?",
+          answer: "Nunca congeles batatas dulces crudas; congelar los tubérculos crudos desencadena una decoloración enzimática grave, descompone los almidones internos en un líquido ácido y deja los centros desagradablemente duros y arenosos."
+        },
+        {
+          question: "¿Cuál es la mejor forma de congelar batata dulce para planificar comidas?",
+          answer: "Hornea las batatas enteras hasta que estén tiernas, déjalas enfriar, envuélvelas individualmente en papel aluminio y bolsas para congelar; o bien, machaca la pulpa cocida con unas gotas de limón para congelarla en porciones."
+        },
+        {
+          question: "¿Cómo se recalienta la batata dulce horneada congelada?",
+          answer: "Retira el envoltorio y hornea a 375 °F (190 °C) durante 25 a 30 minutos hasta que esté bien caliente, o caliéntala al vapor en un recipiente tapado hasta que quede suave y humeante por completo."
+        }
+      ],
+      relatedItems: [
+        "potato",
+        "carrot",
+        "mashed-potatoes",
+        "baking-sheet"
+      ],
+      material: "Verdura Fresca",
+      keyRisk: "Endurecimiento enzimático y exudación de humedad",
+      tip: "Hornea, hierve o cocina al vapor las batatas dulces hasta que estén completamente tiernas antes de congelarlas enteras, en cubos o en puré.",
+      learnMore: "Las batatas crudas se endurecen, adquieren un sabor rancio y se decoloran en el congelador debido a enzimas activas. Cocinarlas gelatiniza los almidones y los convierte en maltosa, fijando su dulzura y textura suave."
+    },
+    {
+      item: "Tomate",
+      appliance: "freezer",
+      slug: "tomato",
+      safe: "depends",
+      shortAnswer: "Depende. La congelación ablanda los tomates por lo que no se pueden cortar frescos, pero son completamente seguros e ideales para salsas y guisados cocinados.",
+      reason: "Los tomates frescos están compuestos por un 94 % de agua, y la congelación expande los cristales de hielo rompiendo de forma permanente su fina estructura celular. Al descongelarse, pierden toda su firmeza, colapsando en una pulpa blanda y acuosa con la piel suelta que resulta inadecuada para ensaladas crudas o sándwiches. Sin embargo, el USDA y centros de conservación recomiendan la congelación como un método práctico para aplicaciones cocinadas, ya que los tomates descongelados se pelan al instante y aportan todo su sabor a salsas, sopas y guisos.",
+      tips: [
+        "Congela los tomates maduros enteros sobre una bandeja para hornear; una vez sólidos, pásalos a bolsas de congelador hasta por 8 meses de almacenamiento.",
+        "Pasa los tomates enteros congelados bajo agua tibia del grifo durante 15 segundos para retirar la piel al instante sin necesidad de pelar con cuchillo.",
+        "Cocina a fuego lento los tomates descongelados en salsas para pasta, estofados y guisados donde se busca una textura suave y deshecha."
+      ],
+      warnings: [
+        "Nunca esperes que los tomates descongelados se puedan cortar en rodajas firmes para hamburguesas, ensalada caprese o pico de gallo fresco.",
+        "Se acumula exceso de líquido al descongelar tomates; escurre el agua liberada antes de incorporar la pulpa a salsas espesas."
+      ],
+      faqs: [
+        {
+          question: "¿Se pueden congelar tomates crudos enteros sin pelar ni blanquear?",
+          answer: "Sí, simplemente lávalos, sécalos y colócalos enteros y maduros directamente en bolsas para congelar; la piel se desprenderá sin esfuerzo una vez descongelados."
+        },
+        {
+          question: "¿Se pueden usar tomates descongelados en ensaladas o salsas crudas?",
+          answer: "No, los tomates descongelados quedan totalmente blandos y acuosos, haciéndolos inadecuados para ensaladas frescas o salsas picadas crujientes."
+        },
+        {
+          question: "¿Cuánto tiempo se pueden almacenar tomates congelados para cocinar?",
+          answer: "Los tomates congelados enteros, picados o triturados conservan un sabor excelente para recetas cocinadas de 8 a 12 meses a 0 °F (-18 °C)."
+        }
+      ],
+      relatedItems: [
+        "bell-pepper",
+        "onion",
+        "garlic",
+        "cucumber"
+      ],
+      material: "Fruta Fresca (Alta Humedad)",
+      keyRisk: "Ablandamiento estructural y desprendimiento de piel",
+      tip: "Congela tomates maduros enteros sin pelar; pásalos bajo agua tibia tras congelar para retirar la piel de inmediato.",
+      learnMore: "Los tomates son 94 % agua. Los cristales de hielo destruyen la turgencia celular. Aunque no sirven para cortar crudos, sus compuestos aromáticos permanecen intactos para salsas cocidas."
+    },
+    {
+      item: "Calabaza Amarilla",
+      appliance: "freezer",
+      slug: "yellow-squash",
+      safe: "yes",
+      shortAnswer: "Sí, puedes congelar calabaza amarilla de forma segura.",
+      reason: "Congelar calabaza amarilla a 0 °F (-18 °C) detiene la actividad enzimática y la proliferación microbiana, conservando el alimento de manera indefinida. Sin embargo, la pérdida de humedad por el aire seco del congelador puede causar quemaduras por frío que alteran el sabor y la textura, por lo que un envasado hermético adecuado es esencial.",
+      tips: [
+        "Extrae todo el aire de las bolsas para congelar antes de sellarlas para prevenir quemaduras por frío.",
+        "Anota la fecha y el nombre del alimento en el recipiente antes de guardarlo en el congelador.",
+        "Deja enfriar los alimentos cocinados a temperatura ambiente o en el refrigerador antes de congelarlos."
+      ],
+      warnings: [
+        "Introducir alimentos calientes eleva la temperatura interna del congelador, arriesgando la proliferación bacteriana en alimentos vecinos.",
+        "No congeles alimentos en el empaque delgado del supermercado, ya que no ofrece sellado hermético contra el aire frío."
+      ],
+      faqs: [
+        {
+          question: "¿Cómo se blanquea la calabaza amarilla de verano antes de congelar?",
+          answer: "Corta la calabaza en rodajas de poco más de 1 cm y blanquéalas en agua hirviendo durante 3 minutos, enfriándolas enseguida en agua con hielo; el blanqueado desactiva enzimas que provocan amargor y pulpa viscosa."
+        },
+        {
+          question: "¿Se puede congelar calabaza amarilla rallada para repostería?",
+          answer: "Sí, ralla la calabaza gruesa, guárdala en porciones medidas en bolsas de congelador sin blanquear y congela; descongela y escurre muy bien en un colador fino antes de añadir a panes rápidos, muffins o buñuelos."
+        },
+        {
+          question: "¿Cómo se deben cocinar las rodajas de calabaza amarilla congeladas para que no queden blandas?",
+          answer: "Saltea las rodajas congeladas en una sartén muy caliente con aceite de oliva o agrégalas directo a guisados hirviendo sin descongelar; descongelar a temperatura ambiente suelta demasiada agua y arruina la forma."
+        }
+      ],
+      relatedItems: [
+        "zucchini",
+        "eggplant",
+        "bell-pepper",
+        "tomato"
+      ],
+      material: "Verdura Fresca",
+      keyRisk: "Colapso de estructura celular y pérdida de humedad",
+      tip: "Almacena las verduras enteras en cajones frescos y húmedos; lava justo antes de consumir o preparar.",
+      learnMore: "Congelar vegetales cristaliza el agua interna, rompiendo las paredes celulares. Al descongelar o calentar, esto genera una textura blanda idónea para preparaciones cocinadas."
+    },
+    {
+      item: "Calabacín",
+      appliance: "freezer",
+      slug: "zucchini",
+      safe: "yes",
+      shortAnswer: "Sí, el calabacín es completamente seguro para congelar cortado en rodajas y blanqueado, o rallado y escurrido para hornear.",
+      reason: "El calabacín tiene un contenido de humedad muy alto (cerca del 95 %), por lo que la congelación modifica su estructura celular. Aunque descongelado queda demasiado blando para ensaladas crudas, se congela de maravilla para cocinar. Las rodajas blanqueadas son ideales para sopas y guisados, mientras que el calabacín rallado en porciones medidas es perfecto para panes, muffins y tortitas.",
+      tips: [
+        "Ralla el calabacín y exprime el exceso de agua con un paño limpio antes de congelarlo en porciones de una taza para repostería.",
+        "Blanquea las rodajas de calabacín en agua hirviendo durante 1 a 2 minutos y pásalas por agua helada para mantener color y consistencia.",
+        "Echa las rodajas de calabacín congeladas directamente a salsas hirviendo, salteados o estofados sin descongelar primero."
+      ],
+      warnings: [
+        "El calabacín descongelado suelta abundante agua y pierde firmeza; nunca intentes usar calabacín descongelado crudo en ensaladas frescas.",
+        "Las rodajas de calabacín congeladas sin blanquear se vuelven acuosas y blandas mucho más rápido que las correctamente blanqueadas."
+      ],
+      faqs: [
+        {
+          question: "¿Cuánto tiempo puedo almacenar este alimento en el congelador?",
+          answer: "La mayoría de los alimentos se mantienen seguros por tiempo indefinido a 0 °F (-18 °C), pero la calidad del calabacín se aprovecha mejor dentro de 3 a 6 meses."
+        },
+        {
+          question: "¿Se debe descongelar a temperatura ambiente?",
+          answer: "No, siempre descongela en el refrigerador o cocina directamente congelado para evitar la proliferación bacteriana."
+        },
+        {
+          question: "¿La congelación destruye las vitaminas del calabacín?",
+          answer: "No, el blanqueado rápido seguido de congelación fija los nutrientes y vitaminas en su punto óptimo de frescura."
+        }
+      ],
+      relatedItems: [
+        "yellow-squash",
+        "eggplant",
+        "bell-pepper",
+        "tomato"
+      ],
+      material: "Verdura Fresca",
+      keyRisk: "Colapso de estructura celular y pérdida de humedad",
+      tip: "Almacena las verduras enteras en cajones frescos y húmedos; lava justo antes de consumir o preparar.",
+      learnMore: "Congelar vegetales cristaliza el agua interna, rompiendo las paredes celulares. Al descongelar o cocinar, esto genera una textura blanda idónea para preparaciones cocinadas."
+    },
+    {
+      item: "Puré de Papas",
+      appliance: "freezer",
+      slug: "mashed-potatoes",
+      safe: "yes",
+      shortAnswer: "Sí, el puré de papas se congela excepcionalmente bien cuando se prepara con mantequilla o crema.",
+      reason: "El puré de papas se congela notablemente bien, especialmente cuando se elabora con mantequilla, leche o crema. Las grasas lácteas recubren los gránulos de almidón, evitando que se separe el agua durante la congelación y descongelación. Porcionar el puré en montoncitos individuales sobre una bandeja antes de guardarlo en bolsas herméticas facilita cenas rápidas en cualquier momento.",
+      tips: [
+        "Usa bolsas gruesas aptas para congelador y extrae todo el exceso de aire para prevenir quemaduras por frío.",
+        "Etiqueta el recipiente con la fecha y el nombre del alimento antes de llevarlo al congelador.",
+        "Congela en porciones individuales de un solo uso para descongelar únicamente lo que necesites."
+      ],
+      warnings: [
+        "Las quemaduras por congelación resecan la superficie, alterando la textura y el sabor aunque sin comprometer la seguridad.",
+        "No dejes alimentos congelados expuestos al aire dentro del congelador."
+      ],
+      faqs: [
+        {
+          question: "¿Cuánto tiempo puedo almacenar este alimento en el congelador?",
+          answer: "La mayoría de los alimentos se mantienen seguros indefinidamente a 0 °F (-18 °C), pero la calidad óptima del puré de papas se conserva mejor dentro de 3 a 6 meses."
+        },
+        {
+          question: "¿Se debe descongelar a temperatura ambiente?",
+          answer: "No, siempre descongela en el refrigerador o recalienta directamente a fuego lento o microondas para evitar el desarrollo bacteriano."
+        },
+        {
+          question: "¿La congelación destruye las vitaminas?",
+          answer: "No, la congelación rápida fija los nutrientes y vitaminas en su punto óptimo de frescura."
+        }
+      ],
+      relatedItems: [
+        "potato",
+        "sweet-potato",
+        "butter",
+        "heavy-cream"
+      ],
+      material: "Alimento Preparado",
+      keyRisk: "Retrogradación y textura arenosa acuosa al descongelar",
+      tip: "Agrega abundante mantequilla o crema antes de congelar, ya que las grasas lácteas recubren los gránulos de almidón y evitan que se separe el agua.",
+      learnMore: "Las moléculas de almidón en papas cocidas sufren retrogradación a bajas temperaturas, expulsando el agua retenida. Incorporar grasas de crema o mantequilla estabiliza el gel de almidón, asegurando una textura aterciopelada al recalentar."
+    }
+  ],
+  pt: [
+    {
+      item: "Batata-Doce",
+      appliance: "freezer",
+      slug: "sweet-potato",
+      safe: "yes",
+      shortAnswer: "Sim, você pode congelar batata-doce com total segurança.",
+      reason: "Congelar batata-doce a 0 °F (-18 °C) paralisa toda atividade enzimática e proliferação microbiana, conservando o alimento indefinidamente. Entretanto, a desidratação provocada pelo ar seco do congelador pode causar queima de gelo, prejudicando sabor e textura, tornando indispensável o uso de embalagens herméticas.",
+      tips: [
+        "Retire todo o ar dos sacos de freezer antes de vedar para evitar queimaduras por congelamento.",
+        "Anote o nome do vegetal e a data na embalagem antes de colocá-la no freezer.",
+        "Deixe as porções cozidas atingirem a temperatura ambiente ou esfriarem na geladeira antes de congelar."
+      ],
+      warnings: [
+        "Colocar preparos quentes eleva a temperatura interna do congelador, criando risco de multiplicação microbiana em itens vizinhos.",
+        "Não congele em embalagens plásticas finas de mercado, pois elas não vedam o ar seco do congelador."
+      ],
+      faqs: [
+        {
+          question: "Pode-se congelar batata-doce crua?",
+          answer: "Nunca congele batata-doce crua; o congelamento cru provoca escurecimento enzimático severo, quebra os amidos internos gerando líquido rançoso e deixa o miolo desagradavelmente duro e esfarelado."
+        },
+        {
+          question: "Qual é o melhor método para congelar batata-doce?",
+          answer: "Asse as batatas-doces inteiras até ficarem macias, deixe esfriar, embale individualmente em papel-alumínio e sacos para freezer; ou então amasse a polpa cozida com algumas gotas de limão para congelar em potes proporcionados."
+        },
+        {
+          question: "Como reaquecer a batata-doce assada congelada?",
+          answer: "Desembale e asse a 190 °C (375 °F) por 25 a 30 minutos até aquecer por completo, ou aqueça no vapor em travessa tampada até ficar macia e fumegante."
+        }
+      ],
+      relatedItems: [
+        "potato",
+        "carrot",
+        "mashed-potatoes",
+        "baking-sheet"
+      ],
+      material: "Vegetal Fresco",
+      keyRisk: "Endurecimento enzimático e perda de umidade",
+      tip: "Asse, cozinhe na água ou no vapor a batata-doce até ficar bem macia antes de congelar inteira, em cubos ou em purê.",
+      learnMore: "A batata-doce crua endurece, ganha sabor desagradável e escurece no freezer por causa de enzimas ativas. O cozimento gelatiniza os amidos e os converte em maltose, garantindo doçura e consistência aveludada."
+    },
+    {
+      item: "Tomate",
+      appliance: "freezer",
+      slug: "tomato",
+      safe: "depends",
+      shortAnswer: "Depende. O congelamento amolece os tomates impedindo o consumo fresco fatiado, mas eles são seguros e ideais para molhos e ensopados cozidos.",
+      reason: "Tomates frescos contêm 94% de água, e o congelamento expande os cristais de gelo rompendo permanentemente a delicada malha celular. Ao descongelar, o fruto perde toda a firmeza, desmanchando-se numa polpa mole e aguada com a casca solta, inadequada para saladas cruas ou sanduíches. No entanto, o USDA recomenda o congelamento como método prático para preparos cozidos, pois os tomates descongelados soltam a casca com facilidade e conferem sabor encorpado a molhos, sopas e caldos.",
+      tips: [
+        "Congele tomates maduros inteiros espalhados numa assadeira; quando firmes, transfira para sacos de freezer por até 8 meses.",
+        "Passe os tomates inteiros congelados sob água morna por 15 segundos para retirar a casca instantaneamente sem faca.",
+        "Cozinhe os tomates descongelados em molhos de macarrão, ensopados e refogados onde a consistência desfeita e macia é desejada."
+      ],
+      warnings: [
+        "Nunca espere que tomates descongelados fiquem firmes para fatiar em hambúrgueres, saladas caprese ou vinagrete fresco.",
+        "O tomate solta bastante líquido ao descongelar; escorra a água liberada antes de usar a polpa em molhos espessos."
+      ],
+      faqs: [
+        {
+          question: "Pode-se congelar tomates crus inteiros sem descascar ou branquear?",
+          answer: "Sim, basta lavar, secar e colocar os tomates maduros inteiros diretamente em sacos de freezer; a casca se soltará sem nenhum esforço ao descongelar."
+        },
+        {
+          question: "Dá para usar tomate descongelado em saladas cruas ou vinagrete?",
+          answer: "Não, tomates descongelados ficam completamente moles e empapados, sendo impróprios para fatiar cru ou para vinagretes crocantes."
+        },
+        {
+          question: "Por quanto tempo tomates congelados podem ser guardados para cozinhar?",
+          answer: "Tomates inteiros, picados ou em purê congelados mantêm sabor excelente para receitas cozidas por 8 a 12 meses a 0 °F (-18 °C)."
+        }
+      ],
+      relatedItems: [
+        "bell-pepper",
+        "onion",
+        "garlic",
+        "cucumber"
+      ],
+      material: "Fruta Fresca (Alta Umidade)",
+      keyRisk: "Amolecimento estrutural e desprendimento da casca",
+      tip: "Congele tomates maduros inteiros com casca; passe em água morna depois para que a pele deslize imediatamente.",
+      learnMore: "Tomates são 94% água. Os cristais de gelo rompem o turgor das células. Embora arruinados para fatiar cru, seus compostos de sabor continuam perfeitos para molhos apurados."
+    },
+    {
+      item: "Abobrinha Amarela",
+      appliance: "freezer",
+      slug: "yellow-squash",
+      safe: "yes",
+      shortAnswer: "Sim, você pode congelar abobrinha amarela com total segurança.",
+      reason: "Congelar abobrinha amarela a 0 °F (-18 °C) paralisa toda atividade enzimática e proliferação microbiana, preservando o alimento por tempo indefinido. No entanto, a desidratação provocada pelo ar seco do freezer pode causar queima de gelo, prejudicando o sabor e a consistência, sendo indispensável uma embalagem bem vedada.",
+      tips: [
+        "Retire todo o ar dos sacos de freezer antes de fechar para evitar a queima de congelamento.",
+        "Anote o nome do vegetal e a data na embalagem antes de colocá-la no freezer.",
+        "Espere os alimentos cozidos esfriarem à temperatura ambiente ou na geladeira antes de levá-los ao freezer."
+      ],
+      warnings: [
+        "Colocar alimentos quentes eleva a temperatura interna do freezer, provocando risco de multiplicação bacteriana em itens ao redor.",
+        "Não congele alimentos na embalagem plástica fina do supermercado, pois ela não impede a passagem de ar seco."
+      ],
+      faqs: [
+        {
+          question: "Como branquear a abobrinha amarela antes de congelar?",
+          answer: "Corte a abobrinha amarela em rodelas de 1 cm e branqueie em água fervente por 3 minutos, resfriando logo em água com gelo; o branqueamento inativa enzimas que causam amargor e textura viscosa."
+        },
+        {
+          question: "Pode-se congelar abobrinha amarela ralada para receitas de forno?",
+          answer: "Sim, rale em tiras grossas, embale em sacos porcionados sem branquear e congele; descongele e escorra muito bem numa peneira fina antes de usar em pães rápidos, muffins ou tortas salgadas."
+        },
+        {
+          question: "Como cozinhar rodelas de abobrinha amarela congeladas sem que desmanchem?",
+          answer: "Refogue as rodelas congeladas diretamente numa frigideira bem quente com azeite ou adicione a ensopados ferventes sem descongelar antes; o descongelamento prévio solta muita água e amolece as fatias."
+        }
+      ],
+      relatedItems: [
+        "zucchini",
+        "eggplant",
+        "bell-pepper",
+        "tomato"
+      ],
+      material: "Vegetal Fresco",
+      keyRisk: "Rompimento da estrutura celular e perda de umidade",
+      tip: "Armazene os vegetais inteiros na gaveta de legumes refrigerada; lave apenas na hora do consumo ou preparo.",
+      learnMore: "O congelamento cristaliza a água nos tecidos vegetais, rompendo paredes celulares. Ao descongelar ou cozinhar, isso gera uma consistência mais macia, ideal para receitas quentes."
+    },
+    {
+      item: "Abobrinha",
+      appliance: "freezer",
+      slug: "zucchini",
+      safe: "yes",
+      shortAnswer: "Sim, a abobrinha é totalmente segura para congelar quando cortada em rodelas e branqueada, ou ralada e escorrida para receitas de forno.",
+      reason: "A abobrinha tem teor de umidade muito alto (cerca de 95%), de modo que o congelamento altera sua estrutura celular. Embora descongelada fique macia demais para saladas cruas, congela com perfeição para pratos quentes. Rodelas branqueadas são ótimas para sopas e ensopados, enquanto abobrinha ralada em porções medidas é ideal para pães, bolos e bolinhos.",
+      tips: [
+        "Rale a abobrinha e esprema o excesso de líquido num pano limpo antes de congelar em porções de 1 xícara para receitas.",
+        "Branqueie rodelas de abobrinha em água fervente por 1 a 2 minutos e resfrie em água com gelo para preservar firmeza e cor.",
+        "Coloque as rodelas de abobrinha congeladas diretamente em molhos ferventes, refogados ou ensopados sem descongelar antes."
+      ],
+      warnings: [
+        "A abobrinha descongelada solta muita água e perde firmeza; nunca tente usar abobrinha descongelada crua em saladas frescas.",
+        "Rodelas de abobrinha congeladas sem branqueamento ficam moles e aguadas muito mais depressa do que porções branqueadas."
+      ],
+      faqs: [
+        {
+          "question": "Por quanto tempo posso guardar este alimento no freezer?",
+          "answer": "A maioria dos alimentos permanece segura indefinidamente a 0 °F (-18 °C), mas a melhor qualidade da abobrinha é aproveitada dentro de 3 a 6 meses."
+        },
+        {
+          "question": "Devo descongelar em temperatura ambiente?",
+          "answer": "Não, sempre descongele dentro da geladeira ou adicione direto na panela ainda congelada para impedir proliferação bacteriana."
+        },
+        {
+          "question": "O congelamento destrói as vitaminas da abobrinha?",
+          "answer": "Não, o congelamento preserva as vitaminas e nutrientes retidos no ápice do frescor."
+        }
+      ],
+      relatedItems: [
+        "yellow-squash",
+        "eggplant",
+        "bell-pepper",
+        "tomato"
+      ],
+      material: "Vegetal Fresco",
+      keyRisk: "Rompimento da estrutura celular e perda de umidade",
+      tip: "Armazene os vegetais inteiros na gaveta de legumes refrigerada; lave apenas na hora do consumo ou preparo.",
+      learnMore: "O congelamento cristaliza a água nos tecidos vegetais, rompendo paredes celulares. Ao descongelar ou cozinhar, isso gera uma consistência mais macia, ideal para receitas quentes."
+    },
+    {
+      item: "Purê de Batata",
+      appliance: "freezer",
+      slug: "mashed-potatoes",
+      safe: "yes",
+      shortAnswer: "Sim, o purê de batata congela extraordinariamente bem quando preparado com manteiga ou creme de leite.",
+      reason: "O purê de batata congela muito bem, especialmente quando enriquecido com manteiga, leite ou creme de leite. A gordura láctea envolve os grânulos de amido, impedindo a separação de água durante o congelamento e descongelamento. Porcionar o purê em montinhos numa assadeira antes de transferir para sacos herméticos torna as refeições diárias muito mais práticas.",
+      tips: [
+        "Use sacos reforçados para freezer e retire todo o ar para evitar queima de congelamento.",
+        "Rotule a embalagem com a data e o nome do alimento antes de congelar.",
+        "Congele em porções individuais para descongelar apenas o necessário em cada refeição."
+      ],
+      warnings: [
+        "A queima de gelo resseca a superfície do purê, prejudicando sabor e textura, embora não afete a segurança.",
+        "Não deixe alimentos congelados desprotegidos expostos ao ar do freezer."
+      ],
+      faqs: [
+        {
+          "question": "Por quanto tempo posso guardar este alimento no freezer?",
+          "answer": "A maioria dos alimentos permanece segura indefinidamente a 0 °F (-18 °C), mas a melhor qualidade do purê de batata é mantida por 3 a 6 meses."
+        },
+        {
+          "question": "Devo descongelar em temperatura ambiente?",
+          "answer": "Não, sempre descongele dentro da geladeira ou reaqueça diretamente em fogo brando com um fio de leite para impedir proliferação microbiana."
+        },
+        {
+          "question": "O congelamento destrói as vitaminas?",
+          "answer": "Não, o congelamento retém as vitaminas e os nutrientes das preparações caseiras no auge do frescor."
+        }
+      ],
+      relatedItems: [
+        "potato",
+        "sweet-potato",
+        "butter",
+        "heavy-cream"
+      ],
+      material: "Alimento Preparado",
+      keyRisk: "Retrogradação e textura arenosa aquosa ao descongelar",
+      tip: "Adicione bastante manteiga ou creme de leite antes de congelar, pois a gordura láctea reveste o amido e impede a separação de água.",
+      learnMore: "Moléculas de amido em batatas cozidas sofrem retrogradação no congelamento, expulsando água retida. A gordura da manteiga ou creme estabiliza a estrutura, assegurando consistência cremosa ao reaquecer."
+    }
+  ]
+};
+
+fs.writeFileSync('scratch/cat3_batch5_translations.json', JSON.stringify(batch5Translations, null, 2), 'utf8');
+console.log('Saved scratch/cat3_batch5_translations.json successfully.');

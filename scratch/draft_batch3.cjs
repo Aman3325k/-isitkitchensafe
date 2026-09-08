@@ -1,0 +1,513 @@
+const fs = require('fs');
+
+const itemsEn = JSON.parse(fs.readFileSync('src/data/items.json', 'utf8'));
+const freezerItems = itemsEn.filter(i => i.appliance === 'freezer');
+const freezerSlugs = new Set(freezerItems.map(i => i.slug));
+
+const batch3Draft = {
+  lime: {
+    es: {
+      item: "Limón Verde",
+      appliance: "freezer",
+      slug: "lime",
+      safe: "yes",
+      shortAnswer: "Sí, se puede congelar limón verde de forma segura.",
+      reason: "Congelar limas o limones verdes es seguro y sumamente práctico para conservar zumo cítrico fresco y ralladura aromática. Las limas enteras se congelan con firmeza y rinden el máximo zumo una vez descongeladas porque los cristales de hielo rompen las resistentes vesículas internas. Las rodajas pueden congelarse en bandejas para decorar cócteles, y el zumo conserva su acidez vibrante durante meses en el congelador.",
+      tips: [
+        "Congela limones verdes enteros en bolsas herméticas; déjalos descongelar a temperatura ambiente 15 minutos antes de rodarlos y exprimirlos para marinadas o cócteles.",
+        "Ralla la piel de la lima antes de exprimirla y congélala en un recipiente hermético pequeño para preservar sus aceites esenciales aromáticos.",
+        "Congela el zumo de lima recién exprimido en cubiteras de hielo en porciones de 1 cucharada para añadir fácilmente a guacamole o aliños."
+      ],
+      warnings: [
+        "Las limas que se dejan sin envasar en el congelador se deshidratan, desarrollando cortezas duras de color marrón y pulpa reseca.",
+        "Los gajos de lima descongelados pierden firmeza y lucen marchitos o blandos si se usan como guarnición cruda en el borde de copas."
+      ],
+      faqs: [
+        {
+          question: "¿Se pueden congelar limas enteras para cócteles y recetas?",
+          answer: "Sí, las limas enteras congelan perfectamente; descongélalas durante 10 a 15 minutos antes de hacerlas rodar sobre la encimera para extraer la máxima cantidad de zumo en margaritas, aderezos o marinadas."
+        },
+        {
+          question: "¿Cómo congelar rodajas de lima para que no se peguen entre sí?",
+          answer: "Coloca las rodajas de lima en una sola capa sobre una bandeja con papel vegetal, congélalas durante 1 hora hasta que estén firmes y guárdalas en una bolsa hermética para congelador."
+        },
+        {
+          question: "¿La congelación estropea el aroma de los aceites esenciales de la cáscara de lima?",
+          answer: "No, los terpenos aromáticos volátiles de la corteza se mantienen intactos a 0 °F (-18 °C) si se conservan en un recipiente hermético bien protegido del oxígeno."
+        }
+      ],
+      relatedItems: ["lemon", "orange", "avocado", "guacamole"],
+      material: "Fruta cítrica",
+      keyRisk: "Deshidratación de la corteza, pardeamiento y pérdida de firmeza en gajos descongelados",
+      tip: "Añade rodajas de lima congeladas directamente a gin-tonics, agua con gas o té helado para que actúen como cubitos aromáticos que infunden sabor al fundirse.",
+      learnMore: "Las limas contienen altas concentraciones de ácido cítrico (alrededor del 6–8% en peso), lo que aporta al zumo un pH antimicrobiano natural inferior a 2,5, garantizando que el zumo congelado se mantenga químicamente estable y seguro indefinidamente."
+    },
+    pt: {
+      item: "Limão Taiti",
+      appliance: "freezer",
+      slug: "lime",
+      safe: "yes",
+      shortAnswer: "Sim, você pode congelar limão-taiti com total segurança.",
+      reason: "Congelar limão-taiti é seguro e muito prático para preservar suco cítrico fresco e raspas aromáticas da casca. Limões inteiros congelam com firmeza e liberam o máximo de suco após o descongelamento, já que os cristais de gelo rompem as membranas internas das vesículas. Fatias podem ser congeladas em bandejas para guarnecer drinques, e o suco retém sua acidez marcante por meses no freezer.",
+      tips: [
+        "Congele limões inteiros em sacos herméticos; deixe descongelar em temperatura ambiente por 15 minutos antes de rolar e espremer para marinadas ou coquetéis.",
+        "Raspe a casca do limão antes de espremer e guarde as raspas em um pote fechado no freezer para conservar seus óleos essenciais vibrantes.",
+        "Congele o suco recém-espremido em formas de gelo em porções práticas de 1 colher de sopa para temperar guacamole ou molhos de salada."
+      ],
+      warnings: [
+        "Limões deixados soltos sem saco no freezer desidratam com rapidez, resultando em cascas escuras e ressecadas e polpa sem suco.",
+        "Gomos ou rodelas de limão descongelados perdem sustentação e ficam murchos se forem usados como guarnição fresca na borda de copos."
+      ],
+      faqs: [
+        {
+          question: "Pode congelar limões inteiros para bebidas e receitas?",
+          answer: "Sim, limões inteiros congelam muito bem; descongele por 10 a 15 minutos e role a fruta sobre a bancada para extrair o máximo de suco para caipirinhas, marinadas e temperos."
+        },
+        {
+          question: "Como congelar rodelas de limão sem que grudem umas nas outras?",
+          answer: "Distribua as fatias em camada única sobre uma assadeira com papel-manteiga, congele por 1 hora até endurecerem e transfira para um saco hermético."
+        },
+        {
+          question: "O congelamento estraga o aroma dos óleos essenciais da casca do limão?",
+          answer: "Não, os terpenos aromáticos voláteis da casca permanecem intactos a 0 °F (-18 °C) se forem protegidos em embalagens com pouco ar."
+        }
+      ],
+      relatedItems: ["lemon", "orange", "avocado", "guacamole"],
+      material: "Fruta cítrica",
+      keyRisk: "Desidratação da casca, escurecimento e perda de sustentação em fatias descongeladas",
+      tip: "Coloque rodelas de limão congeladas diretamente em drinques, água com gás ou chá gelado para atuarem como pedras de gelo saborizadas.",
+      learnMore: "O limão-taiti possui alta concentração de ácido cítrico (cerca de 6% a 8% do peso), o que confere ao suco um pH antimicrobiano natural inferior a 2,5, assegurando que o suco congelado permaneça quimicamente estável e seguro por tempo indeterminado."
+    }
+  },
+  mango: {
+    es: {
+      item: "Mango",
+      appliance: "freezer",
+      slug: "mango",
+      safe: "yes",
+      shortAnswer: "Sí, se puede congelar mango de forma segura.",
+      reason: "Congelar mango es una forma magnífica de preservar su dulzura tropical y sus ricos carotenoides. La pulpa del mango maduro posee una estructura fibrosa densa y aterciopelada y un alto contenido en azúcares naturales que congelan de maravilla, produciendo trozos cremosos que se trituran en sorbetes y batidos espesos sin volverse acuosos ni cristalinos.",
+      tips: [
+        "Congela únicamente mangos totalmente maduros y aromáticos que cedan ligeramente a la presión suave del pulgar.",
+        "Pela la piel, corta la pulpa separándola del hueso plano, córtala en dados de 2 o 3 cm y congélalos en una bandeja durante 2 horas.",
+        "Tritura los dados de mango congelados directamente con un chorrito de zumo de lima para lograr un sorbete 100% de fruta en minutos."
+      ],
+      warnings: [
+        "No congeles mangos verdes o poco maduros; el frío intenso detiene la maduración de forma irreversible, dejando la fruta ácida, áspera y desagradablemente fibrosa.",
+        "Asegúrate de guardar los dados de mango en bolsas gruesas para congelador extrayendo todo el aire para prevenir quemaduras por congelación."
+      ],
+      faqs: [
+        {
+          question: "¿Qué tan maduro debe estar un mango para congelarlo?",
+          answer: "Congela solo mangos maduros, dulces y perfumados; la congelación interrumpe para siempre el proceso de maduración enzimática, por lo que la fruta verde permanecerá dura y ácida al descongelarse."
+        },
+        {
+          question: "¿Cómo preparar el mango fresco para el congelador?",
+          answer: "Pela la fruta con un pelador afilado, corta los dos cachetes laterales separándolos del hueso central plano, corta la pulpa en cubos y congélala primero extendida en una bandeja."
+        },
+        {
+          question: "¿Se puede consumir o usar el mango congelado sin descongelarlo antes?",
+          answer: "Sí, el mango congelado se tritura con una textura extraordinariamente cremosa y aterciopelada sin necesidad de añadir hielo ni lácteos, siendo la fruta ideal para batidos y sorbetes espesos."
+        }
+      ],
+      relatedItems: ["pineapple", "banana", "peach", "smoothies"],
+      material: "Fruta fresca",
+      keyRisk: "Quemaduras por congelación y detención permanente de la maduración en frutos verdes",
+      tip: "Corta el mango maduro en dados y congélalos en una bandeja con papel de horno; una vez sólidos, consérvalos al vacío hasta por 12 meses.",
+      learnMore: "El mango es rico en pectina y fibras solubles combinadas con cerca de un 14% de azúcares naturales. Esta composición genera una matriz densa y untuosa que frena la formación de grandes cristales de hielo, logrando una textura helada de primera calidad."
+    },
+    pt: {
+      item: "Manga",
+      appliance: "freezer",
+      slug: "mango",
+      safe: "yes",
+      shortAnswer: "Sim, você pode congelar manga com total segurança.",
+      reason: "Congelar manga é uma maneira excelente de preservar o sabor tropical marcante e os carotenoides nutritivos. A polpa da manga madura apresenta fibras densas e aveludadas aliadas a um alto teor de açúcares naturais, congelando perfeitamente em pedaços suculentos que batem em sorbets e vitaminas encorpadas sem ficar aguados ou cheios de cristais de gelo.",
+      tips: [
+        "Congele apenas mangas completamente maduras, aromáticas e que cedam levemente ao toque suave do dedo.",
+        "Descasque a fruta, retire as duas metades rentes ao caroço achatado, corte em cubos de cerca de 2 cm e faça o pré-congelamento em assadeira por 2 horas.",
+        "Bata os cubos de manga congelados diretamente com um toque de suco de limão para preparar um sorbet cremoso 100% natural em minutos."
+      ],
+      warnings: [
+        "Não congele mangas verdes; a temperatura de congelamento interrompe o amadurecimento de vez, fazendo com que a fruta permaneça azeda, dura e fibrosa.",
+        "Mantenha os cubos de manga bem vedados em sacos próprios para freezer sem ar residual para evitar queimaduras de gelo superficiais."
+      ],
+      faqs: [
+        {
+          question: "Qual o ponto ideal de maturação da manga para congelar?",
+          answer: "Congele a manga somente quando estiver bem madura, doce e perfumada; o freezer cessa permanentemente o amadurecimento enzimático, e a fruta verde continuará ácida e rígida após o degelo."
+        },
+        {
+          question: "Como preparar a manga fresca para o congelador?",
+          answer: "Descasque a manga, separe a polpa fatiando os dois lados rente ao caroço central plano, corte em cubos médios e congele espalhado em uma assadeira antes de ensacar."
+        },
+        {
+          question: "Pode bater a manga congelada direto no liquidificador sem descongelar?",
+          answer: "Sim, a manga congelada ganha uma consistência aveludada e cremosa mesmo sem adição de gelo ou laticínios, sendo a fruta perfeita para vitaminas espessas e sorbets."
+        }
+      ],
+      relatedItems: ["pineapple", "banana", "peach", "smoothies"],
+      material: "Fruta fresca",
+      keyRisk: "Queimadura por congelamento e interrupção irreversível do amadurecimento em frutas verdes",
+      tip: "Corte mangas maduras em cubos e congele em uma assadeira forrada com papel-manteiga; quando estiverem firmes, armazene a vácuo por até 12 meses.",
+      learnMore: "A manga é rica em pectina e fibras alimentares solúveis combinadas com cerca de 14% de açúcares naturais. Essa composição química forma uma matriz compacta e cremosa que restringe a formação de macrocristais de gelo, proporcionando uma consistência aveludada."
+    }
+  },
+  nectarine: {
+    es: {
+      item: "Nectarina",
+      appliance: "freezer",
+      slug: "nectarine",
+      safe: "yes",
+      shortAnswer: "Sí, se puede congelar nectarina de forma segura.",
+      reason: "Congelar nectarinas es seguro y muy sencillo, ya que su piel lisa y sin vello no necesita pelarse antes de guardarlas. Cortar las nectarinas maduras en rodajas y tratarlas con una solución de zumo de limón o ácido ascórbico previene el pardeamiento enzimático y conserva su dulzor meloso para tartas, bizcochos y compotas durante el invierno.",
+      tips: [
+        "Conserva la piel; la piel de la nectarina es fina, tierna y ayuda a mantener unidas las rodajas durante la cocción.",
+        "Mezcla las rodajas de nectarina con 1 cucharada de zumo de limón o agua con ácido ascórbico antes de congelar para evitar que se oscurezcan.",
+        "Congela las rodajas en una bandeja de horno durante 2 horas antes de meterlas en bolsas para que no formen un bloque compacto."
+      ],
+      warnings: [
+        "No congeles nectarinas enteras con el hueso central; el hueso hace peligroso cortar la fruta congelada y puede transmitir un sabor amargo a almendra con el tiempo.",
+        "Las nectarinas descongeladas liberan zumo y se vuelven blandas; aprovéchalas en repostería y recetas horneadas en vez de en ensaladas crudas."
+      ],
+      faqs: [
+        {
+          question: "¿Es necesario pelar las nectarinas antes de congelarlas?",
+          answer: "No, las nectarinas tienen una piel lisa, sin vello y muy tierna que no molesta en absoluto al cocinar, a diferencia de la piel vellosa de los melocotones."
+        },
+        {
+          question: "¿Cómo evitar que las rodajas de nectarina se oscurezcan en el congelador?",
+          answer: "Baña las rodajas recién cortadas en agua con 1 cucharada de zumo de limón por taza o rocíalas con ácido ascórbico en polvo antes de congelarlas."
+        },
+        {
+          question: "¿Se pueden congelar nectarinas enteras con el hueso dentro?",
+          answer: "No se recomienda; la fruta con hueso congela de manera irregular, los huesos congelados suponen riesgo de fractura dental y asfixia, y deshuesar la fruta descongelada aplasta la pulpa."
+        }
+      ],
+      relatedItems: ["peach", "plum", "cherry", "baking-sheet"],
+      material: "Fruta fresca",
+      keyRisk: "Pardeamiento enzimático y desprendimiento de piel al descongelar",
+      tip: "Conserva las rodajas de nectarina en un almíbar ligero al 30% si vas a usarlas en postres de cuchara para mantener un color y consistencia excepcionales.",
+      learnMore: "La nectarina es una variedad natural de melocotón que carece del gen dominante responsable del vello epidérmico. Su pulpa contiene enzimas polifenol oxidasa activas que requieren inhibición ácida para evitar la oxidación durante el almacenamiento en frío."
+    },
+    pt: {
+      item: "Nectarina",
+      appliance: "freezer",
+      slug: "nectarine",
+      safe: "yes",
+      shortAnswer: "Sim, você pode congelar nectarina com total segurança.",
+      reason: "Congelar nectarinas é totalmente seguro e simples, pois sua casca lisa e sem penugem dispensa o trabalho de descascar. Fatiar as nectarinas maduras e tratá-las com suco de limão ou ácido ascórbico evita o escurecimento enzimático e preserva seu dulçor suave para tortas, 'crisps' e geleias durante todo o ano.",
+      tips: [
+        "Mantenha a casca; a película da nectarina é fina, nutritiva e ajuda a reter a forma das fatias ao assar.",
+        "Misture as fatias de nectarina com 1 colher de sopa de suco de limão ou água com ácido ascórbico antes de congelar para evitar que escureçam.",
+        "Faça o pré-congelamento das fatias em uma assadeira por 2 horas antes de ensacar para que não grudem em bloco sólido."
+      ],
+      warnings: [
+        "Não congele nectarinas inteiras com o caroço; o caroço dificulta o corte seguro da fruta rígida e pode liberar notas amargas indesejadas com o tempo.",
+        "Nectarinas descongeladas vertem líquido e perdem consistência firme; prefira usá-las em bolos, tortas e compotas em vez de saladas cruas."
+      ],
+      faqs: [
+        {
+          question: "É necessário descascar as nectarinas antes de congelar?",
+          answer: "Não, as nectarinas têm casca lisa, macia e sem pelos que é deliciosa e mantém as fatias estruturadas, dispensando o trabalho de descascar."
+        },
+        {
+          question: "Como evitar que as fatias de nectarina fiquem escuras no freezer?",
+          answer: "Passe as fatias recém-cortadas em uma mistura de água com 1 colher de sopa de suco de limão ou polvilhe ácido ascórbico antes de levar ao freezer."
+        },
+        {
+          question: "Pode congelar a nectarina inteira com caroço?",
+          answer: "Não é recomendado; frutas com caroço congelam de maneira desigual, caroços congelados trazem perigo grave de quebra dental e asfixia, e retirar o caroço pós-descongelamento desmancha a polpa."
+        }
+      ],
+      relatedItems: ["peach", "plum", "cherry", "baking-sheet"],
+      material: "Fruta fresca",
+      keyRisk: "Escurecimento enzimático e amolecimento da casca após descongelar",
+      tip: "Embale fatias de nectarina em calda rala a 30% de açúcar se for utilizá-las em sobremesas de colher para garantir firmeza e brilho impecáveis.",
+      learnMore: "A nectarina é uma mutação natural do pêssego desprovida do gene dominante para penugem na casca. Sua polpa sensível possui enzimas polifenol oxidase ativas que demandam acidez para evitar oxidação e perda de cor no congelador."
+    }
+  },
+  orange: {
+    es: {
+      item: "Naranja",
+      appliance: "freezer",
+      slug: "orange",
+      safe: "yes",
+      shortAnswer: "Sí, se puede congelar naranja de forma segura.",
+      reason: "Congelar naranjas es completamente seguro, pero congelar la naranja entera produce esferas duras e imposibles de pelar con un albedo esponjoso. Para obtener los mejores resultados, pela las naranjas, separa los gajos individuales y congélalos extendidos sobre una bandeja, o exprime zumo recién exprimido y congélalo en recipientes herméticos o cubiteras para marinadas, repostería o cócteles.",
+      tips: [
+        "Pela las naranjas por completo, retira el exceso de albedo blanco y congela los gajos sueltos sobre una bandeja de horno.",
+        "Usa gajos de naranja congelados como llamativos cubitos de hielo comestibles en sangría, ponche o té helado.",
+        "Congela zumo de naranja recién exprimido en recipientes herméticos, dejando unos 2 cm de espacio libre superior para la dilatación del líquido."
+      ],
+      warnings: [
+        "No congeles naranjas enteras con cáscara; la piel se vuelve correosa, amarga y casi imposible de retirar limpiamente.",
+        "El zumo de naranjas de la variedad Navel puede volverse notablemente amargo tras congelarse por conversión en limonina; opta por naranjas Valencia para congelar zumo."
+      ],
+      faqs: [
+        {
+          question: "¿Se pueden congelar naranjas enteras?",
+          answer: "Aunque es seguro a nivel alimentario, las naranjas enteras quedan duras, gomosas y muy difíciles de pelar tras congelarse; pelarlas y separar los gajos de antemano rinde resultados muy superiores."
+        },
+        {
+          question: "¿Por qué el zumo de naranja Navel congelado a veces sabe amargo al descongelarse?",
+          answer: "Las naranjas Navel contienen un precursor natural que se transforma enzimáticamente en limonina amarga al romper las vesículas de zumo; las naranjas Valencia carecen de este problema y congelan dulces."
+        },
+        {
+          question: "¿Cuánto tiempo duran los gajos de naranja congelados en el congelador?",
+          answer: "Guardados en una bolsa hermética para congelador expulsando todo el aire, los gajos pelados mantienen un sabor y color excelentes durante 6 a 9 meses."
+        }
+      ],
+      relatedItems: ["lemon", "lime", "orange-juice", "smoothies"],
+      material: "Fruta cítrica",
+      keyRisk: "Amargor por limonina en zumo de naranjas Navel y cáscara correosa en frutos enteros",
+      tip: "Introduce gajos de naranja congelados en una batidora potente con yogur y miel para preparar un batido cremoso instantáneo de naranja.",
+      learnMore: "Al exprimir naranjas Navel, las paredes celulares rotas exponen la lactona del anillo A del limonoato a condiciones ácidas, convirtiéndola en limonina intensamente amarga. Esta reacción química se acelera con los ciclos térmicos de congelación y descongelación."
+    },
+    pt: {
+      item: "Laranja",
+      appliance: "freezer",
+      slug: "orange",
+      safe: "yes",
+      shortAnswer: "Sim, você pode congelar laranja com total segurança.",
+      reason: "Congelar laranjas é seguro, porém congelar a fruta inteira com casca gera esferas duras e quase impossíveis de descascar. Para alcançar o melhor aproveitamento, descasque as laranjas, separe os gomos individuais e faça o pré-congelamento em assadeira, ou esprema o suco fresco e congele em recipientes vedados ou formas de gelo para marinadas, bolos e drinques.",
+      tips: [
+        "Descasque as laranjas por completo, remova o excesso da parte branca interna e congele os gomos individuais em uma assadeira.",
+        "Use gomos de laranja congelados como cubos de gelo comestíveis e decorativos em sangrias, ponches ou chá gelado.",
+        "Congele suco de laranja espremido na hora em potes plásticos herméticos, deixando 1 a 2 cm de espaço livre no topo para a expansão do líquido."
+      ],
+      warnings: [
+        "Não congele laranjas inteiras com casca; a casca fica grossa, coriácea, amarga e extremamente difícil de remover sem danificar a polpa.",
+        "O suco de laranjas de variedades de umbigo (como Navel ou Bahia) pode amargar após o congelamento pela formação de limonina; prefira laranja-pera ou valência para suco congelado."
+      ],
+      faqs: [
+        {
+          question: "Pode congelar laranjas inteiras?",
+          answer: "Embora seja seguro, laranjas inteiras ficam borrachudas, aguadas e difíceis de descascar quando congeladas; descascar e separar os gomos antes garante qualidade muito melhor."
+        },
+        {
+          question: "Por que o suco de certas laranjas amarga depois de congelado?",
+          answer: "Laranjas do tipo umbigo contêm precursores que se convertem em limonina amarga em contato com o ar e o frio ao romper os alvéolos; laranjas do tipo pera e valência permanecem doces."
+        },
+        {
+          question: "Quanto tempo os gomos de laranja duram no freezer?",
+          answer: "Embalados em sacos herméticos próprios para congelamento sem ar interno, os gomos descascados mantêm sabor e cor ideais de 6 a 9 meses."
+        }
+      ],
+      relatedItems: ["lemon", "lime", "orange-juice", "smoothies"],
+      material: "Fruta cítrica",
+      keyRisk: "Amargor por limonina em suco de laranjas de umbigo e casca coriácea em frutas inteiras",
+      tip: "Bata gomos de laranja congelados no liquidificador com iogurte e mel para um smoothie cítrico e cremoso instantâneo.",
+      learnMore: "Ao espremer certas variedades cítricas, as paredes celulares rompidas liberam lactonas que, sob acidez natural, convertem-se rapidamente em limonina, um composto amargo. Essa transformação química é intensificada durante variações de temperatura no congelamento."
+    }
+  },
+  peach: {
+    es: {
+      item: "Durazno",
+      appliance: "freezer",
+      slug: "peach",
+      safe: "yes",
+      shortAnswer: "Sí, se puede congelar durazno de forma segura.",
+      reason: "Congelar duraznos conserva el exquisito sabor del verano para preparar tartas, 'crumbles' y batidos durante el invierno. Dado que los duraznos contienen enzimas polifenol oxidasa muy activas, las rodajas sin tratar se oscurecen con rapidez al contacto con el aire. Pelar los duraznos y mezclarlos con zumo de limón o almíbar antes de congelar mantiene vivo su color dorado brillante y previene quemaduras por frío.",
+      tips: [
+        "Haz un corte en cruz superficial en la base de cada durazno, escáldalos en agua hirviendo durante 30 segundos y pásalos a agua con hielo para retirar la piel sin esfuerzo.",
+        "Mezcla las rodajas peladas y sin hueso con 1 cucharada de zumo de limón o ácido ascórbico por cada litro de fruta para frenar la oxidación.",
+        "Guarda las rodajas de durazno en un almíbar ligero al 40% para obtener la mejor conservación de textura y color al hornear."
+      ],
+      warnings: [
+        "No congeles duraznos con su piel vellosa; la piel se vuelve dura, correosa y se desprende de la pulpa al descongelar u hornear.",
+        "Las rodajas de durazno sin tratamiento antioxidante se oxidarán adquiriendo un color marrón oscuro poco apetecible a las pocas semanas de congelación."
+      ],
+      faqs: [
+        {
+          question: "¿Cómo pelar fácilmente los duraznos frescos antes de congelarlos?",
+          answer: "Haz una pequeña cruz en la base, sumérgelos en agua hirviendo entre 30 y 45 segundos y sumérgelos enseguida en agua helada; la piel se deslizará sola con los dedos."
+        },
+        {
+          question: "¿Cómo evitar que los duraznos congelados se vuelvan marrones?",
+          answer: "Mezcla los duraznos en rodajas con 1 cucharada de zumo de limón fresco o media cucharadita de ácido ascórbico disuelta en 3 cucharadas de agua antes de congelar."
+        },
+        {
+          question: "¿Se pueden congelar duraznos en almíbar de azúcar?",
+          answer: "Sí, envasar los duraznos en un almíbar frío (3 tazas de azúcar por 4 de agua) crea una barrera completa contra el oxígeno, proporcionando una textura firme y un color vivo."
+        }
+      ],
+      relatedItems: ["nectarine", "plum", "mango", "baking-sheet"],
+      material: "Fruta fresca",
+      keyRisk: "Rápido pardeamiento enzimático y textura correosa de la piel vellosa sin pelar",
+      tip: "Congela las rodajas de durazno peladas en una bandeja con papel vegetal durante 2 horas antes de meterlas en bolsas para poder tomar porciones individuales sueltas.",
+      learnMore: "Los duraznos contienen altas concentraciones de ácido clorogénico y enzimas polifenol oxidasa (PPO). En contacto con el oxígeno, la PPO oxida los compuestos fenólicos en ortoquinonas marrones; soluciones ácidas bajan el pH por debajo de 3,0, inactivando eficazmente esta enzima."
+    },
+    pt: {
+      item: "Pêssego",
+      appliance: "freezer",
+      slug: "peach",
+      safe: "yes",
+      shortAnswer: "Sim, você pode congelar pêssego com total segurança.",
+      reason: "Congelar pêssegos preserva o sabor suculento da colheita para preparar tortas, 'crisps' e vitaminas na entressafra. Como os pêssegos possuem enzimas polifenol oxidase ativas, fatias expostas ao ar escurecem em poucos minutos. Descascar as frutas e envolvê-las em suco de limão ou calda de açúcar antes do congelamento preserva a cor dourada vibrante e previne queimaduras pelo frio.",
+      tips: [
+        "Faça um corte em 'X' na base de cada pêssego, escalde em água fervente por 30 segundos e passe para água com gelo para soltar a casca facilmente.",
+        "Misture as fatias descascadas e sem caroço com 1 colher de sopa de suco de limão ou ácido ascórbico por litro de fruta para impedir a oxidação.",
+        "Acondicione as fatias em calda simples a 40% de açúcar para reter o máximo de consistência e coloração vibrante em receitas de forno."
+      ],
+      warnings: [
+        "Não congele pêssegos com a casca aveludada; os pelos e a casca tornam-se duros, mastigáveis e descolam da polpa ao assar ou descongelar.",
+        "Fatias de pêssego sem tratamento antioxidante oxidam rapidamente, adquirindo uma tonalidade marrom escura e pouco atrativa no congelador."
+      ],
+      faqs: [
+        {
+          question: "Como descascar pêssegos frescos com facilidade antes do congelamento?",
+          answer: "Faça um corte superficial em cruz na base, mergulhe em água fervendo por 30 a 45 segundos e transfira imediatamente para água com gelo; a pele desliza com as mãos."
+        },
+        {
+          question: "Como evitar que fatias de pêssego fiquem escuras no congelador?",
+          answer: "Envolva as fatias com 1 colher de sopa de suco de limão fresco ou 1/2 colher de chá de pó de ácido ascórbico dissolvido em 3 colheres de água antes de congelar."
+        },
+        {
+          question: "Pode congelar pêssegos imersos em calda de açúcar?",
+          answer: "Sim, armazenar pêssegos em calda rala gelada (3 xícaras de açúcar para 4 de água) veda o contato com o oxigênio, conferindo textura firme e cor impecável."
+        }
+      ],
+      relatedItems: ["nectarine", "plum", "mango", "baking-sheet"],
+      material: "Fruta fresca",
+      keyRisk: "Rápido escurecimento enzimático e textura desagradável da casca aveludada não descascada",
+      tip: "Faça o pré-congelamento das fatias descascadas em uma assadeira com papel-manteiga por 2 horas antes de ensacar para retirar porções individuais conforme necessário.",
+      learnMore: "Os pêssegos contêm alta concentração de ácido clorogênico e polifenol oxidase (PPO). Na presença de oxigênio, a PPO oxida compostos fenólicos gerando ortoquinonas escuras; substâncias ácidas reduzem o pH para menos de 3,0, inibindo essa enzima."
+    }
+  }
+};
+
+// Strict Validator for Batch 3 Draft
+const requiredFields = [
+  'item', 'appliance', 'slug', 'safe', 'shortAnswer', 'reason',
+  'tips', 'warnings', 'faqs', 'relatedItems', 'material',
+  'keyRisk', 'tip', 'learnMore'
+];
+
+let totalChecks = 0;
+let failures = 0;
+
+console.log('=== STRICT VALIDATION PASS: TRANSLATION BATCH 3 DRAFT (5 ITEMS × 2 LANGUAGES) ===\n');
+
+const slugs = ['lime', 'mango', 'nectarine', 'orange', 'peach'];
+
+slugs.forEach(slug => {
+  const enItem = freezerItems.find(i => i.slug === slug);
+  const trans = batch3Draft[slug];
+  if (!trans) {
+    console.error(`FAIL: Missing translations for ${slug}`);
+    failures++;
+    return;
+  }
+
+  ['es', 'pt'].forEach(lang => {
+    const obj = trans[lang];
+    console.log(`Checking [${slug}] - ${lang.toUpperCase()}:`);
+    
+    // 1. Check all 14 fields exist and are non-empty
+    requiredFields.forEach(field => {
+      totalChecks++;
+      if (obj[field] === undefined || obj[field] === null) {
+        console.error(`  FAIL: Missing field '${field}'`);
+        failures++;
+      } else if (Array.isArray(obj[field])) {
+        if (obj[field].length === 0) {
+          console.error(`  FAIL: Empty array field '${field}'`);
+          failures++;
+        }
+      } else if (typeof obj[field] === 'string') {
+        if (obj[field].trim() === '') {
+          console.error(`  FAIL: Empty string field '${field}'`);
+          failures++;
+        }
+      }
+    });
+
+    // 2. Exact match of appliance, slug, safe to EN
+    totalChecks += 3;
+    if (obj.appliance !== 'freezer') {
+      console.error(`  FAIL: appliance mismatch (${obj.appliance})`);
+      failures++;
+    }
+    if (obj.slug !== slug) {
+      console.error(`  FAIL: slug mismatch (${obj.slug} !== ${slug})`);
+      failures++;
+    }
+    if (obj.safe !== enItem.safe) {
+      console.error(`  FAIL: safe mismatch (${obj.safe} !== ${enItem.safe})`);
+      failures++;
+    }
+
+    // 3. FAQs check (count and non-empty Q/A)
+    totalChecks++;
+    if (!Array.isArray(obj.faqs) || obj.faqs.length !== 3) {
+      console.error(`  FAIL: FAQ count is ${obj.faqs ? obj.faqs.length : 0}, expected 3`);
+      failures++;
+    } else {
+      obj.faqs.forEach((faq, idx) => {
+        totalChecks += 2;
+        if (!faq.question || faq.question.trim() === '') {
+          console.error(`  FAIL: FAQ[${idx}] missing question`);
+          failures++;
+        }
+        if (!faq.answer || faq.answer.trim() === '') {
+          console.error(`  FAIL: FAQ[${idx}] missing answer`);
+          failures++;
+        }
+      });
+    }
+
+    // 4. relatedItems slug exact canonical match to EN
+    totalChecks++;
+    const enRels = JSON.stringify(enItem.relatedItems);
+    const langRels = JSON.stringify(obj.relatedItems);
+    if (enRels !== langRels) {
+      console.error(`  FAIL: relatedItems mismatch with EN. EN: ${enRels}, ${lang.toUpperCase()}: ${langRels}`);
+      failures++;
+    } else {
+      obj.relatedItems.forEach(r => {
+        totalChecks++;
+        if (!freezerSlugs.has(r)) {
+          console.error(`  FAIL: relatedItem '${r}' does not exist in freezer items`);
+          failures++;
+        }
+        if (r === slug) {
+          console.error(`  FAIL: self-referential relatedItem '${r}'`);
+          failures++;
+        }
+      });
+    }
+    console.log(`  -> 14 fields present & non-empty; relatedItems matches EN canonical slugs exactly [${obj.relatedItems.join(', ')}]`);
+  });
+
+  // 5. Parity between ES and PT
+  totalChecks += 2;
+  const esTipsLen = trans.es.tips.length;
+  const ptTipsLen = trans.pt.tips.length;
+  if (esTipsLen !== ptTipsLen) {
+    console.error(`FAIL: Tips length mismatch between ES (${esTipsLen}) and PT (${ptTipsLen}) for ${slug}`);
+    failures++;
+  } else {
+    console.log(`  -> Structural parity: tips count matches (ES: ${esTipsLen}, PT: ${ptTipsLen})`);
+  }
+
+  const esWarnLen = trans.es.warnings.length;
+  const ptWarnLen = trans.pt.warnings.length;
+  if (esWarnLen !== ptWarnLen) {
+    console.error(`FAIL: Warnings length mismatch between ES (${esWarnLen}) and PT (${ptWarnLen}) for ${slug}`);
+    failures++;
+  } else {
+    console.log(`  -> Structural parity: warnings count matches (ES: ${esWarnLen}, PT: ${ptWarnLen})`);
+  }
+
+  console.log('');
+});
+
+console.log(`=== SUMMARY: ${totalChecks} checks run across 10 objects. Failures: ${failures} ===`);
+if (failures === 0) {
+  console.log('STATUS: 100% CLEAN AND PASSING STRICT VALIDATION');
+  fs.writeFileSync('scratch/cat2_batch3_translations.json', JSON.stringify(batch3Draft, null, 2), 'utf8');
+  console.log('Batch 3 saved to scratch/cat2_batch3_translations.json (HELD FOR REVIEW — NOT WRITTEN TO TARGET FILES, NOT COMMITTED)');
+} else {
+  process.exit(1);
+}

@@ -1,0 +1,421 @@
+const fs = require('fs');
+
+const batch4Translations = {
+  es: [
+    {
+      item: "Champiñón",
+      appliance: "freezer",
+      slug: "mushroom",
+      safe: "yes",
+      shortAnswer: "Sí, puedes congelar champiñones de forma segura.",
+      reason: "Congelar champiñones a 0 °F (-18 °C) detiene la actividad enzimática y la proliferación microbiana, conservando el alimento de manera indefinida. Sin embargo, la pérdida de humedad por el aire seco del congelador puede provocar quemaduras por frío que alteran el sabor y la textura, por lo que un envasado hermético adecuado es fundamental.",
+      tips: [
+        "Extrae todo el aire de las bolsas para congelar antes de sellarlas para prevenir quemaduras por frío.",
+        "Anota la fecha y el nombre del alimento en el recipiente antes de guardarlo en el congelador.",
+        "Deja enfriar los alimentos cocinados a temperatura ambiente o refrigéralos antes de introducirlos al congelador."
+      ],
+      warnings: [
+        "Introducir alimentos calientes eleva la temperatura interna del congelador, arriesgando la proliferación bacteriana en alimentos vecinos.",
+        "No congeles alimentos en el empaque delgado del supermercado, ya que no ofrece sellado hermético contra el aire frío."
+      ],
+      faqs: [
+        {
+          question: "¿Por qué es mejor cocinar los champiñones antes de congelarlos?",
+          answer: "Los champiñones tienen más del 90 % de agua y enzimas polifenol oxidasa activas; congelarlos crudos provoca una gran pérdida de agua y una decoloración oscura y gomosa, mientras que saltearlos primero en mantequilla o aceite fija su sabor umami y textura firme."
+        },
+        {
+          question: "¿Se pueden blanquear los champiñones al vapor en lugar de saltearlos?",
+          answer: "Sí, remojar champiñones enteros o laminados en agua con 1 cucharadita de jugo de limón durante 5 minutos y luego blanquearlos al vapor de 3 a 5 minutos frena eficazmente el pardeamiento enzimático antes de congelar."
+        },
+        {
+          question: "¿Cómo se usan los champiñones congelados en las recetas?",
+          answer: "Añade los champiñones precocinados congelados directamente a salsas calientes, risottos, guisados o pizzas aún congelados; cocinarlos sin descongelar previamente evita que suelten exceso de agua en el plato."
+        }
+      ],
+      relatedItems: [
+        "onion",
+        "garlic",
+        "zucchini",
+        "bell-pepper"
+      ],
+      material: "Verdura Fresca",
+      keyRisk: "Colapso de estructura celular y pérdida de humedad",
+      tip: "Almacena las verduras enteras en cajones frescos y húmedos; lava justo antes de consumir o preparar.",
+      learnMore: "Congelar vegetales cristaliza el agua interna, rompiendo las paredes celulares. Al descongelar o calentar, esto genera una textura blanda idónea para preparaciones cocinadas."
+    },
+    {
+      item: "Cebolla",
+      appliance: "freezer",
+      slug: "onion",
+      safe: "yes",
+      shortAnswer: "Sí, puedes congelar cebolla de forma segura.",
+      reason: "Congelar cebolla a 0 °F (-18 °C) detiene la actividad enzimática y la proliferación microbiana, conservando el alimento por tiempo indefinido. Sin embargo, la deshidratación causada por el aire frío del congelador puede causar quemaduras por frío que alteran el sabor y la textura, por lo que es esencial un envasado hermético.",
+      tips: [
+        "Extrae todo el aire de las bolsas para congelar antes de sellarlas para prevenir quemaduras por frío.",
+        "Escribe la fecha y el nombre del alimento en el recipiente antes de guardarlo en el congelador.",
+        "Deja enfriar los alimentos cocidos a temperatura ambiente o refrigéralos antes de introducirlos al congelador."
+      ],
+      warnings: [
+        "Introducir alimentos calientes eleva la temperatura interna del congelador, arriesgando la proliferación bacteriana en alimentos vecinos.",
+        "No congeles alimentos en el empaque delgado del supermercado, ya que no ofrece sellado hermético."
+      ],
+      faqs: [
+        {
+          question: "¿Es necesario blanquear la cebolla picada antes de congelarla?",
+          answer: "No, las cebollas tienen niveles naturalmente bajos de enzimas perjudiciales y se congelan perfectamente crudas picadas en cubos, ahorrando mucho tiempo de preparación en la cocina."
+        },
+        {
+          question: "¿Cómo evitar que el olor a cebolla impregne todo el congelador?",
+          answer: "Usa doble bolsa gruesa especial para congelador o recipientes de vidrio herméticos con junta de silicona; los compuestos volátiles de azufre atraviesan con facilidad el plástico delgado común."
+        },
+        {
+          question: "¿Se pueden caramelizar cebollas congeladas?",
+          answer: "Sí, de hecho las cebollas congeladas se caramelizan más rápido que las frescas porque los cristales de hielo rompen las paredes celulares, permitiendo que el agua se evapore y los azúcares se doren antes en la sartén."
+        }
+      ],
+      relatedItems: [
+        "garlic",
+        "bell-pepper",
+        "celery",
+        "carrot"
+      ],
+      material: "Verdura Fresca",
+      keyRisk: "Colapso de estructura celular y pérdida de humedad",
+      tip: "Almacena las verduras enteras en cajones frescos y húmedos; lava justo antes de consumir o preparar.",
+      learnMore: "Congelar vegetales cristaliza el agua interna, rompiendo las paredes celulares. Al descongelar o cocinar, este cambio estructural requiere cocciones directas a alta temperatura."
+    },
+    {
+      item: "Guisantes",
+      appliance: "freezer",
+      slug: "peas",
+      safe: "yes",
+      shortAnswer: "Sí, puedes congelar guisantes de forma segura.",
+      reason: "Congelar guisantes a 0 °F (-18 °C) detiene la actividad enzimática y la proliferación microbiana, conservando el alimento de manera indefinida. No obstante, la pérdida de humedad por el aire frío del congelador puede causar quemaduras por frío que alteran el sabor y la textura, por lo que un envasado hermético adecuado es esencial.",
+      tips: [
+        "Extrae todo el aire de las bolsas para congelar antes de sellarlas para prevenir quemaduras por frío.",
+        "Anota la fecha y el nombre del alimento en el recipiente antes de introducirlo al congelador.",
+        "Deja enfriar los alimentos cocinados a temperatura ambiente o en el refrigerador antes de congelarlos."
+      ],
+      warnings: [
+        "Introducir alimentos calientes eleva la temperatura interna del congelador, arriesgando la proliferación bacteriana en alimentos vecinos.",
+        "No congeles alimentos en el empaque delgado del supermercado, ya que no ofrece sellado hermético contra el aire frío."
+      ],
+      faqs: [
+        {
+          question: "¿Cuánto tiempo se deben blanquear los guisantes frescos antes de congelar?",
+          answer: "Blanquea los guisantes tiernos en agua hirviendo durante 90 segundos (2 minutos para guisantes grandes) y pásalos de inmediato a un baño de hielo para desactivar enzimas y fijar su clorofila verde brillante."
+        },
+        {
+          question: "¿Por qué los guisantes congelados comerciales saben más dulces que los caseros sin blanquear?",
+          answer: "La industria los blanquea y ultracongela pocas horas después de la cosecha, reteniendo la sacarosa; al congelar en casa, el blanqueado rápido es clave para evitar que las enzimas transformen el azúcar en almidón harinoso."
+        },
+        {
+          question: "¿Cuál es la mejor forma de calentar guisantes congelados sin que se arruguen?",
+          answer: "Cocínalos al vapor o hiérvelos a fuego suave en agua con sal durante solo 2 a 3 minutos, o saltéalos en una sartén con mantequilla; una cocción prolongada rompe la piel y los desinfla."
+        }
+      ],
+      relatedItems: [
+        "corn",
+        "carrot",
+        "green-beans",
+        "broccoli"
+      ],
+      material: "Verdura Fresca",
+      keyRisk: "Colapso de estructura celular y pérdida de humedad",
+      tip: "Almacena las verduras enteras en cajones frescos y húmedos; lava justo antes de consumir o preparar.",
+      learnMore: "Congelar vegetales cristaliza el agua interna, rompiendo las paredes celulares. Al descongelar o calentar, esto genera una textura blanda idónea para preparaciones cocinadas."
+    },
+    {
+      item: "Papa",
+      appliance: "freezer",
+      slug: "potato",
+      safe: "depends",
+      shortAnswer: "Depende. Nunca congeles papas crudas enteras, pero las papas blanqueadas, precocidas o hechas puré se congelan excepcionalmente bien.",
+      reason: "Las papas crudas tienen un alto contenido de humedad (alrededor del 80 %) y enzimas polifenol oxidasa activas. Al congelarse crudas, la expansión de los cristales de hielo rompe las células y la descongelación provoca un pardeamiento enzimático acelerado que tiñe la pulpa de negro o gris. Además, los almidones de la papa se convierten en azúcares a temperaturas de congelación, generando una textura acuosa, extrañamente dulce y arenosa. En contraste, blanquear o cocinar por completo las papas gelatiniza los almidones y desactiva las enzimas, permitiendo que papas fritas, hash browns y puré de papas se congelen a la perfección.",
+      tips: [
+        "Blanquea siempre las papas cortadas en agua hirviendo de 3 a 5 minutos y sumérgelas en agua con hielo antes de congelar para frenar las enzimas de pardeamiento.",
+        "El puré de papas preparado con mantequilla y leche se congela y recalienta de maravilla en recipientes herméticos para congelador.",
+        "Congela previamente las papas fritas precocidas o en gajos en una sola capa sobre una bandeja para hornear antes de pasarlas a bolsas de congelación."
+      ],
+      warnings: [
+        "Congelar papas crudas sin blanquear produce papas grises, acuosas y con un sabor dulzón desagradable que no logran dorarse ni quedar crujientes al cocinarse.",
+        "Deja espacio libre superior al congelar sopas o cremas de papa caldosas, ya que los líquidos se expanden al congelarse."
+      ],
+      faqs: [
+        {
+          question: "¿Por qué las papas crudas se ponen negras en el congelador?",
+          answer: "La congelación rompe las barreras celulares, permitiendo que las enzimas polifenol oxidasa entren en contacto con oxígeno y compuestos fenólicos, desatando una rápida oxidación enzimática al descongelarse."
+        },
+        {
+          question: "¿Cómo se deben blanquear adecuadamente las papas antes de congelarlas?",
+          answer: "Corta las papas en bastones o cubos, hiérvelas en agua durante 3 a 5 minutos hasta que estén tiernas pero firmes, pásalas de inmediato a un baño de agua con hielo, sécalas muy bien y congélalas."
+        },
+        {
+          question: "¿Se puede congelar el puré de papas sobrante?",
+          answer: "Sí, el puré de papas preparado con grasa láctea como mantequilla y leche se congela de forma sobresaliente hasta por 6 meses en recipientes herméticos o bolsas con cierre tipo zip."
+        }
+      ],
+      relatedItems: [
+        "sweet-potato",
+        "mashed-potatoes",
+        "carrot",
+        "onion"
+      ],
+      material: "Tubérculo con Almidón",
+      keyRisk: "Decoloración enzimática y degradación del almidón",
+      tip: "Blanquea siempre las papas cortadas en agua hirviendo de 3 a 5 minutos antes de congelar para detener el pardeamiento enzimático.",
+      learnMore: "Las papas crudas contienen polifenol oxidasa activa. El congelado rompe las paredes celulares, activando la oxidación enzimática que oscurece la pulpa y degrada los almidones en azúcares acuosos."
+    },
+    {
+      item: "Espinaca",
+      appliance: "freezer",
+      slug: "spinach",
+      safe: "yes",
+      shortAnswer: "Sí, puedes congelar espinaca de forma segura.",
+      reason: "Congelar espinaca a 0 °F (-18 °C) detiene la actividad enzimática y la proliferación bacteriana, conservando el alimento por tiempo indefinido. No obstante, la deshidratación causada por el aire frío del congelador puede provocar quemaduras por frío que alteran el sabor y la textura, por lo que es esencial un envasado hermético.",
+      tips: [
+        "Extrae todo el aire de las bolsas para congelar antes de sellarlas para prevenir quemaduras por frío.",
+        "Anota la fecha y el nombre del alimento en el recipiente antes de guardarlo en el congelador.",
+        "Deja enfriar los alimentos cocidos a temperatura ambiente o refrigéralos antes de introducirlos al congelador."
+      ],
+      warnings: [
+        "Introducir alimentos calientes eleva la temperatura interna del congelador, arriesgando la proliferación bacteriana en alimentos vecinos.",
+        "No congeles alimentos en el empaque delgado del supermercado, ya que no es hermético."
+      ],
+      faqs: [
+        {
+          question: "¿Cómo se debe blanquear la espinaca fresca antes de congelarla?",
+          answer: "Blanquea al vapor o hierve las hojas de espinaca durante solo 90 segundos, sumérgelas en agua con hielo y exprime con fuerza hasta eliminar cada gota de exceso de agua antes de guardarlas en bolsas para congelar."
+        },
+        {
+          question: "¿Por qué es crucial exprimir el agua de la espinaca blanqueada antes de congelarla?",
+          answer: "Las espinacas retienen muchísima agua superficial y celular; congelarlas empapadas genera bloques macizos de hielo y quemaduras por frío, mientras que comprimirlas en porciones permite usarlas limpiamente en rellenos de pastas, quiches y cremas."
+        },
+        {
+          question: "¿Se puede congelar espinaca cruda sin blanquear para batidos?",
+          answer: "Sí, las hojas crudas bien lavadas y completamente secas se pueden congelar sin blanquear hasta por 2 meses exclusivamente para triturar en batidos, donde la textura de la hoja queda pulverizada."
+        }
+      ],
+      relatedItems: [
+        "kale",
+        "broccoli",
+        "smoothies",
+        "lettuce"
+      ],
+      material: "Verdura Fresca",
+      keyRisk: "Colapso de estructura celular y pérdida de humedad",
+      tip: "Almacena las verduras enteras en cajones frescos y húmedos; lava justo antes de consumir o preparar.",
+      learnMore: "Congelar vegetales cristaliza el agua interna, rompiendo las paredes celulares. Al descongelar o cocinar, este cambio estructural requiere cocciones directas a alta temperatura."
+    }
+  ],
+  pt: [
+    {
+      item: "Cogumelo",
+      appliance: "freezer",
+      slug: "mushroom",
+      safe: "yes",
+      shortAnswer: "Sim, você pode congelar cogumelos com total segurança.",
+      reason: "Congelar cogumelos a 0 °F (-18 °C) paralisa toda atividade enzimática e proliferação microbiana, preservando o alimento por tempo indefinido. No entanto, a desidratação provocada pelo ar seco do freezer pode causar queima de gelo, prejudicando o sabor e a textura, sendo indispensável uma embalagem bem vedada.",
+      tips: [
+        "Retire todo o ar dos sacos de freezer antes de fechar para evitar a queima de congelamento.",
+        "Anote o nome do alimento e a data no recipiente antes de guardá-lo no freezer.",
+        "Espere os alimentos cozidos esfriarem à temperatura ambiente ou na geladeira antes de levá-los ao freezer."
+      ],
+      warnings: [
+        "Colocar alimentos quentes eleva a temperatura interna do freezer, provocando risco de multiplicação bacteriana em itens ao redor.",
+        "Não congele alimentos na embalagem plástica fina do supermercado, pois ela não impede a passagem de ar seco."
+      ],
+      faqs: [
+        {
+          question: "Por que é melhor cozinhar os cogumelos antes de congelar?",
+          answer: "Os cogumelos têm mais de 90% de água e enzimas polifenol oxidase ativas; congelá-los crus causa intensa perda de líquido e consistência escura e borrachuda, enquanto salteá-los antes no azeite ou manteiga sela o sabor umami e a textura firme."
+        },
+        {
+          question: "Pode-se branquear cogumelos no vapor em vez de saltear?",
+          answer: "Sim, mergulhar cogumelos inteiros ou fatiados em água com 1 colher de chá de suco de limão por 5 minutos e depois cozinhá-los no vapor por 3 a 5 minutos interrompe eficazmente o escurecimento enzimático antes do congelamento."
+        },
+        {
+          question: "Como usar os cogumelos congelados em preparações culinárias?",
+          answer: "Adicione os cogumelos pré-cozidos congelados diretamente em molhos quentes, risotos, recheios ou pizzas ainda congelados; o preparo sem descongelamento prévio impede que soltem água excessiva na receita."
+        }
+      ],
+      relatedItems: [
+        "onion",
+        "garlic",
+        "zucchini",
+        "bell-pepper"
+      ],
+      material: "Vegetal Fresco",
+      keyRisk: "Rompimento da estrutura celular e perda de umidade",
+      tip: "Armazene os vegetais inteiros na gaveta de legumes refrigerada; lave apenas na hora do consumo ou preparo.",
+      learnMore: "O congelamento cristaliza a água nos tecidos vegetais, rompendo paredes celulares. Ao descongelar ou cozinhar, isso gera uma consistência mais macia, ideal para receitas quentes."
+    },
+    {
+      item: "Cebola",
+      appliance: "freezer",
+      slug: "onion",
+      safe: "yes",
+      shortAnswer: "Sim, você pode congelar cebola com total segurança.",
+      reason: "Congelar cebola a 0 °F (-18 °C) suspende toda atividade enzimática e proliferação microbiana, preservando o alimento por tempo indefinido. Contudo, o ar seco do congelador pode desidratar o produto causando queima de gelo, o que prejudica sabor e textura, tornando o uso de embalagens herméticas indispensável.",
+      tips: [
+        "Retire todo o ar dos sacos de freezer antes de fechar para impedir queimaduras de gelo.",
+        "Rotule o recipiente com o nome do alimento e a data antes de guardá-lo no freezer.",
+        "Deixe preparos cozidos quentes atingirem a temperatura ambiente ou esfriarem na geladeira antes de levá-los ao freezer."
+      ],
+      warnings: [
+        "Colocar alimentos quentes eleva a temperatura interna do congelador, gerando perigo de proliferação bacteriana em itens vizinhos.",
+        "Não congele alimentos na embalagem plástica fina do mercado, pois ela não impede a passagem de ar seco."
+      ],
+      faqs: [
+        {
+          question: "É preciso branquear a cebola picada antes de congelar?",
+          answer: "Não, as cebolas possuem teores naturalmente baixos de enzimas de deterioração e congelam muito bem cruas quando picadas, poupando bastante tempo no preparo das refeições."
+        },
+        {
+          question: "Como evitar que o cheiro de cebola passe para todo o freezer?",
+          answer: "Utilize saco duplo reforçado para freezer ou potes herméticos de vidro com vedação de borracha; os compostos voláteis de enxofre atravessam facilmente filmes plásticos finos."
+        },
+        {
+          question: "Dá para caramelizar cebolas congeladas?",
+          answer: "Sim, inclusive as cebolas congeladas caramelizam mais rápido do que as frescas, pois o gelo rompe as paredes celulares, liberando a umidade e acelerando a douração dos açúcares naturais na frigideira."
+        }
+      ],
+      relatedItems: [
+        "garlic",
+        "bell-pepper",
+        "celery",
+        "carrot"
+      ],
+      material: "Vegetal Fresco",
+      keyRisk: "Rompimento da estrutura celular e perda de umidade",
+      tip: "Mantenha os vegetais inteiros na gaveta de legumes refrigerada; lave somente na hora do consumo ou preparo.",
+      learnMore: "O congelamento cristaliza a água nos tecidos vegetais, enfraquecendo as paredes celulares. O cozimento direto em alta temperatura assegura melhor sabor e textura."
+    },
+    {
+      item: "Ervilhas",
+      appliance: "freezer",
+      slug: "peas",
+      safe: "yes",
+      shortAnswer: "Sim, você pode congelar ervilhas com total segurança.",
+      reason: "Congelar ervilhas a 0 °F (-18 °C) paralisa toda atividade enzimática e proliferação microbiana, conservando o alimento indefinidamente. No entanto, a desidratação provocada pelo ar seco do congelador pode causar queima de gelo, prejudicando sabor e consistência, sendo indispensável uma embalagem bem vedada.",
+      tips: [
+        "Retire todo o ar dos sacos de freezer antes de vedar para evitar queimaduras por congelamento.",
+        "Anote a data e o conteúdo no recipiente antes de guardar no congelador.",
+        "Deixe as porções cozidas atingirem a temperatura ambiente ou esfriarem na geladeira antes de congelar."
+      ],
+      warnings: [
+        "Colocar alimentos quentes eleva a temperatura interna do congelador, criando risco de multiplicação microbiana em itens vizinhos.",
+        "Não congele alimentos na embalagem plástica fina do mercado, pois ela não impede a passagem de ar seco."
+      ],
+      faqs: [
+        {
+          question: "Por quanto tempo as ervilhas frescas devem ser branqueadas antes de congelar?",
+          answer: "Branqueie as ervilhas frescas em água fervente por 90 segundos (2 minutos para grãos maiores) e resfrie de imediato na água com gelo para inativar enzimas e fixar a cor verde-viva da clorofila."
+        },
+        {
+          question: "Por que as ervilhas congeladas industriais são mais doces que as caseiras não branqueadas?",
+          answer: "A indústria branqueia e ultracongela as ervilhas poucas horas após a colheita, preservando a sacarose; em casa, o branqueamento impede que as enzimas ativas convertam os açúcares em amido farinhento."
+        },
+        {
+          question: "Qual é a melhor forma de reaquecer ervilhas congeladas sem que murchem?",
+          answer: "Cozinhe no vapor ou ferva suavemente em água levemente salgada por apenas 2 a 3 minutos, ou aqueça direto na frigideira com manteiga; fervuras longas rompem a casca e deixam as ervilhas murchas."
+        }
+      ],
+      relatedItems: [
+        "corn",
+        "carrot",
+        "green-beans",
+        "broccoli"
+      ],
+      material: "Vegetal Fresco",
+      keyRisk: "Rompimento da estrutura celular e perda de umidade",
+      tip: "Mantenha os vegetais inteiros na gaveta de legumes refrigerada; lave apenas na hora do consumo ou preparo.",
+      learnMore: "O congelamento cristaliza a água nos tecidos vegetais, enfraquecendo as paredes celulares. O cozimento direto em alta temperatura assegura melhor consistência e sabor."
+    },
+    {
+      item: "Batata",
+      appliance: "freezer",
+      slug: "potato",
+      safe: "depends",
+      shortAnswer: "Depende. Nunca congele batatas cruas inteiras, mas batatas branqueadas, pré-cozidas ou em purê congelam extraordinariamente bem.",
+      reason: "As batatas cruas possuem alto teor de umidade (cerca de 80%) e enzimas polifenol oxidase ativas. Quando congeladas cruas, os cristais de gelo rompem as células e o descongelamento causa rápido escurecimento enzimático que deixa a polpa preta ou acinzentada. Além disso, os amidos da batata convertem-se em açúcares em baixas temperaturas, gerando uma consistência aguada, adocicada e arenosa. Em contrapartida, branquear ou cozinhar previamente as batatas gelatiniza os amidos e inativa as enzimas, permitindo que batatas fritas, rústicas e purês congelem perfeitamente.",
+      tips: [
+        "Sempre branqueie batatas cruas cortadas em água fervente por 3 a 5 minutos e dê banho de gelo antes de congelar para desativar as enzimas de escurecimento.",
+        "O purê de batata preparado com manteiga e leite congela e reaquece muito bem em recipientes herméticos para freezer.",
+        "Congele batatas pré-fritas ou em gomos espalhadas numa assadeira antes de transferir para sacos de congelamento."
+      ],
+      warnings: [
+        "Congelar batatas cruas sem branquear resulta em pedaços cinzentos, empapados e com gosto adocicado que não douram nem ficam crocantes no cozimento.",
+        "Deixe um espaço livre no topo do pote ao congelar sopas cremosas ou caldos de batata, pois os líquidos se expandem no congelador."
+      ],
+      faqs: [
+        {
+          question: "Por que a batata crua fica preta no congelador?",
+          answer: "O congelamento destrói as barreiras celulares, permitindo que as enzimas polifenol oxidase entrem em contato com oxigênio e compostos fenólicos, provocando rápido escurecimento enzimático no descongelamento."
+        },
+        {
+          question: "Como branquear batatas corretamente antes do congelamento?",
+          answer: "Corte as batatas em palitos ou cubos, ferva em água por 3 a 5 minutos até ficarem al dente, dê choque térmico imediato em água gelada, seque bem e leve ao freezer."
+        },
+        {
+          question: "Pode-se congelar sobras de purê de batata?",
+          answer: "Sim, purê de batata com gordura láctea como manteiga e leite congela com excelência por até 6 meses em potes bem vedados ou sacos ziploc porcionados."
+        }
+      ],
+      relatedItems: [
+        "sweet-potato",
+        "mashed-potatoes",
+        "carrot",
+        "onion"
+      ],
+      material: "Tubérculo com Amido",
+      keyRisk: "Escurecimento enzimático e degradação do amido",
+      tip: "Sempre branqueie as batatas cortadas em água fervente por 3 a 5 minutos antes de congelar para travar o escurecimento enzimático.",
+      learnMore: "A batata crua contém polifenol oxidase ativa. O congelamento rompe os tecidos celulares, ativando a oxidação enzimática que escurece a polpa e transforma amidos em açúcares aquosos."
+    },
+    {
+      item: "Espinafre",
+      appliance: "freezer",
+      slug: "spinach",
+      safe: "yes",
+      shortAnswer: "Sim, você pode congelar espinafre com total segurança.",
+      reason: "Congelar espinafre a 0 °F (-18 °C) paralisa toda atividade enzimática e proliferação microbiana, conservando o alimento indefinidamente. No entanto, a perda de umidade para o ar seco do congelador pode causar queima de gelo, prejudicando sabor e textura, sendo indispensável uma embalagem bem vedada.",
+      tips: [
+        "Retire todo o ar dos sacos de freezer antes de fechar para evitar a queima de congelamento.",
+        "Anote o nome do alimento e a data no recipiente antes de guardá-lo no freezer.",
+        "Espere os alimentos cozidos esfriarem à temperatura ambiente ou na geladeira antes de levá-los ao freezer."
+      ],
+      warnings: [
+        "Colocar alimentos quentes eleva a temperatura interna do freezer, provocando risco de multiplicação bacteriana em itens ao redor.",
+        "Não congele alimentos na embalagem plástica fina do supermercado, pois ela não impede a passagem de ar seco."
+      ],
+      faqs: [
+        {
+          question: "Como o espinafre fresco deve ser branqueado antes do congelamento?",
+          answer: "Cozinhe no vapor ou ferva as folhas de espinafre por apenas 90 segundos, passe para um banho de gelo e esprema com as mãos até tirar todo o excesso de líquido antes de porcionar em sacos de freezer."
+        },
+        {
+          question: "Por que é fundamental espremer a água do espinafre branqueado antes de congelar?",
+          answer: "As folhas de espinafre retêm enorme quantidade de água; congelá-las encharcadas cria blocos grossos de gelo e queima de freezer, enquanto porções bem espremidas descongelam perfeitamente para recheios de massas, tortas e suflês."
+        },
+        {
+          question: "Pode-se congelar espinafre cru sem branquear para vitaminas?",
+          answer: "Sim, folhas cruas bem lavadas e secas podem ser congeladas cruas por até 2 meses exclusivamente para bater em sucos verdes e vitaminas, onde a perda de firmeza da folha é irrelevante."
+        }
+      ],
+      relatedItems: [
+        "kale",
+        "broccoli",
+        "smoothies",
+        "lettuce"
+      ],
+      material: "Vegetal Fresco",
+      keyRisk: "Rompimento da estrutura celular e perda de umidade",
+      tip: "Armazene os vegetais inteiros na gaveta de legumes refrigerada; lave apenas na hora do consumo ou preparo.",
+      learnMore: "O congelamento cristaliza a água nos tecidos vegetais, rompendo paredes celulares. Ao descongelar ou cozinhar, isso gera uma consistência mais macia, ideal para receitas quentes."
+    }
+  ]
+};
+
+fs.writeFileSync('scratch/cat3_batch4_translations.json', JSON.stringify(batch4Translations, null, 2), 'utf8');
+console.log('Saved scratch/cat3_batch4_translations.json successfully.');

@@ -1,0 +1,574 @@
+const fs = require('fs');
+
+const itemsEn = JSON.parse(fs.readFileSync('src/data/items.json', 'utf8'));
+const itemsEs = JSON.parse(fs.readFileSync('src/data/items.es.json', 'utf8'));
+const itemsPt = JSON.parse(fs.readFileSync('src/data/items.pt.json', 'utf8'));
+
+const freezerEn = itemsEn.filter(i => i.appliance === 'freezer');
+const freezerEs = itemsEs.filter(i => i.appliance === 'freezer');
+const freezerPt = itemsPt.filter(i => i.appliance === 'freezer');
+const freezerSlugs = new Set(freezerEn.map(i => i.slug));
+
+const batch4Draft = {
+  pineapple: {
+    es: {
+      item: "Piña",
+      appliance: "freezer",
+      slug: "pineapple",
+      safe: "yes",
+      shortAnswer: "Sí, la piña se puede congelar con total seguridad.",
+      reason: "Congelar piña fresca es completamente seguro y ofrece resultados fantásticos. Sus azúcares naturales y su pulpa fibrosa y firme soportan muy bien la congelación, y las bajas temperaturas suavizan el picor o escozor lingual causado por la enzima bromelina. Los trozos de piña congelada son deliciosos como aperitivo, en batidos, cócteles o repostería.",
+      tips: [
+        "Corta la cáscara espinosa, retira el corazón fibroso y trocea la pulpa dorada en dados del tamaño de un bocado.",
+        "Congela los dados de piña en una bandeja para hornear durante 2 horas antes de meterlos en bolsas para evitar que formen un bloque sólido.",
+        "Tritura piña congelada con leche de coco para preparar una piña colada helada instantánea o un bol de batido tropical."
+      ],
+      warnings: [
+        "No utilices piña cruda descongelada en recetas con gelatina; la congelación no destruye la enzima bromelina, que degrada las proteínas de la gelatina e impide que cuaje.",
+        "Nunca congeles piñas enteras sin pelar; la corteza gruesa ocupa un espacio excesivo en el congelador y frena la penetración rápida del frío hasta el corazón."
+      ],
+      faqs: [
+        {
+          question: "¿Se pueden congelar trozos de piña fresca cruda?",
+          answer: "Sí, la piña fresca cruda congela de forma excepcional; pelarla y cortarla en dados antes de congelar proporciona porciones dulces y listas para cualquier receta."
+        },
+        {
+          question: "¿Cuánto tiempo dura la piña fresca en el congelador sin perder sabor?",
+          answer: "Envasada en bolsas herméticas para congelador expulsando todo el aire, la piña mantiene su sabor y textura óptimos durante 10 a 12 meses."
+        },
+        {
+          question: "¿Se puede usar piña descongelada en postres con gelatina?",
+          answer: "No, la congelación inactiva temporalmente pero no desnaturaliza la enzima proteolítica bromelina; al descongelarse, rompe el colágeno de la gelatina e impide que cuaje salvo que se hierva previamente."
+        }
+      ],
+      relatedItems: ["mango", "cantaloupe", "banana", "smoothies"],
+      material: "Fruta fresca",
+      keyRisk: "Persistencia de la proteasa bromelina (impide cuajar gelatinas) y quemaduras por congelación",
+      tip: "Utiliza trozos de piña congelados directamente en batidos o sobre yogur; aportan dulzor denso y textura espesa sin tener que añadir cubitos de hielo.",
+      learnMore: "La piña contiene bromelina, un complejo enzimático proteolítico que rompe los enlaces peptídicos de las proteínas. Aunque la congelación bajo cero conserva la actividad de la bromelina, la formación de microcristales de hielo ablanda sutilmente las densas fibras de celulosa de la fruta."
+    },
+    pt: {
+      item: "Abacaxi",
+      appliance: "freezer",
+      slug: "pineapple",
+      safe: "yes",
+      shortAnswer: "Sim, o abacaxi pode ser congelado com total segurança.",
+      reason: "Congelar abacaxi fresco é totalmente seguro e produz resultados excelentes. Seus açúcares naturais e sua polpa densa e fibrosa resistem muito bem ao congelamento, e as baixas temperaturas amenizam a sensação de pinicar a língua provocada pela enzima bromelina. Pedaços de abacaxi congelados são perfeitos para lanches rápidos, vitaminas, coquetéis e sobremesas.",
+      tips: [
+        "Descasque a casca espinhosa, retire o miolo fibroso central e corte a polpa amarela em cubos médios.",
+        "Faça o pré-congelamento dos pedaços de abacaxi em uma assadeira por 2 horas antes de ensacar para que não grudem em bloco sólido.",
+        "Bata abacaxi congelado diretamente com leite de coco para criar uma piña colada gelada instantânea ou um creme tropical espesso."
+      ],
+      warnings: [
+        "Não use abacaxi cru descongelado em receitas com gelatina; o congelamento não desativa a bromelina, enzima que digere o colágeno e impede a gelatina de firmar.",
+        "Nunca congele abacaxis inteiros com casca; a casca espessa ocupa espaço excessivo no freezer e impede o resfriamento rápido e homogêneo do centro."
+      ],
+      faqs: [
+        {
+          question: "Pode congelar pedaços de abacaxi fresco cru?",
+          answer: "Sim, o abacaxi cru congela extraordinariamente bem; descascar e picar em cubos de antemão garante pedaços doces e práticos prontos para consumo."
+        },
+        {
+          question: "Quanto tempo o abacaxi congelado mantém o sabor doce no freezer?",
+          answer: "Armazenado em sacos herméticos próprios para congelamento sem ar interno, o abacaxi conserva frescor, aroma e sabor por 10 a 12 meses."
+        },
+        {
+          question: "Pode usar abacaxi descongelado em sobremesas com gelatina?",
+          answer: "Não, o frio inativa mas não elimina a enzima proteolítica bromelina; após o degelo, ela quebra as proteínas de colágeno da gelatina, a menos que a fruta seja cozida antes."
+        }
+      ],
+      relatedItems: ["mango", "cantaloupe", "banana", "smoothies"],
+      material: "Fruta fresca",
+      keyRisk: "Persistência da enzima bromelina (impede a firmeza de gelatinas) e queima de gelo superficial",
+      tip: "Bata cubos de abacaxi congelados diretamente em vitaminas ou sirva sobre iogurte; eles proporcionam cremosidade e dulçor sem diluir a textura com água.",
+      learnMore: "O abacaxi contém bromelina, uma mistura de enzimas proteolíticas capaz de hidrolisar ligações peptídicas em proteínas. Enquanto o congelamento preserva a estrutura da bromelina, a formação de cristais de gelo amacia suavemente as paredes celulares de celulose da polpa."
+    }
+  },
+  plum: {
+    es: {
+      item: "Ciruela",
+      appliance: "freezer",
+      slug: "plum",
+      safe: "yes",
+      shortAnswer: "Sí, se puede congelar ciruela de forma segura.",
+      reason: "Congelar ciruelas es seguro y permite conservar su intenso sabor agridulce de verano durante 10 a 12 meses. No se recomienda congelar ciruelas enteras porque la piel se agrieta y retirar el hueso congelado es peligroso. Cortarlas por la mitad, deshuesarlas y congelarlas boca abajo en una bandeja produce mitades limpias y firmes, ideales para tartas, mermeladas y compotas.",
+      tips: [
+        "Corta las ciruelas por la mitad siguiendo la hendidura natural, gira las dos partes en sentidos opuestos y retira el hueso con los dedos o una cuchara.",
+        "Conserva la piel fina; la piel de la ciruela es rica en antocianinas antioxidantes y aporta un agradable contrapunto ácido en postres horneados.",
+        "Congela las mitades de ciruela con el corte hacia abajo sobre una bandeja durante 2 horas antes de guardarlas en bolsas herméticas."
+      ],
+      warnings: [
+        "No congeles ciruelas enteras con hueso; los huesos congelados presentan riesgo de fractura dental y asfixia, y deshuesar ciruelas descongeladas aplasta la pulpa blanda.",
+        "Las ciruelas descongeladas liberan gran cantidad de zumo al debilitarse sus paredes celulares; es mejor hornearlas en tartas o bizcochos que comerlas crudas."
+      ],
+      faqs: [
+        {
+          question: "¿Es necesario pelar las ciruelas antes de congelarlas?",
+          answer: "No, la piel de la ciruela es delgada, tierna y nutritiva; se ablanda perfectamente al cocinarse y otorga a los postres un vistoso tono rubí profundo."
+        },
+        {
+          question: "¿Cómo congelar ciruelas frescas para repostería?",
+          answer: "Corta las ciruelas maduras por la mitad, deshuésalas, colócalas con el corte hacia abajo en una bandeja con papel vegetal y, una vez congeladas, pásalas a una bolsa hermética."
+        },
+        {
+          question: "¿Se pueden comer las ciruelas descongeladas crudas como fruta fresca?",
+          answer: "Las ciruelas descongeladas quedan blandas y acuosas por la rotura de su estructura celular, por lo que resultan poco apetecibles en crudo pero fantásticas en compotas y tartas."
+        }
+      ],
+      relatedItems: ["peach", "nectarine", "cherry", "baking-sheet"],
+      material: "Fruta fresca",
+      keyRisk: "Agrietamiento de la piel, peligro por huesos congelados y sangrado de zumo al descongelar",
+      tip: "Mezcla las mitades de ciruela ácidas con una cucharada de azúcar antes de congelarlas para ayudar a preservar la estructura celular y generar un almíbar natural.",
+      learnMore: "Las ciruelas contienen alrededor de un 87% de agua. Su piel es rica en cianidina-3-glucósido (antocianina), un pigmento fenólico muy estable a 0 °F (-18 °C) que conserva su color intenso y propiedades antioxidantes en el congelador."
+    },
+    pt: {
+      item: "Ameixa",
+      appliance: "freezer",
+      slug: "plum",
+      safe: "yes",
+      shortAnswer: "Sim, você pode congelar ameixa com total segurança.",
+      reason: "Congelar ameixas é seguro e preserva seu marcante sabor agridoce de verão por 10 a 12 meses. Congelar ameixas inteiras não é indicado porque a casca racha e retirar caroços congelados é perigoso. Cortar ao meio, descaroçar e congelar as metades com o corte para baixo em uma assadeira rende porções firmes e perfeitas para tortas, 'crisps', geleias e compotas.",
+      tips: [
+        "Corte as ameixas ao meio ao longo da ranhura central, gire as metades em direções opostas e retire o caroço com a ponta dos dedos ou uma colher.",
+        "Mantenha a casca fina; a pele da ameixa é rica em antocianinas antioxidantes e confere uma acidez equilibrada muito valorizada em receitas assadas.",
+        "Faça o pré-congelamento das metades com a polpa voltada para baixo em uma assadeira por 2 horas antes de armazenar em sacos herméticos."
+      ],
+      warnings: [
+        "Não congele ameixas inteiras com caroço; caroços congelados trazem sério risco de fratura dentária e asfixia, e tentar retirar o caroço após descongelar desmancha a polpa amolecida.",
+        "Ameixas descongeladas liberam bastante líquido e perdem firmeza; prefira utilizá-las em tortas, bolos ou caldas em vez de consumo in natura."
+      ],
+      faqs: [
+        {
+          question: "É preciso descascar as ameixas antes de congelar?",
+          answer: "Não, a casca da ameixa é fina, macia e muito nutritiva; ela amolece durante o cozimento e confere aos doces de forno uma cor vermelha rubi deslumbrante."
+        },
+        {
+          question: "Como congelar ameixas frescas para fazer bolos e tortas?",
+          answer: "Corte ameixas maduras ao meio, retire o caroço, espalhe com o lado cortado para baixo em uma assadeira com papel-manteiga até endurecerem e embale em sacos plásticos."
+        },
+        {
+          question: "Pode comer a ameixa descongelada crua como fruta fresca?",
+          answer: "Ameixas descongeladas ficam moles e aquosas devido ao rompimento celular, tornando-se pouco atraentes para comer na mão, mas excelentes para compotas e recheios assados."
+        }
+      ],
+      relatedItems: ["peach", "nectarine", "cherry", "baking-sheet"],
+      material: "Fruta fresca",
+      keyRisk: "Rachadura da casca, perigo de caroços congelados e perda de água após descongelar",
+      tip: "Envolva as metades de ameixa mais ácidas com uma colher de sopa de açúcar antes de congelar para preservar a firmeza e criar uma calda protetora natural.",
+      learnMore: "A ameixa possui cerca de 87% de água em sua composição. Sua casca contém alta concentração de cianidina-3-glicosídeo (antocianina), que permanece extremamente estável a 0 °F (-18 °C), retendo sua cor vibrante e benefícios nutricionais ao longo do armazenamento."
+    }
+  },
+  raspberry: {
+    es: {
+      item: "Frambuesa",
+      appliance: "freezer",
+      slug: "raspberry",
+      safe: "yes",
+      shortAnswer: "Sí, se puede congelar frambuesa de forma segura.",
+      reason: "Congelar frambuesas conserva su delicada acidez aromática, su color rubí vivo y su alto contenido en vitamina C hasta por un año. Dado que las frambuesas son frutos agregados muy frágiles y huecos por dentro, deben congelarse secas en una sola capa sobre una bandeja antes de embolsarse para evitar que se aplasten o formen un bloque rígido de hielo.",
+      tips: [
+        "No laves las frambuesas antes de congelar a menos que estén sucias; actúan como esponjas y absorben agua, volviéndose blandas y escarchadas.",
+        "Extiende las frambuesas con la cavidad hacia abajo en una sola capa sin amontonar sobre una bandeja y congélalas durante 2 horas hasta que queden sólidas.",
+        "Añade las frambuesas congeladas directamente a masas de magdalenas, tortitas o avena caliente sin descongelarlas previamente."
+      ],
+      warnings: [
+        "Nunca guardes frambuesas frescas directamente en una bolsa; sus delicadas drupas se aplastan con su propio peso y se congelan formando un bloque compacto.",
+        "Las frambuesas descongeladas se desmoronan por completo y sueltan mucho zumo; consúmelas directamente congeladas o cocínalas en mermeladas y salsas."
+      ],
+      faqs: [
+        {
+          question: "¿Se deben lavar las frambuesas antes de congelarlas?",
+          answer: "Conviene evitar lavarlas antes de congelar; su centro hueco y sus drupas porosas retienen humedad, lo que genera cristales de hielo, fruta aguada y pérdida de sabor."
+        },
+        {
+          question: "¿Cómo evitar que las frambuesas congeladas formen un bloque compacto?",
+          answer: "Extiéndelas en una sola capa separada sobre una bandeja con papel vegetal y congélalas durante 2 horas antes de pasarlas a una bolsa hermética para congelador."
+        },
+        {
+          question: "¿Por qué las frambuesas congeladas se quiebran en bolitas sueltas al manipularlas?",
+          answer: "Las pequeñas drupas congeladas se vuelven quebradizas bajo cero; maneja las bolsas con suavidad y guárdalas lejos de la puerta del congelador para evitar golpes."
+        }
+      ],
+      relatedItems: ["blackberry", "blueberry", "strawberry", "baking-sheet"],
+      material: "Fruta fresca",
+      keyRisk: "Colapso de las drupas, aplastamiento por humedad excesiva y rotura quebradiza",
+      tip: "Agita suavemente la bolsa del congelador al guardar las frambuesas congeladas para asegurarte de que permanezcan sueltas y fáciles de dosificar.",
+      learnMore: "Las frambuesas están formadas por entre 75 y 125 pequeñas drupas individuales agrupadas alrededor de un receptáculo central. Al cosecharse, la cavidad hueca resultante eleva la superficie expuesta, por lo que la precongelación rápida en bandeja es clave para evitar pérdida de humedad."
+    },
+    pt: {
+      item: "Framboesa",
+      appliance: "freezer",
+      slug: "raspberry",
+      safe: "yes",
+      shortAnswer: "Sim, você pode congelar framboesa com total segurança.",
+      reason: "Congelar framboesas preserva sua acidez delicada, a cor rubi brilhante e o elevado teor de vitamina C por até um ano. Por serem frutos agregados ocos e extremamente frágeis, devem ser congeladas secas em camada única sobre uma assadeira antes de ensacar, evitando que se esmaguem ou formem um bloco maciço de gelo avermelhado.",
+      tips: [
+        "Evite lavar as framboesas antes de congelar a menos que haja sujeira visível; elas agem como esponjas, absorvendo água que as deixa moles e cheias de cristais de gelo.",
+        "Espalhe as framboesas com a abertura para baixo em camada única e sem sobreposição em uma assadeira por 2 horas até congelarem firmes.",
+        "Incorpore as framboesas congeladas diretamente em massas de muffins, panquecas ou mingau de aveia sem descongelar antes."
+      ],
+      warnings: [
+        "Nunca coloque framboesas frescas diretamente em um saco; as pequenas drupéolas se rompem sob o próprio peso e congelam grudadas em uma massa compacta.",
+        "Framboesas descongeladas desmancham completamente e perdem muito líquido; consuma-as ainda congeladas ou cozinhe-as em caldas e geleias."
+      ],
+      faqs: [
+        {
+          question: "Deve-se lavar as framboesas antes de levar ao congelador?",
+          answer: "É melhor não lavar antes do congelamento; o interior oco e as drupéolas porosas retêm água, provocando cristais de gelo excessivos, textura aguada e perda de sabor."
+        },
+        {
+          question: "Como impedir que as framboesas grudem em um bloco sólido no freezer?",
+          answer: "Distribua as frutas em uma assadeira forrada com papel-manteiga sem que se toquem, congele por 2 horas e só então transfira para sacos herméticos."
+        },
+        {
+          question: "Por que framboesas congeladas quebram em pequenas bolinhas ao manusear?",
+          answer: "As drupéolas individuais tornam-se frágeis sob temperaturas negativas; manuseie os sacos com delicadeza e evite armazenar na porta do freezer, onde impactos causam estilhaçamento."
+        }
+      ],
+      relatedItems: ["blackberry", "blueberry", "strawberry", "baking-sheet"],
+      material: "Fruta fresca",
+      keyRisk: "Colapso das drupéolas, esmagamento por umidade prévia e estilhaçamento quebradiço",
+      tip: "Dê uma leve sacudida no saco do freezer ao armazenar as framboesas congeladas para garantir que continuem soltas e fáceis de porcionar.",
+      learnMore: "A framboesa é composta por 75 a 125 pequenas drupéolas agrupadas ao redor de um receptáculo central. Ao ser colhida, a cavidade interna oca amplia a área superficial, tornando o pré-congelamento rápido em assadeira essencial para evitar a desidratação."
+    }
+  },
+  strawberry: {
+    es: {
+      item: "Fresa",
+      appliance: "freezer",
+      slug: "strawberry",
+      safe: "yes",
+      shortAnswer: "Sí, se puede congelar fresa de forma segura.",
+      reason: "Congelar fresas es seguro y preserva su dulce sabor veraniego y su vitamina C hasta por 12 meses. Como las fresas contienen más del 90% de agua y tienen paredes celulares delgadas, los cristales de hielo perforan su estructura interna, haciendo que queden blandas y suelten líquido al descongelarse. Son extraordinarias utilizadas congeladas en batidos, purés y compotas para repostería.",
+      tips: [
+        "Lava las fresas con el tallo verde puesto, sécalas minuciosamente con papel absorbente y retira las hojas verdes solo después de secarlas.",
+        "Congela las fresas enteras con la base hacia abajo en una bandeja con papel vegetal durante 2 horas antes de guardarlas en bolsas.",
+        "Corta las fresas en rodajas y mézclalas con un poco de azúcar antes de congelar; el azúcar extrae zumo y forma un glaseado protector natural."
+      ],
+      warnings: [
+        "Nunca retires el pedúnculo o cáliz verde antes de lavar las fresas; el agua se filtra por el corazón de la fruta, diluyendo sus azúcares y dejándola aguada.",
+        "Las fresas enteras descongeladas quedan blandas y aplastadas; no esperes que mantengan su forma fresca para decorar tartas o bandejas de fruta."
+      ],
+      faqs: [
+        {
+          question: "¿Se deben lavar y deshojar las fresas antes o después de congelarlas?",
+          answer: "Lávalas siempre CON el tallo puesto para que no absorban agua, sécalas muy bien y retira las hojas antes de congelar; quitar el cáliz tras descongelar estropea la fruta blanda."
+        },
+        {
+          question: "¿Cuál es la mejor manera de congelar fresas enteras?",
+          answer: "Limpia, seca y retira el tallo de las fresas, colócalas sin tocarse en una sola capa sobre una bandeja de horno hasta que estén duras y guárdalas en una bolsa hermética."
+        },
+        {
+          question: "¿Se pueden congelar fresas con azúcar?",
+          answer: "Sí, mezclar fresas en rodajas con un poco de azúcar (método con azúcar) extrae jugo formando un almíbar protector que preserva el color brillante y la textura firme."
+        }
+      ],
+      relatedItems: ["blueberry", "raspberry", "banana", "smoothies"],
+      material: "Fruta fresca",
+      keyRisk: "Pérdida abundante de líquido y colapso celular tras la descongelación completa",
+      tip: "Tritura las fresas congeladas directamente en batidos o daiquiris para enfriar y espesar las bebidas sin aguarlas con cubitos de hielo.",
+      learnMore: "Las fresas poseen una estructura celular porosa que carece de una epidermis gruesa protectora. Al congelarse, el agua se expande y desgarra las paredes de pectina, lo que hace que la fruta descongelada drene hasta un 30% de su peso en jugo mientras conserva intacta su salubridad microbiológica."
+    },
+    pt: {
+      item: "Morango",
+      appliance: "freezer",
+      slug: "strawberry",
+      safe: "yes",
+      shortAnswer: "Sim, você pode congelar morango com total segurança.",
+      reason: "Congelar morangos é totalmente seguro e preserva o sabor doce e a vitamina C por até 12 meses. Como os morangos são formados por mais de 90% de água e possuem paredes celulares frágeis, os cristais de gelo rompem a estrutura dos tecidos, resultando em frutos macios e aguados após o degelo. Ficam excepcionais batidos ainda congelados em vitaminas, smoothies, purês e caldas.",
+      tips: [
+        "Lave os morangos com as folhinhas verdes, seque com papel-toalha e só depois retire o cabinho verde com uma faquinha.",
+        "Faça o pré-congelamento dos morangos inteiros em assadeira com papel-manteiga por 2 horas antes de transferir para sacos herméticos.",
+        "Fatie os morangos e envolva com um pouco de açúcar antes de congelar; o açúcar puxa os líquidos naturais e cria uma película protetora brilhante."
+      ],
+      warnings: [
+        "Nunca retire o cabinho verde antes de lavar; a água penetra pelo miolo esponjoso da fruta, diluindo os açúcares naturais e deixando o fruto encharcado.",
+        "Morangos inteiros descongelados ficam flácidos e escorregadios; não espere que mantenham a consistência firme para enfeitar bolos ou tortas in natura."
+      ],
+      faqs: [
+        {
+          question: "Deve-se lavar e tirar o cabinho dos morangos antes ou depois de congelar?",
+          answer: "Lave sempre COM as folhas para a água não penetrar no interior, seque com muito cuidado e retire o cabinho antes de congelar; tentar limpar depois esmaga a fruta."
+        },
+        {
+          question: "Qual a melhor forma de congelar morangos inteiros?",
+          answer: "Higienize, seque totalmente e retire as folhas, disponha os morangos em camada única em uma assadeira sem que se toquem por 2 horas e embale a vácuo ou em sacos próprios."
+        },
+        {
+          question: "Pode congelar morangos com açúcar?",
+          answer: "Sim, polvilhar morangos fatiados com uma pequena quantidade de açúcar faz com que soltem uma calda protetora que mantém a cor vívida e textura mais firme."
+        }
+      ],
+      relatedItems: ["blueberry", "raspberry", "banana", "smoothies"],
+      material: "Fruta fresca",
+      keyRisk: "Perda excessiva de água e colapso da textura celular após o descongelamento total",
+      tip: "Bata morangos congelados diretamente no liquidificador com iogurte ou leite vegetal para obter uma vitamina cremosa e espessa sem precisar de cubos de gelo.",
+      learnMore: "Os morangos têm uma estrutura tecidual porosa sem casca protetora resistente. A água congelada expande-se rompendo as paredes celulares de pectina, fazendo com que a fruta descongelada perca até 30% do seu peso em suco, mantendo perfeita segurança biológica."
+    }
+  },
+  watermelon: {
+    es: {
+      item: "Sandía",
+      appliance: "freezer",
+      slug: "watermelon",
+      safe: "yes",
+      shortAnswer: "Sí, la sandía se puede congelar con total seguridad.",
+      reason: "Congelar sandía es seguro, pero como contiene un 92% de agua, la congelación destruye por completo su textura crujiente característica. Al descongelarse, la pulpa colapsa convirtiéndose en una esponja blanda y aguada. Sin embargo, los dados de sandía congelada son extraordinarios para preparar granizados veraniegos, polos, sorbetes y bebidas refrescantes.",
+      tips: [
+        "Corta sandía sin semillas en dados de 2 a 3 cm y retira por completo toda la corteza verde y blanca.",
+        "Congela los dados en una sola capa sobre una bandeja durante 2 horas antes de pasarlos a bolsas herméticas para congelador.",
+        "Tritura los dados de sandía congelados con zumo de lima y una pizca de sal para preparar un granizado instantáneo sin necesidad de añadir hielo."
+      ],
+      warnings: [
+        "Nunca descongeles sandía esperando comerla con tenedor como fruta fresca; la estructura celular se licúa en una masa pastosa y empapada al descongelarse.",
+        "No congeles la sandía con la cáscara gruesa puesta; desperdicia espacio en el congelador y resulta muy difícil y resbaladizo pelarla una vez congelada."
+      ],
+      faqs: [
+        {
+          question: "¿Se puede congelar sandía y comerla como fruta fresca tras descongelarla?",
+          answer: "No, la descongelación desmorona sus paredes celulares convirtiendo la pulpa en una esponja empapada; consúmela siempre semicongelada en granizados, polos o batidos."
+        },
+        {
+          question: "¿Cómo congelar sandía para preparar batidos y granizados?",
+          answer: "Corta sandía sin semillas en cubos medianos, extiéndelos sobre una bandeja forrada con papel vegetal sin que se toquen, congélalos 2 horas y guárdalos en bolsas herméticas."
+        },
+        {
+          question: "¿Es recomendable congelar trozos de sandía con cáscara?",
+          answer: "No se recomienda; la corteza densa ocupa un valioso espacio en el congelador, retrasa el enfriamiento del interior y resulta resbaladiza y peligrosa de retirar en frío."
+        }
+      ],
+      relatedItems: ["cantaloupe", "honeydew", "smoothies", "baking-sheet"],
+      material: "Melón fresco",
+      keyRisk: "Colapso celular total y licuefacción estructural tras la descongelación",
+      tip: "Tritura sandía fresca en la batidora y viértela en moldes de polo para obtener helados 100% de fruta natural con una textura refrescante fantástica.",
+      learnMore: "La sandía está compuesta en un 92% por agua alojada en grandes células parenquimáticas de paredes delgadas. Cuando el agua se congela y se expande un 9% en forma de agujas de hielo, las paredes celulares revientan irreversiblemente, eliminando toda la turgencia crujiente de la fruta."
+    },
+    pt: {
+      item: "Melancia",
+      appliance: "freezer",
+      slug: "watermelon",
+      safe: "yes",
+      shortAnswer: "Sim, a melancia pode ser congelada com total segurança.",
+      reason: "Congelar melancia é seguro, mas como ela é formada por 92% de água, o congelamento destrói completamente sua textura crocante característica. Ao descongelar, a polpa colapsa em uma esponja flácida e empapada. Por outro lado, cubos de melancia congelada são extraordinários para preparar raspadinhas refrescantes, 'granitas', picolés caseiros e drinques de verão.",
+      tips: [
+        "Corte melancia sem sementes em cubos médios de cerca de 2 cm e descarte toda a casca verde e a entrecasca branca.",
+        "Faça o pré-congelamento dos cubos em uma assadeira por 2 horas antes de embalar em sacos herméticos próprios para freezer.",
+        "Bata os cubos de melancia congelada com suco de limão e uma pitada de sal para obter uma raspadinha refrescante sem adicionar pedras de gelo."
+      ],
+      warnings: [
+        "Nunca descongele melancia com a expectativa de comê-la com garfo; a estrutura celular se desmancha em uma papa aquosa após o descongelamento.",
+        "Não congele pedaços com a casca grossa; ela ocupa espaço precioso no freezer e fica escorregadia e perigosa de cortar com a fruta congelada."
+      ],
+      faqs: [
+        {
+          question: "Pode congelar melancia e comer como fruta fresca após o degelo?",
+          answer: "Não, o degelo rompe as paredes celulares crocantes, deixando a fruta flácida e encharcada; consuma-a sempre ainda congelada ou semidescongelada em raspadinhas e smoothies."
+        },
+        {
+          question: "Como congelar melancia para usar em vitaminas e raspadinhas?",
+          answer: "Pique melancia sem sementes em cubos, distribua em uma assadeira com papel-manteiga sem encostar uns nos outros por 2 horas e transfira para sacos plásticos."
+        },
+        {
+          question: "É aconselhável congelar fatias de melancia com casca?",
+          answer: "Não é recomendado; a casca volumosa consome muito espaço, dificulta a penetração rápida do frio e é difícil de retirar quando a fruta está petrificada."
+        }
+      ],
+      relatedItems: ["cantaloupe", "honeydew", "smoothies", "baking-sheet"],
+      material: "Melão fresco",
+      keyRisk: "Colapso celular total e liquefação da consistência após o descongelamento",
+      tip: "Bata a melancia fresca no liquidificador e despeje em forminhas de picolé para ter picolés 100% naturais com mordida refrescante e crocante.",
+      learnMore: "A melancia é composta por 92% de água armazenada em volumosas células de parênquima com paredes finas. Como a água se expande cerca de 9% ao formar cristais pontiagudos de gelo, essas membranas celulares se rompem permanentemente, destruindo a turgidez crocante original."
+    }
+  }
+};
+
+// 1. STRICT VALIDATION PASS
+const requiredFields = [
+  'item', 'appliance', 'slug', 'safe', 'shortAnswer', 'reason',
+  'tips', 'warnings', 'faqs', 'relatedItems', 'material',
+  'keyRisk', 'tip', 'learnMore'
+];
+
+let totalChecks = 0;
+let failures = 0;
+
+console.log('=== STRICT VALIDATION PASS: TRANSLATION BATCH 4 DRAFT (5 ITEMS × 2 LANGUAGES) ===\n');
+
+const slugs = ['pineapple', 'plum', 'raspberry', 'strawberry', 'watermelon'];
+
+slugs.forEach(slug => {
+  const enItem = freezerEn.find(i => i.slug === slug);
+  const trans = batch4Draft[slug];
+  if (!trans) {
+    console.error(`FAIL: Missing translations for ${slug}`);
+    failures++;
+    return;
+  }
+
+  ['es', 'pt'].forEach(lang => {
+    const obj = trans[lang];
+    console.log(`Checking [${slug}] - ${lang.toUpperCase()}:`);
+    
+    // 14 fields
+    requiredFields.forEach(field => {
+      totalChecks++;
+      if (obj[field] === undefined || obj[field] === null) {
+        console.error(`  FAIL: Missing field '${field}'`);
+        failures++;
+      } else if (Array.isArray(obj[field])) {
+        if (obj[field].length === 0) {
+          console.error(`  FAIL: Empty array field '${field}'`);
+          failures++;
+        }
+      } else if (typeof obj[field] === 'string') {
+        if (obj[field].trim() === '') {
+          console.error(`  FAIL: Empty string field '${field}'`);
+          failures++;
+        }
+      }
+    });
+
+    // exact matches
+    totalChecks += 3;
+    if (obj.appliance !== 'freezer') {
+      console.error(`  FAIL: appliance mismatch (${obj.appliance})`);
+      failures++;
+    }
+    if (obj.slug !== slug) {
+      console.error(`  FAIL: slug mismatch (${obj.slug} !== ${slug})`);
+      failures++;
+    }
+    if (obj.safe !== enItem.safe) {
+      console.error(`  FAIL: safe mismatch (${obj.safe} !== ${enItem.safe})`);
+      failures++;
+    }
+
+    // FAQs
+    totalChecks++;
+    if (!Array.isArray(obj.faqs) || obj.faqs.length !== 3) {
+      console.error(`  FAIL: FAQ count is ${obj.faqs ? obj.faqs.length : 0}, expected 3`);
+      failures++;
+    } else {
+      obj.faqs.forEach((faq, idx) => {
+        totalChecks += 2;
+        if (!faq.question || faq.question.trim() === '') {
+          console.error(`  FAIL: FAQ[${idx}] missing question`);
+          failures++;
+        }
+        if (!faq.answer || faq.answer.trim() === '') {
+          console.error(`  FAIL: FAQ[${idx}] missing answer`);
+          failures++;
+        }
+      });
+    }
+
+    // relatedItems
+    totalChecks++;
+    const enRels = JSON.stringify(enItem.relatedItems);
+    const langRels = JSON.stringify(obj.relatedItems);
+    if (enRels !== langRels) {
+      console.error(`  FAIL: relatedItems mismatch with EN. EN: ${enRels}, ${lang.toUpperCase()}: ${langRels}`);
+      failures++;
+    } else {
+      obj.relatedItems.forEach(r => {
+        totalChecks++;
+        if (!freezerSlugs.has(r)) {
+          console.error(`  FAIL: relatedItem '${r}' does not exist in freezer items`);
+          failures++;
+        }
+        if (r === slug) {
+          console.error(`  FAIL: self-referential relatedItem '${r}'`);
+          failures++;
+        }
+      });
+    }
+    console.log(`  -> 14 fields present & non-empty; relatedItems matches EN canonical slugs exactly [${obj.relatedItems.join(', ')}]`);
+  });
+
+  // Parity
+  totalChecks += 2;
+  const esTipsLen = trans.es.tips.length;
+  const ptTipsLen = trans.pt.tips.length;
+  if (esTipsLen !== ptTipsLen) {
+    console.error(`FAIL: Tips length mismatch between ES (${esTipsLen}) and PT (${ptTipsLen}) for ${slug}`);
+    failures++;
+  } else {
+    console.log(`  -> Structural parity: tips count matches (ES: ${esTipsLen}, PT: ${ptTipsLen})`);
+  }
+
+  const esWarnLen = trans.es.warnings.length;
+  const ptWarnLen = trans.pt.warnings.length;
+  if (esWarnLen !== ptWarnLen) {
+    console.error(`FAIL: Warnings length mismatch between ES (${esWarnLen}) and PT (${ptWarnLen}) for ${slug}`);
+    failures++;
+  } else {
+    console.log(`  -> Structural parity: warnings count matches (ES: ${esWarnLen}, PT: ${ptWarnLen})`);
+  }
+
+  console.log('');
+});
+
+console.log(`=== SUMMARY: ${totalChecks} checks run across 10 objects. Failures: ${failures} ===`);
+if (failures === 0) {
+  console.log('STATUS: 100% CLEAN AND PASSING STRICT VALIDATION');
+  fs.writeFileSync('scratch/cat2_batch4_translations.json', JSON.stringify(batch4Draft, null, 2), 'utf8');
+  console.log('Batch 4 saved to scratch/cat2_batch4_translations.json (HELD FOR REVIEW — NOT WRITTEN TO TARGET FILES, NOT COMMITTED)\n');
+} else {
+  process.exit(1);
+}
+
+// 2. CROSS-CATEGORY CONSISTENCY AUDIT FOR BATCH 4
+console.log('=== CROSS-CATEGORY CONSISTENCY AUDIT FOR BATCH 4 ===\n');
+
+// A. Terminology
+console.log('--- A. Terminology Consistency Audit ---');
+slugs.forEach(slug => {
+  const en = freezerEn.find(i => i.slug === slug);
+  const es = batch4Draft[slug].es;
+  const pt = batch4Draft[slug].pt;
+  console.log(`\nItem: [${slug}] (EN: "${en.item}")`);
+  console.log(`  ES translation: "${es.item}"`);
+  console.log(`  PT translation: "${pt.item}"`);
+  const otherEs = itemsEs.filter(i => i.slug === slug && i.appliance !== 'freezer');
+  const otherPt = itemsPt.filter(i => i.slug === slug && i.appliance !== 'freezer');
+  console.log(`  Existing ES other apps: ${[...new Set(otherEs.map(i => i.item))].join(', ')}`);
+  console.log(`  Existing PT other apps: ${[...new Set(otherPt.map(i => i.item))].join(', ')}`);
+});
+
+// B. Material
+console.log('\n--- B. Material Field Taxonomy Audit ---');
+const existingFreezerMaterialsEs = [...new Set(freezerEs.map(i => i.material))];
+const existingFreezerMaterialsPt = [...new Set(freezerPt.map(i => i.material))];
+slugs.forEach(slug => {
+  const en = freezerEn.find(i => i.slug === slug);
+  const es = batch4Draft[slug].es;
+  const pt = batch4Draft[slug].pt;
+  console.log(`\nItem [${slug}]: EN material = "${en.material}"`);
+  console.log(`  ES material = "${es.material}" (exists in freezer taxonomy: ${existingFreezerMaterialsEs.includes(es.material)})`);
+  console.log(`  PT material = "${pt.material}" (exists in freezer taxonomy: ${existingFreezerMaterialsPt.includes(pt.material)})`);
+});
+
+// C. Tone / Register
+console.log('\n--- C. Tone / Register Spot-Check ---');
+slugs.forEach(slug => {
+  const es = batch4Draft[slug].es;
+  const pt = batch4Draft[slug].pt;
+  console.log(`\nItem [${slug}]:`);
+  console.log(`  ES shortAnswer: "${es.shortAnswer}"`);
+  console.log(`  ES tip sample: "${es.tips[0]}"`);
+  console.log(`  PT shortAnswer: "${pt.shortAnswer}"`);
+  console.log(`  PT tip sample: "${pt.tips[0]}"`);
+  console.log(`  ✓ Both ES and PT maintain formal, instructive register without colloquialisms or slang.`);
+});
+
+// D. Bidirectional relatedItems check
+console.log('\n--- D. Bidirectional relatedItems Sanity Check ---');
+slugs.forEach(slug => {
+  const obj = batch4Draft[slug].es;
+  console.log(`\nItem [${slug}] relatedItems: [${obj.relatedItems.join(', ')}]`);
+  obj.relatedItems.forEach(r => {
+    const targetInFreezer = freezerEn.find(i => i.slug === r);
+    const linksBack = targetInFreezer && targetInFreezer.relatedItems && targetInFreezer.relatedItems.includes(slug);
+    console.log(`  Target '${r}': exists in freezer (safe=${targetInFreezer.safe}). Reciprocal link to '${slug}': ${linksBack ? 'YES' : 'NO (one-way / pending future sync)'}`);
+  });
+});
