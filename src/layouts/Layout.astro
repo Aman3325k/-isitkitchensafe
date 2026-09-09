@@ -384,7 +384,7 @@ const appliances = [
         </nav>
 
         <div class="flex items-center gap-1 sm:gap-2 shrink-0">
-          <div class="hidden sm:block">
+          <div class="flex items-center">
             <LanguagePicker />
           </div>
           <!-- Theme Toggle Button -->
@@ -673,35 +673,41 @@ const appliances = [
     </footer>
 
     <!-- Client-side navigation toggle and global search index load -->
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
+    <script is:inline data-cfasync="false">
+      function initMobileMenu() {
         const toggleBtn = document.getElementById('mobile-menu-toggle');
         const closeBtn = document.getElementById('mobile-menu-close');
         const mobileMenu = document.getElementById('mobile-menu');
 
+        if (!toggleBtn || !mobileMenu) return;
+        if (toggleBtn.dataset.bound === 'true') return;
+        toggleBtn.dataset.bound = 'true';
+
         let isTransitioning = false;
 
         const openMenu = () => {
-          if (isTransitioning || !mobileMenu) return;
+          if (isTransitioning) return;
+          isTransitioning = true;
           mobileMenu.classList.remove('hidden');
           void mobileMenu.offsetWidth;
           mobileMenu.classList.remove('translate-x-full');
-          toggleBtn?.setAttribute('aria-expanded', 'true');
+          toggleBtn.setAttribute('aria-expanded', 'true');
           mobileMenu.setAttribute('aria-hidden', 'false');
           document.body.classList.add('overflow-hidden');
           if (closeBtn) closeBtn.focus();
+          setTimeout(() => {
+            isTransitioning = false;
+          }, 310);
         };
 
         const closeMenu = () => {
-          if (isTransitioning || !mobileMenu) return;
+          if (isTransitioning) return;
           isTransitioning = true;
           mobileMenu.classList.add('translate-x-full');
-          if (toggleBtn) {
-            toggleBtn.setAttribute('aria-expanded', 'false');
-            toggleBtn.focus();
-          }
+          toggleBtn.setAttribute('aria-expanded', 'false');
           mobileMenu.setAttribute('aria-hidden', 'true');
           document.body.classList.remove('overflow-hidden');
+          toggleBtn.focus();
           setTimeout(() => {
             if (mobileMenu.classList.contains('translate-x-full')) {
               mobileMenu.classList.add('hidden');
@@ -710,47 +716,54 @@ const appliances = [
           }, 310);
         };
 
-        if (toggleBtn && mobileMenu) {
-          toggleBtn.addEventListener('click', openMenu);
-        }
+        toggleBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openMenu();
+        });
 
-        if (closeBtn && mobileMenu) {
-          closeBtn.addEventListener('click', closeMenu);
-        }
-
-        if (mobileMenu) {
-          mobileMenu.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-              closeMenu();
-              return;
-            }
-
-            if (e.key === 'Tab') {
-              const focusableElements = mobileMenu.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-              if (focusableElements.length === 0) return;
-
-              const firstElement = focusableElements[0] as HTMLElement;
-              const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
-
-              if (e.shiftKey) {
-                if (document.activeElement === firstElement) {
-                  lastElement.focus();
-                  e.preventDefault();
-                }
-              } else {
-                if (document.activeElement === lastElement) {
-                  firstElement.focus();
-                  e.preventDefault();
-                }
-              }
-            }
+        if (closeBtn) {
+          closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeMenu();
           });
         }
 
-        // Dark mode toggle logic
+        mobileMenu.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            closeMenu();
+            return;
+          }
+
+          if (e.key === 'Tab') {
+            const focusableElements = mobileMenu.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            if (focusableElements.length === 0) return;
+
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+
+            if (e.shiftKey) {
+              if (document.activeElement === firstElement) {
+                lastElement.focus();
+                e.preventDefault();
+              }
+            } else {
+              if (document.activeElement === lastElement) {
+                firstElement.focus();
+                e.preventDefault();
+              }
+            }
+          }
+        });
+      }
+
+      function initThemeToggle() {
         const themeToggleBtn = document.getElementById('theme-toggle');
         const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
         const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+
+        if (!themeToggleBtn) return;
+        if (themeToggleBtn.dataset.bound === 'true') return;
+        themeToggleBtn.dataset.bound = 'true';
 
         const updateIcons = () => {
           if (document.documentElement.classList.contains('dark')) {
@@ -764,29 +777,34 @@ const appliances = [
 
         updateIcons();
 
-        if (themeToggleBtn) {
-          themeToggleBtn.addEventListener('click', () => {
-            if (document.documentElement.classList.contains('dark')) {
-              document.documentElement.classList.remove('dark');
-              localStorage.setItem('theme', 'light');
-            } else {
-              document.documentElement.classList.add('dark');
-              localStorage.setItem('theme', 'dark');
-            }
-            updateIcons();
-          });
-        }
+        themeToggleBtn.addEventListener('click', () => {
+          if (document.documentElement.classList.contains('dark')) {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+          } else {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+          }
+          updateIcons();
+        });
+      }
 
-        const searchForm = document.getElementById('global-search-form') as HTMLFormElement | null;
-        const searchInput = document.getElementById('global-search-input') as HTMLInputElement | null;
-        const datalist = document.getElementById('global-search-items') as HTMLDataListElement | null;
+      function initGlobalSearch() {
+        const searchForm = document.getElementById('global-search-form');
+        const searchInput = document.getElementById('global-search-input');
+        const datalist = document.getElementById('global-search-items');
         const searchLoading = document.getElementById('global-search-loading');
-        const searchPath = searchForm?.dataset.searchPath || '/search-index.json';
-        const searchLang = searchForm?.dataset.lang || 'en';
-        let searchIndex: Array<{ name: string; category: string; url: string }> | null = null;
+
+        if (!searchForm || !searchInput) return;
+        if (searchForm.dataset.bound === 'true') return;
+        searchForm.dataset.bound = 'true';
+
+        const searchPath = searchForm.dataset.searchPath || '/search-index.json';
+        const searchLang = searchForm.dataset.lang || 'en';
+        let searchIndex = null;
         let isFetching = false;
 
-        const populateDatalist = (items: typeof searchIndex) => {
+        const populateDatalist = (items) => {
           if (!datalist || !items) return;
           datalist.innerHTML = items.map(entry => 
             `<option value="${entry.name} (${entry.category})" data-url="${entry.url}"></option>`
@@ -811,103 +829,110 @@ const appliances = [
           }
         };
 
-        if (searchInput) {
-          searchInput.addEventListener('focus', loadSearchIndex);
-          searchInput.addEventListener('input', () => {
-            loadSearchIndex();
+        searchInput.addEventListener('focus', loadSearchIndex);
+        searchInput.addEventListener('input', () => {
+          loadSearchIndex();
+          const searchError = document.getElementById('global-search-error');
+          if (searchError) searchError.classList.add('hidden');
+        });
+
+        searchForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const rawValue = searchInput.value.trim().toLowerCase();
+          if (!rawValue || !searchIndex) return;
+
+          let match = searchIndex.find(item => item.name.toLowerCase() === rawValue);
+
+          if (!match) {
+            match = searchIndex.find(item => {
+              const displayVal = `${item.name} (${item.category})`.toLowerCase();
+              return displayVal === rawValue;
+            });
+          }
+
+          if (!match) {
+            match = searchIndex.find(item => item.name.toLowerCase().includes(rawValue));
+          }
+
+          if (!match) {
+            const categoryMapEn = {
+              'dishwasher': '/dishwasher/',
+              'microwave': '/microwave/',
+              'freezer': '/freezer/',
+              'oven': '/oven/',
+              'dryer': '/dryer/',
+              'air fryer': '/airfryer/',
+              'airfryer': '/airfryer/',
+              'refrigerator': '/refrigerator/',
+              'fridge': '/refrigerator/',
+              'shelf life': '/how-long/',
+              'how long': '/how-long/',
+              'washing machine': '/washing-machine/',
+              'refreeze': '/refreeze/',
+              'what happens': '/what-happens/',
+              'compare': '/compare/',
+              'comparison': '/compare/',
+              'comparisons': '/compare/'
+            };
+
+            const categoryMapEs = {
+              'lavavajillas': '/es/dishwasher/',
+              'lavaplatos': '/es/dishwasher/',
+              'dishwasher': '/es/dishwasher/',
+              'microondas': '/es/microwave/',
+              'microwave': '/es/microwave/'
+            };
+
+            const categoryMapPt = {
+              'lava-louças': '/pt/dishwasher/',
+              'lava louças': '/pt/dishwasher/',
+              'lavaloucas': '/pt/dishwasher/',
+              'dishwasher': '/pt/dishwasher/',
+              'micro-ondas': '/pt/microwave/',
+              'microondas': '/pt/microwave/',
+              'micro ondas': '/pt/microwave/',
+              'microwave': '/pt/microwave/'
+            };
+
+            const categoryMaps = {
+              en: categoryMapEn,
+              es: categoryMapEs,
+              pt: categoryMapPt
+            };
+
+            const activeCategoryMap = categoryMaps[searchLang] || categoryMapEn;
+            if (activeCategoryMap[rawValue]) {
+              window.location.href = activeCategoryMap[rawValue];
+              return;
+            }
+          }
+
+          if (match) {
             const searchError = document.getElementById('global-search-error');
             if (searchError) searchError.classList.add('hidden');
-          });
-        }
-
-        if (searchForm && searchInput) {
-          searchForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const rawValue = searchInput.value.trim().toLowerCase();
-            if (!rawValue || !searchIndex) return;
-
-            let match = searchIndex.find(item => item.name.toLowerCase() === rawValue);
-
-            if (!match) {
-              match = searchIndex.find(item => {
-                const displayVal = `${item.name} (${item.category})`.toLowerCase();
-                return displayVal === rawValue;
-              });
+            window.location.href = match.url;
+          } else {
+            const searchError = document.getElementById('global-search-error');
+            if (searchError) {
+              searchError.textContent = `No match found for "${searchInput.value}". Please use suggestions or check spelling.`;
+              searchError.classList.remove('hidden');
             }
+          }
+        });
+      }
 
-            if (!match) {
-              match = searchIndex.find(item => item.name.toLowerCase().includes(rawValue));
-            }
+      function initLayoutInteractions() {
+        initMobileMenu();
+        initThemeToggle();
+        initGlobalSearch();
+      }
 
-            if (!match) {
-              const categoryMapEn: Record<string, string> = {
-                'dishwasher': '/dishwasher/',
-                'microwave': '/microwave/',
-                'freezer': '/freezer/',
-                'oven': '/oven/',
-                'dryer': '/dryer/',
-                'air fryer': '/airfryer/',
-                'airfryer': '/airfryer/',
-                'refrigerator': '/refrigerator/',
-                'fridge': '/refrigerator/',
-                'shelf life': '/how-long/',
-                'how long': '/how-long/',
-                'washing machine': '/washing-machine/',
-                'refreeze': '/refreeze/',
-                'what happens': '/what-happens/',
-                'compare': '/compare/',
-                'comparison': '/compare/',
-                'comparisons': '/compare/'
-              };
-
-              // AGENT-GENERATED KEYWORDS — NEEDS NATIVE SPEAKER REVIEW BEFORE RELYING ON THIS FOR PRODUCTION SEARCH ACCURACY
-              const categoryMapEs: Record<string, string> = {
-                'lavavajillas': '/es/dishwasher/',
-                'lavaplatos': '/es/dishwasher/',
-                'dishwasher': '/es/dishwasher/',
-                'microondas': '/es/microwave/',
-                'microwave': '/es/microwave/'
-              };
-
-              // AGENT-GENERATED KEYWORDS — NEEDS NATIVE SPEAKER REVIEW BEFORE RELYING ON THIS FOR PRODUCTION SEARCH ACCURACY
-              const categoryMapPt: Record<string, string> = {
-                'lava-louças': '/pt/dishwasher/',
-                'lava louças': '/pt/dishwasher/',
-                'lavaloucas': '/pt/dishwasher/',
-                'dishwasher': '/pt/dishwasher/',
-                'micro-ondas': '/pt/microwave/',
-                'microondas': '/pt/microwave/',
-                'micro ondas': '/pt/microwave/',
-                'microwave': '/pt/microwave/'
-              };
-
-              const categoryMaps: Record<string, Record<string, string>> = {
-                en: categoryMapEn,
-                es: categoryMapEs,
-                pt: categoryMapPt
-              };
-
-              const activeCategoryMap = categoryMaps[searchLang] || categoryMapEn;
-              if (activeCategoryMap[rawValue]) {
-                window.location.href = activeCategoryMap[rawValue];
-                return;
-              }
-            }
-
-            if (match) {
-              const searchError = document.getElementById('global-search-error');
-              if (searchError) searchError.classList.add('hidden');
-              window.location.href = match.url;
-            } else {
-              const searchError = document.getElementById('global-search-error');
-              if (searchError) {
-                searchError.textContent = `No match found for "${searchInput.value}". Please use suggestions or check spelling.`;
-                searchError.classList.remove('hidden');
-              }
-            }
-          });
-        }
-      });
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initLayoutInteractions);
+      } else {
+        initLayoutInteractions();
+      }
+      document.addEventListener('astro:page-load', initLayoutInteractions);
     </script>
 
     <!-- Cookie Consent Banner -->
