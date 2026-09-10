@@ -1,0 +1,382 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import howLongEs from '../../../data/how-long.es.json';
+import howLongPt from '../../../data/how-long.pt.json';
+import type { SupportedLanguage } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  const paths: Array<{
+    params: { lang: string; item: string };
+    props: { data: any; lang: SupportedLanguage; availableLocales: SupportedLanguage[] };
+  }> = [];
+
+  howLongEs.forEach((item) => {
+    paths.push({
+      params: { lang: 'es', item: item.slug },
+      props: { data: item, lang: 'es', availableLocales: ['en', 'es', 'pt'] }
+    });
+  });
+
+  howLongPt.forEach((item) => {
+    paths.push({
+      params: { lang: 'pt', item: item.slug },
+      props: { data: item, lang: 'pt', availableLocales: ['en', 'es', 'pt'] }
+    });
+  });
+
+  return paths;
+}
+
+interface Props {
+  data: any;
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { data, lang, availableLocales } = Astro.props;
+const isEs = lang === 'es';
+
+function formatLocation(loc: string, currentLang: string) {
+  if (currentLang === 'es') {
+    if (loc === 'pantry') return 'Despensa';
+    if (loc === 'fridge') return 'Refrigerador';
+    if (loc === 'freezer') return 'Congelador';
+    if (loc === 'counter') return 'Encimera';
+    return loc;
+  }
+  if (loc === 'pantry') return 'Despensa';
+  if (loc === 'fridge') return 'Geladeira';
+  if (loc === 'freezer') return 'Freezer';
+  if (loc === 'counter') return 'Bancada';
+  return loc;
+}
+
+const formattedLocation = formatLocation(data.location, lang);
+const currentDataset = isEs ? howLongEs : howLongPt;
+
+// Find related items within localized dataset
+let relatedItems = currentDataset.filter(item => data.relatedItems?.includes(item.slug) && item.slug !== data.slug);
+if (relatedItems.length < 5) {
+  const sameLocItems = currentDataset.filter(item => item.location === data.location && item.slug !== data.slug && !data.relatedItems?.includes(item.slug));
+  const existingSlugs = new Set(relatedItems.map(i => i.slug));
+  for (const item of sameLocItems) {
+    if (relatedItems.length >= 5) break;
+    if (!existingSlugs.has(item.slug)) {
+      relatedItems.push(item);
+      existingSlugs.add(item.slug);
+    }
+  }
+}
+if (relatedItems.length < 5) {
+  const anyItems = currentDataset.filter(item => item.slug !== data.slug && !relatedItems.some(ri => ri.slug === item.slug));
+  for (const item of anyItems) {
+    if (relatedItems.length >= 5) break;
+    relatedItems.push(item);
+  }
+}
+relatedItems = relatedItems.slice(0, 5);
+
+const ui = {
+  es: {
+    pageTitle: `¿Cuánto dura ${data.item} en el/la ${formattedLocation}? | ¿Es Seguro en la Cocina?`,
+    pageDesc: `${data.shortAnswer} Consulta tiempos de conservación del USDA, signos de descomposición y consejos para ${data.item}.`,
+    home: "Inicio",
+    shelfLife: "Conservación",
+    guideTag: `Guía de ${formattedLocation}`,
+    lastUpdated: "Última Actualización: Junio 2026",
+    usdaBadge: "✓ Basado en pautas del USDA/FDA",
+    h1Title: `¿Cuánto dura ${data.item} en ${formattedLocation}?`,
+    badgeYes: "SÍ",
+    badgeNo: "NO",
+    badgeDepends: "DEPENDE",
+    lastsBadge: `DURA: ${data.duration}`,
+    summaryTitle: "📋 Resumen Rápido de Almacenamiento",
+    itemLabel: "Alimento a Almacenar:",
+    locationLabel: "Ubicación Recomendada:",
+    shelfLifeLabel: "Tiempo Seguro:",
+    mainRuleLabel: "Regla Principal:",
+    mainRuleValue: "Recipiente Hermético",
+    explanationTitle: `¿Se puede guardar ${data.item} en ${formattedLocation}?`,
+    detailsHeading: "Detalles y Fundamentos Científicos",
+    didYouKnowTitle: "💡 ¿Sabías Que?",
+    didYouKnowText: `Las bacterias patógenas se multiplican rápidamente en la "Zona de Peligro" entre 4°C y 60°C (40°F y 140°F). Almacenar ${data.item} adecuadamente en ${formattedLocation} retrasa este proceso drásticamente, ¡manteniendo tu comida segura por más tiempo!`,
+    tipsTitle: "✅ Consejos de Almacenamiento",
+    spoilageTitle: "🔍 Signos de Descomposición",
+    editorialReview: "Revisado por el equipo editorial de IsItKitchenSafe",
+    lastReviewed: "Última actualización: Junio 2026",
+    faqTitle: "Preguntas Frecuentes",
+    relatedTitle: "Guías Relacionadas de Conservación",
+    readGuide: "Leer guía",
+    backLink: "Volver a todas las Guías de Conservación"
+  },
+  pt: {
+    pageTitle: `Quanto tempo dura ${data.item} em ${formattedLocation}? | É Seguro na Cozinha?`,
+    pageDesc: `${data.shortAnswer} Confira prazos de validade do USDA, sinais de deterioração e dicas para ${data.item}.`,
+    home: "Início",
+    shelfLife: "Conservação",
+    guideTag: `Guia de ${formattedLocation}`,
+    lastUpdated: "Última Atualização: Junho 2026",
+    usdaBadge: "✓ Alinhado às diretrizes do USDA/FDA",
+    h1Title: `Quanto tempo dura ${data.item} em ${formattedLocation}?`,
+    badgeYes: "SIM",
+    badgeNo: "NÃO",
+    badgeDepends: "DEPENDE",
+    lastsBadge: `DURA: ${data.duration}`,
+    summaryTitle: "📋 Resumo Rápido de Conservação",
+    itemLabel: "Alimento a Conservar:",
+    locationLabel: "Local Recomendado:",
+    shelfLifeLabel: "Validade Segura:",
+    mainRuleLabel: "Regra Principal:",
+    mainRuleValue: "Pote Hermético",
+    explanationTitle: `Pode guardar ${data.item} em ${formattedLocation}?`,
+    detailsHeading: "Detalhes e Ciência dos Alimentos",
+    didYouKnowTitle: "💡 Você Sabia?",
+    didYouKnowText: `As bactérias patogênicas multiplicam-se rapidamente na "Zona de Perigo" entre 4°C e 60°C (40°F e 140°F). Armazenar ${data.item} corretamente em ${formattedLocation} desacelera essa proliferação, mantendo seu alimento seguro por muito mais tempo!`,
+    tipsTitle: "✅ Melhores Dicas de Armazenamento",
+    spoilageTitle: "🔍 Sinais de Deterioração",
+    editorialReview: "Revisado pela equipe editorial do IsItKitchenSafe",
+    lastReviewed: "Última atualização: Junho 2026",
+    faqTitle: "Perguntas Frequentes",
+    relatedTitle: "Guias Relacionados de Conservação",
+    readGuide: "Ver guia",
+    backLink: "Voltar a todos os Guias de Conservação"
+  }
+};
+
+const currentUi = isEs ? ui.es : ui.pt;
+
+const howToSchema = (data.safe === 'yes' || data.safe === 'depends') ? {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": `${isEs ? 'Cómo almacenar de forma segura' : 'Como conservar com segurança'} ${data.item} en ${formattedLocation}`,
+  "description": data.shortAnswer,
+  "step": data.storageTips?.map((tip: string, idx: number) => ({
+    "@type": "HowToStep",
+    "position": idx + 1,
+    "text": tip
+  })) || []
+} : null;
+---
+
+<Layout 
+  title={currentUi.pageTitle} 
+  description={currentUi.pageDesc} 
+  faqs={data.faqs}
+  lang={lang}
+  availableLocales={availableLocales}
+>
+  <Fragment slot="head">
+    {howToSchema && (
+      <script type="application/ld+json" set:html={JSON.stringify(howToSchema)} />
+    )}
+  </Fragment>
+
+  <article class="max-w-[800px] mx-auto px-6 py-[48px] md:py-[64px]">
+    <!-- Breadcrumbs -->
+    <nav class="flex gap-2 text-muted text-[13px] mb-8" aria-label="Breadcrumb">
+      <a href={`/${lang}/`} class="hover:text-ink transition-colors">{currentUi.home}</a>
+      <span>/</span>
+      <a href={`/${lang}/how-long/`} class="hover:text-ink transition-colors">{currentUi.shelfLife}</a>
+      <span>/</span>
+      <span class="text-ink font-medium">{data.item}</span>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="mb-10 text-center md:text-left">
+      <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-3">
+        <span class="text-caption text-muted uppercase tracking-wider text-xs">{currentUi.guideTag}</span>
+        <span class="text-xs text-muted border-l border-hairline pl-3">{currentUi.lastUpdated}</span>
+        <span class="text-xs text-success font-medium bg-success-bg px-2 py-0.5 rounded-sm">{currentUi.usdaBadge}</span>
+      </div>
+      
+      <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-6 leading-tight">
+        {currentUi.h1Title}
+      </h1>
+
+      <!-- Safety Verdict Badge & Duration Badge -->
+      <div class="flex flex-wrap items-center justify-center md:justify-start gap-3">
+        {data.safe === 'yes' && (
+          <div class="badge-yes quick-answer px-6 py-2 text-sm">
+            <span class="mr-1.5">✓</span> {currentUi.badgeYes}
+          </div>
+        )}
+        {data.safe === 'no' && (
+          <div class="badge-no quick-answer px-6 py-2 text-sm">
+            <span class="mr-1.5">✗</span> {currentUi.badgeNo}
+          </div>
+        )}
+        {data.safe === 'depends' && (
+          <div class="badge-depends quick-answer px-6 py-2 text-sm">
+            <span class="mr-1.5">⚠</span> {currentUi.badgeDepends}
+          </div>
+        )}
+        
+        <div class="badge-time px-6 py-2 text-sm">
+          <span class="mr-1.5">⏱</span> {currentUi.lastsBadge}
+        </div>
+      </div>
+    </header>
+
+    <!-- Quick Summary (Shareable Box) -->
+    <section class="mb-12">
+      <div class="bg-signature-cream/40 border border-signature-cream rounded-md p-6">
+        <h2 class="text-title-sm text-ink font-medium mb-4 flex items-center gap-2">
+          {currentUi.summaryTitle}
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-[14px]">
+          <div>
+            <span class="text-muted block mb-1">{currentUi.itemLabel}</span>
+            <strong class="text-ink text-[16px]">{data.item}</strong>
+          </div>
+          <div>
+            <span class="text-muted block mb-1">{currentUi.locationLabel}</span>
+            <strong class="text-ink text-[16px]">{formattedLocation}</strong>
+          </div>
+          <div>
+            <span class="text-muted block mb-1">{currentUi.shelfLifeLabel}</span>
+            <strong class="text-link text-[16px]">{data.duration}</strong>
+          </div>
+          <div>
+            <span class="text-muted block mb-1">{currentUi.mainRuleLabel}</span>
+            <strong class="text-success text-[16px]">{currentUi.mainRuleValue}</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Detailed Explanation -->
+    <section class="mb-12">
+      <div class="p-8 rounded-lg bg-surface-soft border border-hairline">
+        <h2 class="text-title-sm text-ink font-medium mb-3">{currentUi.explanationTitle}</h2>
+        <p class="short-answer text-title-md font-bold leading-relaxed text-ink mb-4">
+          {data.shortAnswer}
+        </p>
+        
+        <div>
+          <div class="border-t border-hairline my-4 opacity-50"></div>
+          <h3 class="text-caption text-muted mb-2 font-semibold uppercase tracking-wider text-xs">{currentUi.detailsHeading}</h3>
+          {data.reason?.split('\n\n').map((para: string) => (
+            <p class="text-body-md text-body leading-relaxed mb-4">
+              {para}
+            </p>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Did you know / Fun fact -->
+    <section class="mb-12">
+      <div class="bg-surface-soft border border-hairline rounded-md p-6">
+        <h3 class="text-title-sm text-ink font-medium mb-2">{currentUi.didYouKnowTitle}</h3>
+        <p class="text-body-md text-body leading-relaxed">
+          {currentUi.didYouKnowText}
+        </p>
+      </div>
+    </section>
+
+    <!-- Storage Tips and Spoilage Signs -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+      <!-- Tips -->
+      <div class="bg-surface-soft rounded-md p-6 border border-hairline/50">
+        <h2 class="text-title-sm text-ink font-medium mb-4 flex items-center gap-2">
+          {currentUi.tipsTitle}
+        </h2>
+        <ul class="flex flex-col gap-3">
+          {data.storageTips?.map((tip: string) => (
+            <li class="text-body-md text-body flex gap-2.5 items-start leading-relaxed">
+              <span class="text-success font-bold mt-0.5">✓</span>
+              <span>{tip}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Spoilage -->
+      <div class="bg-surface-soft rounded-md p-6 border border-hairline/50">
+        <h2 class="text-title-sm text-ink font-medium mb-4 flex items-center gap-2">
+          {currentUi.spoilageTitle}
+        </h2>
+        <ul class="flex flex-col gap-3">
+          {data.spoilageSigns?.map((sign: string) => (
+            <li class="text-body-md text-body flex gap-2.5 items-start leading-relaxed">
+              <span class="text-signature-coral font-bold mt-0.5">⚠</span>
+              <span>{sign}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- Editorial Byline Block -->
+    <div class="bg-surface-soft border border-hairline rounded-md p-4 mb-12 flex flex-wrap items-center justify-between gap-4 text-xs text-muted">
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center justify-center bg-success/10 text-success w-5 h-5 rounded-full font-bold text-[10px]">✓</span>
+        <span>{currentUi.editorialReview}</span>
+      </div>
+      <div>
+        <span>{currentUi.lastReviewed}</span>
+      </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <section class="border-t border-hairline pt-12 mb-16">
+      <h2 class="text-title-lg text-ink font-medium tracking-tight mb-8">{currentUi.faqTitle}</h2>
+      <div class="flex flex-col">
+        {data.faqs?.map((faq: any) => (
+          <details class="group border-b border-hairline py-5">
+            <summary class="flex items-center justify-between text-title-sm text-ink font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none">
+              <span>{faq.question}</span>
+              <span class="text-muted group-open:rotate-180 transition-transform duration-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </span>
+            </summary>
+            <div class="mt-4 text-body-md text-body leading-relaxed pl-1">
+              {faq.answer}
+            </div>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <!-- Related Items -->
+    {relatedItems.length > 0 && (
+      <section class="border-t border-hairline pt-12 mb-16">
+        <h2 class="text-title-lg text-ink font-medium tracking-tight mb-8">{currentUi.relatedTitle}</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {relatedItems.map((item: any) => (
+            <a 
+              href={`/${lang}/how-long/${item.slug}/`} 
+              class="bg-canvas border border-hairline hover:border-border-strong rounded-md p-5 flex flex-col justify-between shadow-xs transition-colors active:scale-[0.98]"
+            >
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-[11px] text-muted uppercase tracking-wider">{formatLocation(item.location, lang)}</span>
+                  <span class="badge-time text-[10px] px-2 py-0.5">{item.duration}</span>
+                </div>
+                <h3 class="text-title-sm text-ink mb-1">
+                  {item.item}
+                </h3>
+                <p class="text-[13px] text-muted line-clamp-2 leading-relaxed">
+                  {item.shortAnswer}
+                </p>
+              </div>
+              <span class="text-[12px] font-medium text-link mt-4 block">{currentUi.readGuide} &rarr;</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Back Link -->
+    <div class="mt-12 pt-8 border-t border-hairline text-center">
+      <a 
+        href={`/${lang}/how-long/`} 
+        class="text-link text-[14px] font-medium hover:text-link-active transition-colors inline-flex items-center gap-1.5 active:scale-[0.98] transition-transform"
+      >
+        &larr; {currentUi.backLink}
+      </a>
+    </div>
+  </article>
+</Layout>

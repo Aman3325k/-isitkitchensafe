@@ -1,0 +1,351 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import whatHappensEs from '../../../data/what-happens.es.json';
+import whatHappensPt from '../../../data/what-happens.pt.json';
+import type { SupportedLanguage } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  const paths: Array<{
+    params: { lang: string; scenario: string };
+    props: { data: any; lang: SupportedLanguage; availableLocales: SupportedLanguage[] };
+  }> = [];
+
+  whatHappensEs.forEach((item) => {
+    paths.push({
+      params: { lang: 'es', scenario: item.slug },
+      props: { data: item, lang: 'es', availableLocales: ['en', 'es', 'pt'] }
+    });
+  });
+
+  whatHappensPt.forEach((item) => {
+    paths.push({
+      params: { lang: 'pt', scenario: item.slug },
+      props: { data: item, lang: 'pt', availableLocales: ['en', 'es', 'pt'] }
+    });
+  });
+
+  return paths;
+}
+
+interface Props {
+  data: any;
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { data, lang, availableLocales } = Astro.props;
+const isEs = lang === 'es';
+const currentDataset = isEs ? whatHappensEs : whatHappensPt;
+
+// Find related items within localized dataset
+let relatedItems = currentDataset.filter(i => data.relatedItems?.includes(i.slug) && i.slug !== data.slug);
+if (relatedItems.length < 5) {
+  const sameDangerItems = currentDataset.filter(i => i.dangerLevel === data.dangerLevel && i.slug !== data.slug && !data.relatedItems?.includes(i.slug));
+  const existingSlugs = new Set(relatedItems.map(i => i.slug));
+  for (const item of sameDangerItems) {
+    if (relatedItems.length >= 5) break;
+    if (!existingSlugs.has(item.slug)) {
+      relatedItems.push(item);
+      existingSlugs.add(item.slug);
+    }
+  }
+}
+if (relatedItems.length < 5) {
+  const anyItems = currentDataset.filter(i => i.slug !== data.slug && !relatedItems.some(ri => ri.slug === i.slug));
+  for (const item of anyItems) {
+    if (relatedItems.length >= 5) break;
+    relatedItems.push(item);
+  }
+}
+relatedItems = relatedItems.slice(0, 5);
+
+// Danger details variables
+const dangerValue = data.dangerLevel === 'dangerous' ? 9 : data.dangerLevel === 'caution' ? 5 : 2;
+const dangerBarColor = data.dangerLevel === 'dangerous' ? 'bg-error-border' : data.dangerLevel === 'caution' ? 'bg-warning-border' : 'bg-success-border';
+const dangerWidthClass = data.dangerLevel === 'dangerous' ? 'w-[90%]' : data.dangerLevel === 'caution' ? 'w-[50%]' : 'w-[20%]';
+const dangerTextColor = data.dangerLevel === 'dangerous' ? 'text-error' : data.dangerLevel === 'caution' ? 'text-warning' : 'text-success';
+
+const ui = {
+  es: {
+    pageTitle: `${data.item} | ¿Es Seguro en la Cocina?`,
+    pageDesc: `${data.shortAnswer} Consulta consecuencias inmediatas, pasos de emergencia y prevención para evitar accidentes.`,
+    home: "Inicio",
+    whatHappens: "Qué Pasa Si...",
+    guideTag: "Guía de Prevención de Accidentes",
+    lastUpdated: "Última Actualización: Junio 2026",
+    safetyBadge: "⚠️ Datos de Seguridad Verificados",
+    badgeDangerous: "PELIGROSO",
+    badgeCaution: "PRECAUCIÓN",
+    badgeSafe: "SEGURO",
+    dangerIndicator: "⚠️ Indicador de Nivel de Peligro",
+    levelSafe: "Nivel 1 (Seguro)",
+    levelOf: `Nivel ${dangerValue} de 10`,
+    levelCritical: "Nivel 10 (Crítico)",
+    explanationTitle: `¿Qué consecuencias tiene este escenario?`,
+    detailsHeading: "Análisis Detallado del Escenario",
+    healthTitle: "🩺 Impacto en la Salud y Riesgos",
+    actionsTitle: "🚨 Pasos de Acción Inmediata",
+    preventionTitle: "✅ Prevención y Reglas de Seguridad",
+    editorialReview: "Revisado por el equipo editorial de IsItKitchenSafe",
+    lastReviewed: "Última actualización: Junio 2026",
+    faqTitle: "Preguntas Frecuentes",
+    relatedTitle: "Guías Relacionadas de Prevención de Accidentes",
+    readGuide: "Leer guía",
+    backLink: "Volver a todos los Escenarios de Seguridad"
+  },
+  pt: {
+    pageTitle: `${data.item} | É Seguro na Cozinha?`,
+    pageDesc: `${data.shortAnswer} Confira impactos imediatos, medidas de emergência e regras de prevenção para evitar acidentes.`,
+    home: "Início",
+    whatHappens: "O Que Acontece Se...",
+    guideTag: "Guia de Prevenção de Acidentes",
+    lastUpdated: "Última Atualização: Junho 2026",
+    safetyBadge: "⚠️ Dados de Segurança Verificados",
+    badgeDangerous: "PERIGOSO",
+    badgeCaution: "CUIDADO",
+    badgeSafe: "SEGURO",
+    dangerIndicator: "⚠️ Indicador de Nível de Perigo",
+    levelSafe: "Nível 1 (Seguro)",
+    levelOf: `Nível ${dangerValue} de 10`,
+    levelCritical: "Nível 10 (Crítico)",
+    explanationTitle: `Quais são as consequências desse cenário?`,
+    detailsHeading: "Análise Detalhada do Cenário",
+    healthTitle: "🩺 Impactos na Saúde e Riscos",
+    actionsTitle: "🚨 Ações Imediatas de Emergência",
+    preventionTitle: "✅ Prevenção e Regras de Segurança",
+    editorialReview: "Revisado pela equipe editorial do IsItKitchenSafe",
+    lastReviewed: "Última atualização: Junho 2026",
+    faqTitle: "Perguntas Frequentes",
+    relatedTitle: "Guias Relacionados de Prevenção de Acidentes",
+    readGuide: "Ver guia",
+    backLink: "Voltar a todos os Cenários de Segurança"
+  }
+};
+
+const currentUi = isEs ? ui.es : ui.pt;
+const dangerBadgeText = data.dangerLevel === 'dangerous' ? currentUi.badgeDangerous : data.dangerLevel === 'caution' ? currentUi.badgeCaution : currentUi.badgeSafe;
+
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": `${isEs ? 'Cómo prevenir accidentes con' : 'Como prevenir acidentes com'} ${data.item}`,
+  "description": data.shortAnswer,
+  "step": data.prevention?.map((prev: string, idx: number) => ({
+    "@type": "HowToStep",
+    "position": idx + 1,
+    "text": prev
+  })) || []
+};
+---
+
+<Layout 
+  title={currentUi.pageTitle} 
+  description={currentUi.pageDesc} 
+  faqs={data.faqs}
+  lang={lang}
+  availableLocales={availableLocales}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(howToSchema)} />
+  </Fragment>
+
+  <article class="max-w-[800px] mx-auto px-6 py-[48px] md:py-[64px]">
+    <!-- Breadcrumbs -->
+    <nav class="flex gap-2 text-muted text-[13px] mb-8" aria-label="Breadcrumb">
+      <a href={`/${lang}/`} class="hover:text-ink transition-colors">{currentUi.home}</a>
+      <span>/</span>
+      <a href={`/${lang}/what-happens/`} class="hover:text-ink transition-colors">{currentUi.whatHappens}</a>
+      <span>/</span>
+      <span class="text-ink font-medium">{data.item}</span>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="mb-10 text-center md:text-left">
+      <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-3">
+        <span class="text-caption text-muted uppercase tracking-wider text-xs">{currentUi.guideTag}</span>
+        <span class="text-xs text-muted border-l border-hairline pl-3">{currentUi.lastUpdated}</span>
+        <span class="text-xs text-signature-coral font-medium bg-error-bg px-2 py-0.5 rounded-sm">{currentUi.safetyBadge}</span>
+      </div>
+      
+      <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-6 leading-tight">
+        {data.item}
+      </h1>
+
+      <!-- Safety Verdict Badge -->
+      <div class="flex flex-wrap items-center justify-center md:justify-start gap-3">
+        {data.dangerLevel === 'safe' && (
+          <div class="badge-yes quick-answer px-6 py-2 text-sm">
+            <span class="mr-1.5">✓</span> {dangerBadgeText}
+          </div>
+        )}
+        {data.dangerLevel === 'dangerous' && (
+          <div class="badge-no quick-answer px-6 py-2 text-sm">
+            <span class="mr-1.5">✗</span> {dangerBadgeText}
+          </div>
+        )}
+        {data.dangerLevel === 'caution' && (
+          <div class="badge-depends quick-answer px-6 py-2 text-sm">
+            <span class="mr-1.5">⚠</span> {dangerBadgeText}
+          </div>
+        )}
+      </div>
+    </header>
+
+    <!-- Danger Level Meter Box -->
+    <section class="mb-12">
+      <div class="bg-surface-soft border border-hairline rounded-md p-6">
+        <div class="flex justify-between items-center mb-3">
+          <h2 class="text-title-sm text-ink font-medium">{currentUi.dangerIndicator}</h2>
+          <span class={`font-bold text-[14px] uppercase ${dangerTextColor}`}>
+            {dangerBadgeText}
+          </span>
+        </div>
+        
+        <!-- Meter Bar -->
+        <div class="w-full bg-surface-strong h-4 rounded-full overflow-hidden mb-3">
+          <div class={`h-full ${dangerBarColor} ${dangerWidthClass}`}></div>
+        </div>
+        <div class="flex justify-between text-xs text-muted">
+          <span>{currentUi.levelSafe}</span>
+          <span>{currentUi.levelOf}</span>
+          <span>{currentUi.levelCritical}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Detailed Explanation -->
+    <section class="mb-12">
+      <div class="p-8 rounded-lg bg-surface-soft border border-hairline">
+        <h2 class="text-title-sm text-ink font-medium mb-3">{currentUi.explanationTitle}</h2>
+        <p class="short-answer text-title-md font-bold leading-relaxed text-ink mb-4">
+          {data.shortAnswer}
+        </p>
+        
+        <div>
+          <div class="border-t border-hairline my-4 opacity-50"></div>
+          <h3 class="text-caption text-muted mb-2 font-semibold uppercase tracking-wider text-xs">{currentUi.detailsHeading}</h3>
+          {data.reason?.split('\n\n').map((para: string) => (
+            <p class="text-body-md text-body leading-relaxed mb-4">
+              {para}
+            </p>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Health Impact Box -->
+    <section class="mb-12">
+      <div class="bg-error-bg border border-error-bg rounded-md p-6 text-signature-coral">
+        <h3 class="text-title-sm font-semibold mb-2">{currentUi.healthTitle}</h3>
+        <p class="text-body-md leading-relaxed text-signature-coral">
+          {data.healthImpact}
+        </p>
+      </div>
+    </section>
+
+    <!-- Actions and Prevention -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+      <!-- Immediate Actions -->
+      <div class="bg-surface-soft rounded-md p-6 border border-hairline/50">
+        <h2 class="text-title-sm text-ink font-medium mb-4 flex items-center gap-2">
+          {currentUi.actionsTitle}
+        </h2>
+        <ul class="flex flex-col gap-3">
+          {data.actions?.map((act: string) => (
+            <li class="text-body-md text-body flex gap-2.5 items-start leading-relaxed">
+              <span class="text-signature-coral font-bold mt-0.5">⚠</span>
+              <span>{act}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Prevention Tips -->
+      <div class="bg-surface-soft rounded-md p-6 border border-hairline/50">
+        <h2 class="text-title-sm text-ink font-medium mb-4 flex items-center gap-2">
+          {currentUi.preventionTitle}
+        </h2>
+        <ul class="flex flex-col gap-3">
+          {data.prevention?.map((prev: string) => (
+            <li class="text-body-md text-body flex gap-2.5 items-start leading-relaxed">
+              <span class="text-success font-bold mt-0.5">✓</span>
+              <span>{prev}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- Editorial Byline Block -->
+    <div class="bg-surface-soft border border-hairline rounded-md p-4 mb-12 flex flex-wrap items-center justify-between gap-4 text-xs text-muted">
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center justify-center bg-success/10 text-success w-5 h-5 rounded-full font-bold text-[10px]">✓</span>
+        <span>{currentUi.editorialReview}</span>
+      </div>
+      <div>
+        <span>{currentUi.lastReviewed}</span>
+      </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <section class="border-t border-hairline pt-12 mb-16">
+      <h2 class="text-title-lg text-ink font-medium tracking-tight mb-8">{currentUi.faqTitle}</h2>
+      <div class="flex flex-col">
+        {data.faqs?.map((faq: any) => (
+          <details class="group border-b border-hairline py-5">
+            <summary class="flex items-center justify-between text-title-sm text-ink font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none">
+              <span>{faq.question}</span>
+              <span class="text-muted group-open:rotate-180 transition-transform duration-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </span>
+            </summary>
+            <div class="mt-4 text-body-md text-body leading-relaxed pl-1">
+              {faq.answer}
+            </div>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <!-- Related Items -->
+    {relatedItems.length > 0 && (
+      <section class="border-t border-hairline pt-12 mb-16">
+        <h2 class="text-title-lg text-ink font-medium tracking-tight mb-8">{currentUi.relatedTitle}</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {relatedItems.map((item: any) => (
+            <a 
+              href={`/${lang}/what-happens/${item.slug}/`} 
+              class="bg-canvas border border-hairline hover:border-border-strong rounded-md p-5 flex flex-col justify-between shadow-xs transition-colors active:scale-[0.98]"
+            >
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-[11px] text-muted uppercase tracking-wider">{item.type}</span>
+                  <span class="badge-no text-[10px] px-2 py-0.5">{item.dangerLevel}</span>
+                </div>
+                <h3 class="text-title-sm text-ink mb-1">
+                  {item.item}
+                </h3>
+                <p class="text-[13px] text-muted line-clamp-2 leading-relaxed">
+                  {item.shortAnswer}
+                </p>
+              </div>
+              <span class="text-[12px] font-medium text-link mt-4 block">{currentUi.readGuide} &rarr;</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Back Link -->
+    <div class="mt-12 pt-8 border-t border-hairline text-center">
+      <a 
+        href={`/${lang}/what-happens/`} 
+        class="text-link text-[14px] font-medium hover:text-link-active transition-colors inline-flex items-center gap-1.5 active:scale-[0.98] transition-transform"
+      >
+        &larr; {currentUi.backLink}
+      </a>
+    </div>
+  </article>
+</Layout>

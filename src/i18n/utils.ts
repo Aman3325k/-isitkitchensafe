@@ -3,14 +3,26 @@ import itemsEs from '../data/items.es.json';
 import itemsPt from '../data/items.pt.json';
 import washingMachineEs from '../data/washing-machine.es.json';
 import washingMachinePt from '../data/washing-machine.pt.json';
+import howLongEs from '../data/how-long.es.json';
+import howLongPt from '../data/how-long.pt.json';
+import refreezeEs from '../data/refreeze.es.json';
+import refreezePt from '../data/refreeze.pt.json';
+import whatHappensEs from '../data/what-happens.es.json';
+import whatHappensPt from '../data/what-happens.pt.json';
 
 const esSlugs = new Set([
   ...itemsEs.map(i => `${i.appliance}/${i.slug}`),
-  ...washingMachineEs.map(i => `${i.appliance}/${i.slug}`)
+  ...washingMachineEs.map(i => `${i.appliance}/${i.slug}`),
+  ...howLongEs.map(i => `how-long/${i.slug}`),
+  ...refreezeEs.map(i => `refreeze/${i.slug}`),
+  ...whatHappensEs.map(i => `what-happens/${i.slug}`)
 ]);
 const ptSlugs = new Set([
   ...itemsPt.map(i => `${i.appliance}/${i.slug}`),
-  ...washingMachinePt.map(i => `${i.appliance}/${i.slug}`)
+  ...washingMachinePt.map(i => `${i.appliance}/${i.slug}`),
+  ...howLongPt.map(i => `how-long/${i.slug}`),
+  ...refreezePt.map(i => `refreeze/${i.slug}`),
+  ...whatHappensPt.map(i => `what-happens/${i.slug}`)
 ]);
 
 const esAppliances = new Set([
@@ -43,20 +55,8 @@ export function isItemTranslatedInLocale(appliance: string, slug: string, lang: 
   return false;
 }
 
-/**
- * Returns the proper URL for an appliance hub page.
- * If the appliance is translated in `lang`, returns `/es/:appliance/` or `/pt/:appliance/`.
- * If not translated, falls back cleanly to the canonical English hub `/:appliance/`.
- */
-export function getApplianceUrl(appliance: string, lang: SupportedLanguage = 'en'): string {
-  if (lang === 'en' || !isApplianceTranslatedInLocale(appliance, lang)) {
-    return `/${appliance}/`;
-  }
-  return `/${lang}/${appliance}/`;
-}
-
-const esDirectories = new Set<string>(['washing-machine']);
-const ptDirectories = new Set<string>(['washing-machine']);
+const esDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens']);
+const ptDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens']);
 
 /**
  * Checks whether a safety directory section has translated content in the given locale.
@@ -67,6 +67,21 @@ export function isDirectoryTranslatedInLocale(section: string, lang: SupportedLa
   if (lang === 'es') return esDirectories.has(clean);
   if (lang === 'pt') return ptDirectories.has(clean);
   return false;
+}
+
+/**
+ * Returns the proper URL for an appliance hub page.
+ * If the appliance is translated in `lang`, returns `/es/:appliance/` or `/pt/:appliance/`.
+ * If not translated, falls back cleanly to the canonical English hub `/:appliance/`.
+ */
+export function getApplianceUrl(appliance: string, lang: SupportedLanguage = 'en'): string {
+  if (isDirectoryTranslatedInLocale(appliance, lang)) {
+    return getDirectoryUrl(appliance, lang);
+  }
+  if (lang === 'en' || !isApplianceTranslatedInLocale(appliance, lang)) {
+    return `/${appliance}/`;
+  }
+  return `/${lang}/${appliance}/`;
 }
 
 /**
@@ -149,8 +164,8 @@ export function getLocalizedUrl(pathname: string, targetLang: SupportedLanguage)
   const [first, second] = segments;
 
   if (segments.length === 1) {
-    // Appliance hub check (e.g. /dishwasher/)
-    if (isApplianceTranslatedInLocale(first, targetLang)) {
+    // Appliance or directory hub check (e.g. /dishwasher/, /how-long/)
+    if (isApplianceTranslatedInLocale(first, targetLang) || isDirectoryTranslatedInLocale(first, targetLang)) {
       return `/${targetLang}/${first}/`;
     }
     // Untranslated appliance or untranslated section -> fallback to locale homepage
