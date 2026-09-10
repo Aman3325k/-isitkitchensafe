@@ -83,7 +83,7 @@ export function generateMetaDescription(item, appliance, safeStatus, shortAnswer
  * Uses a deterministic hash based on item and appliance to choose different sentence structures,
  * ensuring no two pages have duplicate text.
  */
-export function getUniqueSafetyAnalysis(item, appliance, safeStatus, shortAnswer, tips, warnings) {
+export function getUniqueSafetyAnalysis(item, appliance, safeStatus, _shortAnswer, tips, warnings) {
   const statusText = safeStatus === 'yes' ? 'completely safe' : safeStatus === 'no' ? 'strictly unsafe' : 'dependent on specific guidelines';
   
   // Generate a hash based on item + appliance

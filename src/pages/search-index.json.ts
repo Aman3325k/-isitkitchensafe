@@ -1,3 +1,4 @@
+import type { APIRoute } from 'astro';
 import itemsData from '../data/items.json';
 import howLongData from '../data/how-long.json';
 import washingMachineData from '../data/washing-machine.json';
@@ -61,7 +62,7 @@ const searchItems = [
   }))
 ];
 
-export async function GET() {
+export const GET: APIRoute = async () => {
   return new Response(JSON.stringify(searchItems), {
     headers: {
       'content-type': 'application/json',

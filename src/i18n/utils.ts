@@ -1,4 +1,4 @@
-import { ui, defaultLang, languages, type SupportedLanguage, type UIKey } from './ui';
+import { ui, defaultLang, type SupportedLanguage, type UIKey } from './ui';
 import itemsEs from '../data/items.es.json';
 import itemsPt from '../data/items.pt.json';
 import washingMachineEs from '../data/washing-machine.es.json';

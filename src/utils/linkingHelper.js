@@ -190,7 +190,7 @@ function parseScenario(slug) {
 }
 
 // Generate PAA questions & links dynamically
-export function getPeopleAlsoAsk(item, slug, allGuides, relatedSlugs) {
+export function getPeopleAlsoAsk(_item, _slug, allGuides, relatedSlugs) {
   const paa = [];
   const addedUrls = new Set();
   
@@ -282,7 +282,7 @@ export function getPeopleAlsoAsk(item, slug, allGuides, relatedSlugs) {
 }
 
 // Generate related category lists for an item
-export function getRelatedCategoriesForItem(item, slug, currentPath, allGuides) {
+export function getRelatedCategoriesForItem(_item, _slug, currentPath, allGuides) {
   const categories = [];
   const addedUrls = new Set();
 
