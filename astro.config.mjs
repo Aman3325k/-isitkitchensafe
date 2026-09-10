@@ -13,6 +13,8 @@ function getBuildLastmod() {
     'src/data/how-long.json',
     'src/data/refreeze.json',
     'src/data/washing-machine.json',
+    'src/data/washing-machine.es.json',
+    'src/data/washing-machine.pt.json',
     'src/data/what-happens.json'
   ];
   let maxTime = 0;

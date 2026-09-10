@@ -1,0 +1,434 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import washingMachineEs from '../../../data/washing-machine.es.json';
+import washingMachinePt from '../../../data/washing-machine.pt.json';
+import type { SupportedLanguage } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  const paths: Array<{
+    params: { lang: string; item: string };
+    props: { data: any; lang: SupportedLanguage; availableLocales: SupportedLanguage[] };
+  }> = [];
+
+  // Spanish washing machine items
+  washingMachineEs.forEach((item) => {
+    paths.push({
+      params: {
+        lang: 'es',
+        item: item.slug
+      },
+      props: {
+        data: item,
+        lang: 'es',
+        availableLocales: ['en', 'es', 'pt']
+      }
+    });
+  });
+
+  // Portuguese washing machine items
+  washingMachinePt.forEach((item) => {
+    paths.push({
+      params: {
+        lang: 'pt',
+        item: item.slug
+      },
+      props: {
+        data: item,
+        lang: 'pt',
+        availableLocales: ['en', 'es', 'pt']
+      }
+    });
+  });
+
+  return paths;
+}
+
+interface Props {
+  data: any;
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { data, lang, availableLocales } = Astro.props;
+
+const isEs = lang === 'es';
+
+// Localized UI strings
+const uiStrings = {
+  es: {
+    applianceName: 'Lavadora',
+    guideSuffix: 'Guía de la Lavadora',
+    lastUpdatedPrefix: 'Última Actualización: Junio 2026',
+    verifiedReview: '✓ Verificación de Material',
+    titleQuestion: `¿Se puede meter ${data.item} en la Lavadora?`,
+    metaTitle: `¿Se puede meter ${data.item} en la lavadora? | ¿Es Seguro en la Cocina?`,
+    metaDesc: `${data.shortAnswer} Consulta temperaturas de lavado, ciclos recomendados y precauciones para ${data.item}.`,
+    badgeYes: 'SÍ',
+    badgeNo: 'NO',
+    badgeDepends: 'DEPENDE',
+    settingsTitle: '⚙️ Configuración de Lavado Recomendada',
+    waterTempLabel: 'Temperatura del Agua:',
+    cycleTypeLabel: 'Tipo de Ciclo:',
+    spinSpeedLabel: 'Centrifugado:',
+    explanationTitle: `¿Es seguro lavar ${data.item} en la lavadora?`,
+    materialLabel: 'Composición del Material',
+    riskLabel: 'Riesgo Principal de Seguridad',
+    instructionLabel: 'Instrucción de Seguridad',
+    readBreakdown: 'Leer Análisis Detallado de Seguridad',
+    didYouKnowTitle: '💡 ¿Sabías Que?',
+    didYouKnowText: 'El centrifugado a altas revoluciones y el agua caliente pueden disolver adhesivos en calzado, afieltrar fibras de lana pura y deformar espumas viscoelásticas. ¡Revisa siempre la etiqueta de cuidado del fabricante antes de lavar!',
+    instructionsTitle: '📋 Instrucciones de Lavado',
+    warningsTitle: '⚠ Advertencias Críticas',
+    editorialReview: 'Revisado por el equipo editorial de IsItKitchenSafe',
+    lastUpdated: 'Última actualización',
+    faqTitle: 'Preguntas Frecuentes',
+    relatedTitle: 'Guías de Lavado Relacionadas',
+    readGuide: 'Leer guía',
+    backLink: 'Volver a todas las Guías de la Lavadora',
+    home: 'Inicio',
+  },
+  pt: {
+    applianceName: 'Máquina de Lavar',
+    guideSuffix: 'Guia da Máquina de Lavar',
+    lastUpdatedPrefix: 'Última Atualização: Junho 2026',
+    verifiedReview: '✓ Verificação de Material',
+    titleQuestion: `Pode colocar ${data.item} na Máquina de Lavar?`,
+    metaTitle: `Pode colocar ${data.item} na máquina de lavar? | É Seguro na Cozinha?`,
+    metaDesc: `${data.shortAnswer} Confira temperaturas de lavagem, ciclos recomendados e precauções para ${data.item}.`,
+    badgeYes: 'SIM',
+    badgeNo: 'NÃO',
+    badgeDepends: 'DEPENDE',
+    settingsTitle: '⚙️ Configurações de Lavagem Recomendadas',
+    waterTempLabel: 'Temperatura da Água:',
+    cycleTypeLabel: 'Tipo de Ciclo:',
+    spinSpeedLabel: 'Centrifugação:',
+    explanationTitle: `É seguro lavar ${data.item} na máquina de lavar?`,
+    materialLabel: 'Composição do Material',
+    riskLabel: 'Risco Principal de Segurança',
+    instructionLabel: 'Instrução de Segurança',
+    readBreakdown: 'Ler Análise Detalhada de Segurança',
+    didYouKnowTitle: '💡 Você Sabia?',
+    didYouKnowText: 'A centrifugação intensa e a água quente podem dissolver adesivos de tênis, encolher e feltrar fibras de lã e deformar espumas viscoelásticas. Verifique sempre a etiqueta de cuidados antes de lavar!',
+    instructionsTitle: '📋 Instruções de Lavagem',
+    warningsTitle: '⚠ Avisos Críticos e Riscos',
+    editorialReview: 'Revisado pela equipe editorial de IsItKitchenSafe',
+    lastUpdated: 'Última atualização',
+    faqTitle: 'Perguntas Frequentes',
+    relatedTitle: 'Guias de Lavagem Relacionados',
+    readGuide: 'Ler guia',
+    backLink: 'Voltar para todos os Guias da Máquina de Lavar',
+    home: 'Início',
+  }
+};
+
+const currentUi = isEs ? uiStrings.es : uiStrings.pt;
+
+// Resolve related items from the localized dataset
+const currentDataset = isEs ? washingMachineEs : washingMachinePt;
+let relatedItems = currentDataset.filter(item => data.relatedItems?.includes(item.slug) && item.slug !== data.slug);
+if (relatedItems.length < 5) {
+  const sameSafeItems = currentDataset.filter(item => item.safe === data.safe && item.slug !== data.slug && !data.relatedItems?.includes(item.slug));
+  const existingSlugs = new Set(relatedItems.map(i => i.slug));
+  for (const item of sameSafeItems) {
+    if (relatedItems.length >= 5) break;
+    if (!existingSlugs.has(item.slug)) {
+      relatedItems.push(item);
+      existingSlugs.add(item.slug);
+    }
+  }
+}
+if (relatedItems.length < 5) {
+  const anyItems = currentDataset.filter(item => item.slug !== data.slug && !relatedItems.some(ri => ri.slug === item.slug));
+  for (const item of anyItems) {
+    if (relatedItems.length >= 5) break;
+    relatedItems.push(item);
+  }
+}
+relatedItems = relatedItems.slice(0, 5);
+
+const speakableSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": [".quick-answer", ".short-answer", "h1"]
+  }
+};
+
+const howToSchema = (data.safe === 'yes' || data.safe === 'depends') ? {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": currentUi.titleQuestion,
+  "description": data.shortAnswer,
+  "step": (data.tips || data.instructions || []).map((tip: string, idx: number) => ({
+    "@type": "HowToStep",
+    "position": idx + 1,
+    "text": tip
+  }))
+} : null;
+
+const localeCode = isEs ? 'es-ES' : 'pt-BR';
+const reviewedDate = new Date().toLocaleDateString(localeCode, {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+});
+---
+
+<Layout 
+  title={currentUi.metaTitle} 
+  description={currentUi.metaDesc} 
+  faqs={data.faqs} 
+  lang={lang} 
+  availableLocales={availableLocales}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(speakableSchema)} />
+    {howToSchema && (
+      <script type="application/ld+json" is:inline set:html={JSON.stringify(howToSchema)} />
+    )}
+  </Fragment>
+
+  <article class="max-w-[800px] mx-auto px-6 py-[48px] md:py-[64px]">
+    <!-- Breadcrumbs -->
+    <nav class="flex gap-2 text-muted text-[13px] mb-8" aria-label="Breadcrumb">
+      <a href={`/${lang}/`} class="hover:text-ink transition-colors">{currentUi.home}</a>
+      <span>/</span>
+      <a href={`/${lang}/washing-machine/`} class="hover:text-ink transition-colors">{currentUi.applianceName}</a>
+      <span>/</span>
+      <span class="text-ink font-medium">{data.item}</span>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="mb-10 text-center md:text-left">
+      <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-3">
+        <span class="text-caption text-muted uppercase tracking-wider text-xs">{currentUi.guideSuffix}</span>
+        <span class="text-xs text-muted border-l border-hairline pl-3">{currentUi.lastUpdatedPrefix}</span>
+        <span class="text-xs text-success font-medium bg-success-bg px-2 py-0.5 rounded-sm">{currentUi.verifiedReview}</span>
+      </div>
+      
+      <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-6 leading-tight">
+        {currentUi.titleQuestion}
+      </h1>
+
+      <!-- Safety Verdict Badge -->
+      <div class="inline-flex items-center gap-3">
+        {data.safe === 'yes' && (
+          <div class="badge-yes quick-answer px-6 py-2 text-sm">
+            <span class="mr-1.5">✓</span> {currentUi.badgeYes}
+          </div>
+        )}
+        {data.safe === 'no' && (
+          <div class="badge-no quick-answer px-6 py-2 text-sm">
+            <span class="mr-1.5">✗</span> {currentUi.badgeNo}
+          </div>
+        )}
+        {data.safe === 'depends' && (
+          <div class="badge-depends quick-answer px-6 py-2 text-sm">
+            <span class="mr-1.5">⚠</span> {currentUi.badgeDepends}
+          </div>
+        )}
+      </div>
+    </header>
+
+    <!-- Cycle and Settings Box (only if yes/depends) -->
+    {data.safe !== 'no' && data.settings && (
+      <section class="mb-12">
+        <div class="bg-signature-cream/40 border border-signature-cream rounded-md p-6">
+          <h2 class="text-title-sm text-ink font-medium mb-4 flex items-center gap-2">
+            {currentUi.settingsTitle}
+          </h2>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-[14px]">
+            <div>
+              <span class="text-muted block mb-1">{currentUi.waterTempLabel}</span>
+              <strong class="text-ink text-[16px]">{data.settings.waterTemp}</strong>
+            </div>
+            <div>
+              <span class="text-muted block mb-1">{currentUi.cycleTypeLabel}</span>
+              <strong class="text-ink text-[16px]">{data.settings.cycleType}</strong>
+            </div>
+            <div>
+              <span class="text-muted block mb-1">{currentUi.spinSpeedLabel}</span>
+              <strong class="text-ink text-[16px]">{data.settings.spinSpeed}</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- Detailed Explanation -->
+    <section class="mb-12">
+      <div class="p-8 rounded-lg bg-surface-soft border border-hairline">
+        <h2 class="text-title-sm text-ink font-medium mb-3">{currentUi.explanationTitle}</h2>
+        <p class="short-answer text-title-md font-bold leading-relaxed text-ink mb-4">
+          {data.shortAnswer}
+        </p>
+        
+        {data.material ? (
+          <div>
+            <div class="border-t border-hairline my-4 opacity-50"></div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 my-6">
+              <div class="bg-canvas border border-hairline rounded-md p-4 shadow-xs">
+                <span class="text-caption text-muted uppercase tracking-wider text-[11px] block mb-1">{currentUi.materialLabel}</span>
+                <strong class="text-ink text-[15px] font-semibold">{data.material}</strong>
+              </div>
+              <div class="bg-canvas border border-hairline rounded-md p-4 shadow-xs">
+                <span class="text-caption text-muted uppercase tracking-wider text-[11px] block mb-1">{currentUi.riskLabel}</span>
+                <strong class="text-signature-coral text-[15px] font-semibold">{data.keyRisk || data.specific_warning}</strong>
+              </div>
+              <div class="bg-canvas border border-hairline rounded-md p-4 shadow-xs">
+                <span class="text-caption text-muted uppercase tracking-wider text-[11px] block mb-1">{currentUi.instructionLabel}</span>
+                <strong class="text-success text-[15px] font-semibold">{data.tip || (data.tips && data.tips[0])}</strong>
+              </div>
+            </div>
+            <div class="border-t border-hairline my-4 opacity-50"></div>
+            <details class="group py-2">
+              <summary class="flex items-center justify-between text-body-md text-ink font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none">
+                <span>{currentUi.readBreakdown}</span>
+                <span class="text-muted group-open:rotate-180 transition-transform duration-200">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </span>
+              </summary>
+              <div class="mt-4 text-body-md text-body leading-relaxed pl-1">
+                {data.learnMore && (
+                  <p class="mb-4 font-medium">{data.learnMore}</p>
+                )}
+                {data.reason && data.reason.split('\n\n').map((para: string) => (
+                  <p class="mb-4">
+                    {para}
+                  </p>
+                ))}
+              </div>
+            </details>
+          </div>
+        ) : (
+          <div>
+            <div class="border-t border-hairline my-4 opacity-50"></div>
+            {data.reason && data.reason.split('\n\n').map((para: string) => (
+              <p class="text-body-md text-body leading-relaxed mb-4">
+                {para}
+              </p>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+
+    <!-- Did you know / Fun fact -->
+    <section class="mb-12">
+      <div class="bg-surface-soft border border-hairline rounded-md p-6">
+        <h3 class="text-title-sm text-ink font-medium mb-2">{currentUi.didYouKnowTitle}</h3>
+        <p class="text-body-md text-body leading-relaxed">
+          {currentUi.didYouKnowText}
+        </p>
+      </div>
+    </section>
+
+    <!-- Instructions and Warnings -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+      <!-- Instructions / Tips -->
+      <div class="bg-surface-soft rounded-md p-6 border border-hairline/50">
+        <h2 class="text-title-sm text-ink font-medium mb-4 flex items-center gap-2">
+          {currentUi.instructionsTitle}
+        </h2>
+        <ul class="flex flex-col gap-3">
+          {(data.tips || data.instructions || []).map((tip: string) => (
+            <li class="text-body-md text-body flex gap-2.5 items-start leading-relaxed">
+              <span class="text-success font-bold mt-0.5">✓</span>
+              <span>{tip}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Warnings -->
+      <div class="bg-surface-soft rounded-md p-6 border border-hairline/50">
+        <h2 class="text-title-sm text-ink font-medium mb-4 flex items-center gap-2">
+          {currentUi.warningsTitle}
+        </h2>
+        <ul class="flex flex-col gap-3">
+          {(data.warnings || []).map((warn: string) => (
+            <li class="text-body-md text-body flex gap-2.5 items-start leading-relaxed">
+              <span class="text-signature-coral font-bold mt-0.5">⚠</span>
+              <span>{warn}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- Editorial Byline Block -->
+    <div class="bg-surface-soft border border-hairline rounded-md p-4 mb-12 flex flex-wrap items-center justify-between gap-4 text-xs text-muted">
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center justify-center bg-success/10 text-success w-5 h-5 rounded-full font-bold text-[10px]">✓</span>
+        <span>{currentUi.editorialReview}</span>
+      </div>
+      <div>
+        <span>{currentUi.lastUpdated}: {reviewedDate}</span>
+      </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <section class="border-t border-hairline pt-12 mb-16">
+      <h2 class="text-title-lg text-ink font-medium tracking-tight mb-8">{currentUi.faqTitle}</h2>
+      <div class="flex flex-col">
+        {data.faqs && data.faqs.map((faq: any) => (
+          <details class="group border-b border-hairline py-5">
+            <summary class="flex items-center justify-between text-title-sm text-ink font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none">
+              <span>{faq.question}</span>
+              <span class="text-muted group-open:rotate-180 transition-transform duration-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </span>
+            </summary>
+            <div class="mt-4 text-body-md text-body leading-relaxed pl-1">
+              {faq.answer}
+            </div>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <!-- Related Items -->
+    <section class="border-t border-hairline pt-12 mb-16">
+      <h2 class="text-title-lg text-ink font-medium tracking-tight mb-8">{currentUi.relatedTitle}</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {relatedItems.map(item => (
+          <a 
+            href={`/${lang}/washing-machine/${item.slug}/`} 
+            class="bg-canvas border border-hairline hover:border-border-strong rounded-md p-5 flex flex-col justify-between shadow-xs transition-colors active:scale-[0.98]"
+          >
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-[11px] text-muted uppercase tracking-wider">{currentUi.applianceName}</span>
+                {item.safe === 'yes' && <span class="badge-yes text-[10px] px-2 py-0.5">{currentUi.badgeYes}</span>}
+                {item.safe === 'no' && <span class="badge-no text-[10px] px-2 py-0.5">{currentUi.badgeNo}</span>}
+                {item.safe === 'depends' && <span class="badge-depends text-[10px] px-2 py-0.5">{currentUi.badgeDepends}</span>}
+              </div>
+              <h3 class="text-title-sm text-ink mb-1">
+                {item.item}
+              </h3>
+              <p class="text-[13px] text-muted line-clamp-2 leading-relaxed">
+                {item.shortAnswer}
+              </p>
+            </div>
+            <span class="text-[12px] font-medium text-link mt-4 block">{currentUi.readGuide} &rarr;</span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <!-- Back Link -->
+    <div class="mt-12 pt-8 border-t border-hairline text-center">
+      <a 
+        href={`/${lang}/washing-machine/`} 
+        class="text-link text-[14px] font-medium hover:text-link-active transition-colors inline-flex items-center gap-1.5 active:scale-[0.98] transition-transform"
+      >
+        &larr; {currentUi.backLink}
+      </a>
+    </div>
+  </article>
+</Layout>

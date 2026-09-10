@@ -45,6 +45,7 @@ export const ui = {
     'appliance.airfryer': 'Air Fryer',
     'appliance.refrigerator': 'Refrigerator',
     'appliance.washingMachine': 'Washing Machine',
+    'appliance.washing-machine': 'Washing Machine',
 
     // Verdict Badges
     'verdict.yes': 'YES',
@@ -147,6 +148,7 @@ export const ui = {
     'appliance.airfryer': 'Freidora de Aire',
     'appliance.refrigerator': 'Refrigerador',
     'appliance.washingMachine': 'Lavadora',
+    'appliance.washing-machine': 'Lavadora',
 
     // Verdict Badges
     'verdict.yes': 'SÍ',
@@ -249,6 +251,7 @@ export const ui = {
     'appliance.airfryer': 'Fritadeira sem Óleo',
     'appliance.refrigerator': 'Geladeira',
     'appliance.washingMachine': 'Máquina de Lavar',
+    'appliance.washing-machine': 'Máquina de Lavar',
 
     // Verdict Badges
     'verdict.yes': 'SIM',

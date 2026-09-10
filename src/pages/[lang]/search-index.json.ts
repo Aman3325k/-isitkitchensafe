@@ -1,6 +1,8 @@
 import type { APIRoute } from 'astro';
 import itemsEs from '../../data/items.es.json';
 import itemsPt from '../../data/items.pt.json';
+import washingMachineEs from '../../data/washing-machine.es.json';
+import washingMachinePt from '../../data/washing-machine.pt.json';
 
 export function getStaticPaths() {
   return [
@@ -14,17 +16,29 @@ function formatCategory(app: string, lang: string) {
     if (app === 'dishwasher') return 'Lavavajillas';
     if (app === 'microwave') return 'Microondas';
     if (app === 'oven') return 'Horno';
+    if (app === 'freezer') return 'Congelador';
+    if (app === 'dryer') return 'Secadora';
+    if (app === 'airfryer') return 'Freidora de Aire';
+    if (app === 'refrigerator') return 'Refrigerador';
+    if (app === 'washing-machine') return 'Lavadora';
   } else if (lang === 'pt') {
     if (app === 'dishwasher') return 'Lava-Louças';
     if (app === 'microwave') return 'Micro-ondas';
     if (app === 'oven') return 'Forno';
+    if (app === 'freezer') return 'Freezer';
+    if (app === 'dryer') return 'Secadora';
+    if (app === 'airfryer') return 'Fritadeira sem Óleo';
+    if (app === 'refrigerator') return 'Geladeira';
+    if (app === 'washing-machine') return 'Máquina de Lavar';
   }
   return app.charAt(0).toUpperCase() + app.slice(1);
 }
 
 export const GET: APIRoute = async ({ params }) => {
   const lang = params.lang as 'es' | 'pt';
-  const rawItems = lang === 'es' ? itemsEs : itemsPt;
+  const rawItems = lang === 'es' 
+    ? [...itemsEs, ...washingMachineEs] 
+    : [...itemsPt, ...washingMachinePt];
 
   const searchItems = rawItems.map(item => {
     const category = formatCategory(item.appliance, lang);

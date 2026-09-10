@@ -1,12 +1,26 @@
 import { ui, defaultLang, languages, type SupportedLanguage, type UIKey } from './ui';
 import itemsEs from '../data/items.es.json';
 import itemsPt from '../data/items.pt.json';
+import washingMachineEs from '../data/washing-machine.es.json';
+import washingMachinePt from '../data/washing-machine.pt.json';
 
-const esSlugs = new Set(itemsEs.map(i => `${i.appliance}/${i.slug}`));
-const ptSlugs = new Set(itemsPt.map(i => `${i.appliance}/${i.slug}`));
+const esSlugs = new Set([
+  ...itemsEs.map(i => `${i.appliance}/${i.slug}`),
+  ...washingMachineEs.map(i => `${i.appliance}/${i.slug}`)
+]);
+const ptSlugs = new Set([
+  ...itemsPt.map(i => `${i.appliance}/${i.slug}`),
+  ...washingMachinePt.map(i => `${i.appliance}/${i.slug}`)
+]);
 
-const esAppliances = new Set(itemsEs.map(i => i.appliance));
-const ptAppliances = new Set(itemsPt.map(i => i.appliance));
+const esAppliances = new Set([
+  ...itemsEs.map(i => i.appliance),
+  'washing-machine'
+]);
+const ptAppliances = new Set([
+  ...itemsPt.map(i => i.appliance),
+  'washing-machine'
+]);
 
 /**
  * Checks whether an appliance vertical has translated content in the given locale.
@@ -41,8 +55,8 @@ export function getApplianceUrl(appliance: string, lang: SupportedLanguage = 'en
   return `/${lang}/${appliance}/`;
 }
 
-const esDirectories = new Set<string>([]);
-const ptDirectories = new Set<string>([]);
+const esDirectories = new Set<string>(['washing-machine']);
+const ptDirectories = new Set<string>(['washing-machine']);
 
 /**
  * Checks whether a safety directory section has translated content in the given locale.
