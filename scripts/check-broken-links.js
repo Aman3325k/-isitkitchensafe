@@ -21,7 +21,9 @@ const datasets = [
   { name: 'washing-machine', prefix: i => `washing-machine/${i.slug}`, en: 'src/data/washing-machine.json', es: 'src/data/washing-machine.es.json', pt: 'src/data/washing-machine.pt.json' },
   { name: 'how-long', prefix: i => `how-long/${i.slug}`, en: 'src/data/how-long.json', es: 'src/data/how-long.es.json', pt: 'src/data/how-long.pt.json' },
   { name: 'refreeze', prefix: i => `refreeze/${i.slug}`, en: 'src/data/refreeze.json', es: 'src/data/refreeze.es.json', pt: 'src/data/refreeze.pt.json' },
-  { name: 'what-happens', prefix: i => `what-happens/${i.slug}`, en: 'src/data/what-happens.json', es: 'src/data/what-happens.es.json', pt: 'src/data/what-happens.pt.json' }
+  { name: 'what-happens', prefix: i => `what-happens/${i.slug}`, en: 'src/data/what-happens.json', es: 'src/data/what-happens.es.json', pt: 'src/data/what-happens.pt.json' },
+  { name: 'comparisons', prefix: i => `compare/${i.slug}`, en: 'src/data/comparisons.json', es: 'src/data/comparisons.es.json', pt: 'src/data/comparisons.pt.json' },
+  { name: 'blog', prefix: i => `blog/${i.slug}`, en: 'src/data/blog.json', es: 'src/data/blog.es.json', pt: 'src/data/blog.pt.json' }
 ];
 
 let totalParityErrors = 0;
@@ -65,7 +67,7 @@ for (const ds of datasets) {
 }
 
 if (totalParityErrors === 0) {
-  console.log(`✅ Slug Parity Check PASSED: 1,847 items per language (${totalItemsAudited} items × 3 = 5,541 total) — 100% symmetric.\n`);
+  console.log(`✅ Slug Parity Check PASSED: 1,907 items per language (${totalItemsAudited} items × 3 = ${totalItemsAudited * 3} total) — 100% symmetric.\n`);
 } else {
   console.error(`❌ Slug Parity Check FAILED with ${totalParityErrors} errors.\n`);
 }

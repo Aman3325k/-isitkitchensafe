@@ -1,38 +1,58 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import blogData from '../../data/blog.json';
-import itemsData from '../../data/items.json';
-import comparisonsData from '../../data/comparisons.json';
-import { injectInlineLinks } from '../../utils/linkingHelper.js';
+import Layout from '../../../layouts/Layout.astro';
+import blogEs from '../../../data/blog.es.json';
+import blogPt from '../../../data/blog.pt.json';
+import itemsEs from '../../../data/items.es.json';
+import itemsPt from '../../../data/items.pt.json';
+import comparisonsEs from '../../../data/comparisons.es.json';
+import comparisonsPt from '../../../data/comparisons.pt.json';
+import { injectInlineLinks } from '../../../utils/linkingHelper.js';
+import type { SupportedLanguage } from '../../../i18n/ui';
 
 export function getStaticPaths() {
-  return blogData.map((article) => {
-    return {
-      params: {
-        slug: article.slug
-      },
-      props: {
-        article
-      }
-    };
-  });
+  const esPaths = blogEs.map((article) => ({
+    params: { lang: 'es', slug: article.slug },
+    props: {
+      lang: 'es' as SupportedLanguage,
+      article,
+      availableLocales: ['en', 'es', 'pt'] as SupportedLanguage[]
+    }
+  }));
+
+  const ptPaths = blogPt.map((article) => ({
+    params: { lang: 'pt', slug: article.slug },
+    props: {
+      lang: 'pt' as SupportedLanguage,
+      article,
+      availableLocales: ['en', 'es', 'pt'] as SupportedLanguage[]
+    }
+  }));
+
+  return [...esPaths, ...ptPaths];
 }
 
 interface Props {
-  article: typeof blogData[number];
+  lang: SupportedLanguage;
+  article: typeof blogEs[number];
+  availableLocales: SupportedLanguage[];
 }
 
-const { article } = Astro.props;
+const { lang, article, availableLocales } = Astro.props;
+const isEs = lang === 'es';
 
-// 1. Process inline linking (minimum 10 relevant item links)
+const activeItems = isEs ? itemsEs : itemsPt;
+const activeBlog = isEs ? blogEs : blogPt;
+const activeComparisons = isEs ? comparisonsEs : comparisonsPt;
+
+// 1. Process inline linking
 const linksInjected = new Set();
 const linkCountRef = { count: 0 };
 
-const itemsToMatch = itemsData.map(i => ({
+const itemsToMatch = activeItems.map(i => ({
   name: i.item,
   slug: i.slug,
   appliance: i.appliance,
-  url: `/${i.appliance}/${i.slug}/`
+  url: `/${lang}/${i.appliance}/${i.slug}/`
 })).sort((a, b) => b.name.length - a.name.length);
 
 const linkedIntro = injectInlineLinks(article.intro, itemsToMatch, linksInjected, linkCountRef);
@@ -65,10 +85,10 @@ if (linkCountRef.count < 10) {
 }
 
 // 2. Select 3 related blog articles
-const relatedArticles = blogData.filter(a => a.slug !== article.slug).slice(0, 3);
+const relatedArticles = activeBlog.filter(a => a.slug !== article.slug).slice(0, 3);
 
 // 3. Select relevant comparisons
-const relevantComparisons = comparisonsData.filter(c => 
+const relevantComparisons = activeComparisons.filter(c => 
   article.title.toLowerCase().includes(c.item1.toLowerCase()) || 
   article.title.toLowerCase().includes(c.item2.toLowerCase()) ||
   article.intro.toLowerCase().includes(c.item1.toLowerCase()) ||
@@ -76,7 +96,9 @@ const relevantComparisons = comparisonsData.filter(c =>
 ).slice(0, 3);
 
 // SEO title and description
-const pageTitle = `${article.title} | IsItKitchenSafe`;
+const pageTitle = isEs
+  ? `${article.title} | ¿Es Seguro en la Cocina?`
+  : `${article.title} | É Seguro na Cozinha?`;
 const pageDescription = article.excerpt;
 
 // Calculate realistic word count estimate
@@ -87,7 +109,7 @@ const fullText = [
 ].join(' ');
 const estimatedWordCount = fullText.split(/\s+/).filter(Boolean).length;
 
-const canonicalUrl = `https://isitkitchensafe.com/blog/${article.slug}/`;
+const canonicalUrl = `https://isitkitchensafe.com/${lang}/blog/${article.slug}/`;
 
 const blogPostingSchema = {
   "@context": "https://schema.org",
@@ -96,7 +118,7 @@ const blogPostingSchema = {
   "description": article.excerpt,
   "author": {
     "@type": "Organization",
-    "name": "IsItKitchenSafe Editorial Team"
+    "name": isEs ? "Equipo Editorial IsItKitchenSafe" : "Equipe Editorial IsItKitchenSafe"
   },
   "publisher": {
     "@type": "Organization",
@@ -110,47 +132,49 @@ const blogPostingSchema = {
   "dateModified": "2026-06-13",
   "image": "https://isitkitchensafe.com/og-image.png",
   "wordCount": estimatedWordCount,
-  "articleSection": "Kitchen Safety",
+  "articleSection": isEs ? "Seguridad en la Cocina" : "Segurança na Cozinha",
   "url": canonicalUrl
 };
 ---
 
-<Layout title={pageTitle} description={pageDescription} faqs={article.faqs} excludeArticleSchema={true} availableLocales={['en', 'es', 'pt']} ogType="article">
+<Layout title={pageTitle} description={pageDescription} faqs={article.faqs} excludeArticleSchema={true} availableLocales={availableLocales} lang={lang} ogType="article">
   <script slot="head" type="application/ld+json" set:html={JSON.stringify(blogPostingSchema)} />
   <article class="max-w-[1280px] mx-auto px-6 py-12">
     <!-- Breadcrumbs -->
     <nav class="flex gap-2 text-muted text-[13px] mb-8" aria-label="Breadcrumb">
-      <a href="/" class="hover:text-ink transition-colors">Home</a>
+      <a href={`/${lang}/`} class="hover:text-ink transition-colors">{isEs ? "Inicio" : "Início"}</a>
       <span>/</span>
-      <a href="/blog/" class="hover:text-ink transition-colors">Blog</a>
+      <a href={`/${lang}/blog/`} class="hover:text-ink transition-colors">Blog</a>
       <span>/</span>
       <span class="text-ink font-medium line-clamp-1">{article.title}</span>
     </nav>
 
     <!-- Header Section -->
     <header class="max-w-[800px] mb-10">
-      <span class="text-xs uppercase tracking-wider text-link font-bold block mb-2">Kitchen Safety Guide</span>
+      <span class="text-xs uppercase tracking-wider text-link font-bold block mb-2">
+        {isEs ? "Guía de Seguridad en la Cocina" : "Guia de Segurança na Cozinha"}
+      </span>
       <h1 class="text-3xl md:text-5xl font-bold text-ink tracking-tight mb-6 leading-tight">
         {article.title}
       </h1>
       
       <!-- Trust Signals and Metadata -->
       <div class="flex flex-wrap items-center gap-4 text-xs text-muted border-b border-hairline pb-6">
-        <span>By <strong>{article.author}</strong></span>
+        <span>{isEs ? "Por" : "Por"} <strong>{article.author}</strong></span>
         <span class="hidden sm:inline">•</span>
-        <span>Published: <strong>{article.date}</strong></span>
+        <span>{isEs ? "Publicado:" : "Publicado:"} <strong>{article.date}</strong></span>
         <span class="hidden sm:inline">•</span>
-        <span>Read time: <strong>{article.readTime}</strong></span>
+        <span>{isEs ? "Lectura:" : "Tempo de leitura:"} <strong>{article.readTime}</strong></span>
         <span class="hidden sm:inline">•</span>
         <span class="inline-flex items-center gap-1 text-success font-medium bg-success-bg px-2.5 py-0.5 rounded-full">
-          ✓ Science-Backed (USDA/FDA)
+          {isEs ? "✓ Respaldo Científico (USDA/FDA)" : "✓ Respaldo Científico (USDA/FDA)"}
         </span>
       </div>
     </header>
 
     <!-- AdSense Top Banner -->
     <div class="ad-placeholder w-full h-[90px] bg-surface-soft border border-dashed border-hairline flex items-center justify-center text-xs text-muted mb-10" aria-hidden="true">
-      <!-- Empty placeholder for AdSense banner -->
+      <!-- Top Banner AdSense -->
     </div>
 
     <!-- Main Grid Layout -->
@@ -166,7 +190,7 @@ const blogPostingSchema = {
             <h2 class="text-2xl font-bold text-ink mb-4">{section.title}</h2>
             <p class="text-body-md text-body leading-relaxed mb-6" set:html={section.content}></p>
 
-            <!-- Callout Box depending on type -->
+            <!-- Callout Box -->
             {section.boxText && (
               <div class={`p-5 rounded-md border text-[13.5px] leading-relaxed ${
                 section.type === 'warning' ? 'bg-warning-bg border-warning-border/20 text-ink' :
@@ -180,8 +204,11 @@ const blogPostingSchema = {
                   </span>
                   <div>
                     <strong class="block text-ink font-semibold mb-0.5">
-                      {section.type === 'warning' ? 'Critical Warning' :
-                       section.type === 'success' || section.type === 'fact' ? 'Science Fact' : 'Safety Tip'}
+                      {section.type === 'warning' 
+                        ? (isEs ? 'Aviso Crítico' : 'Aviso Crítico')
+                        : section.type === 'success' || section.type === 'fact' 
+                          ? (isEs ? 'Dato Científico' : 'Fato Científico') 
+                          : (isEs ? 'Consejo de Seguridad' : 'Dica de Segurança')}
                     </strong>
                     <span set:html={section.boxText} />
                   </div>
@@ -191,16 +218,22 @@ const blogPostingSchema = {
           </section>
         ))}
 
-        <!-- Fallback Guides Section (to guarantee 10-link minimum) -->
+        <!-- Fallback Guides Section -->
         {fallbackGuides.length > 0 && (
           <section class="border-t border-hairline pt-8">
             <div class="bg-surface-soft border border-hairline rounded-md p-6">
-              <h3 class="text-title-sm text-ink font-medium mb-3">📖 Referenced Appliance Safety Guides</h3>
-              <p class="text-body-md text-muted mb-4 text-[13.5px]">Learn more about kitchen and appliance safety rules for these related items:</p>
+              <h3 class="text-title-sm text-ink font-medium mb-3">
+                {isEs ? "📖 Guías de Seguridad Relacionadas" : "📖 Guias de Segurança Relacionados"}
+              </h3>
+              <p class="text-body-md text-muted mb-4 text-[13.5px]">
+                {isEs 
+                  ? "Aprende más sobre las pautas de seguridad para estos elementos:"
+                  : "Saiba mais sobre as regras de segurança para estes itens:"}
+              </p>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {fallbackGuides.map(g => (
                   <a href={g.url} class="text-[13px] text-link hover:underline font-medium">
-                    Can you put {g.name.toLowerCase()} in the {g.appliance === 'airfryer' ? 'air fryer' : g.appliance}? &rarr;
+                    {isEs ? `¿Se puede poner ${g.name.toLowerCase()} en el electrodoméstico? →` : `Pode colocar ${g.name.toLowerCase()} no aparelho? →`}
                   </a>
                 ))}
               </div>
@@ -210,13 +243,17 @@ const blogPostingSchema = {
 
         <!-- Conclusion -->
         <section class="border-t border-hairline pt-8 bg-surface-soft/40 p-6 rounded-lg">
-          <h2 class="text-2xl font-bold text-ink mb-4">Conclusion</h2>
+          <h2 class="text-2xl font-bold text-ink mb-4">
+            {isEs ? "Conclusión" : "Conclusão"}
+          </h2>
           <p class="text-body-md text-body leading-relaxed" set:html={linkedConclusion}></p>
         </section>
 
         <!-- FAQ Section -->
         <section class="border-t border-hairline pt-10">
-          <h2 class="text-2xl md:text-3xl font-bold text-ink mb-6">Frequently Asked Questions</h2>
+          <h2 class="text-2xl md:text-3xl font-bold text-ink mb-6">
+            {isEs ? "Preguntas Frecuentes" : "Perguntas Frequentes"}
+          </h2>
           <div class="flex flex-col">
             {article.faqs.map((faq) => (
               <details class="group border-b border-hairline py-4">
@@ -238,11 +275,11 @@ const blogPostingSchema = {
 
         <!-- Back to Blog Navigation -->
         <div class="mt-8 pt-8 border-t border-hairline flex justify-between items-center">
-          <a href="/blog/" class="text-link text-[14px] font-medium hover:text-link-active transition-colors">
-            &larr; Back to Safety Blog
+          <a href={`/${lang}/blog/`} class="text-link text-[14px] font-medium hover:text-link-active transition-colors">
+            {isEs ? "← Volver al Blog de Seguridad" : "← Voltar ao Blog de Segurança"}
           </a>
-          <a href="/" class="text-link text-[14px] font-medium hover:text-link-active transition-colors">
-            Search Appliance Guides &rarr;
+          <a href={`/${lang}/`} class="text-link text-[14px] font-medium hover:text-link-active transition-colors">
+            {isEs ? "Buscar Guías de Electrodomésticos →" : "Pesquisar Guias de Eletrodomésticos →"}
           </a>
         </div>
       </div>
@@ -251,17 +288,19 @@ const blogPostingSchema = {
       <aside class="flex flex-col gap-8">
         <!-- Sidebar AdSense Placeholder -->
         <div class="ad-placeholder w-full h-[250px] bg-surface-soft border border-dashed border-hairline flex items-center justify-center text-xs text-muted" aria-hidden="true">
-          <!-- Empty placeholder for AdSense rectangle -->
+          <!-- Rectangle AdSense -->
         </div>
 
         <!-- Related Guides / Tools Link Box -->
         <div class="border border-hairline rounded-lg p-6 bg-canvas shadow-xs">
-          <h3 class="text-title-sm text-ink font-bold mb-4">Related Safety Guides</h3>
+          <h3 class="text-title-sm text-ink font-bold mb-4">
+            {isEs ? "Guías de Seguridad Relacionadas" : "Guias de Segurança Relacionados"}
+          </h3>
           <ul class="flex flex-col gap-3">
             {article.relatedTools.map((tool) => (
               <li>
                 <a 
-                  href={tool.url.endsWith('/') ? tool.url : `${tool.url}/`} 
+                  href={tool.url} 
                   class="text-[13px] text-link hover:underline font-medium leading-normal block"
                 >
                   {tool.name} &rarr;
@@ -274,15 +313,17 @@ const blogPostingSchema = {
         <!-- Relevant Comparisons Link Box -->
         {relevantComparisons.length > 0 && (
           <div class="border border-hairline rounded-lg p-6 bg-canvas shadow-xs">
-            <h3 class="text-title-sm text-ink font-bold mb-4">Related Comparisons</h3>
+            <h3 class="text-title-sm text-ink font-bold mb-4">
+              {isEs ? "Comparaciones Relacionadas" : "Comparações Relacionadas"}
+            </h3>
             <ul class="flex flex-col gap-3">
               {relevantComparisons.map((c) => (
                 <li>
                   <a 
-                    href={`/compare/${c.slug}/`} 
+                    href={`/${lang}/compare/${c.slug}/`} 
                     class="text-[13px] text-link hover:underline font-medium leading-normal block"
                   >
-                    {c.item1} vs {c.item2} Guide &rarr;
+                    {c.item1} vs {c.item2} &rarr;
                   </a>
                 </li>
               ))}
@@ -292,27 +333,35 @@ const blogPostingSchema = {
 
         <!-- Safety Pledge Trust Signals -->
         <div class="border border-hairline rounded-lg p-6 bg-[#fcfbfa]">
-          <h4 class="text-xs uppercase tracking-wider text-muted font-bold mb-2">Our Safety Policy</h4>
+          <h4 class="text-xs uppercase tracking-wider text-muted font-bold mb-2">
+            {isEs ? "Nuestra Política de Seguridad" : "Nossa Política de Segurança"}
+          </h4>
           <p class="text-xs text-muted leading-relaxed mb-3">
-            Every guide is thoroughly researched using recommendations from the Food Safety and Inspection Service (FSIS), USDA, and FDA.
+            {isEs
+              ? "Cada guía es investigada minuciosamente con recomendaciones oficiales del USDA, FDA y fabricantes."
+              : "Cada artigo é cuidadosamente pesquisado com recomendações oficiais do USDA, FDA e fabricantes."}
           </p>
-          <span class="text-[10px] text-muted block">Last updated: June 2026</span>
+          <span class="text-[10px] text-muted block">
+            {isEs ? "Actualizado: Junio 2026" : "Atualizado: Junho 2026"}
+          </span>
         </div>
 
         <!-- Sidebar AdSense Bottom Placeholder -->
         <div class="ad-placeholder w-full h-[600px] bg-surface-soft border border-dashed border-hairline flex items-center justify-center text-xs text-muted" aria-hidden="true">
-          <!-- Empty placeholder for AdSense skyscraper -->
+          <!-- Skyscraper AdSense -->
         </div>
       </aside>
     </div>
 
     <!-- Related Blog Articles Section -->
     <section class="border-t border-hairline pt-12 mt-12">
-      <h2 class="text-2xl font-bold text-ink mb-8">Related Blog Articles</h2>
+      <h2 class="text-2xl font-bold text-ink mb-8">
+        {isEs ? "Artículos de Seguridad Relacionados" : "Artigos de Segurança Relacionados"}
+      </h2>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         {relatedArticles.map((art) => (
           <a 
-            href={`/blog/${art.slug}/`} 
+            href={`/${lang}/blog/${art.slug}/`} 
             class="group bg-canvas border border-hairline hover:border-border-strong rounded-lg p-6 flex flex-col justify-between shadow-xs transition-colors active:scale-[0.98]"
           >
             <div>
@@ -324,7 +373,9 @@ const blogPostingSchema = {
                 {art.excerpt}
               </p>
             </div>
-            <span class="text-[12px] font-medium text-link mt-4 block">Read article &rarr;</span>
+            <span class="text-[12px] font-medium text-link mt-4 block">
+              {isEs ? "Leer artículo →" : "Ler artigo →"}
+            </span>
           </a>
         ))}
       </div>

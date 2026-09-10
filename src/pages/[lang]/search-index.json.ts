@@ -9,6 +9,10 @@ import refreezeEs from '../../data/refreeze.es.json';
 import refreezePt from '../../data/refreeze.pt.json';
 import whatHappensEs from '../../data/what-happens.es.json';
 import whatHappensPt from '../../data/what-happens.pt.json';
+import comparisonsEs from '../../data/comparisons.es.json';
+import comparisonsPt from '../../data/comparisons.pt.json';
+import blogEs from '../../data/blog.es.json';
+import blogPt from '../../data/blog.pt.json';
 
 export function getStaticPaths() {
   return [
@@ -30,6 +34,8 @@ function formatCategory(app: string, lang: string) {
     if (app === 'how-long') return 'Conservación';
     if (app === 'refreeze') return 'Recongelación';
     if (app === 'what-happens') return 'Qué Pasa Si...';
+    if (app === 'compare') return 'Comparar';
+    if (app === 'blog') return 'Blog';
   } else if (lang === 'pt') {
     if (app === 'dishwasher') return 'Lava-Louças';
     if (app === 'microwave') return 'Micro-ondas';
@@ -42,6 +48,8 @@ function formatCategory(app: string, lang: string) {
     if (app === 'how-long') return 'Conservação';
     if (app === 'refreeze') return 'Recongelamento';
     if (app === 'what-happens') return 'O Que Acontece Se...';
+    if (app === 'compare') return 'Comparar';
+    if (app === 'blog') return 'Blog';
   }
   return app.charAt(0).toUpperCase() + app.slice(1);
 }
@@ -105,11 +113,35 @@ export const GET: APIRoute = async ({ params }) => {
     };
   });
 
+  const rawComparisons = isEs ? comparisonsEs : comparisonsPt;
+  const comparisonsSearchItems = rawComparisons.map(item => {
+    const category = formatCategory('compare', lang);
+    return {
+      name: `${item.item1} vs ${item.item2}`,
+      category,
+      url: `/${lang}/compare/${item.slug}/`,
+      keywords: [item.item1, item.item2, item.slug.replace(/-/g, ' '), category, 'vs'].join(' ').toLowerCase()
+    };
+  });
+
+  const rawBlog = isEs ? blogEs : blogPt;
+  const blogSearchItems = rawBlog.map(item => {
+    const category = formatCategory('blog', lang);
+    return {
+      name: item.title,
+      category,
+      url: `/${lang}/blog/${item.slug}/`,
+      keywords: [item.title, item.slug.replace(/-/g, ' '), category, 'guía', 'dicas', 'tips'].join(' ').toLowerCase()
+    };
+  });
+
   const searchItems = [
     ...primarySearchItems,
     ...howLongSearchItems,
     ...refreezeSearchItems,
-    ...whatHappensSearchItems
+    ...whatHappensSearchItems,
+    ...comparisonsSearchItems,
+    ...blogSearchItems
   ];
 
   return new Response(JSON.stringify(searchItems), {

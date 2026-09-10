@@ -1,24 +1,48 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import comparisonsData from '../../data/comparisons.json';
-import itemsData from '../../data/items.json';
-import howLongData from '../../data/how-long.json';
-import refreezeData from '../../data/refreeze.json';
-import washingData from '../../data/washing-machine.json';
-import { normalizeItemName } from '../../utils/linkingHelper.js';
+import Layout from '../../../layouts/Layout.astro';
+import comparisonsEs from '../../../data/comparisons.es.json';
+import comparisonsPt from '../../../data/comparisons.pt.json';
+import itemsEs from '../../../data/items.es.json';
+import itemsPt from '../../../data/items.pt.json';
+import howLongEs from '../../../data/how-long.es.json';
+import howLongPt from '../../../data/how-long.pt.json';
+import refreezeEs from '../../../data/refreeze.es.json';
+import refreezePt from '../../../data/refreeze.pt.json';
+import washingEs from '../../../data/washing-machine.es.json';
+import washingPt from '../../../data/washing-machine.pt.json';
+import type { SupportedLanguage } from '../../../i18n/ui';
 
 export async function getStaticPaths() {
-  return comparisonsData.map(item => ({
-    params: { slug: item.slug },
-    props: { comparison: item }
+  const esPaths = comparisonsEs.map(item => ({
+    params: { lang: 'es', slug: item.slug },
+    props: {
+      lang: 'es' as SupportedLanguage,
+      comparison: item,
+      availableLocales: ['en', 'es', 'pt'] as SupportedLanguage[]
+    }
   }));
+
+  const ptPaths = comparisonsPt.map(item => ({
+    params: { lang: 'pt', slug: item.slug },
+    props: {
+      lang: 'pt' as SupportedLanguage,
+      comparison: item,
+      availableLocales: ['en', 'es', 'pt'] as SupportedLanguage[]
+    }
+  }));
+
+  return [...esPaths, ...ptPaths];
 }
 
 interface Props {
-  comparison: typeof comparisonsData[number];
+  lang: SupportedLanguage;
+  comparison: typeof comparisonsEs[number];
+  availableLocales: SupportedLanguage[];
 }
 
-const { comparison } = Astro.props;
+const { lang, comparison, availableLocales } = Astro.props;
+const isEs = lang === 'es';
+
 const {
   slug,
   category,
@@ -37,28 +61,46 @@ const {
 } = comparison;
 
 // Human-readable category names
-const categoryNames: Record<string, string> = {
-  "cooking-method": "Cooking Methods",
-  "container-material": "Containers & Materials",
-  "food-storage": "Food Storage",
-  "appliance-safety": "Appliance Safety"
-};
+const categoryNames: Record<string, string> = isEs
+  ? {
+      "cooking-method": "Métodos de Cocción",
+      "container-material": "Recipientes y Materiales",
+      "food-storage": "Almacenamiento de Alimentos",
+      "appliance-safety": "Seguridad de Electrodomésticos"
+    }
+  : {
+      "cooking-method": "Métodos de Cozimento",
+      "container-material": "Recipientes e Materiais",
+      "food-storage": "Armazenamento de Alimentos",
+      "appliance-safety": "Segurança de Eletrodomésticos"
+    };
 
-// Strictly generate 150-160 characters meta description containing the winner/depends
 function getMetaDescription(i1: string, i2: string, win: string, verd: string) {
   let prefix = "";
-  if (win === "item1") {
-    prefix = `Is ${i1} or ${i2} better? Our safety guide names ${i1} the winner. `;
-  } else if (win === "item2") {
-    prefix = `Is ${i1} or ${i2} better? Our safety guide names ${i2} the winner. `;
+  if (isEs) {
+    if (win === "item1") {
+      prefix = `¿Es mejor ${i1} o ${i2}? Nuestra guía de seguridad señala a ${i1} como ganador. `;
+    } else if (win === "item2") {
+      prefix = `¿Es mejor ${i1} o ${i2}? Nuestra guía de seguridad señala a ${i2} como ganador. `;
+    } else {
+      prefix = `¿Es mejor ${i1} o ${i2}? Nuestra comparativa detalla cuándo utilizar cada uno. `;
+    }
   } else {
-    prefix = `Is ${i1} or ${i2} better? Our kitchen safety comparison outlines when to use each. `;
+    if (win === "item1") {
+      prefix = `É melhor ${i1} ou ${i2}? Nosso guia de segurança aponta ${i1} como vencedor. `;
+    } else if (win === "item2") {
+      prefix = `É melhor ${i1} ou ${i2}? Nosso guia de segurança aponta ${i2} como vencedor. `;
+    } else {
+      prefix = `É melhor ${i1} ou ${i2}? Nosso comparativo detalha quando usar cada opção. `;
+    }
   }
   
   let desc = `${prefix}${verd}`;
   
   if (desc.length < 150) {
-    const suffix = " Read our detailed side-by-side comparison table, pros, and safety tips.";
+    const suffix = isEs
+      ? " Consulta nuestra tabla comparativa detallada, ventajas y pautas de seguridad."
+      : " Confira nossa tabela comparativa completa, vantagens e dicas de segurança.";
     desc = (desc + suffix).substring(0, 160);
   }
   
@@ -66,7 +108,6 @@ function getMetaDescription(i1: string, i2: string, win: string, verd: string) {
     desc = desc.substring(0, 157) + "...";
   }
   
-  // Pad if still too short
   if (desc.length < 150) {
     desc = desc.padEnd(150, '.');
   }
@@ -74,10 +115,13 @@ function getMetaDescription(i1: string, i2: string, win: string, verd: string) {
   return desc;
 }
 
-const pageTitle = `${item1} vs ${item2}: Which Is Better? | IsItKitchenSafe`;
+const pageTitle = isEs
+  ? `${item1} vs ${item2}: ¿Cuál es Mejor? | ¿Es Seguro en la Cocina?`
+  : `${item1} vs ${item2}: Qual É Melhor? | É Seguro na Cozinha?`;
+
 const pageDescription = getMetaDescription(item1, item2, winner, verdict);
 
-// Find related comparison objects for linking (ensuring 4 related comparison pages)
+const comparisonsData = isEs ? comparisonsEs : comparisonsPt;
 let relatedComparisonObjects = comparisonsData.filter(c => 
   relatedComparisons.includes(c.slug) && c.slug !== slug
 );
@@ -92,29 +136,37 @@ if (relatedComparisonObjects.length < 4) {
 }
 relatedComparisonObjects = relatedComparisonObjects.slice(0, 4);
 
-// Format related item paths nicely
 function formatItemLinkText(url: string) {
   const parts = url.split('/').filter(Boolean);
-  if (parts.length < 2) return "Kitchen Safety Guide";
-  const app = parts[0] === 'airfryer' ? 'Air Fryer' : parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
-  const itm = parts[1].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-  return `${itm} in the ${app} Guide`;
+  const cleanParts = parts.filter(p => p !== 'es' && p !== 'pt');
+  if (cleanParts.length < 2) return isEs ? "Guía de Seguridad en Cocina" : "Guia de Segurança na Cozinha";
+  const app = cleanParts[0];
+  const itm = cleanParts[1].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  return isEs ? `Guía de ${itm} en ${app}` : `Guia de ${itm} em ${app}`;
 }
 
-// Resolve item1 and item2 URLs dynamically to guarantee they are linked
+const activeItems = isEs ? itemsEs : itemsPt;
+const activeHowLong = isEs ? howLongEs : howLongPt;
+const activeRefreeze = isEs ? refreezeEs : refreezePt;
+const activeWashing = isEs ? washingEs : washingPt;
+
+function normalizeName(name: string) {
+  return name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+}
+
 function resolveItemPageUrl(itemName: string) {
-  const norm = normalizeItemName(itemName);
-  const match = itemsData.find(i => normalizeItemName(i.item) === norm);
-  if (match) return `/${match.appliance}/${match.slug}/`;
+  const norm = normalizeName(itemName);
+  const match = activeItems.find(i => normalizeName(i.item) === norm);
+  if (match) return `/${lang}/${match.appliance}/${match.slug}/`;
   
-  const hlMatch = howLongData.find(h => normalizeItemName(h.item) === norm);
-  if (hlMatch) return `/how-long/${hlMatch.slug}/`;
+  const hlMatch = activeHowLong.find(h => normalizeName(h.item) === norm);
+  if (hlMatch) return `/${lang}/how-long/${hlMatch.slug}/`;
   
-  const rfMatch = refreezeData.find(r => normalizeItemName(r.item) === norm);
-  if (rfMatch) return `/refreeze/${rfMatch.slug}/`;
+  const rfMatch = activeRefreeze.find(r => normalizeName(r.item) === norm);
+  if (rfMatch) return `/${lang}/refreeze/${rfMatch.slug}/`;
   
-  const wMatch = washingData.find(w => normalizeItemName(w.item) === norm);
-  if (wMatch) return `/washing-machine/${wMatch.slug}/`;
+  const wMatch = activeWashing.find(w => normalizeName(w.item) === norm);
+  if (wMatch) return `/${lang}/washing-machine/${wMatch.slug}/`;
   
   return null;
 }
@@ -127,14 +179,16 @@ if (item2Url) individualGuides.push({ name: item2, url: item2Url });
 
 if (relatedItems) {
   relatedItems.forEach(url => {
-    const cleanUrl = url.endsWith('/') ? url : `${url}/`;
+    let cleanUrl = url.endsWith('/') ? url : `${url}/`;
+    if (!cleanUrl.startsWith(`/${lang}/`)) {
+      cleanUrl = `/${lang}${cleanUrl.startsWith('/') ? '' : '/'}${cleanUrl}`;
+    }
     if (!individualGuides.some(g => g.url === cleanUrl)) {
-      individualGuides.push({ name: formatItemLinkText(url), url: cleanUrl });
+      individualGuides.push({ name: formatItemLinkText(cleanUrl), url: cleanUrl });
     }
   });
 }
 
-// Find relevant how-long or refreeze guides for both items
 const preservationGuides: { name: string; url: string; label: string }[] = [];
 const addPreservationGuide = (name: string, url: string, label: string) => {
   const cleanUrl = url.endsWith('/') ? url : `${url}/`;
@@ -143,20 +197,20 @@ const addPreservationGuide = (name: string, url: string, label: string) => {
   }
 };
 
-const item1Norm = normalizeItemName(item1);
-const item1Hl = howLongData.find(h => normalizeItemName(h.item) === item1Norm);
-if (item1Hl) addPreservationGuide(`How Long Does ${item1Hl.item} Last?`, `/how-long/${item1Hl.slug}/`, 'Shelf Life');
-const item1Rf = refreezeData.find(r => normalizeItemName(r.item) === item1Norm);
-if (item1Rf) addPreservationGuide(`Can You Refreeze ${item1Rf.item}?`, `/refreeze/${item1Rf.slug}/`, 'Refreezing');
+const item1Norm = normalizeName(item1);
+const item1Hl = activeHowLong.find(h => normalizeName(h.item) === item1Norm);
+if (item1Hl) addPreservationGuide(isEs ? `¿Cuánto Dura ${item1Hl.item}?` : `Quanto Tempo Dura ${item1Hl.item}?`, `/${lang}/how-long/${item1Hl.slug}/`, isEs ? 'Vida Útil' : 'Validade');
+const item1Rf = activeRefreeze.find(r => normalizeName(r.item) === item1Norm);
+if (item1Rf) addPreservationGuide(isEs ? `¿Se Puede Recongelar ${item1Rf.item}?` : `Pode Recongelar ${item1Rf.item}?`, `/${lang}/refreeze/${item1Rf.slug}/`, isEs ? 'Recongelación' : 'Recongelamento');
 
-const item2Norm = normalizeItemName(item2);
-const item2Hl = howLongData.find(h => normalizeItemName(h.item) === item2Norm);
-if (item2Hl) addPreservationGuide(`How Long Does ${item2Hl.item} Last?`, `/how-long/${item2Hl.slug}/`, 'Shelf Life');
-const item2Rf = refreezeData.find(r => normalizeItemName(r.item) === item2Norm);
-if (item2Rf) addPreservationGuide(`Can You Refreeze ${item2Rf.item}?`, `/refreeze/${item2Rf.slug}/`, 'Refreezing');
+const item2Norm = normalizeName(item2);
+const item2Hl = activeHowLong.find(h => normalizeName(h.item) === item2Norm);
+if (item2Hl) addPreservationGuide(isEs ? `¿Cuánto Dura ${item2Hl.item}?` : `Quanto Tempo Dura ${item2Hl.item}?`, `/${lang}/how-long/${item2Hl.slug}/`, isEs ? 'Vida Útil' : 'Validade');
+const item2Rf = activeRefreeze.find(r => normalizeName(r.item) === item2Norm);
+if (item2Rf) addPreservationGuide(isEs ? `¿Se Puede Recongelar ${item2Rf.item}?` : `Pode Recongelar ${item2Rf.item}?`, `/${lang}/refreeze/${item2Rf.slug}/`, isEs ? 'Recongelación' : 'Recongelamento');
 
 // Schemas
-const pageCanonical = `https://isitkitchensafe.com/compare/${slug}/`;
+const pageCanonical = `https://isitkitchensafe.com/${lang}/compare/${slug}/`;
 
 const breadcrumbSchema = {
   "@context": "https://schema.org",
@@ -165,14 +219,14 @@ const breadcrumbSchema = {
     {
       "@type": "ListItem",
       "position": 1,
-      "name": "Home",
-      "item": "https://isitkitchensafe.com/"
+      "name": isEs ? "Inicio" : "Início",
+      "item": `https://isitkitchensafe.com/${lang}/`
     },
     {
       "@type": "ListItem",
       "position": 2,
-      "name": "Compare",
-      "item": "https://isitkitchensafe.com/compare/"
+      "name": isEs ? "Comparar" : "Comparar",
+      "item": `https://isitkitchensafe.com/${lang}/compare/`
     },
     {
       "@type": "ListItem",
@@ -186,7 +240,7 @@ const breadcrumbSchema = {
 const articleSchema = {
   "@context": "https://schema.org",
   "@type": "Article",
-  "headline": `${item1} vs ${item2}: Which Is Better?`,
+  "headline": isEs ? `${item1} vs ${item2}: ¿Cuál es Mejor?` : `${item1} vs ${item2}: Qual É Melhor?`,
   "description": pageDescription,
   "image": "https://isitkitchensafe.com/favicon.svg",
   "author": {
@@ -221,7 +275,7 @@ const faqSchema = {
 };
 ---
 
-<Layout title={pageTitle} description={pageDescription} excludeBreadcrumbSchema={true} excludeArticleSchema={true} excludeFaqSchema={true} availableLocales={['en', 'es', 'pt']} ogType="article">
+<Layout title={pageTitle} description={pageDescription} excludeBreadcrumbSchema={true} excludeArticleSchema={true} excludeFaqSchema={true} availableLocales={availableLocales} lang={lang} ogType="article">
   <!-- Inject Schemas into Head Slot -->
   <Fragment slot="head">
     <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
@@ -234,9 +288,9 @@ const faqSchema = {
       
       <!-- Breadcrumbs -->
       <nav class="flex gap-2 text-muted text-[13px] mb-6" aria-label="Breadcrumb">
-        <a href="/" class="hover:text-ink transition-colors">Home</a>
+        <a href={`/${lang}/`} class="hover:text-ink transition-colors">{isEs ? "Inicio" : "Início"}</a>
         <span>/</span>
-        <a href="/compare/" class="hover:text-ink transition-colors">Compare</a>
+        <a href={`/${lang}/compare/`} class="hover:text-ink transition-colors">{isEs ? "Comparar" : "Comparar"}</a>
         <span>/</span>
         <span class="text-ink font-medium">{item1} vs {item2}</span>
       </nav>
@@ -244,30 +298,30 @@ const faqSchema = {
       <!-- H1 Page Header -->
       <header class="mb-8 border-b border-hairline pb-8">
         <span class="text-xs font-bold uppercase tracking-wider text-muted mb-2 block">
-          {categoryNames[category]} Comparison
+          {isEs ? `Comparación de ${categoryNames[category]}` : `Comparação de ${categoryNames[category]}`}
         </span>
         <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-6 leading-tight">
-          {item1} vs {item2}: Which Should You Use?
+          {isEs ? `${item1} vs ${item2}: ¿Cuál Deberías Usar?` : `${item1} vs ${item2}: Qual Você Deve Usar?`}
         </h1>
 
-        <!-- Huge and Obvious Winner Badge above the fold -->
+        <!-- Winner Badge above the fold -->
         <div class="flex items-center mb-6">
           {winner === "item1" && (
             <div class="inline-flex items-center gap-2 px-6 py-3 bg-success-bg border border-success/30 rounded-full text-success text-lg md:text-xl font-bold font-display">
               <span class="text-2xl leading-none">✓</span>
-              <span>{item1.toUpperCase()} WINS</span>
+              <span>{item1.toUpperCase()} {isEs ? "GANA" : "VENCE"}</span>
             </div>
           )}
           {winner === "item2" && (
             <div class="inline-flex items-center gap-2 px-6 py-3 bg-success-bg border border-success/30 rounded-full text-success text-lg md:text-xl font-bold font-display">
               <span class="text-2xl leading-none">✓</span>
-              <span>{item2.toUpperCase()} WINS</span>
+              <span>{item2.toUpperCase()} {isEs ? "GANA" : "VENCE"}</span>
             </div>
           )}
           {winner === "depends" && (
             <div class="inline-flex items-center gap-2 px-6 py-3 bg-surface-soft border border-hairline rounded-full text-body text-lg md:text-xl font-bold font-display">
               <span class="text-xl leading-none">⚠</span>
-              <span>IT DEPENDS</span>
+              <span>{isEs ? "DEPENDE" : "DEPENDE"}</span>
             </div>
           )}
         </div>
@@ -282,14 +336,18 @@ const faqSchema = {
 
       <!-- Side-by-Side Comparison Table -->
       <section class="mb-12">
-        <h2 class="text-title-lg font-bold text-ink mb-6">Side-by-Side Comparison</h2>
+        <h2 class="text-title-lg font-bold text-ink mb-6">
+          {isEs ? "Comparación Detallada" : "Comparação Detalhada"}
+        </h2>
         
-        <!-- Desktop Table (visible md and up) -->
+        <!-- Desktop Table -->
         <div class="hidden md:block overflow-hidden border border-hairline rounded-lg">
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="bg-surface-soft border-b border-hairline">
-                <th class="w-[20%] p-4 font-display font-medium text-ink text-[14px]">Aspect</th>
+                <th class="w-[20%] p-4 font-display font-medium text-ink text-[14px]">
+                  {isEs ? "Aspecto" : "Aspecto"}
+                </th>
                 <th class={`w-[40%] p-4 font-display font-medium text-[14px] text-center ${winner === 'item1' ? 'bg-success-bg/50 border-l-2 border-success-border' : 'bg-surface-soft/50'}`}>
                   {item1}
                 </th>
@@ -303,12 +361,10 @@ const faqSchema = {
                 <tr class={idx % 2 === 0 ? 'bg-canvas' : 'bg-surface-soft/30'}>
                   <td class="p-4 font-medium text-ink text-[13px]">{row.aspect}</td>
                   
-                  <!-- Item 1 Value Cell -->
                   <td class={`p-4 text-[13px] text-center ${winner === 'item1' ? 'bg-success-bg border-l-2 border-success-border font-medium text-success' : 'bg-surface-soft text-muted'}`}>
                     {row.item1Value}
                   </td>
                   
-                  <!-- Item 2 Value Cell -->
                   <td class={`p-4 text-[13px] text-center ${winner === 'item2' ? 'bg-success-bg border-l-2 border-success-border font-medium text-success' : 'bg-surface-soft text-muted'}`}>
                     {row.item2Value}
                   </td>
@@ -318,7 +374,7 @@ const faqSchema = {
           </table>
         </div>
 
-        <!-- Mobile Table Stacking (visible below md) -->
+        <!-- Mobile Table Stacking -->
         <div class="block md:hidden flex flex-col gap-4">
           {table.map((row) => (
             <div class="border border-hairline rounded-lg overflow-hidden">
@@ -342,13 +398,14 @@ const faqSchema = {
 
       <!-- Detailed Pros Section -->
       <section class="mb-12 border-t border-hairline pt-8">
-        <h2 class="text-title-lg font-bold text-ink mb-6">Pros & Advantages</h2>
+        <h2 class="text-title-lg font-bold text-ink mb-6">
+          {isEs ? "Ventajas y Pros" : "Vantagens e Prós"}
+        </h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <!-- Item 1 Pros -->
           <div class="p-6 bg-surface-soft/30 border border-hairline rounded-lg">
             <h3 class="text-title-sm font-bold text-ink mb-4 pb-2 border-b border-hairline flex items-center gap-2">
               <span class="text-success text-lg">✓</span>
-              <span>{item1} Pros</span>
+              <span>{item1} ({isEs ? "Ventajas" : "Vantagens"})</span>
             </h3>
             <ul class="flex flex-col gap-3 text-[13.5px] text-body leading-relaxed">
               {item1Pros.map(pro => (
@@ -360,11 +417,10 @@ const faqSchema = {
             </ul>
           </div>
 
-          <!-- Item 2 Pros -->
           <div class="p-6 bg-surface-soft/30 border border-hairline rounded-lg">
             <h3 class="text-title-sm font-bold text-ink mb-4 pb-2 border-b border-hairline flex items-center gap-2">
               <span class="text-success text-lg">✓</span>
-              <span>{item2} Pros</span>
+              <span>{item2} ({isEs ? "Ventajas" : "Vantagens"})</span>
             </h3>
             <ul class="flex flex-col gap-3 text-[13.5px] text-body leading-relaxed">
               {item2Pros.map(pro => (
@@ -380,7 +436,9 @@ const faqSchema = {
 
       <!-- Best Use Cases Section -->
       <section class="mb-12 border-t border-hairline pt-8">
-        <h2 class="text-title-lg font-bold text-ink mb-6">Best Use Cases</h2>
+        <h2 class="text-title-lg font-bold text-ink mb-6">
+          {isEs ? "Mejores Casos de Uso" : "Melhores Casos de Uso"}
+        </h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           {useCases.map(uc => (
             <div class="p-5 border border-hairline rounded-lg bg-canvas shadow-xs">
@@ -393,7 +451,9 @@ const faqSchema = {
 
       <!-- Safety Considerations Section -->
       <section class="mb-12 border-t border-hairline pt-8">
-        <h2 class="text-title-lg font-bold text-ink mb-6">Safety Considerations</h2>
+        <h2 class="text-title-lg font-bold text-ink mb-6">
+          {isEs ? "Consideraciones de Seguridad" : "Considerações de Segurança"}
+        </h2>
         <div class="p-6 bg-[#fce8e6]/30 border border-error-bg rounded-lg">
           <ul class="flex flex-col gap-4 text-[13.5px] text-body leading-relaxed">
             {safetyNotes.map(note => (
@@ -408,7 +468,9 @@ const faqSchema = {
 
       <!-- FAQ Section -->
       <section class="mb-12 border-t border-hairline pt-8">
-        <h2 class="text-title-lg font-bold text-ink mb-6">Frequently Asked Questions</h2>
+        <h2 class="text-title-lg font-bold text-ink mb-6">
+          {isEs ? "Preguntas Frecuentes" : "Perguntas Frequentes"}
+        </h2>
         <div class="flex flex-col gap-4">
           {faqs.map(faq => (
             <details class="group border border-hairline rounded-lg bg-canvas [&_summary::-webkit-details-marker]:hidden">
@@ -427,15 +489,17 @@ const faqSchema = {
       <!-- Compared Individual Item Guides Grid -->
       {individualGuides.length > 0 && (
         <section class="mb-12 border-t border-hairline pt-8">
-          <h2 class="text-title-lg font-bold text-ink mb-6">Compare Individual Safety Guides</h2>
+          <h2 class="text-title-lg font-bold text-ink mb-6">
+            {isEs ? "Guías Individuales de Seguridad Relacionadas" : "Guias Individuais de Segurança Relacionados"}
+          </h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {individualGuides.map(g => (
               <a 
                 href={g.url}
                 class="flex items-center justify-between p-4 border border-hairline rounded-lg hover:border-border-strong hover:bg-surface-soft/40 transition-all text-decoration-none text-ink font-medium text-[13.5px] shadow-xs"
               >
-                <span>{g.name.includes('Guide') ? g.name : `${g.name} Safety Guide`}</span>
-                <span class="text-link text-xs">Read Guide →</span>
+                <span>{g.name}</span>
+                <span class="text-link text-xs">{isEs ? "Leer Guía →" : "Ler Guia →"}</span>
               </a>
             ))}
           </div>
@@ -445,7 +509,9 @@ const faqSchema = {
       <!-- Relevant Preservation & Food Storage Guides -->
       {preservationGuides.length > 0 && (
         <section class="mb-12 border-t border-hairline pt-8">
-          <h2 class="text-title-lg font-bold text-ink mb-6">Shelf Life & Food Preservation Guides</h2>
+          <h2 class="text-title-lg font-bold text-ink mb-6">
+            {isEs ? "Guías de Conservación y Vida Útil" : "Guias de Conservação e Validade"}
+          </h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {preservationGuides.map(g => (
               <a 
@@ -463,11 +529,13 @@ const faqSchema = {
       <!-- Related Comparisons Grid -->
       {relatedComparisonObjects.length > 0 && (
         <section class="mb-12 border-t border-hairline pt-8">
-          <h2 class="text-title-lg font-bold text-ink mb-6">Related Safety Comparisons</h2>
+          <h2 class="text-title-lg font-bold text-ink mb-6">
+            {isEs ? "Comparaciones de Seguridad Relacionadas" : "Comparações de Segurança Relacionadas"}
+          </h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {relatedComparisonObjects.map(rc => (
               <a 
-                href={`/compare/${rc.slug}/`}
+                href={`/${lang}/compare/${rc.slug}/`}
                 class="block border border-hairline rounded-lg p-5 hover:border-border-strong hover:bg-surface-soft/40 transition-all text-decoration-none"
               >
                 <span class="text-xs uppercase tracking-wider text-muted font-bold block mb-1">
@@ -488,11 +556,11 @@ const faqSchema = {
       <!-- Back Link -->
       <footer class="border-t border-hairline pt-8 text-center">
         <a 
-          href="/compare/" 
+          href={`/${lang}/compare/`} 
           class="inline-flex items-center gap-1.5 text-link hover:underline font-medium text-[14px]"
         >
           <span>←</span>
-          <span>Back to safety comparisons index</span>
+          <span>{isEs ? "Volver al índice de comparaciones" : "Voltar ao índice de comparações"}</span>
         </a>
       </footer>
 

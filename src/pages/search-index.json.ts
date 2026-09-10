@@ -4,6 +4,7 @@ import washingMachineData from '../data/washing-machine.json';
 import refreezeData from '../data/refreeze.json';
 import whatHappensData from '../data/what-happens.json';
 import comparisonsData from '../data/comparisons.json';
+import blogData from '../data/blog.json';
 
 function formatAppliance(app: string) {
   if (app === 'airfryer') return 'Air Fryer';
@@ -11,6 +12,7 @@ function formatAppliance(app: string) {
   if (app === 'washing-machine') return 'Washing Machine';
   if (app === 'refreeze') return 'Refreeze Safety';
   if (app === 'what-happens') return 'What Happens If';
+  if (app === 'blog') return 'Blog';
   return app.charAt(0).toUpperCase() + app.slice(1);
 }
 
@@ -50,6 +52,12 @@ const searchItems = [
     category: 'Compare',
     url: `/compare/${item.slug}/`,
     keywords: [item.item1, item.item2, item.slug.replace(/-/g, ' '), 'compare', 'vs'].join(' ').toLowerCase()
+  })),
+  ...blogData.map(item => ({
+    name: item.title,
+    category: 'Blog',
+    url: `/blog/${item.slug}/`,
+    keywords: [item.title, item.slug.replace(/-/g, ' '), 'blog', 'guide', 'safety'].join(' ').toLowerCase()
   }))
 ];
 

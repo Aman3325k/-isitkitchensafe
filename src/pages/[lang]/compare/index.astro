@@ -1,70 +1,128 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import comparisonsData from '../../data/comparisons.json';
+import Layout from '../../../layouts/Layout.astro';
+import comparisonsEs from '../../../data/comparisons.es.json';
+import comparisonsPt from '../../../data/comparisons.pt.json';
+import type { SupportedLanguage } from '../../../i18n/ui';
 
-const pageTitle = "Kitchen Safety Comparisons | IsItKitchenSafe";
-const pageDescription = "Compare kitchen safety rules, appliance guidelines, cooking methods, and food storage options side-by-side. Read our expert, USDA/FDA-aligned comparisons.";
+export function getStaticPaths() {
+  return [
+    {
+      params: { lang: 'es' },
+      props: {
+        lang: 'es' as SupportedLanguage,
+        comparisonsData: comparisonsEs,
+        availableLocales: ['en', 'es', 'pt'] as SupportedLanguage[]
+      }
+    },
+    {
+      params: { lang: 'pt' },
+      props: {
+        lang: 'pt' as SupportedLanguage,
+        comparisonsData: comparisonsPt,
+        availableLocales: ['en', 'es', 'pt'] as SupportedLanguage[]
+      }
+    }
+  ];
+}
 
-// Category human-readable name mapping
-const categoryNames: Record<string, string> = {
-  "cooking-method": "Cooking Methods",
-  "container-material": "Containers & Materials",
-  "food-storage": "Food Storage",
-  "appliance-safety": "Appliance Safety"
-};
+interface Props {
+  lang: SupportedLanguage;
+  comparisonsData: typeof comparisonsEs;
+  availableLocales: SupportedLanguage[];
+}
 
-// Group comparisons by category
+const { lang, comparisonsData, availableLocales } = Astro.props;
+const isEs = lang === 'es';
+
+const pageTitle = isEs
+  ? "Comparaciones de Seguridad en la Cocina | ¿Es Seguro en la Cocina?"
+  : "Comparações de Segurança na Cozinha | É Seguro na Cozinha?";
+
+const pageDescription = isEs
+  ? "Compara reglas de seguridad, electrodomésticos, métodos de cocción y recipientes frente a frente. Evaluaciones directas alineadas con el USDA y la FDA."
+  : "Compare regras de segurança, eletrodomésticos, métodos de cozimento e recipientes lado a lado. Avaliações completas e respaldadas pelo USDA e FDA.";
+
+const categoryNames: Record<string, string> = isEs
+  ? {
+      "cooking-method": "Métodos de Cocción",
+      "container-material": "Recipientes y Materiales",
+      "food-storage": "Almacenamiento de Alimentos",
+      "appliance-safety": "Seguridad de Electrodomésticos"
+    }
+  : {
+      "cooking-method": "Métodos de Cozimento",
+      "container-material": "Recipientes e Materiais",
+      "food-storage": "Armazenamento de Alimentos",
+      "appliance-safety": "Segurança de Eletrodomésticos"
+    };
+
 const categories = ["cooking-method", "container-material", "food-storage", "appliance-safety"];
 const groupedComparisons = categories.reduce((acc, cat) => {
   acc[cat] = comparisonsData.filter(c => c.category === cat);
   return acc;
 }, {} as Record<string, typeof comparisonsData>);
 
-// FAQ schema for the index page
-const compareFaqs = [
-  {
-    question: "Why compare kitchen safety guidelines?",
-    answer: "Comparing appliances, cooking techniques, and container materials side-by-side helps prevent accidental damage, chemical contamination, and foodborne illness by clarifying the precise physical limits of each material or method."
-  },
-  {
-    question: "What is the source of these safety comparison recommendations?",
-    answer: "All recommendations are compiled directly from USDA food safety guidelines, FDA materials standards, and official kitchen appliance manufacturer manuals."
-  },
-  {
-    question: "How do I know if an item is microwave or dishwasher safe?",
-    answer: "Check the bottom of your container for the standard safety icons (wavy lines for microwave, water droplets/racks for dishwasher) or consult our comparison charts for general material guidelines."
-  }
-];
+const compareFaqs = isEs
+  ? [
+      {
+        question: "¿Por qué comparar pautas de seguridad en la cocina?",
+        answer: "Comparar electrodomésticos, métodos de cocción y materiales de recipientes lado a lado previene daños accidentales, migración química e intoxicaciones alimentarias."
+      },
+      {
+        question: "¿Cuál es la fuente de estas recomendaciones de seguridad?",
+        answer: "Todas las recomendaciones provienen de pautas oficiales del USDA, estándares de materiales de la FDA y manuales de fabricantes de electrodomésticos."
+      },
+      {
+        question: "¿Cómo saber si un recipiente es seguro para microondas o lavavajillas?",
+        answer: "Verifica los símbolos estampados en la base del recipiente o consulta nuestras tablas de comparación de materiales para obtener orientación precisa."
+      }
+    ]
+  : [
+      {
+        question: "Por que comparar diretrizes de segurança na cozinha?",
+        answer: "Comparar eletrodomésticos, métodos de cozimento e materiais lado a lado evita acidentes domésticos, liberação química e intoxicações alimentares."
+      },
+      {
+        question: "Qual é a fonte dessas recomendações de segurança?",
+        answer: "Todas as diretrizes são baseadas em dados do USDA, padrões de contato da FDA e manuais de engenharia dos fabricantes."
+      },
+      {
+        question: "Como saber se um pote pode ir ao micro-ondas ou lava-louças?",
+        answer: "Confira as marcações estampadas no fundo da peça ou consulte nossos guias de materiais para verificar os limites térmicos exatos."
+      }
+    ];
 
 const itemListSchema = {
   "@context": "https://schema.org",
   "@type": "ItemList",
-  "name": "Kitchen Safety Comparisons",
+  "name": isEs ? "Comparaciones de Seguridad en la Cocina" : "Comparações de Segurança na Cozinha",
   "itemListElement": comparisonsData.map((item, idx) => ({
     "@type": "ListItem",
     "position": idx + 1,
-    "url": `https://isitkitchensafe.com/compare/${item.slug}/`
+    "url": `https://isitkitchensafe.com/${lang}/compare/${item.slug}/`
   }))
 };
 ---
 
-<Layout title={pageTitle} description={pageDescription} faqs={compareFaqs} excludeArticleSchema={true} availableLocales={['en', 'es', 'pt']}>
+<Layout title={pageTitle} description={pageDescription} faqs={compareFaqs} excludeArticleSchema={true} availableLocales={availableLocales} lang={lang}>
   <script slot="head" type="application/ld+json" set:html={JSON.stringify(itemListSchema)} />
   <div class="bg-canvas min-h-screen">
     <!-- Hero Header Section -->
     <section class="border-b border-hairline py-[64px] md:py-[80px]">
       <div class="max-w-[1280px] mx-auto px-6 text-center md:text-left">
         <nav class="flex justify-center md:justify-start gap-2 text-muted text-[13px] mb-6 animate-fade-in" aria-label="Breadcrumb">
-          <a href="/" class="hover:text-ink transition-colors">Home</a>
+          <a href={`/${lang}/`} class="hover:text-ink transition-colors">{isEs ? "Inicio" : "Início"}</a>
           <span>/</span>
-          <span class="text-ink font-medium">Compare</span>
+          <span class="text-ink font-medium">{isEs ? "Comparar" : "Comparar"}</span>
         </nav>
 
         <h1 class="text-display-lg md:text-display-xl font-medium tracking-tight text-ink mb-4">
-          Kitchen Safety Comparisons
+          {isEs ? "Comparaciones de Seguridad en la Cocina" : "Comparações de Segurança na Cozinha"}
         </h1>
         <p class="text-body-md text-muted max-w-[680px] leading-relaxed">
-          Compare kitchen appliances, storage containers, food safety rules, and cooking methods side-by-side. Make informed decisions backed by USDA, FDA, and manufacturer guidelines.
+          {isEs
+            ? "Compara electrodomésticos, recipientes, reglas de conservación y métodos de cocción lado a lado con información respaldada por el USDA y la FDA."
+            : "Compare eletrodomésticos, recipientes térmicos, prazos de conservação e técnicas culinárias lado a lado com respaldo científico do USDA e FDA."}
         </p>
       </div>
     </section>
@@ -77,12 +135,12 @@ const itemListSchema = {
           <input 
             type="text" 
             id="compare-search"
-            placeholder="Search comparisons (e.g. foil, air fryer)..." 
-            aria-label="Search comparisons"
+            placeholder={isEs ? "Buscar comparaciones (ej. aluminio, freidora)..." : "Pesquisar comparações (ex: alumínio, air fryer)..."} 
+            aria-label={isEs ? "Buscar comparaciones" : "Pesquisar comparações"}
             class="w-full h-11 px-4 py-3 bg-canvas text-ink text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
           />
           <span class="absolute right-3 top-3 text-muted text-[13px] pointer-events-none" id="search-count">
-            50 matches
+            {comparisonsData.length} {isEs ? "coincidencias" : "resultados"}
           </span>
         </div>
 
@@ -92,7 +150,7 @@ const itemListSchema = {
             data-filter="all"
             class="px-4 py-2 bg-primary text-on-primary text-[13px] font-medium rounded-lg border-none cursor-pointer transition-colors select-none active:scale-95"
           >
-            All Categories
+            {isEs ? "Todas las Categorías" : "Todas as Categorias"}
           </button>
           {categories.map(cat => (
             <button 
@@ -109,8 +167,12 @@ const itemListSchema = {
     <!-- Comparisons Grid -->
     <section class="max-w-[1280px] mx-auto px-6 py-12">
       <div id="no-results-msg" class="hidden text-center py-12">
-        <p class="text-lg font-medium text-ink mb-2">No matching comparisons found</p>
-        <p class="text-sm text-muted">Try adjusting your search keywords or resetting filters.</p>
+        <p class="text-lg font-medium text-ink mb-2">
+          {isEs ? "No se encontraron comparaciones" : "Nenhuma comparação encontrada"}
+        </p>
+        <p class="text-sm text-muted">
+          {isEs ? "Prueba ajustando tus términos de búsqueda o restableciendo los filtros." : "Tente ajustar seus termos de pesquisa ou redefinir os filtros."}
+        </p>
       </div>
 
       <div id="comparisons-container" class="flex flex-col gap-12">
@@ -121,20 +183,19 @@ const itemListSchema = {
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {groupedComparisons[cat].map(item => {
-                // Determine Winner Badge display text and color classes
-                let winnerText = "Depends";
+                let winnerText = isEs ? "Depende" : "Depende";
                 let winnerClass = "bg-surface-strong text-muted";
                 if (item.winner === "item1") {
-                  winnerText = `${item.item1} Wins`;
+                  winnerText = isEs ? `${item.item1} Gana` : `${item.item1} Vence`;
                   winnerClass = "bg-success-bg text-success font-medium";
                 } else if (item.winner === "item2") {
-                  winnerText = `${item.item2} Wins`;
+                  winnerText = isEs ? `${item.item2} Gana` : `${item.item2} Vence`;
                   winnerClass = "bg-success-bg text-success font-medium";
                 }
                 
                 return (
                   <a 
-                    href={`/compare/${item.slug}/`} 
+                    href={`/${lang}/compare/${item.slug}/`} 
                     class="compare-card block border border-hairline rounded-lg p-6 bg-canvas hover:border-border-strong hover:shadow-sm transition-all text-decoration-none"
                     data-search-term={`${item.item1.toLowerCase()} ${item.item2.toLowerCase()} ${item.slug.replace(/-/g, ' ')}`}
                   >
@@ -145,7 +206,7 @@ const itemListSchema = {
                       </span>
                     </div>
 
-                    <!-- Mini comparison layout with VS divider between two boxes -->
+                    <!-- Mini comparison layout with VS divider -->
                     <div class="flex items-center justify-between border border-hairline rounded-lg overflow-hidden bg-surface-soft/40 mb-4 h-16">
                       <div class="flex-1 px-3 py-2 text-center flex items-center justify-center h-full">
                         <span class="font-medium text-ink text-[13px] line-clamp-2 leading-snug">{item.item1}</span>
@@ -163,7 +224,7 @@ const itemListSchema = {
                     </p>
                     
                     <div class="mt-4 flex items-center gap-1 text-[13px] text-link font-medium">
-                      <span>Read side-by-side comparison</span>
+                      <span>{isEs ? "Leer comparación detallada" : "Ler comparação detalhada"}</span>
                       <span class="text-[11px]">→</span>
                     </div>
                   </a>
@@ -211,7 +272,6 @@ const itemListSchema = {
           }
         });
 
-        // Hide the whole section if no cards are visible inside it
         if (sectionVisibleCards > 0) {
           section.classList.remove('hidden');
         } else {
@@ -219,12 +279,10 @@ const itemListSchema = {
         }
       });
 
-      // Update match count badge
       if (searchCountSpan) {
         searchCountSpan.textContent = `${visibleCount} match${visibleCount !== 1 ? 'es' : ''}`;
       }
 
-      // Show/hide empty state
       if (visibleCount === 0) {
         noResultsMsg?.classList.remove('hidden');
       } else {
@@ -232,7 +290,6 @@ const itemListSchema = {
       }
     };
 
-    // Handle search input
     if (searchInput) {
       searchInput.addEventListener('input', () => {
         searchQuery = searchInput.value.trim().toLowerCase();
@@ -240,16 +297,13 @@ const itemListSchema = {
       });
     }
 
-    // Handle filter buttons
     filterButtons.forEach(btn => {
       btn.addEventListener('click', () => {
-        // Reset active state for all buttons
         filterButtons.forEach(b => {
           b.classList.remove('bg-primary', 'text-on-primary');
           b.classList.add('bg-canvas', 'text-body', 'border', 'border-hairline');
         });
 
-        // Add active state to clicked button
         btn.classList.remove('bg-canvas', 'text-body', 'border', 'border-hairline');
         btn.classList.add('bg-primary', 'text-on-primary');
 
