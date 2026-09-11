@@ -1,6 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import itemsData from '../data/items.json';
+import itemsEs from '../data/items.es.json';
+import itemsPt from '../data/items.pt.json';
 import { generateMetaDescription, getUniqueSafetyAnalysis } from '../utils/seoHelper.js';
 import { resolveAllGuidesForItem, getPeopleAlsoAsk } from '../utils/linkingHelper.js';
 import { getCategoryForMaterial } from '../utils/materialCategories';
@@ -23,10 +25,13 @@ const appKey = `appliance.${data.appliance}` as any;
 const formattedAppliance = t(appKey) || (data.appliance.charAt(0).toUpperCase() + data.appliance.slice(1));
 const applianceInPhrase = getApplianceIn(data.appliance, lang);
 
+// Select localized items dataset based on lang
+const currentItemsDataset = lang === 'es' ? itemsEs : lang === 'pt' ? itemsPt : itemsData;
+
 // Get details for related items (minimum 5 related item pages)
-let relatedItems = itemsData.filter(item => data.relatedItems?.includes(item.slug) && item.slug !== data.slug);
+let relatedItems = currentItemsDataset.filter(item => data.relatedItems?.includes(item.slug) && item.slug !== data.slug);
 if (relatedItems.length < 5) {
-  const sameApplianceItems = itemsData.filter(item => item.appliance === data.appliance && item.slug !== data.slug && !data.relatedItems?.includes(item.slug));
+  const sameApplianceItems = currentItemsDataset.filter(item => item.appliance === data.appliance && item.slug !== data.slug && !data.relatedItems?.includes(item.slug));
   const existingSlugs = new Set(relatedItems.map(i => i.slug));
   for (const item of sameApplianceItems) {
     if (relatedItems.length >= 5) break;
@@ -37,7 +42,7 @@ if (relatedItems.length < 5) {
   }
 }
 if (relatedItems.length < 5) {
-  const anyItems = itemsData.filter(item => item.slug !== data.slug && !relatedItems.some(ri => ri.slug === item.slug));
+  const anyItems = currentItemsDataset.filter(item => item.slug !== data.slug && !relatedItems.some(ri => ri.slug === item.slug));
   for (const item of anyItems) {
     if (relatedItems.length >= 5) break;
     relatedItems.push(item);
@@ -355,8 +360,8 @@ const reviewedDate = new Date().toLocaleDateString(localeCode, {
       </section>
     )}
 
-    <!-- Related Items (English) -->
-    {lang === 'en' && relatedItems.length > 0 && (
+    <!-- Related Items -->
+    {relatedItems.length > 0 && (
       <section class="border-t border-hairline pt-12 mb-16">
         <h2 class="text-title-lg text-ink font-medium tracking-tight mb-8">{t('page.relatedGuides')}</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
