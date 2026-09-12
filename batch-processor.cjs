@@ -74,15 +74,28 @@ function classifyItem(name, type, file, appliance, location, slug) {
   }
 
   // 4. Cleaning Chemicals / Detergent Overflow
+  // Split into specific hazard groups so dish soap/detergent does not inherit bleach/ammonia gas warnings
   if (
-    slug.includes("detergent") || slug.includes("soap") || slug.includes("bleach") || slug.includes("ammonia") || slug.includes("vinegar") ||
-    name.includes("detergent") || name.includes("soap") || name.includes("bleach") || name.includes("ammonia") || name.includes("vinegar")
+    slug.includes("bleach") || slug.includes("ammonia") ||
+    name.includes("bleach") || name.includes("ammonia")
   ) {
     return {
-      material: "Cleaning Chemical Compound",
-      keyRisk: "Excessive foaming & toxic gas emission",
-      tip: "Only use formulated dishwasher detergents; never mix household chemicals like bleach and ammonia.",
-      learnMore: "Standard dish soaps create excessive foam that overflows the washer tub. Mixing bleach with acids (vinegar) or bases (ammonia) releases highly toxic chloramine or chlorine gases."
+      material: "Chemical Compound",
+      keyRisk: "Toxic gas emission & respiratory hazard",
+      tip: "Never mix household chemicals like bleach and ammonia or acids.",
+      learnMore: "Mixing bleach with acids (vinegar) or bases (ammonia) releases highly toxic chloramine or chlorine gases."
+    };
+  }
+
+  if (
+    slug.includes("detergent") || slug.includes("soap") || slug.includes("dish-soap") ||
+    name.includes("detergent") || name.includes("soap") || name.includes("dish soap")
+  ) {
+    return {
+      material: "Surfactant / Detergent",
+      keyRisk: "Excessive foaming & appliance overflow",
+      tip: "Only use formulated dishwasher detergents in dishwashers.",
+      learnMore: "Standard liquid dish soaps create excessive foam that overflows the washer tub and can cause electrical shorting or mechanical leaks."
     };
   }
 
@@ -196,9 +209,13 @@ function classifyItem(name, type, file, appliance, location, slug) {
   }
 
   // 14. Oils / Fats / Mist
+  // Use hyphen-delimited token matching for slugs and word-boundary matching for names
+  // to prevent false-positive matches on words containing 'oil' as a substring (e.g. 'foil', 'boil').
+  const slugTokens = slug.split('-');
+  const isOilMatch = slugTokens.includes("oil") || slugTokens.includes("oils") || /\b(oil|oils)\b/i.test(name);
   if (
-    slug.includes("oil") || slug.includes("mist") || slug.includes("butter") || slug.includes("grease") || slug.includes("cooking-spray") || slug.includes("rub") ||
-    name.includes("oil") || name.includes("mist") || name.includes("butter") || name.includes("grease") || name.includes("cooking spray") || name.includes("rub")
+    isOilMatch || slug.includes("mist") || slug.includes("butter") || slug.includes("grease") || slug.includes("cooking-spray") || slug.includes("rub") ||
+    name.includes("mist") || name.includes("butter") || name.includes("grease") || name.includes("cooking spray") || name.includes("rub")
   ) {
     return {
       material: "Cooking Oil / Liquid Fat / Seasoning",
@@ -274,7 +291,7 @@ function classifyItem(name, type, file, appliance, location, slug) {
   if (type.includes("metal") || type.includes("aluminum") || type.includes("copper") || type.includes("steel") || type.includes("cast-iron") || type.includes("yeti") || type.includes("vacuum") || name.includes("metal") || name.includes("foil") || name.includes("aluminum") || name.includes("copper") || name.includes("steel") || name.includes("iron") || name.includes("brass") || name.includes("gold") || name.includes("silver") || name.includes("pewter") || name.includes("pan") || name.includes("wok") || name.includes("whisk") || name.includes("tongs") || name.includes("grater") || name.includes("peeler") || name.includes("thermometer") || name.includes("sheet") || name.includes("tin") || name.includes("skillet") || name.includes("shears") || name.includes("knife") || name.includes("blade") || name.includes("can") || name.includes("dutch oven") || name.includes("silverware") || name.includes("rack") || name.includes("carafe") || name.includes("shears") || slug.includes("fork") || slug.includes("spoon") || slug.includes("knife") || slug.includes("foil") || slug.includes("metal") || slug.includes("steel") || slug.includes("silverware") || name.includes("fork") || name.includes("spoon") || name.includes("knife") || name.includes("foil") || name.includes("metal") || name.includes("steel") || name.includes("silverware")) {
     const isCastIron = name.includes("cast iron") || type.includes("cast-iron") || slug.includes("cast-iron");
     const isCopper = name.includes("copper") || type.includes("copper") || slug.includes("copper");
-    const isAluminum = name.includes("aluminum") || type.includes("aluminum") || slug.includes("aluminum");
+    const isAluminum = name.includes("aluminum") || type.includes("aluminum") || slug.includes("aluminum") || slug.includes("foil") || name.includes("foil");
     const isGoldSilver = name.includes("gold") || name.includes("silver") || slug.includes("gold") || slug.includes("silver");
     return {
       material: isCastIron ? "Cast Iron" :
@@ -377,166 +394,298 @@ function classifyItem(name, type, file, appliance, location, slug) {
     };
   }
 
-  return { material, keyRisk, tip, learnMore };
+  // SAFEGUARD: If no confident classification match was found, flag with needsReview: true
+  // instead of silently falling back to generic boilerplate copy.
+  const isDefaultFallback = (material === "Processed Material");
+  return { 
+    material, 
+    keyRisk, 
+    tip, 
+    learnMore,
+    needsReview: isDefaultFallback
+  };
 }
 
-// Perform dry run
-files.forEach(f => {
-  const data = JSON.parse(fs.readFileSync(path.join(dataDir, f), 'utf-8'));
-  let genericCount = 0;
-  let sampleGenerics = [];
-  
-  data.forEach(e => {
-    const specs = classifyItem(
-      e.item || e.slug,
-      e.type || "",
-      f,
-      e.appliance || "",
-      e.location || "",
-      e.slug || ""
-    );
-    if (specs.material === 'Processed Material') {
-      genericCount++;
-      sampleGenerics.push(e.item + ' (' + e.slug + ')');
+/**
+ * Tier-based boilerplate generator with hazard keyword safeguards.
+ * Replaces coarse 3-tier template that previously injected bleach/ammonia text into unrelated items.
+ * If no confident hazard match is found, sets needsReview: true rather than falling back to generic copy.
+ */
+function generateTieredBoilerplate(scenario, dangerLevel) {
+  const s = (scenario || "").toLowerCase();
+  let shortAnswer = "";
+  let reason = "";
+  let healthImpact = "";
+  let actions = [];
+  let prevention = [];
+  let needsReview = false;
+
+  if (dangerLevel === 'dangerous') {
+    shortAnswer = `It is extremely dangerous to ${scenario.replace(/-/g, ' ')}.`;
+    
+    // Keyword-aware classification of the actual hazard
+    if (s.includes("bleach") || s.includes("ammonia")) {
+      reason = `Mixing chlorine bleach with ammonia or acids releases lethal gases (chlorine or chloramine) that cause immediate, severe lung damage and chemical burns.`;
+      healthImpact = `Inhalation causes acute respiratory distress, severe chemical burns to lungs, and can be fatal.`;
+      actions = [
+        `Evacuate the area immediately into fresh air.`,
+        `Call Poison Control (1-800-222-1222) or emergency services (911).`,
+        `Do not re-enter until the space is thoroughly ventilated.`
+      ];
+      prevention = [
+        `Never mix cleaning chemicals together under any circumstance.`,
+        `Keep bleach and ammonia stored in separate locations.`
+      ];
+    } else if (s.includes("foil") || s.includes("metal") || s.includes("cd")) {
+      reason = `Placing thin or unapproved metal in a microwave concentrates electrical charge, creating intense arcing that can ignite fires and destroy the magnetron.`;
+      healthImpact = `Fire and smoke inhalation risk; explosion risk from violent electrical discharge.`;
+      actions = [
+        `Stop the microwave immediately and unplug the unit if safe.`,
+        `Keep the microwave door closed if flames appear inside.`,
+        `Have a Class ABC fire extinguisher accessible.`
+      ];
+      prevention = [
+        `Use only microwave-safe glass, ceramic, or labeled containers.`,
+        `Keep all metals and foil out of the microwave.`
+      ];
+    } else if (s.includes("chicken") || s.includes("pork") || s.includes("meat") || s.includes("egg") || s.includes("cookie-dough") || s.includes("rice") || s.includes("sprouted-potatoes") || s.includes("moldy") || s.includes("power-outage")) {
+      reason = `Consuming undercooked, temperature-abused, or moldy food exposes you to pathogenic bacteria (such as Salmonella, Campylobacter, or Bacillus cereus) or fungal mycotoxins that cause severe gastrointestinal illness.`;
+      healthImpact = `High risk of bacterial food poisoning, severe dehydration, and systemic infection.`;
+      actions = [
+        `Discard the compromised food immediately; do not taste test.`,
+        `Monitor for symptoms including fever, cramps, nausea, and vomiting.`,
+        `Consult a healthcare professional if symptoms persist.`
+      ];
+      prevention = [
+        `Cook meats to USDA safe internal temperatures using a digital thermometer.`,
+        `Refrigerate perishable foods within 2 hours of preparation.`
+      ];
+    } else {
+      // SAFEGUARD: Do NOT fall back to generic chlorine bleach/ammonia text!
+      // Require explicit manual review when no hazard pattern matches with confidence.
+      needsReview = true;
+      reason = `This scenario presents a safety hazard specific to ${scenario.replace(/-/g, ' ')}. Detailed safety guidelines required.`;
+      healthImpact = `Potential risk of property damage or physical injury depending on scenario.`;
+      actions = [
+        `Cease unsafe operation immediately.`,
+        `Inspect equipment or food for damage or hazards.`
+      ];
+      prevention = [
+        `Follow verified kitchen safety protocols for this scenario.`
+      ];
+    }
+  } else if (dangerLevel === 'caution') {
+    shortAnswer = `Be cautious, as doing this can cause damage or minor safety issues.`;
+    if (s.includes("cast-iron") || s.includes("knife") || s.includes("copper") || s.includes("non-stick")) {
+      reason = `Washing delicate cookware or cutlery in the dishwasher strips protective seasoning, dulls precision edges, or degrades non-stick polymer coatings.`;
+      healthImpact = `Minimal health risk, but permanent irreversible cosmetic and functional damage to cookware.`;
+      actions = [
+        `Allow items to cool and dry completely.`,
+        `Re-season cast iron or re-sharpen dulled cutlery as needed.`
+      ];
+      prevention = [
+        `Always hand-wash knives, cast iron, copper, and non-stick pans with gentle soap.`
+      ];
+    } else if (s.includes("freeze") || s.includes("soda") || s.includes("can") || s.includes("wine")) {
+      reason = `Liquid expands by approximately 9% upon freezing; in sealed rigid containers, this pressure causes violent ruptures or shattered glass.`;
+      healthImpact = `Laceration hazard from shattered glass and difficult cleanup of pressurized spills.`;
+      actions = [
+        `Handle frozen compromised containers with protective gloves.`,
+        `Allow thawed contents to melt safely inside a secondary container.`
+      ];
+      prevention = [
+        `Never freeze glass bottles or unvented metal cans full of liquid.`
+      ];
+    } else {
+      needsReview = true;
+      reason = `Doing this requires caution to avoid food spoilage or appliance wear.`;
+      healthImpact = `Low health risk; potential food quality degradation or equipment wear.`;
+      actions = [`Inspect items before use.`];
+      prevention = [`Follow proper food storage and handling guidelines.`];
+    }
+  } else {
+    shortAnswer = `It is safe, though it may result in a loss of food quality.`;
+    reason = `Doing this is safe and does not release toxins or cause immediate appliance failure, though texture or freshness may be compromised.`;
+    healthImpact = `None; food or equipment remains non-toxic and pathogen-safe.`;
+    actions = [`Inspect food quality and use as appropriate.`];
+    prevention = [`Store foods properly to maintain optimal taste and texture.`];
+  }
+
+  return { shortAnswer, reason, healthImpact, actions, prevention, needsReview };
+}
+
+function runMigration() {
+  // Perform dry run
+  files.forEach(f => {
+    const data = JSON.parse(fs.readFileSync(path.join(dataDir, f), 'utf-8'));
+    let genericCount = 0;
+    let sampleGenerics = [];
+    
+    data.forEach(e => {
+      const specs = classifyItem(
+        e.item || e.slug,
+        e.type || "",
+        f,
+        e.appliance || "",
+        e.location || "",
+        e.slug || ""
+      );
+      if (specs.material === 'Processed Material') {
+        genericCount++;
+        sampleGenerics.push(e.item + ' (' + e.slug + ')');
+      }
+    });
+    console.log(f, 'generic count after refinement:', genericCount, 'total:', data.length);
+    if (sampleGenerics.length > 0) {
+      console.log('  Samples:', sampleGenerics.slice(0, 15).join(', '));
     }
   });
-  console.log(f, 'generic count after refinement:', genericCount, 'total:', data.length);
-  if (sampleGenerics.length > 0) {
-    console.log('  Samples:', sampleGenerics.slice(0, 15).join(', '));
-  }
-});
 
 
-// ----------------------------------------------------
-// 1. Identify Unique Items Dynamically (Skipped list)
-// ----------------------------------------------------
-const reasonMap = new Map();
-const allEntries = [];
+  // ----------------------------------------------------
+  // 1. Identify Unique Items Dynamically (Skipped list)
+  // ----------------------------------------------------
+  const reasonMap = new Map();
+  const allEntries = [];
 
-files.forEach(file => {
-  const filePath = path.join(dataDir, file);
-  if (fs.existsSync(filePath)) {
-    const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    data.forEach((entry, idx) => {
-      let norm = entry.reason || '';
-      const itemText = entry.item || '';
-      if (itemText) {
-        const itemRegex = new RegExp(itemText.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
-        norm = norm.replace(itemRegex, '[ITEM]');
-      }
-      if (entry.appliance) {
-        const appRegex = new RegExp(entry.appliance.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
-        norm = norm.replace(appRegex, '[APPLIANCE]');
-      }
-      if (entry.location) {
-        const locRegex = new RegExp(entry.location.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
-        norm = norm.replace(locRegex, '[LOCATION]');
-      }
-
-      const record = { file, index: idx, slug: entry.slug || '', item: entry.item || '', norm };
-      allEntries.push(record);
-
-      if (!reasonMap.has(norm)) {
-        reasonMap.set(norm, []);
-      }
-      reasonMap.get(norm).push(record);
-    });
-  }
-});
-
-// Identify uniques
-const uniqueKeys = new Set();
-for (const [norm, records] of reasonMap.entries()) {
-  if (records.length === 1) {
-    uniqueKeys.add(`${records[0].file}:${records[0].index}`);
-  }
-}
-
-console.log(`Identified ${uniqueKeys.size} unique hand-crafted entries in the database to be skipped.`);
-
-// ----------------------------------------------------
-// 2. Queue Non-Unique Items for Batch Processing
-// ----------------------------------------------------
-const migrationQueue = [];
-
-files.forEach(file => {
-  const filePath = path.join(dataDir, file);
-  if (fs.existsSync(filePath)) {
-    const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    data.forEach((entry, idx) => {
-      const key = `${file}:${idx}`;
-      if (!uniqueKeys.has(key)) {
-        // Queue it for migration
-        migrationQueue.push({ file, index: idx, entry });
-      }
-    });
-  }
-});
-
-console.log(`Total non-unique items queued for migration: ${migrationQueue.length}`);
-
-// ----------------------------------------------------
-// 3. Batch Migrator Execution
-// ----------------------------------------------------
-const BATCH_SIZE = 50;
-const totalBatches = Math.ceil(migrationQueue.length / BATCH_SIZE);
-
-console.log(`Starting migration in ${totalBatches} batches of ${BATCH_SIZE} items...`);
-
-for (let batchIdx = 0; batchIdx < totalBatches; batchIdx++) {
-  const start = batchIdx * BATCH_SIZE;
-  const end = Math.min(start + BATCH_SIZE, migrationQueue.length);
-  const currentBatch = migrationQueue.slice(start, end);
-
-  console.log(`\n--- PROCESSING BATCH ${batchIdx + 1}/${totalBatches} (Items ${start + 1} to ${end}) ---`);
-
-  // Group batch operations by file to minimize read/write disk cycles
-  const fileGroups = {};
-  currentBatch.forEach(item => {
-    if (!fileGroups[item.file]) fileGroups[item.file] = [];
-    fileGroups[item.file].push(item);
-  });
-
-  // Apply classifications and write to files
-  Object.keys(fileGroups).forEach(file => {
+  files.forEach(file => {
     const filePath = path.join(dataDir, file);
-    const fileData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    if (fs.existsSync(filePath)) {
+      const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+      data.forEach((entry, idx) => {
+        let norm = entry.reason || '';
+        const itemText = entry.item || '';
+        if (itemText) {
+          const itemRegex = new RegExp(itemText.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
+          norm = norm.replace(itemRegex, '[ITEM]');
+        }
+        if (entry.appliance) {
+          const appRegex = new RegExp(entry.appliance.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
+          norm = norm.replace(appRegex, '[APPLIANCE]');
+        }
+        if (entry.location) {
+          const locRegex = new RegExp(entry.location.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
+          norm = norm.replace(locRegex, '[LOCATION]');
+        }
 
-    fileGroups[file].forEach(item => {
-      const entry = fileData[item.index];
-      // Get classification parameters
-      const specs = classifyItem(
-        entry.item || entry.slug,
-        entry.type || "",
-        file,
-        entry.appliance || "",
-        entry.location || "",
-        entry.slug || ""
-      );
+        const record = { file, index: idx, slug: entry.slug || '', item: entry.item || '', norm };
+        allEntries.push(record);
 
-      // Add fields
-      entry.material = specs.material;
-      entry.keyRisk = specs.keyRisk;
-      entry.tip = specs.tip;
-      entry.learnMore = specs.learnMore;
-    });
-
-    // Write file back to disk
-    fs.writeFileSync(filePath, JSON.stringify(fileData, null, 2), 'utf-8');
+        if (!reasonMap.has(norm)) {
+          reasonMap.set(norm, []);
+        }
+        reasonMap.get(norm).push(record);
+      });
+    }
   });
 
-  // Run build compile test
-  console.log(`Batch ${batchIdx + 1} changes written. Compiling Astro build...`);
-  try {
-    execSync('npm run build', { cwd: path.join(__dirname), stdio: 'ignore' });
-    console.log(`✓ Batch ${batchIdx + 1}/${totalBatches} compiled successfully!`);
-  } catch (err) {
-    console.error(`✕ Compilation FAILED at batch ${batchIdx + 1}!`);
-    console.error(err);
-    process.exit(1);
+  // Identify uniques
+  const uniqueKeys = new Set();
+  for (const [norm, records] of reasonMap.entries()) {
+    if (records.length === 1) {
+      uniqueKeys.add(`${records[0].file}:${records[0].index}`);
+    }
   }
+
+  console.log(`Identified ${uniqueKeys.size} unique hand-crafted entries in the database to be skipped.`);
+
+  // ----------------------------------------------------
+  // 2. Queue Non-Unique Items for Batch Processing
+  // ----------------------------------------------------
+  const migrationQueue = [];
+
+  files.forEach(file => {
+    const filePath = path.join(dataDir, file);
+    if (fs.existsSync(filePath)) {
+      const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+      data.forEach((entry, idx) => {
+        const key = `${file}:${idx}`;
+        if (!uniqueKeys.has(key)) {
+          // Queue it for migration
+          migrationQueue.push({ file, index: idx, entry });
+        }
+      });
+    }
+  });
+
+  console.log(`Total non-unique items queued for migration: ${migrationQueue.length}`);
+
+  // ----------------------------------------------------
+  // 3. Batch Migrator Execution
+  // ----------------------------------------------------
+  const BATCH_SIZE = 50;
+  const totalBatches = Math.ceil(migrationQueue.length / BATCH_SIZE);
+
+  console.log(`Starting migration in ${totalBatches} batches of ${BATCH_SIZE} items...`);
+
+  for (let batchIdx = 0; batchIdx < totalBatches; batchIdx++) {
+    const start = batchIdx * BATCH_SIZE;
+    const end = Math.min(start + BATCH_SIZE, migrationQueue.length);
+    const currentBatch = migrationQueue.slice(start, end);
+
+    console.log(`\n--- PROCESSING BATCH ${batchIdx + 1}/${totalBatches} (Items ${start + 1} to ${end}) ---`);
+
+    // Group batch operations by file to minimize read/write disk cycles
+    const fileGroups = {};
+    currentBatch.forEach(item => {
+      if (!fileGroups[item.file]) fileGroups[item.file] = [];
+      fileGroups[item.file].push(item);
+    });
+
+    // Apply classifications and write to files
+    Object.keys(fileGroups).forEach(file => {
+      const filePath = path.join(dataDir, file);
+      const fileData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+
+      fileGroups[file].forEach(item => {
+        const entry = fileData[item.index];
+        // Get classification parameters
+        const specs = classifyItem(
+          entry.item || entry.slug,
+          entry.type || "",
+          file,
+          entry.appliance || "",
+          entry.location || "",
+          entry.slug || ""
+        );
+
+        // Add fields
+        entry.material = specs.material;
+        entry.keyRisk = specs.keyRisk;
+        entry.tip = specs.tip;
+        entry.learnMore = specs.learnMore;
+        if (specs.needsReview) {
+          entry.needsReview = true;
+        }
+      });
+
+      // Write file back to disk
+      fs.writeFileSync(filePath, JSON.stringify(fileData, null, 2), 'utf-8');
+    });
+
+    // Run build compile test
+    console.log(`Batch ${batchIdx + 1} changes written. Compiling Astro build...`);
+    try {
+      execSync('npm run build', { cwd: path.join(__dirname), stdio: 'ignore' });
+      console.log(`✓ Batch ${batchIdx + 1}/${totalBatches} compiled successfully!`);
+    } catch (err) {
+      console.error(`✕ Compilation FAILED at batch ${batchIdx + 1}!`);
+      console.error(err);
+      process.exit(1);
+    }
+  }
+
+  console.log('\n=============================================');
+  console.log('Database batch migration complete successfully!');
+  console.log('=============================================');
 }
 
-console.log('\n=============================================');
-console.log('Database batch migration complete successfully!');
-console.log('=============================================');
+if (require.main === module) {
+  runMigration();
+}
+
+module.exports = {
+  classifyItem,
+  generateTieredBoilerplate,
+  runMigration
+};
