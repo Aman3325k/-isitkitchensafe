@@ -243,6 +243,26 @@ export function getApplianceIn(appliance: string, lang: SupportedLanguage = 'en'
       refrigerator: 'na Geladeira',
       washingmachine: 'na Máquina de Lavar',
     },
+    'zh-cn': {
+      dishwasher: '放进洗碗机',
+      microwave: '放进微波炉',
+      freezer: '放进冷冻室',
+      oven: '放进烤箱',
+      dryer: '放进烘干机',
+      airfryer: '放进空气炸锅',
+      refrigerator: '放进冰箱冷藏室',
+      washingmachine: '放进洗衣机',
+    },
+    ja: {
+      dishwasher: '食洗機に',
+      microwave: '電子レンジに',
+      freezer: '冷凍庫に',
+      oven: 'オーブンに',
+      dryer: '乾燥機に',
+      airfryer: 'ノンフライヤーに',
+      refrigerator: '冷蔵庫に',
+      washingmachine: '洗濯機に',
+    },
   };
 
   if (map[lang]?.[norm]) {
