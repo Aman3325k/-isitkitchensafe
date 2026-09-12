@@ -39,7 +39,7 @@ export default defineConfig({
   trailingSlash: 'always',
   i18n: {
     defaultLocale: 'en',
-    locales: ['en', 'es', 'pt'],
+    locales: ['en', 'es', 'pt', 'zh-cn', 'ja'],
     routing: {
       prefixDefaultLocale: false,
     },
@@ -52,6 +52,8 @@ export default defineConfig({
           en: 'en',
           es: 'es',
           pt: 'pt',
+          'zh-cn': 'zh-CN',
+          ja: 'ja',
         },
       },
       serialize(item) {
