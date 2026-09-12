@@ -17,7 +17,9 @@ import blogPt from '../../data/blog.pt.json';
 export function getStaticPaths() {
   return [
     { params: { lang: 'es' } },
-    { params: { lang: 'pt' } }
+    { params: { lang: 'pt' } },
+    { params: { lang: 'zh-cn' } },
+    { params: { lang: 'ja' } }
   ];
 }
 
@@ -50,17 +52,48 @@ function formatCategory(app: string, lang: string) {
     if (app === 'what-happens') return 'O Que Acontece Se...';
     if (app === 'compare') return 'Comparar';
     if (app === 'blog') return 'Blog';
+  } else if (lang === 'zh-cn') {
+    if (app === 'dishwasher') return '洗碗机';
+    if (app === 'microwave') return '微波炉';
+    if (app === 'oven') return '烤箱';
+    if (app === 'freezer') return '冷冻室';
+    if (app === 'dryer') return '烘干机';
+    if (app === 'airfryer') return '空气炸锅';
+    if (app === 'refrigerator') return '冰箱冷藏室';
+    if (app === 'washing-machine') return '洗衣机';
+    if (app === 'how-long') return '保质期';
+    if (app === 'refreeze') return '二次冷冻';
+    if (app === 'what-happens') return '会发生什么';
+    if (app === 'compare') return '物品对比';
+    if (app === 'blog') return '博客';
+  } else if (lang === 'ja') {
+    if (app === 'dishwasher') return '食洗機';
+    if (app === 'microwave') return '電子レンジ';
+    if (app === 'oven') return 'オーブン';
+    if (app === 'freezer') return '冷凍庫';
+    if (app === 'dryer') return '乾燥機';
+    if (app === 'airfryer') return 'ノンフライヤー';
+    if (app === 'refrigerator') return '冷蔵庫';
+    if (app === 'washing-machine') return '洗濯機';
+    if (app === 'how-long') return '保存期間';
+    if (app === 'refreeze') return '再冷凍';
+    if (app === 'what-happens') return 'どうなる？';
+    if (app === 'compare') return '比較';
+    if (app === 'blog') return 'ブログ';
   }
   return app.charAt(0).toUpperCase() + app.slice(1);
 }
 
 export const GET: APIRoute = async ({ params }) => {
-  const lang = params.lang as 'es' | 'pt';
+  const lang = params.lang as string;
   const isEs = lang === 'es';
+  const isPt = lang === 'pt';
 
   const rawPrimaryItems = isEs 
     ? [...itemsEs, ...washingMachineEs] 
-    : [...itemsPt, ...washingMachinePt];
+    : isPt 
+    ? [...itemsPt, ...washingMachinePt]
+    : [];
 
   const primarySearchItems = rawPrimaryItems.map(item => {
     const category = formatCategory(item.appliance, lang);
@@ -80,7 +113,7 @@ export const GET: APIRoute = async ({ params }) => {
     };
   });
 
-  const rawHowLong = isEs ? howLongEs : howLongPt;
+  const rawHowLong = isEs ? howLongEs : isPt ? howLongPt : [];
   const howLongSearchItems = rawHowLong.map(item => {
     const category = formatCategory('how-long', lang);
     return {
@@ -91,7 +124,7 @@ export const GET: APIRoute = async ({ params }) => {
     };
   });
 
-  const rawRefreeze = isEs ? refreezeEs : refreezePt;
+  const rawRefreeze = isEs ? refreezeEs : isPt ? refreezePt : [];
   const refreezeSearchItems = rawRefreeze.map(item => {
     const category = formatCategory('refreeze', lang);
     return {
@@ -102,7 +135,7 @@ export const GET: APIRoute = async ({ params }) => {
     };
   });
 
-  const rawWhatHappens = isEs ? whatHappensEs : whatHappensPt;
+  const rawWhatHappens = isEs ? whatHappensEs : isPt ? whatHappensPt : [];
   const whatHappensSearchItems = rawWhatHappens.map(item => {
     const category = formatCategory('what-happens', lang);
     return {
@@ -113,7 +146,7 @@ export const GET: APIRoute = async ({ params }) => {
     };
   });
 
-  const rawComparisons = isEs ? comparisonsEs : comparisonsPt;
+  const rawComparisons = isEs ? comparisonsEs : isPt ? comparisonsPt : [];
   const comparisonsSearchItems = rawComparisons.map(item => {
     const category = formatCategory('compare', lang);
     return {
@@ -124,7 +157,7 @@ export const GET: APIRoute = async ({ params }) => {
     };
   });
 
-  const rawBlog = isEs ? blogEs : blogPt;
+  const rawBlog = isEs ? blogEs : isPt ? blogPt : [];
   const blogSearchItems = rawBlog.map(item => {
     const category = formatCategory('blog', lang);
     return {

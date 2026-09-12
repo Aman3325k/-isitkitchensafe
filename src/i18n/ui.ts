@@ -2,6 +2,8 @@ export const languages = {
   en: 'English',
   es: 'Español',
   pt: 'Português',
+  'zh-cn': '简体中文',
+  ja: '日本語',
 } as const;
 
 export type SupportedLanguage = keyof typeof languages;
