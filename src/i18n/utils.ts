@@ -13,6 +13,8 @@ import comparisonsEs from '../data/comparisons.es.json';
 import comparisonsPt from '../data/comparisons.pt.json';
 import blogEs from '../data/blog.es.json';
 import blogPt from '../data/blog.pt.json';
+import itemsZh from '../data/items.zh-cn.json';
+import itemsJa from '../data/items.ja.json';
 import { CATEGORIES } from '../utils/materialCategories';
 
 const esSlugs = new Set([
@@ -34,6 +36,12 @@ const ptSlugs = new Set([
   ...comparisonsPt.map(i => `compare/${i.slug}`),
   ...blogPt.map(i => `blog/${i.slug}`),
   ...CATEGORIES.map(c => `material/${c.id}`)
+]);
+const zhSlugs = new Set([
+  ...itemsZh.map(i => `${i.appliance}/${i.slug}`)
+]);
+const jaSlugs = new Set([
+  ...itemsJa.map(i => `${i.appliance}/${i.slug}`)
 ]);
 
 const esAppliances = new Set([
@@ -63,6 +71,8 @@ export function isItemTranslatedInLocale(appliance: string, slug: string, lang: 
   const key = `${appliance}/${slug}`;
   if (lang === 'es') return esSlugs.has(key);
   if (lang === 'pt') return ptSlugs.has(key);
+  if (lang === 'zh-cn') return zhSlugs.has(key);
+  if (lang === 'ja') return jaSlugs.has(key);
   return false;
 }
 

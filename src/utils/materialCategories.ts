@@ -3,12 +3,10 @@ import path from 'path';
 import itemsData from '../data/items.json';
 import itemsEs from '../data/items.es.json';
 import itemsPt from '../data/items.pt.json';
-import howLongData from '../data/how-long.json';
-import refreezeData from '../data/refreeze.json';
 import washingData from '../data/washing-machine.json';
 import washingEs from '../data/washing-machine.es.json';
 import washingPt from '../data/washing-machine.pt.json';
-import whatHappensData from '../data/what-happens.json';
+import type { SupportedLanguage } from '../i18n/ui';
 
 export interface MaterialCategory {
   id: string;
@@ -19,10 +17,10 @@ export interface MaterialCategory {
   relatedIds: string[];
 }
 
-export const CATEGORY_LOCALIZATIONS: Record<string, {
-  es: { displayName: string; description: string };
-  pt: { displayName: string; description: string };
-}> = {
+export const CATEGORY_LOCALIZATIONS: Record<string, Partial<Record<SupportedLanguage, {
+  displayName: string;
+  description: string;
+}>>> = {
   metal: {
     es: {
       displayName: "Utensilios y Menaje de Metal",
@@ -215,7 +213,7 @@ export function getCategoryForMaterial(material: string | undefined): string | n
   return MATERIAL_TO_CATEGORY[trimmed] || null;
 }
 
-export function getCategoryById(id: string, lang: 'en' | 'es' | 'pt' = 'en'): MaterialCategory | undefined {
+export function getCategoryById(id: string, lang: SupportedLanguage = 'en'): MaterialCategory | undefined {
   const cat = CATEGORIES.find(c => c.id === id);
   if (!cat) return undefined;
   if (lang === 'en') return cat;
@@ -223,7 +221,7 @@ export function getCategoryById(id: string, lang: 'en' | 'es' | 'pt' = 'en'): Ma
   return loc ? { ...cat, displayName: loc.displayName, description: loc.description } : cat;
 }
 
-export function getCategories(lang: 'en' | 'es' | 'pt' = 'en'): MaterialCategory[] {
+export function getCategories(lang: SupportedLanguage = 'en'): MaterialCategory[] {
   if (lang === 'en') return CATEGORIES;
   return CATEGORIES.map(cat => {
     const loc = CATEGORY_LOCALIZATIONS[cat.id]?.[lang];
@@ -263,7 +261,7 @@ export interface AggregatedItem {
   appliances: Record<string, { safe: string; url: string }>;
 }
 
-export function getCategoryItemsAndStats(categoryId: string, lang: 'en' | 'es' | 'pt' = 'en') {
+export function getCategoryItemsAndStats(categoryId: string, lang: SupportedLanguage = 'en') {
   const baseCat = getCategoryById(categoryId, lang);
   if (!baseCat) return null;
 

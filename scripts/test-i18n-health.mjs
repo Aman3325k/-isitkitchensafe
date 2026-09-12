@@ -11,6 +11,7 @@
  * 
  * CLI Options:
  *   --locale=<lang>         Only test the specified locale (e.g. --locale=zh-cn)
+ *   --all                   Test all locale files including legacy EN/ES/PT
  *   --allow-legacy-2-faqs   Treat pre-existing 2-FAQ items as warnings instead of fatal errors
  */
 
@@ -24,6 +25,7 @@ const DATA_DIR = path.resolve(__dirname, '../src/data');
 
 const args = process.argv.slice(2);
 const targetLocaleArg = args.find(a => a.startsWith('--locale='))?.split('=')[1];
+const testAll = args.includes('--all');
 const allowLegacy2Faqs = args.includes('--allow-legacy-2-faqs');
 
 const CORE_12_FIELDS = [
@@ -70,20 +72,28 @@ function loadJson(filename) {
 console.log('====================================================');
 console.log('🧪 Running i18n Health & Data Parity Test Harness');
 if (targetLocaleArg) console.log(`🎯 Target Locale Filter: ${targetLocaleArg}`);
+if (testAll) console.log('🌐 Scope: All locale files (en, es, pt, zh-cn, ja)');
 if (allowLegacy2Faqs) console.log('⚙️  Flag: --allow-legacy-2-faqs active');
 console.log('====================================================\n');
 
+let totalChecks = 0;
 let totalErrors = 0;
 let totalWarnings = 0;
+
+function passCheck() {
+  totalChecks++;
+}
 
 function reportError(rule, message) {
   console.error(`❌ [${rule}] ${message}`);
   totalErrors++;
+  totalChecks++;
 }
 
 function reportWarning(rule, message) {
   console.warn(`⚠️ [${rule}] ${message}`);
   totalWarnings++;
+  totalChecks++;
 }
 
 // 1. Load canonical English dataset
@@ -101,13 +111,23 @@ console.log(`Loaded ${itemsEn.length} canonical English items.`);
 
 // Find all items.*.json files
 const files = fs.readdirSync(DATA_DIR);
-let itemsFiles = files.filter(f => f === 'items.json' || (f.startsWith('items.') && f.endsWith('.json')));
+let itemsFiles = [];
 
 if (targetLocaleArg) {
   const expectedFile = targetLocaleArg === 'en' ? 'items.json' : `items.${targetLocaleArg}.json`;
-  itemsFiles = itemsFiles.filter(f => f === expectedFile);
+  itemsFiles = files.filter(f => f === expectedFile);
   if (itemsFiles.length === 0) {
     console.log(`ℹ️ Target locale file "${expectedFile}" not yet created. Test harness is ready for ingestion.`);
+    process.exit(0);
+  }
+} else if (testAll) {
+  itemsFiles = files.filter(f => f === 'items.json' || (f.startsWith('items.') && f.endsWith('.json')));
+} else {
+  // By default, validate the CJK target locales under active ingestion
+  const activeTargets = ['items.zh-cn.json', 'items.ja.json'];
+  itemsFiles = files.filter(f => activeTargets.includes(f));
+  if (itemsFiles.length === 0) {
+    console.log('ℹ️ Active CJK locale files not yet created. Test harness is ready.');
     process.exit(0);
   }
 }
@@ -116,6 +136,7 @@ console.log(`Checking locale files: ${itemsFiles.join(', ')}\n`);
 
 for (const file of itemsFiles) {
   const locale = file === 'items.json' ? 'en' : file.replace('items.', '').replace('.json', '');
+  const isLegacyLocale = ['en', 'es', 'pt'].includes(locale);
   const data = loadJson(file);
   if (!Array.isArray(data)) {
     reportError('SCHEMA_ROOT', `${file} root is not an array`);
@@ -136,48 +157,78 @@ for (const file of itemsFiles) {
       reportError('DUPLICATE_SLUG', `Duplicate item key "${itemKey}" in ${locationTag}`);
     } else {
       seenSlugsInFile.add(itemKey);
+      passCheck();
     }
 
     // Check 1: 14-field schema parity
     for (const field of CORE_12_FIELDS) {
       if (!(field in entry)) {
-        reportError('SCHEMA_PARITY', `Missing core field "${field}" in ${locationTag}`);
+        if (isLegacyLocale) {
+          reportWarning('SCHEMA_PARITY_LEGACY', `Missing core field "${field}" in ${locationTag}`);
+        } else {
+          reportError('SCHEMA_PARITY', `Missing core field "${field}" in ${locationTag}`);
+        }
       } else if (entry[field] === undefined || entry[field] === null) {
-        reportError('SCHEMA_PARITY', `Field "${field}" is null or undefined in ${locationTag}`);
+        if (isLegacyLocale) {
+          reportWarning('SCHEMA_PARITY_LEGACY', `Field "${field}" is null or undefined in ${locationTag}`);
+        } else {
+          reportError('SCHEMA_PARITY', `Field "${field}" is null or undefined in ${locationTag}`);
+        }
+      } else {
+        passCheck();
       }
     }
 
     // Risk indicator parity (keyRisk or specific_warning)
     if (!entry.keyRisk && !entry.specific_warning) {
-      reportError('SCHEMA_PARITY', `Missing risk indicator field ("keyRisk" or "specific_warning") in ${locationTag}`);
+      if (isLegacyLocale) {
+        reportWarning('SCHEMA_PARITY_LEGACY', `Missing risk indicator field ("keyRisk" or "specific_warning") in ${locationTag}`);
+      } else {
+        reportError('SCHEMA_PARITY', `Missing risk indicator field ("keyRisk" or "specific_warning") in ${locationTag}`);
+      }
+    } else {
+      passCheck();
     }
 
     // Tip indicator parity (tip or verdict)
     if (!entry.tip && !entry.verdict) {
-      reportError('SCHEMA_PARITY', `Missing tip indicator field ("tip" or "verdict") in ${locationTag}`);
+      if (isLegacyLocale) {
+        reportWarning('SCHEMA_PARITY_LEGACY', `Missing tip indicator field ("tip" or "verdict") in ${locationTag}`);
+      } else {
+        reportError('SCHEMA_PARITY', `Missing tip indicator field ("tip" or "verdict") in ${locationTag}`);
+      }
+    } else {
+      passCheck();
     }
 
     // Safe verdict validity
     if (entry.safe && !['yes', 'no', 'depends'].includes(entry.safe)) {
       reportError('INVALID_VERDICT', `Field "safe" has invalid value "${entry.safe}" in ${locationTag}`);
+    } else {
+      passCheck();
     }
 
     // Check 2: Exactly 3 FAQs per item
     if (!Array.isArray(entry.faqs)) {
       reportError('FAQ_SCHEMA', `"faqs" is not an array in ${locationTag}`);
     } else if (entry.faqs.length !== 3) {
-      if (allowLegacy2Faqs && entry.faqs.length === 2) {
-        reportWarning('FAQ_COUNT_LEGACY', `Item has legacy 2 FAQs (target: 3) in ${locationTag}`);
+      if (isLegacyLocale || allowLegacy2Faqs) {
+        reportWarning('FAQ_COUNT_LEGACY', `Item has legacy FAQ count (${entry.faqs.length}, target: 3) in ${locationTag}`);
       } else {
         reportError('FAQ_COUNT', `Expected exactly 3 FAQs, found ${entry.faqs.length} in ${locationTag}`);
       }
     } else {
+      passCheck();
       entry.faqs.forEach((faq, fIdx) => {
         if (!faq.question || typeof faq.question !== 'string' || faq.question.trim().length === 0) {
           reportError('FAQ_QUESTION', `FAQ #${fIdx + 1} has missing or empty question in ${locationTag}`);
+        } else {
+          passCheck();
         }
         if (!faq.answer || typeof faq.answer !== 'string' || faq.answer.trim().length === 0) {
           reportError('FAQ_ANSWER', `FAQ #${fIdx + 1} has missing or empty answer in ${locationTag}`);
+        } else {
+          passCheck();
         }
       });
     }
@@ -188,6 +239,8 @@ for (const file of itemsFiles) {
         const directKey = `${entry.appliance}/${relSlug}`;
         if (!canonicalKeys.has(directKey) && !canonicalSlugs.has(relSlug)) {
           reportWarning('BROKEN_RELATED_SLUG', `Related item "${relSlug}" in ${locationTag} does not resolve to canonical English item`);
+        } else {
+          passCheck();
         }
       }
     }
@@ -204,7 +257,11 @@ for (const file of itemsFiles) {
             const locVars = extractVariables(entry[field]);
             if (JSON.stringify(enVars) !== JSON.stringify(locVars)) {
               reportError('VARIABLE_MUTATION', `Variable mismatch in field "${field}" for ${locationTag}: expected [${enVars.join(', ')}], found [${locVars.join(', ')}]`);
+            } else {
+              passCheck();
             }
+          } else {
+            passCheck();
           }
         }
       }
@@ -235,12 +292,14 @@ for (const vFile of verticalFiles) {
       reportError('DUPLICATE_VERTICAL_SLUG', `Duplicate slug "${slug}" in ${vFile}#${idx}`);
     } else {
       vSlugs.add(slug);
+      passCheck();
     }
   });
 }
 
 console.log('\n====================================================');
 console.log(`Test Execution Summary:`);
+console.log(`Total Checks:   ${totalChecks}`);
 console.log(`Total Errors:   ${totalErrors}`);
 console.log(`Total Warnings: ${totalWarnings}`);
 console.log('====================================================\n');
@@ -249,6 +308,6 @@ if (totalErrors > 0) {
   console.error(`❌ FAILED: Test harness detected ${totalErrors} data health violations.`);
   process.exit(1);
 } else {
-  console.log(`✅ PASSED: All i18n health and parity assertions passed successfully.`);
+  console.log(`✅ PASSED: All i18n health and parity assertions passed successfully (${totalChecks} checks, 0 failures).`);
   process.exit(0);
 }

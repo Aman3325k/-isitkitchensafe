@@ -10,6 +10,8 @@ function getBuildLastmod() {
     'src/data/items.json',
     'src/data/items.es.json',
     'src/data/items.pt.json',
+    'src/data/items.zh-cn.json',
+    'src/data/items.ja.json',
     'src/data/how-long.json',
     'src/data/refreeze.json',
     'src/data/washing-machine.json',

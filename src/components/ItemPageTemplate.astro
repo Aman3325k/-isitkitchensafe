@@ -3,6 +3,8 @@ import Layout from '../layouts/Layout.astro';
 import itemsData from '../data/items.json';
 import itemsEs from '../data/items.es.json';
 import itemsPt from '../data/items.pt.json';
+import itemsZh from '../data/items.zh-cn.json';
+import itemsJa from '../data/items.ja.json';
 import { generateMetaDescription, getUniqueSafetyAnalysis } from '../utils/seoHelper.js';
 import { resolveAllGuidesForItem, getPeopleAlsoAsk } from '../utils/linkingHelper.js';
 import { getCategoryForMaterial } from '../utils/materialCategories';
@@ -26,7 +28,7 @@ const formattedAppliance = t(appKey) || (data.appliance.charAt(0).toUpperCase() 
 const applianceInPhrase = getApplianceIn(data.appliance, lang);
 
 // Select localized items dataset based on lang
-const currentItemsDataset = lang === 'es' ? itemsEs : lang === 'pt' ? itemsPt : itemsData;
+const currentItemsDataset = lang === 'es' ? itemsEs : lang === 'pt' ? itemsPt : lang === 'zh-cn' ? itemsZh : lang === 'ja' ? itemsJa : itemsData;
 
 // Get details for related items (minimum 5 related item pages)
 let relatedItems = currentItemsDataset.filter(item => data.relatedItems?.includes(item.slug) && item.slug !== data.slug);
@@ -55,6 +57,14 @@ const paaList = getPeopleAlsoAsk(data.item, data.slug, allGuides, data.relatedIt
 
 const formattedAnswer = data.safe.toUpperCase(); // "YES", "NO", or "DEPENDS"
 
+// Format natural question heading per locale grammar
+let questionHeading = `${t('page.canYouPut')} ${data.item} ${applianceInPhrase}?`;
+if (lang === 'zh-cn') {
+  questionHeading = `${data.item}可以${applianceInPhrase}吗？`;
+} else if (lang === 'ja') {
+  questionHeading = `${data.item}は${applianceInPhrase}入れても大丈夫？`;
+}
+
 // SEO title and description
 let pageTitle = `Can You Put ${data.item} in the ${formattedAppliance}? | IsItKitchenSafe`;
 let pageDescription = data.shortAnswer;
@@ -65,6 +75,12 @@ if (lang === 'es') {
 } else if (lang === 'pt') {
   pageTitle = `Pode colocar ${data.item} ${applianceInPhrase}? | É Seguro na Cozinha?`;
   pageDescription = `${data.shortAnswer} Saiba mais sobre avisos de segurança, dicas de cozinha e regras de compatibilidade.`;
+} else if (lang === 'zh-cn') {
+  pageTitle = `${questionHeading} | 厨房安全指南`;
+  pageDescription = `${data.shortAnswer} 查看安全使用注意事项、操作技巧与材质禁忌。`;
+} else if (lang === 'ja') {
+  pageTitle = `${questionHeading} | キッチン安全チェッカー`;
+  pageDescription = `${data.shortAnswer} 安全上の注意点、冷凍のコツ、失敗しない保存方法を徹底解説。`;
 } else {
   pageDescription = generateMetaDescription(data.item, formattedAppliance, formattedAnswer, data.shortAnswer);
 }
@@ -86,7 +102,7 @@ const speakableSchema = {
 const howToSchema = (data.safe === 'yes' || data.safe === 'depends') ? {
   "@context": "https://schema.org",
   "@type": "HowTo",
-  "name": `${t('page.canYouPut')} ${data.item} ${applianceInPhrase}`,
+  "name": questionHeading,
   "description": data.shortAnswer,
   "step": data.tips.map((tip: string, idx: number) => ({
     "@type": "HowToStep",
@@ -95,7 +111,7 @@ const howToSchema = (data.safe === 'yes' || data.safe === 'depends') ? {
   }))
 } : null;
 
-const localeCode = lang === 'es' ? 'es-ES' : lang === 'pt' ? 'pt-BR' : 'en-US';
+const localeCode = lang === 'es' ? 'es-ES' : lang === 'pt' ? 'pt-BR' : lang === 'zh-cn' ? 'zh-CN' : lang === 'ja' ? 'ja-JP' : 'en-US';
 const reviewedDate = new Date().toLocaleDateString(localeCode, {
   year: 'numeric',
   month: 'long',
@@ -124,7 +140,7 @@ const reviewedDate = new Date().toLocaleDateString(localeCode, {
     <header class="mb-10 text-center md:text-left">
       <span class="text-caption text-muted uppercase tracking-wider text-xs block mb-2">{formattedAppliance} {t('page.guideSuffix')}</span>
       <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-6 leading-tight">
-        {t('page.canYouPut')} {data.item} {applianceInPhrase}?
+        {questionHeading}
       </h1>
 
       <!-- Trust Signal Badge (Above the fold) -->
@@ -154,7 +170,7 @@ const reviewedDate = new Date().toLocaleDateString(localeCode, {
         data.safe === 'no' ? 'bg-error-bg border border-error-border/20' : 
         'bg-warning-bg border border-warning-border/20'
       }`}>
-        <h2 class="text-title-sm text-ink font-medium mb-3">{t('page.quickVerdict')}: {t('page.canYouPut')} {data.item} {applianceInPhrase}?</h2>
+        <h2 class="text-title-sm text-ink font-medium mb-3">{t('page.quickVerdict')}: {questionHeading}</h2>
         <p class="short-answer text-title-md font-bold leading-relaxed text-ink mb-4">
           {data.shortAnswer}
         </p>
