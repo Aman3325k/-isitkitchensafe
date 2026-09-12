@@ -1,0 +1,108 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { getCategories, getCategoryItemsAndStats } from '../../../utils/materialCategories';
+import type { SupportedLanguage } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  return [
+    {
+      params: { lang: 'es' },
+      props: {
+        lang: 'es' as SupportedLanguage,
+        availableLocales: ['en', 'es', 'pt'] as SupportedLanguage[]
+      }
+    },
+    {
+      params: { lang: 'pt' },
+      props: {
+        lang: 'pt' as SupportedLanguage,
+        availableLocales: ['en', 'es', 'pt'] as SupportedLanguage[]
+      }
+    }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+const isEs = lang === 'es';
+
+const pageTitle = isEs
+  ? "Seguridad de Electrodomésticos por Tipo de Material | ¿Es Seguro en la Cocina?"
+  : "Segurança de Eletrodomésticos por Tipo de Material | É Seguro na Cozinha?";
+
+const pageDescription = isEs
+  ? "¿Son tus artículos de cocina aptos para lavavajillas, microondas, horno o congelador? Consulta guías de seguridad y estadísticas por material: metal, plástico, silicona, vidrio y más."
+  : "Seus utensílios de cozinha podem ir à lava-louças, micro-ondas, forno ou freezer? Consulte guias de segurança e estatísticas por material: metal, plástico, silicone, vidro e mais.";
+
+const categories = getCategories(lang);
+
+const categoriesWithStats = categories.map(cat => {
+  const stats = getCategoryItemsAndStats(cat.id, lang);
+  return {
+    ...cat,
+    itemCount: stats ? stats.totalItemsTested : 0
+  };
+});
+---
+
+<Layout title={pageTitle} description={pageDescription} availableLocales={availableLocales} lang={lang}>
+  <!-- Breadcrumbs -->
+  <div class="bg-surface-soft border-b border-hairline py-4">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <nav class="flex gap-2 text-muted text-[13px]" aria-label="Breadcrumb">
+        <a href={`/${lang}/`} class="hover:text-ink transition-colors">{isEs ? "Inicio" : "Início"}</a>
+        <span>/</span>
+        <span class="text-ink font-medium">{isEs ? "Materiales" : "Materiais"}</span>
+      </nav>
+    </div>
+  </div>
+
+  <section class="max-w-[1280px] mx-auto px-6 py-[80px] md:py-[96px]">
+    <!-- Header -->
+    <header class="max-w-[800px] mb-12">
+      <span class="text-caption text-muted uppercase tracking-wider text-xs block mb-2">
+        {isEs ? "Directorios de Materiales" : "Diretórios de Materiais"}
+      </span>
+      <h1 class="text-display-lg md:text-display-xl font-medium text-ink tracking-tight mb-4">
+        {isEs ? "Seguridad de Electrodomésticos por Tipo de Material" : "Segurança de Eletrodomésticos por Tipo de Material"}
+      </h1>
+      <p class="text-body-md text-muted text-lg leading-relaxed">
+        {isEs 
+          ? "Selecciona una categoría de material a continuación para ver estadísticas dinámicas de seguridad, riesgos comunes en electrodomésticos y tablas completas de referencia para utensilios de cocina."
+          : "Selecione uma categoria de material abaixo para ver estatísticas dinâmicas de segurança, riscos comuns em aparelhos e tabelas completas de referência para utensílios de cozinha."}
+      </p>
+    </header>
+
+    <!-- Categories Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {categoriesWithStats.map(cat => {
+        const isDark = cat.styling.includes('text-white');
+        return (
+          <a 
+            href={`/${lang}/material/${cat.id}`} 
+            class={`${cat.styling} border rounded-lg p-8 flex flex-col justify-between min-h-[220px] shadow-sm transition-transform active:scale-[0.98]`}
+          >
+            <div>
+              <span class={`text-[11px] uppercase tracking-wider font-bold block mb-2 ${isDark ? 'text-white/75' : 'text-muted'}`}>
+                {isEs ? `${cat.itemCount} Artículos Verificados` : `${cat.itemCount} Itens Verificados`}
+              </span>
+              <h2 class={`text-title-lg font-medium tracking-tight mb-3 ${isDark ? 'text-white' : 'text-ink'}`}>
+                {cat.displayName}
+              </h2>
+              <p class={`text-[13px] leading-relaxed mb-6 ${isDark ? 'text-white/85' : 'text-body'}`}>
+                {cat.description}
+              </p>
+            </div>
+            <span class={`text-[13px] font-medium underline underline-offset-4 flex items-center gap-1 ${isDark ? 'text-white' : 'text-link'}`}>
+              {isEs ? "Explorar guías →" : "Explorar guias →"}
+            </span>
+          </a>
+        );
+      })}
+    </div>
+  </section>
+</Layout>

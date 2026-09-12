@@ -1,9 +1,13 @@
 import fs from 'fs';
 import path from 'path';
 import itemsData from '../data/items.json';
+import itemsEs from '../data/items.es.json';
+import itemsPt from '../data/items.pt.json';
 import howLongData from '../data/how-long.json';
 import refreezeData from '../data/refreeze.json';
 import washingData from '../data/washing-machine.json';
+import washingEs from '../data/washing-machine.es.json';
+import washingPt from '../data/washing-machine.pt.json';
 import whatHappensData from '../data/what-happens.json';
 
 export interface MaterialCategory {
@@ -14,6 +18,92 @@ export interface MaterialCategory {
   styling: string; // CSS theme classes
   relatedIds: string[];
 }
+
+export const CATEGORY_LOCALIZATIONS: Record<string, {
+  es: { displayName: string; description: string };
+  pt: { displayName: string; description: string };
+}> = {
+  metal: {
+    es: {
+      displayName: "Utensilios y Menaje de Metal",
+      description: "Incluye acero inoxidable, hierro fundido, cobre, aluminio y adornos metálicos. Los metales son duraderos pero conllevan alto riesgo de chispas en el microondas."
+    },
+    pt: {
+      displayName: "Utensílios e Panelas de Metal",
+      description: "Inclui aço inoxidável, ferro fundido, cobre, alumínio e detalhes metálicos. Metais são resistentes mas apresentam alto risco de faíscas no micro-ondas."
+    }
+  },
+  plastic: {
+    es: {
+      displayName: "Polímeros y Plásticos",
+      description: "Incluye plásticos poliméricos y poliestireno expandido (porexpan). La sensibilidad térmica hace que el derretimiento y la liberación de sustancias químicas sean la principal preocupación."
+    },
+    pt: {
+      displayName: "Polímeros e Plásticos",
+      description: "Inclui plásticos poliméricos e poliestireno expandido (isopor). A sensibilidade ao calor torna o derretimento e a lixiviação química as principais preocupações."
+    }
+  },
+  "glass-ceramic": {
+    es: {
+      displayName: "Vidrio y Cerámica",
+      description: "Incluye vidrio sodocálcico, vidrio de borosilicato, cerámica, porcelana y cristal. Altamente resistentes al calor pero susceptibles al choque térmico."
+    },
+    pt: {
+      displayName: "Vidro e Cerâmica",
+      description: "Inclui vidro sodo-cálcico, vidro borossilicato, cerâmica, porcelana e cristal. Altamente resistentes ao calor mas suscetíveis ao choque térmico."
+    }
+  },
+  fabric: {
+    es: {
+      displayName: "Telas y Textiles",
+      description: "Incluye mezclas de poliéster, algodón, lana y seda. Habitualmente aptos para lavar a máquina pero vulnerables a encogerse con el calor de la secadora."
+    },
+    pt: {
+      displayName: "Tecidos e Têxteis",
+      description: "Inclui misturas de poliéster, algodão, lã e seda. Geralmente laváveis em máquina mas vulneráveis ao encolhimento no calor da secadora."
+    }
+  },
+  footwear: {
+    es: {
+      displayName: "Calzado y Zapatos",
+      description: "Incluye materiales de calzado y zapatillas. Propensos a la degradación del pegamento y deformación estructural bajo calor intenso."
+    },
+    pt: {
+      displayName: "Calçados e Tênis",
+      description: "Inclui materiais de calçados e tênis. Suscetíveis à degradação da cola e deformação estrutural sob altas temperaturas de lavagem e secagem."
+    }
+  },
+  silicone: {
+    es: {
+      displayName: "Silicona Alimentaria",
+      description: "Incluye moldes y utensilios de silicona de grado alimentario. Destacan por su excelente estabilidad térmica en congeladores, hornos y lavavajillas."
+    },
+    pt: {
+      displayName: "Silicone de Grau Alimentício",
+      description: "Inclui formas e utensílios de silicone culinário. Conhecidos por sua excelente estabilidade térmica em freezers, fornos e lava-louças."
+    }
+  },
+  "wood-paper": {
+    es: {
+      displayName: "Productos de Madera y Papel",
+      description: "Incluye bambú, madera natural, platos de papel y cartón. Susceptibles a la absorción de humedad, deformaciones, grietas y alto riesgo de incendio."
+    },
+    pt: {
+      displayName: "Produtos de Madeira e Papel",
+      description: "Inclui bambu, madeira natural, pratos de papel e papelão. Suscetíveis à absorção de umidade, deformação, rachaduras e alto risco de fogo."
+    }
+  },
+  "appliance-components": {
+    es: {
+      displayName: "Componentes de Electrodomésticos",
+      description: "Incluye piezas y accesorios verificados de electrodomésticos. Requieren comprobación cuidadosa ya que los ciclos pueden degradar juntas y capas antiadherentes."
+    },
+    pt: {
+      displayName: "Componentes de Eletrodomésticos",
+      description: "Inclui peças e elementos verificados de máquinas e aparelhos. Exigem atenção pois ciclos podem degradar vedações e revestimentos antiaderentes."
+    }
+  }
+};
 
 export const CATEGORIES: MaterialCategory[] = [
   {
@@ -125,8 +215,20 @@ export function getCategoryForMaterial(material: string | undefined): string | n
   return MATERIAL_TO_CATEGORY[trimmed] || null;
 }
 
-export function getCategoryById(id: string): MaterialCategory | undefined {
-  return CATEGORIES.find(c => c.id === id);
+export function getCategoryById(id: string, lang: 'en' | 'es' | 'pt' = 'en'): MaterialCategory | undefined {
+  const cat = CATEGORIES.find(c => c.id === id);
+  if (!cat) return undefined;
+  if (lang === 'en') return cat;
+  const loc = CATEGORY_LOCALIZATIONS[id]?.[lang];
+  return loc ? { ...cat, displayName: loc.displayName, description: loc.description } : cat;
+}
+
+export function getCategories(lang: 'en' | 'es' | 'pt' = 'en'): MaterialCategory[] {
+  if (lang === 'en') return CATEGORIES;
+  return CATEGORIES.map(cat => {
+    const loc = CATEGORY_LOCALIZATIONS[cat.id]?.[lang];
+    return loc ? { ...cat, displayName: loc.displayName, description: loc.description } : cat;
+  });
 }
 
 // Function to resolve the true cryptographic last modified date of data sources
@@ -161,13 +263,11 @@ export interface AggregatedItem {
   appliances: Record<string, { safe: string; url: string }>;
 }
 
-export function getCategoryItemsAndStats(categoryId: string) {
-  const cat = getCategoryById(categoryId);
-  if (!cat) return null;
+export function getCategoryItemsAndStats(categoryId: string, lang: 'en' | 'es' | 'pt' = 'en') {
+  const baseCat = getCategoryById(categoryId, lang);
+  if (!baseCat) return null;
 
-  const rawMaterials = cat.rawMaterials;
-
-  // Gather unique items in this category across datasets
+  const rawMaterials = baseCat.rawMaterials;
   const uniqueItemsMap = new Map<string, AggregatedItem>();
 
   const getOrInitItem = (name: string, keyRisk: string | undefined) => {
@@ -186,13 +286,18 @@ export function getCategoryItemsAndStats(categoryId: string) {
     return existing;
   };
 
+  const currentItems = lang === 'es' ? itemsEs : lang === 'pt' ? itemsPt : itemsData;
+  const currentWashing = lang === 'es' ? washingEs : lang === 'pt' ? washingPt : washingData;
+  const prefix = lang === 'en' ? '' : `/${lang}`;
+
   // Populate from items.json
   itemsData.forEach(item => {
     if (item.material && rawMaterials.includes(item.material)) {
-      const entry = getOrInitItem(item.item, item.keyRisk);
+      const locItem = currentItems.find(i => i.appliance === item.appliance && i.slug === item.slug) || item;
+      const entry = getOrInitItem(locItem.item, locItem.keyRisk);
       entry.appliances[item.appliance] = {
         safe: item.safe,
-        url: `/${item.appliance}/${item.slug}`
+        url: `${prefix}/${item.appliance}/${item.slug}`
       };
     }
   });
@@ -200,10 +305,11 @@ export function getCategoryItemsAndStats(categoryId: string) {
   // Populate from washing-machine.json
   washingData.forEach(item => {
     if (item.material && rawMaterials.includes(item.material)) {
-      const entry = getOrInitItem(item.item, item.keyRisk);
+      const locItem = currentWashing.find(i => i.slug === item.slug) || item;
+      const entry = getOrInitItem(locItem.item, locItem.keyRisk);
       entry.appliances["washing-machine"] = {
         safe: item.safe,
-        url: `/washing-machine/${item.slug}`
+        url: `${prefix}/washing-machine/${item.slug}`
       };
     }
   });
@@ -234,13 +340,16 @@ export function getCategoryItemsAndStats(categoryId: string) {
     riskCounts[risk] = (riskCounts[risk] || 0) + 1;
   };
 
-  itemsData.forEach(i => { if (i.material && rawMaterials.includes(i.material)) addRisk(i.keyRisk); });
-  howLongData.forEach(i => { if (i.material && rawMaterials.includes(i.material)) addRisk(i.keyRisk); });
-  refreezeData.forEach(i => { if (i.material && rawMaterials.includes(i.material)) addRisk(i.keyRisk); });
-  washingData.forEach(i => { if (i.material && rawMaterials.includes(i.material)) addRisk(i.keyRisk); });
-  whatHappensData.forEach(i => { if (i.material && rawMaterials.includes(i.material)) addRisk(i.keyRisk); });
+  currentItems.forEach(i => {
+    const orig = itemsData.find(o => o.appliance === i.appliance && o.slug === i.slug);
+    if (orig?.material && rawMaterials.includes(orig.material)) addRisk(i.keyRisk);
+  });
+  currentWashing.forEach(i => {
+    const orig = washingData.find(o => o.slug === i.slug);
+    if (orig?.material && rawMaterials.includes(orig.material)) addRisk(i.keyRisk);
+  });
 
-  let mostCommonRisk = "None";
+  let mostCommonRisk = lang === 'es' ? "Ninguno" : lang === 'pt' ? "Nenhum" : "None";
   let maxCount = 0;
   for (const [risk, count] of Object.entries(riskCounts)) {
     if (count > maxCount) {
@@ -250,7 +359,7 @@ export function getCategoryItemsAndStats(categoryId: string) {
   }
 
   return {
-    category: cat,
+    category: baseCat,
     totalItemsTested,
     safePercentage,
     mostCommonRisk,

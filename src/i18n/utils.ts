@@ -13,6 +13,7 @@ import comparisonsEs from '../data/comparisons.es.json';
 import comparisonsPt from '../data/comparisons.pt.json';
 import blogEs from '../data/blog.es.json';
 import blogPt from '../data/blog.pt.json';
+import { CATEGORIES } from '../utils/materialCategories';
 
 const esSlugs = new Set([
   ...itemsEs.map(i => `${i.appliance}/${i.slug}`),
@@ -21,7 +22,8 @@ const esSlugs = new Set([
   ...refreezeEs.map(i => `refreeze/${i.slug}`),
   ...whatHappensEs.map(i => `what-happens/${i.slug}`),
   ...comparisonsEs.map(i => `compare/${i.slug}`),
-  ...blogEs.map(i => `blog/${i.slug}`)
+  ...blogEs.map(i => `blog/${i.slug}`),
+  ...CATEGORIES.map(c => `material/${c.id}`)
 ]);
 const ptSlugs = new Set([
   ...itemsPt.map(i => `${i.appliance}/${i.slug}`),
@@ -30,7 +32,8 @@ const ptSlugs = new Set([
   ...refreezePt.map(i => `refreeze/${i.slug}`),
   ...whatHappensPt.map(i => `what-happens/${i.slug}`),
   ...comparisonsPt.map(i => `compare/${i.slug}`),
-  ...blogPt.map(i => `blog/${i.slug}`)
+  ...blogPt.map(i => `blog/${i.slug}`),
+  ...CATEGORIES.map(c => `material/${c.id}`)
 ]);
 
 const esAppliances = new Set([
@@ -63,8 +66,8 @@ export function isItemTranslatedInLocale(appliance: string, slug: string, lang: 
   return false;
 }
 
-const esDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens', 'compare', 'blog']);
-const ptDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens', 'compare', 'blog']);
+const esDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens', 'compare', 'blog', 'material']);
+const ptDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens', 'compare', 'blog', 'material']);
 
 /**
  * Checks whether a safety directory section has translated content in the given locale.
