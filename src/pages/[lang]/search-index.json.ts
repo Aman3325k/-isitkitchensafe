@@ -9,6 +9,8 @@ import refreezeEs from '../../data/refreeze.es.json';
 import refreezePt from '../../data/refreeze.pt.json';
 import whatHappensEs from '../../data/what-happens.es.json';
 import whatHappensPt from '../../data/what-happens.pt.json';
+import whatHappensZh from '../../data/what-happens.zh-cn.json';
+import whatHappensJa from '../../data/what-happens.ja.json';
 import comparisonsEs from '../../data/comparisons.es.json';
 import comparisonsPt from '../../data/comparisons.pt.json';
 import blogEs from '../../data/blog.es.json';
@@ -90,6 +92,8 @@ export const GET: APIRoute = async ({ params }) => {
   const lang = params.lang as string;
   const isEs = lang === 'es';
   const isPt = lang === 'pt';
+  const isZh = lang === 'zh-cn';
+  const isJa = lang === 'ja';
 
   const rawPrimaryItems = isEs 
     ? [...itemsEs, ...washingMachineEs] 
@@ -141,7 +145,7 @@ export const GET: APIRoute = async ({ params }) => {
     };
   });
 
-  const rawWhatHappens = isEs ? whatHappensEs : isPt ? whatHappensPt : [];
+  const rawWhatHappens = isEs ? whatHappensEs : isPt ? whatHappensPt : isZh ? whatHappensZh : isJa ? whatHappensJa : [];
   const whatHappensSearchItems = rawWhatHappens.map(item => {
     const category = formatCategory('what-happens', lang);
     return {
