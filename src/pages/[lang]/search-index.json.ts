@@ -5,6 +5,8 @@ import washingMachineEs from '../../data/washing-machine.es.json';
 import washingMachinePt from '../../data/washing-machine.pt.json';
 import howLongEs from '../../data/how-long.es.json';
 import howLongPt from '../../data/how-long.pt.json';
+import howLongZh from '../../data/how-long.zh-cn.json';
+import howLongJa from '../../data/how-long.ja.json';
 import refreezeEs from '../../data/refreeze.es.json';
 import refreezePt from '../../data/refreeze.pt.json';
 import refreezeZh from '../../data/refreeze.zh-cn.json';
@@ -127,7 +129,7 @@ export const GET: APIRoute = async ({ params }) => {
     };
   });
 
-  const rawHowLong = isEs ? howLongEs : isPt ? howLongPt : [];
+  const rawHowLong = isEs ? howLongEs : isPt ? howLongPt : isZh ? howLongZh : isJa ? howLongJa : [];
   const howLongSearchItems = rawHowLong.map(item => {
     const category = formatCategory('how-long', lang);
     return {

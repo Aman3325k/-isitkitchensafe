@@ -2,6 +2,8 @@
 import Layout from '../../../layouts/Layout.astro';
 import howLongEs from '../../../data/how-long.es.json';
 import howLongPt from '../../../data/how-long.pt.json';
+import howLongZh from '../../../data/how-long.zh-cn.json';
+import howLongJa from '../../../data/how-long.ja.json';
 import type { SupportedLanguage } from '../../../i18n/ui';
 
 export function getStaticPaths() {
@@ -10,17 +12,33 @@ export function getStaticPaths() {
     props: { data: any; lang: SupportedLanguage; availableLocales: SupportedLanguage[] };
   }> = [];
 
+  const allLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'ja', 'zh-cn'];
+
   howLongEs.forEach((item) => {
     paths.push({
       params: { lang: 'es', item: item.slug },
-      props: { data: item, lang: 'es', availableLocales: ['en', 'es', 'pt'] }
+      props: { data: item, lang: 'es', availableLocales: allLocales }
     });
   });
 
   howLongPt.forEach((item) => {
     paths.push({
       params: { lang: 'pt', item: item.slug },
-      props: { data: item, lang: 'pt', availableLocales: ['en', 'es', 'pt'] }
+      props: { data: item, lang: 'pt', availableLocales: allLocales }
+    });
+  });
+
+  howLongZh.forEach((item) => {
+    paths.push({
+      params: { lang: 'zh-cn', item: item.slug },
+      props: { data: item, lang: 'zh-cn', availableLocales: allLocales }
+    });
+  });
+
+  howLongJa.forEach((item) => {
+    paths.push({
+      params: { lang: 'ja', item: item.slug },
+      props: { data: item, lang: 'ja', availableLocales: allLocales }
     });
   });
 
@@ -44,15 +62,32 @@ function formatLocation(loc: string, currentLang: string) {
     if (loc === 'counter') return 'Encimera';
     return loc;
   }
-  if (loc === 'pantry') return 'Despensa';
-  if (loc === 'fridge') return 'Geladeira';
-  if (loc === 'freezer') return 'Freezer';
-  if (loc === 'counter') return 'Bancada';
+  if (currentLang === 'pt') {
+    if (loc === 'pantry') return 'Despensa';
+    if (loc === 'fridge') return 'Geladeira';
+    if (loc === 'freezer') return 'Freezer';
+    if (loc === 'counter') return 'Bancada';
+    return loc;
+  }
+  if (currentLang === 'zh-cn') {
+    if (loc === 'pantry') return '储物柜';
+    if (loc === 'fridge') return '冰箱冷藏室';
+    if (loc === 'freezer') return '冰箱冷冻室';
+    if (loc === 'counter') return '厨房台面';
+    return loc;
+  }
+  if (currentLang === 'ja') {
+    if (loc === 'pantry') return 'パントリー（常温）';
+    if (loc === 'fridge') return '冷蔵庫';
+    if (loc === 'freezer') return '冷凍庫';
+    if (loc === 'counter') return '常温（台所）';
+    return loc;
+  }
   return loc;
 }
 
 const formattedLocation = formatLocation(data.location, lang);
-const currentDataset = isEs ? howLongEs : howLongPt;
+const currentDataset = lang === 'es' ? howLongEs : (lang === 'pt' ? howLongPt : (lang === 'ja' ? howLongJa : howLongZh));
 
 // Find related items within localized dataset
 let relatedItems = currentDataset.filter(item => data.relatedItems?.includes(item.slug) && item.slug !== data.slug);
@@ -76,7 +111,7 @@ if (relatedItems.length < 5) {
 }
 relatedItems = relatedItems.slice(0, 5);
 
-const ui = {
+const ui: Record<string, any> = {
   es: {
     pageTitle: `¿Cuánto dura ${data.item} en el/la ${formattedLocation}? | ¿Es Seguro en la Cocina?`,
     pageDesc: `${data.shortAnswer} Consulta tiempos de conservación del USDA, signos de descomposición y consejos para ${data.item}.`,
@@ -136,19 +171,91 @@ const ui = {
     spoilageTitle: "🔍 Sinais de Deterioração",
     editorialReview: "Revisado pela equipe editorial do IsItKitchenSafe",
     lastReviewed: "Última atualização: Setembro 2026",
-    faqTitle: "Perguntas Frequentes",
+    faqTitle: "Perguntas Frecuentes",
     relatedTitle: "Guias Relacionados de Conservação",
     readGuide: "Ver guia",
     backLink: "Voltar a todos os Guias de Conservação"
+  },
+  'zh-cn': {
+    pageTitle: `${data.item}在${formattedLocation}能放多久？ | IsItKitchenSafe 厨房安全`,
+    pageDesc: `${data.shortAnswer} 查看权威USDA食品保质期、变质辨别特征与安全储存技巧。`,
+    home: "首页",
+    shelfLife: "保质期",
+    guideTag: `${formattedLocation}储存指南`,
+    lastUpdated: "最近更新：2026年9月",
+    usdaBadge: "✓ 依据 USDA / FDA 官方食品安全标准",
+    h1Title: `${data.item}在${formattedLocation}能放多久？`,
+    badgeYes: "可以",
+    badgeNo: "不可",
+    badgeDepends: "视情况而定",
+    lastsBadge: `保质期：${data.duration}`,
+    summaryTitle: "📋 储存要点速览",
+    itemLabel: "储存食材：",
+    locationLabel: "推荐位置：",
+    shelfLifeLabel: "安全储存期：",
+    mainRuleLabel: "核心原则：",
+    mainRuleValue: "密封保鲜容器",
+    explanationTitle: `${data.item}可以存放在${formattedLocation}吗？`,
+    detailsHeading: "科学原理解析与安全细节",
+    didYouKnowTitle: "💡 您知道吗？",
+    didYouKnowText: `在4°C至60°C（40°F至140°F）的“危险温度带”内，致病微生物会迅速滋生。将${data.item}妥善储存在${formattedLocation}能大幅延缓细菌繁殖，让食材保持新鲜安全！`,
+    tipsTitle: "✅ 最佳储存建议",
+    spoilageTitle: "🔍 变质识别要点",
+    editorialReview: "由 IsItKitchenSafe 专业编辑团队审核",
+    lastReviewed: "最新审核：2026年9月",
+    faqTitle: "常见问题解答",
+    relatedTitle: "相关食材保质期指南",
+    readGuide: "阅读指南",
+    backLink: "返回所有保质期指南"
+  },
+  ja: {
+    pageTitle: `${data.item}は${formattedLocation}でどれくらい日持ちする？ | IsItKitchenSafe`,
+    pageDesc: `${data.shortAnswer} USDA公式の保存期間、傷みのサイン、安全な保存テクニックを解説。`,
+    home: "ホーム",
+    shelfLife: "保存期間",
+    guideTag: `${formattedLocation}保存ガイド`,
+    lastUpdated: "最終更新：2026年9月",
+    usdaBadge: "✓ USDA / FDA 公式食品安全基準準拠",
+    h1Title: `${data.item}は${formattedLocation}でどれくらい日持ちする？`,
+    badgeYes: "可能",
+    badgeNo: "不可",
+    badgeDepends: "条件付き",
+    lastsBadge: `目安：${data.duration}`,
+    summaryTitle: "📋 保存ポイントまとめ",
+    itemLabel: "対象の食品：",
+    locationLabel: "おすすめの保存場所：",
+    shelfLifeLabel: "安全な保存期間：",
+    mainRuleLabel: "基本ルール：",
+    mainRuleValue: "密閉容器で保存",
+    explanationTitle: `${data.item}は${formattedLocation}で保存できる？`,
+    detailsHeading: "科学的根拠と詳しい解説",
+    didYouKnowTitle: "💡 知っていましたか？",
+    didYouKnowText: `4°C〜60°C（40°F〜140°F）の「危険温度帯」では食中毒原因菌が急激に増殖します。${data.item}を適切に${formattedLocation}で保管することで菌の繁殖を大幅に抑え、食品を安全に長持ちさせることができます！`,
+    tipsTitle: "✅ 正しい保存のコツ",
+    spoilageTitle: "🔍 傷んでいるサイン",
+    editorialReview: "IsItKitchenSafe 編集チームによる監修",
+    lastReviewed: "最終更新：2026年9月",
+    faqTitle: "よくある質問",
+    relatedTitle: "関連する保存期間ガイド",
+    readGuide: "ガイドを見る",
+    backLink: "すべての保存期間ガイドに戻る"
   }
 };
 
-const currentUi = isEs ? ui.es : ui.pt;
+const currentUi = ui[lang] || ui.es;
+
+const howToName = lang === 'es'
+  ? `Cómo almacenar de forma segura ${data.item} en ${formattedLocation}`
+  : (lang === 'pt'
+    ? `Como conservar com segurança ${data.item} em ${formattedLocation}`
+    : (lang === 'ja'
+      ? `${data.item}を${formattedLocation}で安全に保存する方法`
+      : `如何在${formattedLocation}安全储存${data.item}`));
 
 const howToSchema = (data.safe === 'yes' || data.safe === 'depends') ? {
   "@context": "https://schema.org",
   "@type": "HowTo",
-  "name": `${isEs ? 'Cómo almacenar de forma segura' : 'Como conservar com segurança'} ${data.item} en ${formattedLocation}`,
+  "name": howToName,
   "description": data.shortAnswer,
   "step": data.storageTips?.map((tip: string, idx: number) => ({
     "@type": "HowToStep",

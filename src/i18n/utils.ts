@@ -19,6 +19,8 @@ import refreezeZh from '../data/refreeze.zh-cn.json';
 import refreezeJa from '../data/refreeze.ja.json';
 import washingMachineZh from '../data/washing-machine.zh-cn.json';
 import washingMachineJa from '../data/washing-machine.ja.json';
+import howLongZh from '../data/how-long.zh-cn.json';
+import howLongJa from '../data/how-long.ja.json';
 import itemsZh from '../data/items.zh-cn.json';
 import itemsJa from '../data/items.ja.json';
 import { CATEGORIES } from '../utils/materialCategories';
@@ -46,6 +48,7 @@ const ptSlugs = new Set([
 const zhSlugs = new Set([
   ...itemsZh.map(i => `${i.appliance}/${i.slug}`),
   ...washingMachineZh.map(i => `${i.appliance}/${i.slug}`),
+  ...howLongZh.map(i => `how-long/${i.slug}`),
   ...whatHappensZh.map(i => `what-happens/${i.slug}`),
   ...refreezeZh.map(i => `refreeze/${i.slug}`),
   ...CATEGORIES.map(c => `material/${c.id}`)
@@ -53,6 +56,7 @@ const zhSlugs = new Set([
 const jaSlugs = new Set([
   ...itemsJa.map(i => `${i.appliance}/${i.slug}`),
   ...washingMachineJa.map(i => `${i.appliance}/${i.slug}`),
+  ...howLongJa.map(i => `how-long/${i.slug}`),
   ...whatHappensJa.map(i => `what-happens/${i.slug}`),
   ...refreezeJa.map(i => `refreeze/${i.slug}`),
   ...CATEGORIES.map(c => `material/${c.id}`)
@@ -102,8 +106,8 @@ export function isItemTranslatedInLocale(appliance: string, slug: string, lang: 
 
 const esDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens', 'compare', 'blog', 'material']);
 const ptDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens', 'compare', 'blog', 'material']);
-const zhDirectories = new Set<string>(['washing-machine', 'material', 'what-happens', 'refreeze', 'about', 'contact', 'privacy', 'terms', 'sitemap-page']);
-const jaDirectories = new Set<string>(['washing-machine', 'material', 'what-happens', 'refreeze', 'about', 'contact', 'privacy', 'terms', 'sitemap-page']);
+const zhDirectories = new Set<string>(['washing-machine', 'how-long', 'material', 'what-happens', 'refreeze', 'about', 'contact', 'privacy', 'terms', 'sitemap-page']);
+const jaDirectories = new Set<string>(['washing-machine', 'how-long', 'material', 'what-happens', 'refreeze', 'about', 'contact', 'privacy', 'terms', 'sitemap-page']);
 
 /**
  * Checks whether a safety directory section has translated content in the given locale.
