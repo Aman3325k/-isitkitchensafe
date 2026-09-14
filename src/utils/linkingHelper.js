@@ -40,7 +40,7 @@ export function resolveAllGuidesForItem(item, slug) {
     const iNorm = normalizeItemName(i.item);
     if (iNorm === norm || i.slug === slug || i.slug.startsWith(baseSlug) || baseSlug.startsWith(i.slug)) {
       results.applianceGuides.push({
-        url: `/${i.appliance}/${i.slug}`,
+        url: `/${i.appliance}/${i.slug}/`,
         title: `Can You Put ${i.item} in the ${i.appliance === 'airfryer' ? 'Air Fryer' : i.appliance.charAt(0).toUpperCase() + i.appliance.slice(1)}?`,
         item: i.item,
         appliance: i.appliance,
@@ -55,7 +55,7 @@ export function resolveAllGuidesForItem(item, slug) {
     const hNorm = normalizeItemName(h.item);
     if (hNorm === norm || h.slug.startsWith(baseSlug) || baseSlug.startsWith(h.slug.split('-in-')[0])) {
       results.howLongGuides.push({
-        url: `/how-long/${h.slug}`,
+        url: `/how-long/${h.slug}/`,
         title: `How Long Does ${h.item} Last in the ${h.location === 'fridge' ? 'Refrigerator' : h.location === 'freezer' ? 'Freezer' : 'Countertop'}?`,
         item: h.item,
         location: h.location,
@@ -69,7 +69,7 @@ export function resolveAllGuidesForItem(item, slug) {
     const rNorm = normalizeItemName(r.item);
     if (rNorm === norm || r.slug.startsWith(baseSlug) || baseSlug.startsWith(r.slug)) {
       results.refreezeGuides.push({
-        url: `/refreeze/${r.slug}`,
+        url: `/refreeze/${r.slug}/`,
         title: `Can You Refreeze ${r.item}?`,
         item: r.item,
         safe: r.safe
@@ -82,7 +82,7 @@ export function resolveAllGuidesForItem(item, slug) {
     const wNorm = normalizeItemName(w.item);
     if (wNorm === norm || w.slug.startsWith(baseSlug) || baseSlug.startsWith(w.slug)) {
       results.washingGuides.push({
-        url: `/washing-machine/${w.slug}`,
+        url: `/washing-machine/${w.slug}/`,
         title: `Can You Put ${w.item} in the Washing Machine?`,
         item: w.item,
         safe: w.safe
@@ -96,7 +96,7 @@ export function resolveAllGuidesForItem(item, slug) {
     if (whNorm.includes(norm) || wh.slug.includes(baseSlug) || norm.includes(whNorm)) {
       const parsed = parseScenario(wh.slug);
       results.whatHappensGuides.push({
-        url: `/what-happens/${wh.slug}`,
+        url: `/what-happens/${wh.slug}/`,
         title: `What Happens If You ${wh.item}?`,
         item: wh.item,
         appliance: parsed.appliance,
@@ -109,7 +109,7 @@ export function resolveAllGuidesForItem(item, slug) {
   comparisonsData.forEach(c => {
     if (c.item1.toLowerCase().includes(norm) || c.item2.toLowerCase().includes(norm) || c.slug.includes(baseSlug)) {
       results.comparisonGuides.push({
-        url: `/compare/${c.slug}`,
+        url: `/compare/${c.slug}/`,
         title: `${c.item1} vs ${c.item2}: Which Is Better?`,
         item1: c.item1,
         item2: c.item2
@@ -252,19 +252,19 @@ export function getPeopleAlsoAsk(_item, _slug, allGuides, relatedSlugs) {
       if (relItem) {
         if (relItem.appliance) {
           const app = relItem.appliance === 'airfryer' ? 'air fryer' : relItem.appliance;
-          addQuestion(`Can you put ${relItem.item.toLowerCase()} in the ${app}?`, `/${relItem.appliance}/${relItem.slug}`);
+          addQuestion(`Can you put ${relItem.item.toLowerCase()} in the ${app}?`, `/${relItem.appliance}/${relItem.slug}/`);
         } else if (relItem.location) {
           const loc = relItem.location === 'fridge' ? 'refrigerator' : relItem.location === 'freezer' ? 'freezer' : 'countertop';
-          addQuestion(`How long does ${relItem.item.toLowerCase()} last in the ${loc}?`, `/how-long/${relItem.slug}`);
+          addQuestion(`How long does ${relItem.item.toLowerCase()} last in the ${loc}?`, `/how-long/${relItem.slug}/`);
         } else if (relItem.dangerLevel) {
           const verbPhrase = relItem.item.toLowerCase();
-          addQuestion(`What happens if you ${verbPhrase}?`, `/what-happens/${relItem.slug}`);
+          addQuestion(`What happens if you ${verbPhrase}?`, `/what-happens/${relItem.slug}/`);
         } else if (relItem.safe !== undefined) {
           const isWashing = washingData.some(w => w.slug === relItem.slug);
           if (isWashing) {
-            addQuestion(`Can you wash ${relItem.item.toLowerCase()} in the washing machine?`, `/washing-machine/${relItem.slug}`);
+            addQuestion(`Can you wash ${relItem.item.toLowerCase()} in the washing machine?`, `/washing-machine/${relItem.slug}/`);
           } else {
-            addQuestion(`Can you refreeze ${relItem.item.toLowerCase()}?`, `/refreeze/${relItem.slug}`);
+            addQuestion(`Can you refreeze ${relItem.item.toLowerCase()}?`, `/refreeze/${relItem.slug}/`);
           }
         }
       }
@@ -273,9 +273,9 @@ export function getPeopleAlsoAsk(_item, _slug, allGuides, relatedSlugs) {
 
   // Hardcoded fallbacks if we still have fewer than 3
   if (paa.length < 3) {
-    addQuestion("Is it safe to wash metal in the dishwasher?", "/dishwasher/metal");
-    addQuestion("Can you microwave aluminum foil?", "/what-happens/microwave-aluminum-foil");
-    addQuestion("How long does raw chicken last in the fridge?", "/how-long/chicken-in-fridge");
+    addQuestion("Is it safe to wash metal in the dishwasher?", "/dishwasher/metal/");
+    addQuestion("Can you microwave aluminum foil?", "/what-happens/microwave-aluminum-foil/");
+    addQuestion("How long does raw chicken last in the fridge?", "/how-long/chicken-in-fridge/");
   }
 
   return paa.slice(0, 3);

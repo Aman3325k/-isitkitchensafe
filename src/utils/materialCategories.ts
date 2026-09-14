@@ -295,7 +295,7 @@ export function getCategoryItemsAndStats(categoryId: string, lang: SupportedLang
       const entry = getOrInitItem(locItem.item, locItem.keyRisk);
       entry.appliances[item.appliance] = {
         safe: item.safe,
-        url: `${prefix}/${item.appliance}/${item.slug}`
+        url: `${prefix}/${item.appliance}/${item.slug}/`
       };
     }
   });
@@ -307,7 +307,7 @@ export function getCategoryItemsAndStats(categoryId: string, lang: SupportedLang
       const entry = getOrInitItem(locItem.item, locItem.keyRisk);
       entry.appliances["washing-machine"] = {
         safe: item.safe,
-        url: `${prefix}/washing-machine/${item.slug}`
+        url: `${prefix}/washing-machine/${item.slug}/`
       };
     }
   });
