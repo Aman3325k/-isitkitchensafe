@@ -326,7 +326,7 @@ export const ui = {
   'zh-cn': {
     // Navigation & Global Header
     'nav.skip': '跳至主要内容',
-    'nav.siteTitle': '厨房安全指南 (Is It Kitchen Safe?)',
+    'nav.siteTitle': '厨房安全指南',
     'nav.searchPlaceholder': '搜索厨房安全指南...',
     'nav.searchAria': '搜索厨房安全指南',
     'nav.searchLoading': '正在搜索...',
@@ -522,7 +522,7 @@ export const ui = {
     'footer.contact': 'お問い合わせ',
     'footer.privacy': 'プライバシーポリシー',
     'footer.terms': '利用規約',
-    'footer.allRights': 'All rights reserved.',
+    'footer.allRights': '無断転載を禁じます。',
     'footer.disclaimer': '免責事項：当サイトの情報は参考情報です。ご使用の際は必ず各家電製品の取扱説明書をご確認ください。',
 
     // Cookie Consent Banner
