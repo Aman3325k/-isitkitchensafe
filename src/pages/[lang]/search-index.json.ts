@@ -19,6 +19,8 @@ import blogEs from '../../data/blog.es.json';
 import blogPt from '../../data/blog.pt.json';
 import itemsZh from '../../data/items.zh-cn.json';
 import itemsJa from '../../data/items.ja.json';
+import washingMachineZh from '../../data/washing-machine.zh-cn.json';
+import washingMachineJa from '../../data/washing-machine.ja.json';
 
 export function getStaticPaths() {
   return [
@@ -102,9 +104,9 @@ export const GET: APIRoute = async ({ params }) => {
     : isPt 
     ? [...itemsPt, ...washingMachinePt]
     : lang === 'zh-cn'
-    ? itemsZh
+    ? [...itemsZh, ...washingMachineZh]
     : lang === 'ja'
-    ? itemsJa
+    ? [...itemsJa, ...washingMachineJa]
     : [];
 
   const primarySearchItems = rawPrimaryItems.map(item => {
