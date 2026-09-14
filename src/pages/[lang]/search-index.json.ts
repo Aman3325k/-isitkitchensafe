@@ -23,6 +23,8 @@ import itemsZh from '../../data/items.zh-cn.json';
 import itemsJa from '../../data/items.ja.json';
 import washingMachineZh from '../../data/washing-machine.zh-cn.json';
 import washingMachineJa from '../../data/washing-machine.ja.json';
+import comparisonsZh from '../../data/comparisons.zh-cn.json';
+import comparisonsJa from '../../data/comparisons.ja.json';
 
 export function getStaticPaths() {
   return [
@@ -162,7 +164,7 @@ export const GET: APIRoute = async ({ params }) => {
     };
   });
 
-  const rawComparisons = isEs ? comparisonsEs : isPt ? comparisonsPt : [];
+  const rawComparisons = isEs ? comparisonsEs : isPt ? comparisonsPt : isZh ? comparisonsZh : isJa ? comparisonsJa : [];
   const comparisonsSearchItems = rawComparisons.map(item => {
     const category = formatCategory('compare', lang);
     return {

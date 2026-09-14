@@ -23,6 +23,8 @@ import howLongZh from '../data/how-long.zh-cn.json';
 import howLongJa from '../data/how-long.ja.json';
 import itemsZh from '../data/items.zh-cn.json';
 import itemsJa from '../data/items.ja.json';
+import comparisonsZh from '../data/comparisons.zh-cn.json';
+import comparisonsJa from '../data/comparisons.ja.json';
 import { CATEGORIES } from '../utils/materialCategories';
 
 const esSlugs = new Set([
@@ -51,6 +53,7 @@ const zhSlugs = new Set([
   ...howLongZh.map(i => `how-long/${i.slug}`),
   ...whatHappensZh.map(i => `what-happens/${i.slug}`),
   ...refreezeZh.map(i => `refreeze/${i.slug}`),
+  ...comparisonsZh.map(i => `compare/${i.slug}`),
   ...CATEGORIES.map(c => `material/${c.id}`)
 ]);
 const jaSlugs = new Set([
@@ -59,6 +62,7 @@ const jaSlugs = new Set([
   ...howLongJa.map(i => `how-long/${i.slug}`),
   ...whatHappensJa.map(i => `what-happens/${i.slug}`),
   ...refreezeJa.map(i => `refreeze/${i.slug}`),
+  ...comparisonsJa.map(i => `compare/${i.slug}`),
   ...CATEGORIES.map(c => `material/${c.id}`)
 ]);
 
@@ -106,8 +110,8 @@ export function isItemTranslatedInLocale(appliance: string, slug: string, lang: 
 
 const esDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens', 'compare', 'blog', 'material']);
 const ptDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens', 'compare', 'blog', 'material']);
-const zhDirectories = new Set<string>(['washing-machine', 'how-long', 'material', 'what-happens', 'refreeze', 'about', 'contact', 'privacy', 'terms', 'sitemap-page']);
-const jaDirectories = new Set<string>(['washing-machine', 'how-long', 'material', 'what-happens', 'refreeze', 'about', 'contact', 'privacy', 'terms', 'sitemap-page']);
+const zhDirectories = new Set<string>(['washing-machine', 'how-long', 'material', 'what-happens', 'refreeze', 'compare', 'about', 'contact', 'privacy', 'terms', 'sitemap-page']);
+const jaDirectories = new Set<string>(['washing-machine', 'how-long', 'material', 'what-happens', 'refreeze', 'compare', 'about', 'contact', 'privacy', 'terms', 'sitemap-page']);
 
 /**
  * Checks whether a safety directory section has translated content in the given locale.

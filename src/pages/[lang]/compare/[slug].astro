@@ -2,36 +2,45 @@
 import Layout from '../../../layouts/Layout.astro';
 import comparisonsEs from '../../../data/comparisons.es.json';
 import comparisonsPt from '../../../data/comparisons.pt.json';
+import comparisonsZh from '../../../data/comparisons.zh-cn.json';
+import comparisonsJa from '../../../data/comparisons.ja.json';
 import itemsEs from '../../../data/items.es.json';
 import itemsPt from '../../../data/items.pt.json';
+import itemsZh from '../../../data/items.zh-cn.json';
+import itemsJa from '../../../data/items.ja.json';
 import howLongEs from '../../../data/how-long.es.json';
 import howLongPt from '../../../data/how-long.pt.json';
+import howLongZh from '../../../data/how-long.zh-cn.json';
+import howLongJa from '../../../data/how-long.ja.json';
 import refreezeEs from '../../../data/refreeze.es.json';
 import refreezePt from '../../../data/refreeze.pt.json';
+import refreezeZh from '../../../data/refreeze.zh-cn.json';
+import refreezeJa from '../../../data/refreeze.ja.json';
 import washingEs from '../../../data/washing-machine.es.json';
 import washingPt from '../../../data/washing-machine.pt.json';
+import washingZh from '../../../data/washing-machine.zh-cn.json';
+import washingJa from '../../../data/washing-machine.ja.json';
 import type { SupportedLanguage } from '../../../i18n/ui';
 
 export async function getStaticPaths() {
-  const esPaths = comparisonsEs.map(item => ({
-    params: { lang: 'es', slug: item.slug },
-    props: {
-      lang: 'es' as SupportedLanguage,
-      comparison: item,
-      availableLocales: ['en', 'es', 'pt'] as SupportedLanguage[]
-    }
-  }));
+  const allLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  const locales: { lang: SupportedLanguage; data: typeof comparisonsEs }[] = [
+    { lang: 'es', data: comparisonsEs },
+    { lang: 'pt', data: comparisonsPt },
+    { lang: 'zh-cn', data: comparisonsZh },
+    { lang: 'ja', data: comparisonsJa }
+  ];
 
-  const ptPaths = comparisonsPt.map(item => ({
-    params: { lang: 'pt', slug: item.slug },
-    props: {
-      lang: 'pt' as SupportedLanguage,
-      comparison: item,
-      availableLocales: ['en', 'es', 'pt'] as SupportedLanguage[]
-    }
-  }));
-
-  return [...esPaths, ...ptPaths];
+  return locales.flatMap(({ lang, data }) =>
+    data.map(item => ({
+      params: { lang, slug: item.slug },
+      props: {
+        lang,
+        comparison: item,
+        availableLocales: allLocales
+      }
+    }))
+  );
 }
 
 interface Props {
@@ -42,6 +51,9 @@ interface Props {
 
 const { lang, comparison, availableLocales } = Astro.props as Props;
 const isEs = lang === 'es';
+const isPt = lang === 'pt';
+const isZh = lang === 'zh-cn';
+const isJa = lang === 'ja';
 
 const {
   slug,
@@ -61,19 +73,37 @@ const {
 } = comparison;
 
 // Human-readable category names
-const categoryNames: Record<string, string> = isEs
-  ? {
-      "cooking-method": "Métodos de Cocción",
-      "container-material": "Recipientes y Materiales",
-      "food-storage": "Almacenamiento de Alimentos",
-      "appliance-safety": "Seguridad de Electrodomésticos"
-    }
-  : {
-      "cooking-method": "Métodos de Cozimento",
-      "container-material": "Recipientes e Materiais",
-      "food-storage": "Armazenamento de Alimentos",
-      "appliance-safety": "Segurança de Eletrodomésticos"
-    };
+const categoryNames: Record<string, string> = {
+  es: {
+    "cooking-method": "Métodos de Cocción",
+    "container-material": "Recipientes y Materiales",
+    "food-storage": "Almacenamiento de Alimentos",
+    "appliance-safety": "Seguridad de Electrodomésticos"
+  },
+  pt: {
+    "cooking-method": "Métodos de Cozimento",
+    "container-material": "Recipientes e Materiais",
+    "food-storage": "Armazenamento de Alimentos",
+    "appliance-safety": "Segurança de Eletrodomésticos"
+  },
+  'zh-cn': {
+    "cooking-method": "烹饪方式对比",
+    "container-material": "器皿材质对比",
+    "food-storage": "食材储存保鲜",
+    "appliance-safety": "厨房电器安全"
+  },
+  ja: {
+    "cooking-method": "調理方法・加熱器具",
+    "container-material": "容器・素材の安全性",
+    "food-storage": "食品保存・鮮度保持",
+    "appliance-safety": "調理家電の安全性"
+  }
+}[lang] || {
+  "cooking-method": "Cooking Methods",
+  "container-material": "Containers & Materials",
+  "food-storage": "Food Storage",
+  "appliance-safety": "Appliance Safety"
+};
 
 function getMetaDescription(i1: string, i2: string, win: string, verd: string) {
   let prefix = "";
@@ -85,7 +115,7 @@ function getMetaDescription(i1: string, i2: string, win: string, verd: string) {
     } else {
       prefix = `¿Es mejor ${i1} o ${i2}? Nuestra comparativa detalla cuándo utilizar cada uno. `;
     }
-  } else {
+  } else if (isPt) {
     if (win === "item1") {
       prefix = `É melhor ${i1} ou ${i2}? Nosso guia de segurança aponta ${i1} como vencedor. `;
     } else if (win === "item2") {
@@ -93,23 +123,49 @@ function getMetaDescription(i1: string, i2: string, win: string, verd: string) {
     } else {
       prefix = `É melhor ${i1} ou ${i2}? Nosso comparativo detalha quando usar cada opção. `;
     }
+  } else if (isZh) {
+    if (win === "item1") {
+      prefix = `${i1}与${i2}哪个更好？安全指南评定${i1}更胜一筹。`;
+    } else if (win === "item2") {
+      prefix = `${i1}与${i2}哪个更好？安全指南评定${i2}更胜一筹。`;
+    } else {
+      prefix = `${i1}与${i2}该怎么选？安全指南详细对比了两者的适用场景。`;
+    }
+  } else {
+    if (win === "item1") {
+      prefix = `${i1}と${i2}はどちらがおすすめ？安全ガイドでは${i1}を推奨しています。`;
+    } else if (win === "item2") {
+      prefix = `${i1}と${i2}はどちらがおすすめ？安全ガイドでは${i2}を推奨しています。`;
+    } else {
+      prefix = `${i1}と${i2}の使い分けは？それぞれの特徴と安全性を徹底比較。`;
+    }
   }
   
   let desc = `${prefix}${verd}`;
   
-  if (desc.length < 150) {
-    const suffix = isEs
-      ? " Consulta nuestra tabla comparativa detallada, ventajas y pautas de seguridad."
-      : " Confira nossa tabela comparativa completa, vantagens e dicas de segurança.";
-    desc = (desc + suffix).substring(0, 160);
-  }
-  
-  if (desc.length > 160) {
-    desc = desc.substring(0, 157) + "...";
-  }
-  
-  if (desc.length < 150) {
-    desc = desc.padEnd(150, '.');
+  if (isEs || isPt) {
+    if (desc.length < 150) {
+      const suffix = isEs
+        ? " Consulta nuestra tabla comparativa detallada, ventajas y pautas de seguridad."
+        : " Confira nossa tabela comparativa completa, vantagens e dicas de segurança.";
+      desc = (desc + suffix).substring(0, 160);
+    }
+    if (desc.length > 160) {
+      desc = desc.substring(0, 157) + "...";
+    }
+    if (desc.length < 150) {
+      desc = desc.padEnd(150, '.');
+    }
+  } else {
+    if (desc.length < 110) {
+      const suffix = isZh
+        ? " 查看详尽的耐热对比表、优缺点分析及厨房安全操作守则。"
+        : " 耐熱温度・メリット比較表や注意すべき安全ポイントを詳しく解説。";
+      desc = (desc + suffix).substring(0, 160);
+    }
+    if (desc.length > 160) {
+      desc = desc.substring(0, 157) + "...";
+    }
   }
   
   return desc;
@@ -117,11 +173,15 @@ function getMetaDescription(i1: string, i2: string, win: string, verd: string) {
 
 const pageTitle = isEs
   ? `${item1} vs ${item2}: ¿Cuál es Mejor? | ¿Es Seguro en la Cocina?`
-  : `${item1} vs ${item2}: Qual É Melhor? | É Seguro na Cozinha?`;
+  : isPt
+  ? `${item1} vs ${item2}: Qual É Melhor? | É Seguro na Cozinha?`
+  : isZh
+  ? `${item1}与${item2}对比：哪个更好？怎么选？ | 厨房安全指南`
+  : `${item1} vs ${item2} 徹底比較：おすすめはどっち？ | キッチン安全チェッカー`;
 
 const pageDescription = getMetaDescription(item1, item2, winner, verdict);
 
-const comparisonsData = isEs ? comparisonsEs : comparisonsPt;
+const comparisonsData = isEs ? comparisonsEs : isPt ? comparisonsPt : isZh ? comparisonsZh : comparisonsJa;
 let relatedComparisonObjects = comparisonsData.filter(c => 
   relatedComparisons.includes(c.slug) && c.slug !== slug
 );
@@ -136,31 +196,36 @@ if (relatedComparisonObjects.length < 4) {
 }
 relatedComparisonObjects = relatedComparisonObjects.slice(0, 4);
 
-const applianceNamesMap: Record<string, { es: string; pt: string }> = {
-  dishwasher: { es: 'Lavavajillas', pt: 'Lava-Louças' },
-  microwave: { es: 'Microondas', pt: 'Micro-ondas' },
-  oven: { es: 'Horno', pt: 'Forno' },
-  freezer: { es: 'Congelador', pt: 'Freezer' },
-  airfryer: { es: 'Freidora de Aire', pt: 'Fritadeira sem Óleo' },
-  refrigerator: { es: 'Refrigerador', pt: 'Geladeira' },
-  dryer: { es: 'Secadora', pt: 'Secadora' },
-  'washing-machine': { es: 'Lavadora', pt: 'Máquina de Lavar' }
+const applianceNamesMap: Record<string, Record<string, string>> = {
+  dishwasher: { es: 'Lavavajillas', pt: 'Lava-Louças', 'zh-cn': '洗碗机', ja: '食洗機' },
+  microwave: { es: 'Microondas', pt: 'Micro-ondas', 'zh-cn': '微波炉', ja: '電子レンジ' },
+  oven: { es: 'Horno', pt: 'Forno', 'zh-cn': '烤箱', ja: 'オーブン' },
+  freezer: { es: 'Congelador', pt: 'Freezer', 'zh-cn': '冷冻室', ja: '冷凍庫' },
+  airfryer: { es: 'Freidora de Aire', pt: 'Fritadeira sem Óleo', 'zh-cn': '空气炸锅', ja: 'ノンフライヤー' },
+  refrigerator: { es: 'Refrigerador', pt: 'Geladeira', 'zh-cn': '冰箱冷藏室', ja: '冷蔵庫' },
+  dryer: { es: 'Secadora', pt: 'Secadora', 'zh-cn': '烘干机', ja: '乾燥機' },
+  'washing-machine': { es: 'Lavadora', pt: 'Máquina de Lavar', 'zh-cn': '洗衣机', ja: '洗濯機' }
 };
 
 function formatItemLinkText(url: string) {
   const parts = url.split('/').filter(Boolean);
-  const cleanParts = parts.filter(p => p !== 'es' && p !== 'pt');
-  if (cleanParts.length < 2) return isEs ? "Guía de Seguridad en Cocina" : "Guia de Segurança na Cozinha";
+  const cleanParts = parts.filter(p => p !== 'es' && p !== 'pt' && p !== 'zh-cn' && p !== 'ja');
+  if (cleanParts.length < 2) {
+    return isEs ? "Guía de Seguridad en Cocina" : isPt ? "Guia de Segurança na Cozinha" : isZh ? "厨房安全指南" : "キッチン安全ガイド";
+  }
   const app = cleanParts[0];
   const localizedApp = (applianceNamesMap[app] as any)?.[lang] || (app.charAt(0).toUpperCase() + app.slice(1));
   const itm = cleanParts[1].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-  return isEs ? `Guía de ${itm} en ${localizedApp}` : `Guia de ${itm} em ${localizedApp}`;
+  if (isEs) return `Guía de ${itm} en ${localizedApp}`;
+  if (isPt) return `Guia de ${itm} em ${localizedApp}`;
+  if (isZh) return `${localizedApp}${itm}安全指南`;
+  return `${localizedApp}での${itm}安全ガイド`;
 }
 
-const activeItems = isEs ? itemsEs : itemsPt;
-const activeHowLong = isEs ? howLongEs : howLongPt;
-const activeRefreeze = isEs ? refreezeEs : refreezePt;
-const activeWashing = isEs ? washingEs : washingPt;
+const activeItems = isEs ? itemsEs : isPt ? itemsPt : isZh ? itemsZh : itemsJa;
+const activeHowLong = isEs ? howLongEs : isPt ? howLongPt : isZh ? howLongZh : howLongJa;
+const activeRefreeze = isEs ? refreezeEs : isPt ? refreezePt : isZh ? refreezeZh : refreezeJa;
+const activeWashing = isEs ? washingEs : isPt ? washingPt : isZh ? washingZh : washingJa;
 
 function normalizeName(name: string) {
   return name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
@@ -209,19 +274,33 @@ const addPreservationGuide = (name: string, url: string, label: string) => {
   }
 };
 
+const hlLabel = isEs ? 'Vida Útil' : isPt ? 'Validade' : isZh ? '保质期' : '保存期間';
+const rfLabel = isEs ? 'Recongelación' : isPt ? 'Recongelamento' : isZh ? '二次冷冻' : '再冷凍';
+
 const item1Norm = normalizeName(item1);
 const item1Hl = activeHowLong.find(h => normalizeName(h.item) === item1Norm);
-if (item1Hl) addPreservationGuide(isEs ? `¿Cuánto Dura ${item1Hl.item}?` : `Quanto Tempo Dura ${item1Hl.item}?`, `/${lang}/how-long/${item1Hl.slug}/`, isEs ? 'Vida Útil' : 'Validade');
+if (item1Hl) {
+  const hlQuestion = isEs ? `¿Cuánto Dura ${item1Hl.item}?` : isPt ? `Quanto Tempo Dura ${item1Hl.item}?` : isZh ? `${item1Hl.item}能保存多久？` : `${item1Hl.item}の保存期間は？`;
+  addPreservationGuide(hlQuestion, `/${lang}/how-long/${item1Hl.slug}/`, hlLabel);
+}
 const item1Rf = activeRefreeze.find(r => normalizeName(r.item) === item1Norm);
-if (item1Rf) addPreservationGuide(isEs ? `¿Se Puede Recongelar ${item1Rf.item}?` : `Pode Recongelar ${item1Rf.item}?`, `/${lang}/refreeze/${item1Rf.slug}/`, isEs ? 'Recongelación' : 'Recongelamento');
+if (item1Rf) {
+  const rfQuestion = isEs ? `¿Se Puede Recongelar ${item1Rf.item}?` : isPt ? `Pode Recongelar ${item1Rf.item}?` : isZh ? `${item1Rf.item}可以二次冷冻吗？` : `${item1Rf.item}は再冷凍できる？`;
+  addPreservationGuide(rfQuestion, `/${lang}/refreeze/${item1Rf.slug}/`, rfLabel);
+}
 
 const item2Norm = normalizeName(item2);
 const item2Hl = activeHowLong.find(h => normalizeName(h.item) === item2Norm);
-if (item2Hl) addPreservationGuide(isEs ? `¿Cuánto Dura ${item2Hl.item}?` : `Quanto Tempo Dura ${item2Hl.item}?`, `/${lang}/how-long/${item2Hl.slug}/`, isEs ? 'Vida Útil' : 'Validade');
+if (item2Hl) {
+  const hlQuestion = isEs ? `¿Cuánto Dura ${item2Hl.item}?` : isPt ? `Quanto Tempo Dura ${item2Hl.item}?` : isZh ? `${item2Hl.item}能保存多久？` : `${item2Hl.item}の保存期間は？`;
+  addPreservationGuide(hlQuestion, `/${lang}/how-long/${item2Hl.slug}/`, hlLabel);
+}
 const item2Rf = activeRefreeze.find(r => normalizeName(r.item) === item2Norm);
-if (item2Rf) addPreservationGuide(isEs ? `¿Se Puede Recongelar ${item2Rf.item}?` : `Pode Recongelar ${item2Rf.item}?`, `/${lang}/refreeze/${item2Rf.slug}/`, isEs ? 'Recongelación' : 'Recongelamento');
+if (item2Rf) {
+  const rfQuestion = isEs ? `¿Se Puede Recongelar ${item2Rf.item}?` : isPt ? `Pode Recongelar ${item2Rf.item}?` : isZh ? `${item2Rf.item}可以二次冷冻吗？` : `${item2Rf.item}は再冷凍できる？`;
+  addPreservationGuide(rfQuestion, `/${lang}/refreeze/${item2Rf.slug}/`, rfLabel);
+}
 
-// Schemas
 const pageCanonical = `https://isitkitchensafe.com/${lang}/compare/${slug}/`;
 
 const breadcrumbSchema = {
@@ -231,13 +310,13 @@ const breadcrumbSchema = {
     {
       "@type": "ListItem",
       "position": 1,
-      "name": isEs ? "Inicio" : "Início",
+      "name": isEs ? "Inicio" : isPt ? "Início" : isZh ? "首页" : "ホーム",
       "item": `https://isitkitchensafe.com/${lang}/`
     },
     {
       "@type": "ListItem",
       "position": 2,
-      "name": isEs ? "Comparar" : "Comparar",
+      "name": isEs || isPt ? "Comparar" : isZh ? "安全对比" : "比較ガイド",
       "item": `https://isitkitchensafe.com/${lang}/compare/`
     },
     {
@@ -252,7 +331,13 @@ const breadcrumbSchema = {
 const articleSchema = {
   "@context": "https://schema.org",
   "@type": "Article",
-  "headline": isEs ? `${item1} vs ${item2}: ¿Cuál es Mejor?` : `${item1} vs ${item2}: Qual É Melhor?`,
+  "headline": isEs
+    ? `${item1} vs ${item2}: ¿Cuál es Mejor?`
+    : isPt
+    ? `${item1} vs ${item2}: Qual É Melhor?`
+    : isZh
+    ? `${item1}与${item2}对比：哪个更好？怎么选？`
+    : `${item1} vs ${item2} 徹底比較：おすすめはどっち？`,
   "description": pageDescription,
   "image": "https://isitkitchensafe.com/favicon.svg",
   "author": {
@@ -300,9 +385,9 @@ const faqSchema = {
       
       <!-- Breadcrumbs -->
       <nav class="flex gap-2 text-muted text-[13px] mb-6" aria-label="Breadcrumb">
-        <a href={`/${lang}/`} class="hover:text-ink transition-colors">{isEs ? "Inicio" : "Início"}</a>
+        <a href={`/${lang}/`} class="hover:text-ink transition-colors">{isEs ? "Inicio" : isPt ? "Início" : isZh ? "首页" : "ホーム"}</a>
         <span>/</span>
-        <a href={`/${lang}/compare/`} class="hover:text-ink transition-colors">{isEs ? "Comparar" : "Comparar"}</a>
+        <a href={`/${lang}/compare/`} class="hover:text-ink transition-colors">{isEs || isPt ? "Comparar" : isZh ? "安全对比" : "比較ガイド"}</a>
         <span>/</span>
         <span class="text-ink font-medium">{item1} vs {item2}</span>
       </nav>
@@ -310,10 +395,22 @@ const faqSchema = {
       <!-- H1 Page Header -->
       <header class="mb-8 border-b border-hairline pb-8">
         <span class="text-xs font-bold uppercase tracking-wider text-muted mb-2 block">
-          {isEs ? `Comparación de ${categoryNames[category]}` : `Comparação de ${categoryNames[category]}`}
+          {isEs
+            ? `Comparación de ${categoryNames[category]}`
+            : isPt
+            ? `Comparação de ${categoryNames[category]}`
+            : isZh
+            ? `${categoryNames[category]}`
+            : `${categoryNames[category]}の比較`}
         </span>
         <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-6 leading-tight">
-          {isEs ? `${item1} vs ${item2}: ¿Cuál Deberías Usar?` : `${item1} vs ${item2}: Qual Você Deve Usar?`}
+          {isEs
+            ? `${item1} vs ${item2}: ¿Cuál Deberías Usar?`
+            : isPt
+            ? `${item1} vs ${item2}: Qual Você Deve Usar?`
+            : isZh
+            ? `${item1} 对比 ${item2}：该选哪一个？`
+            : `${item1} vs ${item2}：どちらを使うべき？`}
         </h1>
 
         <!-- Winner Badge above the fold -->
@@ -321,19 +418,19 @@ const faqSchema = {
           {winner === "item1" && (
             <div class="inline-flex items-center gap-2 px-6 py-3 bg-success-bg border border-success/30 rounded-full text-success text-lg md:text-xl font-bold font-display">
               <span class="text-2xl leading-none">✓</span>
-              <span>{item1.toUpperCase()} {isEs ? "GANA" : "VENCE"}</span>
+              <span>{item1.toUpperCase()} {isEs ? "GANA" : isPt ? "VENCE" : isZh ? "胜出" : "推奨"}</span>
             </div>
           )}
           {winner === "item2" && (
             <div class="inline-flex items-center gap-2 px-6 py-3 bg-success-bg border border-success/30 rounded-full text-success text-lg md:text-xl font-bold font-display">
               <span class="text-2xl leading-none">✓</span>
-              <span>{item2.toUpperCase()} {isEs ? "GANA" : "VENCE"}</span>
+              <span>{item2.toUpperCase()} {isEs ? "GANA" : isPt ? "VENCE" : isZh ? "胜出" : "推奨"}</span>
             </div>
           )}
           {winner === "depends" && (
             <div class="inline-flex items-center gap-2 px-6 py-3 bg-surface-soft border border-hairline rounded-full text-body text-lg md:text-xl font-bold font-display">
               <span class="text-xl leading-none">⚠</span>
-              <span>{isEs ? "DEPENDE" : "DEPENDE"}</span>
+              <span>{isEs || isPt ? "DEPENDE" : isZh ? "视情况而定" : "用途による"}</span>
             </div>
           )}
         </div>
@@ -349,7 +446,7 @@ const faqSchema = {
       <!-- Side-by-Side Comparison Table -->
       <section class="mb-12">
         <h2 class="text-title-lg font-bold text-ink mb-6">
-          {isEs ? "Comparación Detallada" : "Comparação Detalhada"}
+          {isEs ? "Comparación Detallada" : isPt ? "Comparação Detalhada" : isZh ? "详细参数及特性对比" : "詳細スペック・特性比較"}
         </h2>
         
         <!-- Desktop Table -->
@@ -358,7 +455,7 @@ const faqSchema = {
             <thead>
               <tr class="bg-surface-soft border-b border-hairline">
                 <th class="w-[20%] p-4 font-display font-medium text-ink text-[14px]">
-                  {isEs ? "Aspecto" : "Aspecto"}
+                  {isEs || isPt ? "Aspecto" : isZh ? "对比维度" : "比較項目"}
                 </th>
                 <th class={`w-[40%] p-4 font-display font-medium text-[14px] text-center ${winner === 'item1' ? 'bg-success-bg/50 border-l-2 border-success-border' : 'bg-surface-soft/50'}`}>
                   {item1}
@@ -411,13 +508,13 @@ const faqSchema = {
       <!-- Detailed Pros Section -->
       <section class="mb-12 border-t border-hairline pt-8">
         <h2 class="text-title-lg font-bold text-ink mb-6">
-          {isEs ? "Ventajas y Pros" : "Vantagens e Prós"}
+          {isEs ? "Ventajas y Pros" : isPt ? "Vantagens e Prós" : isZh ? "核心优势分析" : "主なメリット・利点"}
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div class="p-6 bg-surface-soft/30 border border-hairline rounded-lg">
             <h3 class="text-title-sm font-bold text-ink mb-4 pb-2 border-b border-hairline flex items-center gap-2">
               <span class="text-success text-lg">✓</span>
-              <span>{item1} ({isEs ? "Ventajas" : "Vantagens"})</span>
+              <span>{item1} ({isEs ? "Ventajas" : isPt ? "Vantagens" : isZh ? "优势" : "メリット"})</span>
             </h3>
             <ul class="flex flex-col gap-3 text-[13.5px] text-body leading-relaxed">
               {item1Pros.map(pro => (
@@ -432,7 +529,7 @@ const faqSchema = {
           <div class="p-6 bg-surface-soft/30 border border-hairline rounded-lg">
             <h3 class="text-title-sm font-bold text-ink mb-4 pb-2 border-b border-hairline flex items-center gap-2">
               <span class="text-success text-lg">✓</span>
-              <span>{item2} ({isEs ? "Ventajas" : "Vantagens"})</span>
+              <span>{item2} ({isEs ? "Ventajas" : isPt ? "Vantagens" : isZh ? "优势" : "メリット"})</span>
             </h3>
             <ul class="flex flex-col gap-3 text-[13.5px] text-body leading-relaxed">
               {item2Pros.map(pro => (
@@ -449,7 +546,7 @@ const faqSchema = {
       <!-- Best Use Cases Section -->
       <section class="mb-12 border-t border-hairline pt-8">
         <h2 class="text-title-lg font-bold text-ink mb-6">
-          {isEs ? "Mejores Casos de Uso" : "Melhores Casos de Uso"}
+          {isEs ? "Mejores Casos de Uso" : isPt ? "Melhores Casos de Uso" : isZh ? "最佳推荐使用场景" : "最適な使用シーン・活用例"}
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           {useCases.map(uc => (
@@ -464,7 +561,7 @@ const faqSchema = {
       <!-- Safety Considerations Section -->
       <section class="mb-12 border-t border-hairline pt-8">
         <h2 class="text-title-lg font-bold text-ink mb-6">
-          {isEs ? "Consideraciones de Seguridad" : "Considerações de Segurança"}
+          {isEs ? "Consideraciones de Seguridad" : isPt ? "Considerações de Segurança" : isZh ? "关键安全防范事项" : "使用上の安全注意点"}
         </h2>
         <div class="p-6 bg-[#fce8e6]/30 border border-error-bg rounded-lg">
           <ul class="flex flex-col gap-4 text-[13.5px] text-body leading-relaxed">
@@ -481,7 +578,7 @@ const faqSchema = {
       <!-- FAQ Section -->
       <section class="mb-12 border-t border-hairline pt-8">
         <h2 class="text-title-lg font-bold text-ink mb-6">
-          {isEs ? "Preguntas Frecuentes" : "Perguntas Frequentes"}
+          {isEs ? "Preguntas Frecuentes" : isPt ? "Perguntas Frequentes" : isZh ? "常见问题解答（FAQ）" : "よくある質問（FAQ）"}
         </h2>
         <div class="flex flex-col gap-4">
           {faqs.map(faq => (
@@ -502,7 +599,7 @@ const faqSchema = {
       {individualGuides.length > 0 && (
         <section class="mb-12 border-t border-hairline pt-8">
           <h2 class="text-title-lg font-bold text-ink mb-6">
-            {isEs ? "Guías Individuales de Seguridad Relacionadas" : "Guias Individuais de Segurança Relacionados"}
+            {isEs ? "Guías Individuales de Seguridad Relacionadas" : isPt ? "Guias Individuais de Segurança Relacionados" : isZh ? "相关单品电器安全指南" : "関連アイテムの安全性ガイド"}
           </h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {individualGuides.map(g => (
@@ -511,7 +608,7 @@ const faqSchema = {
                 class="flex items-center justify-between p-4 border border-hairline rounded-lg hover:border-border-strong hover:bg-surface-soft/40 transition-all text-decoration-none text-ink font-medium text-[13.5px] shadow-xs"
               >
                 <span>{g.name}</span>
-                <span class="text-link text-xs">{isEs ? "Leer Guía →" : "Ler Guia →"}</span>
+                <span class="text-link text-xs">{isEs ? "Leer Guía →" : isPt ? "Ler Guia →" : isZh ? "查看指南 →" : "ガイドを読む →"}</span>
               </a>
             ))}
           </div>
@@ -522,7 +619,7 @@ const faqSchema = {
       {preservationGuides.length > 0 && (
         <section class="mb-12 border-t border-hairline pt-8">
           <h2 class="text-title-lg font-bold text-ink mb-6">
-            {isEs ? "Guías de Conservación y Vida Útil" : "Guias de Conservação e Validade"}
+            {isEs ? "Guías de Conservación y Vida Útil" : isPt ? "Guias de Conservação e Validade" : isZh ? "食材保质期与保存指南" : "食品の保存期間・再冷凍ガイド"}
           </h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {preservationGuides.map(g => (
@@ -542,7 +639,7 @@ const faqSchema = {
       {relatedComparisonObjects.length > 0 && (
         <section class="mb-12 border-t border-hairline pt-8">
           <h2 class="text-title-lg font-bold text-ink mb-6">
-            {isEs ? "Comparaciones de Seguridad Relacionadas" : "Comparações de Segurança Relacionadas"}
+            {isEs ? "Comparaciones de Seguridad Relacionadas" : isPt ? "Comparações de Segurança Relacionadas" : isZh ? "更多相关安全对比" : "関連する安全性比較"}
           </h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {relatedComparisonObjects.map(rc => (
@@ -572,7 +669,7 @@ const faqSchema = {
           class="inline-flex items-center gap-1.5 text-link hover:underline font-medium text-[14px]"
         >
           <span>←</span>
-          <span>{isEs ? "Volver al índice de comparaciones" : "Voltar ao índice de comparações"}</span>
+          <span>{isEs ? "Volver al índice de comparaciones" : isPt ? "Voltar ao índice de comparações" : isZh ? "返回对比文章总览" : "比較ガイド一覧に戻る"}</span>
         </a>
       </footer>
 
