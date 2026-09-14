@@ -39,6 +39,9 @@ export default defineConfig({
   site: 'https://isitkitchensafe.com',
   output: 'static',
   trailingSlash: 'always',
+  build: {
+    inlineStylesheets: 'always',
+  },
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'es', 'pt', 'zh-cn', 'ja'],
