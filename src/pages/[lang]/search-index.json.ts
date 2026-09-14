@@ -7,6 +7,8 @@ import howLongEs from '../../data/how-long.es.json';
 import howLongPt from '../../data/how-long.pt.json';
 import refreezeEs from '../../data/refreeze.es.json';
 import refreezePt from '../../data/refreeze.pt.json';
+import refreezeZh from '../../data/refreeze.zh-cn.json';
+import refreezeJa from '../../data/refreeze.ja.json';
 import whatHappensEs from '../../data/what-happens.es.json';
 import whatHappensPt from '../../data/what-happens.pt.json';
 import whatHappensZh from '../../data/what-happens.zh-cn.json';
@@ -134,7 +136,7 @@ export const GET: APIRoute = async ({ params }) => {
     };
   });
 
-  const rawRefreeze = isEs ? refreezeEs : isPt ? refreezePt : [];
+  const rawRefreeze = isEs ? refreezeEs : isPt ? refreezePt : isZh ? refreezeZh : isJa ? refreezeJa : [];
   const refreezeSearchItems = rawRefreeze.map(item => {
     const category = formatCategory('refreeze', lang);
     return {
