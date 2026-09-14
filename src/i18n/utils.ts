@@ -38,10 +38,12 @@ const ptSlugs = new Set([
   ...CATEGORIES.map(c => `material/${c.id}`)
 ]);
 const zhSlugs = new Set([
-  ...itemsZh.map(i => `${i.appliance}/${i.slug}`)
+  ...itemsZh.map(i => `${i.appliance}/${i.slug}`),
+  ...CATEGORIES.map(c => `material/${c.id}`)
 ]);
 const jaSlugs = new Set([
-  ...itemsJa.map(i => `${i.appliance}/${i.slug}`)
+  ...itemsJa.map(i => `${i.appliance}/${i.slug}`),
+  ...CATEGORIES.map(c => `material/${c.id}`)
 ]);
 
 const esAppliances = new Set([
@@ -86,6 +88,8 @@ export function isItemTranslatedInLocale(appliance: string, slug: string, lang: 
 
 const esDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens', 'compare', 'blog', 'material']);
 const ptDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens', 'compare', 'blog', 'material']);
+const zhDirectories = new Set<string>(['material']);
+const jaDirectories = new Set<string>(['material']);
 
 /**
  * Checks whether a safety directory section has translated content in the given locale.
@@ -95,6 +99,8 @@ export function isDirectoryTranslatedInLocale(section: string, lang: SupportedLa
   const clean = section.replace(/^\/+|\/+$/g, '');
   if (lang === 'es') return esDirectories.has(clean);
   if (lang === 'pt') return ptDirectories.has(clean);
+  if (lang === 'zh-cn') return zhDirectories.has(clean);
+  if (lang === 'ja') return jaDirectories.has(clean);
   return false;
 }
 

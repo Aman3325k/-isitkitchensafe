@@ -4,25 +4,19 @@ import { CATEGORIES, getCategoryItemsAndStats, getLatestDataModifiedTime, getCat
 import type { SupportedLanguage } from '../../../i18n/ui';
 
 export function getStaticPaths() {
-  const esPaths = CATEGORIES.map(cat => ({
-    params: { lang: 'es', material: cat.id },
-    props: {
-      lang: 'es' as SupportedLanguage,
-      categoryId: cat.id,
-      availableLocales: ['en', 'es', 'pt'] as SupportedLanguage[]
-    }
-  }));
+  const allLangs: SupportedLanguage[] = ['es', 'pt', 'zh-cn', 'ja'];
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
 
-  const ptPaths = CATEGORIES.map(cat => ({
-    params: { lang: 'pt', material: cat.id },
-    props: {
-      lang: 'pt' as SupportedLanguage,
-      categoryId: cat.id,
-      availableLocales: ['en', 'es', 'pt'] as SupportedLanguage[]
-    }
-  }));
-
-  return [...esPaths, ...ptPaths];
+  return allLangs.flatMap(l => 
+    CATEGORIES.map(cat => ({
+      params: { lang: l, material: cat.id },
+      props: {
+        lang: l,
+        categoryId: cat.id,
+        availableLocales
+      }
+    }))
+  );
 }
 
 interface Props {
@@ -32,7 +26,6 @@ interface Props {
 }
 
 const { lang, categoryId, availableLocales } = Astro.props;
-const isEs = lang === 'es';
 
 const stats = getCategoryItemsAndStats(categoryId, lang);
 if (!stats) {
@@ -41,45 +34,66 @@ if (!stats) {
 
 const { category, totalItemsTested, safePercentage, mostCommonRisk, items } = stats;
 
-const pageTitle = isEs
-  ? `Guía de Seguridad para ${category.displayName} | ¿Es Seguro en la Cocina?`
-  : `Guia de Segurança para ${category.displayName} | É Seguro na Cozinha?`;
+const titles: Record<SupportedLanguage, (cat: string) => string> = {
+  en: (cat) => `${cat} Appliance Safety Guide | IsItKitchenSafe`,
+  es: (cat) => `Guía de Seguridad para ${cat} | ¿Es Seguro en la Cocina?`,
+  pt: (cat) => `Guia de Segurança para ${cat} | É Seguro na Cozinha?`,
+  'zh-cn': (cat) => `${cat}厨房电器安全使用指南 | 厨房安全指南`,
+  ja: (cat) => `${cat}の厨房・家電安全性ガイド | キッチン安全チェッカー`
+};
 
-const pageDescription = isEs
-  ? `¿Son seguros los artículos de ${category.displayName} en el lavavajillas, microondas, horno o congelador? Consulta estadísticas de seguridad, riesgos y tabla comparativa para ${totalItemsTested} artículos.`
-  : `Os itens de ${category.displayName} são seguros na lava-louças, micro-ondas, forno ou freezer? Veja estatísticas de segurança, riscos e tabela comparativa para ${totalItemsTested} itens.`;
+const descriptions: Record<SupportedLanguage, (cat: string, count: number) => string> = {
+  en: (cat, count) => `Are ${cat} items safe in the dishwasher, microwave, oven, or freezer? View safety stats, risks, and a full safety comparison table for ${count} items.`,
+  es: (cat, count) => `¿Son seguros los artículos de ${cat} en el lavavajillas, microondas, horno o congelador? Consulta estadísticas de seguridad, riesgos y tabla comparativa para ${count} artículos.`,
+  pt: (cat, count) => `Os itens de ${cat} são seguros na lava-louças, micro-ondas, forno ou freezer? Veja estatísticas de segurança, riscos e tabela comparativa para ${count} itens.`,
+  'zh-cn': (cat, count) => `${cat}物品能否放进洗碗机、微波炉、烤箱或冷冻室？查看针对${count}件物品的安全统计、潜在风险与完整对照表。`,
+  ja: (cat, count) => `${cat}のアイテムは食洗機、電子レンジ、オーブン、冷凍庫に入れても大丈夫？検証済み${count}アイテムの安全性データとリスク解説。`
+};
+
+const pageTitle = (titles[lang] || titles.en)(category.displayName);
+const pageDescription = (descriptions[lang] || descriptions.en)(category.displayName, totalItemsTested);
 
 const lastModifiedTime = getLatestDataModifiedTime();
-const formattedLastVerified = lastModifiedTime.toLocaleDateString(isEs ? 'es-ES' : 'pt-BR', {
+const localeCodeMap: Record<SupportedLanguage, string> = {
+  en: 'en-US',
+  es: 'es-ES',
+  pt: 'pt-BR',
+  'zh-cn': 'zh-CN',
+  ja: 'ja-JP'
+};
+const formattedLastVerified = lastModifiedTime.toLocaleDateString(localeCodeMap[lang] || 'en-US', {
   year: 'numeric',
   month: 'long',
   day: 'numeric'
 });
 
 const isWashingBased = categoryId === 'fabric' || categoryId === 'footwear';
-const columns = isWashingBased 
-  ? (isEs 
-      ? [
-          { id: 'washing-machine', label: 'Lavadora' },
-          { id: 'dryer', label: 'Secadora' }
-        ]
-      : [
-          { id: 'washing-machine', label: 'Máquina de Lavar' },
-          { id: 'dryer', label: 'Secadora' }
-        ])
-  : (isEs
-      ? [
-          { id: 'dishwasher', label: 'Lavavajillas' },
-          { id: 'microwave', label: 'Microondas' },
-          { id: 'oven', label: 'Horno' },
-          { id: 'freezer', label: 'Congelador' }
-        ]
-      : [
-          { id: 'dishwasher', label: 'Lava-Louças' },
-          { id: 'microwave', label: 'Micro-ondas' },
-          { id: 'oven', label: 'Forno' },
-          { id: 'freezer', label: 'Freezer' }
-        ]);
+
+const columnConfigs: Record<SupportedLanguage, { washing: Array<{ id: string; label: string }>; kitchen: Array<{ id: string; label: string }> }> = {
+  en: {
+    washing: [{ id: 'washing-machine', label: 'Washing Machine' }, { id: 'dryer', label: 'Dryer' }],
+    kitchen: [{ id: 'dishwasher', label: 'Dishwasher' }, { id: 'microwave', label: 'Microwave' }, { id: 'oven', label: 'Oven' }, { id: 'freezer', label: 'Freezer' }]
+  },
+  es: {
+    washing: [{ id: 'washing-machine', label: 'Lavadora' }, { id: 'dryer', label: 'Secadora' }],
+    kitchen: [{ id: 'dishwasher', label: 'Lavavajillas' }, { id: 'microwave', label: 'Microondas' }, { id: 'oven', label: 'Horno' }, { id: 'freezer', label: 'Congelador' }]
+  },
+  pt: {
+    washing: [{ id: 'washing-machine', label: 'Máquina de Lavar' }, { id: 'dryer', label: 'Secadora' }],
+    kitchen: [{ id: 'dishwasher', label: 'Lava-Louças' }, { id: 'microwave', label: 'Micro-ondas' }, { id: 'oven', label: 'Forno' }, { id: 'freezer', label: 'Freezer' }]
+  },
+  'zh-cn': {
+    washing: [{ id: 'washing-machine', label: '洗衣机' }, { id: 'dryer', label: '烘干机' }],
+    kitchen: [{ id: 'dishwasher', label: '洗碗机' }, { id: 'microwave', label: '微波炉' }, { id: 'oven', label: '烤箱' }, { id: 'freezer', label: '冷冻室' }]
+  },
+  ja: {
+    washing: [{ id: 'washing-machine', label: '洗濯機' }, { id: 'dryer', label: '乾燥機' }],
+    kitchen: [{ id: 'dishwasher', label: '食洗機' }, { id: 'microwave', label: '電子レンジ' }, { id: 'oven', label: 'オーブン' }, { id: 'freezer', label: '冷凍庫' }]
+  }
+};
+
+const curConfig = columnConfigs[lang] || columnConfigs.en;
+const columns = isWashingBased ? curConfig.washing : curConfig.kitchen;
 
 // Generate dynamic cross-linking links with localized category names
 const allCategories = getCategories(lang);
@@ -87,16 +101,150 @@ const relatedMaterials = category.relatedIds
   .map(id => allCategories.find(c => c.id === id))
   .filter((c): c is typeof allCategories[number] => c !== undefined);
 
+const homeLabels: Record<SupportedLanguage, string> = {
+  en: "Home",
+  es: "Inicio",
+  pt: "Início",
+  'zh-cn': "首页",
+  ja: "ホーム"
+};
+
+const materialLabels: Record<SupportedLanguage, string> = {
+  en: "Materials",
+  es: "Materiales",
+  pt: "Materiais",
+  'zh-cn': "材质索引",
+  ja: "素材別ガイド"
+};
+
+const guideBadgeLabels: Record<SupportedLanguage, string> = {
+  en: "Material Safety Guide",
+  es: "Guía de Seguridad del Material",
+  pt: "Guia de Segurança do Material",
+  'zh-cn': "材质安全指南",
+  ja: "素材別安全性ガイド"
+};
+
+const h1Titles: Record<SupportedLanguage, (cat: string) => string> = {
+  en: (cat) => `Appliance Safety for ${cat}`,
+  es: (cat) => `Seguridad de Electrodomésticos para ${cat}`,
+  pt: (cat) => `Segurança de Eletrodomésticos para ${cat}`,
+  'zh-cn': (cat) => `${cat}电器安全使用指南`,
+  ja: (cat) => `${cat}の厨房・家電安全性`
+};
+
+const subTexts: Record<SupportedLanguage, string> = {
+  en: "Read below for aggregated safety risks and the complete appliance comparison table.",
+  es: "Lee a continuación los riesgos de seguridad agregados y la tabla comparativa completa.",
+  pt: "Veja abaixo os riscos de segurança agregados e a tabela comparativa completa.",
+  'zh-cn': "请阅读下方汇总的安全风险提示及完整的电器适用性对照表。",
+  ja: "以下に集約された主な安全リスクと、家電ごとの完全な比較対照表をご確認いただけます。"
+};
+
+const statsHeadings: Record<SupportedLanguage, string> = {
+  en: "Material Verification Statistics",
+  es: "Estadísticas de Verificación del Material",
+  pt: "Estatísticas de Verificação do Material",
+  'zh-cn': "材质检测与验证统计",
+  ja: "素材の検証統計データ"
+};
+
+const totalTestedLabels: Record<SupportedLanguage, (count: number) => string> = {
+  en: (count) => `${count} items`,
+  es: (count) => `${count} artículos`,
+  pt: (count) => `${count} itens`,
+  'zh-cn': (count) => `${count} 件物品`,
+  ja: (count) => `${count} 点`
+};
+
+const totalTestedTitles: Record<SupportedLanguage, string> = {
+  en: "Total Items Tested",
+  es: "Artículos Totales Verificados",
+  pt: "Total de Itens Testados",
+  'zh-cn': "已验证物品总数",
+  ja: "検証済みアイテム総数"
+};
+
+const safeRateTitles: Record<SupportedLanguage, (washing: boolean) => string> = {
+  en: (w) => w ? "Wash Safe Rate" : "Dishwasher Safe Rate",
+  es: (w) => w ? "Tasa Apto para Lavado" : "Tasa Apto para Lavavajillas",
+  pt: (w) => w ? "Taxa Apto para Lavar" : "Taxa Apto para Lava-Louças",
+  'zh-cn': (w) => w ? "水洗适用率" : "洗碗机机洗适用率",
+  ja: (w) => w ? "洗濯機対応率" : "食洗機対応率"
+};
+
+const commonRiskTitles: Record<SupportedLanguage, string> = {
+  en: "Primary Safety Risk",
+  es: "Riesgo Principal de Seguridad",
+  pt: "Risco Principal de Segurança",
+  'zh-cn': "核心安全风险",
+  ja: "主な安全リスク"
+};
+
+const verifiedByLabels: Record<SupportedLanguage, string> = {
+  en: "Verified by the IsItKitchenSafe Editorial Team",
+  es: "Verificado por el Equipo Editorial de ¿Es Seguro en la Cocina?",
+  pt: "Verificado pela Equipe Editorial do É Seguro na Cozinha?",
+  'zh-cn': "由《厨房安全指南》编辑团队权威审核",
+  ja: "キッチン安全チェッカー編集チームによる検証済み"
+};
+
+const verifiedOnLabels: Record<SupportedLanguage, string> = {
+  en: "Data verified on: ",
+  es: "Datos verificados el: ",
+  pt: "Dados verificados em: ",
+  'zh-cn': "数据验证日期：",
+  ja: "最終検証日："
+};
+
+const tableHeadings: Record<SupportedLanguage, (cat: string) => string> = {
+  en: (cat) => `Safety Comparison Table for ${cat}`,
+  es: (cat) => `Tabla Comparativa de Seguridad para ${cat}`,
+  pt: (cat) => `Tabela Comparativa de Segurança para ${cat}`,
+  'zh-cn': (cat) => `${cat}安全性对照表`,
+  ja: (cat) => `${cat} 安全性比較一覧表`
+};
+
+const itemNameHeaders: Record<SupportedLanguage, string> = {
+  en: "Item Name",
+  es: "Nombre del Artículo",
+  pt: "Nome do Item",
+  'zh-cn': "物品名称",
+  ja: "アイテム名"
+};
+
+const verdictLabels: Record<SupportedLanguage, { yes: string; no: string; depends: string }> = {
+  en: { yes: '✓ YES', no: '✗ NO', depends: '⚠ DEPENDS' },
+  es: { yes: '✓ SÍ', no: '✗ NO', depends: '⚠ DEPENDE' },
+  pt: { yes: '✓ SIM', no: '✗ NÃO', depends: '⚠ DEPENDE' },
+  'zh-cn': { yes: '✓ 安全', no: '✗ 危险', depends: '⚠ 视情况' },
+  ja: { yes: '✓ 安全', no: '✗ 不可', depends: '⚠ 条件付' }
+};
+
+const curVerdicts = verdictLabels[lang] || verdictLabels.en;
+
+const alsoLikeTitles: Record<SupportedLanguage, string> = {
+  en: "You might also want to check:",
+  es: "También te puede interesar consultar:",
+  pt: "Você também pode querer conferir:",
+  'zh-cn': "您可能还对以下材质感兴趣：",
+  ja: "こちらの関連素材もご確認ください："
+};
+
+const compareCtas: Record<SupportedLanguage, string> = {
+  en: "Compare safety →",
+  es: "Comparar seguridad →",
+  pt: "Comparar segurança →",
+  'zh-cn': "对比材质安全性 →",
+  ja: "安全性を比較する →"
+};
+
 // Upgraded Schema markup
 const itemListSchema = {
   "@context": "https://schema.org",
   "@type": "ItemList",
-  "name": isEs 
-    ? `Comparativa de Seguridad para ${category.displayName}` 
-    : `Comparação de Segurança para ${category.displayName}`,
-  "description": isEs 
-    ? `Pautas detalladas de seguridad y comparaciones para artículos de ${category.displayName}.`
-    : `Diretrizes detalhadas de segurança e comparações para itens de ${category.displayName}.`,
+  "name": (tableHeadings[lang] || tableHeadings.en)(category.displayName),
+  "description": pageDescription,
   "numberOfItems": items.length,
   "itemListElement": items.map((item, idx) => ({
     "@type": "ListItem",
@@ -121,13 +269,13 @@ const breadcrumbListSchema = {
     {
       "@type": "ListItem",
       "position": 1,
-      "name": isEs ? "Inicio" : "Início",
+      "name": homeLabels[lang] || homeLabels.en,
       "item": `https://isitkitchensafe.com/${lang}/`
     },
     {
       "@type": "ListItem",
       "position": 2,
-      "name": isEs ? "Materiales" : "Materiais",
+      "name": materialLabels[lang] || materialLabels.en,
       "item": `https://isitkitchensafe.com/${lang}/material/`
     },
     {
@@ -150,9 +298,9 @@ const breadcrumbListSchema = {
   <div class="bg-surface-soft border-b border-hairline py-4">
     <div class="max-w-[1280px] mx-auto px-6">
       <nav class="flex gap-2 text-muted text-[13px]" aria-label="Breadcrumb">
-        <a href={`/${lang}/`} class="hover:text-ink transition-colors">{isEs ? "Inicio" : "Início"}</a>
+        <a href={`/${lang}/`} class="hover:text-ink transition-colors">{homeLabels[lang] || homeLabels.en}</a>
         <span>/</span>
-        <a href={`/${lang}/material/`} class="hover:text-ink transition-colors">{isEs ? "Materiales" : "Materiais"}</a>
+        <a href={`/${lang}/material/`} class="hover:text-ink transition-colors">{materialLabels[lang] || materialLabels.en}</a>
         <span>/</span>
         <span class="text-ink font-medium">{category.displayName}</span>
       </nav>
@@ -163,15 +311,13 @@ const breadcrumbListSchema = {
     <!-- Header -->
     <header class="mb-10 text-center md:text-left">
       <span class="text-caption text-muted uppercase tracking-wider text-xs block mb-2">
-        {isEs ? "Guía de Seguridad del Material" : "Guia de Segurança do Material"}
+        {guideBadgeLabels[lang] || guideBadgeLabels.en}
       </span>
       <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-4">
-        {isEs ? `Seguridad de Electrodomésticos para ${category.displayName}` : `Segurança de Eletrodomésticos para ${category.displayName}`}
+        {(h1Titles[lang] || h1Titles.en)(category.displayName)}
       </h1>
       <p class="text-body-md text-muted text-lg leading-relaxed max-w-[800px]">
-        {category.description} {isEs 
-          ? "Lee a continuación los riesgos de seguridad agregados y la tabla comparativa completa."
-          : "Veja abaixo os riscos de segurança agregados e a tabela comparativa completa."}
+        {category.description} {subTexts[lang] || subTexts.en}
       </p>
     </header>
 
@@ -179,36 +325,34 @@ const breadcrumbListSchema = {
     <section class="mb-12">
       <div class="bg-surface-soft border border-hairline rounded-lg p-6 md:p-8">
         <h2 class="text-title-sm text-ink font-medium mb-6">
-          {isEs ? "Estadísticas de Verificación del Material" : "Estatísticas de Verificação do Material"}
+          {statsHeadings[lang] || statsHeadings.en}
         </h2>
         <dl class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-[14px]">
           <div class="bg-canvas border border-hairline/60 rounded-md p-5 shadow-xs">
             <dt class="text-caption text-muted uppercase tracking-wider text-[11px] block mb-1">
-              {isEs ? "Artículos Totales Verificados" : "Total de Itens Testados"}
+              {totalTestedTitles[lang] || totalTestedTitles.en}
             </dt>
-            <dd class="text-ink text-[18px] font-semibold">{totalItemsTested} {isEs ? "artículos" : "itens"}</dd>
+            <dd class="text-ink text-[18px] font-semibold">{(totalTestedLabels[lang] || totalTestedLabels.en)(totalItemsTested)}</dd>
           </div>
           <div class="bg-canvas border border-hairline/60 rounded-md p-5 shadow-xs">
             <dt class="text-caption text-muted uppercase tracking-wider text-[11px] block mb-1">
-              {isWashingBased 
-                ? (isEs ? "Tasa Apto para Lavado" : "Taxa Apto para Lavar")
-                : (isEs ? "Tasa Apto para Lavavajillas" : "Taxa Apto para Lava-Louças")}
+              {(safeRateTitles[lang] || safeRateTitles.en)(isWashingBased)}
             </dt>
-            <dd class="text-ink text-[18px] font-semibold">{safePercentage}% {isEs ? "seguro" : "seguro"}</dd>
+            <dd class="text-ink text-[18px] font-semibold">{safePercentage}%</dd>
           </div>
           <div class="bg-canvas border border-hairline/60 rounded-md p-5 shadow-xs lg:col-span-2">
             <dt class="text-caption text-muted uppercase tracking-wider text-[11px] block mb-1">
-              {isEs ? "Riesgo Principal de Seguridad" : "Risco Principal de Segurança"}
+              {commonRiskTitles[lang] || commonRiskTitles.en}
             </dt>
             <dd class="text-signature-coral text-[15px] font-semibold leading-snug">{mostCommonRisk}</dd>
           </div>
         </dl>
         <div class="mt-6 border-t border-hairline/60 pt-4 flex items-center justify-between text-xs text-muted">
           <span>
-            {isEs ? "Verificado por el Equipo Editorial de ¿Es Seguro en la Cocina?" : "Verificado pela Equipe Editorial do É Seguro na Cozinha?"}
+            {verifiedByLabels[lang] || verifiedByLabels.en}
           </span>
           <span>
-            {isEs ? "Datos verificados el: " : "Dados verificados em: "}
+            {verifiedOnLabels[lang] || verifiedOnLabels.en}
             <strong class="text-ink font-medium">{formattedLastVerified}</strong>
           </span>
         </div>
@@ -218,19 +362,17 @@ const breadcrumbListSchema = {
     <!-- Comparison Table Section -->
     <section class="mb-16">
       <h2 class="text-title-lg text-ink font-medium tracking-tight mb-6">
-        {isEs ? `Tabla Comparativa de Seguridad para ${category.displayName}` : `Tabela Comparativa de Segurança para ${category.displayName}`}
+        {(tableHeadings[lang] || tableHeadings.en)(category.displayName)}
       </h2>
       <div class="border border-hairline rounded-lg overflow-hidden shadow-xs bg-canvas">
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <caption class="sr-only">
-              {isEs 
-                ? `Clasificaciones de seguridad en electrodomésticos para artículos de ${category.displayName}`
-                : `Classificações de segurança em eletrodomésticos para itens de ${category.displayName}`}
+              {(tableHeadings[lang] || tableHeadings.en)(category.displayName)}
             </caption>
             <thead>
               <tr class="bg-surface-soft border-b border-hairline text-ink text-[13px] font-semibold">
-                <th scope="col" class="py-4 px-6 font-medium">{isEs ? "Nombre del Artículo" : "Nome do Item"}</th>
+                <th scope="col" class="py-4 px-6 font-medium">{itemNameHeaders[lang] || itemNameHeaders.en}</th>
                 {columns.map(col => (
                   <th scope="col" class="py-4 px-6 font-medium text-center">{col.label}</th>
                 ))}
@@ -264,7 +406,7 @@ const breadcrumbListSchema = {
                               'bg-warning/10 text-warning border-warning/20 hover:bg-warning/20'
                             }`}
                           >
-                            {status.safe === 'yes' ? (isEs ? '✓ SÍ' : '✓ SIM') : status.safe === 'no' ? (isEs ? '✗ NO' : '✗ NÃO') : (isEs ? '⚠ DEPENDE' : '⚠ DEPENDE')}
+                            {status.safe === 'yes' ? curVerdicts.yes : status.safe === 'no' ? curVerdicts.no : curVerdicts.depends}
                           </a>
                         ) : (
                           <span class="text-muted/50">—</span>
@@ -283,7 +425,7 @@ const breadcrumbListSchema = {
     <!-- Related Materials Cross-Linking -->
     <section class="border-t border-hairline pt-12">
       <h2 class="text-title-md text-ink font-medium tracking-tight mb-6">
-        {isEs ? "También te puede interesar consultar:" : "Você também pode querer conferir:"}
+        {alsoLikeTitles[lang] || alsoLikeTitles.en}
       </h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {relatedMaterials.map(rel => {
@@ -302,7 +444,7 @@ const breadcrumbListSchema = {
                 </p>
               </div>
               <span class={`text-[12px] font-medium underline underline-offset-4 flex items-center gap-1 ${isDark ? 'text-white' : 'text-link'}`}>
-                {isEs ? "Comparar seguridad →" : "Comparar segurança →"}
+                {compareCtas[lang] || compareCtas.en}
               </span>
             </a>
           );

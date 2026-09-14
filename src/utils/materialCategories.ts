@@ -3,6 +3,8 @@ import path from 'path';
 import itemsData from '../data/items.json';
 import itemsEs from '../data/items.es.json';
 import itemsPt from '../data/items.pt.json';
+import itemsZh from '../data/items.zh-cn.json';
+import itemsJa from '../data/items.ja.json';
 import washingData from '../data/washing-machine.json';
 import washingEs from '../data/washing-machine.es.json';
 import washingPt from '../data/washing-machine.pt.json';
@@ -29,6 +31,14 @@ export const CATEGORY_LOCALIZATIONS: Record<string, Partial<Record<SupportedLang
     pt: {
       displayName: "Utensílios e Panelas de Metal",
       description: "Inclui aço inoxidável, ferro fundido, cobre, alumínio e detalhes metálicos. Metais são resistentes mas apresentam alto risco de faíscas no micro-ondas."
+    },
+    'zh-cn': {
+      displayName: "金属锅具与器皿",
+      description: "涵盖不锈钢、铸铁、纯铜、铝合金及金属饰边。金属坚固耐用，但在微波炉中存在极高的打火和起火风险。"
+    },
+    ja: {
+      displayName: "金属製調理器具・カトラリー",
+      description: "ステンレス、鋳鉄（スキレット）、銅、アルミニウム、金属装飾付き食器を含みます。耐久性に優れますが電子レンジでの放電・火花リスクがあります。"
     }
   },
   plastic: {
@@ -39,6 +49,14 @@ export const CATEGORY_LOCALIZATIONS: Record<string, Partial<Record<SupportedLang
     pt: {
       displayName: "Polímeros e Plásticos",
       description: "Inclui plásticos poliméricos e poliestireno expandido (isopor). A sensibilidade ao calor torna o derretimento e a lixiviação química as principais preocupações."
+    },
+    'zh-cn': {
+      displayName: "聚合物与塑料制品",
+      description: "涵盖各类食品塑料与发泡聚苯乙烯（泡沫塑料/保丽龙）。由于热敏感性，高温熔化与有害化学物质析出是主要安全隐患。"
+    },
+    ja: {
+      displayName: "プラスチック・ポリマー製品",
+      description: "ポリマー樹脂プラスチックおよび発泡スチロールを含みます。耐熱温度を超えた場合の溶融や有害物質の溶出が主な懸念点です。"
     }
   },
   "glass-ceramic": {
@@ -49,6 +67,14 @@ export const CATEGORY_LOCALIZATIONS: Record<string, Partial<Record<SupportedLang
     pt: {
       displayName: "Vidro e Cerâmica",
       description: "Inclui vidro sodo-cálcico, vidro borossilicato, cerâmica, porcelana e cristal. Altamente resistentes ao calor mas suscetíveis ao choque térmico."
+    },
+    'zh-cn': {
+      displayName: "玻璃与陶瓷制品",
+      description: "涵盖钠钙玻璃、高硼硅耐热玻璃、陶瓷、骨瓷及水晶玻璃。耐高温性能良好，但极易因骤冷骤热发生热冲击破裂。"
+    },
+    ja: {
+      displayName: "ガラス・陶磁器製品",
+      description: "ソーダガラス、耐熱ホウケイ酸ガラス、陶器、磁器、クリスタルを含みます。耐熱性は高いものの急激な温度変化によるヒートショック（熱衝撃破損）に注意が必要です。"
     }
   },
   fabric: {
@@ -59,6 +85,14 @@ export const CATEGORY_LOCALIZATIONS: Record<string, Partial<Record<SupportedLang
     pt: {
       displayName: "Tecidos e Têxteis",
       description: "Inclui misturas de poliéster, algodão, lã e seda. Geralmente laváveis em máquina mas vulneráveis ao encolhimento no calor da secadora."
+    },
+    'zh-cn': {
+      displayName: "织物与纺织品",
+      description: "涵盖聚酯纤维混纺、纯棉、羊毛及真丝。通常可机洗，但容易在烘干机的高温翻滚中缩水或损坏面料结构。"
+    },
+    ja: {
+      displayName: "布製品・テキスタイル",
+      description: "ポリエステル混紡、綿（コットン）、ウール（羊毛）、シルクを含みます。洗濯機での水洗いは可能ですが、乾燥機の高熱による縮みや傷みに注意が必要です。"
     }
   },
   footwear: {
@@ -69,6 +103,14 @@ export const CATEGORY_LOCALIZATIONS: Record<string, Partial<Record<SupportedLang
     pt: {
       displayName: "Calçados e Tênis",
       description: "Inclui materiais de calçados e tênis. Suscetíveis à degradação da cola e deformação estrutural sob altas temperaturas de lavagem e secagem."
+    },
+    'zh-cn': {
+      displayName: "鞋类与运动鞋",
+      description: "涵盖鞋履材质与各类运动鞋。在洗衣机剧烈摔打或烘干机高温环境下，鞋底胶水极易开胶，鞋身易发生结构性变形。"
+    },
+    ja: {
+      displayName: "靴・スニーカー",
+      description: "シューズ素材およびスニーカーを含みます。高温洗浄や乾燥機の熱風により、ソールの接着剤劣化やアッパーの熱変形が生じやすいカテゴリです。"
     }
   },
   silicone: {
@@ -79,6 +121,14 @@ export const CATEGORY_LOCALIZATIONS: Record<string, Partial<Record<SupportedLang
     pt: {
       displayName: "Silicone de Grau Alimentício",
       description: "Inclui formas e utensílios de silicone culinário. Conhecidos por sua excelente estabilidade térmica em freezers, fornos e lava-louças."
+    },
+    'zh-cn': {
+      displayName: "食品级硅胶制品",
+      description: "涵盖食品级烘焙模具与硅胶厨具。具有优异的高低温热稳定性，可安全适用于冷冻室、烤箱和洗碗机。"
+    },
+    ja: {
+      displayName: "食品衛生法適合シリコン",
+      description: "食品グレードのシリコン型やキッチンツールを含みます。優れた耐熱・耐冷安定性を備え、冷凍庫、オーブン、食洗機で安心して使用できます。"
     }
   },
   "wood-paper": {
@@ -89,6 +139,14 @@ export const CATEGORY_LOCALIZATIONS: Record<string, Partial<Record<SupportedLang
     pt: {
       displayName: "Produtos de Madeira e Papel",
       description: "Inclui bambu, madeira natural, pratos de papel e papelão. Suscetíveis à absorção de umidade, deformação, rachaduras e alto risco de fogo."
+    },
+    'zh-cn': {
+      displayName: "木质与纸制品",
+      description: "涵盖天然竹木、原木砧板、纸盘及纸板。极易吸水膨胀、变形开裂，且在微波炉和烤箱中存在极高火灾风险。"
+    },
+    ja: {
+      displayName: "木製品・ペーパー製品",
+      description: "竹、天然木、紙皿、ダンボール製品を含みます。吸水による変形やひび割れが起きやすく、電子レンジやオーブンでは発火リスクが極めて高い素材です。"
     }
   },
   "appliance-components": {
@@ -99,6 +157,14 @@ export const CATEGORY_LOCALIZATIONS: Record<string, Partial<Record<SupportedLang
     pt: {
       displayName: "Componentes de Eletrodomésticos",
       description: "Inclui peças e elementos verificados de máquinas e aparelhos. Exigem atenção pois ciclos podem degradar vedações e revestimentos antiaderentes."
+    },
+    'zh-cn': {
+      displayName: "电器零部件与配件",
+      description: "涵盖经验证的厨房电器配件与可拆卸部件。清洗时需仔细确认，某些程序可能会侵蚀密封胶圈或破坏不粘涂层。"
+    },
+    ja: {
+      displayName: "家電部品・パーツ",
+      description: "検証済みのキッチン家電アクセサリーや取り外し可能部品を含みます。洗浄コースによりパッキンの劣化やフッ素加工の剥がれを招くため確認が必要です。"
     }
   }
 };
@@ -284,9 +350,10 @@ export function getCategoryItemsAndStats(categoryId: string, lang: SupportedLang
     return existing;
   };
 
-  const currentItems = lang === 'es' ? itemsEs : lang === 'pt' ? itemsPt : itemsData;
+  const currentItems = lang === 'es' ? itemsEs : lang === 'pt' ? itemsPt : lang === 'zh-cn' ? itemsZh : lang === 'ja' ? itemsJa : itemsData;
   const currentWashing = lang === 'es' ? washingEs : lang === 'pt' ? washingPt : washingData;
   const prefix = lang === 'en' ? '' : `/${lang}`;
+  const washingPrefix = (lang === 'es' || lang === 'pt') ? `/${lang}` : '';
 
   // Populate from items.json
   itemsData.forEach(item => {
@@ -303,11 +370,13 @@ export function getCategoryItemsAndStats(categoryId: string, lang: SupportedLang
   // Populate from washing-machine.json
   washingData.forEach(item => {
     if (item.material && rawMaterials.includes(item.material)) {
-      const locItem = currentWashing.find(i => i.slug === item.slug) || item;
+      const locItem = (lang === 'es' || lang === 'pt') 
+        ? (currentWashing.find(i => i.slug === item.slug) || item) 
+        : item;
       const entry = getOrInitItem(locItem.item, locItem.keyRisk);
       entry.appliances["washing-machine"] = {
         safe: item.safe,
-        url: `${prefix}/washing-machine/${item.slug}/`
+        url: `${washingPrefix}/washing-machine/${item.slug}/`
       };
     }
   });
