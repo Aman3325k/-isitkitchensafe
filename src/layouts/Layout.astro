@@ -895,10 +895,76 @@ const appliances = [
         });
       }
 
+      function setupLanguagePickers() {
+        const containers = document.querySelectorAll('[data-language-picker]');
+
+        containers.forEach((container) => {
+          if (container.dataset.bound === 'true') return;
+          container.dataset.bound = 'true';
+
+          const btn = container.querySelector('[data-picker-button]');
+          const menu = container.querySelector('[data-picker-dropdown]');
+          const arrow = container.querySelector('[data-picker-arrow]');
+
+          if (!btn || !menu) return;
+
+          const toggleDropdown = (open) => {
+            const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+            const shouldOpen = open !== undefined ? open : !isExpanded;
+            btn.setAttribute('aria-expanded', String(shouldOpen));
+            if (shouldOpen) {
+              menu.classList.remove('hidden');
+              if (arrow) arrow.classList.add('rotate-180');
+            } else {
+              menu.classList.add('hidden');
+              if (arrow) arrow.classList.remove('rotate-180');
+            }
+          };
+
+          let lastTouchTime = 0;
+          const handleToggle = (e) => {
+            if (e.type === 'touchstart') {
+              lastTouchTime = Date.now();
+            } else if (e.type === 'click' && Date.now() - lastTouchTime < 500) {
+              e.stopPropagation();
+              return;
+            }
+            e.stopPropagation();
+            containers.forEach((other) => {
+              if (other !== container) {
+                const otherBtn = other.querySelector('[data-picker-button]');
+                const otherMenu = other.querySelector('[data-picker-dropdown]');
+                const otherArrow = other.querySelector('[data-picker-arrow]');
+                if (otherBtn) otherBtn.setAttribute('aria-expanded', 'false');
+                if (otherMenu) otherMenu.classList.add('hidden');
+                if (otherArrow) otherArrow.classList.remove('rotate-180');
+              }
+            });
+            toggleDropdown();
+          };
+
+          btn.addEventListener('click', handleToggle);
+          btn.addEventListener('touchstart', handleToggle, { passive: true });
+
+          document.addEventListener('click', (e) => {
+            if (!container.contains(e.target)) {
+              toggleDropdown(false);
+            }
+          });
+
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+              toggleDropdown(false);
+            }
+          });
+        });
+      }
+
       function initLayoutInteractions() {
         initMobileMenu();
         initThemeToggle();
         initGlobalSearch();
+        setupLanguagePickers();
       }
 
       if (document.readyState === 'loading') {

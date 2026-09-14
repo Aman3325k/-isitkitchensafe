@@ -9,10 +9,12 @@ if (!fs.existsSync(REPORTS_DIR)) {
 }
 
 const PAGES = [
+  { name: 'item-detail-en', path: '/dishwasher/hydroflask/', locale: 'en' },
+  { name: 'item-detail-ja', path: '/ja/dishwasher/hydroflask/', locale: 'ja' },
   { name: 'homepage-en', path: '/', locale: 'en' },
   { name: 'homepage-ja', path: '/ja/', locale: 'ja' },
-  { name: 'category-en', path: '/dishwasher/', locale: 'en' },
-  { name: 'item-en', path: '/dishwasher/hydroflask/', locale: 'en' }
+  { name: 'category-listing-en', path: '/dishwasher/', locale: 'en' },
+  { name: 'blog-article-en', path: '/blog/things-you-should-never-microwave/', locale: 'en' }
 ];
 
 const results = [];
