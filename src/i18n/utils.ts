@@ -88,8 +88,8 @@ export function isItemTranslatedInLocale(appliance: string, slug: string, lang: 
 
 const esDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens', 'compare', 'blog', 'material']);
 const ptDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens', 'compare', 'blog', 'material']);
-const zhDirectories = new Set<string>(['material']);
-const jaDirectories = new Set<string>(['material']);
+const zhDirectories = new Set<string>(['material', 'about', 'contact', 'privacy', 'terms', 'sitemap-page']);
+const jaDirectories = new Set<string>(['material', 'about', 'contact', 'privacy', 'terms', 'sitemap-page']);
 
 /**
  * Checks whether a safety directory section has translated content in the given locale.
