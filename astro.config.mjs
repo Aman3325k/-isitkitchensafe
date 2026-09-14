@@ -40,7 +40,7 @@ export default defineConfig({
   output: 'static',
   trailingSlash: 'always',
   build: {
-    inlineStylesheets: 'always',
+    inlineStylesheets: 'auto',
   },
   i18n: {
     defaultLocale: 'en',
