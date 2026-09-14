@@ -330,9 +330,9 @@ export function injectInlineLinks(text, itemsToMatch, linksInjected, linkCountRe
   for (const item of itemsToMatch) {
     if (linksInjected.has(item.url)) continue;
     
-    // We match word boundaries, case-insensitive
     const escapedName = item.name.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-    const regex = new RegExp(`\\b(${escapedName})\\b`, 'i');
+    const isCJK = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/.test(escapedName);
+    const regex = isCJK ? new RegExp(`(${escapedName})`, 'i') : new RegExp(`\\b(${escapedName})\\b`, 'i');
     
     if (regex.test(modifiedText)) {
       const alreadyHasHtml = modifiedText.includes('<a');

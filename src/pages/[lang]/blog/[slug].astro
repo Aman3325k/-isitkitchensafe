@@ -2,33 +2,38 @@
 import Layout from '../../../layouts/Layout.astro';
 import blogEs from '../../../data/blog.es.json';
 import blogPt from '../../../data/blog.pt.json';
+import blogZh from '../../../data/blog.zh-cn.json';
+import blogJa from '../../../data/blog.ja.json';
 import itemsEs from '../../../data/items.es.json';
 import itemsPt from '../../../data/items.pt.json';
+import itemsZh from '../../../data/items.zh-cn.json';
+import itemsJa from '../../../data/items.ja.json';
 import comparisonsEs from '../../../data/comparisons.es.json';
 import comparisonsPt from '../../../data/comparisons.pt.json';
+import comparisonsZh from '../../../data/comparisons.zh-cn.json';
+import comparisonsJa from '../../../data/comparisons.ja.json';
 import { injectInlineLinks } from '../../../utils/linkingHelper.js';
 import type { SupportedLanguage } from '../../../i18n/ui';
 
 export function getStaticPaths() {
-  const esPaths = blogEs.map((article) => ({
-    params: { lang: 'es', slug: article.slug },
-    props: {
-      lang: 'es' as SupportedLanguage,
-      article,
-      availableLocales: ['en', 'es', 'pt'] as SupportedLanguage[]
-    }
-  }));
+  const allLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  const locales: { lang: SupportedLanguage; data: typeof blogEs }[] = [
+    { lang: 'es', data: blogEs },
+    { lang: 'pt', data: blogPt },
+    { lang: 'zh-cn', data: blogZh },
+    { lang: 'ja', data: blogJa }
+  ];
 
-  const ptPaths = blogPt.map((article) => ({
-    params: { lang: 'pt', slug: article.slug },
-    props: {
-      lang: 'pt' as SupportedLanguage,
-      article,
-      availableLocales: ['en', 'es', 'pt'] as SupportedLanguage[]
-    }
-  }));
-
-  return [...esPaths, ...ptPaths];
+  return locales.flatMap(({ lang, data }) =>
+    data.map((article) => ({
+      params: { lang, slug: article.slug },
+      props: {
+        lang,
+        article,
+        availableLocales: allLocales
+      }
+    }))
+  );
 }
 
 interface Props {
@@ -39,10 +44,13 @@ interface Props {
 
 const { lang, article, availableLocales } = Astro.props;
 const isEs = lang === 'es';
+const isPt = lang === 'pt';
+const isZh = lang === 'zh-cn';
+const isJa = lang === 'ja';
 
-const activeItems = isEs ? itemsEs : itemsPt;
-const activeBlog = isEs ? blogEs : blogPt;
-const activeComparisons = isEs ? comparisonsEs : comparisonsPt;
+const activeItems = isEs ? itemsEs : isPt ? itemsPt : isZh ? itemsZh : itemsJa;
+const activeBlog = isEs ? blogEs : isPt ? blogPt : isZh ? blogZh : blogJa;
+const activeComparisons = isEs ? comparisonsEs : isPt ? comparisonsPt : isZh ? comparisonsZh : comparisonsJa;
 
 // 1. Process inline linking
 const linksInjected = new Set<string>();
@@ -98,7 +106,11 @@ const relevantComparisons = activeComparisons.filter(c =>
 // SEO title and description
 const pageTitle = isEs
   ? `${article.title} | ¿Es Seguro en la Cocina?`
-  : `${article.title} | É Seguro na Cozinha?`;
+  : isPt
+  ? `${article.title} | É Seguro na Cozinha?`
+  : isZh
+  ? `${article.title} | 厨房安全指南`
+  : `${article.title} | キッチン安全チェッカー`;
 const pageDescription = article.excerpt;
 
 // Calculate realistic word count estimate
@@ -118,7 +130,13 @@ const blogPostingSchema = {
   "description": article.excerpt,
   "author": {
     "@type": "Organization",
-    "name": isEs ? "Equipo Editorial IsItKitchenSafe" : "Equipe Editorial IsItKitchenSafe"
+    "name": isEs
+      ? "Equipo Editorial IsItKitchenSafe"
+      : isPt
+      ? "Equipe Editorial IsItKitchenSafe"
+      : isZh
+      ? "厨房安全指南编辑部"
+      : "キッチン安全チェッカー編集部"
   },
   "publisher": {
     "@type": "Organization",
@@ -132,7 +150,13 @@ const blogPostingSchema = {
   "dateModified": "2026-09-12",
   "image": "https://isitkitchensafe.com/og-image.png",
   "wordCount": estimatedWordCount,
-  "articleSection": isEs ? "Seguridad en la Cocina" : "Segurança na Cozinha",
+  "articleSection": isEs
+    ? "Seguridad en la Cocina"
+    : isPt
+    ? "Segurança na Cozinha"
+    : isZh
+    ? "厨房电器与食品安全"
+    : "キッチンの安全性・食品衛生",
   "url": canonicalUrl
 };
 ---
@@ -142,9 +166,9 @@ const blogPostingSchema = {
   <article class="max-w-[1280px] mx-auto px-6 py-12">
     <!-- Breadcrumbs -->
     <nav class="flex gap-2 text-muted text-[13px] mb-8" aria-label="Breadcrumb">
-      <a href={`/${lang}/`} class="hover:text-ink transition-colors">{isEs ? "Inicio" : "Início"}</a>
+      <a href={`/${lang}/`} class="hover:text-ink transition-colors">{isEs ? "Inicio" : isPt ? "Início" : isZh ? "首页" : "ホーム"}</a>
       <span>/</span>
-      <a href={`/${lang}/blog/`} class="hover:text-ink transition-colors">Blog</a>
+      <a href={`/${lang}/blog/`} class="hover:text-ink transition-colors">{isEs || isPt ? "Blog" : isZh ? "科普博客" : "ブログ"}</a>
       <span>/</span>
       <span class="text-ink font-medium line-clamp-1">{article.title}</span>
     </nav>
@@ -152,7 +176,13 @@ const blogPostingSchema = {
     <!-- Header Section -->
     <header class="max-w-[800px] mb-10">
       <span class="text-xs uppercase tracking-wider text-link font-bold block mb-2">
-        {isEs ? "Guía de Seguridad en la Cocina" : "Guia de Segurança na Cozinha"}
+        {isEs
+          ? "Guía de Seguridad en la Cocina"
+          : isPt
+          ? "Guia de Segurança na Cozinha"
+          : isZh
+          ? "厨房安全深度指南"
+          : "キッチン安全ガイド"}
       </span>
       <h1 class="text-3xl md:text-5xl font-bold text-ink tracking-tight mb-6 leading-tight">
         {article.title}
@@ -160,14 +190,20 @@ const blogPostingSchema = {
       
       <!-- Trust Signals and Metadata -->
       <div class="flex flex-wrap items-center gap-4 text-xs text-muted border-b border-hairline pb-6">
-        <span>{isEs ? "Por" : "Por"} <strong>{article.author}</strong></span>
+        <span>{isEs || isPt ? "Por" : isZh ? "作者：" : "著者："} <strong>{article.author}</strong></span>
         <span class="hidden sm:inline">•</span>
-        <span>{isEs ? "Publicado:" : "Publicado:"} <strong>{article.date}</strong></span>
+        <span>{isEs || isPt ? "Publicado:" : isZh ? "发布日期：" : "公開日："} <strong>{article.date}</strong></span>
         <span class="hidden sm:inline">•</span>
-        <span>{isEs ? "Lectura:" : "Tempo de leitura:"} <strong>{article.readTime}</strong></span>
+        <span>{isEs ? "Lectura:" : isPt ? "Tempo de leitura:" : isZh ? "预计阅读：" : "所要時間："} <strong>{article.readTime}</strong></span>
         <span class="hidden sm:inline">•</span>
         <span class="inline-flex items-center gap-1 text-success font-medium bg-success-bg px-2.5 py-0.5 rounded-full">
-          {isEs ? "✓ Respaldo Científico (USDA/FDA)" : "✓ Base Científica (USDA/FDA)"}
+          {isEs
+            ? "✓ Respaldo Científico (USDA/FDA)"
+            : isPt
+            ? "✓ Base Científica (USDA/FDA)"
+            : isZh
+            ? "✓ 权威科学背书（USDA/FDA标准）"
+            : "✓ 科学的根拠（USDA/FDA基準準拠）"}
         </span>
       </div>
     </header>
@@ -205,10 +241,10 @@ const blogPostingSchema = {
                   <div>
                     <strong class="block text-ink font-semibold mb-0.5">
                       {section.type === 'warning' 
-                        ? (isEs ? 'Aviso Crítico' : 'Aviso Crítico')
+                        ? (isEs || isPt ? 'Aviso Crítico' : isZh ? '重要安全警示' : '重要警告')
                         : section.type === 'success' || section.type === 'fact' 
-                          ? (isEs ? 'Dato Científico' : 'Fato Científico') 
-                          : (isEs ? 'Consejo de Seguridad' : 'Dica de Segurança')}
+                          ? (isEs ? 'Dato Científico' : isPt ? 'Fato Científico' : isZh ? '科学知识点' : '科学的データ') 
+                          : (isEs ? 'Consejo de Seguridad' : isPt ? 'Dica de Segurança' : isZh ? '操作建议' : '安全のヒント')}
                     </strong>
                     <span set:html={section.boxText} />
                   </div>
@@ -223,17 +259,33 @@ const blogPostingSchema = {
           <section class="border-t border-hairline pt-8">
             <div class="bg-surface-soft border border-hairline rounded-md p-6">
               <h3 class="text-title-sm text-ink font-medium mb-3">
-                {isEs ? "📖 Guías de Seguridad Relacionadas" : "📖 Guias de Segurança Relacionados"}
+                {isEs
+                  ? "📖 Guías de Seguridad Relacionadas"
+                  : isPt
+                  ? "📖 Guias de Segurança Relacionados"
+                  : isZh
+                  ? "📖 相关单品安全使用指南"
+                  : "📖 関連するアイテムの安全性ガイド"}
               </h3>
               <p class="text-body-md text-muted mb-4 text-[13.5px]">
                 {isEs 
                   ? "Aprende más sobre las pautas de seguridad para estos elementos:"
-                  : "Saiba mais sobre as regras de segurança para estes itens:"}
+                  : isPt
+                  ? "Saiba mais sobre as regras de segurança para estes itens:"
+                  : isZh
+                  ? "了解更多关于以下物品在厨房电器中的安全规范："
+                  : "以下のアイテムの安全基準や使用上の注意点も合わせてご確認ください："}
               </p>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {fallbackGuides.map(g => (
                   <a href={g.url} class="text-[13px] text-link hover:underline font-medium">
-                    {isEs ? `¿Se puede poner ${g.name.toLowerCase()} en el electrodoméstico? →` : `Pode colocar ${g.name.toLowerCase()} no aparelho? →`}
+                    {isEs
+                      ? `¿Se puede poner ${g.name.toLowerCase()} en el electrodoméstico? →`
+                      : isPt
+                      ? `Pode colocar ${g.name.toLowerCase()} no aparelho? →`
+                      : isZh
+                      ? `“${g.name}”可以放入电器吗？ →`
+                      : `「${g.name}」は使っても大丈夫？ →`}
                   </a>
                 ))}
               </div>
@@ -244,7 +296,7 @@ const blogPostingSchema = {
         <!-- Conclusion -->
         <section class="border-t border-hairline pt-8 bg-surface-soft/40 p-6 rounded-lg">
           <h2 class="text-2xl font-bold text-ink mb-4">
-            {isEs ? "Conclusión" : "Conclusão"}
+            {isEs ? "Conclusión" : isPt ? "Conclusão" : isZh ? "核心总结与安全建议" : "まとめと安全上の留意点"}
           </h2>
           <p class="text-body-md text-body leading-relaxed" set:html={linkedConclusion}></p>
         </section>
@@ -252,7 +304,7 @@ const blogPostingSchema = {
         <!-- FAQ Section -->
         <section class="border-t border-hairline pt-10">
           <h2 class="text-2xl md:text-3xl font-bold text-ink mb-6">
-            {isEs ? "Preguntas Frecuentes" : "Perguntas Frequentes"}
+            {isEs ? "Preguntas Frecuentes" : isPt ? "Perguntas Frequentes" : isZh ? "常见问题解答（FAQ）" : "よくある質問（FAQ）"}
           </h2>
           <div class="flex flex-col">
             {article.faqs.map((faq) => (
@@ -276,10 +328,22 @@ const blogPostingSchema = {
         <!-- Back to Blog Navigation -->
         <div class="mt-8 pt-8 border-t border-hairline flex justify-between items-center">
           <a href={`/${lang}/blog/`} class="text-link text-[14px] font-medium hover:text-link-active transition-colors">
-            {isEs ? "← Volver al Blog de Seguridad" : "← Voltar ao Blog de Segurança"}
+            {isEs
+              ? "← Volver al Blog de Seguridad"
+              : isPt
+              ? "← Voltar ao Blog de Segurança"
+              : isZh
+              ? "← 返回厨房安全博客"
+              : "← キッチン安全ブログに戻る"}
           </a>
           <a href={`/${lang}/`} class="text-link text-[14px] font-medium hover:text-link-active transition-colors">
-            {isEs ? "Buscar Guías de Electrodomésticos →" : "Pesquisar Guias de Eletrodomésticos →"}
+            {isEs
+              ? "Buscar Guías de Electrodomésticos →"
+              : isPt
+              ? "Pesquisar Guias de Eletrodomésticos →"
+              : isZh
+              ? "搜索全部电器指南 →"
+              : "すべての家電ガイドを検索 →"}
           </a>
         </div>
       </div>
@@ -294,7 +358,13 @@ const blogPostingSchema = {
         <!-- Related Guides / Tools Link Box -->
         <div class="border border-hairline rounded-lg p-6 bg-canvas shadow-xs">
           <h3 class="text-title-sm text-ink font-bold mb-4">
-            {isEs ? "Guías de Seguridad Relacionadas" : "Guias de Segurança Relacionados"}
+            {isEs
+              ? "Guías de Seguridad Relacionadas"
+              : isPt
+              ? "Guias de Segurança Relacionados"
+              : isZh
+              ? "相关安全指南"
+              : "関連する安全ガイド"}
           </h3>
           <ul class="flex flex-col gap-3">
             {article.relatedTools.map((tool) => (
@@ -314,7 +384,13 @@ const blogPostingSchema = {
         {relevantComparisons.length > 0 && (
           <div class="border border-hairline rounded-lg p-6 bg-canvas shadow-xs">
             <h3 class="text-title-sm text-ink font-bold mb-4">
-              {isEs ? "Comparaciones Relacionadas" : "Comparações Relacionadas"}
+              {isEs
+                ? "Comparaciones Relacionadas"
+                : isPt
+                ? "Comparações Relacionadas"
+                : isZh
+                ? "相关安全对比"
+                : "関連する安全性比較"}
             </h3>
             <ul class="flex flex-col gap-3">
               {relevantComparisons.map((c) => (
@@ -334,15 +410,25 @@ const blogPostingSchema = {
         <!-- Safety Pledge Trust Signals -->
         <div class="border border-hairline rounded-lg p-6 bg-[#fcfbfa]">
           <h4 class="text-xs uppercase tracking-wider text-muted font-bold mb-2">
-            {isEs ? "Nuestra Política de Seguridad" : "Nossa Política de Segurança"}
+            {isEs
+              ? "Nuestra Política de Seguridad"
+              : isPt
+              ? "Nossa Política de Segurança"
+              : isZh
+              ? "我们的安全准则"
+              : "安全性評価ポリシー"}
           </h4>
           <p class="text-xs text-muted leading-relaxed mb-3">
             {isEs
               ? "Cada guía es investigada minuciosamente con recomendaciones oficiales del USDA, FDA y fabricantes."
-              : "Cada artigo é cuidadosamente pesquisado com recomendações oficiais do USDA, FDA e fabricantes."}
+              : isPt
+              ? "Cada artigo é cuidadosamente pesquisado com recomendações oficiais do USDA, FDA e fabricantes."
+              : isZh
+              ? "本站所有指南均由编辑团队深入研究，严格对照USDA、FDA及家电制造商官方规范撰写。"
+              : "当サイトの全記事は、USDA、FDA、および各主要家電メーカーの公式基準に基づいて厳格に執筆・監修されています。"}
           </p>
           <span class="text-[10px] text-muted block">
-            {isEs ? "Actualizado: Junio 2026" : "Atualizado: Junho 2026"}
+            {isEs ? "Actualizado: Junio 2026" : isPt ? "Atualizado: Junho 2026" : isZh ? "最近更新：2026年6月" : "最終更新：2026年6月"}
           </span>
         </div>
 
@@ -356,7 +442,13 @@ const blogPostingSchema = {
     <!-- Related Blog Articles Section -->
     <section class="border-t border-hairline pt-12 mt-12">
       <h2 class="text-2xl font-bold text-ink mb-8">
-        {isEs ? "Artículos de Seguridad Relacionados" : "Artigos de Segurança Relacionados"}
+        {isEs
+          ? "Artículos de Seguridad Relacionados"
+          : isPt
+          ? "Artigos de Segurança Relacionados"
+          : isZh
+          ? "更多推荐安全科普"
+          : "関連するおすすめ記事"}
       </h2>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         {relatedArticles.map((art) => (
@@ -374,7 +466,7 @@ const blogPostingSchema = {
               </p>
             </div>
             <span class="text-[12px] font-medium text-link mt-4 block">
-              {isEs ? "Leer artículo →" : "Ler artigo →"}
+              {isEs ? "Leer artículo →" : isPt ? "Ler artigo →" : isZh ? "阅读全文 →" : "記事を読む →"}
             </span>
           </a>
         ))}

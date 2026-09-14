@@ -25,6 +25,8 @@ import washingMachineZh from '../../data/washing-machine.zh-cn.json';
 import washingMachineJa from '../../data/washing-machine.ja.json';
 import comparisonsZh from '../../data/comparisons.zh-cn.json';
 import comparisonsJa from '../../data/comparisons.ja.json';
+import blogZh from '../../data/blog.zh-cn.json';
+import blogJa from '../../data/blog.ja.json';
 
 export function getStaticPaths() {
   return [
@@ -175,7 +177,7 @@ export const GET: APIRoute = async ({ params }) => {
     };
   });
 
-  const rawBlog = isEs ? blogEs : isPt ? blogPt : [];
+  const rawBlog = isEs ? blogEs : isPt ? blogPt : isZh ? blogZh : isJa ? blogJa : [];
   const blogSearchItems = rawBlog.map(item => {
     const category = formatCategory('blog', lang);
     return {
