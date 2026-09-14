@@ -52,6 +52,12 @@ const ptAppliances = new Set([
   ...itemsPt.map(i => i.appliance),
   'washing-machine'
 ]);
+const zhAppliances = new Set([
+  ...itemsZh.map(i => i.appliance)
+]);
+const jaAppliances = new Set([
+  ...itemsJa.map(i => i.appliance)
+]);
 
 /**
  * Checks whether an appliance vertical has translated content in the given locale.
@@ -60,6 +66,8 @@ export function isApplianceTranslatedInLocale(appliance: string, lang: Supported
   if (lang === 'en') return true;
   if (lang === 'es') return esAppliances.has(appliance);
   if (lang === 'pt') return ptAppliances.has(appliance);
+  if (lang === 'zh-cn') return zhAppliances.has(appliance);
+  if (lang === 'ja') return jaAppliances.has(appliance);
   return false;
 }
 
