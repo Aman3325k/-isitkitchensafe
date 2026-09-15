@@ -46,8 +46,6 @@ export const redirectsMap = new Map([
   ["/refrigerator/cleaning-sponges", "/material/"],
   ["/washing-machine/leather-belt", "/material/"],
   ["/washing-machine/pet-collar", "/material/"],
-  ["/refreeze/cauliflower", "/refreeze/cauliflower/"],
-  ["/what-happens/microwave-cd", "/what-happens/microwave-cd/"],
   ["/dishwasher/cast-iron", "/dishwasher/cast-iron-skillet/"],
   ["/dishwasher/crystal-glass", "/dishwasher/crystal-glasses/"],
   ["/freezer/whole-eggs", "/freezer/egg/"],

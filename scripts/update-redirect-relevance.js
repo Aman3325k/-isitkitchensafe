@@ -18,8 +18,6 @@ const dryerSlugs = ['hats', 'baseball-cap', 'shower-pouf', 'velvet-hanger', 'clo
 
 const cat1Map = {
   '/refrigerator/cauliflower': '/refrigerator/fresh-cauliflower-head',
-  '/refreeze/cauliflower': '/refreeze/cauliflower',
-  '/what-happens/microwave-cd': '/what-happens/microwave-cd',
   '/oven/mason-jar-in-oven': '/oven/mason-jar',
   '/freezer/cucumbers': '/freezer/cucumber',
   '/freezer/tomatoes': '/freezer/tomato',
