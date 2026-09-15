@@ -1,3 +1,5 @@
+import { redirectsMap } from './_redirects-map.js';
+
 export async function onRequest(context) {
   const request = context.request;
   const url = new URL(request.url);
@@ -13,6 +15,19 @@ export async function onRequest(context) {
       return response;
     }
     return res;
+  }
+
+  // ─── Edge Redirects Fallback ───
+  // Intercepts any redirect in the entire database (1,425+ rules) at the edge.
+  // Guarantees zero 404s for any redirect, scaling seamlessly beyond
+  // Cloudflare's 2,000-line static _redirects parser limit.
+  const cleanPath = url.pathname.length > 1 ? url.pathname.replace(/\/+$/, '') : url.pathname;
+  const redirectTarget = redirectsMap.get(cleanPath) || redirectsMap.get(url.pathname) || redirectsMap.get(cleanPath.toLowerCase());
+  
+  if (redirectTarget) {
+    const targetUrl = new URL(redirectTarget, url.origin);
+    targetUrl.search = url.search;
+    return Response.redirect(targetUrl.toString(), 301);
   }
 
   const country = request.cf?.country || request.headers.get('cf-ipcountry');
