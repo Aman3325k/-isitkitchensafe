@@ -202,7 +202,7 @@ const appliances = [
         var gaLoaded = false;
         var idleId = null;
         var timerId = null;
-        var interactionEvents = ['pointerdown', 'scroll', 'touchstart'];
+        var interactionEvents = ['pointerdown', 'scroll', 'touchstart', 'keydown'];
 
         function cleanup() {
           if (idleId && 'cancelIdleCallback' in window) {
@@ -245,11 +245,15 @@ const appliances = [
             window.addEventListener(evt, triggerGA4, { passive: true, once: true });
           });
 
-          if ('requestIdleCallback' in window) {
-            idleId = requestIdleCallback(triggerGA4, { timeout: 3500 });
-          } else {
-            timerId = setTimeout(triggerGA4, 3500);
-          }
+          // Fallback timer: 7000ms allows the browser's initial rendering and quiet window to complete
+          // undisturbed, while capturing 100% of passive/non-scrolling readers.
+          timerId = setTimeout(function() {
+            if ('requestIdleCallback' in window) {
+              idleId = requestIdleCallback(triggerGA4, { timeout: 2000 });
+            } else {
+              triggerGA4();
+            }
+          }, 7000);
         }
 
         var consent = localStorage.getItem('cookie-consent');
