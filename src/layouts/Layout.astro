@@ -199,30 +199,77 @@ const appliances = [
       (function() {
         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return;
         
+        var gaLoaded = false;
+        var idleId = null;
+        var timerId = null;
+        var interactionEvents = ['pointerdown', 'scroll', 'touchstart'];
+
+        function cleanup() {
+          if (idleId && 'cancelIdleCallback' in window) {
+            cancelIdleCallback(idleId);
+            idleId = null;
+          }
+          if (timerId) {
+            clearTimeout(timerId);
+            timerId = null;
+          }
+          interactionEvents.forEach(function(evt) {
+            window.removeEventListener(evt, triggerGA4);
+          });
+        }
+
         function loadGA4() {
+          if (gaLoaded) return;
+          gaLoaded = true;
+
           var scriptEl = document.createElement('script');
           scriptEl.async = true;
           scriptEl.src = 'https://www.googletagmanager.com/gtag/js?id=G-N3LZSB37ED';
           document.head.appendChild(scriptEl);
 
           window.dataLayer = window.dataLayer || [];
-          window.gtag = function(){ window.dataLayer.push(arguments); };
+          window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
           window.gtag('js', new Date());
           window.gtag('config', 'G-N3LZSB37ED');
+        }
+
+        function triggerGA4() {
+          cleanup();
+          loadGA4();
+        }
+
+        function scheduleGA4() {
+          if (gaLoaded) return;
+
+          interactionEvents.forEach(function(evt) {
+            window.addEventListener(evt, triggerGA4, { passive: true, once: true });
+          });
+
+          if ('requestIdleCallback' in window) {
+            idleId = requestIdleCallback(triggerGA4, { timeout: 3500 });
+          } else {
+            timerId = setTimeout(triggerGA4, 3500);
+          }
         }
 
         var consent = localStorage.getItem('cookie-consent');
         var region = window.__VISITOR_REGION__;
 
         if (region === 'non-eu') {
-          loadGA4();
+          window.dataLayer = window.dataLayer || [];
+          window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
+          scheduleGA4();
         } else {
           // 'eu' or undefined (fallback safe path)
           if (consent === 'accepted') {
-            loadGA4();
+            window.dataLayer = window.dataLayer || [];
+            window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
+            scheduleGA4();
           } else if (!consent) {
             window.addEventListener('cookie-consent-accepted', function() {
-              loadGA4();
+              window.dataLayer = window.dataLayer || [];
+              window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
+              scheduleGA4();
             });
           }
         }
