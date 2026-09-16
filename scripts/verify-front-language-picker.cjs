@@ -4,8 +4,8 @@ const path = require('node:path');
 const { spawn } = require('node:child_process');
 
 const PORT = 9228;
-const BASE_URL = 'http://127.0.0.1:4321';
-const OUT_DIR = path.resolve(__dirname, '../qa-screenshots/language-front-verify');
+const BASE_URL = 'https://isitkitchensafe.com';
+const OUT_DIR = path.resolve(__dirname, '../qa-screenshots/language-front-verify-live');
 if (!fs.existsSync(OUT_DIR)) {
   fs.mkdirSync(OUT_DIR, { recursive: true });
 }
