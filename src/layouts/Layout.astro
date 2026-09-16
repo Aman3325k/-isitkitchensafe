@@ -370,13 +370,21 @@ const appliances = [
             type="text" 
             id="global-search-input" 
             placeholder={t('nav.searchPlaceholder')} 
-            list="global-search-items"
             autocomplete="off"
             aria-label={t('nav.searchAria')}
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded="false"
+            aria-controls="global-search-dropdown"
             class="w-full h-11 md:h-9 pl-3 pr-8 py-2.5 md:py-1.5 bg-canvas text-ink text-[16px] md:text-[13px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
           />
-          <datalist id="global-search-items"></datalist>
-          <div id="global-search-loading" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2">
+          <div 
+            id="global-search-dropdown" 
+            role="listbox" 
+            aria-label="Search suggestions"
+            class="hidden absolute top-full left-0 right-0 mt-1 max-h-64 overflow-y-auto bg-canvas border border-hairline rounded-md shadow-lg z-50 py-1"
+          ></div>
+          <div id="global-search-loading" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
             <svg class="animate-spin h-3.5 w-3.5 text-muted" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -548,7 +556,7 @@ const appliances = [
       role="dialog"
       aria-modal="true"
       aria-label="Mobile Navigation"
-      class="fixed inset-0 bg-canvas z-[60] transform translate-x-full transition-transform duration-300 xl:hidden flex flex-col pt-16 px-6 overflow-y-auto pb-8 hidden"
+      class="fixed inset-0 bg-canvas z-[110] transform translate-x-full transition-transform duration-300 xl:hidden flex flex-col pt-16 px-6 overflow-y-auto pb-8 hidden"
       aria-hidden="true"
     >
       <button 
@@ -875,7 +883,7 @@ const appliances = [
       function initGlobalSearch() {
         const searchForm = document.getElementById('global-search-form');
         const searchInput = document.getElementById('global-search-input');
-        const datalist = document.getElementById('global-search-items');
+        const dropdown = document.getElementById('global-search-dropdown');
         const searchLoading = document.getElementById('global-search-loading');
 
         if (!searchForm || !searchInput) return;
@@ -886,12 +894,61 @@ const appliances = [
         const searchLang = searchForm.dataset.lang || 'en';
         let searchIndex = null;
         let isFetching = false;
+        let activeIndex = -1;
+        let currentMatches = [];
 
-        const populateDatalist = (items) => {
-          if (!datalist || !items) return;
-          datalist.innerHTML = items.map(entry => 
-            `<option value="${entry.name} (${entry.category})" data-url="${entry.url}"></option>`
-          ).join('');
+        const closeDropdown = () => {
+          if (!dropdown) return;
+          dropdown.classList.add('hidden');
+          dropdown.innerHTML = '';
+          searchInput.setAttribute('aria-expanded', 'false');
+          searchInput.removeAttribute('aria-activedescendant');
+          activeIndex = -1;
+          currentMatches = [];
+        };
+
+        const renderDropdown = (matches) => {
+          currentMatches = matches;
+          activeIndex = -1;
+          if (!dropdown) return;
+          if (!matches || matches.length === 0) {
+            closeDropdown();
+            return;
+          }
+          dropdown.innerHTML = matches.map((entry, idx) => `
+            <div 
+              role="option" 
+              id="search-opt-${idx}" 
+              data-index="${idx}" 
+              data-url="${entry.url}" 
+              aria-selected="false" 
+              class="search-option px-3 py-2 text-[13px] text-ink hover:bg-surface-soft cursor-pointer flex items-center justify-between transition-colors"
+            >
+              <span class="font-medium text-ink truncate">${entry.name}</span>
+              <span class="text-[11px] text-muted ml-2 shrink-0 capitalize">${entry.category}</span>
+            </div>
+          `).join('');
+          dropdown.classList.remove('hidden');
+          searchInput.setAttribute('aria-expanded', 'true');
+        };
+
+        const updateActiveOption = (newIndex) => {
+          if (!dropdown) return;
+          const options = dropdown.querySelectorAll('.search-option');
+          if (options.length === 0) return;
+          if (activeIndex >= 0 && options[activeIndex]) {
+            options[activeIndex].classList.remove('bg-surface-soft');
+            options[activeIndex].setAttribute('aria-selected', 'false');
+          }
+          activeIndex = newIndex;
+          if (activeIndex >= 0 && options[activeIndex]) {
+            options[activeIndex].classList.add('bg-surface-soft');
+            options[activeIndex].setAttribute('aria-selected', 'true');
+            searchInput.setAttribute('aria-activedescendant', options[activeIndex].id);
+            options[activeIndex].scrollIntoView({ block: 'nearest' });
+          } else {
+            searchInput.removeAttribute('aria-activedescendant');
+          }
         };
 
         const loadSearchIndex = async () => {
@@ -902,7 +959,15 @@ const appliances = [
             const response = await fetch(searchPath);
             if (response.ok) {
               searchIndex = await response.json();
-              populateDatalist(searchIndex);
+              const q = searchInput.value.trim().toLowerCase();
+              if (q) {
+                const matches = searchIndex.filter(entry => {
+                  const name = entry.name.toLowerCase();
+                  const cat = (entry.category || '').toLowerCase();
+                  return name.includes(q) || cat.includes(q);
+                }).slice(0, 8);
+                renderDropdown(matches);
+              }
             }
           } catch (e) {
             // Silently fail to maintain UX
@@ -917,6 +982,59 @@ const appliances = [
           loadSearchIndex();
           const searchError = document.getElementById('global-search-error');
           if (searchError) searchError.classList.add('hidden');
+
+          const query = searchInput.value.trim().toLowerCase();
+          if (!query || !searchIndex) {
+            closeDropdown();
+            return;
+          }
+
+          const matches = searchIndex.filter(entry => {
+            const name = entry.name.toLowerCase();
+            const cat = (entry.category || '').toLowerCase();
+            return name.includes(query) || cat.includes(query);
+          }).slice(0, 8);
+
+          renderDropdown(matches);
+        });
+
+        searchInput.addEventListener('keydown', (e) => {
+          if (!dropdown || dropdown.classList.contains('hidden') || currentMatches.length === 0) {
+            return;
+          }
+          if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            const nextIndex = (activeIndex + 1) % currentMatches.length;
+            updateActiveOption(nextIndex);
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const prevIndex = activeIndex <= 0 ? currentMatches.length - 1 : activeIndex - 1;
+            updateActiveOption(prevIndex);
+          } else if (e.key === 'Enter') {
+            if (activeIndex >= 0 && currentMatches[activeIndex]) {
+              e.preventDefault();
+              closeDropdown();
+              window.location.href = currentMatches[activeIndex].url;
+            }
+          } else if (e.key === 'Escape') {
+            closeDropdown();
+          }
+        });
+
+        if (dropdown) {
+          dropdown.addEventListener('click', (e) => {
+            const opt = e.target.closest('.search-option');
+            if (opt && opt.dataset.url) {
+              closeDropdown();
+              window.location.href = opt.dataset.url;
+            }
+          });
+        }
+
+        document.addEventListener('click', (e) => {
+          if (!searchForm.contains(e.target)) {
+            closeDropdown();
+          }
         });
 
         searchForm.addEventListener('submit', (e) => {

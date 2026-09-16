@@ -71,7 +71,7 @@ for (const page of PAGES) {
 
     const renderBlocking = lhr.audits['render-blocking-insight']?.displayValue || lhr.audits['render-blocking-resources']?.displayValue || 'None (Pass)';
 
-    console.log(`  ✓ Done in ${(durationMs / 1000).toFixed(1)}s: Perf=${scores.performance} | FCP=${cwv.fcp} | LCP=${cwv.lcp} | TBT=${cwv.tbt} (${Math.round(cwv.tbtMs)}ms) | CLS=${cwv.cls} | Render-blocking: ${renderBlocking}\n`);
+    console.log(`  ✓ Done in ${(durationMs / 1000).toFixed(1)}s: Perf=${scores.performance} | A11y=${scores.accessibility} | SEO=${scores.seo} | FCP=${cwv.fcp} | LCP=${cwv.lcp} | TBT=${cwv.tbt} (${Math.round(cwv.tbtMs)}ms) | CLS=${cwv.cls} | Render-blocking: ${renderBlocking}\n`);
 
     results.push({
       page: page.name,
