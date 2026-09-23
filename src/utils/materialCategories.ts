@@ -17,6 +17,22 @@ export interface MaterialCategory {
   rawMaterials: string[];
   styling: string; // CSS theme classes
   relatedIds: string[];
+  technicalSpecs?: {
+    materialThermal?: {
+      property?: string;
+      threshold: string;
+      details: string;
+    };
+    safetyStandard?: {
+      organization?: string;
+      standard: string;
+      citation: string;
+    };
+    applianceSpecs?: {
+      parameter: string;
+      guideline: string;
+    };
+  };
 }
 
 export const CATEGORY_LOCALIZATIONS: Record<string, Partial<Record<SupportedLanguage, {
