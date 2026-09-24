@@ -9,6 +9,7 @@ import washingData from '../data/washing-machine.json';
 import washingEs from '../data/washing-machine.es.json';
 import washingPt from '../data/washing-machine.pt.json';
 import type { SupportedLanguage } from '../i18n/ui';
+import materialSpecs from '../data/specs/material.json';
 
 export interface MaterialCategory {
   id: string;
@@ -280,7 +281,10 @@ export const CATEGORIES: MaterialCategory[] = [
     styling: "bg-surface-dark text-white border-surface-dark",
     relatedIds: ["wood-paper", "fabric", "footwear"]
   }
-];
+].map(c => ({
+  ...c,
+  technicalSpecs: (materialSpecs as any)[c.id]
+}));
 
 const MATERIAL_TO_CATEGORY: Record<string, string> = {};
 CATEGORIES.forEach(c => {
