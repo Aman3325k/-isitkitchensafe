@@ -196,7 +196,7 @@ function auditItem(item, vertical) {
 
   // B6: Non-meat food item in oven with raw poultry/meat pathogen lethality (Salmonella/Listeria)
   if (vertical === 'oven' && !isNonFoodItem(item)) {
-    const isMeatOrPoultryOrEgg = /chicken|turkey|duck|beef|pork|lamb|steak|bacon|sausage|meat|salmon|tuna|fish|shrimp|lobster|crab|egg/.test(itemSlug);
+    const isMeatOrPoultryOrEgg = /(?:chicken|turkey|duck|beef|pork|lamb|steak|bacon|sausage|meat|salmon|tuna|fish|shrimp|lobster|crab|(?:^|-)eggs?(?:-|$))/.test(itemSlug) && itemSlug !== 'eggplant';
     if (!isMeatOrPoultryOrEgg && textLower.includes('salmonella')) {
       issues.push({
         rule: 'RULE_B_MATERIAL_CONTRADICTION',

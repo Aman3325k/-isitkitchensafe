@@ -603,7 +603,7 @@ function remediateDataset(ds, rawData, skipLog, stats) {
       }
 
       // Beverages, condiments, syrups, oils, and non-meat foods with raw-poultry pathogen lethality
-      const isMeatOrPoultryOrEgg = /chicken|turkey|duck|beef|pork|lamb|steak|bacon|sausage|meat|salmon|tuna|fish|shrimp|lobster|crab|egg/.test(slug);
+      const isMeatOrPoultryOrEgg = /(?:chicken|turkey|duck|beef|pork|lamb|steak|bacon|sausage|meat|salmon|tuna|fish|shrimp|lobster|crab|(?:^|-)eggs?(?:-|$))/.test(slug) && slug !== 'eggplant';
       if (!isMeatOrPoultryOrEgg) {
         delete item.technicalSpecs;
         stats.skipped++;
