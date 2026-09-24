@@ -117,23 +117,7 @@ function runBatch(vertical, batchNum, isRetry = false) {
   const appliedSlugs = [];
 
   if (vertical === 'material') {
-    // Update src/utils/materialCategories.ts
-    const matCatPath = path.resolve('src/utils/materialCategories.ts');
-    let matCatCode = fs.readFileSync(matCatPath, 'utf8');
-    
-    // Inject technicalSpecs into CATEGORIES in materialCategories.ts if not present
-    if (!matCatCode.includes("import materialSpecs from '../data/specs/material.json';")) {
-      matCatCode = "import materialSpecs from '../data/specs/material.json';\n" + matCatCode;
-    }
-    if (!matCatCode.includes("c.technicalSpecs = (materialSpecs as any)[c.id];")) {
-      matCatCode = matCatCode.replace(
-        "export const CATEGORIES: MaterialCategory[] = [",
-        "export const CATEGORIES_BASE: MaterialCategory[] = ["
-      );
-      matCatCode += `\nexport const CATEGORIES: MaterialCategory[] = CATEGORIES_BASE.map(c => {\n  const s = (materialSpecs as any)[c.id];\n  if (s) c.technicalSpecs = s;\n  return c;\n});\n`;
-      fs.writeFileSync(matCatPath, matCatCode, 'utf8');
-    }
-    
+    // src/utils/materialCategories.ts is already configured with materialSpecs
     batchItems.forEach(item => {
       const slug = item.slug;
       if (specsMap[slug]) {
