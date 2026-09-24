@@ -41,7 +41,7 @@ export default defineConfig({
   trailingSlash: 'always',
   build: {
     inlineStylesheets: 'auto',
-    concurrency: 8,
+    concurrency: 12,
   },
   i18n: {
     defaultLocale: 'en',
