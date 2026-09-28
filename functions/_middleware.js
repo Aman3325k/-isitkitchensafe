@@ -4,10 +4,10 @@ export async function onRequest(context) {
   const request = context.request;
   const url = new URL(request.url);
   
-  const isGet = request.method === 'GET';
+  const isGetOrHead = request.method === 'GET' || request.method === 'HEAD';
   const isHtml = !url.pathname.includes('.') || url.pathname.endsWith('.html');
   
-  if (!isGet || !isHtml) {
+  if (!isGetOrHead || !isHtml) {
     const res = await context.next();
     if (url.hostname.endsWith('.pages.dev')) {
       const response = new Response(res.body, res);
@@ -17,15 +17,68 @@ export async function onRequest(context) {
     return res;
   }
 
-  // ─── Edge Redirects Fallback ───
+  // ─── Path & Canonical Normalization ───
+  // A. /en prefix stripping & B. Lowercase normalization & C. Single-hop trailing slash
+  const pathname = url.pathname;
+  let normalizedPath = pathname;
+  let modified = false;
+
+  const isBypassedPath = 
+    pathname.startsWith('/_astro/') ||
+    pathname.startsWith('/sitemap') ||
+    pathname === '/robots.txt' ||
+    pathname.startsWith('/favicon');
+
+  if (!isBypassedPath) {
+    const segments = pathname.split('/').filter(Boolean);
+    const lastSegment = segments[segments.length - 1] || '';
+    const hasExtension = lastSegment.includes('.');
+
+    // A. /en prefix stripping (/en, /en/, /en/anything, /EN/...)
+    if (/^\/en(\/.*)?$/i.test(normalizedPath)) {
+      normalizedPath = normalizedPath.replace(/^\/en(?:\/|$)/i, '/');
+      if (!normalizedPath.startsWith('/')) normalizedPath = '/' + normalizedPath;
+      modified = true;
+    }
+
+    // B. Lowercase normalization (page URLs only, no file extensions)
+    if (!hasExtension && /[A-Z]/.test(normalizedPath)) {
+      normalizedPath = normalizedPath.toLowerCase();
+      modified = true;
+    }
+
+    // C. Trailing slash consistency on redirected page URLs (guarantees 1 hop)
+    if (modified && !hasExtension && normalizedPath.length > 1 && !normalizedPath.endsWith('/')) {
+      normalizedPath = normalizedPath + '/';
+    }
+
+    normalizedPath = normalizedPath.replace(/\/{2,}/g, '/');
+  }
+
+  // ─── Edge Redirects Fallback (redirectsMap) ───
   // Intercepts any redirect in the entire database (1,425+ rules) at the edge.
   // Guarantees zero 404s for any redirect, scaling seamlessly beyond
   // Cloudflare's 2,000-line static _redirects parser limit.
-  const cleanPath = url.pathname.length > 1 ? url.pathname.replace(/\/+$/, '') : url.pathname;
-  const redirectTarget = redirectsMap.get(cleanPath) || redirectsMap.get(url.pathname) || redirectsMap.get(cleanPath.toLowerCase());
+  const cleanOriginal = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
+  const cleanNormalized = normalizedPath.length > 1 ? normalizedPath.replace(/\/+$/, '') : normalizedPath;
+
+  const redirectTarget = 
+    redirectsMap.get(cleanOriginal) || 
+    redirectsMap.get(pathname) || 
+    redirectsMap.get(cleanOriginal.toLowerCase()) ||
+    redirectsMap.get(cleanNormalized) ||
+    redirectsMap.get(normalizedPath) ||
+    redirectsMap.get(cleanNormalized.toLowerCase());
   
   if (redirectTarget) {
     const targetUrl = new URL(redirectTarget, url.origin);
+    targetUrl.search = url.search;
+    return Response.redirect(targetUrl.toString(), 301);
+  }
+
+  // If path was modified by /en stripping or lowercase normalization, redirect in 1 hop!
+  if (modified && normalizedPath !== pathname) {
+    const targetUrl = new URL(normalizedPath, url.origin);
     targetUrl.search = url.search;
     return Response.redirect(targetUrl.toString(), 301);
   }

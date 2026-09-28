@@ -6,29 +6,19 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 function getBuildLastmod() {
-  const files = [
-    'src/data/items.json',
-    'src/data/items.es.json',
-    'src/data/items.pt.json',
-    'src/data/items.zh-cn.json',
-    'src/data/items.ja.json',
-    'src/data/how-long.json',
-    'src/data/refreeze.json',
-    'src/data/washing-machine.json',
-    'src/data/washing-machine.es.json',
-    'src/data/washing-machine.pt.json',
-    'src/data/what-happens.json'
-  ];
+  const dataDir = path.resolve(process.cwd(), 'src/data');
   let maxTime = 0;
-  files.forEach(file => {
-    try {
-      const fullPath = path.resolve(process.cwd(), file);
-      if (fs.existsSync(fullPath)) {
-        const stats = fs.statSync(fullPath);
-        if (stats.mtimeMs > maxTime) maxTime = stats.mtimeMs;
-      }
-    } catch {}
-  });
+  try {
+    if (fs.existsSync(dataDir)) {
+      const files = fs.readdirSync(dataDir).filter(f => f.endsWith('.json') && !f.includes('redirects'));
+      files.forEach(file => {
+        try {
+          const stats = fs.statSync(path.join(dataDir, file));
+          if (stats.mtimeMs > maxTime) maxTime = stats.mtimeMs;
+        } catch {}
+      });
+    }
+  } catch {}
   return maxTime > 0 ? new Date(maxTime).toISOString() : new Date().toISOString();
 }
 
@@ -67,6 +57,20 @@ export default defineConfig({
         return item;
       },
     }),
+    {
+      name: 'copy-sitemap-index',
+      hooks: {
+        'astro:build:done': async () => {
+          const sitemapIndex = path.resolve(process.cwd(), 'dist/sitemap-index.xml');
+          const sitemap = path.resolve(process.cwd(), 'dist/sitemap.xml');
+          try {
+            if (fs.existsSync(sitemapIndex)) {
+              fs.copyFileSync(sitemapIndex, sitemap);
+            }
+          } catch {}
+        },
+      },
+    },
   ],
   vite: {
     plugins: [tailwindcss()],
