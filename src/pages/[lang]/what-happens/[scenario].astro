@@ -5,6 +5,8 @@ import whatHappensEs from '../../../data/what-happens.es.json';
 import whatHappensPt from '../../../data/what-happens.pt.json';
 import whatHappensJa from '../../../data/what-happens.ja.json';
 import whatHappensZh from '../../../data/what-happens.zh-cn.json';
+import whatHappensEn from '../../../data/what-happens.json';
+import whatHappensNoindex from '../../../data/whatHappensNoindex.json';
 import type { SupportedLanguage } from '../../../i18n/ui';
 
 export function getStaticPaths() {
@@ -77,11 +79,151 @@ if (relatedItems.length < 5) {
 }
 relatedItems = relatedItems.slice(0, 5);
 
+// Helper to parse scenario for kitchen fallback consistency
+function parseScenario(slug: string) {
+  let item = "";
+  let appliance = "";
+  let isAction = false;
+  
+  if (slug === 'microwave-cd') {
+    appliance = 'Microwave';
+    item = 'a CD';
+  } else if (slug === 'microwave-egg-in-shell') {
+    appliance = 'Microwave';
+    item = 'an Egg in Its Shell';
+  } else if (slug === 'microwave-tupperware-unmarked') {
+    appliance = 'Microwave';
+    item = 'Unmarked Tupperware';
+  } else if (slug === 'microwave-paper-bag') {
+    appliance = 'Microwave';
+    item = 'a Paper Bag';
+  } else if (slug === 'put-paper-bag-in-oven') {
+    appliance = 'Oven';
+    item = 'a Paper Bag';
+  } else if (slug === 'microwave-sealed-container') {
+    appliance = 'Microwave';
+    item = 'a Sealed Container';
+  } else if (slug === 'microwave-travel-mug') {
+    appliance = 'Microwave';
+    item = 'a Travel Mug';
+  } else if (slug.startsWith("microwave-")) {
+    if (slug === "microwave-nothing" || slug === "microwave-water-too-long" || slug === "microwave-frozen-meat-wrong") {
+      isAction = true;
+      appliance = "Kitchen";
+    } else {
+      appliance = "Microwave";
+      item = slug.replace("microwave-", "").replace(/-/g, " ");
+    }
+  } else if (slug.startsWith("put-") && slug.includes("-in-dishwasher")) {
+    if (slug === "put-too-much-detergent") {
+      isAction = true;
+      appliance = "Kitchen";
+    } else {
+      appliance = "Dishwasher";
+      item = slug.replace("put-", "").replace("-in-dishwasher", "").replace(/-/g, " ");
+    }
+  } else if (slug.endsWith("-in-dishwasher")) {
+    if (slug === "use-dish-soap-in-dishwasher" || slug.startsWith("run-dishwasher-")) {
+      isAction = true;
+      appliance = "Kitchen";
+    } else {
+      appliance = "Dishwasher";
+      item = slug.replace("-in-dishwasher", "").replace(/-/g, " ");
+    }
+  } else if (slug.startsWith("run-dishwasher-")) {
+    isAction = true;
+    appliance = "Kitchen";
+  } else if (slug.startsWith("refreeze-")) {
+    isAction = true;
+    appliance = "Kitchen";
+  } else if (slug.startsWith("freeze-")) {
+    if (slug === "freeze-hot-food" || slug === "freeze-cooked-rice-wrong" || slug === "freeze-bread-wrong") {
+      isAction = true;
+      appliance = "Kitchen";
+    } else {
+      appliance = "Freezer";
+      item = slug.replace("freeze-", "").replace(/-/g, " ");
+    }
+  } else if (slug.startsWith("leave-freezer-")) {
+    isAction = true;
+    appliance = "Kitchen";
+  } else if (slug.startsWith("put-") && slug.includes("-in-oven")) {
+    if (slug === "put-cold-dish-in-hot-oven") {
+      isAction = true;
+      appliance = "Kitchen";
+    } else {
+      appliance = "Oven";
+      item = slug.replace("put-", "").replace("-in-oven", "").replace(/-/g, " ");
+    }
+  } else if (slug.endsWith("-in-oven")) {
+    appliance = "Oven";
+    item = slug.replace("-in-oven", "").replace(/-/g, " ");
+  } else if (slug.startsWith("leave-oven-")) {
+    isAction = true;
+    appliance = "Kitchen";
+  } else if (slug.startsWith("use-") && slug.includes("-on-oven-bottom")) {
+    isAction = true;
+    appliance = "Kitchen";
+  } else if (slug.startsWith("leave-gas-stove-") || slug.startsWith("leave-electric-stove-")) {
+    isAction = true;
+    appliance = "Kitchen";
+  } else if (slug.startsWith("boil-dry-")) {
+    isAction = true;
+    appliance = "Kitchen";
+  } else if (slug.includes("-on-hot-stove") || slug.includes("-on-cold-counter") || slug.includes("-in-cold-water")) {
+    isAction = true;
+    appliance = "Kitchen";
+  } else if (slug.startsWith("mix-")) {
+    isAction = true;
+    appliance = "Kitchen";
+  } else if (slug.startsWith("eat-") || slug.startsWith("drink-")) {
+    isAction = true;
+    appliance = "Kitchen";
+  } else if (slug.startsWith("leave-fridge-")) {
+    isAction = true;
+    appliance = "Kitchen";
+  } else if (slug.startsWith("keep-freezer-") || slug.startsWith("open-oven-") || slug.startsWith("preheat-oven-") || slug.startsWith("cross-contaminate-") || slug.startsWith("leave-rice-")) {
+    isAction = true;
+    appliance = "Kitchen";
+  } else {
+    isAction = true;
+    appliance = "Kitchen";
+    item = slug.replace(/-/g, " ");
+  }
+  const specialItems = ['a CD', 'an Egg in Its Shell', 'Unmarked Tupperware', 'a Paper Bag', 'a Sealed Container', 'a Travel Mug'];
+  if (item && !item.includes(' ')) {
+    item = item.charAt(0).toUpperCase() + item.slice(1);
+  } else if (item && !specialItems.includes(item)) {
+    item = item.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  }
+  return { item, appliance, isAction };
+}
+
+const { appliance, isAction } = parseScenario(data.slug);
+const isKitchenFallback = appliance === "Kitchen" || isAction;
+const slugAction = data.slug.split('-').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+
+// For slugs hitting appliance="Kitchen" fallback, if data.item is not set, build from slug
+const pageH1 = data.item || (isKitchenFallback ? `What Happens If You ${slugAction}?` : data.item);
+
 // Danger details variables
-const dangerValue = data.dangerLevel === 'dangerous' ? 9 : data.dangerLevel === 'caution' ? 5 : 2;
+const dangerValue = data.dangerLevel === 'dangerous' ? 9 : data.dangerLevel === 'caution' ? 5 : 1;
 const dangerBarColor = data.dangerLevel === 'dangerous' ? 'bg-error-border' : data.dangerLevel === 'caution' ? 'bg-warning-border' : 'bg-success-border';
 const dangerWidthClass = data.dangerLevel === 'dangerous' ? 'w-[90%]' : data.dangerLevel === 'caution' ? 'w-[50%]' : 'w-[20%]';
 const dangerTextColor = data.dangerLevel === 'dangerous' ? 'text-error' : data.dangerLevel === 'caution' ? 'text-warning' : 'text-success';
+
+// Check generic dry paper FAQ
+const dryPaperSlug = whatHappensEn.find(d => (d.faqs || []).some(f => f.answer?.includes('dry paper in the oven')))?.slug;
+const genericEnAnswer = whatHappensEn.find(d => d.slug === dryPaperSlug)?.faqs?.[0]?.answer;
+const genericLocaleAnswer = (currentDataset as any[]).find(d => d.slug === dryPaperSlug)?.faqs?.[0]?.answer;
+
+const hasGenericFaq = Boolean(
+  (genericEnAnswer && data.faqs?.some((f: any) => f.answer === genericEnAnswer)) ||
+  (genericLocaleAnswer && (lang === 'es' || lang === 'pt') && data.faqs?.some((f: any) => f.answer === genericLocaleAnswer))
+);
+
+const isLangExempt = lang === 'ja' || lang === 'zh-cn';
+const isNoindex = !isLangExempt && whatHappensNoindex.includes(data.slug);
 
 const ui = {
   es: {
@@ -133,7 +275,7 @@ const ui = {
     preventionTitle: "✅ Prevenção e Regras de Segurança",
     editorialReview: "Revisado pela equipe editorial do IsItKitchenSafe",
     lastReviewed: "Última atualização: Setembro 2026",
-    faqTitle: "Perguntas Frecuentes",
+    faqTitle: "Perguntas Frequentes",
     relatedTitle: "Guias Relacionados de Prevenção de Acidentes",
     readGuide: "Ver guia",
     backLink: "Voltar a todos os Cenários de Segurança"
@@ -219,6 +361,8 @@ const howToSchema = {
   title={currentUi.pageTitle} 
   description={currentUi.pageDesc} 
   faqs={data.faqs}
+  excludeFaqSchema={hasGenericFaq}
+  noindex={isNoindex}
   lang={lang}
   availableLocales={availableLocales}
 >
@@ -240,12 +384,11 @@ const howToSchema = {
     <header class="mb-10 text-center md:text-left">
       <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-3">
         <span class="text-caption text-muted uppercase tracking-wider text-xs">{currentUi.guideTag}</span>
-        <span class="text-xs text-muted border-l border-hairline pl-3">{currentUi.lastUpdated}</span>
         <span class="text-xs text-signature-coral font-medium bg-error-bg px-2 py-0.5 rounded-sm">{currentUi.safetyBadge}</span>
       </div>
       
       <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-6 leading-tight">
-        {data.item}
+        {pageH1}
       </h1>
 
       <!-- Safety Verdict Badge -->
@@ -365,26 +508,28 @@ const howToSchema = {
     </div>
 
     <!-- FAQ Section -->
-    <section class="border-t border-hairline pt-12 mb-16">
-      <h2 class="text-title-lg text-ink font-medium tracking-tight mb-8">{currentUi.faqTitle}</h2>
-      <div class="flex flex-col">
-        {data.faqs?.map((faq: any) => (
-          <details class="group border-b border-hairline py-5">
-            <summary class="flex items-center justify-between text-title-sm text-ink font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none">
-              <span>{faq.question}</span>
-              <span class="text-muted group-open:rotate-180 transition-transform duration-200">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </span>
-            </summary>
-            <div class="mt-4 text-body-md text-body leading-relaxed pl-1">
-              {faq.answer}
-            </div>
-          </details>
-        ))}
-      </div>
-    </section>
+    {!hasGenericFaq && data.faqs && data.faqs.length > 0 && (
+      <section class="border-t border-hairline pt-12 mb-16">
+        <h2 class="text-title-lg text-ink font-medium tracking-tight mb-8">{currentUi.faqTitle}</h2>
+        <div class="flex flex-col">
+          {data.faqs?.map((faq: any) => (
+            <details class="group border-b border-hairline py-5">
+              <summary class="flex items-center justify-between text-title-sm text-ink font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none">
+                <span>{faq.question}</span>
+                <span class="text-muted group-open:rotate-180 transition-transform duration-200">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </span>
+              </summary>
+              <div class="mt-4 text-body-md text-body leading-relaxed pl-1">
+                {faq.answer}
+              </div>
+            </details>
+          ))}
+        </div>
+      </section>
+    )}
 
     <!-- Related Items -->
     {relatedItems.length > 0 && (

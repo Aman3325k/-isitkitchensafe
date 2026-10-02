@@ -6,6 +6,7 @@ import whatHappensData from '../../data/what-happens.json';
 import { generateWhatHappensMetaDescription, getUniqueSafetyAnalysis } from '../../utils/seoHelper.js';
 import { resolveAllGuidesForItem, getPeopleAlsoAsk, getRelatedCategoriesForItem } from '../../utils/linkingHelper.js';
 import { getCategoryForMaterial } from '../../utils/materialCategories';
+import whatHappensNoindex from '../../data/whatHappensNoindex.json';
 
 export function getStaticPaths() {
   return whatHappensData
@@ -27,83 +28,187 @@ interface Props {
 
 const { data } = Astro.props;
 
+function formatSlugAction(slug: string) {
+  if (slug === 'boil-dry-pot') return 'Boil a Pot Dry';
+  
+  const actionOverrides: Record<string, string> = {
+    'leave-fridge-door-open': 'Leave the Fridge Door Open',
+    'leave-freezer-door-open': 'Leave the Freezer Door Open',
+    'leave-oven-on-overnight': 'Leave the Oven on Overnight',
+    'leave-gas-stove-on': 'Leave the Gas Stove On',
+    'leave-electric-stove-on': 'Leave the Electric Stove On',
+    'leave-food-in-oven-overnight': 'Leave Food in the Oven Overnight',
+    'leave-rice-out-overnight': 'Leave Rice out Overnight',
+    'run-dishwasher-empty': 'Run the Dishwasher Empty',
+    'run-dishwasher-without-detergent': 'Run the Dishwasher Without Detergent',
+    'use-dish-soap-in-dishwasher': 'Use Dish Soap in the Dishwasher',
+    'use-aluminum-foil-on-oven-bottom': 'Use Aluminum Foil on the Oven Bottom',
+    'put-cold-glass-on-hot-stove': 'Put Cold Glass on a Hot Stove',
+    'put-hot-glass-dish-on-cold-counter': 'Put a Hot Glass Dish on a Cold Counter',
+    'put-hot-pan-in-cold-water': 'Put a Hot Pan in Cold Water',
+    'put-cold-dish-in-hot-oven': 'Put a Cold Dish in a Hot Oven',
+    'microwave-water-too-long': 'Microwave Water Too Long',
+    'microwave-nothing': 'Microwave Nothing',
+    'microwave-frozen-meat-wrong': 'Microwave Frozen Meat Wrong',
+    'freeze-cooked-rice-wrong': 'Freeze Cooked Rice Wrong',
+    'freeze-bread-wrong': 'Freeze Bread Wrong',
+    'freeze-hot-food': 'Freeze Hot Food',
+    'refreeze-thawed-chicken': 'Refreeze Thawed Chicken',
+    'preheat-oven-too-long': 'Preheat the Oven Too Long',
+    'open-oven-too-often': 'Open the Oven Too Often',
+    'keep-freezer-too-full': 'Keep the Freezer Too Full',
+    'keep-freezer-too-empty': 'Keep the Freezer Too Empty',
+    'put-too-much-detergent': 'Put Too Much Detergent in the Dishwasher',
+    'mix-bleach-and-vinegar': 'Mix Bleach and Vinegar',
+    'mix-bleach-and-ammonia': 'Mix Bleach and Ammonia',
+    'eat-food-after-power-outage': 'Eat Food After a Power Outage',
+    'eat-food-left-out-overnight': 'Eat Food Left Out Overnight',
+    'drink-from-damaged-can': 'Drink from a Damaged Can'
+  };
+
+  if (actionOverrides[slug]) return actionOverrides[slug];
+  return slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+}
+
 // Helper to parse slug into item and appliance to strictly satisfy H1 rules
 function parseScenario(slug: string) {
   let item = "";
   let appliance = "";
+  let isAction = false;
   
-  if (slug.startsWith("microwave-")) {
-    appliance = "Microwave";
-    item = slug.replace("microwave-", "").replace(/-/g, " ");
+  if (slug === 'microwave-cd') {
+    appliance = 'Microwave';
+    item = 'a CD';
+  } else if (slug === 'microwave-egg-in-shell') {
+    appliance = 'Microwave';
+    item = 'an Egg in Its Shell';
+  } else if (slug === 'microwave-tupperware-unmarked') {
+    appliance = 'Microwave';
+    item = 'Unmarked Tupperware';
+  } else if (slug === 'microwave-paper-bag') {
+    appliance = 'Microwave';
+    item = 'a Paper Bag';
+  } else if (slug === 'put-paper-bag-in-oven') {
+    appliance = 'Oven';
+    item = 'a Paper Bag';
+  } else if (slug === 'microwave-sealed-container') {
+    appliance = 'Microwave';
+    item = 'a Sealed Container';
+  } else if (slug === 'microwave-travel-mug') {
+    appliance = 'Microwave';
+    item = 'a Travel Mug';
+  } else if (slug.startsWith("microwave-")) {
+    if (slug === "microwave-nothing" || slug === "microwave-water-too-long" || slug === "microwave-frozen-meat-wrong") {
+      isAction = true;
+      appliance = "Kitchen";
+    } else {
+      appliance = "Microwave";
+      item = slug.replace("microwave-", "").replace(/-/g, " ");
+    }
   } else if (slug.startsWith("put-") && slug.includes("-in-dishwasher")) {
-    appliance = "Dishwasher";
-    item = slug.replace("put-", "").replace("-in-dishwasher", "").replace(/-/g, " ");
+    if (slug === "put-too-much-detergent") {
+      isAction = true;
+      appliance = "Kitchen";
+    } else {
+      appliance = "Dishwasher";
+      item = slug.replace("put-", "").replace("-in-dishwasher", "").replace(/-/g, " ");
+    }
   } else if (slug.endsWith("-in-dishwasher")) {
-    appliance = "Dishwasher";
-    item = slug.replace("-in-dishwasher", "").replace(/-/g, " ");
+    if (slug === "use-dish-soap-in-dishwasher" || slug.startsWith("run-dishwasher-")) {
+      isAction = true;
+      appliance = "Kitchen";
+    } else {
+      appliance = "Dishwasher";
+      item = slug.replace("-in-dishwasher", "").replace(/-/g, " ");
+    }
   } else if (slug.startsWith("run-dishwasher-")) {
-    appliance = "Dishwasher";
-    item = slug.replace("run-dishwasher-", "").replace(/-/g, " ");
+    isAction = true;
+    appliance = "Kitchen";
   } else if (slug.startsWith("refreeze-")) {
-    appliance = "Freezer";
-    item = slug.replace("refreeze-", "").replace(/-/g, " ");
+    isAction = true;
+    appliance = "Kitchen";
   } else if (slug.startsWith("freeze-")) {
-    appliance = "Freezer";
-    item = slug.replace("freeze-", "").replace(/-/g, " ");
+    if (slug === "freeze-hot-food" || slug === "freeze-cooked-rice-wrong" || slug === "freeze-bread-wrong") {
+      isAction = true;
+      appliance = "Kitchen";
+    } else {
+      appliance = "Freezer";
+      item = slug.replace("freeze-", "").replace(/-/g, " ");
+    }
   } else if (slug.startsWith("leave-freezer-")) {
-    appliance = "Freezer";
-    item = slug.replace("leave-freezer-", "").replace(/-/g, " ");
+    isAction = true;
+    appliance = "Kitchen";
   } else if (slug.startsWith("put-") && slug.includes("-in-oven")) {
-    appliance = "Oven";
-    item = slug.replace("put-", "").replace("-in-oven", "").replace(/-/g, " ");
+    if (slug === "put-cold-dish-in-hot-oven") {
+      isAction = true;
+      appliance = "Kitchen";
+    } else {
+      appliance = "Oven";
+      item = slug.replace("put-", "").replace("-in-oven", "").replace(/-/g, " ");
+    }
   } else if (slug.endsWith("-in-oven")) {
     appliance = "Oven";
     item = slug.replace("-in-oven", "").replace(/-/g, " ");
   } else if (slug.startsWith("leave-oven-")) {
-    appliance = "Oven";
-    item = slug.replace("leave-oven-", "").replace(/-/g, " ");
+    isAction = true;
+    appliance = "Kitchen";
   } else if (slug.startsWith("use-") && slug.includes("-on-oven-bottom")) {
-    appliance = "Oven";
-    item = slug.replace("use-", "").replace("-on-oven-bottom", "").replace(/-/g, " ");
-  } else if (slug.startsWith("leave-gas-stove-")) {
-    appliance = "Stove";
-    item = "Gas Stove";
-  } else if (slug.startsWith("leave-electric-stove-")) {
-    appliance = "Stove";
-    item = "Electric Stove";
+    isAction = true;
+    appliance = "Kitchen";
+  } else if (slug.startsWith("leave-gas-stove-") || slug.startsWith("leave-electric-stove-")) {
+    isAction = true;
+    appliance = "Kitchen";
   } else if (slug.startsWith("boil-dry-")) {
-    appliance = "Stove";
-    item = slug.replace("boil-dry-", "").replace(/-/g, " ");
-  } else if (slug.includes("-on-hot-stove") || slug.includes("-on-cold-counter")) {
-    appliance = "Stove";
-    item = slug.replace(/-/g, " ");
+    isAction = true;
+    appliance = "Kitchen";
+  } else if (slug.includes("-on-hot-stove") || slug.includes("-on-cold-counter") || slug.includes("-in-cold-water")) {
+    isAction = true;
+    appliance = "Kitchen";
   } else if (slug.startsWith("mix-")) {
+    isAction = true;
     appliance = "Kitchen";
-    item = slug.replace("mix-", "").replace(/-/g, " ");
   } else if (slug.startsWith("eat-") || slug.startsWith("drink-")) {
+    isAction = true;
     appliance = "Kitchen";
-    item = slug.replace("eat-", "").replace("drink-", "").replace(/-/g, " ");
   } else if (slug.startsWith("leave-fridge-")) {
-    appliance = "Refrigerator";
-    item = slug.replace("leave-fridge-", "").replace(/-/g, " ");
+    isAction = true;
+    appliance = "Kitchen";
+  } else if (slug.startsWith("keep-freezer-") || slug.startsWith("open-oven-") || slug.startsWith("preheat-oven-") || slug.startsWith("cross-contaminate-") || slug.startsWith("leave-rice-")) {
+    isAction = true;
+    appliance = "Kitchen";
   } else {
+    isAction = true;
     appliance = "Kitchen";
     item = slug.replace(/-/g, " ");
   }
 
-  // Capitalize first letters of item
-  item = item.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-  return { item, appliance };
+  if (item && !item.includes(' ')) {
+    item = item.charAt(0).toUpperCase() + item.slice(1);
+  } else if (item && !['a CD', 'an Egg in Its Shell', 'Unmarked Tupperware', 'a Paper Bag', 'a Sealed Container', 'a Travel Mug'].includes(item)) {
+    item = item.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  }
+  return { item, appliance, isAction };
 }
 
-const { item, appliance } = parseScenario(data.slug);
+const { item, appliance, isAction } = parseScenario(data.slug);
+const isKitchenFallback = appliance === "Kitchen" || isAction;
+const slugAction = formatSlugAction(data.slug);
 
 // Map danger levels to YES/NO/DEPENDS badge rules for H1 compatibility
 // e.g. safe = YES, caution = DEPENDS, dangerous = NO
 const mappedSafe = data.dangerLevel === 'safe' ? 'yes' : data.dangerLevel === 'caution' ? 'depends' : 'no';
 
-const pageTitle = `What Happens If You Put ${item} in the ${appliance}? | IsItKitchenSafe`;
-const pageDescription = generateWhatHappensMetaDescription(item, appliance, data.shortAnswer);
+const pageTitle = isKitchenFallback
+  ? `What Happens If You ${slugAction}? | IsItKitchenSafe`
+  : `What Happens If You Put ${item} in the ${appliance}? | IsItKitchenSafe`;
+
+const pageH1 = isKitchenFallback
+  ? `What Happens If You ${slugAction}?`
+  : `Can You Put ${item} in the ${appliance}?`;
+
+const pageDescription = isKitchenFallback
+  ? `What happens if you ${slugAction.toLowerCase()}? Learn the danger levels. ${data.shortAnswer}`
+  : generateWhatHappensMetaDescription(item, appliance, data.shortAnswer);
 
 // Get related items
 let relatedItems = whatHappensData.filter(i => data.relatedItems.includes(i.slug) && i.slug !== data.slug);
@@ -133,10 +238,22 @@ const paaList = getPeopleAlsoAsk(item, data.slug, allGuides, data.relatedItems);
 const relatedCategories = getRelatedCategoriesForItem(item, data.slug, currentPath, allGuides);
 
 // Danger details variables
-const dangerValue = data.dangerLevel === 'dangerous' ? 9 : data.dangerLevel === 'caution' ? 5 : 2;
+const dangerValue = data.dangerLevel === 'dangerous' ? 9 : data.dangerLevel === 'caution' ? 5 : 1;
 const dangerBarColor = data.dangerLevel === 'dangerous' ? 'bg-error-border' : data.dangerLevel === 'caution' ? 'bg-warning-border' : 'bg-success-border';
 const dangerWidthClass = data.dangerLevel === 'dangerous' ? 'w-[90%]' : data.dangerLevel === 'caution' ? 'w-[50%]' : 'w-[20%]';
 const dangerTextColor = data.dangerLevel === 'dangerous' ? 'text-error' : data.dangerLevel === 'caution' ? 'text-warning' : 'text-success';
+
+// Generic FAQ detection (read dynamically from data, not hardcoded)
+const genericDryPaperAnswer = whatHappensData
+  .flatMap(d => d.faqs || [])
+  .find(f => f.answer && f.answer.includes("dry paper in the oven"))
+  ?.answer;
+
+const hasGenericFaq = Boolean(
+  genericDryPaperAnswer && data.faqs?.some(f => f.answer === genericDryPaperAnswer)
+);
+
+const isNoindex = whatHappensNoindex.includes(data.slug);
 
 // Dynamic unique safety analysis
 const uniqueAnalysis = getUniqueSafetyAnalysis(item, appliance, mappedSafe, data.shortAnswer, data.actions, data.prevention);
@@ -169,7 +286,14 @@ const reviewedDate = new Date().toLocaleDateString('en-US', {
 });
 ---
 
-<Layout title={pageTitle} description={pageDescription} faqs={data.faqs} availableLocales={['en', 'es', 'pt', 'ja', 'zh-cn']}>
+<Layout 
+  title={pageTitle} 
+  description={pageDescription} 
+  faqs={data.faqs} 
+  excludeFaqSchema={hasGenericFaq}
+  noindex={isNoindex}
+  availableLocales={['en', 'es', 'pt', 'ja', 'zh-cn']}
+>
   <Fragment slot="head">
     <script is:inline type="application/ld+json" set:html={JSON.stringify(speakableSchema)} />
     {howToSchema && (
@@ -190,12 +314,11 @@ const reviewedDate = new Date().toLocaleDateString('en-US', {
     <header class="mb-10 text-center md:text-left">
       <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-3">
         <span class="text-caption text-muted uppercase tracking-wider text-xs">Accident Prevention Guide</span>
-        <span class="text-xs text-muted border-l border-hairline pl-3">Last Updated: June 2026</span>
         <span class="text-xs text-signature-coral font-medium bg-error-bg px-2 py-0.5 rounded-sm">⚠️ High Trust Safety Data</span>
       </div>
       
       <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-6 leading-tight">
-        Can You Put {item} in the {appliance}?
+        {pageH1}
       </h1>
 
       <!-- Safety Verdict Badge -->
@@ -243,7 +366,9 @@ const reviewedDate = new Date().toLocaleDateString('en-US', {
     <!-- Detailed Explanation -->
     <section class="mb-12">
       <div class="p-8 rounded-lg bg-surface-soft border border-hairline">
-        <h2 class="text-title-sm text-ink font-medium mb-3">What Happens If You Put {item} in the {appliance}?</h2>
+        <h2 class="text-title-sm text-ink font-medium mb-3">
+          {isKitchenFallback ? `What Happens If You ${slugAction}?` : `What Happens If You Put ${item} in the ${appliance}?`}
+        </h2>
         <p class="short-answer text-title-md font-bold leading-relaxed text-ink mb-4">
           {data.shortAnswer}
         </p>
@@ -375,26 +500,28 @@ const reviewedDate = new Date().toLocaleDateString('en-US', {
     </div>
 
     <!-- FAQ Section -->
-    <section class="border-t border-hairline pt-12 mb-16">
-      <h2 class="text-title-lg text-ink font-medium tracking-tight mb-8">Frequently Asked Questions</h2>
-      <div class="flex flex-col">
-        {data.faqs.map(faq => (
-          <details class="group border-b border-hairline py-5">
-            <summary class="flex items-center justify-between text-title-sm text-ink font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none">
-              <span>{faq.question}</span>
-              <span class="text-muted group-open:rotate-180 transition-transform duration-200">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </span>
-            </summary>
-            <div class="mt-4 text-body-md text-body leading-relaxed pl-1">
-              {faq.answer}
-            </div>
-          </details>
-        ))}
-      </div>
-    </section>
+    {!hasGenericFaq && data.faqs && data.faqs.length > 0 && (
+      <section class="border-t border-hairline pt-12 mb-16">
+        <h2 class="text-title-lg text-ink font-medium tracking-tight mb-8">Frequently Asked Questions</h2>
+        <div class="flex flex-col">
+          {data.faqs.map(faq => (
+            <details class="group border-b border-hairline py-5">
+              <summary class="flex items-center justify-between text-title-sm text-ink font-medium cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none">
+                <span>{faq.question}</span>
+                <span class="text-muted group-open:rotate-180 transition-transform duration-200">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </span>
+              </summary>
+              <div class="mt-4 text-body-md text-body leading-relaxed pl-1">
+                {faq.answer}
+              </div>
+            </details>
+          ))}
+        </div>
+      </section>
+    )}
 
     <!-- Direct Cross-linking Guides Box -->
     {(allGuides.applianceGuides.length > 0 || allGuides.howLongGuides.length > 0 || allGuides.refreezeGuides.length > 0 || allGuides.comparisonGuides.length > 0) && (

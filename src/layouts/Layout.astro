@@ -4,6 +4,7 @@ import { getLatestDataModifiedTime } from '../utils/materialCategories';
 import { getLangFromUrl, useTranslations, useTranslatedPath, getPathWithoutLocale, getApplianceUrl, getDirectoryUrl, getLocalizedUrl, isApplianceTranslatedInLocale, isDirectoryTranslatedInLocale } from '../i18n/utils';
 import type { SupportedLanguage } from '../i18n/ui';
 import LanguagePicker from '../components/LanguagePicker.astro';
+import whatHappensNoindex from '../data/whatHappensNoindex.json';
 
 interface Props {
   title: string;
@@ -33,13 +34,19 @@ const {
   ogType = 'website'
 } = Astro.props;
 
-const isErrorPage = is404 || noindex || Astro.url.pathname.includes('404') || Astro.url.pathname.includes('500');
-
 const currentLang = lang || getLangFromUrl(Astro.url);
 const t = useTranslations(currentLang);
 const translatePath = useTranslatedPath(currentLang);
 
 const basePath = getPathWithoutLocale(Astro.url.pathname);
+const pathSegments = basePath.split('/').filter(Boolean);
+const isLangExempt = currentLang === 'ja' || currentLang === 'zh-cn';
+const isNoindexWhatHappens = !isLangExempt && pathSegments[0] === 'what-happens' && whatHappensNoindex.includes(pathSegments[1]);
+const isPageNoindex = Boolean(noindex || isNoindexWhatHappens);
+const isEnglishNoindexed = pathSegments[0] === 'what-happens' && whatHappensNoindex.includes(pathSegments[1]);
+
+const isErrorPage = is404 || Astro.url.pathname.includes('404') || Astro.url.pathname.includes('500');
+
 const canonicalUrl = new URL(Astro.url.pathname, 'https://isitkitchensafe.com').href;
 const englishUrl = new URL(basePath, 'https://isitkitchensafe.com').href;
 
@@ -97,7 +104,6 @@ const faqSchema = {
 const lastModifiedIso = getLatestDataModifiedTime().toISOString();
 
 // Generate BreadcrumbList JSON-LD Schema
-const pathSegments = basePath.split('/').filter(Boolean);
 const breadcrumbItems = [
   {
     "@type": "ListItem",
@@ -295,19 +301,31 @@ const appliances = [
     <title>{title}</title>
     <meta name="title" content={title} />
     <meta name="description" content={description} />
-    {is404 || noindex || Astro.url.pathname.includes('404') || Astro.url.pathname.includes('500') ? (
+    {isErrorPage ? (
       <meta name="robots" content="noindex, nofollow" />
+    ) : isPageNoindex ? (
+      <meta name="robots" content="noindex, follow" />
     ) : (
       <>
         <link rel="canonical" href={canonicalUrl} />
-        {activeLocales.map((loc) => (
-          <link 
-            rel="alternate" 
-            hreflang={loc === 'zh-cn' ? 'zh-CN' : loc} 
-            href={new URL(getLocalizedUrl(basePath, loc), 'https://isitkitchensafe.com').href} 
-          />
-        ))}
-        <link rel="alternate" hreflang="x-default" href={englishUrl} />
+        {activeLocales
+          .filter((loc) => {
+            if (loc === 'ja' || loc === 'zh-cn') return true;
+            const targetUrl = getLocalizedUrl(basePath, loc);
+            const targetSegments = getPathWithoutLocale(targetUrl).split('/').filter(Boolean);
+            const isTargetNoindexed = targetSegments[0] === 'what-happens' && whatHappensNoindex.includes(targetSegments[1]);
+            return !isTargetNoindexed;
+          })
+          .map((loc) => (
+            <link 
+              rel="alternate" 
+              hreflang={loc === 'zh-cn' ? 'zh-CN' : loc} 
+              href={new URL(getLocalizedUrl(basePath, loc), 'https://isitkitchensafe.com').href} 
+            />
+          ))}
+        {!isEnglishNoindexed && (
+          <link rel="alternate" hreflang="x-default" href={englishUrl} />
+        )}
       </>
     )}
 

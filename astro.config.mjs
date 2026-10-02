@@ -48,6 +48,22 @@ function getRedirectSourceSet() {
 
 const redirectSourceSet = getRedirectSourceSet();
 
+function getWhatHappensNoindexSet() {
+  const slugs = new Set();
+  const file = path.resolve(process.cwd(), 'src/data/whatHappensNoindex.json');
+  try {
+    if (fs.existsSync(file)) {
+      const list = JSON.parse(fs.readFileSync(file, 'utf8'));
+      for (const s of list) {
+        slugs.add(s.toLowerCase().trim());
+      }
+    }
+  } catch {}
+  return slugs;
+}
+
+const whatHappensNoindexSet = getWhatHappensNoindexSet();
+
 // https://astro.build/config
 export default defineConfig({
   site: 'https://isitkitchensafe.com',
@@ -72,6 +88,12 @@ export default defineConfig({
           if (redirectSourceSet.has(pathname)) return false;
           const cleanPath = pathname.replace(/\/+$/, '');
           if (cleanPath && redirectSourceSet.has(cleanPath)) return false;
+
+          // Exclude noindexed what-happens scenarios for en, es, pt (ja/zh are exempt)
+          const match = pathname.match(/^(?:\/(?:es|pt))?\/what-happens\/([^/]+)\/?$/);
+          if (match && whatHappensNoindexSet.has(match[1])) {
+            return false;
+          }
         } catch {}
         return true;
       },
