@@ -3,6 +3,10 @@
 // Provides O(1) in-memory resolution for all redirects, bypassing static parser limits.
 
 export const redirectsMap = new Map([
+  ["/zh-cn/airfryer/aerosol-cooking-spray", "/zh-cn/airfryer/cooking-spray-aerosol/"],
+  ["/ja/airfryer/aerosol-cooking-spray", "/ja/airfryer/cooking-spray-aerosol/"],
+  ["/pt/airfryer/aerosol-cooking-spray", "/pt/airfryer/cooking-spray-aerosol/"],
+  ["/es/airfryer/aerosol-cooking-spray", "/es/airfryer/cooking-spray-aerosol/"],
   ["/how-long/avocado-counter", "/how-long/avocado-in-counter/"],
   ["/how-long/pineapple-counter", "/how-long/pineapple-in-counter/"],
   ["/how-long/gravy-fridge", "/how-long/gravy-in-fridge/"],
