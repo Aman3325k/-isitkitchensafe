@@ -24,6 +24,30 @@ function getBuildLastmod() {
 
 const dataLastmod = getBuildLastmod();
 
+function getRedirectSourceSet() {
+  const sources = new Set();
+  const redirectsFile = path.resolve(process.cwd(), 'redirects.json');
+  try {
+    if (fs.existsSync(redirectsFile)) {
+      const list = JSON.parse(fs.readFileSync(redirectsFile, 'utf8'));
+      for (const item of list) {
+        if (item.source && item.target) {
+          const cleanSrc = item.source.trim().replace(/\/+$/, '').toLowerCase();
+          const cleanTgt = item.target.trim().replace(/\/+$/, '').toLowerCase();
+          // Exclude if it redirects to a different target (not just a trailing slash normalization)
+          if (cleanSrc && cleanSrc !== cleanTgt) {
+            sources.add(cleanSrc);
+            sources.add(`${cleanSrc}/`);
+          }
+        }
+      }
+    }
+  } catch {}
+  return sources;
+}
+
+const redirectSourceSet = getRedirectSourceSet();
+
 // https://astro.build/config
 export default defineConfig({
   site: 'https://isitkitchensafe.com',
@@ -42,6 +66,15 @@ export default defineConfig({
   },
   integrations: [
     sitemap({
+      filter(page) {
+        try {
+          const pathname = new URL(page).pathname.toLowerCase();
+          if (redirectSourceSet.has(pathname)) return false;
+          const cleanPath = pathname.replace(/\/+$/, '');
+          if (cleanPath && redirectSourceSet.has(cleanPath)) return false;
+        } catch {}
+        return true;
+      },
       i18n: {
         defaultLocale: 'en',
         locales: {
