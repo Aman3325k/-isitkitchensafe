@@ -34,7 +34,8 @@ const SPECIAL_PAGES = [
   'tools/pan-scratch-inspector',
   'tools/cookware-brand-transparency-index',
   'tools/kitchen-hazard-emergency-triage',
-  'tools/product-recalls-scanner'
+  'tools/product-recalls-scanner',
+  'tools/toxic-leaching-scorecard'
 ];
 
 const esSlugs = new Set([

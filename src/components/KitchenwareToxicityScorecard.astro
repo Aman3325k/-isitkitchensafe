@@ -1,0 +1,718 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import toxicData from '../data/toxic-leaching-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  presetsHeading: string;
+  preset1: string;
+  preset2: string;
+  preset3: string;
+  preset4: string;
+  selectMaterial: string;
+  selectCondition: string;
+  selectTemp: string;
+  selectAcid: string;
+  selectDuration: string;
+  scoreHeading: string;
+  scoreOf100: string;
+  tierMinimal: string;
+  tierLow: string;
+  tierElevated: string;
+  tierCritical: string;
+  tierMinimalDesc: string;
+  tierLowDesc: string;
+  tierElevatedDesc: string;
+  tierCriticalDesc: string;
+  leachMultiplierLabel: string;
+  toxinsHeading: string;
+  healthHeading: string;
+  thresholdHeading: string;
+  bestHeading: string;
+  neverHeading: string;
+  altHeading: string;
+  citationHeading: string;
+  copyReportBtn: string;
+  copiedNotice: string;
+  crossLinkTools: string;
+  crossLinkPanInspector: string;
+  crossLinkBrandIndex: string;
+  crossLinkEmergency: string;
+  crossLinkRecalls: string;
+  standardsTitle: string;
+}
+
+const DICT: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Toxicology & Material Science Diagnostic",
+    title: "Kitchenware Toxic Leaching & PFAS Risk Scorecard",
+    subtitle: "Calculate heavy metal migration (lead, cadmium, aluminum), PFAS fluoropolymer breakdown, and microplastic particle shedding based on cookware material, scratch wear, cooking heat, and food acidity.",
+    presetsHeading: "Common Risk Scenarios:",
+    preset1: "🍳 Scratched Teflon at High Heat",
+    preset2: "🍅 Tomato Sauce in Raw Aluminum",
+    preset3: "☕ Hot Coffee in Vintage Ceramic",
+    preset4: "🍱 Microwaving Plastic Takeout",
+    selectMaterial: "1. Cookware / Vessel Material",
+    selectCondition: "2. Surface Condition & Wear",
+    selectTemp: "3. Cooking Temperature",
+    selectAcid: "4. Food Acidity (pH Level)",
+    selectDuration: "5. Contact & Cooking Duration",
+    scoreHeading: "Estimated Toxic Migration Risk",
+    scoreOf100: "/ 100 Risk Index",
+    tierMinimal: "MINIMAL RISK",
+    tierLow: "LOW / MANAGEABLE RISK",
+    tierElevated: "ELEVATED CAUTION",
+    tierCritical: "CRITICAL HAZARD",
+    tierMinimalDesc: "Chemically inert under these conditions. Migration is below detectable scientific thresholds.",
+    tierLowDesc: "Trace ion migration well within regulatory limits. Follow standard non-abrasive care.",
+    tierElevatedDesc: "Accelerated chemical leaching detected. Avoid acidic ingredients and temperatures over 200°C.",
+    tierCriticalDesc: "Dangerous chemical leaching active. Ingestion of heavy metals, microplastics, or toxic pyrolysis fumes likely. Discontinue food contact immediately.",
+    leachMultiplierLabel: "Chemical Migration Acceleration Factor:",
+    toxinsHeading: "Migrating Toxins & Particulates:",
+    healthHeading: "Clinical Toxicology & Health Impact:",
+    thresholdHeading: "Thermal Stability Ceiling:",
+    bestHeading: "Scientifically Validated Use:",
+    neverHeading: "Strict Prohibitions (Never Do):",
+    altHeading: "Safer Non-Toxic Replacement:",
+    citationHeading: "Peer-Reviewed Scientific Authority:",
+    copyReportBtn: "📋 Copy Diagnostic Lab Report",
+    copiedNotice: "Diagnostic Report Copied to Clipboard!",
+    crossLinkTools: "Explore More Safety Tools:",
+    crossLinkPanInspector: "AI Pan Scratch Inspector",
+    crossLinkBrandIndex: "Cookware Brand Transparency Index",
+    crossLinkEmergency: "Emergency Hazard Triage",
+    crossLinkRecalls: "Barcode & Product Recalls Scanner",
+    standardsTitle: "Regulatory Safety Thresholds & Leaching Limits"
+  },
+  es: {
+    badge: "Diagnóstico Toxicológico y de Ciencia de Materiales",
+    title: "Calculadora de Riesgo de Lixiviación Tóxica y PFAS en Utensilios",
+    subtitle: "Calcula la migración de metales pesados (plomo, cadmio, aluminio), degradación de PFAS y desprendimiento de microplásticos según material, desgaste por arañazos, temperatura y acidez.",
+    presetsHeading: "Escenarios Comunes de Riesgo:",
+    preset1: "🍳 Teflón rayado a fuego alto",
+    preset2: "🍅 Salsa de tomate en aluminio crudo",
+    preset3: "☕ Café caliente en taza de barro antigua",
+    preset4: "🍱 Calentar plástico en microondas",
+    selectMaterial: "1. Material del Utensilio o Recipiente",
+    selectCondition: "2. Estado de Desgaste y Arañazos",
+    selectTemp: "3. Temperatura de Cocinado",
+    selectAcid: "4. Acidez del Alimento (Nivel de pH)",
+    selectDuration: "5. Tiempo de Cocción o Contacto",
+    scoreHeading: "Riesgo Estimado de Migración Tóxica",
+    scoreOf100: "/ 100 Índice de Riesgo",
+    tierMinimal: "RIESGO MÍNIMO",
+    tierLow: "RIESGO BAJO / CONTROLABLE",
+    tierElevated: "PRECAUCIÓN ELEVADA",
+    tierCritical: "PELIGRO CRÍTICO",
+    tierMinimalDesc: "Material químicamente inerte en estas condiciones. Migración por debajo de límites detectables.",
+    tierLowDesc: "Migración de trazas dentro de los límites legales alimentarios. Use utensilios suaves.",
+    tierElevatedDesc: "Lixiviación química acelerada. Evite ingredientes ácidos y calor superior a 200°C.",
+    tierCriticalDesc: "Migración química peligrosa activa. Alta probabilidad de ingesta de metales pesados o microplásticos. Reemplace de inmediato.",
+    leachMultiplierLabel: "Factor de Aceleración de Migración Química:",
+    toxinsHeading: "Toxinas y Partículas Liberadas:",
+    healthHeading: "Impacto Toxicológico y en la Salud:",
+    thresholdHeading: "Límite Máximo de Estabilidad Térmica:",
+    bestHeading: "Uso Seguro y Recomendado:",
+    neverHeading: "Prohibiciones Estrictas (Nunca Hacer):",
+    altHeading: "Alternativa Segura No Tóxica:",
+    citationHeading: "Evidencia Científica y Normativa:",
+    copyReportBtn: "📋 Copiar Informe de Laboratorio",
+    copiedNotice: "¡Informe copiado al portapapeles!",
+    crossLinkTools: "Explora Más Herramientas de Seguridad:",
+    crossLinkPanInspector: "Inspector de Arañazos en Sartenes",
+    crossLinkBrandIndex: "Índice de Transparencia de Marcas",
+    crossLinkEmergency: "Triaje de Emergencias en Cocina",
+    crossLinkRecalls: "Escáner de Retiradas de Productos",
+    standardsTitle: "Límites Oficiales de Migración y Normas Sanitarias"
+  },
+  pt: {
+    badge: "Diagnóstico Toxicológico e Ciência dos Materiais",
+    title: "Calculadora de Risco de Liberação Tóxica e PFAS em Panelas",
+    subtitle: "Calcule a migração de metais pesados (chumbo, cádmio, alumínio), degradação de PFAS e desprendimento de microplásticos com base no material, riscos, calor e acidez do alimento.",
+    presetsHeading: "Cenários Comuns de Risco:",
+    preset1: "🍳 Teflon riscado em fogo alto",
+    preset2: "🍅 Molho de tomate em alumínio puro",
+    preset3: "☕ Café quente em louça de barro antiga",
+    preset4: "🍱 Aquecer pote de plástico no micro-ondas",
+    selectMaterial: "1. Material da Panela ou Utensílio",
+    selectCondition: "2. Estado de Conservação e Riscos",
+    selectTemp: "3. Temperatura de Cozimento",
+    selectAcid: "4. Acidez do Alimento (pH)",
+    selectDuration: "5. Tempo de Exposição ou Cozimento",
+    scoreHeading: "Risco Estimado de Liberação Química",
+    scoreOf100: "/ 100 Índice de Risco",
+    tierMinimal: "RISCO MÍNIMO",
+    tierLow: "RISCO BAIXO / CONTROLÁVEL",
+    tierElevated: "CUIDADO ELEVADO",
+    tierCritical: "PERIGO CRÍTICO",
+    tierMinimalDesc: "Material quimicamente inerte nestas condições. Liberação abaixo dos limites de detecção.",
+    tierLowDesc: "Migração de traços dentro das normas regulatórias. Siga cuidados não abrasivos.",
+    tierElevatedDesc: "Liberação química acelerada. Evite molhos ácidos e temperaturas acima de 200°C.",
+    tierCriticalDesc: "Liberação perigosa em andamento. Ingestão de metais pesados ou microplásticos iminente. Descontinue o uso.",
+    leachMultiplierLabel: "Fator de Aceleração da Migração Química:",
+    toxinsHeading: "Toxinas e Partículas Liberadas:",
+    healthHeading: "Toxicologia Clínica e Impacto na Saúde:",
+    thresholdHeading: "Limite Térmico de Estabilidade:",
+    bestHeading: "Uso Seguro e Validado:",
+    neverHeading: "Proibições Absolutas (Nunca Fazer):",
+    altHeading: "Substituto Não Tóxico Recomendado:",
+    citationHeading: "Referência Científica com Revisão por Pares:",
+    copyReportBtn: "📋 Copiar Relatório de Diagnóstico",
+    copiedNotice: "Relatório copiado para a área de transferência!",
+    crossLinkTools: "Mais Ferramentas Interativas de Segurança:",
+    crossLinkPanInspector: "Inspetor de Riscos em Panelas",
+    crossLinkBrandIndex: "Índice de Transparência de Marcas",
+    crossLinkEmergency: "Triagem de Emergências na Cozinha",
+    crossLinkRecalls: "Scanner de Códigos de Barras e Recalls",
+    standardsTitle: "Normas Regulamentares e Limites de Migração"
+  },
+  'zh-cn': {
+    badge: "毒理学与材料安全深度评估",
+    title: "厨具重金属与 PFAS 有毒溶出风险测评计算器",
+    subtitle: "依据厨具材质成分、划痕破损程度、烹饪加热温度及食材酸碱度，精确计算剧毒重金属（铅、镉、铝）、全氟化合物（PFAS）分解与微塑料纳米颗粒析出风险。",
+    presetsHeading: "高频真实风险场景直达：",
+    preset1: "🍳 涂层划伤特氟龙锅高温煎炒",
+    preset2: "🍅 生铝锅慢熬番茄浓汤",
+    preset3: "☕ 复古彩陶杯冲泡滚烫热咖啡",
+    preset4: "🍱 外卖塑料餐盒微波高火加热",
+    selectMaterial: "1. 厨具或餐具主体材质",
+    selectCondition: "2. 表面划痕与磨损状况",
+    selectTemp: "3. 烹饪加热温度",
+    selectAcid: "4. 食材酸碱度 (pH值)",
+    selectDuration: "5. 加热接触持续时长",
+    scoreHeading: "有毒有害物质综合溶出风险评级",
+    scoreOf100: "/ 100 综合风险指数",
+    tierMinimal: "极低风险 (安全)",
+    tierLow: "低风险 / 可控",
+    tierElevated: "高度警戒 (慎用)",
+    tierCritical: "极高危 / 严重致毒隐患",
+    tierMinimalDesc: "在此条件下化学性质极为稳定，有害物质溶出量低于实验室精密仪器检出限。",
+    tierLowDesc: "仅存在国家法规限量以内的微量离子析出，建议使用木质或硅胶铲轻柔保养。",
+    tierElevatedDesc: "有害化学溶出明显加剧。强烈建议杜绝高酸性食材，并严禁超过 200°C 爆炒。",
+    tierCriticalDesc: "剧毒重金属、永久化学品 PFAS 或高浓度纳米微塑料正在高速溶入食物。请立即停止接触食品并淘汰该厨具！",
+    leachMultiplierLabel: "化学物质溶出加速倍率：",
+    toxinsHeading: "析出毒素与纳米颗粒清单：",
+    healthHeading: "临床毒理学危害与健康影响：",
+    thresholdHeading: "最高耐受热分解临界点：",
+    bestHeading: "经科学验证的最佳适用场景：",
+    neverHeading: "绝对禁忌事项 (严禁操作)：",
+    altHeading: "更安全的无毒环保替代材质：",
+    citationHeading: "国际同行评审权威文献依据：",
+    copyReportBtn: "📋 复制完整实验室诊断分析报告",
+    copiedNotice: "诊断报告已成功复制到剪贴板！",
+    crossLinkTools: "浏览更多厨房安全诊断工具：",
+    crossLinkPanInspector: "AI 不粘锅划痕与微塑料检测仪",
+    crossLinkBrandIndex: "锅具品牌安全与防虚假宣传索引",
+    crossLinkEmergency: "厨房险情紧急扑救与处置指南",
+    crossLinkRecalls: "产品条形码与官方召回查询器",
+    standardsTitle: "国际食品接触材料法规与安全限值标准"
+  },
+  ja: {
+    badge: "毒性学・材料科学リスク診断",
+    title: "調理器具の有害物質溶出＆PFASリスク評価カリキュレーター",
+    subtitle: "材質、傷の深さ、加熱温度、食品の酸性度（pH）に基づき、重金属（鉛・カドミウム・アルミニウム）の溶出、PFAS熱分解、マイクロプラスチックの混入リスクを数値化。",
+    presetsHeading: "よくある高リスク事例の即時診断：",
+    preset1: "🍳 傷ついたテフロンフライパンで強火加熱",
+    preset2: "🍅 無垢アルミ鍋でトマトソースを煮込む",
+    preset3: "☕ レトロ陶器マグに熱いコーヒーを注ぐ",
+    preset4: "🍱 プラスチック容器を電子レンジで加熱",
+    selectMaterial: "1. 調理器具・容器の材質",
+    selectCondition: "2. 表面の傷・劣化状態",
+    selectTemp: "3. 調理・加熱温度",
+    selectAcid: "4. 食品の酸性度（pHレベル）",
+    selectDuration: "5. 加熱・接触時間",
+    scoreHeading: "推定有害物質溶出リスク指数",
+    scoreOf100: "/ 100 総合リスク度",
+    tierMinimal: "極めて安全（微小）",
+    tierLow: "低リスク / 許容範囲内",
+    tierElevated: "厳重警戒（注意）",
+    tierCritical: "極めて危険（有害）",
+    tierMinimalDesc: "この条件下では化学的に不活性です。溶出量は検出限界未満です。",
+    tierLowDesc: "食品衛生基準値内の微小なイオン移行にとどまります。通常のお手入れを行ってください。",
+    tierElevatedDesc: "化学物質の溶出が加速しています。酸性の強い食材や200℃以上の強火調理は避けてください。",
+    tierCriticalDesc: "重金属、PFAS分解ガス、マイクロプラスチックが食品中に活発に溶出しています。直ちに使用を中止してください。",
+    leachMultiplierLabel: "化学物質移行の加速倍率：",
+    toxinsHeading: "溶出する有害物質・微粒子：",
+    healthHeading: "臨床毒性・健康への悪影響：",
+    thresholdHeading: "耐熱限界・熱分解温度：",
+    bestHeading: "推奨される安全な調理用途：",
+    neverHeading: "絶対にしてはいけない禁止行為：",
+    altHeading: "推奨される安全な代替材質：",
+    citationHeading: "査読付き学術論文・公式安全基準：",
+    copyReportBtn: "📋 診断レポートをコピー",
+    copiedNotice: "レポートをクリップボードにコピーしました！",
+    crossLinkTools: "その他の安全診断ツール：",
+    crossLinkPanInspector: "AI フライパン傷・劣化診断",
+    crossLinkBrandIndex: "調理器具ブランド透明性インデックス",
+    crossLinkEmergency: "キッチン緊急トラブル対応ガイド",
+    crossLinkRecalls: "バーコード製品リコールスキャナー",
+    standardsTitle: "公的機関の溶出規制値および安全基準"
+  }
+};
+
+const d = DICT[lang] || DICT.en;
+
+const prefix = lang === 'en' ? '' : `/${lang}`;
+---
+
+<div class="toxicity-calculator max-w-5xl mx-auto space-y-8" data-lang={lang}>
+  <!-- Quick Presets -->
+  <div class="bg-surface-soft border border-hairline rounded-2xl p-6">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="w-2.5 h-2.5 rounded-full bg-rose-600 animate-pulse"></span>
+      <h3 class="text-xs font-bold uppercase tracking-wider text-muted">
+        {d.presetsHeading}
+      </h3>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <button type="button" class="preset-btn text-left p-3 rounded-xl bg-canvas hover:bg-surface-strong border border-hairline/70 transition-colors text-xs font-medium text-ink flex items-center gap-2" data-mat="ptfe-traditional" data-cond="severe-flaking" data-temp="extreme-heat" data-acid="neutral" data-dur="standard">
+        <span>{d.preset1}</span>
+      </button>
+      <button type="button" class="preset-btn text-left p-3 rounded-xl bg-canvas hover:bg-surface-strong border border-hairline/70 transition-colors text-xs font-medium text-ink flex items-center gap-2" data-mat="uncoated-aluminum" data-cond="minor-scratches" data-temp="low-simmer" data-acid="strongly-acidic" data-dur="long-simmer">
+        <span>{d.preset2}</span>
+      </button>
+      <button type="button" class="preset-btn text-left p-3 rounded-xl bg-canvas hover:bg-surface-strong border border-hairline/70 transition-colors text-xs font-medium text-ink flex items-center gap-2" data-mat="lead-glazed-ceramic" data-cond="moderate-wear" data-temp="low-simmer" data-acid="mildly-acidic" data-dur="standard">
+        <span>{d.preset3}</span>
+      </button>
+      <button type="button" class="preset-btn text-left p-3 rounded-xl bg-canvas hover:bg-surface-strong border border-hairline/70 transition-colors text-xs font-medium text-ink flex items-center gap-2" data-mat="plastic-polypropylene" data-cond="moderate-wear" data-temp="low-simmer" data-acid="strongly-acidic" data-dur="quick">
+        <span>{d.preset4}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Interactive Controls Form Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-surface-soft border border-hairline rounded-3xl p-6 md:p-8 shadow-xs">
+    <!-- Factor 1: Material Selection -->
+    <div class="space-y-2">
+      <label for="material-select" class="block text-xs font-bold uppercase tracking-wider text-ink flex items-center gap-1.5">
+        <span class="w-5 h-5 rounded-full bg-ink text-white flex items-center justify-center text-[10px]">1</span>
+        {d.selectMaterial}
+      </label>
+      <select id="material-select" class="w-full py-3 px-4 rounded-xl bg-canvas border border-hairline text-ink text-sm focus:outline-none focus:ring-2 focus:ring-ink font-medium">
+        {toxicData.materials.map(m => (
+          <option value={m.id}>{m.name}</option>
+        ))}
+      </select>
+      <p id="material-chem-note" class="text-xs text-muted leading-relaxed pl-1"></p>
+    </div>
+
+    <!-- Factor 2: Condition / Wear -->
+    <div class="space-y-2">
+      <label for="condition-select" class="block text-xs font-bold uppercase tracking-wider text-ink flex items-center gap-1.5">
+        <span class="w-5 h-5 rounded-full bg-ink text-white flex items-center justify-center text-[10px]">2</span>
+        {d.selectCondition}
+      </label>
+      <select id="condition-select" class="w-full py-3 px-4 rounded-xl bg-canvas border border-hairline text-ink text-sm focus:outline-none focus:ring-2 focus:ring-ink font-medium">
+        {toxicData.conditions.map(c => (
+          <option value={c.id}>{c.label}</option>
+        ))}
+      </select>
+      <p id="condition-desc-note" class="text-xs text-muted leading-relaxed pl-1"></p>
+    </div>
+
+    <!-- Factor 3: Cooking Temperature -->
+    <div class="space-y-2">
+      <label for="temp-select" class="block text-xs font-bold uppercase tracking-wider text-ink flex items-center gap-1.5">
+        <span class="w-5 h-5 rounded-full bg-ink text-white flex items-center justify-center text-[10px]">3</span>
+        {d.selectTemp}
+      </label>
+      <select id="temp-select" class="w-full py-3 px-4 rounded-xl bg-canvas border border-hairline text-ink text-sm focus:outline-none focus:ring-2 focus:ring-ink font-medium">
+        {toxicData.temperatures.map(t => (
+          <option value={t.id}>{t.label}</option>
+        ))}
+      </select>
+      <p id="temp-desc-note" class="text-xs text-muted leading-relaxed pl-1"></p>
+    </div>
+
+    <!-- Factor 4: Food Acidity -->
+    <div class="space-y-2">
+      <label for="acid-select" class="block text-xs font-bold uppercase tracking-wider text-ink flex items-center gap-1.5">
+        <span class="w-5 h-5 rounded-full bg-ink text-white flex items-center justify-center text-[10px]">4</span>
+        {d.selectAcid}
+      </label>
+      <select id="acid-select" class="w-full py-3 px-4 rounded-xl bg-canvas border border-hairline text-ink text-sm focus:outline-none focus:ring-2 focus:ring-ink font-medium">
+        {toxicData.acidities.map(a => (
+          <option value={a.id}>{a.label}</option>
+        ))}
+      </select>
+      <p id="acid-desc-note" class="text-xs text-muted leading-relaxed pl-1"></p>
+    </div>
+
+    <!-- Factor 5: Duration -->
+    <div class="space-y-2 md:col-span-2">
+      <label for="duration-select" class="block text-xs font-bold uppercase tracking-wider text-ink flex items-center gap-1.5">
+        <span class="w-5 h-5 rounded-full bg-ink text-white flex items-center justify-center text-[10px]">5</span>
+        {d.selectDuration}
+      </label>
+      <select id="duration-select" class="w-full py-3 px-4 rounded-xl bg-canvas border border-hairline text-ink text-sm focus:outline-none focus:ring-2 focus:ring-ink font-medium">
+        {toxicData.durations.map(dur => (
+          <option value={dur.id}>{dur.label}</option>
+        ))}
+      </select>
+      <p id="duration-desc-note" class="text-xs text-muted leading-relaxed pl-1"></p>
+    </div>
+  </div>
+
+  <!-- Output Dashboard: Live Risk Scorecard -->
+  <div id="scorecard-output" class="rounded-3xl border-2 transition-all p-7 md:p-10 space-y-8 bg-canvas">
+    <!-- Top Bar: Dial & Verdict Tier -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-hairline pb-8">
+      <div class="space-y-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-muted block">
+          {d.scoreHeading}
+        </span>
+        <div class="flex items-baseline gap-3">
+          <span id="risk-score-value" class="text-5xl md:text-6xl font-black tracking-tight font-mono">0</span>
+          <span class="text-sm font-semibold text-muted">{d.scoreOf100}</span>
+        </div>
+        <div class="w-full md:w-64 h-3 rounded-full bg-surface-soft overflow-hidden border border-hairline">
+          <div id="risk-meter-bar" class="h-full rounded-full transition-all duration-500 w-0 bg-emerald-600"></div>
+        </div>
+      </div>
+
+      <div class="md:text-right space-y-2 max-w-md">
+        <span id="risk-tier-badge" class="inline-block px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider text-white bg-emerald-600 shadow-xs">
+          {d.tierMinimal}
+        </span>
+        <p id="risk-tier-description" class="text-xs md:text-sm text-body leading-relaxed">
+          {d.tierMinimalDesc}
+        </p>
+      </div>
+    </div>
+
+    <!-- Multiplier Factor Callout -->
+    <div id="multiplier-banner" class="p-4 rounded-xl bg-surface-soft border border-hairline flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+      <span class="font-bold text-ink flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+        {d.leachMultiplierLabel}
+      </span>
+      <span id="multiplier-value" class="font-mono font-bold text-ink px-2.5 py-1 rounded-md bg-canvas border border-hairline text-sm">
+        1.0x baseline
+      </span>
+    </div>
+
+    <!-- Deep-Dive Breakdown Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Card A: Toxins at Risk -->
+      <div class="p-6 rounded-2xl bg-surface-soft border border-hairline space-y-3">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-rose-600 flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          {d.toxinsHeading}
+        </h4>
+        <ul id="toxins-list" class="space-y-1.5 text-xs text-ink font-medium list-disc list-inside"></ul>
+      </div>
+
+      <!-- Card B: Health Impact -->
+      <div class="p-6 rounded-2xl bg-surface-soft border border-hairline space-y-3">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-ink flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+          {d.healthHeading}
+        </h4>
+        <p id="health-risk-text" class="text-xs text-body leading-relaxed"></p>
+      </div>
+
+      <!-- Card C: Thermal Threshold & Prohibitions -->
+      <div class="p-6 rounded-2xl bg-surface-soft border border-hairline space-y-3">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-ink">
+            {d.thresholdHeading}
+          </h4>
+          <span id="temp-ceiling-badge" class="px-2.5 py-0.5 rounded font-mono font-bold text-xs bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300"></span>
+        </div>
+        <div>
+          <span class="text-[11px] font-bold text-muted uppercase tracking-wider block mb-1">{d.neverHeading}</span>
+          <p id="prohibitions-text" class="text-xs text-rose-700 dark:text-rose-400 font-medium leading-relaxed"></p>
+        </div>
+      </div>
+
+      <!-- Card D: Safer Alternatives & Validated Use -->
+      <div class="p-6 rounded-2xl bg-surface-soft border border-hairline space-y-3">
+        <div>
+          <span class="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block mb-1">{d.altHeading}</span>
+          <p id="safer-alt-text" class="text-xs font-semibold text-ink leading-relaxed"></p>
+        </div>
+        <div class="pt-2 border-t border-hairline/60">
+          <span class="text-[11px] font-bold text-muted uppercase tracking-wider block mb-1">{d.bestHeading}</span>
+          <p id="best-use-text" class="text-xs text-body leading-relaxed"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Peer-Reviewed Scientific Authority -->
+    <div class="p-5 rounded-2xl bg-canvas border border-hairline/80 space-y-2">
+      <div class="flex items-center gap-2">
+        <svg class="w-4 h-4 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+        </svg>
+        <span class="text-[11px] font-bold uppercase tracking-wider text-muted">
+          {d.citationHeading}
+        </span>
+      </div>
+      <p id="citation-text" class="text-xs font-mono text-muted leading-relaxed"></p>
+    </div>
+
+    <!-- Actions: Copy Diagnostic Lab Report -->
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-hairline">
+      <button id="copy-report-btn" type="button" class="w-full sm:w-auto py-3 px-6 rounded-xl bg-ink hover:bg-black text-white font-medium text-xs transition-colors shadow-xs flex items-center justify-center gap-2">
+        <span>{d.copyReportBtn}</span>
+      </button>
+      <span id="copied-toast" class="text-xs font-bold text-emerald-600 hidden">
+        {d.copiedNotice}
+      </span>
+    </div>
+  </div>
+
+  <!-- Regulatory Standards Reference Section -->
+  <div class="border-t border-hairline pt-10 space-y-4">
+    <h3 class="text-title-md font-medium text-ink tracking-tight">
+      {d.standardsTitle}
+    </h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {toxicData.regulatoryStandards.map(std => (
+        <div class="p-4 rounded-xl bg-surface-soft border border-hairline space-y-1.5">
+          <span class="text-[11px] font-mono font-bold text-rose-600 block">{std.code}</span>
+          <h4 class="text-xs font-semibold text-ink">{std.title}</h4>
+          <p class="text-[11px] text-body">{std.threshold}</p>
+          <span class="text-[10px] text-muted block pt-1">{std.agency}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <!-- Cross-Links to Other Safety Tools -->
+  <div class="p-6 rounded-2xl bg-surface-soft border border-hairline space-y-3">
+    <h4 class="text-xs font-bold uppercase tracking-wider text-muted">
+      {d.crossLinkTools}
+    </h4>
+    <div class="flex flex-wrap gap-2 text-xs">
+      <a href={`${prefix}/tools/pan-scratch-inspector/`} class="px-3 py-1.5 rounded-lg bg-canvas hover:bg-surface-strong border border-hairline text-ink transition-colors">
+        🔍 {d.crossLinkPanInspector} &rarr;
+      </a>
+      <a href={`${prefix}/tools/cookware-brand-transparency-index/`} class="px-3 py-1.5 rounded-lg bg-canvas hover:bg-surface-strong border border-hairline text-ink transition-colors">
+        🛡️ {d.crossLinkBrandIndex} &rarr;
+      </a>
+      <a href={`${prefix}/tools/kitchen-hazard-emergency-triage/`} class="px-3 py-1.5 rounded-lg bg-canvas hover:bg-surface-strong border border-hairline text-ink transition-colors">
+        🚨 {d.crossLinkEmergency} &rarr;
+      </a>
+      <a href={`${prefix}/tools/product-recalls-scanner/`} class="px-3 py-1.5 rounded-lg bg-canvas hover:bg-surface-strong border border-hairline text-ink transition-colors">
+        📷 {d.crossLinkRecalls} &rarr;
+      </a>
+    </div>
+  </div>
+</div>
+
+<script is:inline define:vars={{ toxicData, d, lang }}>
+  (function() {
+    const matSelect = document.getElementById('material-select');
+    const condSelect = document.getElementById('condition-select');
+    const tempSelect = document.getElementById('temp-select');
+    const acidSelect = document.getElementById('acid-select');
+    const durSelect = document.getElementById('duration-select');
+
+    const scoreVal = document.getElementById('risk-score-value');
+    const meterBar = document.getElementById('risk-meter-bar');
+    const tierBadge = document.getElementById('risk-tier-badge');
+    const tierDesc = document.getElementById('risk-tier-description');
+    const multVal = document.getElementById('multiplier-value');
+    const toxinsList = document.getElementById('toxins-list');
+    const healthText = document.getElementById('health-risk-text');
+    const tempBadge = document.getElementById('temp-ceiling-badge');
+    const prohibitionsText = document.getElementById('prohibitions-text');
+    const saferAltText = document.getElementById('safer-alt-text');
+    const bestUseText = document.getElementById('best-use-text');
+    const citationText = document.getElementById('citation-text');
+    const matNote = document.getElementById('material-chem-note');
+    const condNote = document.getElementById('condition-desc-note');
+    const tempNote = document.getElementById('temp-desc-note');
+    const acidNote = document.getElementById('acid-desc-note');
+    const durNote = document.getElementById('duration-desc-note');
+
+    const copyBtn = document.getElementById('copy-report-btn');
+    const copiedToast = document.getElementById('copied-toast');
+    const scorecardBox = document.getElementById('scorecard-output');
+
+    if (!matSelect || !condSelect || !tempSelect || !acidSelect || !durSelect) return;
+
+    function recalculate() {
+      const matId = matSelect.value;
+      const condId = condSelect.value;
+      const tempId = tempSelect.value;
+      const acidId = acidSelect.value;
+      const durId = durSelect.value;
+
+      const mat = toxicData.materials.find(m => m.id === matId) || toxicData.materials[0];
+      const cond = toxicData.conditions.find(c => c.id === condId) || toxicData.conditions[0];
+      const temp = toxicData.temperatures.find(t => t.id === tempId) || toxicData.temperatures[0];
+      const acid = toxicData.acidities.find(a => a.id === acidId) || toxicData.acidities[0];
+      const dur = toxicData.durations.find(d => d.id === durId) || toxicData.durations[0];
+
+      // Update explanatory sub-notes
+      if (matNote) matNote.textContent = mat.coatings;
+      if (condNote) condNote.textContent = cond.description;
+      if (tempNote) tempNote.textContent = temp.description;
+      if (acidNote) acidNote.textContent = acid.description;
+      if (durNote) durNote.textContent = dur.description;
+
+      // Calculate Total Multiplier
+      const accelerationFactor = (cond.leachMultiplier * temp.tempMultiplier * acid.acidMultiplier * dur.durationMultiplier);
+      if (multVal) {
+        multVal.textContent = accelerationFactor.toFixed(1) + 'x baseline';
+      }
+
+      // Material-specific chemical modifiers
+      let matSpecialMod = 1.0;
+      if (mat.id === 'uncoated-aluminum' && acid.id === 'strongly-acidic') {
+        matSpecialMod = 1.5; // aluminum vigorously dissolves in acid
+      } else if (mat.id === 'lead-glazed-ceramic' && (acid.id === 'strongly-acidic' || temp.id === 'low-simmer')) {
+        matSpecialMod = 1.6; // acid/heat accelerates lead dissolution
+      } else if (mat.id === 'melamine-resin' && (temp.id === 'high-heat' || temp.id === 'extreme-heat' || dur.id === 'long-simmer')) {
+        matSpecialMod = 1.8; // depolymerization of melamine
+      } else if (mat.id === 'ptfe-traditional' && (temp.id === 'extreme-heat' || cond.id === 'severe-flaking')) {
+        matSpecialMod = 1.7; // rapid pyrolysis / microplastic detachment
+      } else if (mat.id === 'stainless-steel-304' && acid.id !== 'strongly-acidic') {
+        matSpecialMod = 0.5; // highly passivated inert surface
+      }
+
+      // Compute Raw Score: (baseRisk + riskAddition) * (accelerationFactor / 2.5) * matSpecialMod
+      const baseWeighted = mat.baseRisk + cond.riskAddition;
+      const normalizedFactor = 0.5 + (accelerationFactor * 0.45);
+      let calculatedScore = Math.round(baseWeighted * normalizedFactor * matSpecialMod);
+      calculatedScore = Math.max(3, Math.min(100, calculatedScore));
+
+      if (scoreVal) scoreVal.textContent = calculatedScore.toString();
+      if (meterBar) meterBar.style.width = calculatedScore + '%';
+
+      // Update Tier Styling
+      let tierTitle = d.tierMinimal;
+      let tierExpl = d.tierMinimalDesc;
+      let tierColorClass = 'bg-emerald-600 text-white';
+      let barColor = 'bg-emerald-600';
+      let boxBorder = 'border-emerald-500/40';
+
+      if (calculatedScore >= 76) {
+        tierTitle = d.tierCritical;
+        tierExpl = d.tierCriticalDesc;
+        tierColorClass = 'bg-rose-600 text-white';
+        barColor = 'bg-rose-600';
+        boxBorder = 'border-rose-500/60';
+      } else if (calculatedScore >= 46) {
+        tierTitle = d.tierElevated;
+        tierExpl = d.tierElevatedDesc;
+        tierColorClass = 'bg-amber-600 text-white';
+        barColor = 'bg-amber-600';
+        boxBorder = 'border-amber-500/50';
+      } else if (calculatedScore >= 21) {
+        tierTitle = d.tierLow;
+        tierExpl = d.tierLowDesc;
+        tierColorClass = 'bg-blue-600 text-white';
+        barColor = 'bg-blue-600';
+        boxBorder = 'border-blue-500/40';
+      }
+
+      if (tierBadge) {
+        tierBadge.textContent = tierTitle;
+        tierBadge.className = 'inline-block px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider shadow-xs ' + tierColorClass;
+      }
+      if (tierDesc) tierDesc.textContent = tierExpl;
+      if (meterBar) {
+        meterBar.className = 'h-full rounded-full transition-all duration-500 ' + barColor;
+      }
+      if (scorecardBox) {
+        scorecardBox.className = 'rounded-3xl border-2 transition-all p-7 md:p-10 space-y-8 bg-canvas ' + boxBorder;
+      }
+
+      // Update Details Content
+      if (toxinsList) {
+        toxinsList.innerHTML = mat.primaryToxins.map(t => '<li>' + t + '</li>').join('');
+      }
+      if (healthText) healthText.textContent = mat.healthRisks;
+      if (tempBadge) tempBadge.textContent = mat.heatThresholdC + '°C (' + mat.heatThresholdF + '°F)';
+      if (prohibitionsText) prohibitionsText.textContent = mat.neverUseFor;
+      if (saferAltText) saferAltText.textContent = mat.saferAlternative;
+      if (bestUseText) bestUseText.textContent = mat.bestFor;
+      if (citationText) citationText.textContent = mat.scientificCitation;
+    }
+
+    [matSelect, condSelect, tempSelect, acidSelect, durSelect].forEach(el => {
+      el.addEventListener('change', recalculate);
+    });
+
+    // Preset button handlers
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const mat = btn.getAttribute('data-mat');
+        const cond = btn.getAttribute('data-cond');
+        const temp = btn.getAttribute('data-temp');
+        const acid = btn.getAttribute('data-acid');
+        const dur = btn.getAttribute('data-dur');
+
+        if (mat) matSelect.value = mat;
+        if (cond) condSelect.value = cond;
+        if (temp) tempSelect.value = temp;
+        if (acid) acidSelect.value = acid;
+        if (dur) durSelect.value = dur;
+
+        recalculate();
+        scorecardBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+    });
+
+    // Copy Report handler
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        const mat = toxicData.materials.find(m => m.id === matSelect.value);
+        const cond = toxicData.conditions.find(c => c.id === condSelect.value);
+        const temp = toxicData.temperatures.find(t => t.id === tempSelect.value);
+        const acid = toxicData.acidities.find(a => a.id === acidSelect.value);
+        const dur = toxicData.durations.find(d => d.id === durSelect.value);
+
+        const report = [
+          "==================================================",
+          "ISITKITCHENSAFE TOXIC LEACHING & PFAS RISK REPORT",
+          "==================================================",
+          "Vessel / Cookware: " + (mat ? mat.name : matSelect.value),
+          "Surface Condition: " + (cond ? cond.label : condSelect.value),
+          "Cooking Heat:      " + (temp ? temp.label : tempSelect.value),
+          "Food Acidity:      " + (acid ? acid.label : acidSelect.value),
+          "Duration:          " + (dur ? dur.label : durSelect.value),
+          "--------------------------------------------------",
+          "Calculated Risk Score: " + scoreVal.textContent + " / 100",
+          "Risk Tier:             " + tierBadge.textContent,
+          "Leaching Acceleration: " + multVal.textContent,
+          "--------------------------------------------------",
+          "Primary Toxins: " + (mat ? mat.primaryToxins.join(', ') : ''),
+          "Health Hazard:  " + (mat ? mat.healthRisks : ''),
+          "Safe Threshold: Max " + (mat ? mat.heatThresholdC + '°C / ' + mat.heatThresholdF + '°F' : ''),
+          "Strict Prohibitions: " + (mat ? mat.neverUseFor : ''),
+          "Safer Alternative:   " + (mat ? mat.saferAlternative : ''),
+          "Scientific Citation: " + (mat ? mat.scientificCitation : ''),
+          "==================================================",
+          "Generated at: https://isitkitchensafe.com/tools/toxic-leaching-scorecard/"
+        ].join("\n");
+
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(report).then(() => {
+            if (copiedToast) {
+              copiedToast.classList.remove('hidden');
+              setTimeout(() => copiedToast.classList.add('hidden'), 3500);
+            }
+          });
+        }
+      });
+    }
+
+    recalculate();
+  })();
+</script>
