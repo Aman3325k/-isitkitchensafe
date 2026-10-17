@@ -36,7 +36,8 @@ const SPECIAL_PAGES = [
   'tools/kitchen-hazard-emergency-triage',
   'tools/product-recalls-scanner',
   'tools/toxic-leaching-scorecard',
-  'tools/material-swap-calculator'
+  'tools/material-swap-calculator',
+  'tools/viral-trend-debunker'
 ];
 
 const esSlugs = new Set([
