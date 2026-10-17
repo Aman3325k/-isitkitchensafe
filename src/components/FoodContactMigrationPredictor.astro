@@ -1,0 +1,896 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import migrationData from '../data/food-contact-migration-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  materialLabel: string;
+  simulantLabel: string;
+  tempLabel: string;
+  durationLabel: string;
+  chartTitle: string;
+  chartSub: string;
+  chartYAxis: string;
+  chartXAxis: string;
+  smlThresholdLabel: string;
+  arrheniusMultiplierLabel: string;
+  crossoverAlertTitle: string;
+  crossoverSafeTitle: string;
+  assessmentTitle: string;
+  scoreStatusLabel: string;
+  currentConcLabel: string;
+  legalLimitLabel: string;
+  crossoverTimeLabel: string;
+  swapTitle: string;
+  swapRecommendationLabel: string;
+  copyReportBtn: string;
+  reportCopied: string;
+  standardsTitle: string;
+  standardsSub: string;
+  crossLinkTools: string;
+  crossLinkScorecard: string;
+  crossLinkPlasticizer: string;
+  crossLinkSwap: string;
+  crossLinkPanInspector: string;
+  crossLinkThermal: string;
+}
+
+const DICT: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Fickian Diffusion & Arrhenius Kinetics Lab",
+    title: "Food Contact Chemical Migration & Leaching Time-Series Predictor",
+    subtitle: "Simulate time-dependent chemical leaching from cookware, plastic packaging, and tableware into food. Computes real-time Fickian diffusion curves, Arrhenius thermal acceleration factors, and regulatory threshold crossover points.",
+    controlsTitle: "Experimental Leaching Parameters",
+    controlsSub: "Configure container material, food matrix simulant, exposure temperature, and contact duration.",
+    materialLabel: "Cookware / Container Material & Target Migrant",
+    simulantLabel: "Food Matrix Chemical Simulant",
+    tempLabel: "Contact Temperature",
+    durationLabel: "Exposure Duration Horizon",
+    chartTitle: "Kinetic Migration Concentration Curve [C(t) vs SML]",
+    chartSub: "Dynamic planar diffusion modeling with Arrhenius temperature dependence. Red dashed line indicates legal Specific Migration Limit (SML).",
+    chartYAxis: "Migrant Conc. (mg/kg food)",
+    chartXAxis: "Contact Time Elapsed",
+    smlThresholdLabel: "Legal SML Threshold",
+    arrheniusMultiplierLabel: "Arrhenius Thermal Acceleration Factor (vs 20°C):",
+    crossoverAlertTitle: "⚠️ CRITICAL REGULATORY LIMIT BREACH",
+    crossoverSafeTitle: "✓ WITHIN REGULATORY SAFETY THRESHOLD",
+    assessmentTitle: "Diagnostic Toxicological Assessment",
+    scoreStatusLabel: "Compliance Status",
+    currentConcLabel: "Predicted Concentration",
+    legalLimitLabel: "Legal Threshold (SML / SRL)",
+    crossoverTimeLabel: "Critical Breach Time Horizon",
+    swapTitle: "Actionable Non-Toxic Protocol & Swap",
+    swapRecommendationLabel: "Recommended Non-Toxic Replacement:",
+    copyReportBtn: "📋 Copy Kinetic Migration Diagnostic Report",
+    reportCopied: "✓ Diagnostic Report Copied to Clipboard!",
+    standardsTitle: "Regulatory Frameworks & Migration Testing Directives",
+    standardsSub: "Grounded in European Commission (EU) 10/2011, US FDA 21 CFR, and Council of Europe resolutions.",
+    crossLinkTools: "Explore Companion Material Science Tools:",
+    crossLinkScorecard: "Toxic Leaching & PFAS Risk Scorecard",
+    crossLinkPlasticizer: "Microplastic Blood Burden Estimator",
+    crossLinkSwap: "Safe Material Swap Calculator",
+    crossLinkPanInspector: "AI Pan Scratch Inspector",
+    crossLinkThermal: "Thermal Shock Simulator"
+  },
+  es: {
+    badge: "Laboratorio de Difusión de Fick y Cinética de Arrhenius",
+    title: "Predictor Cinético de Migración Química y Lixiviación en Contacto con Alimentos",
+    subtitle: "Simula la lixiviación química dependiente del tiempo desde utensilios, plásticos y vajillas hacia los alimentos. Modela curvas de difusión de Fick, aceleración térmica de Arrhenius y puntos de cruce de límites reglamentarios.",
+    controlsTitle: "Parámetros Experimentales de Migración",
+    controlsSub: "Configura el material del recipiente, el simulante alimentario, la temperatura de contacto y el tiempo de exposición.",
+    materialLabel: "Material del Recipiente y Sustancia Migrante",
+    simulantLabel: "Simulante Químico Alimentario",
+    tempLabel: "Temperatura de Contacto",
+    durationLabel: "Horizonte Temporal de Exposición",
+    chartTitle: "Curva Cinética de Concentración de Migración [C(t) vs LMS]",
+    chartSub: "Modelado dinámico de difusión planar con dependencia térmica de Arrhenius. La línea roja discontinua indica el Límite de Migración Específica (LMS).",
+    chartYAxis: "Concentración (mg/kg alimento)",
+    chartXAxis: "Tiempo de Contacto Transcurrido",
+    smlThresholdLabel: "Límite Legal LMS",
+    arrheniusMultiplierLabel: "Factor de Aceleración Térmica de Arrhenius (vs 20°C):",
+    crossoverAlertTitle: "⚠️ EXCESO CRÍTICO DE LÍMITE REGLAMENTARIO",
+    crossoverSafeTitle: "✓ DENTRO DE LOS LÍMITES LEGALES DE SEGURIDAD",
+    assessmentTitle: "Evaluación Toxicológica Diagnóstica",
+    scoreStatusLabel: "Estado de Conformidad",
+    currentConcLabel: "Concentración Estimada",
+    legalLimitLabel: "Límite Legal (LMS / LRE)",
+    crossoverTimeLabel: "Horizonte Temporal de Infracción",
+    swapTitle: "Protocolo de Sustitución No Tóxica",
+    swapRecommendationLabel: "Alternativa Segura Recomendada:",
+    copyReportBtn: "📋 Copiar Informe Cinético de Migración",
+    reportCopied: "✓ ¡Informe copiado al portapapeles!",
+    standardsTitle: "Marcos Regulatorios y Ensayos de Migración Específica",
+    standardsSub: "Basado en el Reglamento UE 10/2011, US FDA 21 CFR y resoluciones del Consejo de Europa.",
+    crossLinkTools: "Explorar Herramientas Científicas Complementarias:",
+    crossLinkScorecard: "Evaluador de Fuga de Tóxicos y PFAS",
+    crossLinkPlasticizer: "Estimador de Carga de Microplásticos",
+    crossLinkSwap: "Calculadora de Sustitución de Materiales",
+    crossLinkPanInspector: "Inspector de Daño en Sartenes",
+    crossLinkThermal: "Simulador de Choque Térmico"
+  },
+  pt: {
+    badge: "Laboratório de Difusão de Fick e Cinética de Arrhenius",
+    title: "Preditor Cinético de Migração Química e Liberação em Contato com Alimentos",
+    subtitle: "Simule a liberação química dependente do tempo a partir de panelas, potes plásticos e louças para os alimentos. Calcula curvas de difusão de Fick, fatores de aceleração térmica de Arrhenius e cruzamento de limites regulatórios.",
+    controlsTitle: "Parâmetros Experimentais de Migração",
+    controlsSub: "Configure o material do recipiente, o simulante de alimento, a temperatura e o tempo de contato.",
+    materialLabel: "Material do Recipiente e Migrante Alvo",
+    simulantLabel: "Simulante Químico de Alimento",
+    tempLabel: "Temperatura de Contato",
+    durationLabel: "Duração da Exposição",
+    chartTitle: "Curva Cinética de Migração [C(t) vs LME]",
+    chartSub: "Modelagem planar com dependência térmica de Arrhenius. Linha tracejada vermelha indica o Limite de Migração Específica (LME).",
+    chartYAxis: "Concentração (mg/kg alimento)",
+    chartXAxis: "Tempo de Contato Decorrido",
+    smlThresholdLabel: "Limite Legal LME",
+    arrheniusMultiplierLabel: "Fator de Aceleração Térmica de Arrhenius (vs 20°C):",
+    crossoverAlertTitle: "⚠️ VIOLAÇÃO CRÍTICA DO LIMITE REGULATÓRIO",
+    crossoverSafeTitle: "✓ DENTRO DOS LIMITES SEGUROS DE TOXICIDADE",
+    assessmentTitle: "Avaliação Toxicológica Diagnóstica",
+    scoreStatusLabel: "Status Regulatório",
+    currentConcLabel: "Concentração Prevista",
+    legalLimitLabel: "Limite Legal (LME / LRE)",
+    crossoverTimeLabel: "Ponto Crítico de Ultrapassagem",
+    swapTitle: "Protocolo e Substituição Segura",
+    swapRecommendationLabel: "Substituto Não Tóxico Recomendado:",
+    copyReportBtn: "📋 Copiar Relatório Diagnóstico de Migração",
+    reportCopied: "✓ Relatório copiado para a área de transferência!",
+    standardsTitle: "Normas Regulamentares e Diretivas de Migração",
+    standardsSub: "Fundamentado no Regulamento (UE) 10/2011, US FDA 21 CFR e resoluções do Conselho da Europa.",
+    crossLinkTools: "Explorar Ferramentas Científicas Complementares:",
+    crossLinkScorecard: "Scorecard de Liberação Tóxica e PFAS",
+    crossLinkPlasticizer: "Estimador de Carga de Microplásticos",
+    crossLinkSwap: "Calculadora de Troca Segura de Materiais",
+    crossLinkPanInspector: "Inspetor de Riscos em Frigideiras",
+    crossLinkThermal: "Simulador de Choque Térmico"
+  },
+  'zh-cn': {
+    badge: "菲克扩散与阿伦尼乌斯动力学实验室",
+    title: "食品接触化学物质迁移与溶出时序动力学预测模型",
+    subtitle: "精确模拟厨具、塑料包装及餐具中化学添加剂与单体向食物迁移的时间浓度动力学曲线。基于菲克第二扩散定律与阿伦尼乌斯热加速方程，实时计算特定迁移限量（SML）合规超标临界点。",
+    controlsTitle: "迁移浸泡实验控制参数",
+    controlsSub: "自由配置容器材质、食品接触模拟物矩阵、加热/接触温度及持续暴露时间。",
+    materialLabel: "食品接触材料与目标迁移物",
+    simulantLabel: "食品物理化学模拟物（浸泡介质）",
+    tempLabel: "接触与加热温度",
+    durationLabel: "持续接触时间跨度",
+    chartTitle: "时序动态迁移浓度动力学曲线 [C(t) vs SML]",
+    chartSub: "动态一维平面扩散数值模拟，结合阿伦尼乌斯热活化能参数。红色虚线标示欧盟/美国法定特定迁移限量（SML）。",
+    chartYAxis: "迁移物浓度 (mg/kg 食物)",
+    chartXAxis: "接触历经时间",
+    smlThresholdLabel: "法定SML安全临界线",
+    arrheniusMultiplierLabel: "阿伦尼乌斯热反应速率加速倍率（基准20°C常温）：",
+    crossoverAlertTitle: "⚠️ 严重新法规限值超标警报",
+    crossoverSafeTitle: "✓ 符合法定食品接触安全限量标准",
+    assessmentTitle: "毒理学安全综合评估报告",
+    scoreStatusLabel: "法规合规状态",
+    currentConcLabel: "预测当前析出浓度",
+    legalLimitLabel: "法定迁移上限 (SML / SRL)",
+    crossoverTimeLabel: "超标突破时间拐点",
+    swapTitle: "科学去毒替换方案与安全指南",
+    swapRecommendationLabel: "推荐权威安全替代材质：",
+    copyReportBtn: "📋 复制迁移动力学诊断报告",
+    reportCopied: "✓ 迁移诊断报告已成功复制至剪贴板！",
+    standardsTitle: "国际食品接触材料法规与标准指引",
+    standardsSub: "严格遵循欧盟委员会EU 10/2011、美国FDA 21 CFR及欧洲委员会CM/Res(2013)9法规要求。",
+    crossLinkTools: "探索更多厨房材料科学与安全工具：",
+    crossLinkScorecard: "厨具毒性溶出与PFAS风险测评",
+    crossLinkPlasticizer: "微塑料与增塑剂血液负担测评",
+    crossLinkSwap: "安全厨具材质替换计算器",
+    crossLinkPanInspector: "AI划痕智能诊断仪",
+    crossLinkThermal: "器具热震与炸裂临界模拟器"
+  },
+  ja: {
+    badge: "フィックの拡散＆アレニウス動力学研究室",
+    title: "食品接触化学物質移行・溶出タイムシリーズ動力学予測シミュレーター",
+    subtitle: "調理器具、プラスチック容器、食器から食品へ溶出する化学物質の経時変化をシミュレーション。フィックの拡散方程式とアレニウスの熱活性化モデルに基づき、法定特定移行限界（SML）超過時間を予測します。",
+    controlsTitle: "溶出実験パラメータ設定",
+    controlsSub: "容器材質、食品擬似溶媒、接触加熱温度、暴露時間を設定してください。",
+    materialLabel: "接触素材および対象移行化学物質",
+    simulantLabel: "食品擬似溶媒（浸漬マトリックス）",
+    tempLabel: "接触・加熱温度",
+    durationLabel: "接触・保存期間",
+    chartTitle: "経時的溶出濃度動力学曲線 [C(t) vs SML]",
+    chartSub: "アレニウス熱依存性を取り入れた平面拡散モデル。赤の破線はEU・FDAの法定特定移行限度（SML）を示します。",
+    chartYAxis: "溶出濃度 (mg/kg 食品)",
+    chartXAxis: "経過接触時間",
+    smlThresholdLabel: "法定SML安全限界値",
+    arrheniusMultiplierLabel: "アレニウス熱加速倍率（20°C常温比）：",
+    crossoverAlertTitle: "⚠️ 法定基準値オーバー（危険水準）",
+    crossoverSafeTitle: "✓ 法定安全基準範囲内（適合）",
+    assessmentTitle: "毒性学安全性診断レポート",
+    scoreStatusLabel: "法規制適合ステータス",
+    currentConcLabel: "推定溶出濃度",
+    legalLimitLabel: "法定移行上限値 (SML / SRL)",
+    crossoverTimeLabel: "基準超過到達時間",
+    swapTitle: "無害化アクション＆安全素材の提案",
+    swapRecommendationLabel: "推奨される安全な代替素材：",
+    copyReportBtn: "📋 溶出動力学レポートをコピー",
+    reportCopied: "✓ レポートをクリップボードにコピーしました！",
+    standardsTitle: "参照国際規格および公的試験基準",
+    standardsSub: "EU規則 10/2011、米国FDA 21 CFR、欧州評議会決議 CM/Res(2013)9 に準拠。",
+    crossLinkTools: "関連する材料科学シミュレーター＆安全ツール：",
+    crossLinkScorecard: "有害物質溶出＆PFASリスク評価",
+    crossLinkPlasticizer: "マイクロプラスチック血中蓄積試算",
+    crossLinkSwap: "安全な調理器具素材乗り換え計算機",
+    crossLinkPanInspector: "フライパン傷AI診断ツール",
+    crossLinkThermal: "熱衝撃・ガラス割れ限界シミュレーター"
+  }
+};
+
+const d = DICT[lang] || DICT.en;
+const prefix = lang === 'en' ? '' : `/${lang}`;
+---
+
+<div class="max-w-5xl mx-auto space-y-12 text-ink" id="migration-predictor-root">
+  <!-- Hero Section -->
+  <header class="text-center space-y-4">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-amber-100 text-amber-950 border border-amber-200">
+      <span class="w-2 h-2 rounded-full bg-amber-600 animate-pulse"></span>
+      {d.badge}
+    </div>
+    <h1 class="text-display-sm md:text-display-md font-semibold text-ink tracking-tight">
+      {d.title}
+    </h1>
+    <p class="text-body max-w-3xl mx-auto text-base md:text-lg leading-relaxed text-muted">
+      {d.subtitle}
+    </p>
+  </header>
+
+  <!-- Main Calculator & Simulator Panel -->
+  <section class="bg-surface-soft border border-hairline rounded-3xl p-6 md:p-10 shadow-xs space-y-8" id="migration-engine">
+    <div class="border-b border-hairline pb-4 flex flex-col md:flex-row md:items-center justify-between gap-2">
+      <div>
+        <h2 class="text-title-lg font-medium text-ink tracking-tight">{d.controlsTitle}</h2>
+        <p class="text-body text-xs md:text-sm text-muted">{d.controlsSub}</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-mono px-2.5 py-1 rounded-lg bg-surface font-medium border border-hairline text-muted">
+          Fick's 2nd Law &bull; Arrhenius Ea
+        </span>
+      </div>
+    </div>
+
+    <!-- Parameter Inputs Form -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Material & Migrant Select -->
+      <div class="space-y-2">
+        <label for="material-select" class="block text-xs font-semibold uppercase tracking-wider text-amber-900">
+          {d.materialLabel}
+        </label>
+        <select 
+          id="material-select" 
+          class="w-full p-3 rounded-xl bg-canvas border border-hairline text-ink font-medium text-xs md:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"
+        >
+          {migrationData.materials.map((m) => (
+            <option value={m.id}>
+              {m.name} &bull; [{m.migrant}]
+            </option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted" id="material-mechanism-note">
+          {migrationData.materials[0].mechanism}
+        </p>
+      </div>
+
+      <!-- Food Matrix Simulant Select -->
+      <div class="space-y-2">
+        <label for="simulant-select" class="block text-xs font-semibold uppercase tracking-wider text-amber-900">
+          {d.simulantLabel}
+        </label>
+        <select 
+          id="simulant-select" 
+          class="w-full p-3 rounded-xl bg-canvas border border-hairline text-ink font-medium text-xs md:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"
+        >
+          {migrationData.simulants.map((s) => (
+            <option value={s.id}>
+              {s.name} ({s.standard})
+            </option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted" id="simulant-corrosiveness-note">
+          {migrationData.simulants[0].corrosiveness}
+        </p>
+      </div>
+
+      <!-- Temperature Select -->
+      <div class="space-y-2">
+        <label for="temp-select" class="block text-xs font-semibold uppercase tracking-wider text-amber-900">
+          {d.tempLabel}
+        </label>
+        <select 
+          id="temp-select" 
+          class="w-full p-3 rounded-xl bg-canvas border border-hairline text-ink font-medium text-xs md:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"
+        >
+          {migrationData.temperaturePresets.map((t) => (
+            <option value={t.celsius}>
+              {t.label} &bull; {t.context}
+            </option>
+          ))}
+        </select>
+        <div class="flex items-center justify-between text-[11px] text-muted pt-1">
+          <span>{d.arrheniusMultiplierLabel}</span>
+          <span class="font-mono font-bold text-amber-900" id="arrhenius-factor-val">1.0x (Baseline)</span>
+        </div>
+      </div>
+
+      <!-- Duration Horizon Select -->
+      <div class="space-y-2">
+        <label for="duration-select" class="block text-xs font-semibold uppercase tracking-wider text-amber-900">
+          {d.durationLabel}
+        </label>
+        <select 
+          id="duration-select" 
+          class="w-full p-3 rounded-xl bg-canvas border border-hairline text-ink font-medium text-xs md:text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"
+        >
+          <option value="5m">5 Minutes (Quick rinse / brief dip)</option>
+          <option value="15m">15 Minutes (Short microwave or stir-fry)</option>
+          <option value="30m">30 Minutes (Simmering / quick meal prep)</option>
+          <option value="1h">1 Hour (Simmering pot / warm hold)</option>
+          <option value="4h">4 Hours (Slow cooker / buffet hold)</option>
+          <option value="24h" selected>24 Hours (Overnight refrigerated storage)</option>
+          <option value="7d">7 Days (Weekly meal-prep container)</option>
+          <option value="30d">30 Days (Commercial pantry shelf life)</option>
+        </select>
+        <div class="flex items-center justify-between text-[11px] text-muted pt-1">
+          <span>Modeled Time Interval:</span>
+          <span class="font-mono font-bold text-ink" id="duration-readable-val">24 Hours</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dynamic Kinetic Curve Chart (SVG) -->
+    <div class="p-6 md:p-8 rounded-2xl bg-canvas border border-hairline space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-hairline pb-4">
+        <div>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-amber-800 block mb-0.5">
+            Transport Kinetics Visualizer
+          </span>
+          <h3 class="text-title-sm font-semibold text-ink">{d.chartTitle}</h3>
+          <p class="text-xs text-muted mt-0.5">{d.chartSub}</p>
+        </div>
+        <div class="flex items-center gap-3 text-xs font-mono shrink-0">
+          <div class="flex items-center gap-1.5">
+            <span class="w-3 h-0.5 bg-amber-600 inline-block"></span>
+            <span class="text-muted">C(t) Kinetic Curve</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="w-3 h-0.5 border-b-2 border-dashed border-rose-500 inline-block"></span>
+            <span class="text-rose-600 font-semibold">{d.smlThresholdLabel}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SVG Chart Canvas Area -->
+      <div class="w-full overflow-hidden pt-2">
+        <svg 
+          id="kinetic-svg-chart" 
+          viewBox="0 0 600 240" 
+          class="w-full h-56 md:h-64 select-none"
+        >
+          <!-- Background Grid lines -->
+          <line x1="50" y1="20" x2="570" y2="20" stroke="currentColor" stroke-opacity="0.08" stroke-dasharray="3,3" />
+          <line x1="50" y1="70" x2="570" y2="70" stroke="currentColor" stroke-opacity="0.08" stroke-dasharray="3,3" />
+          <line x1="50" y1="120" x2="570" y2="120" stroke="currentColor" stroke-opacity="0.08" stroke-dasharray="3,3" />
+          <line x1="50" y1="170" x2="570" y2="170" stroke="currentColor" stroke-opacity="0.08" stroke-dasharray="3,3" />
+          <line x1="50" y1="210" x2="570" y2="210" stroke="currentColor" stroke-opacity="0.2" stroke-width="1.5" />
+          <line x1="50" y1="20" x2="50" y2="210" stroke="currentColor" stroke-opacity="0.2" stroke-width="1.5" />
+
+          <!-- Axes Labels -->
+          <text x="50" y="15" font-size="10" fill="currentColor" fill-opacity="0.6" font-family="monospace" id="chart-y-top-label">
+            0.10 mg/kg
+          </text>
+          <text x="50" y="224" font-size="10" fill="currentColor" fill-opacity="0.6" font-family="monospace">
+            t = 0
+          </text>
+          <text x="540" y="224" font-size="10" fill="currentColor" fill-opacity="0.6" font-family="monospace" id="chart-x-end-label">
+            24h
+          </text>
+
+          <!-- Safe Baseline Shading -->
+          <rect id="safe-fill-zone" x="50" y="115" width="520" height="95" fill="#10b981" fill-opacity="0.06" />
+
+          <!-- Legal Threshold Line (Dashed Red) -->
+          <line id="sml-dashed-line" x1="50" y1="115" x2="570" y2="115" stroke="#ef4444" stroke-width="2" stroke-dasharray="6,4" />
+          <text id="sml-line-label" x="55" y="110" font-size="10" font-weight="bold" fill="#ef4444" font-family="monospace">
+            EU SML: 0.05 mg/kg
+          </text>
+
+          <!-- Dynamic Diffusion Curve Path -->
+          <path 
+            id="kinetic-curve-path" 
+            d="M 50 210 Q 150 160 570 60" 
+            fill="none" 
+            stroke="#d97706" 
+            stroke-width="3.5" 
+            stroke-linecap="round"
+          />
+
+          <!-- Crossover Point Marker (Circle & Label) -->
+          <circle id="crossover-marker-dot" cx="240" cy="115" r="5" fill="#dc2626" stroke="#ffffff" stroke-width="2" />
+          <text id="crossover-marker-text" x="250" y="105" font-size="10" font-weight="bold" fill="#dc2626" font-family="monospace">
+            Exceeds SML at t = 45m
+          </text>
+        </svg>
+      </div>
+
+      <!-- Crossover Status Banner -->
+      <div id="crossover-banner" class="p-4 rounded-xl border flex items-center justify-between gap-3 text-xs md:text-sm">
+        <div class="flex items-center gap-2">
+          <span class="text-base" id="crossover-status-icon">⚠️</span>
+          <div>
+            <span class="font-bold block" id="crossover-status-title">{d.crossoverAlertTitle}</span>
+            <span class="text-xs text-muted" id="crossover-status-detail">
+              Predicted migrant concentration exceeds legal safety thresholds.
+            </span>
+          </div>
+        </div>
+        <span class="font-mono font-bold px-3 py-1 rounded-lg shrink-0" id="crossover-time-badge">
+          Breach at ~45m
+        </span>
+      </div>
+    </div>
+
+    <!-- Diagnostic Toxicological Assessment Cards -->
+    <div class="space-y-4">
+      <h3 class="text-title-sm font-semibold text-ink">{d.assessmentTitle}</h3>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <!-- Card 1: Compliance Status -->
+        <div class="p-4 rounded-xl bg-canvas border border-hairline space-y-1">
+          <span class="text-[11px] uppercase font-mono tracking-wider text-muted block">
+            {d.scoreStatusLabel}
+          </span>
+          <div class="text-title-md font-bold font-mono" id="assessment-status-badge">
+            HAZARDOUS
+          </div>
+          <p class="text-[11px] text-muted leading-tight" id="assessment-status-note">
+            Violates Specific Migration Limit.
+          </p>
+        </div>
+
+        <!-- Card 2: Predicted Concentration -->
+        <div class="p-4 rounded-xl bg-canvas border border-hairline space-y-1">
+          <span class="text-[11px] uppercase font-mono tracking-wider text-muted block">
+            {d.currentConcLabel}
+          </span>
+          <div class="text-title-md font-bold text-amber-900 font-mono" id="assessment-conc-val">
+            0.082 mg/kg
+          </div>
+          <p class="text-[11px] text-muted leading-tight" id="assessment-conc-note">
+            Calculated at selected time horizon.
+          </p>
+        </div>
+
+        <!-- Card 3: Legal Threshold -->
+        <div class="p-4 rounded-xl bg-canvas border border-hairline space-y-1">
+          <span class="text-[11px] uppercase font-mono tracking-wider text-muted block">
+            {d.legalLimitLabel}
+          </span>
+          <div class="text-title-md font-bold text-ink font-mono" id="assessment-limit-val">
+            0.05 mg/kg
+          </div>
+          <p class="text-[11px] text-muted leading-tight" id="assessment-limit-note">
+            EU Regulation 10/2011 SML.
+          </p>
+        </div>
+
+        <!-- Card 4: Breach Time Horizon -->
+        <div class="p-4 rounded-xl bg-canvas border border-hairline space-y-1">
+          <span class="text-[11px] uppercase font-mono tracking-wider text-muted block">
+            {d.crossoverTimeLabel}
+          </span>
+          <div class="text-title-md font-bold text-rose-600 font-mono" id="assessment-crossover-val">
+            45 Minutes
+          </div>
+          <p class="text-[11px] text-muted leading-tight" id="assessment-crossover-note">
+            Time until SML threshold is crossed.
+          </p>
+        </div>
+      </div>
+
+      <!-- Actionable Mitigation & Non-Toxic Swap Card -->
+      <div class="p-5 rounded-2xl bg-canvas border-2 border-amber-300 space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-amber-800 block mb-0.5">
+              {d.swapTitle}
+            </span>
+            <h4 class="text-body font-semibold text-ink text-sm" id="swap-recommendation-title">
+              {migrationData.materials[0].swapRecommendation}
+            </h4>
+            <p class="text-xs text-muted mt-1 leading-relaxed" id="swap-typical-crossover">
+              {migrationData.materials[0].typicalCrossover}
+            </p>
+          </div>
+          <button 
+            type="button" 
+            id="copy-migration-report-btn" 
+            class="px-4 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-medium text-xs transition-colors shadow-xs shrink-0 flex items-center gap-1.5"
+          >
+            {d.copyReportBtn}
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scientific Regulatory Directives Section -->
+  <section class="space-y-6">
+    <div class="border-b border-hairline pb-3">
+      <h2 class="text-title-lg font-medium text-ink">{d.standardsTitle}</h2>
+      <p class="text-xs text-muted">{d.standardsSub}</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {migrationData.scientificStandards.map((std) => (
+        <article class="p-5 rounded-2xl bg-surface-soft border border-hairline space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-mono font-bold text-amber-900">{std.code}</span>
+            <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-surface border border-hairline text-muted">
+              {std.authority}
+            </span>
+          </div>
+          <p class="text-xs text-body leading-relaxed">
+            {std.scope}
+          </p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- Companion Tools Navigation -->
+  <section class="bg-surface-soft border border-hairline rounded-3xl p-6 md:p-8 space-y-4">
+    <h3 class="text-title-sm font-semibold text-ink">{d.crossLinkTools}</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+      <a 
+        href={`${prefix}/tools/toxic-leaching-scorecard/`} 
+        class="p-3.5 rounded-xl bg-canvas border border-hairline hover:bg-surface transition-colors flex items-center justify-between text-xs font-medium text-ink"
+      >
+        <span>{d.crossLinkScorecard}</span>
+        <span class="text-muted font-bold">&rarr;</span>
+      </a>
+      <a 
+        href={`${prefix}/tools/plasticizer-microplastic-burden-estimator/`} 
+        class="p-3.5 rounded-xl bg-canvas border border-hairline hover:bg-surface transition-colors flex items-center justify-between text-xs font-medium text-ink"
+      >
+        <span>{d.crossLinkPlasticizer}</span>
+        <span class="text-muted font-bold">&rarr;</span>
+      </a>
+      <a 
+        href={`${prefix}/tools/material-swap-calculator/`} 
+        class="p-3.5 rounded-xl bg-canvas border border-hairline hover:bg-surface transition-colors flex items-center justify-between text-xs font-medium text-ink"
+      >
+        <span>{d.crossLinkSwap}</span>
+        <span class="text-muted font-bold">&rarr;</span>
+      </a>
+      <a 
+        href={`${prefix}/tools/pan-scratch-inspector/`} 
+        class="p-3.5 rounded-xl bg-canvas border border-hairline hover:bg-surface transition-colors flex items-center justify-between text-xs font-medium text-ink"
+      >
+        <span>{d.crossLinkPanInspector}</span>
+        <span class="text-muted font-bold">&rarr;</span>
+      </a>
+      <a 
+        href={`${prefix}/tools/thermal-shock-simulator/`} 
+        class="p-3.5 rounded-xl bg-canvas border border-hairline hover:bg-surface transition-colors flex items-center justify-between text-xs font-medium text-ink"
+      >
+        <span>{d.crossLinkThermal}</span>
+        <span class="text-muted font-bold">&rarr;</span>
+      </a>
+      <a 
+        href={`${prefix}/material/scratched-nonstick-cookware/`} 
+        class="p-3.5 rounded-xl bg-canvas border border-hairline hover:bg-surface transition-colors flex items-center justify-between text-xs font-medium text-ink"
+      >
+        <span>Scratched Cookware Guide</span>
+        <span class="text-muted font-bold">&rarr;</span>
+      </a>
+    </div>
+  </section>
+</div>
+
+<!-- Client-Side Kinetic Calculation & Dynamic SVG Graph Script -->
+<script define:vars={{ migrationData, d }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    const matSelect = document.getElementById('material-select');
+    const simSelect = document.getElementById('simulant-select');
+    const tempSelect = document.getElementById('temp-select');
+    const durSelect = document.getElementById('duration-select');
+
+    const matNote = document.getElementById('material-mechanism-note');
+    const simNote = document.getElementById('simulant-corrosiveness-note');
+    const arrheniusFactorVal = document.getElementById('arrhenius-factor-val');
+    const durReadableVal = document.getElementById('duration-readable-val');
+
+    const curvePath = document.getElementById('kinetic-curve-path');
+    const smlDashedLine = document.getElementById('sml-dashed-line');
+    const smlLineLabel = document.getElementById('sml-line-label');
+    const safeZone = document.getElementById('safe-fill-zone');
+    const chartYTopLabel = document.getElementById('chart-y-top-label');
+    const chartXEndLabel = document.getElementById('chart-x-end-label');
+    const crossoverDot = document.getElementById('crossover-marker-dot');
+    const crossoverText = document.getElementById('crossover-marker-text');
+
+    const banner = document.getElementById('crossover-banner');
+    const bannerIcon = document.getElementById('crossover-status-icon');
+    const bannerTitle = document.getElementById('crossover-status-title');
+    const bannerDetail = document.getElementById('crossover-status-detail');
+    const bannerBadge = document.getElementById('crossover-time-badge');
+
+    const statBadge = document.getElementById('assessment-status-badge');
+    const statNote = document.getElementById('assessment-status-note');
+    const concVal = document.getElementById('assessment-conc-val');
+    const limitVal = document.getElementById('assessment-limit-val');
+    const crossVal = document.getElementById('assessment-crossover-val');
+
+    const swapTitle = document.getElementById('swap-recommendation-title');
+    const swapCrossover = document.getElementById('swap-typical-crossover');
+    const copyBtn = document.getElementById('copy-migration-report-btn');
+
+    if (!matSelect || !simSelect || !tempSelect || !durSelect) return;
+
+    // Duration mapping in minutes
+    const DURATION_MINUTES = {
+      '5m': 5,
+      '15m': 15,
+      '30m': 30,
+      '1h': 60,
+      '4h': 240,
+      '24h': 1440,
+      '7d': 10080,
+      '30d': 43200
+    };
+
+    function recalculate() {
+      const matId = matSelect.value;
+      const simId = simSelect.value;
+      const tempC = parseFloat(tempSelect.value);
+      const durKey = durSelect.value;
+      const totalMinutes = DURATION_MINUTES[durKey] || 1440;
+
+      const mat = migrationData.materials.find(m => m.id === matId) || migrationData.materials[0];
+      const sim = migrationData.simulants.find(s => s.id === simId) || migrationData.simulants[0];
+
+      // Update explanatory captions
+      if (matNote) matNote.textContent = mat.mechanism;
+      if (simNote) simNote.textContent = sim.corrosiveness;
+      if (durReadableVal) durReadableVal.textContent = durSelect.options[durSelect.selectedIndex].text.split('(')[0].trim();
+
+      // Arrhenius Calculation:
+      // k(T) = exp(-Ea / R * (1/T - 1/T_ref)) with T_ref = 293.15 K (20°C), R = 8.314 J/mol·K
+      const R = 8.314;
+      const T_kelvin = tempC + 273.15;
+      const T_ref = 293.15; // 20°C
+      const Ea_joules = (mat.activationEnergy || 70.0) * 1000; // kJ to Joules
+
+      const arrheniusFactor = Math.exp((-Ea_joules / R) * ((1 / T_kelvin) - (1 / T_ref)));
+      if (arrheniusFactorVal) {
+        arrheniusFactorVal.textContent = `${arrheniusFactor.toFixed(1)}x (${tempC}°C vs 20°C)`;
+      }
+
+      // Simulant chemical aggressiveness multiplier
+      const simMultiplier = mat.baseSimulantMultipliers[simId] || 1.0;
+
+      // Rate constant K = d0 * Arrhenius * Simulant
+      const kineticRate = (mat.d0 || 1e-4) * arrheniusFactor * simMultiplier;
+
+      // Asymptotic maximum migration conc (C_inf) set to ~ 2.5x to 4x of SML
+      const C_inf = mat.smlLimit * 3.5;
+
+      // Fickian Diffusion short/medium time solution:
+      // C(t) = C_inf * (1 - exp(-sqrt(kineticRate * t_minutes)))
+      function getConcentrationAtMinutes(t_m) {
+        if (t_m <= 0) return 0;
+        const progress = 1 - Math.exp(-Math.sqrt(kineticRate * t_m));
+        return C_inf * progress;
+      }
+
+      const currentConc = getConcentrationAtMinutes(totalMinutes);
+      const sml = mat.smlLimit;
+
+      // Solve for Crossover Time when C(t) = SML:
+      // 1 - exp(-sqrt(k * t)) = SML / C_inf
+      // exp(-sqrt(k * t)) = 1 - (SML / C_inf)
+      // sqrt(k * t) = -ln(1 - SML / C_inf)
+      // t = [-ln(1 - SML / C_inf)]^2 / k
+      let crossoverMinutes = null;
+      const ratio = sml / C_inf;
+      if (ratio < 1.0 && kineticRate > 0) {
+        const val = -Math.log(1 - ratio);
+        crossoverMinutes = Math.pow(val, 2) / kineticRate;
+      }
+
+      // Format crossover string
+      function formatMinutes(mins) {
+        if (!mins || mins > 500000) return 'Never (> 1 Year)';
+        if (mins < 1) return '< 1 Minute';
+        if (mins < 60) return `${Math.round(mins)} Minutes`;
+        if (mins < 1440) return `${(mins / 60).toFixed(1)} Hours`;
+        return `${(mins / 1440).toFixed(1)} Days`;
+      }
+
+      const hasCrossed = crossoverMinutes !== null && totalMinutes >= crossoverMinutes;
+
+      // Update assessment cards
+      if (concVal) concVal.textContent = `${currentConc.toFixed(currentConc < 0.01 ? 5 : 3)} ${mat.smlUnit}`;
+      if (limitVal) limitVal.textContent = `${sml} ${mat.smlUnit}`;
+
+      if (statBadge) {
+        if (hasCrossed) {
+          statBadge.textContent = 'HAZARDOUS (EXCEEDED)';
+          statBadge.className = 'text-title-md font-bold text-rose-600 font-mono';
+          if (statNote) statNote.textContent = `Violates ${mat.smlStandard}.`;
+        } else if (currentConc > sml * 0.7) {
+          statBadge.textContent = 'ELEVATED WARNING';
+          statBadge.className = 'text-title-md font-bold text-amber-800 font-mono';
+          if (statNote) statNote.textContent = 'Approaching maximum safety threshold.';
+        } else {
+          statBadge.textContent = 'COMPLIANT / SAFE';
+          statBadge.className = 'text-title-md font-bold text-emerald-800 font-mono';
+          if (statNote) statNote.textContent = 'Within legal and toxicological limits.';
+        }
+      }
+
+      if (crossVal) {
+        crossVal.textContent = crossoverMinutes ? formatMinutes(crossoverMinutes) : 'Safe (>1 Year)';
+        crossVal.className = hasCrossed ? 'text-title-md font-bold text-rose-600 font-mono' : 'text-title-md font-bold text-emerald-800 font-mono';
+      }
+
+      // Update Banner
+      if (banner) {
+        if (hasCrossed) {
+          banner.className = 'p-4 rounded-xl border flex items-center justify-between gap-3 text-xs md:text-sm bg-rose-50 border-rose-200 text-rose-950';
+          if (bannerIcon) bannerIcon.textContent = '⚠️';
+          if (bannerTitle) bannerTitle.textContent = d.crossoverAlertTitle;
+          if (bannerDetail) bannerDetail.textContent = `At ${tempC}°C in ${sim.name}, migrant concentration crosses the safety threshold after ${formatMinutes(crossoverMinutes)}.`;
+          if (bannerBadge) {
+            bannerBadge.textContent = `Breach at ~${formatMinutes(crossoverMinutes)}`;
+            bannerBadge.className = 'font-mono font-bold px-3 py-1 rounded-lg shrink-0 bg-rose-200 text-rose-900';
+          }
+        } else {
+          banner.className = 'p-4 rounded-xl border flex items-center justify-between gap-3 text-xs md:text-sm bg-emerald-50 border-emerald-200 text-emerald-950';
+          if (bannerIcon) bannerIcon.textContent = '✓';
+          if (bannerTitle) bannerTitle.textContent = d.crossoverSafeTitle;
+          if (bannerDetail) bannerDetail.textContent = `Within the selected ${durReadableVal ? durReadableVal.textContent : 'period'}, migrant concentration remains safely under the ${mat.smlUnit} threshold.`;
+          if (bannerBadge) {
+            bannerBadge.textContent = `Compliant (${((currentConc / sml) * 100).toFixed(0)}% of SML)`;
+            bannerBadge.className = 'font-mono font-bold px-3 py-1 rounded-lg shrink-0 bg-emerald-200 text-emerald-900';
+          }
+        }
+      }
+
+      // Update Swap Section
+      if (swapTitle) swapTitle.textContent = mat.swapRecommendation;
+      if (swapCrossover) swapCrossover.textContent = `${mat.typicalCrossover} Chemical Class: ${mat.chemicalFormula || 'Polymer'} (MW: ${mat.molecularWeight} g/mol). ${mat.toxicityClass}.`;
+
+      // ----------------- SVG Graph Rendering -----------------
+      // Chart canvas: X from 50 to 570 (width = 520px), Y from 210 (bottom) to 20 (top) (height = 190px)
+      // Max Y scale: should accommodate max of (C_inf, sml * 2, currentConc * 1.2)
+      const maxYVal = Math.max(sml * 2.2, currentConc * 1.2, 0.001);
+      const y0 = 210;
+      const x0 = 50;
+      const chartWidth = 520;
+      const chartHeight = 190;
+
+      function valToY(v) {
+        const norm = Math.min(Math.max(v / maxYVal, 0), 1);
+        return y0 - (norm * chartHeight);
+      }
+
+      // Update SML line Y position
+      const smlY = valToY(sml);
+      if (smlDashedLine) {
+        smlDashedLine.setAttribute('y1', smlY.toString());
+        smlDashedLine.setAttribute('y2', smlY.toString());
+      }
+      if (smlLineLabel) {
+        smlLineLabel.setAttribute('y', (smlY - 5).toString());
+        smlLineLabel.textContent = `Legal SML: ${sml} ${mat.smlUnit}`;
+      }
+      if (safeZone) {
+        safeZone.setAttribute('y', smlY.toString());
+        safeZone.setAttribute('height', (y0 - smlY).toString());
+      }
+      if (chartYTopLabel) {
+        chartYTopLabel.textContent = `${maxYVal.toFixed(maxYVal < 0.01 ? 4 : 2)} ${mat.smlUnit}`;
+      }
+      if (chartXEndLabel) {
+        chartXEndLabel.textContent = durSelect.options[durSelect.selectedIndex].text.split('(')[0].trim();
+      }
+
+      // Build SVG Path for kinetic curve: sample 25 points along X
+      const steps = 25;
+      let pathD = `M ${x0} ${y0}`;
+      for (let i = 1; i <= steps; i++) {
+        const tStep = (i / steps) * totalMinutes;
+        const cStep = getConcentrationAtMinutes(tStep);
+        const xPos = x0 + ((i / steps) * chartWidth);
+        const yPos = valToY(cStep);
+        pathD += ` L ${xPos.toFixed(1)} ${yPos.toFixed(1)}`;
+      }
+      if (curvePath) {
+        curvePath.setAttribute('d', pathD);
+        curvePath.setAttribute('stroke', hasCrossed ? '#ef4444' : '#d97706');
+      }
+
+      // Update Crossover Marker on Chart
+      if (crossoverDot && crossoverText) {
+        if (hasCrossed && crossoverMinutes !== null && crossoverMinutes <= totalMinutes) {
+          const crossX = x0 + ((crossoverMinutes / totalMinutes) * chartWidth);
+          const crossY = smlY;
+          crossoverDot.setAttribute('cx', crossX.toFixed(1));
+          crossoverDot.setAttribute('cy', crossY.toFixed(1));
+          crossoverDot.style.display = 'block';
+
+          crossoverText.setAttribute('x', Math.min(crossX + 8, 450).toFixed(1));
+          crossoverText.setAttribute('y', Math.max(crossY - 8, 30).toFixed(1));
+          crossoverText.textContent = `Crosses SML at ${formatMinutes(crossoverMinutes)}`;
+          crossoverText.style.display = 'block';
+        } else {
+          crossoverDot.style.display = 'none';
+          crossoverText.style.display = 'none';
+        }
+      }
+    }
+
+    // Attach listeners
+    matSelect.addEventListener('change', recalculate);
+    simSelect.addEventListener('change', recalculate);
+    tempSelect.addEventListener('change', recalculate);
+    durSelect.addEventListener('change', recalculate);
+
+    recalculate();
+
+    // Copy Report handler
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        const mat = migrationData.materials.find(m => m.id === matSelect.value) || migrationData.materials[0];
+        const sim = migrationData.simulants.find(s => s.id === simSelect.value) || migrationData.simulants[0];
+        const temp = tempSelect.options[tempSelect.selectedIndex].text;
+        const dur = durSelect.options[durSelect.selectedIndex].text;
+        const conc = concVal ? concVal.innerText.trim() : 'N/A';
+        const limit = limitVal ? limitVal.innerText.trim() : 'N/A';
+        const cross = crossVal ? crossVal.innerText.trim() : 'N/A';
+        const status = statBadge ? statBadge.innerText.trim() : 'N/A';
+        const swap = swapTitle ? swapTitle.innerText.trim() : 'N/A';
+
+        const summary = `IsItKitchenSafe - Food Contact Chemical Migration Kinetic Report\n` +
+          `===============================================================================\n` +
+          `• Target Material: ${mat.name} [Migrant: ${mat.migrant}]\n` +
+          `• Food Matrix Simulant: ${sim.name} (${sim.standard})\n` +
+          `• Exposure Temperature: ${temp}\n` +
+          `• Contact Horizon: ${dur}\n` +
+          `-------------------------------------------------------------------------------\n` +
+          `• Regulatory Compliance: ${status}\n` +
+          `• Predicted Concentration: ${conc}\n` +
+          `• Legal Limit (SML/SRL): ${limit}\n` +
+          `• Critical Threshold Breach Time: ${cross}\n` +
+          `-------------------------------------------------------------------------------\n` +
+          `• Non-Toxic Replacement: ${swap}\n` +
+          `• Toxicological Scope: ${mat.toxicityClass}\n` +
+          `===============================================================================\n` +
+          `Interactive Simulator: https://isitkitchensafe.com/tools/food-contact-migration-predictor/`;
+
+        navigator.clipboard.writeText(summary).then(() => {
+          const originalText = copyBtn.innerText;
+          copyBtn.innerText = d.reportCopied;
+          copyBtn.classList.replace('bg-amber-700', 'bg-emerald-700');
+          setTimeout(() => {
+            copyBtn.innerText = originalText;
+            copyBtn.classList.replace('bg-emerald-700', 'bg-amber-700');
+          }, 3000);
+        });
+      });
+    }
+  });
+</script>

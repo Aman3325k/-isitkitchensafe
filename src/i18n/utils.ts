@@ -40,7 +40,8 @@ const SPECIAL_PAGES = [
   'tools/viral-trend-debunker',
   'tools/thermal-shock-simulator',
   'tools/kitchen-energy-carbon-calculator',
-  'tools/plasticizer-microplastic-burden-estimator'
+  'tools/plasticizer-microplastic-burden-estimator',
+  'tools/food-contact-migration-predictor'
 ];
 
 const esSlugs = new Set([
