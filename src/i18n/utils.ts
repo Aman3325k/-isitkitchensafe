@@ -39,7 +39,8 @@ const SPECIAL_PAGES = [
   'tools/material-swap-calculator',
   'tools/viral-trend-debunker',
   'tools/thermal-shock-simulator',
-  'tools/kitchen-energy-carbon-calculator'
+  'tools/kitchen-energy-carbon-calculator',
+  'tools/plasticizer-microplastic-burden-estimator'
 ];
 
 const esSlugs = new Set([
