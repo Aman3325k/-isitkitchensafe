@@ -1,0 +1,1009 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import recallsData from '../data/product-recalls.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  searchPlaceholder: string;
+  scanCameraBtn: string;
+  stopCameraBtn: string;
+  cameraPrompt: string;
+  cameraUnsupported: string;
+  cameraError: string;
+  quickSamplesLabel: string;
+  filterAllCats: string;
+  filterAirFryers: string;
+  filterBlenders: string;
+  filterPressureCookers: string;
+  filterDrinkware: string;
+  filterCookware: string;
+  filterTableware: string;
+  filterSmallApp: string;
+  filterAllSeverities: string;
+  filterCritical: string;
+  filterHigh: string;
+  filterModerate: string;
+  resultsShowing: string;
+  resultsOf: string;
+  resultsRecalls: string;
+  noResultsTitle: string;
+  noResultsSub: string;
+  matchAlertTitle: string;
+  matchAlertSub: string;
+  unitsLabel: string;
+  modelsLabel: string;
+  barcodesLabel: string;
+  hazardHeading: string;
+  actionHeading: string;
+  verificationHeading: string;
+  chemicalHeading: string;
+  hotlineHeading: string;
+  officialDocBtn: string;
+  howToCheckTitle: string;
+  howToCheckSub: string;
+  checkStep1Title: string;
+  checkStep1Desc: string;
+  checkStep2Title: string;
+  checkStep2Desc: string;
+  checkStep3Title: string;
+  checkStep3Desc: string;
+  testingTitle: string;
+  testingLead: string;
+  testingThermal: string;
+  testingBlades: string;
+  clearSearch: string;
+  crossLinkTools: string;
+  crossLinkPanInspector: string;
+  crossLinkBrandIndex: string;
+  crossLinkEmergency: string;
+}
+
+const DICT: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Official FDA & CPSC Kitchenware Database",
+    title: "Barcode & Product Packaging Recalls Scanner",
+    subtitle: "Scan your kitchenware barcode or search by model number to instantly check official FDA, CPSC, and Health Canada recall registries for fire hazards, exploding air fryers, lead contamination, and defective blades.",
+    searchPlaceholder: "Scan or enter barcode (e.g. 817915025703), model (e.g. CP158-AF), or brand (Cosori, BlendJet, Cupkin)...",
+    scanCameraBtn: "📷 Scan Barcode with Camera",
+    stopCameraBtn: "⏹ Stop Camera Scanner",
+    cameraPrompt: "Position the product barcode within the viewfinder box below.",
+    cameraUnsupported: "Camera barcode detection is not supported in this browser. Please use manual barcode entry or select a sample recall below.",
+    cameraError: "Unable to access camera. Please verify camera permissions in your browser or enter the barcode manually.",
+    quickSamplesLabel: "Quick Recall Lookups:",
+    filterAllCats: "All Categories",
+    filterAirFryers: "Air Fryers",
+    filterBlenders: "Blenders & Food Processors",
+    filterPressureCookers: "Pressure Cookers",
+    filterDrinkware: "Water Bottles & Cups",
+    filterCookware: "Cookware & Bakeware",
+    filterTableware: "Ceramics & Tableware",
+    filterSmallApp: "Small Appliances",
+    filterAllSeverities: "All Severity Levels",
+    filterCritical: "Critical Hazard (Life Safety / Fire)",
+    filterHigh: "High Hazard (Lead / Laceration)",
+    filterModerate: "Moderate Hazard (Coating Flaking)",
+    resultsShowing: "Showing",
+    resultsOf: "of",
+    resultsRecalls: "verified recalls",
+    noResultsTitle: "No Recalls Found for this Search",
+    noResultsSub: "If your barcode or model number didn't return a match, it is not currently recorded under major CPSC/FDA active recalls. Double-check your rating label or search by brand name.",
+    matchAlertTitle: "RECALL MATCH IDENTIFIED",
+    matchAlertSub: "Your scanned barcode or search query matches an active product safety recall. Stop using this item immediately and follow the remedy steps below.",
+    unitsLabel: "Units Affected:",
+    modelsLabel: "Recalled Models:",
+    barcodesLabel: "Matching Barcodes (UPC / EAN):",
+    hazardHeading: "Hazard & Failure Mechanism",
+    actionHeading: "Immediate Consumer Action & Free Remedy",
+    verificationHeading: "How to Verify Your Rating Plate & Batch Code",
+    chemicalHeading: "Toxicology & Material Hazard Breakdown",
+    hotlineHeading: "Manufacturer Hotline & Official Portal",
+    officialDocBtn: "View Official CPSC / FDA Docket &rarr;",
+    howToCheckTitle: "How to Verify Product Rating Plates and Barcodes",
+    howToCheckSub: "Manufacturer safety recalls depend on specific manufacturing windows, date codes, and UPC barcodes. Here is how to verify yours:",
+    checkStep1Title: "1. Locate the Underside Rating Plate",
+    checkStep1Desc: "Electric appliances (air fryers, multicookers, blenders) always feature a silver, white, or laser-etched compliance plate on the bottom underside with Model, Serial, and Electrical Ratings.",
+    checkStep2Title: "2. Inspect the 12-Digit UPC Barcode",
+    checkStep2Desc: "Check the product box, original packaging, or base sticker for the standard 12-digit UPC-A or 13-digit EAN barcode. Enter the digits without spaces into our scanner.",
+    checkStep3Title: "3. Check Date Codes on Electric Prongs",
+    checkStep3Desc: "Many pressure cookers and appliances (e.g. Crock-Pot, Instant Pot) stamp production date codes (e.g. K160TS, 1901) directly onto one of the metal prongs of the electric wall plug.",
+    testingTitle: "Critical Kitchenware Safety Warning Signs",
+    testingLead: "Lead Leaching: Low-fired artisan ceramics and vintage mugs with bright yellow/orange glazes frequently leach toxic lead when exposed to hot acidic coffee or tomato sauce.",
+    testingThermal: "Thermal Shock: Soda-lime tempered glass lids can suffer spontaneous explosive shattering if placed on cold or wet counters after oven heating.",
+    testingBlades: "Metal Blade Fatigue: Riveted food processor blades can crack at the rivet holes, shedding stainless steel slivers into purées and chopped food.",
+    clearSearch: "Clear Filter",
+    crossLinkTools: "Explore Companion Kitchen Safety Tools",
+    crossLinkPanInspector: "AI Pan Scratch Inspector",
+    crossLinkBrandIndex: "Cookware Brand Transparency Index",
+    crossLinkEmergency: "Kitchen Hazard Emergency Triage"
+  },
+  es: {
+    badge: "Base de Datos Oficial de Retiradas de la FDA y CPSC",
+    title: "Escáner de Código de Barras y Retiradas de Productos",
+    subtitle: "Escanea el código de barras o busca por modelo para consultar el registro oficial de la CPSC, FDA y agencias sanitarias: freidoras de aire con riesgo de fuego, plomo en tazas, batidoras defectuosas y ollas a presión.",
+    searchPlaceholder: "Escanea o ingresa código de barras (ej. 817915025703), modelo (CP158-AF) o marca (Cosori, BlendJet, Cupkin)...",
+    scanCameraBtn: "📷 Escanear con la Cámara",
+    stopCameraBtn: "⏹ Detener Escáner de Cámara",
+    cameraPrompt: "Enfoca el código de barras del producto dentro del recuadro.",
+    cameraUnsupported: "La detección por cámara no es compatible en este navegador. Ingresa el código manualmente o usa los ejemplos directos.",
+    cameraError: "No se pudo acceder a la cámara. Revisa los permisos de tu navegador o ingresa el código manualmente.",
+    quickSamplesLabel: "Consultas Rápidas de Ejemplo:",
+    filterAllCats: "Todas las Categorías",
+    filterAirFryers: "Freidoras de Aire",
+    filterBlenders: "Batidoras y Procesadores",
+    filterPressureCookers: "Ollas a Presión",
+    filterDrinkware: "Botellas y Vasos",
+    filterCookware: "Baterías y Moldes",
+    filterTableware: "Cerámica y Vajilla",
+    filterSmallApp: "Pequeños Electrodomésticos",
+    filterAllSeverities: "Todos los Niveles de Peligro",
+    filterCritical: "Peligro Crítico (Fuego / Explosión)",
+    filterHigh: "Peligro Alto (Plomo / Cortes)",
+    filterModerate: "Peligro Moderado (Desprendimiento)",
+    resultsShowing: "Mostrando",
+    resultsOf: "de",
+    resultsRecalls: "retiradas verificadas",
+    noResultsTitle: "No se encontraron retiradas para esta búsqueda",
+    noResultsSub: "Si tu código o modelo no arrojó resultados, actualmente no figura entre las alertas activas de la CPSC/FDA. Verifica la placa inferior o busca por marca.",
+    matchAlertTitle: "ALERTA: COINCIDENCIA DE RETIRADA IDENTIFICADA",
+    matchAlertSub: "Tu código o búsqueda coincide con una retirada activa de seguridad. Deja de usar el producto de inmediato y solicita el reemplazo gratuito.",
+    unitsLabel: "Unidades Afectadas:",
+    modelsLabel: "Modelos Afectados:",
+    barcodesLabel: "Códigos de Barras Coincidentes (UPC / EAN):",
+    hazardHeading: "Peligro y Mecanismo del Fallo",
+    actionHeading: "Acción Inmediata y Solución Gratuita",
+    verificationHeading: "Cómo Verificar la Placa y Código de Lote",
+    chemicalHeading: "Toxicología y Riesgo de Materiales",
+    hotlineHeading: "Línea de Atención y Portal Oficial",
+    officialDocBtn: "Ver Expediente Oficial CPSC / FDA &rarr;",
+    howToCheckTitle: "Cómo Comprobar la Placa de Características",
+    howToCheckSub: "Las alertas oficiales dependen del lote, año de fabricación y código UPC. Así puedes verificarlo:",
+    checkStep1Title: "1. Localiza la Placa Inferior",
+    checkStep1Desc: "En freidoras, ollas y batidoras, busca la etiqueta plateada en la base inferior con el modelo y número de serie exactos.",
+    checkStep2Title: "2. Revisa el Código UPC de 12 Dígitos",
+    checkStep2Desc: "Examina la caja original o etiqueta adhesiva para localizar el código de barras de 12 o 13 cifras e ingrésalo en el buscador.",
+    checkStep3Title: "3. Fecha Grabada en las Clavijas Eléctricas",
+    checkStep3Desc: "Muchos fabricantes graban el código de fecha de fabricación (ej. K160TS) directamente sobre las clavijas metálicas del enchufe.",
+    testingTitle: "Signos Críticos de Peligro en Utensilios de Cocina",
+    testingLead: "Migración de Plomo: Cerámicas artesanales esmaltadas a baja temperatura liberan plomo y cadmio en contacto con café caliente o tomate.",
+    testingThermal: "Choque Térmico: Tapas de vidrio sódico-cálcico pueden estallar violentamente si se apoyan sobre encimeras frías o húmedas tras el horno.",
+    testingBlades: "Fatiga de Cuchillas: Las cuchillas con remaches de acero en procesadores pueden quebrarse, dejando astillas metálicas en los alimentos.",
+    clearSearch: "Limpiar Filtro",
+    crossLinkTools: "Otras Herramientas de Seguridad en la Cocina",
+    crossLinkPanInspector: "Inspector de Rayaduras con IA",
+    crossLinkBrandIndex: "Índice de Transparencia de Marcas",
+    crossLinkEmergency: "Triaje de Emergencias en la Cocina"
+  },
+  pt: {
+    badge: "Banco de Dados Oficial de Recalls da FDA e CPSC",
+    title: "Scanner de Códigos de Barras e Recalls de Produtos",
+    subtitle: "Escaneie o código de barras ou pesquise o modelo para consultar os alertas oficiais da CPSC, FDA e Health Canada: air fryers com risco de fogo, chumbo em copos, lâminas quebradas e panelas de pressão.",
+    searchPlaceholder: "Escaneie ou digite o código de barras (ex: 817915025703), modelo (CP158-AF) ou marca (Cosori, BlendJet, Cupkin)...",
+    scanCameraBtn: "📷 Escanear com a Câmera",
+    stopCameraBtn: "⏹ Parar Scanner da Câmera",
+    cameraPrompt: "Posicione o código de barras dentro da moldura abaixo.",
+    cameraUnsupported: "Detecção por câmera não suportada neste navegador. Digite o código de barras manualmente ou selecione um exemplo abaixo.",
+    cameraError: "Não foi possível acessar a câmera. Verifique as permissões do navegador ou insira o código manualmente.",
+    quickSamplesLabel: "Consultas Rápidas de Exemplo:",
+    filterAllCats: "Todas as Categorias",
+    filterAirFryers: "Fritadeiras sem Óleo (Air Fryers)",
+    filterBlenders: "Liquidificadores e Processadores",
+    filterPressureCookers: "Panelas de Pressão Elétricas",
+    filterDrinkware: "Garrafas e Copos Térmicos",
+    filterCookware: "Panelas e Formas",
+    filterTableware: "Cerâmicas e Louças",
+    filterSmallApp: "Eletroportáteis",
+    filterAllSeverities: "Todos os Níveis de Risco",
+    filterCritical: "Risco Crítico (Incêndio / Explosão)",
+    filterHigh: "Risco Alto (Chumbo / Laceração)",
+    filterModerate: "Risco Moderado (Descamação de Revestimento)",
+    resultsShowing: "Exibindo",
+    resultsOf: "de",
+    resultsRecalls: "recalls verificados",
+    noResultsTitle: "Nenhum Recall Encontrado",
+    noResultsSub: "Se o código ou modelo não retornou resultados, o produto não está sob recall ativo nas bases CPSC/FDA. Confira a etiqueta inferior.",
+    matchAlertTitle: "ALERTA DE RECALL IDENTIFICADO",
+    matchAlertSub: "Seu produto possui um recall de segurança ativo. Interrompa o uso imediatamente e solicite a substituição gratuita.",
+    unitsLabel: "Unidades Afetadas:",
+    modelsLabel: "Modelos em Recall:",
+    barcodesLabel: "Códigos de Barras (UPC / EAN):",
+    hazardHeading: "Perigo e Mecanismo da Falha",
+    actionHeading: "Ação Imediata e Reparo Gratuito",
+    verificationHeading: "Como Verificar a Etiqueta e Lote",
+    chemicalHeading: "Toxicologia e Risco dos Materiais",
+    hotlineHeading: "Canal do Fabricante e Portal Oficial",
+    officialDocBtn: "Ver Registro Oficial CPSC / FDA &rarr;",
+    howToCheckTitle: "Como Identificar Etiquetas e Códigos de Barras",
+    howToCheckSub: "Os recalls oficiais dependem de lotes específicos e códigos de barras UPC. Veja como checar:",
+    checkStep1Title: "1. Encontre a Etiqueta na Base",
+    checkStep1Desc: "Air fryers e panelas elétricas possuem etiqueta prateada na base com modelo, número de série e potência.",
+    checkStep2Title: "2. Verifique o Código UPC de 12 Dígitos",
+    checkStep2Desc: "Localize na caixa ou adesivo o código de barras de 12 dígitos e digite em nossa busca.",
+    checkStep3Title: "3. Código Gravado nos Pinos do Plugue",
+    checkStep3Desc: "Muitos fabricantes gravam o código de data de produção diretamente nos pinos metálicos do plugue de energia.",
+    testingTitle: "Sinais de Alerta Críticos em Utensílios de Cozinha",
+    testingLead: "Liberação de Chumbo: Louças artesanais decoradas e esmaltadas a baixa temperatura liberam chumbo tóxico em café quente ou molhos ácidos.",
+    testingThermal: "Choque Térmico: Tampas de vidro comum podem estourar ao serem apoiadas em superfícies frias após o forno.",
+    testingBlades: "Fadiga Metálica: Lâminas rebitadas de processadores podem trincar, soltando lascas metálicas nos alimentos.",
+    clearSearch: "Limpar Filtro",
+    crossLinkTools: "Conheça Outras Ferramentas de Segurança",
+    crossLinkPanInspector: "Inspetor de Riscos com IA",
+    crossLinkBrandIndex: "Índice de Transparência de Marcas",
+    crossLinkEmergency: "Triagem de Emergências na Cozinha"
+  },
+  'zh-cn': {
+    badge: "FDA 与 CPSC 官方厨具与电器召回数据库",
+    title: "产品条形码与召回安全查询检测仪",
+    subtitle: "扫描厨房用品条形码或输入型号，即刻查询美国消费品安全委员会 (CPSC)、FDA 及各大卫生机构的权威召回名录：排查空气炸锅起火、儿童水杯铅超标、搅拌机刀片断裂飞溅及压力锅自爆等致命隐患。",
+    searchPlaceholder: "扫描或输入条形码 (如 817915025703)、型号 (CP158-AF) 或品牌 (Cosori, BlendJet, Cupkin)...",
+    scanCameraBtn: "📷 启用摄像头扫描条码",
+    stopCameraBtn: "⏹ 停止摄像头扫描",
+    cameraPrompt: "将包装或产品底部的条形码对准下方取景框。",
+    cameraUnsupported: "当前浏览器不支持摄像头条形码直接识别。请在上方输入框手动输入条形码或点击下方高风险案例。",
+    cameraError: "无法访问摄像头。请检查浏览器摄像头权限或在上方手动输入条形码。",
+    quickSamplesLabel: "知名召回案例快速直达：",
+    filterAllCats: "全部品类",
+    filterAirFryers: "空气炸锅",
+    filterBlenders: "破壁机与食品料理机",
+    filterPressureCookers: "电压力锅与多功能锅",
+    filterDrinkware: "保温杯与儿童水杯",
+    filterCookware: "锅具与烤盘",
+    filterTableware: "陶瓷与日用餐具",
+    filterSmallApp: "小型厨房电器",
+    filterAllSeverities: "全部危险等级",
+    filterCritical: "极高危险（人身安全 / 起火爆燃）",
+    filterHigh: "高危（重金属铅超标 / 刀片割伤）",
+    filterModerate: "中度危险（涂层起皮脱落）",
+    resultsShowing: "当前显示",
+    resultsOf: "/",
+    resultsRecalls: "条官方核验召回记录",
+    noResultsTitle: "未检索到匹配的官方召回记录",
+    noResultsSub: "若您的条形码或型号未查出记录，说明该批次未被列入 CPSC/FDA 重大召回名单。请核对铭牌或按品牌名称查询。",
+    matchAlertTitle: "警告：已精准匹配官方召回记录！",
+    matchAlertSub: "您扫描的条码或输入的型号属于正在召回的危险缺陷产品！请立即停止通电使用，并按照下方指引申请免费换新或退款。",
+    unitsLabel: "受影响总量：",
+    modelsLabel: "召回具体型号：",
+    barcodesLabel: "匹配的 12/13 位条形码 (UPC / EAN)：",
+    hazardHeading: "缺陷隐患与物理失效机制",
+    actionHeading: "即刻处置指令与官方免费换新权益",
+    verificationHeading: "如何查验产品底部铭牌与生产批次号",
+    chemicalHeading: "材料毒理学与化学危害解析",
+    hotlineHeading: "品牌召回官方热线与申请入口",
+    officialDocBtn: "查看 CPSC / FDA 官方公文原件 &rarr;",
+    howToCheckTitle: "如何识别厨房用品的铭牌、条形码与批次号",
+    howToCheckSub: "官方缺陷召回通常限定于特定型号、生产周期与 UPC 条形码。以下是识别步骤：",
+    checkStep1Title: "1. 查看机身底部的金属/塑料铭牌",
+    checkStep1Desc: "空气炸锅、料理机、电饭煲底部通常印有银色标签，包含 Model（型号）、Serial No（序列号）与电气参数。",
+    checkStep2Title: "2. 核对包装盒上的 12 位 UPC 条形码",
+    checkStep2Desc: "产品包装盒外层或合格证条形码为标准的 12 位 UPC-A 或 13 位 EAN 编码，输入数字即可秒级检索。",
+    checkStep3Title: "3. 检查电源插头金属插脚上的冲压日期码",
+    checkStep3Desc: "不少压力锅与小家电（如 Crock-Pot）会将出厂日期代码（如 K160TS、1901）直接冲压在电源插头的金属插脚上。",
+    testingTitle: "厨房用品常见致命物理/化学警示征兆",
+    testingLead: "铅重金属溶出：低温烧结的民间彩绘陶器与复古马克杯，接触热咖啡或番茄浓汤时极易析出超标几十倍的剧毒铅与镉。",
+    testingThermal: "热冲击爆裂：普通钠钙回火玻璃锅盖与烤盘，如果在高温烘烤后直接接触冰凉或潮湿台面，内部应力失衡会引发爆炸式自爆。",
+    testingBlades: "刀片金属疲劳：老款铆钉固定式绞肉机/料理机刀片，长时间经受震动与洗碗机腐蚀后，铆钉断裂会导致不锈钢碎屑混入婴儿辅食。",
+    clearSearch: "清除筛选条件",
+    crossLinkTools: "探索其他材料科学安全工具",
+    crossLinkPanInspector: "AI 不粘锅划痕检测仪",
+    crossLinkBrandIndex: "全球锅具品牌透明度榜单",
+    crossLinkEmergency: "厨房突发危险应急处置工具"
+  },
+  ja: {
+    badge: "米FDA・CPSC 公式リコールデータベース照会",
+    title: "バーコード＆製品パッケージ リコール診断スキャナー",
+    subtitle: "調理器具のバーコードスキャンや型番検索により、米CPSC・FDA・カナダ保健省の最新リコール情報を瞬時に照会。ノンフライヤーの火災、鉛含有タンブラー、ミキサー刃の破損、圧力鍋の蓋吹き飛び事故を未然に防ぎます。",
+    searchPlaceholder: "バーコード（例: 817915025703）、型番（CP158-AF）、ブランド（Cosori, BlendJet, Cupkin）で検索...",
+    scanCameraBtn: "📷 カメラでバーコードをスキャン",
+    stopCameraBtn: "⏹ カメラを停止",
+    cameraPrompt: "製品またはパッケージのバーコードを枠内に合わせてください。",
+    cameraUnsupported: "このブラウザはカメラでのバーコード自動認識に対応していません。手動でバーコードを入力するか、下記のサンプルをクリックしてください。",
+    cameraError: "カメラを起動できませんでした。ブラウザのアクセス権限を確認するか、手動で入力してください。",
+    quickSamplesLabel: "代表的な大規模リコール事例：",
+    filterAllCats: "すべてのカテゴリー",
+    filterAirFryers: "ノンフライヤー",
+    filterBlenders: "ブレンダー・フードプロセッサー",
+    filterPressureCookers: "電気圧力鍋・マルチクッカー",
+    filterDrinkware: "水筒・タンブラー・子供用カップ",
+    filterCookware: "鍋・フライパン・焼き型",
+    filterTableware: "陶磁器・食器類",
+    filterSmallApp: "小型調理家電",
+    filterAllSeverities: "すべての危険度",
+    filterCritical: "最重要危険（生命・火災・爆発）",
+    filterHigh: "高危険度（鉛溶出・刃破損割創）",
+    filterModerate: "中程度危険度（コーティング剥離）",
+    resultsShowing: "表示中:",
+    resultsOf: "/",
+    resultsRecalls: "件の公式検証済みリコール",
+    noResultsTitle: "該当するリコールは見つかりませんでした",
+    noResultsSub: "検索したバーコードや型番は、現在CPSC/FDAの主要リコールには登録されていません。定格銘板の型番を再確認してください。",
+    matchAlertTitle: "警告：リコール該当製品が検出されました！",
+    matchAlertSub: "スキャンしたバーコードまたは製品型番は、公式のリコール対象製品と一致しました。直ちに使用を中止し、無償交換等の手続きを行ってください。",
+    unitsLabel: "対象台数:",
+    modelsLabel: "該当型番:",
+    barcodesLabel: "該当バーコード (UPC / EAN):",
+    hazardHeading: "危険内容および製品の欠陥機構",
+    actionHeading: "直ちに行うべき行動および無償救済措置",
+    verificationHeading: "定格銘板およびロット番号の確認方法",
+    chemicalHeading: "毒性物質・材料化学リスクの解説",
+    hotlineHeading: "メーカー問い合わせ窓口・公式サイト",
+    officialDocBtn: "米当局 (CPSC/FDA) 公式リコール文書を見る &rarr;",
+    howToCheckTitle: "製品銘板・バーコード・ロット番号の調べ方",
+    howToCheckSub: "公式リコールは特定の製造年・ロット・UPCコードに限定されます。以下の手順でご確認ください：",
+    checkStep1Title: "1. 底面の定格銘板（ラベル）を確認",
+    checkStep1Desc: "ノンフライヤーやマルチクッカーの底面にある銀色ラベルに、正式な型番（Model）と製造シリアルが刻印されています。",
+    checkStep2Title: "2. 箱や製品の12桁UPCバーコードを確認",
+    checkStep2Desc: "パッケージ外箱や底面シールの12桁または13桁の数字をそのままスキャナーに入力して検索できます。",
+    checkStep3Title: "3. 電源プラグの金属端子に刻印された製造年週",
+    checkStep3Desc: "電気圧力鍋など一部の家電製品は、電源プラグの金属端子に直接製造年コード（K160TS等）が打刻されています。",
+    testingTitle: "調理器具に潜む重大な物理・化学的危険のサイン",
+    testingLead: "鉛の溶出：低温焼成された手作業陶器や伝統食器は、熱いコーヒーや酸味のあるスープに触れると基準値を大幅に超える鉛が溶出します。",
+    testingThermal: "熱衝撃破壊：ソーダライム強化ガラスの蓋は、オーブン加熱後に冷えた濡れた調理台に置くと内部応力で破裂飛散する危険があります。",
+    testingBlades: "刃の金属疲労：リベット留めされたフードプロセッサーの刃は、経年劣化でリベット部から金属破片が欠落し食材に混入します。",
+    clearSearch: "検索条件をクリア",
+    crossLinkTools: "関連する調理器具安全ツール",
+    crossLinkPanInspector: "AI フライパン傷診断",
+    crossLinkBrandIndex: "調理器具ブランド 透明度調査名鑑",
+    crossLinkEmergency: "キッチン危険緊急トリアージ"
+  }
+};
+
+const d = DICT[lang] || DICT.en;
+---
+
+<div class="product-recalls-scanner bg-surface-soft border border-hairline rounded-3xl p-6 md:p-10 shadow-sm" id="recallsApp">
+  <!-- Top Tool Header -->
+  <div class="mb-8 border-b border-hairline/80 pb-6">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-600 text-white">
+        <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+        {d.badge}
+      </span>
+      <span class="text-xs text-muted font-mono font-medium">
+        CPSC &bull; FDA &bull; Health Canada &bull; RAPEX
+      </span>
+    </div>
+    <h2 class="text-title-lg md:text-display-sm font-medium text-ink tracking-tight mb-2">
+      {d.title}
+    </h2>
+    <p class="text-body text-sm md:text-[15px] leading-relaxed max-w-3xl">
+      {d.subtitle}
+    </p>
+  </div>
+
+  <!-- Search & Barcode Camera Scanner Controls -->
+  <div class="space-y-4 mb-8">
+    <div class="flex flex-col sm:flex-row gap-3">
+      <!-- Search Input -->
+      <div class="relative flex-1">
+        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+        <input 
+          type="text" 
+          id="recallSearchInput"
+          placeholder={d.searchPlaceholder}
+          class="w-full pl-11 pr-10 py-3.5 rounded-xl bg-white border border-hairline text-ink text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all shadow-xs"
+        />
+        <button 
+          type="button" 
+          id="clearSearchBtn" 
+          class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-muted hover:text-ink hidden"
+          title={d.clearSearch}
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Camera Barcode Scan Toggle Button -->
+      <button 
+        type="button" 
+        id="cameraScanToggleBtn"
+        class="inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-ink hover:bg-black text-white font-medium text-sm transition-colors shadow-xs whitespace-nowrap cursor-pointer"
+      >
+        <span id="cameraBtnIcon">📷</span>
+        <span id="cameraBtnText">{d.scanCameraBtn}</span>
+      </button>
+    </div>
+
+    <!-- Live Video Viewport (Initially hidden) -->
+    <div id="cameraViewportContainer" class="hidden bg-slate-950 border border-slate-800 rounded-2xl p-4 text-center relative overflow-hidden transition-all">
+      <div class="max-w-md mx-auto relative rounded-xl overflow-hidden bg-black aspect-video flex items-center justify-center">
+        <video id="barcodeVideo" class="w-full h-full object-cover" playsinline muted></video>
+        <!-- Targeting Reticle -->
+        <div class="absolute inset-0 border-2 border-dashed border-rose-500/80 rounded-xl m-6 pointer-events-none flex flex-col items-center justify-between p-3">
+          <span class="text-[11px] font-mono font-bold uppercase tracking-wider text-white bg-black/70 px-2 py-0.5 rounded">
+            SCANNING FOR BARCODE
+          </span>
+          <div class="w-full h-0.5 bg-rose-500 shadow-[0_0_8px_#f43f5e] animate-pulse"></div>
+          <span class="text-[10px] text-white/80 font-sans">
+            UPC-A / EAN-13 / CODE-128
+          </span>
+        </div>
+      </div>
+      <p class="text-xs text-slate-400 mt-3" id="cameraStatusMsg">
+        {d.cameraPrompt}
+      </p>
+    </div>
+
+    <!-- Quick Example Recall Samples -->
+    <div class="flex flex-wrap items-center gap-2 pt-1 text-xs">
+      <span class="text-muted font-medium">{d.quickSamplesLabel}</span>
+      <button type="button" class="sample-chip px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-strong border border-hairline text-ink transition-colors" data-query="817915025703">
+        🔥 Cosori (817915025703)
+      </button>
+      <button type="button" class="sample-chip px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-strong border border-hairline text-ink transition-colors" data-query="850011833005">
+        ⚡ BlendJet 2 (850011833005)
+      </button>
+      <button type="button" class="sample-chip px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-strong border border-hairline text-ink transition-colors" data-query="SCCPPC600">
+        ⚠️ Crock-Pot (SCCPPC600)
+      </button>
+      <button type="button" class="sample-chip px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-strong border border-hairline text-ink transition-colors" data-query="Cupkin">
+        🥛 Cupkin Lead Cup
+      </button>
+      <button type="button" class="sample-chip px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-strong border border-hairline text-ink transition-colors" data-query="Cuisinart">
+        🔪 Cuisinart Riveted Blade
+      </button>
+      <button type="button" class="sample-chip px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-strong border border-hairline text-ink transition-colors" data-query="TJX Lead">
+        🧪 Lead Glazed Ceramics
+      </button>
+    </div>
+  </div>
+
+  <!-- Category & Severity Filters -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
+    <!-- Category Filter -->
+    <div>
+      <label for="categorySelect" class="block text-xs font-semibold uppercase tracking-wider text-muted mb-1.5">
+        Product Category
+      </label>
+      <select id="categorySelect" class="w-full px-3 py-2.5 rounded-xl bg-white border border-hairline text-ink text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
+        <option value="all">{d.filterAllCats}</option>
+        <option value="air-fryers">{d.filterAirFryers}</option>
+        <option value="blenders">{d.filterBlenders}</option>
+        <option value="pressure-cookers">{d.filterPressureCookers}</option>
+        <option value="drinkware-bottles">{d.filterDrinkware}</option>
+        <option value="cookware-bakeware">{d.filterCookware}</option>
+        <option value="tableware-ceramics">{d.filterTableware}</option>
+        <option value="small-appliances">{d.filterSmallApp}</option>
+      </select>
+    </div>
+
+    <!-- Severity Filter -->
+    <div>
+      <label for="severitySelect" class="block text-xs font-semibold uppercase tracking-wider text-muted mb-1.5">
+        Hazard Severity Level
+      </label>
+      <select id="severitySelect" class="w-full px-3 py-2.5 rounded-xl bg-white border border-hairline text-ink text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
+        <option value="all">{d.filterAllSeverities}</option>
+        <option value="critical">{d.filterCritical}</option>
+        <option value="high">{d.filterHigh}</option>
+        <option value="moderate">{d.filterModerate}</option>
+      </select>
+    </div>
+
+    <!-- Regulatory Agency Filter -->
+    <div>
+      <label for="agencySelect" class="block text-xs font-semibold uppercase tracking-wider text-muted mb-1.5">
+        Regulatory Agency
+      </label>
+      <select id="agencySelect" class="w-full px-3 py-2.5 rounded-xl bg-white border border-hairline text-ink text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
+        <option value="all">All Regulatory Agencies (CPSC / FDA / RAPEX)</option>
+        <option value="CPSC">CPSC (Consumer Product Safety Commission)</option>
+        <option value="FDA">FDA (Food &amp; Drug Administration)</option>
+        <option value="RAPEX">EU RAPEX Safety Gate</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Direct Barcode Match Banner (Dynamic) -->
+  <div id="barcodeMatchAlertBanner" class="hidden mb-8 p-5 rounded-2xl bg-rose-50 border-2 border-rose-600 text-rose-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-bounce">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-rose-600 text-white font-bold flex items-center justify-center shrink-0 text-xl">
+        ⚠️
+      </div>
+      <div>
+        <h4 class="font-bold text-base text-rose-900 tracking-tight">
+          {d.matchAlertTitle}
+        </h4>
+        <p class="text-xs text-rose-800 leading-relaxed" id="matchAlertDesc">
+          {d.matchAlertSub}
+        </p>
+      </div>
+    </div>
+    <span class="inline-block px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-rose-700 text-white shrink-0">
+      URGENT SAFETY RECALL
+    </span>
+  </div>
+
+  <!-- Results Count Bar -->
+  <div class="flex items-center justify-between text-xs text-muted mb-6 pb-2 border-b border-hairline">
+    <div>
+      {d.resultsShowing} <strong id="visibleCount" class="text-ink font-semibold">{recallsData.length}</strong> {d.resultsOf} <span class="font-semibold">{recallsData.length}</span> {d.resultsRecalls}
+    </div>
+    <button type="button" id="resetFiltersBtn" class="text-rose-600 hover:text-rose-800 font-medium underline cursor-pointer hidden">
+      {d.clearSearch}
+    </button>
+  </div>
+
+  <!-- Recalls Cards Grid -->
+  <div class="space-y-6" id="recallsListContainer">
+    {recallsData.map((item) => (
+      <article 
+        class="recall-card bg-surface border border-hairline hover:border-hairline/80 rounded-2xl p-6 md:p-8 transition-all shadow-xs"
+        data-id={item.id}
+        data-brand={item.brand.toLowerCase()}
+        data-category={item.category}
+        data-severity={item.hazardSeverity}
+        data-agency={item.recallAgency}
+        data-search={`${item.productName} ${item.brand} ${item.recallId} ${item.modelNumbers.join(' ')} ${item.barcodes.join(' ')} ${item.hazardSummary} ${item.hazardType}`.toLowerCase()}
+        data-barcodes={item.barcodes.join(',')}
+      >
+        <!-- Card Header -->
+        <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+          <div class="space-y-1 max-w-2xl">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider text-white ${
+                item.hazardSeverity === 'critical' ? 'bg-rose-600' :
+                item.hazardSeverity === 'high' ? 'bg-amber-600' : 'bg-slate-700'
+              }`}>
+                {item.hazardType}
+              </span>
+              <span class="text-xs font-mono font-semibold text-ink bg-surface-soft px-2 py-0.5 rounded border border-hairline">
+                {item.recallId}
+              </span>
+              <span class="text-xs text-muted">
+                &bull; {item.recallDate}
+              </span>
+            </div>
+            <h3 class="text-title-md md:text-title-lg font-medium text-ink tracking-tight">
+              {item.productName}
+            </h3>
+            <p class="text-xs text-muted font-medium">
+              Manufacturer / Brand: <span class="text-ink font-semibold">{item.brand}</span>
+            </p>
+          </div>
+
+          <div class="text-right sm:text-right shrink-0">
+            <span class="text-xs text-muted block mb-0.5">{d.unitsLabel}</span>
+            <span class="inline-block px-3 py-1 rounded-xl bg-surface-soft border border-hairline font-mono text-xs font-bold text-ink">
+              {item.unitsAffected.split('(')[0].trim()}
+            </span>
+          </div>
+        </div>
+
+        <!-- Hazard Summary Callout -->
+        <div class="p-4 rounded-xl bg-rose-50/70 border border-rose-200/80 mb-5">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-rose-900 mb-1">
+            {d.hazardHeading}
+          </h4>
+          <p class="text-xs md:text-sm text-rose-950 leading-relaxed">
+            {item.hazardSummary}
+          </p>
+          {item.incidentsReported && (
+            <div class="mt-2 pt-2 border-t border-rose-200/60 text-[11px] text-rose-800 font-medium">
+              <strong>Official Incident Record:</strong> {item.incidentsReported}
+            </div>
+          )}
+        </div>
+
+        <!-- Spec Pills: Barcodes & Models -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5 text-xs">
+          <!-- Recalled Models -->
+          <div class="p-3.5 rounded-xl bg-surface-soft border border-hairline">
+            <span class="font-bold uppercase tracking-wider text-muted text-[10px] block mb-1.5">
+              {d.modelsLabel}
+            </span>
+            <div class="flex flex-wrap gap-1.5">
+              {item.modelNumbers.map((m) => (
+                <span class="px-2 py-0.5 rounded bg-white border border-hairline font-mono text-ink text-[11px]">
+                  {m}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <!-- Recalled Barcodes -->
+          <div class="p-3.5 rounded-xl bg-surface-soft border border-hairline">
+            <span class="font-bold uppercase tracking-wider text-muted text-[10px] block mb-1.5">
+              {d.barcodesLabel}
+            </span>
+            <div class="flex flex-wrap gap-1.5">
+              {item.barcodes.map((bc) => (
+                <span class="barcode-tag px-2 py-0.5 rounded bg-white border border-hairline font-mono text-ink text-[11px]" data-bc={bc}>
+                  {bc}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <!-- Consumer Action & Remedy Box -->
+        <div class="p-4 rounded-xl bg-surface-soft border border-hairline mb-5 space-y-2">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-ink">
+              {d.actionHeading}
+            </h4>
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-700 text-white">
+              {item.remedyType}
+            </span>
+          </div>
+          <p class="text-xs text-body leading-relaxed">
+            {item.consumerAction}
+          </p>
+          <div class="text-xs text-muted pt-2 border-t border-hairline flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <span class="font-semibold text-ink">{d.hotlineHeading}:</span> {item.contactInfo}
+            </div>
+            <a 
+              href={item.officialUrl} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              class="inline-flex items-center gap-1 font-semibold text-rose-600 hover:text-rose-800 text-xs"
+            >
+              <Fragment set:html={d.officialDocBtn} />
+            </a>
+          </div>
+        </div>
+
+        <!-- Verification Tip Toggle/Guidance -->
+        <div class="text-xs border-t border-hairline/80 pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-muted">
+          <div>
+            <strong class="text-ink font-semibold">{d.verificationHeading}:</strong> {item.verificationTip}
+          </div>
+          <div class="shrink-0 text-[11px] font-mono text-muted">
+            Agency: <span class="text-ink font-semibold">{item.recallAgency}</span>
+          </div>
+        </div>
+      </article>
+    ))}
+  </div>
+
+  <!-- Empty State -->
+  <div id="noResultsState" class="hidden text-center py-16 px-4 bg-surface rounded-2xl border border-hairline">
+    <div class="w-12 h-12 rounded-full bg-surface-soft text-muted flex items-center justify-center mx-auto mb-3 text-2xl">
+      🔍
+    </div>
+    <h3 class="text-title-md font-medium text-ink mb-1">
+      {d.noResultsTitle}
+    </h3>
+    <p class="text-body text-xs max-w-md mx-auto mb-4 leading-relaxed">
+      {d.noResultsSub}
+    </p>
+    <button 
+      type="button" 
+      id="resetFromEmptyBtn" 
+      class="px-4 py-2 rounded-xl bg-ink text-white text-xs font-medium hover:bg-black transition-colors"
+    >
+      {d.clearSearch}
+    </button>
+  </div>
+
+  <!-- Educational Guide: Rating Plates & Barcodes -->
+  <div class="mt-12 border-t border-hairline pt-10">
+    <div class="max-w-3xl mb-8">
+      <span class="text-caption text-muted uppercase tracking-wider text-xs block mb-1">
+        Consumer Protection Protocols &bull; Regulatory Compliance
+      </span>
+      <h3 class="text-title-lg font-medium text-ink tracking-tight mb-2">
+        {d.howToCheckTitle}
+      </h3>
+      <p class="text-body text-sm leading-relaxed">
+        {d.howToCheckSub}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+      <div class="p-5 rounded-2xl bg-surface-soft border border-hairline space-y-2">
+        <div class="w-7 h-7 rounded-lg bg-ink text-white font-bold flex items-center justify-center text-xs">
+          1
+        </div>
+        <h4 class="font-semibold text-ink text-sm">{d.checkStep1Title}</h4>
+        <p class="text-xs text-body leading-relaxed">{d.checkStep1Desc}</p>
+      </div>
+
+      <div class="p-5 rounded-2xl bg-surface-soft border border-hairline space-y-2">
+        <div class="w-7 h-7 rounded-lg bg-ink text-white font-bold flex items-center justify-center text-xs">
+          2
+        </div>
+        <h4 class="font-semibold text-ink text-sm">{d.checkStep2Title}</h4>
+        <p class="text-xs text-body leading-relaxed">{d.checkStep2Desc}</p>
+      </div>
+
+      <div class="p-5 rounded-2xl bg-surface-soft border border-hairline space-y-2">
+        <div class="w-7 h-7 rounded-lg bg-ink text-white font-bold flex items-center justify-center text-xs">
+          3
+        </div>
+        <h4 class="font-semibold text-ink text-sm">{d.checkStep3Title}</h4>
+        <p class="text-xs text-body leading-relaxed">{d.checkStep3Desc}</p>
+      </div>
+    </div>
+
+    <!-- Safety Warning Signs -->
+    <div class="p-6 rounded-2xl bg-canvas border border-hairline space-y-4">
+      <h4 class="text-sm font-bold text-ink uppercase tracking-wider">
+        {d.testingTitle}
+      </h4>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-body">
+        <div class="p-3.5 rounded-xl bg-surface-soft border border-hairline">
+          <strong class="text-rose-600 block mb-1">🧪 Lead Poisoning Risk</strong>
+          {d.testingLead}
+        </div>
+        <div class="p-3.5 rounded-xl bg-surface-soft border border-hairline">
+          <strong class="text-amber-600 block mb-1">💥 Explosive Shattering</strong>
+          {d.testingThermal}
+        </div>
+        <div class="p-3.5 rounded-xl bg-surface-soft border border-hairline">
+          <strong class="text-blue-600 block mb-1">🔪 Metal Sliver Ingestion</strong>
+          {d.testingBlades}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Internal Cross Links to other tools -->
+  <div class="mt-10 pt-8 border-t border-hairline flex flex-wrap items-center justify-between gap-4 text-xs">
+    <span class="text-muted font-medium">{d.crossLinkTools}:</span>
+    <div class="flex flex-wrap gap-2">
+      <a href="/tools/pan-scratch-inspector/" class="px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-strong border border-hairline font-medium text-ink transition-colors">
+        {d.crossLinkPanInspector} &rarr;
+      </a>
+      <a href="/tools/cookware-brand-transparency-index/" class="px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-strong border border-hairline font-medium text-ink transition-colors">
+        {d.crossLinkBrandIndex} &rarr;
+      </a>
+      <a href="/tools/kitchen-hazard-emergency-triage/" class="px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-strong border border-hairline font-medium text-ink transition-colors">
+        {d.crossLinkEmergency} &rarr;
+      </a>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('recallSearchInput');
+    const clearBtn = document.getElementById('clearSearchBtn');
+    const categorySelect = document.getElementById('categorySelect');
+    const severitySelect = document.getElementById('severitySelect');
+    const agencySelect = document.getElementById('agencySelect');
+    const resetFiltersBtn = document.getElementById('resetFiltersBtn');
+    const resetFromEmptyBtn = document.getElementById('resetFromEmptyBtn');
+    const visibleCount = document.getElementById('visibleCount');
+    const noResultsState = document.getElementById('noResultsState');
+    const barcodeMatchAlertBanner = document.getElementById('barcodeMatchAlertBanner');
+    const matchAlertDesc = document.getElementById('matchAlertDesc');
+    const cards = Array.from(document.querySelectorAll('.recall-card'));
+    const sampleChips = document.querySelectorAll('.sample-chip');
+
+    // Camera Barcode Scanning Elements
+    const cameraToggleBtn = document.getElementById('cameraScanToggleBtn');
+    const cameraViewport = document.getElementById('cameraViewportContainer');
+    const barcodeVideo = document.getElementById('barcodeVideo');
+    const cameraStatusMsg = document.getElementById('cameraStatusMsg');
+    const cameraBtnIcon = document.getElementById('cameraBtnIcon');
+    const cameraBtnText = document.getElementById('cameraBtnText');
+
+    let isScanning = false;
+    let cameraStream = null;
+    let scanInterval = null;
+    let barcodeDetector = null;
+
+    // Check BarcodeDetector support
+    if ('BarcodeDetector' in window) {
+      try {
+        barcodeDetector = new window.BarcodeDetector({
+          formats: ['qr_code', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39']
+        });
+      } catch (err) {
+        console.warn('BarcodeDetector format error:', err);
+      }
+    }
+
+    async function startCameraScanner() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Camera access is not supported by your browser.');
+        return;
+      }
+
+      try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' }
+        });
+        barcodeVideo.srcObject = cameraStream;
+        await barcodeVideo.play();
+
+        isScanning = true;
+        cameraViewport.classList.remove('hidden');
+        cameraBtnIcon.textContent = '⏹';
+        cameraBtnText.textContent = 'Stop Camera Scanner';
+
+        if (barcodeDetector) {
+          scanInterval = setInterval(async () => {
+            if (!isScanning) return;
+            try {
+              const barcodes = await barcodeDetector.detect(barcodeVideo);
+              if (barcodes.length > 0) {
+                const detectedVal = barcodes[0].rawValue;
+                if (detectedVal) {
+                  stopCameraScanner();
+                  searchInput.value = detectedVal;
+                  filterRecalls();
+                  // Vibrate if supported
+                  if (navigator.vibrate) navigator.vibrate(200);
+                }
+              }
+            } catch (scanErr) {
+              // Frame dropped or decoding error, ignore
+            }
+          }, 300);
+        } else {
+          cameraStatusMsg.textContent = 'Camera active. For browsers without native BarcodeDetector, please type the barcode into the search box.';
+        }
+      } catch (camErr) {
+        console.error('Camera access error:', camErr);
+        alert('Could not access camera. Please allow camera permissions or enter barcode manually.');
+      }
+    }
+
+    function stopCameraScanner() {
+      isScanning = false;
+      if (scanInterval) clearInterval(scanInterval);
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(t => t.stop());
+        cameraStream = null;
+      }
+      if (barcodeVideo) barcodeVideo.srcObject = null;
+      cameraViewport.classList.add('hidden');
+      cameraBtnIcon.textContent = '📷';
+      cameraBtnText.textContent = 'Scan Barcode with Camera';
+    }
+
+    if (cameraToggleBtn) {
+      cameraToggleBtn.addEventListener('click', () => {
+        if (isScanning) {
+          stopCameraScanner();
+        } else {
+          startCameraScanner();
+        }
+      });
+    }
+
+    function filterRecalls() {
+      const query = (searchInput.value || '').trim().toLowerCase();
+      const cleanDigits = query.replace(/[^0-9]/g, '');
+      const selectedCategory = categorySelect.value;
+      const selectedSeverity = severitySelect.value;
+      const selectedAgency = agencySelect.value;
+
+      if (query.length > 0) {
+        clearBtn.classList.remove('hidden');
+        resetFiltersBtn.classList.remove('hidden');
+      } else {
+        clearBtn.classList.add('hidden');
+        if (selectedCategory === 'all' && selectedSeverity === 'all' && selectedAgency === 'all') {
+          resetFiltersBtn.classList.add('hidden');
+        } else {
+          resetFiltersBtn.classList.remove('hidden');
+        }
+      }
+
+      let matchCount = 0;
+      let directBarcodeMatchItem = null;
+
+      cards.forEach(card => {
+        const itemSearch = card.getAttribute('data-search') || '';
+        const itemCategory = card.getAttribute('data-category') || '';
+        const itemSeverity = card.getAttribute('data-severity') || '';
+        const itemAgency = card.getAttribute('data-agency') || '';
+        const itemBarcodes = (card.getAttribute('data-barcodes') || '').split(',');
+
+        let matchesSearch = true;
+        if (query) {
+          // Check text query
+          const textMatch = itemSearch.includes(query);
+          // Check exact or partial barcode digit match
+          const barcodeMatch = cleanDigits.length >= 4 && itemBarcodes.some(b => b.includes(cleanDigits));
+          matchesSearch = textMatch || barcodeMatch;
+
+          // Check if exact barcode hit
+          if (cleanDigits.length >= 8 && itemBarcodes.some(b => b === cleanDigits || b.endsWith(cleanDigits))) {
+            directBarcodeMatchItem = card;
+          }
+        }
+
+        const matchesCategory = selectedCategory === 'all' || itemCategory === selectedCategory;
+        const matchesSeverity = selectedSeverity === 'all' || itemSeverity === selectedSeverity;
+        const matchesAgency = selectedAgency === 'all' || itemAgency === selectedAgency;
+
+        const isVisible = matchesSearch && matchesCategory && matchesSeverity && matchesAgency;
+
+        if (isVisible) {
+          card.classList.remove('hidden');
+          matchCount++;
+
+          // Highlight matching barcode tag if digits match
+          const tags = card.querySelectorAll('.barcode-tag');
+          tags.forEach(t => {
+            const bcVal = t.getAttribute('data-bc') || '';
+            if (cleanDigits.length >= 6 && bcVal.includes(cleanDigits)) {
+              t.classList.add('bg-rose-600', 'text-white', 'font-bold');
+              t.classList.remove('bg-white', 'text-ink');
+            } else {
+              t.classList.remove('bg-rose-600', 'text-white', 'font-bold');
+              t.classList.add('bg-white', 'text-ink');
+            }
+          });
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+
+      // Update visible count
+      visibleCount.textContent = matchCount.toString();
+
+      // Toggle Empty State
+      if (matchCount === 0) {
+        noResultsState.classList.remove('hidden');
+      } else {
+        noResultsState.classList.add('hidden');
+      }
+
+      // Toggle Direct Barcode Match Banner
+      if (directBarcodeMatchItem) {
+        const prodName = directBarcodeMatchItem.querySelector('h3')?.textContent || 'Kitchenware Item';
+        matchAlertDesc.textContent = `Your scanned code matches the active recall for "${prodName}". Cease use immediately.`;
+        barcodeMatchAlertBanner.classList.remove('hidden');
+      } else {
+        barcodeMatchAlertBanner.classList.add('hidden');
+      }
+    }
+
+    // Input & Change listeners
+    searchInput.addEventListener('input', filterRecalls);
+    categorySelect.addEventListener('change', filterRecalls);
+    severitySelect.addEventListener('change', filterRecalls);
+    agencySelect.addEventListener('change', filterRecalls);
+
+    // Clear Search button
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      searchInput.focus();
+      filterRecalls();
+    });
+
+    // Reset filters
+    function resetAllFilters() {
+      searchInput.value = '';
+      categorySelect.value = 'all';
+      severitySelect.value = 'all';
+      agencySelect.value = 'all';
+      filterRecalls();
+    }
+    resetFiltersBtn.addEventListener('click', resetAllFilters);
+    resetFromEmptyBtn.addEventListener('click', resetAllFilters);
+
+    // Sample chips clickers
+    sampleChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        const query = chip.getAttribute('data-query');
+        if (query) {
+          searchInput.value = query;
+          categorySelect.value = 'all';
+          severitySelect.value = 'all';
+          agencySelect.value = 'all';
+          filterRecalls();
+          searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
+    });
+  });
+</script>

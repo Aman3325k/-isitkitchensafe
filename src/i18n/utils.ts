@@ -32,7 +32,9 @@ import { CATEGORIES } from '../utils/materialCategories';
 const SPECIAL_PAGES = [
   'material/scratched-nonstick-cookware',
   'tools/pan-scratch-inspector',
-  'tools/cookware-brand-transparency-index'
+  'tools/cookware-brand-transparency-index',
+  'tools/kitchen-hazard-emergency-triage',
+  'tools/product-recalls-scanner'
 ];
 
 const esSlugs = new Set([
