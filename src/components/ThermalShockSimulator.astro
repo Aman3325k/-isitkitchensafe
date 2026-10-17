@@ -1,0 +1,789 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import shockData from '../data/thermal-shock-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  step1: string;
+  step2: string;
+  step3: string;
+  materialLabel: string;
+  initialTempLabel: string;
+  quenchSurfaceLabel: string;
+  tempUnitToggle: string;
+  liveSimTitle: string;
+  deltaTLabel: string;
+  stressScoreLabel: string;
+  estStressLabel: string;
+  failureModeLabel: string;
+  acousticLabel: string;
+  safeStatus: string;
+  moderateStatus: string;
+  highStatus: string;
+  criticalStatus: string;
+  safeStatusDesc: string;
+  moderateStatusDesc: string;
+  highStatusDesc: string;
+  criticalStatusDesc: string;
+  physicsExpTitle: string;
+  labStandardsTitle: string;
+  preventionTitle: string;
+  prevention1: string;
+  prevention2: string;
+  prevention3: string;
+  prevention4: string;
+  prevention5: string;
+  relatedToolsHeading: string;
+  relatedToolsDesc: string;
+  toolDebunker: string;
+  toolScorecard: string;
+  toolSwap: string;
+  toolEmergency: string;
+  toolRecalls: string;
+  toolInspector: string;
+}
+
+const DICT: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Physics-Based Thermal Stress Engine",
+    title: "Appliance Thermal Shock & Shatter Threshold Safety Simulator",
+    subtitle: "Simulate rapid temperature differentials (ΔT) across cookware materials like tempered soda-lime glass, borosilicate, ceramic, and enameled cast iron. Calculate tensile breaking stress, acoustic shockwave risk, and explosive shatter thresholds before moving hot dishes.",
+    step1: "1. Select Cookware Material",
+    step2: "2. Set Current Cookware Temperature",
+    step3: "3. Choose Immediate Contact / Quench Surface",
+    materialLabel: "Cookware Material & Composition",
+    initialTempLabel: "Current Temperature of Cookware",
+    quenchSurfaceLabel: "Immediate Contact Surface / Quench Environment",
+    tempUnitToggle: "Switch Units (°C / °F)",
+    liveSimTitle: "Dynamic Thermal Stress & Fracture Visualizer",
+    deltaTLabel: "Calculated Temperature Differential (ΔT)",
+    stressScoreLabel: "Thermal Shock Risk Index",
+    estStressLabel: "Estimated Tensile Stress",
+    failureModeLabel: "Expected Failure Mechanism",
+    acousticLabel: "Acoustic Decibel Report",
+    safeStatus: "SAFE — THERMAL EQUILIBRIUM",
+    moderateStatus: "MODERATE — THERMAL FATIGUE STRAIN",
+    highStatus: "HIGH HAZARD — CRAZING & CRACK RISK",
+    criticalStatus: "CRITICAL HAZARD — CATASTROPHIC SHATTER ZONE",
+    safeStatusDesc: "Calculated thermal stress remains well below the elastic breaking limit. Material will safely accommodate this temperature shift without structural damage.",
+    moderateStatusDesc: "Internal tensile strain is approaching safe thresholds. Microscopic fatigue accumulates with repeated cycles, accelerating future failure risk.",
+    highStatusDesc: "Severe thermal gradient detected. Visible glaze crazing, permanent warping, or micro-cracking is highly likely. Discontinue sudden cooling immediately.",
+    criticalStatusDesc: "Tensile stress exceeds ultimate material strength! Massive risk of violent explosive detonation, razor-sharp projectile shards, or permanent structural bisection.",
+    physicsExpTitle: "Thermodynamic Equation & Physics Principles",
+    labStandardsTitle: "Standardized Laboratory Testing Standards",
+    preventionTitle: "5 Mandatory Rules to Prevent Thermal Explosions",
+    prevention1: "Never place hot glass or ceramic bakeware onto cold granite, quartz, or marble countertops. Always rest on a dry wooden board or cork trivet.",
+    prevention2: "Avoid wet kitchen towels or damp sponges beneath hot cookware. Water conducts heat 20x faster than air, triggering violent localized contraction.",
+    prevention3: "Never pour cold tap water or broth into a searing hot skillet or glass casserole in the oven. Allow vessels to cool gradually for 10 minutes first.",
+    prevention4: "Inspect glass for microscopic scratches from metal utensils or dishwasher racks. Scratches act as stress risers that slash thermal tolerance by over 50%.",
+    prevention5: "Thaw frozen casseroles before placing them in a preheated oven. Extreme differentials (-18°C to 200°C) guarantee structural bisection in stoneware.",
+    relatedToolsHeading: "Explore Companion Kitchen Diagnostics",
+    relatedToolsDesc: "Cross-reference thermal limits with our complete suite of evidence-based kitchen safety tools.",
+    toolDebunker: "Viral Kitchen Trend Debunker & Myth Fact-Checker",
+    toolScorecard: "Toxic Leaching & PFAS Risk Scorecard",
+    toolSwap: "Safe Material Swap Calculator",
+    toolEmergency: "Kitchen Hazard Emergency Triage",
+    toolRecalls: "Product Recalls & Barcode Scanner",
+    toolInspector: "AI Pan Scratch Inspector"
+  },
+  es: {
+    badge: "Motor de Tensión Térmica Basado en Física",
+    title: "Simulador de Choque Térmico y Umbral de Rotura de Utensilios",
+    subtitle: "Simula gradientes bruscos de temperatura (ΔT) en vidrio de cal sodada templado, borosilicato, cerámica y hierro fundido esmaltado. Calcula la tensión de rotura por tracción, decibelios acústicos y riesgo de explosión de proyectiles antes de mover fuentes calientes.",
+    step1: "1. Selecciona el Material del Utensilio",
+    step2: "2. Ajusta la Temperatura Actual del Utensilio",
+    step3: "3. Elige la Superficie de Contacto Inmediato",
+    materialLabel: "Material y Composición del Utensilio",
+    initialTempLabel: "Temperatura Inicial del Utensilio",
+    quenchSurfaceLabel: "Superficie de Contacto o Enfriamiento",
+    tempUnitToggle: "Cambiar Unidades (°C / °F)",
+    liveSimTitle: "Visualizador Dinámico de Fracturas y Tensión Térmica",
+    deltaTLabel: "Diferencial de Temperatura Calculado (ΔT)",
+    stressScoreLabel: "Índice de Riesgo de Choque Térmico",
+    estStressLabel: "Tensión de Tracción Estimada",
+    failureModeLabel: "Mecanismo de Falla Esperado",
+    acousticLabel: "Reporte Acústico en Decibelios",
+    safeStatus: "SEGURO — EQUILIBRIO TÉRMICO",
+    moderateStatus: "MODERADO — FATIGA TÉRMICA ACUMULADA",
+    highStatus: "ALTO RIESGO — AGRIETAMIENTO Y FISURAS",
+    criticalStatus: "PELIGRO CRÍTICO — ZONA DE DETONACIÓN Y ESTALLIDO",
+    safeStatusDesc: "La tensión térmica calculada se mantiene muy por debajo del límite elástico. El material soporta el cambio de temperatura sin daño estructural.",
+    moderateStatusDesc: "La tensión interna se aproxima al límite seguro. Ciclos repetidos provocan fatiga microscópica que aumenta el riesgo de rotura futura.",
+    highStatusDesc: "Gradiente térmico severo. Es muy probable que se produzcan fisuras visibles en el esmalte, alabeo permanente o grietas internas.",
+    criticalStatusDesc: "¡La tensión de tracción supera la resistencia máxima del material! Riesgo extremo de explosión violenta con fragmentos afilados o fractura total.",
+    physicsExpTitle: "Ecuación Termodinámica y Principios Físicos",
+    labStandardsTitle: "Normas de Ensayo en Laboratorio Homologadas",
+    preventionTitle: "5 Reglas Obligatorias para Evitar Estallidos Térmicos",
+    prevention1: "Nunca coloques fuentes calientes de vidrio o cerámica sobre encimeras frías de granito o cuarzo. Usa siempre tablas de madera secas o salvamanteles de corcho.",
+    prevention2: "Evita apoyar recipientes calientes sobre paños de cocina húmedos. El agua conduce el calor 20 veces más rápido que el aire, provocando choques extremos.",
+    prevention3: "Nunca viertas agua fría o caldo en una sartén o fuente de vidrio recién salida del horno caliente. Deja que se enfríe de forma gradual.",
+    prevention4: "Revisa el vidrio en busca de microarañazos causados por cubiertos metálicos o el lavavajillas. Reducen la resistencia térmica a más de la mitad.",
+    prevention5: "Descongela los platos preparados antes de meterlos al horno precalentado. Pasar de -18°C a 200°C parte casi cualquier fuente de gres.",
+    relatedToolsHeading: "Herramientas de Seguridad Complementarias",
+    relatedToolsDesc: "Compara los límites térmicos con nuestra suite de diagnóstico culinario basada en ciencia.",
+    toolDebunker: "Detector de Mitos Virales de Cocina",
+    toolScorecard: "Evaluador de Toxicidad y PFAS en Utensilios",
+    toolSwap: "Calculadora de Sustitución Segura de Materiales",
+    toolEmergency: "Triaje de Emergencia en la Cocina",
+    toolRecalls: "Escáner de Retiradas de Productos y Códigos de Barras",
+    toolInspector: "Inspector de Arañazos en Sartenes con IA"
+  },
+  pt: {
+    badge: "Simulador Físico de Tensão Térmica",
+    title: "Simulador de Choque Térmico e Limiar de Estilhaçamento",
+    subtitle: "Simule gradientes rápidos de temperatura (ΔT) em vidro de cal sodada temperado, borossilicato, cerâmica e ferro fundido esmaltado. Calcule a tensão de tração, ruído acústico e risco de estilhaçamento violento.",
+    step1: "1. Selecione o Material do Utensílio",
+    step2: "2. Defina a Temperatura Atual do Utensílio",
+    step3: "3. Escolha a Superfície de Contato Imediato",
+    materialLabel: "Material e Composição",
+    initialTempLabel: "Temperatura Inicial do Utensílio",
+    quenchSurfaceLabel: "Superfície de Contato ou Resfriamento",
+    tempUnitToggle: "Alternar Unidades (°C / °F)",
+    liveSimTitle: "Visualizador Dinâmico de Tensão Térmica e Fraturas",
+    deltaTLabel: "Diferencial de Temperatura Calculado (ΔT)",
+    stressScoreLabel: "Índice de Risco de Choque Térmico",
+    estStressLabel: "Tensão de Tração Estimada",
+    failureModeLabel: "Mecanismo de Falha Previsto",
+    acousticLabel: "Nível de Ruído Acústico",
+    safeStatus: "SEGURO — EQUILÍBRIO TÉRMICO",
+    moderateStatus: "MODERADO — FADIGA TÉRMICA ACUMULADA",
+    highStatus: "ALTO RISCO — MICROFISSURAS E RACHADURAS",
+    criticalStatus: "PERIGO CRÍTICO — ZONA DE DETONAÇÃO E ESTILHAÇAMENTO",
+    safeStatusDesc: "A tensão térmica calculada permanece bem abaixo do limite de ruptura. O utensílio suporta a transição de temperatura com total segurança.",
+    moderateStatusDesc: "A tensão interna aproxima-se dos limites de segurança. Choques sucessivos acumulam fadiga mecânica na estrutura.",
+    highStatusDesc: "Gradiente térmico severo. Formação provável de rachaduras no esmalte vítreo, empenamento irreversível ou trincas estruturais.",
+    criticalStatusDesc: "A tensão de tração excede a resistência máxima do material! Risco iminente de explosão em milhares de cacos afiados.",
+    physicsExpTitle: "Equação Termodinâmica e Mecânica dos Materiais",
+    labStandardsTitle: "Normas de Ensaio Laboratorial",
+    preventionTitle: "5 Regras Essenciais contra Explosões Térmicas",
+    prevention1: "Nunca apoie assadeiras quentes de vidro ou cerâmica em bancadas frias de granito ou quartzo. Utilize sempre tábuas de madeira ou suportes de cortiça.",
+    prevention2: "Evite panos de prato úmidos sob recipientes quentes. A umidade conduz calor 20 vezes mais rápido que o ar ambiente.",
+    prevention3: "Nunca despeje água fria ou líquidos gelados numa frigideira quente ou travessa de vidro no forno. Deixe esfriar por 10 minutos.",
+    prevention4: "Examine o vidro contra microarranhões causados por talheres de metal. Arranhões reduzem a tolerância térmica pela metade.",
+    prevention5: "Descongele travessas congeladas antes de levar ao forno pré-aquecido. A transição de -18°C para 200°C parte cerâmicas ao meio.",
+    relatedToolsHeading: "Ferramentas de Diagnóstico Relacionadas",
+    relatedToolsDesc: "Aprofunde sua análise com o restante de nossas ferramentas científicas de segurança na cozinha.",
+    toolDebunker: "Desmistificador de Mitos Culinários do TikTok",
+    toolScorecard: "Scorecard de Toxinas e PFAS em Panelas",
+    toolSwap: "Calculadora de Troca Segura de Panelas",
+    toolEmergency: "Triagem de Emergência na Cozinha",
+    toolRecalls: "Scanner de Recalls de Produtos",
+    toolInspector: "Inspetor de Arranhões com IA"
+  },
+  'zh-cn': {
+    badge: "基于材料物理的热应力模拟引擎",
+    title: "厨房器皿热冲击与爆裂阈值安全模拟器",
+    subtitle: "精准模拟钢化钠钙玻璃、高硼硅玻璃、陶瓷炖盅及珐琅铸铁锅在急剧温差（ΔT）下的热膨胀应力。计算抗拉断裂极限、声学爆裂分贝与飞溅危险，防止厨房烫伤与炸裂事故。",
+    step1: "1. 选择炊具/餐具材质",
+    step2: "2. 设定当前器皿温度",
+    step3: "3. 选择接触台面或骤冷环境",
+    materialLabel: "器皿材质与物理成分",
+    initialTempLabel: "当前器皿温度",
+    quenchSurfaceLabel: "接触台面 / 冷却介质",
+    tempUnitToggle: "切换温度单位 (°C / °F)",
+    liveSimTitle: "动态热应变与破裂裂纹可视化模拟",
+    deltaTLabel: "计算温差 (ΔT)",
+    stressScoreLabel: "热冲击危险指数",
+    estStressLabel: "估算内部拉伸应力",
+    failureModeLabel: "结构失效破坏模式",
+    acousticLabel: "爆裂声学分贝报告",
+    safeStatus: "安全 — 处于热力学稳定平衡",
+    moderateStatus: "中度 — 累积微观热疲劳应变",
+    highStatus: "高度危险 — 极易出现龟裂与开裂",
+    criticalStatus: "极度危险 — 瞬时爆炸式粉碎爆裂区",
+    safeStatusDesc: "计算热应力远低于材料弹性极限，器皿可安全耐受该温差而无结构损伤。",
+    moderateStatusDesc: "内部拉伸应变接近安全阈值。多次循环会导致微观疲劳裂纹累积，增加日后突然爆裂概率。",
+    highStatusDesc: "存在剧烈温度梯度。极易诱发釉面开裂（龟裂）、不可逆底盘翘曲或主体贯穿裂纹。",
+    criticalStatusDesc: "热应力彻底超过材料抗拉强度极限！存在极高风险产生枪击般巨响并向四周高速喷射锋利玻璃碎片！",
+    physicsExpTitle: "热力学公式与断裂物理原理",
+    labStandardsTitle: "国际权威实验室测试标准",
+    preventionTitle: "防止厨房器皿热爆裂的5大铁律",
+    prevention1: "切勿将滚烫的玻璃或陶瓷烤盘直接放置在冰冷的花岗岩、大理石或石英石台面上，务必垫干燥木板或隔热垫。",
+    prevention2: "避免在热锅底垫湿抹布。水分导热系数是空气的20倍以上，会引发剧烈局部收缩导致底部爆底。",
+    prevention3: "切勿向刚出炉的热玻璃烤盘或烧热的铸铁锅中直接倒入冰水或冷高汤，应静置自然降温10分钟以上。",
+    prevention4: "定期检查玻璃器皿是否有金属餐具刮痕。微小划痕是应力集中源，会使器皿抗温差能力减半。",
+    prevention5: "冷冻室（-18°C）取出的陶瓷餐具切勿直接放入预热烤箱，巨大内应力将导致其直接从中截断。",
+    relatedToolsHeading: "探索更多厨房安全科学检测工具",
+    relatedToolsDesc: "结合多维度检测工具，全面守护家庭烹饪与餐具健康安全。",
+    toolDebunker: "热门厨房网络爆款谣言打假",
+    toolScorecard: "厨具毒性溶出与PFAS风险评分",
+    toolSwap: "健康厨具替代升级计算器",
+    toolEmergency: "厨房险情紧急分诊处置指南",
+    toolRecalls: "召回商品与包装条形码扫描器",
+    toolInspector: "AI涂层划痕健康度智能检测"
+  },
+  ja: {
+    badge: "物理学に基づく熱応力シミュレーション",
+    title: "調理器具の熱衝撃＆破裂閾値安全シミュレーター",
+    subtitle: "強化ソーダ石灰ガラス、耐熱ホウケイ酸ガラス、陶磁器、ホーロー鋳鉄鍋における急激な温度差（ΔT）による熱応力をシミュレート。引張破壊応力、破裂音のデシベル値、飛散リスクを瞬時に算出します。",
+    step1: "1. 調理器具の材質を選択",
+    step2: "2. 現在の調理器具温度を設定",
+    step3: "3. 接触させる天板・冷却環境を選択",
+    materialLabel: "器具の材質・成分",
+    initialTempLabel: "器具の現在温度",
+    quenchSurfaceLabel: "接触面・冷却環境",
+    tempUnitToggle: "単位切り替え (°C / °F)",
+    liveSimTitle: "動的熱応力・破壊クラックビジュアライザー",
+    deltaTLabel: "算出温度差 (ΔT)",
+    stressScoreLabel: "熱衝撃リスク指数",
+    estStressLabel: "推定内部引張応力",
+    failureModeLabel: "予測される破損形態",
+    acousticLabel: "破裂音の音圧レベル (dB)",
+    safeStatus: "安全 — 熱的平衡状態",
+    moderateStatus: "注意 — 熱疲労ひずみの蓄積",
+    highStatus: "高危険 — ひび割れ・貫通亀裂リスク",
+    criticalStatus: "極めて危険 — 爆発的破裂・飛散ゾーン",
+    safeStatusDesc: "計算された熱応力は材料の弾性限界を十分に下回っており、構造的損傷なく安全です。",
+    moderateStatusDesc: "内部引張ひずみが安全限界に近づいています。繰り返しの使用で微細疲労が蓄積し、将来の破損原因になります。",
+    highStatusDesc: "深刻な温度勾配を検知。釉薬の貫入、永久的な底面の反り、亀裂の発生が極めて高い状態です。",
+    criticalStatusDesc: "引張応力が材料の極限強度を超過！銃声のような破裂音とともに、鋭利な破片が高速飛散する危険があります。",
+    physicsExpTitle: "熱力学計算式と破壊力学の原理",
+    labStandardsTitle: "規格化された実験室試験標準",
+    preventionTitle: "調理器具の熱割れ・爆発を防ぐ5つの鉄則",
+    prevention1: "熱々のガラスや陶器のグラタン皿を、冷たい人工大理石や御影石の天板に直接置かないでください。必ず木製鍋敷きを使用してください。",
+    prevention2: "濡れた布巾の上に熱い皿を置かないでください。水は空気の20倍以上の速さで熱を奪い、局所的な急収縮で底抜けの原因になります。",
+    prevention3: "高温の鍋やガラス皿に冷水を急に注がないでください。洗う前に必ず室温で10分以上自然放熱させてください。",
+    prevention4: "金属ヘラや食洗機による微細な擦り傷に注意してください。傷に応力が集中し、耐熱温度差が半減します。",
+    prevention5: "冷凍庫（-18°C）から取り出したキャセロールを予熱済みのオーブンに直接入れないでください。急激な熱膨張差で真っ二つに割れます。",
+    relatedToolsHeading: "関連する厨房安全診断ツール",
+    relatedToolsDesc: "科学的エビデンスに基づく各種ツールで、調理器具の安全性を総合検証しましょう。",
+    toolDebunker: "SNSバズり料理裏ワザの科学的検証＆ファクトチェック",
+    toolScorecard: "有害物質溶出＆PFASリスクスコアカード",
+    toolSwap: "安全な調理器具への買い替え計算機",
+    toolEmergency: "キッチン火災・事故の緊急トリアージ",
+    toolRecalls: "製品リコール＆バーコードスキャナー",
+    toolInspector: "フライパン傷AI診断ツール"
+  }
+};
+
+const d = DICT[lang] || DICT.en;
+const materials = shockData.materials;
+const contactSurfaces = shockData.contactSurfaces;
+const tempPresets = shockData.tempPresets;
+---
+
+<div class="bg-surface-soft border border-hairline rounded-3xl p-6 md:p-10 shadow-sm" id="thermal-shock-root">
+  <!-- Header Badge -->
+  <div class="flex items-center gap-2 mb-3">
+    <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-indigo-600 text-white">
+      {d.badge}
+    </span>
+    <span class="text-xs text-muted font-mono">ASTM C149 &bull; ISO 3585</span>
+  </div>
+
+  <h2 class="text-title-lg md:text-display-sm font-medium text-ink tracking-tight mb-3">
+    {d.title}
+  </h2>
+  <p class="text-body text-sm md:text-base leading-relaxed mb-8 max-w-3xl">
+    {d.subtitle}
+  </p>
+
+  <!-- Interactive Controls Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-10">
+    <!-- Left Column: Inputs & Sliders (7 cols) -->
+    <div class="lg:col-span-7 space-y-7">
+      <!-- Step 1: Material Selection -->
+      <div>
+        <label class="block text-sm font-semibold text-ink mb-2">
+          {d.step1}
+        </label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="material-selector-grid">
+          {materials.map((m, idx) => (
+            <button
+              type="button"
+              data-material-id={m.id}
+              class={`text-left p-3.5 rounded-2xl border transition-all text-sm flex flex-col justify-between material-btn ${
+                idx === 0 
+                  ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/20 ring-2 ring-indigo-500/20' 
+                  : 'border-hairline bg-surface hover:border-hairline-strong'
+              }`}
+            >
+              <div>
+                <div class="font-medium text-ink flex items-center justify-between mb-1">
+                  <span>{m.name}</span>
+                  <span class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-surface-soft text-muted border border-hairline">
+                    α={m.cte}
+                  </span>
+                </div>
+                <div class="text-[12px] text-muted line-clamp-1">
+                  {m.tradeNames}
+                </div>
+              </div>
+              <div class="mt-2 text-[11px] font-medium text-indigo-600 dark:text-indigo-400">
+                Safe ΔT: ≤{m.maxSafeDeltaTC}°C ({m.maxSafeDeltaTF}°F)
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <!-- Step 2: Cookware Temperature Slider -->
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <label for="temp-slider" class="text-sm font-semibold text-ink">
+            {d.step2}
+          </label>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-muted font-medium" id="unit-label">Units: °C</span>
+            <button 
+              type="button" 
+              id="unit-toggle-btn"
+              class="text-xs font-semibold px-2.5 py-1 rounded-lg border border-hairline bg-surface hover:bg-surface-soft text-ink transition-colors"
+            >
+              °C / °F
+            </button>
+          </div>
+        </div>
+
+        <!-- Temperature Presets -->
+        <div class="flex flex-wrap gap-1.5 mb-3">
+          {tempPresets.map(preset => (
+            <button
+              type="button"
+              data-preset-c={preset.tempC}
+              class="text-xs px-2.5 py-1 rounded-lg border border-hairline bg-surface hover:bg-surface-soft text-body transition-colors preset-btn"
+            >
+              {preset.label} ({preset.tempC}°C)
+            </button>
+          ))}
+        </div>
+
+        <div class="p-4 rounded-2xl bg-surface border border-hairline space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-muted">Range: -20°C (-4°F) to 260°C (500°F)</span>
+            <span class="text-lg font-bold font-mono text-ink" id="current-temp-display">200°C (392°F)</span>
+          </div>
+          <input 
+            type="range" 
+            id="temp-slider" 
+            min="-20" 
+            max="260" 
+            value="200" 
+            step="5"
+            class="w-full accent-indigo-600 h-2 bg-surface-soft rounded-lg cursor-pointer"
+          />
+        </div>
+      </div>
+
+      <!-- Step 3: Quench / Contact Surface -->
+      <div>
+        <label class="block text-sm font-semibold text-ink mb-2">
+          {d.step3}
+        </label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="surface-selector-grid">
+          {contactSurfaces.map((s, idx) => (
+            <button
+              type="button"
+              data-surface-id={s.id}
+              class={`text-left p-3.5 rounded-2xl border transition-all text-sm flex flex-col justify-between surface-btn ${
+                idx === 2 
+                  ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/20 ring-2 ring-indigo-500/20' 
+                  : 'border-hairline bg-surface hover:border-hairline-strong'
+              }`}
+            >
+              <div>
+                <div class="font-medium text-ink flex items-center justify-between mb-1">
+                  <span>{s.name}</span>
+                </div>
+                <div class="text-[12px] text-muted line-clamp-2">
+                  {s.description}
+                </div>
+              </div>
+              <div class="mt-2 text-[11px] font-mono text-muted">
+                Temp: {s.tempC}°C ({s.tempF}°F)
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Visualizer & Live Physics Diagnostics (5 cols) -->
+    <div class="lg:col-span-5 space-y-6 flex flex-col justify-between">
+      <!-- Visual Vessel SVG & Stress Fracture Display -->
+      <div class="p-6 rounded-2xl bg-surface border border-hairline shadow-sm flex flex-col items-center justify-center relative overflow-hidden" id="visualizer-box">
+        <div class="w-full flex items-center justify-between text-xs text-muted mb-4">
+          <span class="font-medium uppercase tracking-wider">{d.liveSimTitle}</span>
+          <span class="font-mono text-xs px-2 py-0.5 rounded-full bg-surface-soft" id="acoustic-badge">75 dB</span>
+        </div>
+
+        <!-- Dynamic Cookware SVG Canvas -->
+        <div class="w-full max-w-[280px] h-[180px] relative flex items-center justify-center my-2">
+          <svg viewBox="0 0 300 200" class="w-full h-full overflow-visible" id="cookware-svg">
+            <defs>
+              <!-- Dynamic Linear Gradient: Hot Rim to Cold Base -->
+              <linearGradient id="thermal-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" id="grad-top" stop-color="#ef4444" />
+                <stop offset="70%" id="grad-mid" stop-color="#f97316" />
+                <stop offset="100%" id="grad-bot" stop-color="#3b82f6" />
+              </linearGradient>
+
+              <!-- Shockwave blast filter -->
+              <filter id="glow-danger" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="4" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+            </defs>
+
+            <!-- Countertop / Quench Surface Base Line -->
+            <rect x="20" y="150" width="260" height="20" rx="4" id="svg-countertop" fill="#94a3b8" opacity="0.3" />
+            <text x="150" y="164" text-anchor="middle" font-size="10" fill="#64748b" id="svg-countertop-text">Cold Granite (18°C)</text>
+
+            <!-- Cookware Vessel Profile (Casserole Dish) -->
+            <path 
+              id="svg-vessel"
+              d="M 50 70 L 65 140 Q 70 148 85 148 L 215 148 Q 230 148 235 140 L 250 70 Q 255 60 240 60 L 60 60 Q 45 60 50 70 Z" 
+              fill="url(#thermal-gradient)"
+              stroke="#cbd5e1"
+              stroke-width="3"
+              class="transition-all duration-300"
+            />
+
+            <!-- Handles -->
+            <path id="svg-handle-l" d="M 50 75 Q 30 75 30 90 Q 30 105 52 105" fill="none" stroke="#94a3b8" stroke-width="4" stroke-linecap="round" />
+            <path id="svg-handle-r" d="M 250 75 Q 270 75 270 90 Q 270 105 248 105" fill="none" stroke="#94a3b8" stroke-width="4" stroke-linecap="round" />
+
+            <!-- Dynamic Crack Pattern Lines (Revealed under stress) -->
+            <g id="svg-crack-group" class="opacity-0 transition-opacity duration-300">
+              <path d="M 150 148 L 140 115 L 115 100 L 90 75" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" filter="url(#glow-danger)" />
+              <path d="M 140 115 L 165 95 L 195 85 L 230 65" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
+              <path d="M 165 95 L 175 130 L 205 148" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
+              <path d="M 115 100 L 80 120 L 70 142" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
+              
+              <!-- Detonation Projectile Shards -->
+              <g id="svg-shards" class="hidden">
+                <polygon points="120,40 135,30 130,50" fill="#ffffff" stroke="#ef4444" stroke-width="1" />
+                <polygon points="180,35 195,45 175,55" fill="#ffffff" stroke="#ef4444" stroke-width="1" />
+                <polygon points="20,110 35,125 15,130" fill="#ffffff" stroke="#ef4444" stroke-width="1" />
+                <polygon points="265,115 285,105 275,135" fill="#ffffff" stroke="#ef4444" stroke-width="1" />
+              </g>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Live Status Alert Banner -->
+        <div id="status-banner" class="w-full p-4 rounded-xl text-center font-bold text-xs md:text-sm tracking-wide mt-2 border transition-all">
+          <div id="status-headline" class="mb-1">SAFE</div>
+          <div id="status-explanation" class="text-xs font-normal opacity-90 leading-relaxed"></div>
+        </div>
+      </div>
+
+      <!-- Scientific Diagnostics Cards -->
+      <div class="grid grid-cols-2 gap-3 text-center">
+        <div class="p-4 rounded-xl bg-surface border border-hairline">
+          <div class="text-xs text-muted mb-1">{d.deltaTLabel}</div>
+          <div class="text-xl font-bold font-mono text-ink" id="stat-delta-t">182°C (328°F)</div>
+        </div>
+        <div class="p-4 rounded-xl bg-surface border border-hairline">
+          <div class="text-xs text-muted mb-1">{d.stressScoreLabel}</div>
+          <div class="text-xl font-bold font-mono text-ink" id="stat-risk-score">96 / 100</div>
+        </div>
+        <div class="p-4 rounded-xl bg-surface border border-hairline">
+          <div class="text-xs text-muted mb-1">{d.estStressLabel}</div>
+          <div class="text-sm font-semibold font-mono text-ink" id="stat-tensile-stress">148 MPa (21,460 PSI)</div>
+        </div>
+        <div class="p-4 rounded-xl bg-surface border border-hairline">
+          <div class="text-xs text-muted mb-1">{d.acousticLabel}</div>
+          <div class="text-sm font-semibold font-mono text-ink" id="stat-decibels">115 dB (Gunshot report)</div>
+        </div>
+      </div>
+
+      <!-- Failure Mode Summary Box -->
+      <div class="p-4 rounded-xl bg-surface border border-hairline space-y-1">
+        <span class="text-xs font-bold uppercase tracking-wider text-muted block">{d.failureModeLabel}:</span>
+        <div class="text-xs font-semibold text-ink" id="failure-mode-title">Explosive Detonation (Dice Sharding)</div>
+        <p class="text-[12px] text-body leading-relaxed" id="failure-mode-desc"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Educational Science & Standards Accordion / Breakdown -->
+  <div class="border-t border-hairline pt-8 space-y-8">
+    <!-- Prevention Rules -->
+    <div>
+      <h3 class="text-base font-semibold text-ink mb-4 flex items-center gap-2">
+        <span class="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold">✓</span>
+        {d.preventionTitle}
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-body leading-relaxed">
+        <div class="p-3.5 rounded-xl bg-surface border border-hairline flex items-start gap-2.5">
+          <span class="font-bold text-ink">01</span>
+          <span>{d.prevention1}</span>
+        </div>
+        <div class="p-3.5 rounded-xl bg-surface border border-hairline flex items-start gap-2.5">
+          <span class="font-bold text-ink">02</span>
+          <span>{d.prevention2}</span>
+        </div>
+        <div class="p-3.5 rounded-xl bg-surface border border-hairline flex items-start gap-2.5">
+          <span class="font-bold text-ink">03</span>
+          <span>{d.prevention3}</span>
+        </div>
+        <div class="p-3.5 rounded-xl bg-surface border border-hairline flex items-start gap-2.5">
+          <span class="font-bold text-ink">04</span>
+          <span>{d.prevention4}</span>
+        </div>
+        <div class="p-3.5 rounded-xl bg-surface border border-hairline flex items-start gap-2.5 md:col-span-2">
+          <span class="font-bold text-ink">05</span>
+          <span>{d.prevention5}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Physics & Formula Deep-Dive -->
+    <div class="p-6 rounded-2xl bg-surface border border-hairline space-y-3">
+      <h3 class="text-sm font-semibold text-ink flex items-center gap-2">
+        <span class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold">∑</span>
+        {d.physicsExpTitle}
+      </h3>
+      <div class="font-mono text-xs md:text-sm bg-surface-soft p-3 rounded-lg border border-hairline text-indigo-700 dark:text-indigo-300">
+        σ = (E &times; α &times; ΔT) / (1 - ν)
+      </div>
+      <p class="text-xs text-body leading-relaxed">
+        {shockData.physicsModel.description} {shockData.physicsModel.failureCondition}
+      </p>
+    </div>
+
+    <!-- Cross-links to companion tools -->
+    <div class="border-t border-hairline pt-6">
+      <div class="text-xs font-bold uppercase tracking-wider text-muted mb-3">
+        {d.relatedToolsHeading}
+      </div>
+      <p class="text-xs text-body mb-4">
+        {d.relatedToolsDesc}
+      </p>
+      <div class="flex flex-wrap gap-2 text-xs">
+        <a href={lang === 'en' ? '/tools/viral-trend-debunker/' : `/${lang}/tools/viral-trend-debunker/`} class="px-3 py-1.5 rounded-lg bg-surface border border-hairline hover:border-hairline-strong font-medium text-ink transition-colors">
+          &rarr; {d.toolDebunker}
+        </a>
+        <a href={lang === 'en' ? '/tools/pan-scratch-inspector/' : `/${lang}/tools/pan-scratch-inspector/`} class="px-3 py-1.5 rounded-lg bg-surface border border-hairline hover:border-hairline-strong font-medium text-ink transition-colors">
+          &rarr; {d.toolInspector}
+        </a>
+        <a href={lang === 'en' ? '/tools/toxic-leaching-scorecard/' : `/${lang}/tools/toxic-leaching-scorecard/`} class="px-3 py-1.5 rounded-lg bg-surface border border-hairline hover:border-hairline-strong font-medium text-ink transition-colors">
+          &rarr; {d.toolScorecard}
+        </a>
+        <a href={lang === 'en' ? '/tools/material-swap-calculator/' : `/${lang}/tools/material-swap-calculator/`} class="px-3 py-1.5 rounded-lg bg-surface border border-hairline hover:border-hairline-strong font-medium text-ink transition-colors">
+          &rarr; {d.toolSwap}
+        </a>
+        <a href={lang === 'en' ? '/tools/kitchen-hazard-emergency-triage/' : `/${lang}/tools/kitchen-hazard-emergency-triage/`} class="px-3 py-1.5 rounded-lg bg-surface border border-hairline hover:border-hairline-strong font-medium text-ink transition-colors">
+          &rarr; {d.toolEmergency}
+        </a>
+        <a href={lang === 'en' ? '/tools/product-recalls-scanner/' : `/${lang}/tools/product-recalls-scanner/`} class="px-3 py-1.5 rounded-lg bg-surface border border-hairline hover:border-hairline-strong font-medium text-ink transition-colors">
+          &rarr; {d.toolRecalls}
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script is:inline define:vars={{ shockData, d }}>
+  (function() {
+    const root = document.getElementById('thermal-shock-root');
+    if (!root) return;
+
+    let selectedMaterialId = 'soda-lime-tempered';
+    let selectedSurfaceId = 'granite-counter';
+    let currentTempC = 200;
+    let isFahrenheit = false;
+
+    const materials = shockData.materials;
+    const surfaces = shockData.contactSurfaces;
+
+    // Elements
+    const materialBtns = root.querySelectorAll('.material-btn');
+    const surfaceBtns = root.querySelectorAll('.surface-btn');
+    const presetBtns = root.querySelectorAll('.preset-btn');
+    const tempSlider = root.getElementById('temp-slider');
+    const tempDisplay = root.getElementById('current-temp-display');
+    const unitToggleBtn = root.getElementById('unit-toggle-btn');
+    const unitLabel = root.getElementById('unit-label');
+
+    // Diagnostic stat elements
+    const statDeltaT = root.getElementById('stat-delta-t');
+    const statRiskScore = root.getElementById('stat-risk-score');
+    const statTensileStress = root.getElementById('stat-tensile-stress');
+    const statDecibels = root.getElementById('stat-decibels');
+    const acousticBadge = root.getElementById('acoustic-badge');
+    const statusBanner = root.getElementById('status-banner');
+    const statusHeadline = root.getElementById('status-headline');
+    const statusExplanation = root.getElementById('status-explanation');
+    const failureModeTitle = root.getElementById('failure-mode-title');
+    const failureModeDesc = root.getElementById('failure-mode-desc');
+
+    // SVG elements
+    const svgCountertopText = root.getElementById('svg-countertop-text');
+    const gradTop = root.getElementById('grad-top');
+    const gradBot = root.getElementById('grad-bot');
+    const crackGroup = root.getElementById('svg-crack-group');
+    const shardsGroup = root.getElementById('svg-shards');
+
+    function cToF(c) {
+      return Math.round((c * 9/5) + 32);
+    }
+
+    function calculate() {
+      const mat = materials.find(m => m.id === selectedMaterialId) || materials[0];
+      const surf = surfaces.find(s => s.id === selectedSurfaceId) || surfaces[0];
+
+      const rawDeltaT = Math.abs(currentTempC - surf.tempC);
+      const effectiveDeltaT = rawDeltaT * surf.riskMultiplier;
+
+      // Risk score: 0 to 100 based on material critical delta T
+      let riskScore = Math.min(100, Math.round((effectiveDeltaT / mat.criticalDeltaTC) * 85));
+      if (rawDeltaT > mat.criticalDeltaTC) {
+        riskScore = Math.min(100, Math.max(85, riskScore));
+      }
+
+      // Tensile Stress σ = (E · α · ΔT) / (1 - ν)
+      // E in GPa (10^9), α in 10^-6, resulting in MPa
+      const E = mat.youngsModulusGPa;
+      const alpha = mat.cte;
+      const nu = mat.poissonsRatio;
+      const tensileStressMPa = Math.round((E * alpha * rawDeltaT) / (1 - nu));
+      const tensileStressPSI = Math.round(tensileStressMPa * 145.038);
+
+      // Render Display Text
+      const rawDeltaTF = Math.round(rawDeltaT * 9/5);
+      statDeltaT.textContent = isFahrenheit 
+        ? `${rawDeltaTF}°F (${rawDeltaT}°C)` 
+        : `${rawDeltaT}°C (${rawDeltaTF}°F)`;
+
+      statRiskScore.textContent = `${riskScore} / 100`;
+      statTensileStress.textContent = `${tensileStressMPa} MPa (${tensileStressPSI.toLocaleString()} PSI)`;
+
+      failureModeTitle.textContent = mat.shatterMode;
+      failureModeDesc.textContent = mat.failurePhysics;
+
+      // Acoustic Profile
+      let activeDecibels = Math.min(mat.acousticDecibels, Math.round(mat.acousticDecibels * (riskScore / 80)));
+      if (riskScore < 30) activeDecibels = 20;
+      statDecibels.textContent = `${activeDecibels} dB (${mat.acousticProfile.split('.')[0]})`;
+      acousticBadge.textContent = `${activeDecibels} dB`;
+
+      // SVG Countertop Label
+      svgCountertopText.textContent = `${surf.name.split('(')[0].trim()} (${isFahrenheit ? surf.tempF + '°F' : surf.tempC + '°C'})`;
+
+      // SVG Heat Colors
+      if (currentTempC > 150) {
+        gradTop.setAttribute('stop-color', '#dc2626'); // bright red
+      } else if (currentTempC > 80) {
+        gradTop.setAttribute('stop-color', '#f97316'); // orange
+      } else if (currentTempC > 25) {
+        gradTop.setAttribute('stop-color', '#eab308'); // yellow
+      } else {
+        gradTop.setAttribute('stop-color', '#3b82f6'); // blue
+      }
+
+      if (surf.tempC <= 0) {
+        gradBot.setAttribute('stop-color', '#1e3a8a'); // deep navy ice
+      } else if (surf.tempC <= 20) {
+        gradBot.setAttribute('stop-color', '#0284c7'); // sky cold
+      } else {
+        gradBot.setAttribute('stop-color', '#ea580c'); // warm
+      }
+
+      // Status tier banner & Crack rendering
+      statusBanner.className = 'w-full p-4 rounded-xl text-center font-bold text-xs md:text-sm tracking-wide mt-2 border transition-all ';
+      if (riskScore < 30) {
+        // Safe
+        statusBanner.classList.add('bg-emerald-50', 'text-emerald-800', 'border-emerald-300', 'dark:bg-emerald-950/40', 'dark:text-emerald-300', 'dark:border-emerald-800');
+        statusHeadline.textContent = d.safeStatus;
+        statusExplanation.textContent = d.safeStatusDesc;
+        crackGroup.classList.add('opacity-0');
+        crackGroup.classList.remove('opacity-100');
+        shardsGroup.classList.add('hidden');
+      } else if (riskScore < 60) {
+        // Moderate
+        statusBanner.classList.add('bg-amber-50', 'text-amber-800', 'border-amber-300', 'dark:bg-amber-950/40', 'dark:text-amber-300', 'dark:border-amber-800');
+        statusHeadline.textContent = d.moderateStatus;
+        statusExplanation.textContent = d.moderateStatusDesc;
+        crackGroup.classList.remove('opacity-0');
+        crackGroup.classList.add('opacity-40');
+        shardsGroup.classList.add('hidden');
+      } else if (riskScore < 80) {
+        // High
+        statusBanner.classList.add('bg-orange-50', 'text-orange-900', 'border-orange-400', 'dark:bg-orange-950/40', 'dark:text-orange-300', 'dark:border-orange-800');
+        statusHeadline.textContent = d.highStatus;
+        statusExplanation.textContent = d.highStatusDesc;
+        crackGroup.classList.remove('opacity-0');
+        crackGroup.classList.add('opacity-80');
+        shardsGroup.classList.add('hidden');
+      } else {
+        // Critical
+        statusBanner.classList.add('bg-red-100', 'text-red-900', 'border-red-500', 'dark:bg-red-950/60', 'dark:text-red-200', 'dark:border-red-700', 'animate-pulse');
+        statusHeadline.textContent = d.criticalStatus;
+        statusExplanation.textContent = d.criticalStatusDesc;
+        crackGroup.classList.remove('opacity-0');
+        crackGroup.classList.add('opacity-100');
+        shardsGroup.classList.remove('hidden');
+      }
+    }
+
+    // Event Listeners
+    materialBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        materialBtns.forEach(b => {
+          b.classList.remove('border-indigo-600', 'bg-indigo-50/50', 'dark:bg-indigo-950/20', 'ring-2', 'ring-indigo-500/20');
+          b.classList.add('border-hairline', 'bg-surface');
+        });
+        btn.classList.add('border-indigo-600', 'bg-indigo-50/50', 'dark:bg-indigo-950/20', 'ring-2', 'ring-indigo-500/20');
+        btn.classList.remove('border-hairline', 'bg-surface');
+        selectedMaterialId = btn.getAttribute('data-material-id');
+        calculate();
+      });
+    });
+
+    surfaceBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        surfaceBtns.forEach(b => {
+          b.classList.remove('border-indigo-600', 'bg-indigo-50/50', 'dark:bg-indigo-950/20', 'ring-2', 'ring-indigo-500/20');
+          b.classList.add('border-hairline', 'bg-surface');
+        });
+        btn.classList.add('border-indigo-600', 'bg-indigo-50/50', 'dark:bg-indigo-950/20', 'ring-2', 'ring-indigo-500/20');
+        btn.classList.remove('border-hairline', 'bg-surface');
+        selectedSurfaceId = btn.getAttribute('data-surface-id');
+        calculate();
+      });
+    });
+
+    tempSlider.addEventListener('input', (e) => {
+      currentTempC = parseInt(e.target.value, 10);
+      updateTempDisplay();
+      calculate();
+    });
+
+    presetBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentTempC = parseInt(btn.getAttribute('data-preset-c'), 10);
+        tempSlider.value = currentTempC;
+        updateTempDisplay();
+        calculate();
+      });
+    });
+
+    unitToggleBtn.addEventListener('click', () => {
+      isFahrenheit = !isFahrenheit;
+      unitLabel.textContent = isFahrenheit ? 'Units: °F' : 'Units: °C';
+      updateTempDisplay();
+      calculate();
+    });
+
+    function updateTempDisplay() {
+      const fVal = cToF(currentTempC);
+      tempDisplay.textContent = isFahrenheit 
+        ? `${fVal}°F (${currentTempC}°C)` 
+        : `${currentTempC}°C (${fVal}°F)`;
+    }
+
+    // Initial run
+    updateTempDisplay();
+    calculate();
+  })();
+</script>
