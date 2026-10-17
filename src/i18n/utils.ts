@@ -38,7 +38,8 @@ const SPECIAL_PAGES = [
   'tools/toxic-leaching-scorecard',
   'tools/material-swap-calculator',
   'tools/viral-trend-debunker',
-  'tools/thermal-shock-simulator'
+  'tools/thermal-shock-simulator',
+  'tools/kitchen-energy-carbon-calculator'
 ];
 
 const esSlugs = new Set([
