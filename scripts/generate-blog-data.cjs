@@ -8,7 +8,7 @@ const blogData = [
     "excerpt": "From aluminum foil to eggs, these common items can cause fires, explosions, or release toxic chemicals in your microwave.",
     "date": "2026-06-13",
     "readTime": "7 min read",
-    "author": "IsItKitchenSafe Editorial Team",
+    "author": "IsItKitchenSafe",
     "intro": "The microwave is a staple of modern convenience, allowing us to heat food and beverages in a matter of seconds. However, this powerful kitchen appliance works by emitting radiofrequency electromagnetic waves that excite water molecules in food, generating heat. Because of this unique heating mechanism, certain materials and objects react violently, potentially causing electrical arcing, explosions, toxic outgassing, or chemical leaching. According to the USDA and FDA, putting the wrong items in a microwave can cause severe injuries or property damage. Here is a definitive guide to ten things you must never put in your microwave.",
     "sections": [
       {
@@ -108,7 +108,7 @@ const blogData = [
     "excerpt": "Refreezing these foods can cause serious food poisoning. Learn which foods are unsafe to refreeze and why the USDA warns against it.",
     "date": "2026-06-13",
     "readTime": "6 min read",
-    "author": "IsItKitchenSafe Editorial Team",
+    "author": "IsItKitchenSafe",
     "intro": "Freezing is an exceptional preservation method that keeps food safe by slowing down the movement of molecules and putting microbes into a dormant state. According to the USDA, food kept constantly at 0°F will remain safe indefinitely. However, the safety issues occur during the thawing process. When frozen food is thawed, the ambient temperature rises, and bacteria that lay dormant quickly wake up and multiply. Refreezing thawed food is a common practice, but doing so with the wrong foods can lead to serious foodborne illnesses, structural quality loss, and spoilage. Here are seven foods you should never refreeze.",
     "sections": [
       {
@@ -190,7 +190,7 @@ const blogData = [
     "excerpt": "Not everything belongs in the dishwasher. This complete guide covers 30+ common kitchen items and whether they're safe to machine wash.",
     "date": "2026-06-13",
     "readTime": "8 min read",
-    "author": "IsItKitchenSafe Editorial Team",
+    "author": "IsItKitchenSafe",
     "intro": "The dishwasher is a marvel of modern efficiency, saving hours of manual labor. However, a dishwasher operates under extreme conditions: temperatures reaching 150°F to 180°F, high-pressure water jets, and highly abrasive detergents. While most modern ceramics, glassware, and plastics are engineered to withstand this environment, many premium kitchen tools and materials will be ruined or compromised. To maintain your cookware's longevity and protect your family, you must know what can and cannot go in the dishwasher.",
     "sections": [
       {
@@ -272,7 +272,7 @@ const blogData = [
     "excerpt": "Air fryers are amazing — but put the wrong thing in and you'll have a fire or ruined meal. Here's exactly what's safe and what isn't.",
     "date": "2026-06-13",
     "readTime": "6 min read",
-    "author": "IsItKitchenSafe Editorial Team",
+    "author": "IsItKitchenSafe",
     "intro": "Air fryers have revolutionized home cooking, delivering crispy, fried-style food with a fraction of the oil. They function as compact, powerful convection ovens, utilizing a high-velocity fan to circulate superheated air around the food. However, this high-speed airflow and the proximity of the heating elements introduce unique safety hazards. Putting the wrong materials or foods in an air fryer can cause smoke, fire, damaged heating elements, or ruined food. Let's look at what is safe and what is dangerous.",
     "sections": [
       {
@@ -353,7 +353,7 @@ const blogData = [
     "excerpt": "These common freezer mistakes are causing freezer burn, food waste, and even food poisoning. Are you making any of these?",
     "date": "2026-06-13",
     "readTime": "6 min read",
-    "author": "IsItKitchenSafe Editorial Team",
+    "author": "IsItKitchenSafe",
     "intro": "A freezer is one of the most valuable appliances in the modern kitchen, allowing us to preserve meat, vegetables, and leftovers for months. However, freezing is more than just placing food in the freezer drawer. Poor freezing practices can lead to freezer burn, which turns food dry and flavorless, and can even create bacterial growth conditions that cause food poisoning. According to food safety authorities, avoiding these eight common mistakes will improve food quality and ensure safety.",
     "sections": [
       {
@@ -440,7 +440,7 @@ const blogData = [
     "excerpt": "Putting these foods in the fridge actually makes them go bad faster or ruins their taste and texture. Find out what to store where.",
     "date": "2026-06-13",
     "readTime": "6 min read",
-    "author": "IsItKitchenSafe Editorial Team",
+    "author": "IsItKitchenSafe",
     "intro": "The refrigerator is a cornerstone of kitchen safety, extending the lifespan of meat, dairy, and leftovers by retarding bacterial growth. However, many foods are severely degraded by cold temperatures. The high humidity and cold air inside a refrigerator can halt ripening, turn starches into sugars, accelerate decay, and destroy delicate textures. For optimal flavor, texture, and storage life, keep these 25 common foods out of the refrigerator and store them on your counter or in a dark pantry.",
     "sections": [
       {
@@ -522,7 +522,7 @@ const blogData = [
     "excerpt": "These microwave safety tips could prevent a fire, explosion, or food poisoning in your kitchen. Number 7 surprises most people.",
     "date": "2026-06-13",
     "readTime": "6 min read",
-    "author": "IsItKitchenSafe Editorial Team",
+    "author": "IsItKitchenSafe",
     "intro": "The microwave is a staple of modern convenience, but it is also a powerful appliance that utilizes high-frequency radio waves to cook food. Because it heats food unevenly and interacts uniquely with different materials, improper use can lead to serious hazards. According to the FDA, thousands of people suffer microwave-related burns and injuries each year. By following these 12 essential safety tips, you can protect your family and extend the lifespan of your appliance.",
     "sections": [
       {
@@ -616,7 +616,7 @@ const blogData = [
     "excerpt": "Leftover food safety is more important than most people realize. Here's exactly how long every type of leftover lasts in fridge and freezer.",
     "date": "2026-06-13",
     "readTime": "6 min read",
-    "author": "IsItKitchenSafe Editorial Team",
+    "author": "IsItKitchenSafe",
     "intro": "Cooking in bulk and saving leftovers is an excellent way to save time and reduce food waste. However, leftover food safety is a critical topic that is often overlooked. As soon as hot food drops below 140°F, bacteria start to grow. According to the USDA and FDA, storing leftovers correctly is essential to prevent food poisoning. Let's look at how long different types of cooked leftovers remain safe to eat.",
     "sections": [
       {
@@ -704,7 +704,7 @@ const blogData = [
     "excerpt": "Not all cookware is oven safe — and using the wrong pan in the oven can be dangerous. Here's what's safe at every temperature.",
     "date": "2026-06-13",
     "readTime": "6 min read",
-    "author": "IsItKitchenSafe Editorial Team",
+    "author": "IsItKitchenSafe",
     "intro": "The oven is a harsh cooking environment, exposing cookware to intense radiant heat and temperatures ranging from 300°F to over 500°F. Placing the wrong pan, dish, or lid inside can result in cracked glass, melted plastic handles, toxic chemical fumes, or ruined cookware. To ensure kitchen safety and protect your culinary investments, you must understand the temperature limits of different materials. Here is a comprehensive temperature guide for cookware.",
     "sections": [
       {
@@ -786,7 +786,7 @@ const blogData = [
     "excerpt": "These common kitchen safety myths are surprisingly widespread — and some of them are actually dangerous. Here's the truth.",
     "date": "2026-06-13",
     "readTime": "7 min read",
-    "author": "IsItKitchenSafe Editorial Team",
+    "author": "IsItKitchenSafe",
     "intro": "Kitchen safety is a blend of science, biology, and common sense. However, many generational myths and old wives' tales persist in home kitchens. While some of these myths are harmless, others can lead to severe foodborne illnesses, cross-contamination, and appliance damage. According to food safety scientists and the USDA, debunking these myths is crucial for maintaining a healthy and safe kitchen. Here are 10 kitchen safety myths you probably believe.",
     "sections": [
       {
