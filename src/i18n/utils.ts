@@ -29,6 +29,11 @@ import blogZh from '../data/blog.zh-cn.json';
 import blogJa from '../data/blog.ja.json';
 import { CATEGORIES } from '../utils/materialCategories';
 
+const SPECIAL_PAGES = [
+  'material/scratched-nonstick-cookware',
+  'tools/pan-scratch-inspector'
+];
+
 const esSlugs = new Set([
   ...itemsEs.map(i => `${i.appliance}/${i.slug}`),
   ...washingMachineEs.map(i => `${i.appliance}/${i.slug}`),
@@ -37,7 +42,8 @@ const esSlugs = new Set([
   ...whatHappensEs.map(i => `what-happens/${i.slug}`),
   ...comparisonsEs.map(i => `compare/${i.slug}`),
   ...blogEs.map(i => `blog/${i.slug}`),
-  ...CATEGORIES.map(c => `material/${c.id}`)
+  ...CATEGORIES.map(c => `material/${c.id}`),
+  ...SPECIAL_PAGES
 ]);
 const ptSlugs = new Set([
   ...itemsPt.map(i => `${i.appliance}/${i.slug}`),
@@ -47,7 +53,8 @@ const ptSlugs = new Set([
   ...whatHappensPt.map(i => `what-happens/${i.slug}`),
   ...comparisonsPt.map(i => `compare/${i.slug}`),
   ...blogPt.map(i => `blog/${i.slug}`),
-  ...CATEGORIES.map(c => `material/${c.id}`)
+  ...CATEGORIES.map(c => `material/${c.id}`),
+  ...SPECIAL_PAGES
 ]);
 const zhSlugs = new Set([
   ...itemsZh.map(i => `${i.appliance}/${i.slug}`),
@@ -57,7 +64,8 @@ const zhSlugs = new Set([
   ...refreezeZh.map(i => `refreeze/${i.slug}`),
   ...comparisonsZh.map(i => `compare/${i.slug}`),
   ...blogZh.map(i => `blog/${i.slug}`),
-  ...CATEGORIES.map(c => `material/${c.id}`)
+  ...CATEGORIES.map(c => `material/${c.id}`),
+  ...SPECIAL_PAGES
 ]);
 const jaSlugs = new Set([
   ...itemsJa.map(i => `${i.appliance}/${i.slug}`),
@@ -67,7 +75,8 @@ const jaSlugs = new Set([
   ...refreezeJa.map(i => `refreeze/${i.slug}`),
   ...comparisonsJa.map(i => `compare/${i.slug}`),
   ...blogJa.map(i => `blog/${i.slug}`),
-  ...CATEGORIES.map(c => `material/${c.id}`)
+  ...CATEGORIES.map(c => `material/${c.id}`),
+  ...SPECIAL_PAGES
 ]);
 
 const esAppliances = new Set([
@@ -112,10 +121,10 @@ export function isItemTranslatedInLocale(appliance: string, slug: string, lang: 
   return false;
 }
 
-const esDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens', 'compare', 'blog', 'material', 'about', 'contact', 'privacy', 'terms', 'sitemap-page']);
-const ptDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens', 'compare', 'blog', 'material', 'about', 'contact', 'privacy', 'terms', 'sitemap-page']);
-const zhDirectories = new Set<string>(['washing-machine', 'how-long', 'material', 'what-happens', 'refreeze', 'compare', 'blog', 'about', 'contact', 'privacy', 'terms', 'sitemap-page']);
-const jaDirectories = new Set<string>(['washing-machine', 'how-long', 'material', 'what-happens', 'refreeze', 'compare', 'blog', 'about', 'contact', 'privacy', 'terms', 'sitemap-page']);
+const esDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens', 'compare', 'blog', 'material', 'tools', 'about', 'contact', 'privacy', 'terms', 'sitemap-page']);
+const ptDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens', 'compare', 'blog', 'material', 'tools', 'about', 'contact', 'privacy', 'terms', 'sitemap-page']);
+const zhDirectories = new Set<string>(['washing-machine', 'how-long', 'material', 'what-happens', 'refreeze', 'compare', 'blog', 'tools', 'about', 'contact', 'privacy', 'terms', 'sitemap-page']);
+const jaDirectories = new Set<string>(['washing-machine', 'how-long', 'material', 'what-happens', 'refreeze', 'compare', 'blog', 'tools', 'about', 'contact', 'privacy', 'terms', 'sitemap-page']);
 
 /**
  * Checks whether a safety directory section has translated content in the given locale.
