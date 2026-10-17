@@ -71,7 +71,7 @@ export default defineConfig({
   trailingSlash: 'always',
   build: {
     inlineStylesheets: 'auto',
-    concurrency: 4,
+    concurrency: 2,
   },
   i18n: {
     defaultLocale: 'en',
@@ -129,5 +129,10 @@ export default defineConfig({
   ],
   vite: {
     plugins: [tailwindcss()],
+    build: {
+      rollupOptions: {
+        maxParallelFileOps: 2,
+      },
+    },
   },
 });
