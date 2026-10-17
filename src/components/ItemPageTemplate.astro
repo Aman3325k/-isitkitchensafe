@@ -33,25 +33,49 @@ const applianceInPhrase = getApplianceIn(data.appliance, lang);
 const currentItemsDataset = lang === 'es' ? itemsEs : lang === 'pt' ? itemsPt : lang === 'zh-cn' ? itemsZh : lang === 'ja' ? itemsJa : itemsData;
 
 // Get details for related items (minimum 5 related item pages)
-let relatedItems = currentItemsDataset.filter(item => data.relatedItems?.includes(item.slug) && item.slug !== data.slug);
-if (relatedItems.length < 5) {
-  const sameApplianceItems = currentItemsDataset.filter(item => item.appliance === data.appliance && item.slug !== data.slug && !data.relatedItems?.includes(item.slug));
-  const existingSlugs = new Set(relatedItems.map(i => i.slug));
-  for (const item of sameApplianceItems) {
-    if (relatedItems.length >= 5) break;
-    if (!existingSlugs.has(item.slug)) {
-      relatedItems.push(item);
-      existingSlugs.add(item.slug);
-    }
+let relatedItems: any[] = [];
+const seenSlugs = new Set<string>();
+if (data.slug) {
+  seenSlugs.add(data.slug);
+}
+
+for (const relatedSlug of (data.relatedItems || [])) {
+  if (seenSlugs.has(relatedSlug)) continue;
+  // Pick the entry matching the current page's appliance; fall back to the first only if none match
+  const matchingSameAppliance = currentItemsDataset.find(
+    (item: any) => item.slug === relatedSlug && item.appliance === data.appliance
+  );
+  const picked = matchingSameAppliance || currentItemsDataset.find(
+    (item: any) => item.slug === relatedSlug
+  );
+  if (picked) {
+    relatedItems.push(picked);
+    seenSlugs.add(relatedSlug);
   }
 }
+
 if (relatedItems.length < 5) {
-  const anyItems = currentItemsDataset.filter(item => item.slug !== data.slug && !relatedItems.some(ri => ri.slug === item.slug));
+  const sameApplianceItems = currentItemsDataset.filter(
+    (item: any) => item.appliance === data.appliance && !seenSlugs.has(item.slug)
+  );
+  for (const item of sameApplianceItems) {
+    if (relatedItems.length >= 5) break;
+    relatedItems.push(item);
+    seenSlugs.add(item.slug);
+  }
+}
+
+if (relatedItems.length < 5) {
+  const anyItems = currentItemsDataset.filter(
+    (item: any) => !seenSlugs.has(item.slug)
+  );
   for (const item of anyItems) {
     if (relatedItems.length >= 5) break;
     relatedItems.push(item);
+    seenSlugs.add(item.slug);
   }
 }
+
 relatedItems = relatedItems.slice(0, 5);
 
 const allGuides = resolveAllGuidesForItem(data.item, data.slug);
