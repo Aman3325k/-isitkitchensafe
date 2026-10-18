@@ -49,7 +49,8 @@ const SPECIAL_PAGES = [
   'tools/water-filter-efficiency-analyzer',
   'tools/air-fryer-acrylamide-calculator',
   'tools/slow-cooker-safety-simulator',
-  'tools/microwave-radiation-leakage-evaluator'
+  'tools/microwave-radiation-leakage-evaluator',
+  'tools/induction-cooktop-emf-safety-modeler'
 ];
 
 const esSlugs = new Set([
