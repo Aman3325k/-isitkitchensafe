@@ -1,0 +1,1300 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import waterFilterData from '../data/water-filter-efficiency-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  techLabel: string;
+  sourceLabel: string;
+  tdsLabel: string;
+  hardnessLabel: string;
+  pressureLabel: string;
+  ageLabel: string;
+  remineralizeLabel: string;
+  remineralizeToggleOn: string;
+  remineralizeToggleOff: string;
+  presetsTitle: string;
+  presetCity: string;
+  presetOldPipes: string;
+  presetWell: string;
+  presetPfas: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  overallStatusLabel: string;
+  statusOptimal: string;
+  statusDemineralized: string;
+  statusSelective: string;
+  statusHazardous: string;
+  statusFouled: string;
+  fluorideAlertTitle: string;
+  fluorideAlertText: string;
+  leadAlertTitle: string;
+  leadAlertText: string;
+  demineralizedAlertTitle: string;
+  demineralizedAlertText: string;
+  membraneFoulingAlertTitle: string;
+  membraneFoulingAlertText: string;
+  metricsTitle: string;
+  feedTdsLabel: string;
+  permeateTdsLabel: string;
+  reductionTdsLabel: string;
+  waterPhLabel: string;
+  remineralizationScoreLabel: string;
+  fluxEfficiencyLabel: string;
+  contaminantsTitle: string;
+  pfasRejectionLabel: string;
+  leadRejectionLabel: string;
+  fluorideRejectionLabel: string;
+  microplasticsRejectionLabel: string;
+  arsenicRejectionLabel: string;
+  chloraminesRejectionLabel: string;
+  guideTitle: string;
+  guideSub: string;
+  copyReportBtn: string;
+  reportCopied: string;
+  crossLinkTitle: string;
+  crossLinkSousVide: string;
+  crossLinkOil: string;
+  crossLinkMigration: string;
+  crossLinkScorecard: string;
+  crossLinkPlasticizer: string;
+}
+
+const DICT: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Water Quality & Membrane Kinetics Laboratory",
+    title: "Water Fluoride, Microplastics & Heavy Metal Filter Efficiency Analyzer",
+    subtitle: "Evidence-based mathematical evaluation of membrane rejection kinetics, EPA NPDWR 2024 PFAS removal, lead and fluoride elimination, and post-RO remineralization health scoring across major filtration technologies.",
+    controlsTitle: "Water Quality & System Parameters",
+    controlsSub: "Configure filtration technology, tap water source profile, incoming TDS, hardness, line pressure, and membrane age to analyze contaminant rejection and remineralization.",
+    techLabel: "Filtration Technology & Membrane Type",
+    sourceLabel: "Tap Water Quality Profile",
+    tdsLabel: "Feed Water Total Dissolved Solids (TDS):",
+    hardnessLabel: "Water Hardness (CaCO₃):",
+    pressureLabel: "Feed Water Line Pressure:",
+    ageLabel: "Filter / Membrane Operating Age:",
+    remineralizeLabel: "Post-RO Remineralization Stage (Calcite / Corosex)",
+    remineralizeToggleOn: "Enabled (Alkaline Remineralized)",
+    remineralizeToggleOff: "Disabled (Pure Acidic Demineralized RO)",
+    presetsTitle: "Water Quality Scenarios (One-Click)",
+    presetCity: "🏙️ Standard City Tap",
+    presetOldPipes: "🚰 Aging Lead Pipes (⚠️)",
+    presetWell: "🌾 Hard Well Water",
+    presetPfas: "🏭 PFAS Contamination Zone (⚠️)",
+    diagnosticTitle: "Contaminant Rejection & Health Scorecard",
+    diagnosticSub: "Calculated via Donnan electrostatic exclusion, solution-diffusion flux equations, EPA NPDWR 2024 standards, and WHO remineralization guidelines.",
+    overallStatusLabel: "Filtration Efficacy & Clinical Safety Verdict",
+    statusOptimal: "EXCELLENT: FULL CLINICAL PROTECTION & OPTIMAL MINERALIZATION",
+    statusDemineralized: "CAUTION: COMPLETE TOXIN REMOVAL BUT DEMINERALIZED ACIDIC WATER",
+    statusSelective: "MODERATE: MINERAL PRESERVING BUT INEFFECTIVE AGAINST FLUORIDE/TDS",
+    statusHazardous: "HAZARD: INSUFFICIENT BARRIER AGAINST HEAVY METALS & PFAS",
+    statusFouled: "WARNING: SEVERE MEMBRANE FOULING & FLUX DECLINE DETECTED",
+    fluorideAlertTitle: "⚠️ Fluoride Removal Barrier Limitation",
+    fluorideAlertText: "The selected filter does NOT eliminate municipal fluoride (F⁻). Fluoride requires Reverse Osmosis Donnan electrostatic repulsion or specialized activated alumina cartridges.",
+    leadAlertTitle: "⚠️ Severe Heavy Metal Lead Hazard",
+    leadAlertText: "The incoming water contains high lead levels from aging pipes. Standard gravity pitchers and basic ultrafiltration cannot reliably protect against dissolved ionic lead Pb²⁺.",
+    demineralizedAlertTitle: "ℹ️ WHO Demineralized Water Advisory",
+    demineralizedAlertText: "Pure RO water without remineralization is stripped of essential calcium and magnesium, resulting in mildly acidic pH (~6.0). Adding a calcite/corosex remineralization cartridge restores neutral-alkaline pH and dietary minerals.",
+    membraneFoulingAlertTitle: "⚠️ Accelerated Membrane Scaling Warning",
+    membraneFoulingAlertText: "Hard feed water (> 180 ppm CaCO₃) combined with extended membrane age has induced calcium carbonate crystallization and scaling, reducing flow flux and membrane rejection efficiency.",
+    metricsTitle: "Membrane Filtration & Mineralization Metrics",
+    feedTdsLabel: "Incoming Feed TDS",
+    permeateTdsLabel: "Filtered Permeate TDS",
+    reductionTdsLabel: "Overall TDS Reduction",
+    waterPhLabel: "Estimated Water pH",
+    remineralizationScoreLabel: "Remineralization Health Score",
+    fluxEfficiencyLabel: "Membrane Flux & Condition",
+    contaminantsTitle: "Contaminant Barrier Rejection Performance",
+    pfasRejectionLabel: "PFAS / PFOA / GenX (EPA 4.0 ppt Limit)",
+    leadRejectionLabel: "Lead Pb²⁺ / Colloidal (EPA 10 ppb Limit)",
+    fluorideRejectionLabel: "Fluoride F⁻ (0.7 ppm Municipal Level)",
+    microplasticsRejectionLabel: "Microplastics & Nanoplastics (< 1 µm)",
+    arsenicRejectionLabel: "Arsenic (10 ppb EPA MCL)",
+    chloraminesRejectionLabel: "Chloramines & Disinfection Byproducts",
+    guideTitle: "Certified Filter Technologies & Remineralization Science",
+    guideSub: "Understanding NSF/ANSI standards and healthy mineralization:",
+    copyReportBtn: "📋 Copy Water Filtration Safety Audit",
+    reportCopied: "✓ Water Safety Audit Copied to Clipboard!",
+    crossLinkTitle: "Explore Companion Kitchen Safety Tools:",
+    crossLinkSousVide: "Sous Vide Plastic & Botulinum Modeler",
+    crossLinkOil: "Cooking Oil Smoke Point Simulator",
+    crossLinkMigration: "Food Contact Chemical Migration Predictor",
+    crossLinkScorecard: "Kitchenware PFAS & Toxic Leaching Scorecard",
+    crossLinkPlasticizer: "Household Microplastic Blood Burden Estimator"
+  },
+  es: {
+    badge: "Laboratorio de Calidad del Agua y Cinética de Membranas",
+    title: "Analizador de Eficiencia de Filtros: Fluoruro, Microplásticos y Metales Pesados",
+    subtitle: "Evaluación matemática de cinéticas de rechazo de membranas, eliminación de PFAS según EPA NPDWR 2024, plomo y fluoruro, y puntuación de salud de remineralización post-ósmosis inversa.",
+    controlsTitle: "Parámetros del Agua y del Sistema de Filtración",
+    controlsSub: "Configura la tecnología de filtrado, el perfil de agua de red, TDS entrante, dureza, presión y antigüedad de membrana para analizar la retención de tóxicos.",
+    techLabel: "Tecnología de Filtración y Tipo de Membrana",
+    sourceLabel: "Perfil de Calidad del Agua del Grifo",
+    tdsLabel: "Sólidos Totales Disueltos (TDS) de Entrada:",
+    hardnessLabel: "Dureza del Agua (CaCO₃):",
+    pressureLabel: "Presión de Red de Entrada:",
+    ageLabel: "Antigüedad / Uso del Filtro:",
+    remineralizeLabel: "Etapa de Remineralización Post-Ósmosis (Calcita / Corosex)",
+    remineralizeToggleOn: "Activada (Agua Alcalina Remineralizada)",
+    remineralizeToggleOff: "Desactivada (Ósmosis Pura Ácida Desmineralizada)",
+    presetsTitle: "Escenarios de Calidad del Agua (Un Clic)",
+    presetCity: "🏙️ Red Municipal Urbana Estándar",
+    presetOldPipes: "🚰 Tuberías Antiguas con Plomo (⚠️)",
+    presetWell: "🌾 Pozo Privado (Agua Muy Dura)",
+    presetPfas: "🏭 Zona con Contaminación de PFAS (⚠️)",
+    diagnosticTitle: "Evaluación de Rechazo de Contaminantes y Salud",
+    diagnosticSub: "Calculado mediante repulsión electrostática de Donnan, ecuaciones de difusión-solución, normas EPA NPDWR y directrices de la OMS.",
+    overallStatusLabel: "Eficacia de Filtración y Dictamen Clínico de Seguridad",
+    statusOptimal: "EXCELENTE: MÁXIMA PROTECCIÓN CLÍNICA Y MINERALIZACIÓN ÓPTIMA",
+    statusDemineralized: "PRECAUCIÓN: RETENCIÓN TOTAL DE TÓXICOS PERO AGUA ÁCIDA DESMINERALIZADA",
+    statusSelective: "MODERADO: PRESERVA MINERALES PERO NO ELIMINA FLUORURO NI TDS",
+    statusHazardous: "PELIGRO: BARRERA INSUFICIENTE CONTRA METALES PESADOS Y PFAS",
+    statusFouled: "ADVERTENCIA: INCRUSTACIÓN SEVERA DE MEMBRANA Y CAÍDA DE CAUDAL",
+    fluorideAlertTitle: "⚠️ Límite de Retención de Fluoruro",
+    fluorideAlertText: "El filtro seleccionado NO elimina el fluoruro municipal (F⁻). El fluoruro requiere la repulsión electrostática de la Ósmosis Inversa o alúmina activada específica.",
+    leadAlertTitle: "⚠️ Peligro Severo por Plomo",
+    leadAlertText: "El agua contiene niveles peligrosos de plomo por tuberías antiguas. Las jarras básicas y la ultrafiltración no protegen de forma fiable contra el plomo iónico disuelto Pb²⁺.",
+    demineralizedAlertTitle: "ℹ️ Aviso OMS sobre Agua Desmineralizada",
+    demineralizedAlertText: "El agua pura de ósmosis sin remineralizar carece de calcio y magnesio, quedando ligeramente ácida (pH ~6.0). Un cartucho de calcita/corosex restablece el pH neutro-alcalino y minerales esenciales.",
+    membraneFoulingAlertTitle: "⚠️ Alerta de Incrustación y Envejecimiento de Membrana",
+    membraneFoulingAlertText: "El agua dura (> 180 ppm CaCO₃) unida al tiempo de uso ha provocado incrustaciones de carbonato de calcio, reduciendo el flujo y la capacidad de rechazo.",
+    metricsTitle: "Métricas de Filtración y Mineralización",
+    feedTdsLabel: "TDS de Entrada",
+    permeateTdsLabel: "TDS Filtrado (Permeado)",
+    reductionTdsLabel: "Reducción Total de TDS",
+    waterPhLabel: "pH Estimado del Agua",
+    remineralizationScoreLabel: "Puntuación de Remineralización",
+    fluxEfficiencyLabel: "Caudal y Estado de Membrana",
+    contaminantsTitle: "Rendimiento de Barrera contra Contaminantes",
+    pfasRejectionLabel: "PFAS / PFOA / GenX (Límite EPA 4.0 ppt)",
+    leadRejectionLabel: "Plomo Pb²⁺ / Coloidal (Límite EPA 10 ppb)",
+    fluorideRejectionLabel: "Fluoruro F⁻ (Nivel Urbano 0.7 ppm)",
+    microplasticsRejectionLabel: "Microplásticos y Nanoplásticos (< 1 µm)",
+    arsenicRejectionLabel: "Arsénico (Límite EPA 10 ppb)",
+    chloraminesRejectionLabel: "Cloraminas y Subproductos de Cloración",
+    guideTitle: "Guía de Tecnologías Certificadas y Remineralización",
+    guideSub: "Normas NSF/ANSI y pautas de mineralización saludable:",
+    copyReportBtn: "📋 Copiar Auditoría de Calidad y Seguridad del Agua",
+    reportCopied: "✓ ¡Auditoría de Agua Copiada al Portapapeles!",
+    crossLinkTitle: "Explora Herramientas Complementarias de Seguridad:",
+    crossLinkSousVide: "Modelador de Seguridad Sous Vide",
+    crossLinkOil: "Simulador de Punto de Humo de Aceites",
+    crossLinkMigration: "Predictor de Migración Química en Alimentos",
+    crossLinkScorecard: "Scorecard de Lixiviación Tóxica y PFAS",
+    crossLinkPlasticizer: "Estimador de Carga de Microplásticos"
+  },
+  pt: {
+    badge: "Laboratório de Qualidade da Água e Cinética de Membranas",
+    title: "Analisador de Eficiência de Filtros: Fluoreto, Microplásticos e Metais Pesados",
+    subtitle: "Avaliação matemática da cinética de rejeição de membranas, remoção de PFAS (EPA 2024), retenção de chumbo e fluoreto, e pontuação de saúde da remineralização pós-osmose reversa.",
+    controlsTitle: "Parâmetros da Água e do Sistema de Filtragem",
+    controlsSub: "Configure a tecnologia de filtragem, o perfil da água de torneira, TDS de entrada, dureza, pressão e tempo de uso da membrana para analisar a retenção de poluentes.",
+    techLabel: "Tecnologia de Filtragem e Tipo de Membrana",
+    sourceLabel: "Perfil de Qualidade da Água da Torneira",
+    tdsLabel: "Sólidos Dissolvidos Totais (TDS) de Entrada:",
+    hardnessLabel: "Dureza da Água (CaCO₃):",
+    pressureLabel: "Pressão de Rede de Entrada:",
+    ageLabel: "Tempo de Uso / Idade do Filtro:",
+    remineralizeLabel: "Etapa de Remineralização Pós-Osmose (Calcita / Corosex)",
+    remineralizeToggleOn: "Ativada (Água Alcalina Remineralizada)",
+    remineralizeToggleOff: "Desativada (Osmose Pura Ácida Desmineralizada)",
+    presetsTitle: "Cenários de Qualidade da Água (Um Clique)",
+    presetCity: "🏙️ Rede Pública Urbana Padrão",
+    presetOldPipes: "🚰 Tubulações Antigas de Chumbo (⚠️)",
+    presetWell: "🌾 Poço Artesiano (Água Muito Dura)",
+    presetPfas: "🏭 Zona com Poluição por PFAS (⚠️)",
+    diagnosticTitle: "Avaliação de Retenção de Contaminantes e Saúde",
+    diagnosticSub: "Calculado por repulsão eletrostática de Donnan, equações de fluxo de solução-difusão, padrões EPA NPDWR 2024 e diretrizes da OMS.",
+    overallStatusLabel: "Eficácia da Filtragem e Parecer Clínico de Segurança",
+    statusOptimal: "EXCELENTE: MÁXIMA PROTEÇÃO CLÍNICA E MINERALIZAÇÃO IDEAL",
+    statusDemineralized: "ATENÇÃO: RETENÇÃO TOTAL DE TÓXICOS MAS ÁGUA ÁCIDA DESMINERALIZADA",
+    statusSelective: "MODERADO: PRESERVA MINERAIS MAS NÃO RETÉM FLUORETO NEM TDS",
+    statusHazardous: "PERIGO: BARREIRA INSUFICIENTE CONTRA METAIS PESADOS E PFAS",
+    statusFouled: "AVISO: INCRUSTAÇÃO GRAVE DA MEMBRANA E QUEDA DE VAZÃO",
+    fluorideAlertTitle: "⚠️ Limite de Retenção de Fluoreto",
+    fluorideAlertText: "O filtro selecionado NÃO remove o fluoreto da água da rede (F⁻). A remoção requer a repulsão eletrostática da Osmose Reversa ou cartuchos de alumina ativada.",
+    leadAlertTitle: "⚠️ Risco Severo de Chumbo",
+    leadAlertText: "A água contém altos teores de chumbo devido a tubulações antigas. Jarras comuns e ultrafiltração não bloqueiam de forma confiável o chumbo iônico dissolvido Pb²⁺.",
+    demineralizedAlertTitle: "ℹ️ Alerta da OMS sobre Água Desmineralizada",
+    demineralizedAlertText: "A água pura de osmose sem remineralização é desprovida de cálcio e magnésio, tornando-se ácida (pH ~6.0). A adição de calcita/corosex restaura o pH alcalino e os minerais essenciais.",
+    membraneFoulingAlertTitle: "⚠️ Alerta de Incrustação e Envelhecimento da Membrana",
+    membraneFoulingAlertText: "Água dura (> 180 ppm CaCO₃) combinada ao uso prolongado gerou incrustações de calcário, diminuindo a vazão e o poder de retenção da membrana.",
+    metricsTitle: "Métricas de Filtragem e Mineralização",
+    feedTdsLabel: "TDS de Entrada",
+    permeateTdsLabel: "TDS Filtrado (Permeado)",
+    reductionTdsLabel: "Redução Total de TDS",
+    waterPhLabel: "pH Estimado da Água",
+    remineralizationScoreLabel: "Pontuação de Remineralização",
+    fluxEfficiencyLabel: "Vazão e Estado da Membrana",
+    contaminantsTitle: "Desempenho da Barreira contra Poluentes",
+    pfasRejectionLabel: "PFAS / PFOA / GenX (Limite EPA 4.0 ppt)",
+    leadRejectionLabel: "Chumbo Pb²⁺ / Coloidal (Limite EPA 10 ppb)",
+    fluorideRejectionLabel: "Fluoreto F⁻ (Nível Urbano 0.7 ppm)",
+    microplasticsRejectionLabel: "Microplásticos e Nanoplásticos (< 1 µm)",
+    arsenicRejectionLabel: "Arsênio (Limite EPA 10 ppb)",
+    chloraminesRejectionLabel: "Cloraminas e Subprodutos da Cloração",
+    guideTitle: "Guia de Tecnologias Certificadas e Mineralização Saudável",
+    guideSub: "Normas NSF/ANSI e benefícios da remineralização:",
+    copyReportBtn: "📋 Copiar Auditoria de Segurança da Água",
+    reportCopied: "✓ Relatório de Segurança da Água Copiado!",
+    crossLinkTitle: "Explore Ferramentas Complementares de Segurança:",
+    crossLinkSousVide: "Modelador de Segurança Sous Vide",
+    crossLinkOil: "Simulador de Ponto de Fumaça de Óleos",
+    crossLinkMigration: "Preditor de Migração Química em Alimentos",
+    crossLinkScorecard: "Scorecard de Lixiviação Tóxica e PFAS",
+    crossLinkPlasticizer: "Estimador de Carga de Microplásticos"
+  },
+  "zh-cn": {
+    badge: "水质化学与高分子分离膜动力学实验室",
+    title: "反渗透净水器效率与氟化物、微塑料及重金属过滤评估工具",
+    subtitle: "严格基于唐南（Donnan）静电排斥效应、溶解-扩散传质动力学、美国 EPA 2024 饮用水 PFAS 新规及 WHO 去矿物质水健康指南，深度模拟反渗透（RO）、超滤（UF）、烧结活性炭滤芯对氟化物、纳米微塑料、铅、全氟化合物的拦截率及矿化健康评分。",
+    controlsTitle: "进水水质与净水系统参数配置",
+    controlsSub: "自由配置净水过滤技术、水源水质概况、原水 TDS、水质硬度、供水管网水压及滤膜服役月数，实时测算各类污染物的穿透率与出水矿化度。",
+    techLabel: "净水过滤技术与膜分离工艺",
+    sourceLabel: "自来水水源与管网水质概况",
+    tdsLabel: "进水总溶解固体（TDS）：",
+    hardnessLabel: "进水水质硬度（碳酸钙计）：",
+    pressureLabel: "自来水进水管网压力：",
+    ageLabel: "滤芯 / 反渗透膜服役月数：",
+    remineralizeLabel: "RO 渗透液后置富氢矿化弱碱滤芯（方解石 / 氧化镁）",
+    remineralizeToggleOn: "已开启（富含钙镁微量元素 / 弱碱性）",
+    remineralizeToggleOff: "未开启（纯净水脱盐呈微酸性 pH 6.0）",
+    presetsTitle: "典型自来水水质场景（一键载入）",
+    presetCity: "🏙️ 标准市政自来水",
+    presetOldPipes: "🚰 老旧铸铁镀锌水管（铅超标 ⚠️）",
+    presetWell: "🌾 北方高硬度地下深井水",
+    presetPfas: "🏭 工业全氟化工污染区（PFAS 爆表 ⚠️）",
+    diagnosticTitle: "水污染物拦截效率与矿化健康报告卡",
+    diagnosticSub: "遵循 NSF/ANSI 58（反渗透）、NSF 53（健康毒理危害）及世界卫生组织饮用水水质安全准则。",
+    overallStatusLabel: "净水技术阻隔效率与医学临床安全评级",
+    statusOptimal: "极佳：临床级全谱系毒素阻隔与微量元素黄金平衡",
+    statusDemineralized: "注意：完全清除有毒重金属，但长期饮用偏酸性纯去离子水",
+    statusSelective: "中等：完整保留天然矿物质，但无法阻隔氟化物与无机盐",
+    statusHazardous: "高危：无法有效拦截老旧管网铅与永久化学品 PFAS",
+    statusFouled: "警告：钙镁碳酸盐严重结垢沉积，滤膜产水率与脱盐率暴跌",
+    fluorideAlertTitle: "⚠️ 氟离子截留能力物理限制警告",
+    fluorideAlertText: "您当前选中的滤芯材质无法滤除市政饮用水中的氟化物（F⁻）。有效去除氟离子必须依靠孔径在 0.1 纳米的反渗透膜唐南静电排斥，或专用活性氧化铝/骨炭滤料。",
+    leadAlertTitle: "⚠️ 老旧水管重金属铅中毒极高风险",
+    leadAlertText: "当前水源存在严重铅污染（管网老化析出）。普通家用重力滤水壶与超滤膜对水溶性二价铅离子（Pb²⁺）拦截率不足，无法保护婴幼儿神经发育安全。",
+    demineralizedAlertTitle: "ℹ️ 世界卫生组织（WHO）去矿物质水警示",
+    demineralizedAlertText: "反渗透纯水彻底过滤了人体必须的钙、镁离子，出水呈现微酸性（pH 6.0 左右）。建议加装食品级方解石/氧化镁矿化滤芯，将出水恢复为微弱碱性（pH 7.5-8.2）。",
+    membraneFoulingAlertTitle: "⚠️ 膜表面碳酸钙严重污堵结垢预警",
+    membraneFoulingAlertText: "原水硬度极高（> 180 ppm）且滤膜长期服役，钙镁结晶已阻塞聚酰胺膜孔，导致纯水产水量下降且部分无机离子开始穿透渗透膜。",
+    metricsTitle: "水质纯化动力学与出水生化指标",
+    feedTdsLabel: "进水原水 TDS",
+    permeateTdsLabel: "出水净水 TDS",
+    reductionTdsLabel: "总无机盐去除率",
+    waterPhLabel: "出水酸碱度预估（pH）",
+    remineralizationScoreLabel: "矿化健康指数",
+    fluxEfficiencyLabel: "滤膜通量与服役工况",
+    contaminantsTitle: "各类危险化学污染物拦截效能评估",
+    pfasRejectionLabel: "PFAS 全氟化合物（EPA 4.0 ppt 标准）",
+    leadRejectionLabel: "重金属铅（EPA 10 ppb 极值标准）",
+    fluorideRejectionLabel: "氟化物离子（0.7 ppm 市政添加标准）",
+    microplasticsRejectionLabel: "微塑料与纳米塑料（< 1 微米阻断）",
+    arsenicRejectionLabel: "剧毒无机砷（EPA 10 ppb 极值）",
+    chloraminesRejectionLabel: "余氯、氯胺与致癌消毒副产物（THMs）",
+    guideTitle: "权威净水膜认证标准与科学饮水指南",
+    guideSub: "NSF/ANSI 58、53、401 认证深度解析与矿物质吸收机理：",
+    copyReportBtn: "📋 复制家庭饮用水安全过滤诊断报告",
+    reportCopied: "✓ 水质安全诊断报告已成功复制到剪贴板！",
+    crossLinkTitle: "探索更多厨房材质与健康安全工具：",
+    crossLinkSousVide: "低温慢煮塑料溶出与肉毒杆菌模型",
+    crossLinkOil: "食用油发烟点与致癌醛类模拟器",
+    crossLinkMigration: "食品接触化学物质迁移模型",
+    crossLinkScorecard: "厨具重金属与 PFAS 溶出测评",
+    crossLinkPlasticizer: "微塑料与增塑剂血液负担评估"
+  },
+  ja: {
+    badge: "水質化学・高分子分離膜動力学研究所",
+    title: "逆浸透膜（RO）浄水器効率＆フッ素・マイクロプラスチック・重金属除去診断ツール",
+    subtitle: "ドナン静電排除理論、溶解拡散膜分離モデル、米EPA 2024年PFAS規制値、およびWHOミネラル除去水指針に基づき、逆浸透膜（RO）、限外ろ過（UF）、活性炭ブロックのフッ素・ナノプラスチック・鉛・PFAS除去効率および再ミネラル化健康度を科学的にシミュレート。",
+    controlsTitle: "原水水質および浄水システム設定",
+    controlsSub: "浄水技術、水道水質プロファイル、TDS、硬度、水圧、フィルター使用期間を設定し、有害物質の除去率と出水水質を算出します。",
+    techLabel: "浄水技術・分離膜タイプ",
+    sourceLabel: "水道水質・配管環境プロファイル",
+    tdsLabel: "原水・総溶解固形物（TDS）：",
+    hardnessLabel: "水質硬度（CaCO₃換算）：",
+    pressureLabel: "給水水圧（PSI）：",
+    ageLabel: "フィルター・RO膜の使用月数：",
+    remineralizeLabel: "RO透過水・後段ミネラル添加カートリッジ（方解石/酸化マグネシウム）",
+    remineralizeToggleOn: "有効（カルシウム・マグネシウム含有／弱アルカリ性）",
+    remineralizeToggleOff: "無効（完全脱塩純水／弱酸性 pH 6.0）",
+    presetsTitle: "代表的な水道水質シナリオ（ワンクリック）",
+    presetCity: "🏙️ 標準的な都市水道水",
+    presetOldPipes: "🚰 老朽化鉛給水管（鉛溶出 ⚠️）",
+    presetWell: "🌾 硬度の高い地下水・井戸水",
+    presetPfas: "🏭 PFAS汚染懸念エリア（⚠️）",
+    diagnosticTitle: "有害物質除去カルテ＆ミネラル健康診断",
+    diagnosticSub: "NSF/ANSI 58（RO膜規格）、NSF 53（健康影響規格）、米EPA基準、およびWHO飲料水指針に準拠。",
+    overallStatusLabel: "有害物質バリア性能＆臨床医学的総合判定",
+    statusOptimal: "極めて優秀：完全な臨床的有害物質除去＆理想的ミネラルバランス",
+    statusDemineralized: "注意：有害物質は完全除去、ただし過度な脱塩による弱酸性水",
+    statusSelective: "中等度：天然ミネラルを保持、ただしフッ素・無機塩は除去不可",
+    statusHazardous: "危険：老朽配管の鉛やPFASに対する阻止能力が不十分",
+    statusFouled: "警告：カルシウム結晶化による膜目詰まりと透水性能の低下",
+    fluorideAlertTitle: "⚠️ フッ素除去の物理的限界に関する警告",
+    fluorideAlertText: "選択された浄水方式では水道水のフッ化物（F⁻）を除去できません。フッ素の除去には逆浸透膜（RO）によるドナン静電排除、または特殊な活性アルミナろ材が必須です。",
+    leadAlertTitle: "⚠️ 老朽給水管による鉛汚染リスク警告",
+    leadAlertText: "給水管の老朽化により高濃度の鉛が含まれています。一般的なポット型浄水器や簡易UF膜では溶存態の鉛イオン（Pb²⁺）を安全に防ぎきれません。",
+    demineralizedAlertTitle: "ℹ️ WHO（世界保健機関）脱塩水摂取に関する勧告",
+    demineralizedAlertText: "再ミネラル化を行わない純粋なRO水は必須カルシウムやマグネシウムを失い、弱酸性（pH 6.0付近）になります。カルサイト／酸化マグネシウムによる再ミネラル化を推奨します。",
+    membraneFoulingAlertTitle: "⚠️ RO膜スケール結垢・寿命警告",
+    membraneFoulingAlertText: "原水の高硬度（> 180 ppm）と長期間の使用により、膜表面に炭酸カルシウムが結晶化し、透過流量とイオン阻止率が著しく低下しています。",
+    metricsTitle: "浄水プロセス動力学と水質指標",
+    feedTdsLabel: "原水 TDS",
+    permeateTdsLabel: "浄水後 TDS",
+    reductionTdsLabel: "総合塩類除去率",
+    waterPhLabel: "推定出水 pH",
+    remineralizationScoreLabel: "ミネラル健康度スコア",
+    fluxEfficiencyLabel: "透過流束＆膜健全度",
+    contaminantsTitle: "主要有害物質別・阻止除去パフォーマンス",
+    pfasRejectionLabel: "PFAS「永遠の化学物質」（EPA 4.0 ppt基準）",
+    leadRejectionLabel: "重金属・鉛（Pb²⁺）（EPA 10 ppb基準）",
+    fluorideRejectionLabel: "フッ化物イオン（0.7 ppm基準）",
+    microplasticsRejectionLabel: "マイクロ＆ナノプラスチック（< 1 µm）",
+    arsenicRejectionLabel: "無機ヒ素（EPA 10 ppb基準）",
+    chloraminesRejectionLabel: "クロラミン＆有害消毒副生成物（トリハロメタン）",
+    guideTitle: "浄水規格の真実とミネラル摂取の科学ガイド",
+    guideSub: "NSF/ANSI 58・53認証の重要性と健康的な飲水基準：",
+    copyReportBtn: "📋 水質安全診断レポートをコピー",
+    reportCopied: "✓ 診断レポートがクリップボードにコピーされました！",
+    crossLinkTitle: "他のキッチン安全性診断ツールを試す：",
+    crossLinkSousVide: "低温調理プラスチック溶出診断ツール",
+    crossLinkOil: "食用油発煙点シミュレーター",
+    crossLinkMigration: "食品接触化学物質移行予測ツール",
+    crossLinkScorecard: "調理器具PFAS溶出カルテ",
+    crossLinkPlasticizer: "マイクロプラスチック血液負荷計算機"
+  }
+};
+
+const d = DICT[lang] || DICT.en;
+const prefix = lang === 'en' ? '' : `/${lang}`;
+---
+
+<div class="water-filter-analyzer-widget space-y-8" data-lang={lang}>
+  <!-- Header Banner -->
+  <div class="bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-emerald-500/10 border border-cyan-500/30 rounded-3xl p-6 md:p-8 space-y-3">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-cyan-600 text-white shadow-xs">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+        </svg>
+        {d.badge}
+      </span>
+      <span class="text-xs font-mono text-muted">
+        EPA NPDWR 2024 &bull; NSF/ANSI 58/53 &bull; WHO
+      </span>
+    </div>
+    <div>
+      <h1 class="text-title-xl md:text-title-2xl font-bold text-ink tracking-tight">
+        {d.title}
+      </h1>
+      <p class="text-body text-xs md:text-sm leading-relaxed max-w-4xl mt-2">
+        {d.subtitle}
+      </p>
+    </div>
+  </div>
+
+  <!-- Interactive Grid: Controls (5 cols) & Analytics (7 cols) -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <!-- Left Column: Interactive Controls -->
+    <div class="lg:col-span-5 bg-surface-soft border border-hairline rounded-2xl p-6 space-y-6 shadow-xs">
+      <div>
+        <h2 class="text-title-md font-bold text-ink tracking-tight flex items-center gap-2">
+          <svg class="w-5 h-5 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+          </svg>
+          {d.controlsTitle}
+        </h2>
+        <p class="text-xs text-muted leading-relaxed mt-1">
+          {d.controlsSub}
+        </p>
+      </div>
+
+      <!-- Quick Water Quality Scenarios -->
+      <div class="space-y-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-muted block">
+          {d.presetsTitle}
+        </span>
+        <div class="grid grid-cols-2 gap-2">
+          <button 
+            type="button" 
+            class="water-preset-btn p-2.5 rounded-xl border border-hairline bg-canvas hover:border-cyan-500 hover:bg-cyan-500/5 text-[11px] font-medium text-ink text-left transition-all"
+            data-source="municipal-standard"
+            data-tds="280"
+            data-hardness="120"
+            data-pressure="60"
+            data-tech="reverse-osmosis"
+            data-remin="true"
+          >
+            {d.presetCity}
+          </button>
+          <button 
+            type="button" 
+            class="water-preset-btn p-2.5 rounded-xl border border-amber-500/30 bg-amber-500/5 hover:border-amber-500 text-[11px] font-medium text-amber-800 dark:text-amber-200 text-left transition-all"
+            data-source="municipal-aging-pipes"
+            data-tds="340"
+            data-hardness="160"
+            data-pressure="55"
+            data-tech="reverse-osmosis"
+            data-remin="true"
+          >
+            {d.presetOldPipes}
+          </button>
+          <button 
+            type="button" 
+            class="water-preset-btn p-2.5 rounded-xl border border-hairline bg-canvas hover:border-cyan-500 hover:bg-cyan-500/5 text-[11px] font-medium text-ink text-left transition-all"
+            data-source="private-well-hard"
+            data-tds="620"
+            data-hardness="380"
+            data-pressure="50"
+            data-tech="reverse-osmosis"
+            data-remin="true"
+          >
+            {d.presetWell}
+          </button>
+          <button 
+            type="button" 
+            class="water-preset-btn p-2.5 rounded-xl border border-rose-500/30 bg-rose-500/5 hover:border-rose-500 text-[11px] font-medium text-rose-700 dark:text-rose-300 text-left transition-all"
+            data-source="industrial-pfas-zone"
+            data-tds="240"
+            data-hardness="90"
+            data-pressure="65"
+            data-tech="reverse-osmosis"
+            data-remin="true"
+          >
+            {d.presetPfas}
+          </button>
+        </div>
+      </div>
+
+      <!-- Filtration Technology Selector -->
+      <div class="space-y-2">
+        <label for="tech-select" class="block text-xs font-bold uppercase tracking-wider text-ink">
+          {d.techLabel}
+        </label>
+        <select 
+          id="tech-select" 
+          class="w-full p-3 rounded-xl border border-hairline bg-canvas text-ink text-xs md:text-sm focus:ring-2 focus:ring-cyan-500 focus:outline-none transition-all font-medium"
+        >
+          {waterFilterData.technologies.map(t => (
+            <option value={t.id} selected={t.id === 'reverse-osmosis'}>
+              {t.name} ({t.badge})
+            </option>
+          ))}
+        </select>
+        <p id="tech-pore-text" class="text-[11px] text-muted leading-relaxed">
+          Pore Size: 0.0001 µm (0.1 nm) &bull; MWCO: 100-200 Da &bull; Donnan exclusion
+        </p>
+      </div>
+
+      <!-- Water Source Profile Selector -->
+      <div class="space-y-2">
+        <label for="source-select" class="block text-xs font-bold uppercase tracking-wider text-ink">
+          {d.sourceLabel}
+        </label>
+        <select 
+          id="source-select" 
+          class="w-full p-3 rounded-xl border border-hairline bg-canvas text-ink text-xs md:text-sm focus:ring-2 focus:ring-cyan-500 focus:outline-none transition-all"
+        >
+          {waterFilterData.waterSources.map(s => (
+            <option value={s.id} selected={s.id === 'municipal-standard'}>
+              {s.name}
+            </option>
+          ))}
+        </select>
+        <p id="source-desc-text" class="text-[11px] text-muted leading-relaxed">
+          Treated surface or blended aquifer water. Moderately hard, fluoridated at 0.7 ppm, disinfected with chloramines.
+        </p>
+      </div>
+
+      <!-- Sliders Section -->
+      <!-- Feed TDS Slider -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <label for="tds-slider" class="text-xs font-bold uppercase tracking-wider text-ink">
+            {d.tdsLabel}
+          </label>
+          <span class="text-xs md:text-sm font-black font-mono text-cyan-600 dark:text-cyan-400">
+            <span id="tds-val-display">280</span> ppm (mg/L)
+          </span>
+        </div>
+        <input 
+          id="tds-slider" 
+          type="range" 
+          min="50" 
+          max="1000" 
+          step="10" 
+          value="280"
+          class="w-full accent-cyan-600 cursor-pointer h-2 bg-surface-strong rounded-lg"
+        />
+        <div class="flex justify-between text-[10px] text-muted font-mono">
+          <span>50 ppm (Mountain)</span>
+          <span>300 ppm (Avg Tap)</span>
+          <span>500 ppm (EPA Max)</span>
+          <span>1000 ppm</span>
+        </div>
+      </div>
+
+      <!-- Hardness Slider -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <label for="hardness-slider" class="text-xs font-bold uppercase tracking-wider text-ink">
+            {d.hardnessLabel}
+          </label>
+          <span class="text-xs md:text-sm font-black font-mono text-cyan-600 dark:text-cyan-400">
+            <span id="hardness-val-display">120</span> ppm (<span id="hardness-classification">Moderately Hard</span>)
+          </span>
+        </div>
+        <input 
+          id="hardness-slider" 
+          type="range" 
+          min="20" 
+          max="500" 
+          step="10" 
+          value="120"
+          class="w-full accent-cyan-600 cursor-pointer h-2 bg-surface-strong rounded-lg"
+        />
+        <div class="flex justify-between text-[10px] text-muted font-mono">
+          <span>&lt;60 Soft</span>
+          <span>120 Mod</span>
+          <span>180 Hard</span>
+          <span>&gt;300 Very Hard</span>
+        </div>
+      </div>
+
+      <!-- Line Pressure Slider -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <label for="pressure-slider" class="text-xs font-bold uppercase tracking-wider text-ink">
+            {d.pressureLabel}
+          </label>
+          <span class="text-xs md:text-sm font-black font-mono text-cyan-600 dark:text-cyan-400">
+            <span id="pressure-val-display">60</span> PSI
+          </span>
+        </div>
+        <input 
+          id="pressure-slider" 
+          type="range" 
+          min="30" 
+          max="95" 
+          step="5" 
+          value="60"
+          class="w-full accent-cyan-600 cursor-pointer h-2 bg-surface-strong rounded-lg"
+        />
+        <div class="flex justify-between text-[10px] text-muted font-mono">
+          <span>30 PSI (Low)</span>
+          <span>50-70 PSI (Ideal)</span>
+          <span>95 PSI (Booster)</span>
+        </div>
+      </div>
+
+      <!-- Filter / Membrane Operating Age Slider -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <label for="age-slider" class="text-xs font-bold uppercase tracking-wider text-ink">
+            {d.ageLabel}
+          </label>
+          <span class="text-xs md:text-sm font-black font-mono text-cyan-600 dark:text-cyan-400">
+            <span id="age-val-display">3</span> Months (<span id="age-condition-text">Fresh Membrane</span>)
+          </span>
+        </div>
+        <input 
+          id="age-slider" 
+          type="range" 
+          min="1" 
+          max="36" 
+          step="1" 
+          value="3"
+          class="w-full accent-cyan-600 cursor-pointer h-2 bg-surface-strong rounded-lg"
+        />
+        <div class="flex justify-between text-[10px] text-muted font-mono">
+          <span>1 mo (New)</span>
+          <span>12 mo (Annual)</span>
+          <span>24 mo (Target RO)</span>
+          <span>36 mo (End-of-Life)</span>
+        </div>
+      </div>
+
+      <!-- Remineralization Stage Toggle -->
+      <div class="p-4 rounded-xl border border-hairline bg-canvas space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="space-y-0.5">
+            <span class="text-xs font-bold text-ink block">{d.remineralizeLabel}</span>
+            <span id="remin-status-tag" class="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
+              {d.remineralizeToggleOn}
+            </span>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="remin-toggle" class="sr-only peer" checked>
+            <div class="w-11 h-6 bg-surface-strong peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-hairline after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+          </label>
+        </div>
+        <p class="text-[11px] text-muted leading-relaxed">
+          Adds food-grade calcite and corosex to infuse 25–45 ppm of bioavailable Ca²⁺/Mg²⁺, shifting pH from acidic 6.0 to crisp alkaline 7.6–8.0.
+        </p>
+      </div>
+    </div>
+
+    <!-- Right Column: Analytical & Diagnostic Output -->
+    <div class="lg:col-span-7 space-y-6">
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-6 md:p-8 space-y-6 shadow-xs">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 block mb-1">
+            Diagnostic Verification &bull; Rejection Kinetics
+          </span>
+          <h2 class="text-title-lg font-bold text-ink tracking-tight">
+            {d.diagnosticTitle}
+          </h2>
+          <p class="text-xs text-muted leading-relaxed mt-1">
+            {d.diagnosticSub}
+          </p>
+        </div>
+
+        <!-- Master Status Banner -->
+        <div id="status-banner" class="rounded-2xl p-5 border transition-all space-y-2 bg-emerald-500/10 border-emerald-500/30 text-emerald-950 dark:text-emerald-200">
+          <div class="flex items-center justify-between gap-2">
+            <span id="status-badge" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-600 text-white">
+              OPTIMAL
+            </span>
+            <span id="target-spec-tag" class="text-[11px] font-mono opacity-80">
+              NSF/ANSI 58 &bull; EPA NPDWR 2024
+            </span>
+          </div>
+          <div id="status-title-text" class="text-sm md:text-base font-bold">
+            {d.statusOptimal}
+          </div>
+          <p id="status-explanation-text" class="text-xs leading-relaxed opacity-90">
+            Reverse osmosis membrane provides complete barrier defense against sub-nanometer PFAS, dissolved lead, fluoride, and nanoplastics. Alkaline remineralization ensures healthy mineral intake.
+          </p>
+        </div>
+
+        <!-- Warning / Hazard Banners (Hidden by default, triggered conditionally) -->
+        <div id="fluoride-alert" class="hidden rounded-xl p-4 bg-amber-500/10 border border-amber-500/40 text-amber-900 dark:text-amber-200 space-y-1">
+          <div class="text-xs font-bold uppercase tracking-wide flex items-center gap-1.5 text-amber-700 dark:text-amber-300">
+            <span>{d.fluorideAlertTitle}</span>
+          </div>
+          <p class="text-xs leading-relaxed">
+            {d.fluorideAlertText}
+          </p>
+        </div>
+
+        <div id="lead-alert" class="hidden rounded-xl p-4 bg-rose-500/10 border border-rose-500/40 text-rose-900 dark:text-rose-200 space-y-1">
+          <div class="text-xs font-bold uppercase tracking-wide flex items-center gap-1.5 text-rose-700 dark:text-rose-300">
+            <span>{d.leadAlertTitle}</span>
+          </div>
+          <p class="text-xs leading-relaxed">
+            {d.leadAlertText}
+          </p>
+        </div>
+
+        <div id="demineralized-alert" class="hidden rounded-xl p-4 bg-blue-500/10 border border-blue-500/40 text-blue-900 dark:text-blue-200 space-y-1">
+          <div class="text-xs font-bold uppercase tracking-wide flex items-center gap-1.5 text-blue-700 dark:text-blue-300">
+            <span>{d.demineralizedAlertTitle}</span>
+          </div>
+          <p class="text-xs leading-relaxed">
+            {d.demineralizedAlertText}
+          </p>
+        </div>
+
+        <div id="fouling-alert" class="hidden rounded-xl p-4 bg-amber-500/10 border border-amber-500/40 text-amber-900 dark:text-amber-200 space-y-1">
+          <div class="text-xs font-bold uppercase tracking-wide flex items-center gap-1.5 text-amber-700 dark:text-amber-300">
+            <span>{d.membraneFoulingAlertTitle}</span>
+          </div>
+          <p class="text-xs leading-relaxed">
+            {d.membraneFoulingAlertText}
+          </p>
+        </div>
+
+        <!-- Key Biochemical Metrics (4 cards) -->
+        <div class="space-y-3">
+          <span class="text-xs font-bold uppercase tracking-wider text-muted block">
+            {d.metricsTitle}
+          </span>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="p-3.5 rounded-xl border border-hairline bg-canvas space-y-1">
+              <span class="text-[11px] text-muted block">{d.feedTdsLabel}</span>
+              <span class="text-base font-black font-mono text-ink">
+                <span id="metric-feed-tds">280</span> <span class="text-xs font-normal text-muted">ppm</span>
+              </span>
+            </div>
+            <div class="p-3.5 rounded-xl border border-hairline bg-canvas space-y-1">
+              <span class="text-[11px] text-muted block">{d.permeateTdsLabel}</span>
+              <span class="text-base font-black font-mono text-cyan-600 dark:text-cyan-400">
+                <span id="metric-permeate-tds">52</span> <span class="text-xs font-normal text-muted">ppm</span>
+              </span>
+            </div>
+            <div class="p-3.5 rounded-xl border border-hairline bg-canvas space-y-1">
+              <span class="text-[11px] text-muted block">{d.waterPhLabel}</span>
+              <span class="text-base font-black font-mono text-emerald-600 dark:text-emerald-400">
+                <span id="metric-ph-val">7.8</span> <span class="text-xs font-normal text-muted">pH</span>
+              </span>
+            </div>
+            <div class="p-3.5 rounded-xl border border-hairline bg-canvas space-y-1">
+              <span class="text-[11px] text-muted block">{d.remineralizationScoreLabel}</span>
+              <span class="text-base font-black font-mono text-indigo-600 dark:text-indigo-400">
+                <span id="metric-remin-score">96</span><span class="text-xs font-normal text-muted">/100</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contaminant Rejection Scorecard Table / Progress Bars -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-muted">
+              {d.contaminantsTitle}
+            </span>
+            <span class="text-[11px] font-mono text-muted">Rejection % &bull; Residual Level</span>
+          </div>
+
+          <div class="space-y-3 bg-canvas p-4 rounded-xl border border-hairline">
+            <!-- PFAS -->
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs">
+                <span class="font-medium text-ink flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-cyan-500"></span>
+                  {d.pfasRejectionLabel}
+                </span>
+                <span class="font-mono font-bold text-ink">
+                  <span id="rej-pfas-pct">98.9%</span> &bull; <span id="res-pfas-val" class="text-emerald-600 dark:text-emerald-400">&lt; 0.5 ppt</span>
+                </span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-surface-strong overflow-hidden">
+                <div id="bar-pfas" class="h-full bg-cyan-500 transition-all duration-300" style="width: 98.9%"></div>
+              </div>
+            </div>
+
+            <!-- Lead -->
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs">
+                <span class="font-medium text-ink flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  {d.leadRejectionLabel}
+                </span>
+                <span class="font-mono font-bold text-ink">
+                  <span id="rej-lead-pct">99.4%</span> &bull; <span id="res-lead-val" class="text-emerald-600 dark:text-emerald-400">&lt; 0.1 ppb</span>
+                </span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-surface-strong overflow-hidden">
+                <div id="bar-lead" class="h-full bg-emerald-500 transition-all duration-300" style="width: 99.4%"></div>
+              </div>
+            </div>
+
+            <!-- Fluoride -->
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs">
+                <span class="font-medium text-ink flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                  {d.fluorideRejectionLabel}
+                </span>
+                <span class="font-mono font-bold text-ink">
+                  <span id="rej-fluoride-pct">92.5%</span> &bull; <span id="res-fluoride-val" class="text-emerald-600 dark:text-emerald-400">0.05 ppm</span>
+                </span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-surface-strong overflow-hidden">
+                <div id="bar-fluoride" class="h-full bg-blue-500 transition-all duration-300" style="width: 92.5%"></div>
+              </div>
+            </div>
+
+            <!-- Microplastics & Nanoplastics -->
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs">
+                <span class="font-medium text-ink flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-teal-500"></span>
+                  {d.microplasticsRejectionLabel}
+                </span>
+                <span class="font-mono font-bold text-ink">
+                  <span id="rej-micro-pct">99.9%</span> &bull; <span id="res-micro-val" class="text-emerald-600 dark:text-emerald-400">0 particles/L</span>
+                </span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-surface-strong overflow-hidden">
+                <div id="bar-micro" class="h-full bg-teal-500 transition-all duration-300" style="width: 99.9%"></div>
+              </div>
+            </div>
+
+            <!-- Arsenic -->
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs">
+                <span class="font-medium text-ink flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                  {d.arsenicRejectionLabel}
+                </span>
+                <span class="font-mono font-bold text-ink">
+                  <span id="rej-arsenic-pct">96.2%</span> &bull; <span id="res-arsenic-val" class="text-emerald-600 dark:text-emerald-400">&lt; 0.4 ppb</span>
+                </span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-surface-strong overflow-hidden">
+                <div id="bar-arsenic" class="h-full bg-purple-500 transition-all duration-300" style="width: 96.2%"></div>
+              </div>
+            </div>
+
+            <!-- Chloramines -->
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs">
+                <span class="font-medium text-ink flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                  {d.chloraminesRejectionLabel}
+                </span>
+                <span class="font-mono font-bold text-ink">
+                  <span id="rej-chloramines-pct">96.0%</span> &bull; <span id="res-chloramines-val" class="text-emerald-600 dark:text-emerald-400">&lt; 0.1 ppm</span>
+                </span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-surface-strong overflow-hidden">
+                <div id="bar-chloramines" class="h-full bg-indigo-500 transition-all duration-300" style="width: 96.0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action / Copy Report Button -->
+        <div class="pt-2">
+          <button 
+            type="button" 
+            id="copy-water-report-btn" 
+            class="w-full py-3 px-4 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-medium text-xs md:text-sm transition-all shadow-xs flex items-center justify-center gap-2"
+          >
+            <span>{d.copyReportBtn}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Educational Guide: Certified Technologies & Remineralization Science -->
+  <div class="bg-surface-soft border border-hairline rounded-2xl p-6 md:p-8 space-y-6">
+    <div class="border-b border-hairline pb-4">
+      <h3 class="text-title-md font-bold text-ink">
+        {d.guideTitle}
+      </h3>
+      <p class="text-xs text-muted leading-relaxed mt-1">
+        {d.guideSub}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-canvas border border-cyan-500/30 rounded-xl p-5 space-y-2">
+        <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-500/10 text-cyan-700 dark:text-cyan-300">
+          NSF/ANSI 58 &bull; 0.0001 µm
+        </span>
+        <h4 class="font-bold text-ink text-sm">Reverse Osmosis Separation Kinetics</h4>
+        <p class="text-xs text-body leading-relaxed">
+          Thin-film composite (TFC) polyamide membranes reject contaminants via molecular sieving and Donnan electrostatic charge exclusion. Rejects 99%+ of lead ions, 98.9% of PFAS, and 92% of fluoride.
+        </p>
+      </div>
+
+      <div class="bg-canvas border border-emerald-500/30 rounded-xl p-5 space-y-2">
+        <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+          WHO Guidelines &bull; Calcite/Corosex
+        </span>
+        <h4 class="font-bold text-ink text-sm">Post-RO Remineralization Chemistry</h4>
+        <p class="text-xs text-body leading-relaxed">
+          Pure RO water is corrosive and slightly acidic (~6.0 pH). Passing water through a food-grade calcium carbonate and magnesium oxide bed dissolves 25–45 ppm of bioavailable minerals, buffering pH to 7.8.
+        </p>
+      </div>
+
+      <div class="bg-canvas border border-amber-500/30 rounded-xl p-5 space-y-2">
+        <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-700 dark:text-amber-300">
+          NSF 53 vs 42 &bull; Pitcher Limits
+        </span>
+        <h4 class="font-bold text-ink text-sm">Standard Pitcher Filter Realities</h4>
+        <p class="text-xs text-body leading-relaxed">
+          Standard gravity pitchers (NSF 42) only reduce taste and aesthetic chlorine. They fail to eliminate fluoride (0%), allow significant PFAS breakthrough, and can breed bacterial biofilms if unchanged.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Companion Tools Navigation -->
+  <div class="border-t border-hairline pt-8 space-y-4">
+    <h4 class="text-xs font-bold uppercase tracking-wider text-muted">
+      {d.crossLinkTitle}
+    </h4>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+      <a href={`${prefix}/tools/sous-vide-plastic-microbial-modeler/`} class="p-3.5 rounded-xl border border-hairline bg-surface-soft hover:border-cyan-500/50 hover:bg-canvas transition-all text-xs font-medium text-ink flex items-center justify-between">
+        <span>{d.crossLinkSousVide}</span>
+        <span class="text-muted">&rarr;</span>
+      </a>
+      <a href={`${prefix}/tools/culinary-oil-smoke-point-simulator/`} class="p-3.5 rounded-xl border border-hairline bg-surface-soft hover:border-cyan-500/50 hover:bg-canvas transition-all text-xs font-medium text-ink flex items-center justify-between">
+        <span>{d.crossLinkOil}</span>
+        <span class="text-muted">&rarr;</span>
+      </a>
+      <a href={`${prefix}/tools/food-contact-migration-predictor/`} class="p-3.5 rounded-xl border border-hairline bg-surface-soft hover:border-cyan-500/50 hover:bg-canvas transition-all text-xs font-medium text-ink flex items-center justify-between">
+        <span>{d.crossLinkMigration}</span>
+        <span class="text-muted">&rarr;</span>
+      </a>
+      <a href={`${prefix}/tools/toxic-leaching-scorecard/`} class="p-3.5 rounded-xl border border-hairline bg-surface-soft hover:border-cyan-500/50 hover:bg-canvas transition-all text-xs font-medium text-ink flex items-center justify-between">
+        <span>{d.crossLinkScorecard}</span>
+        <span class="text-muted">&rarr;</span>
+      </a>
+      <a href={`${prefix}/tools/plasticizer-microplastic-burden-estimator/`} class="p-3.5 rounded-xl border border-hairline bg-surface-soft hover:border-cyan-500/50 hover:bg-canvas transition-all text-xs font-medium text-ink flex items-center justify-between">
+        <span>{d.crossLinkPlasticizer}</span>
+        <span class="text-muted">&rarr;</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script define:vars={{ waterFilterData, d }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    const root = document.querySelector('.water-filter-analyzer-widget');
+    if (!root) return;
+
+    const techSelect = root.querySelector('#tech-select');
+    const sourceSelect = root.querySelector('#source-select');
+    const tdsSlider = root.querySelector('#tds-slider');
+    const hardnessSlider = root.querySelector('#hardness-slider');
+    const pressureSlider = root.querySelector('#pressure-slider');
+    const ageSlider = root.querySelector('#age-slider');
+    const reminToggle = root.querySelector('#remin-toggle');
+
+    const tdsValDisplay = root.querySelector('#tds-val-display');
+    const hardnessValDisplay = root.querySelector('#hardness-val-display');
+    const hardnessClassification = root.querySelector('#hardness-classification');
+    const pressureValDisplay = root.querySelector('#pressure-val-display');
+    const ageValDisplay = root.querySelector('#age-val-display');
+    const ageConditionText = root.querySelector('#age-condition-text');
+    const reminStatusTag = root.querySelector('#remin-status-tag');
+
+    const techPoreText = root.querySelector('#tech-pore-text');
+    const sourceDescText = root.querySelector('#source-desc-text');
+
+    const statusBanner = root.querySelector('#status-banner');
+    const statusBadge = root.querySelector('#status-badge');
+    const statusTitleText = root.querySelector('#status-title-text');
+    const statusExplanationText = root.querySelector('#status-explanation-text');
+    const targetSpecTag = root.querySelector('#target-spec-tag');
+
+    const fluorideAlert = root.querySelector('#fluoride-alert');
+    const leadAlert = root.querySelector('#lead-alert');
+    const demineralizedAlert = root.querySelector('#demineralized-alert');
+    const foulingAlert = root.querySelector('#fouling-alert');
+
+    const metricFeedTds = root.querySelector('#metric-feed-tds');
+    const metricPermeateTds = root.querySelector('#metric-permeate-tds');
+    const metricPhVal = root.querySelector('#metric-ph-val');
+    const metricReminScore = root.querySelector('#metric-remin-score');
+
+    const rejPfasPct = root.querySelector('#rej-pfas-pct');
+    const resPfasVal = root.querySelector('#res-pfas-val');
+    const barPfas = root.querySelector('#bar-pfas');
+
+    const rejLeadPct = root.querySelector('#rej-lead-pct');
+    const resLeadVal = root.querySelector('#res-lead-val');
+    const barLead = root.querySelector('#bar-lead');
+
+    const rejFluoridePct = root.querySelector('#rej-fluoride-pct');
+    const resFluorideVal = root.querySelector('#res-fluoride-val');
+    const barFluoride = root.querySelector('#bar-fluoride');
+
+    const rejMicroPct = root.querySelector('#rej-micro-pct');
+    const resMicroVal = root.querySelector('#res-micro-val');
+    const barMicro = root.querySelector('#bar-micro');
+
+    const rejArsenicPct = root.querySelector('#rej-arsenic-pct');
+    const resArsenicVal = root.querySelector('#res-arsenic-val');
+    const barArsenic = root.querySelector('#bar-arsenic');
+
+    const rejChloraminesPct = root.querySelector('#rej-chloramines-pct');
+    const resChloraminesVal = root.querySelector('#res-chloramines-val');
+    const barChloramines = root.querySelector('#bar-chloramines');
+
+    const copyBtn = root.querySelector('#copy-water-report-btn');
+    const presetBtns = root.querySelectorAll('.water-preset-btn');
+
+    function calculate() {
+      const techId = techSelect.value;
+      const sourceId = sourceSelect.value;
+      const feedTds = parseFloat(tdsSlider.value);
+      const hardness = parseFloat(hardnessSlider.value);
+      const pressure = parseFloat(pressureSlider.value);
+      const ageMonths = parseFloat(ageSlider.value);
+      const isRemineralized = reminToggle.checked;
+
+      const tech = waterFilterData.technologies.find(t => t.id === techId) || waterFilterData.technologies[0];
+      const source = waterFilterData.waterSources.find(s => s.id === sourceId) || waterFilterData.waterSources[0];
+
+      // Update Slider Displays
+      tdsValDisplay.textContent = feedTds;
+      hardnessValDisplay.textContent = hardness;
+      pressureValDisplay.textContent = pressure;
+      ageValDisplay.textContent = ageMonths;
+
+      // Hardness classification
+      if (hardness < 60) {
+        hardnessClassification.textContent = 'Soft Water';
+      } else if (hardness < 120) {
+        hardnessClassification.textContent = 'Moderately Hard';
+      } else if (hardness < 180) {
+        hardnessClassification.textContent = 'Hard Water';
+      } else {
+        hardnessClassification.textContent = 'Very Hard (Scaling)';
+      }
+
+      // Age condition text
+      if (ageMonths <= 6) {
+        ageConditionText.textContent = 'Fresh Filter';
+      } else if (ageMonths <= 18) {
+        ageConditionText.textContent = 'Normal Working Condition';
+      } else if (ageMonths <= 24) {
+        ageConditionText.textContent = 'Service Inspection Due';
+      } else {
+        ageConditionText.textContent = 'End-of-Life / Replace';
+      }
+
+      // Remin toggle label
+      if (isRemineralized) {
+        reminStatusTag.textContent = d.remineralizeToggleOn;
+        reminStatusTag.className = 'text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold';
+      } else {
+        reminStatusTag.textContent = d.remineralizeToggleOff;
+        reminStatusTag.className = 'text-[11px] text-muted font-semibold';
+      }
+
+      // Update descriptions
+      techPoreText.textContent = `Pore Size: ${tech.poreSizeMicrons} µm (${tech.poreSizeNm} nm) • MWCO: ${tech.mwcoDa} • Standard: ${tech.nsfStandard}`;
+      sourceDescText.textContent = `${source.description} (Fluoride: ${source.fluoridePpm} ppm, Lead: ${source.leadRisk})`;
+
+      // Membrane Aging & Fouling Kinetics
+      // Hardness causes CaCO3 scaling on RO membranes, accelerating rejection loss
+      let foulingRate = 0.0015;
+      if (hardness > 180) foulingRate = 0.0035;
+      if (hardness > 300) foulingRate = 0.0055;
+
+      // Pressure effect (RO performs best at 60-80 PSI; below 40 PSI, osmotic pressure lowers flux)
+      let pressureFactor = 1.0;
+      if (tech.id === 'reverse-osmosis') {
+        if (pressure < 45) pressureFactor = 0.94;
+        else if (pressure >= 70) pressureFactor = 1.02;
+      }
+
+      const degradation = Math.min(0.25, ageMonths * foulingRate);
+      const conditionMultiplier = Math.max(0.70, (1 - degradation) * pressureFactor);
+
+      // Calculate Rejections
+      const calcRejection = (baseRej) => {
+        if (baseRej === 0) return 0;
+        return Math.min(99.9, Math.max(0, baseRej * conditionMultiplier));
+      };
+
+      const rejPfas = calcRejection(tech.baselineRejections.pfas);
+      const rejLead = calcRejection(tech.baselineRejections.lead);
+      const rejFluoride = calcRejection(tech.baselineRejections.fluoride);
+      const rejMicro = calcRejection(tech.baselineRejections.microplastics);
+      const rejArsenic = calcRejection(tech.baselineRejections.arsenic);
+      const rejChloramines = calcRejection(tech.baselineRejections.chloramines);
+      const rejTds = calcRejection(tech.baselineRejections.tds);
+
+      // Permeate TDS & Mineral Calculations
+      let permeateTds = feedTds * (1 - (rejTds / 100));
+      let outputPh = 7.2;
+      let reminScore = 80;
+
+      if (tech.id === 'reverse-osmosis') {
+        if (isRemineralized) {
+          permeateTds += 38; // Remineralization adds ~38 ppm of beneficial Ca2+/Mg2+
+          outputPh = 7.8;
+          reminScore = 98;
+        } else {
+          outputPh = 6.1; // Pure acidic RO water
+          reminScore = 58;
+        }
+      } else if (tech.id === 'ultrafiltration') {
+        outputPh = 7.4;
+        reminScore = 90; // Natural minerals preserved
+      } else if (tech.id === 'carbon-block') {
+        outputPh = 7.3;
+        reminScore = 88;
+      } else if (tech.id === 'gravity-ceramic') {
+        outputPh = 7.2;
+        reminScore = 85;
+      } else {
+        // Standard pitcher
+        outputPh = 6.8;
+        reminScore = 65;
+      }
+
+      // Update Biochemical Cards
+      metricFeedTds.textContent = Math.round(feedTds);
+      metricPermeateTds.textContent = Math.round(permeateTds);
+      metricPhVal.textContent = outputPh.toFixed(1);
+      metricReminScore.textContent = Math.round(reminScore);
+
+      // Update Contaminant Bars & Residuals
+      rejPfasPct.textContent = rejPfas.toFixed(1) + '%';
+      barPfas.style.width = `${rejPfas}%`;
+      const basePfasInput = source.id === 'industrial-pfas-zone' ? 95 : 12;
+      const resPfas = (basePfasInput * (1 - rejPfas / 100)).toFixed(1);
+      resPfasVal.textContent = resPfas < 1.0 ? '< 1.0 ppt' : `${resPfas} ppt`;
+
+      rejLeadPct.textContent = rejLead.toFixed(1) + '%';
+      barLead.style.width = `${rejLead}%`;
+      const baseLeadInput = source.id === 'municipal-aging-pipes' ? 35 : 4;
+      const resLead = (baseLeadInput * (1 - rejLead / 100)).toFixed(1);
+      resLeadVal.textContent = resLead < 0.2 ? '< 0.2 ppb' : `${resLead} ppb`;
+
+      rejFluoridePct.textContent = rejFluoride.toFixed(1) + '%';
+      barFluoride.style.width = `${rejFluoride}%`;
+      const baseFluorideInput = source.fluoridePpm;
+      const resFluoride = (baseFluorideInput * (1 - rejFluoride / 100)).toFixed(2);
+      resFluorideVal.textContent = `${resFluoride} ppm`;
+
+      rejMicroPct.textContent = rejMicro.toFixed(1) + '%';
+      barMicro.style.width = `${rejMicro}%`;
+      resMicroVal.textContent = rejMicro > 99.0 ? '0 particles/L' : `${Math.round(25 * (1 - rejMicro / 100))} particles/L`;
+
+      rejArsenicPct.textContent = rejArsenic.toFixed(1) + '%';
+      barArsenic.style.width = `${rejArsenic}%`;
+      const baseArsenic = 8;
+      const resArsenic = (baseArsenic * (1 - rejArsenic / 100)).toFixed(1);
+      resArsenicVal.textContent = `${resArsenic} ppb`;
+
+      rejChloraminesPct.textContent = rejChloramines.toFixed(1) + '%';
+      barChloramines.style.width = `${rejChloramines}%`;
+      const baseChlor = source.chloramines;
+      const resChlor = (baseChlor * (1 - rejChloramines / 100)).toFixed(2);
+      resChloraminesVal.textContent = `${resChlor} ppm`;
+
+      // Evaluate Alerts & Verdicts
+      // 1. Fluoride Alert: If feed has >= 0.5 ppm fluoride and rejection is < 50%
+      if (source.fluoridePpm >= 0.5 && rejFluoride < 50) {
+        fluorideAlert.classList.remove('hidden');
+      } else {
+        fluorideAlert.classList.add('hidden');
+      }
+
+      // 2. Lead Alert: If aging pipes source and filter lead rejection < 95%
+      if (source.id === 'municipal-aging-pipes' && rejLead < 95) {
+        leadAlert.classList.remove('hidden');
+      } else {
+        leadAlert.classList.add('hidden');
+      }
+
+      // 3. Demineralized Water Alert: RO without remineralization
+      if (tech.id === 'reverse-osmosis' && !isRemineralized) {
+        demineralizedAlert.classList.remove('hidden');
+      } else {
+        demineralizedAlert.classList.add('hidden');
+      }
+
+      // 4. Membrane Fouling Alert
+      if (tech.id === 'reverse-osmosis' && ageMonths >= 20 && hardness >= 180) {
+        foulingAlert.classList.remove('hidden');
+      } else {
+        foulingAlert.classList.add('hidden');
+      }
+
+      // Master Verdict
+      if (tech.id === 'reverse-osmosis' && isRemineralized && rejLead >= 95 && rejPfas >= 95) {
+        statusBanner.className = 'rounded-2xl p-5 border transition-all space-y-2 bg-emerald-500/10 border-emerald-500/30 text-emerald-950 dark:text-emerald-200';
+        statusBadge.textContent = 'OPTIMAL';
+        statusBadge.className = 'px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-600 text-white';
+        statusTitleText.textContent = d.statusOptimal;
+        statusExplanationText.textContent = 'Reverse osmosis with alkaline remineralization delivers clinical-grade elimination of sub-nanometer PFAS, dissolved lead, fluoride, and nanoplastics, balanced with essential dietary minerals.';
+      } else if (tech.id === 'reverse-osmosis' && !isRemineralized) {
+        statusBanner.className = 'rounded-2xl p-5 border transition-all space-y-2 bg-blue-500/10 border-blue-500/30 text-blue-950 dark:text-blue-200';
+        statusBadge.textContent = 'ACIDIC RO';
+        statusBadge.className = 'px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-600 text-white';
+        statusTitleText.textContent = d.statusDemineralized;
+        statusExplanationText.textContent = 'Near-total elimination of all chemical toxins and heavy metals, but total demineralization leaves water acidic (pH ~6.1). Enable remineralization to buffer pH.';
+      } else if (tech.id === 'ultrafiltration' || tech.id === 'carbon-block') {
+        statusBanner.className = 'rounded-2xl p-5 border transition-all space-y-2 bg-cyan-500/10 border-cyan-500/30 text-cyan-950 dark:text-cyan-200';
+        statusBadge.textContent = 'SELECTIVE';
+        statusBadge.className = 'px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-cyan-600 text-white';
+        statusTitleText.textContent = d.statusSelective;
+        statusExplanationText.textContent = 'Preserves natural alkaline minerals and effectively blocks microplastics and chloramines. However, ionic fluoride and dissolved total salts pass freely.';
+      } else {
+        statusBanner.className = 'rounded-2xl p-5 border transition-all space-y-2 bg-rose-500/10 border-rose-500/30 text-rose-950 dark:text-rose-200';
+        statusBadge.textContent = 'INADEQUATE';
+        statusBadge.className = 'px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-600 text-white';
+        statusTitleText.textContent = d.statusHazardous;
+        statusExplanationText.textContent = 'Standard gravity filtration media does not possess the pore density or ionic charge to reliably stop PFAS forever chemicals, municipal fluoride, or dissolved lead.';
+      }
+    }
+
+    // Preset button event handlers
+    presetBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const s = btn.getAttribute('data-source');
+        const t = btn.getAttribute('data-tds');
+        const h = btn.getAttribute('data-hardness');
+        const p = btn.getAttribute('data-pressure');
+        const tech = btn.getAttribute('data-tech');
+        const remin = btn.getAttribute('data-remin') === 'true';
+
+        if (sourceSelect) sourceSelect.value = s;
+        if (tdsSlider) tdsSlider.value = t;
+        if (hardnessSlider) hardnessSlider.value = h;
+        if (pressureSlider) pressureSlider.value = p;
+        if (techSelect) techSelect.value = tech;
+        if (reminToggle) reminToggle.checked = remin;
+
+        calculate();
+      });
+    });
+
+    // Control event listeners
+    [techSelect, sourceSelect, tdsSlider, hardnessSlider, pressureSlider, ageSlider].forEach(el => {
+      if (el) el.addEventListener('input', calculate);
+    });
+
+    if (reminToggle) {
+      reminToggle.addEventListener('change', calculate);
+    }
+
+    // Copy Report Event Handler
+    if (copyBtn) {
+      copyBtn.addEventListener('click', async () => {
+        const report = `=== ISITKITCHENSAFE WATER FILTRATION AUDIT REPORT ===
+Technology: ${techSelect.options[techSelect.selectedIndex].text}
+Water Profile: ${sourceSelect.options[sourceSelect.selectedIndex].text}
+Feed TDS: ${tdsSlider.value} ppm | Water Hardness: ${hardnessSlider.value} ppm CaCO3
+Filter Operating Age: ${ageSlider.value} months | Feed Pressure: ${pressureSlider.value} PSI
+Post-RO Remineralization: ${reminToggle.checked ? 'Enabled (Calcite/Corosex Alkaline)' : 'Disabled (Pure Demineralized)'}
+
+--- FILTRATION PERFORMANCE & RESIDUALS ---
+• Final Permeate TDS: ${metricPermeateTds.textContent} ppm (pH: ${metricPhVal.textContent})
+• Remineralization Health Score: ${metricReminScore.textContent}/100
+• PFAS Rejection: ${rejPfasPct.textContent} (Residual: ${resPfasVal.textContent})
+• Lead Rejection: ${rejLeadPct.textContent} (Residual: ${resLeadVal.textContent})
+• Fluoride Rejection: ${rejFluoridePct.textContent} (Residual: ${resFluorideVal.textContent})
+• Microplastics & Nanoplastics: ${rejMicroPct.textContent} (Residual: ${resMicroVal.textContent})
+• Arsenic Rejection: ${rejArsenicPct.textContent} (Residual: ${resArsenicVal.textContent})
+• Chloramines Rejection: ${rejChloraminesPct.textContent} (Residual: ${resChloraminesVal.textContent})
+
+Clinical Verdict: ${statusTitleText.textContent}
+Reference Standards: EPA NPDWR 2024 (PFAS 4.0 ppt MCL) • NSF/ANSI 58 & 53 • WHO Remineralization Guidelines
+Generated at: https://isitkitchensafe.com/tools/water-filter-efficiency-analyzer/`;
+
+        try {
+          await navigator.clipboard.writeText(report);
+          const originalText = copyBtn.innerHTML;
+          copyBtn.innerHTML = `<span>${d.reportCopied}</span>`;
+          copyBtn.classList.remove('bg-cyan-600', 'hover:bg-cyan-700');
+          copyBtn.classList.add('bg-emerald-600', 'hover:bg-emerald-700');
+          setTimeout(() => {
+            copyBtn.innerHTML = originalText;
+            copyBtn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700');
+            copyBtn.classList.add('bg-cyan-600', 'hover:bg-cyan-700');
+          }, 3000);
+        } catch (err) {
+          console.error('Failed to copy report:', err);
+        }
+      });
+    }
+
+    // Initial calculation
+    calculate();
+  });
+</script>
