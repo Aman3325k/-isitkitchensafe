@@ -1,0 +1,866 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import oilData from '../data/culinary-oil-smoke-point-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  oilLabel: string;
+  methodLabel: string;
+  tempLabel: string;
+  durationLabel: string;
+  reuseLabel: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  thermalMarginLabel: string;
+  smokePointLabel: string;
+  tpmLabel: string;
+  tpmThresholdNote: string;
+  aldehydesTitle: string;
+  hneLabel: string;
+  mdaLabel: string;
+  acroleinLabel: string;
+  overallGradeLabel: string;
+  statusOptimal: string;
+  statusModerate: string;
+  statusHazard: string;
+  statusCritical: string;
+  airwayAlertTitle: string;
+  airwayAlertText: string;
+  swapTitle: string;
+  swapSub: string;
+  paradoxTitle: string;
+  paradoxText: string;
+  copyReportBtn: string;
+  reportCopied: string;
+  crossLinkTitle: string;
+  crossLinkMigration: string;
+  crossLinkPan: string;
+  crossLinkScorecard: string;
+  crossLinkSwap: string;
+  crossLinkChild: string;
+}
+
+const DICT: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Biochemical Food Safety & Lipid Oxidation Lab",
+    title: "Culinary Oil Smoke Point & Carcinogenic Aldehyde Simulator",
+    subtitle: "Simulate real-time thermal oxidation, lipid peroxidation kinetics, and toxic aldehyde formation (4-HNE, MDA, acrolein) across 20 culinary oils. Compare smoke points against true oxidative stability to prevent toxic fumes and kitchen cellular damage.",
+    controlsTitle: "Culinary Thermal & Oil Parameters",
+    controlsSub: "Select a culinary fat, active cooking temperature, heating duration, and oil reuse count to compute lipid degradation kinetics.",
+    oilLabel: "Select Culinary Oil / Cooking Fat",
+    methodLabel: "Cooking Method Preset",
+    tempLabel: "Cooking Surface Temperature:",
+    durationLabel: "Active Heating Duration:",
+    reuseLabel: "Oil Reheating / Fryer Reuse Cycle",
+    diagnosticTitle: "Thermal Breakdown & Aldehyde Toxicity Scorecard",
+    diagnosticSub: "Real-time biochemical kinetic model based on Codex Alimentarius, EU 2019/343 fryer limits, and IARC inhalation research.",
+    thermalMarginLabel: "Thermal Headroom / Smoke Delta",
+    smokePointLabel: "Standard Oil Smoke Point",
+    tpmLabel: "Total Polar Materials (TPM)",
+    tpmThresholdNote: "EU Legal Limit for Frying Oil: 24.0% TPM",
+    aldehydesTitle: "Cytotoxic & Genotoxic Aldehyde Yield",
+    hneLabel: "4-Hydroxy-2-nonenal (4-HNE)",
+    mdaLabel: "Malondialdehyde (MDA)",
+    acroleinLabel: "Acrolein Volatile Plume",
+    overallGradeLabel: "Culinary Health & Carcinogenic Risk Grade",
+    statusOptimal: "OPTIMAL & THERMALLY STABLE (Safe)",
+    statusModerate: "MODERATE THERMAL OXIDATION (Caution)",
+    statusHazard: "HAZARDOUS LIPID PEROXIDATION (Unsafe)",
+    statusCritical: "CRITICAL TOXIC BREAKDOWN (Carcinogenic Aldehydes)",
+    airwayAlertTitle: "⚠️ Airborne Acrolein Inhalation Danger",
+    airwayAlertText: "Cooking fumes exceed NIOSH/OSHA airway thresholds (0.1 ppm). Inhalation of acrolein causes cilia necrosis and upper airway epithelial inflammation. Ventilate immediately or run range hood at maximum CFM.",
+    swapTitle: "Smart Culinary Oil Swap Recommendation",
+    swapSub: "Recommended heat-stable culinary fats for this cooking temperature:",
+    paradoxTitle: "The Smoke Point Paradox: Why EVOO Outperforms Seed Oils",
+    paradoxText: "Contrary to common kitchen myths, smoke point alone does NOT determine cooking safety. Cold-pressed Extra Virgin Olive Oil contains 75% monounsaturated oleic acid and up to 500 ppm of protective phenolic antioxidants (hydroxytyrosol, oleocanthal) that scavenge free radicals. In laboratory heating trials (De Alzaa et al., 2018), EVOO produced vastly fewer toxic aldehydes and polar compounds than high-smoke-point refined corn, soybean, or sunflower oils, whose high polyunsaturated linoleic acid content (55-70%) cracks rapidly under heat into toxic 4-HNE and acrolein.",
+    copyReportBtn: "📋 Copy Oil Oxidation Audit Report",
+    reportCopied: "✓ Oxidation Audit Report Copied to Clipboard!",
+    crossLinkTitle: "Explore Companion Kitchen Safety & Materials Tools:",
+    crossLinkMigration: "Food Contact Chemical Migration Predictor",
+    crossLinkPan: "AI Pan Scratch & Non-Stick Inspector",
+    crossLinkScorecard: "Cookware Toxic Leaching & PFAS Scorecard",
+    crossLinkSwap: "Safe Kitchenware Material Swap Calculator",
+    crossLinkChild: "Childhood Kitchen Safety & Ingestion Evaluator"
+  },
+  es: {
+    badge: "Laboratorio de Seguridad Bioquímica y Oxidación Lipídica",
+    title: "Simulador de Punto de Humo y Formación de Aldehídos Carcinógenos",
+    subtitle: "Simula la oxidación térmica en tiempo real, la cinética de peroxidación lipídica y la síntesis de aldehídos citotóxicos (4-HNE, MDA, acroleína) en 20 aceites culinarios. Compara el punto de humo con la estabilidad oxidativa real para cocinar sin vapores tóxicos.",
+    controlsTitle: "Parámetros Térmicos y del Aceite",
+    controlsSub: "Selecciona el aceite culinario, temperatura de cocción, duración y ciclos de reutilización para calcular el deterioro lipídico.",
+    oilLabel: "Selecciona el Aceite o Grasa Culinaria",
+    methodLabel: "Método de Cocción Predefinido",
+    tempLabel: "Temperatura Superficial de Cocción:",
+    durationLabel: "Tiempo de Calentamiento Activo:",
+    reuseLabel: "Ciclo de Reutilización del Aceite",
+    diagnosticTitle: "Evaluación Diagnóstica de Degradación y Aldehídos",
+    diagnosticSub: "Modelo cinético bioquímico basado en Codex Alimentarius, límites UE 2019/343 de fritura y directrices IARC.",
+    thermalMarginLabel: "Margen Térmico / Delta de Humo",
+    smokePointLabel: "Punto de Humo del Aceite",
+    tpmLabel: "Materiales Polares Totales (TPM)",
+    tpmThresholdNote: "Límite legal europeo de descarte: 24,0% TPM",
+    aldehydesTitle: "Rendimiento de Aldehídos Citotóxicos y Mutagénicos",
+    hneLabel: "4-Hidroxi-2-nonenal (4-HNE)",
+    mdaLabel: "Malondialdehído (MDA)",
+    acroleinLabel: "Acroleína en Vapores Volátiles",
+    overallGradeLabel: "Nivel de Salubridad y Riesgo Carcinógeno",
+    statusOptimal: "ÓPTIMO Y TÉRMICAMENTE ESTABLE (Seguro)",
+    statusModerate: "OXIDACIÓN TÉRMICA MODERADA (Precaución)",
+    statusHazard: "PEROXIDACIÓN LIPÍDICA PELIGROSA (Inseguro)",
+    statusCritical: "DEGRADACIÓN TÓXICA CRÍTICA (Aldehídos Carcinógenos)",
+    airwayAlertTitle: "⚠️ Peligro de Inhalación de Vapores de Acroleína",
+    airwayAlertText: "Los vapores culinarios superan los umbrales respiratorios seguros. La inhalación de acroleína causa necrosis de los cilios e inflamación epitelial pulmonar. Ventile de inmediato y encienda la campana extractora al máximo.",
+    swapTitle: "Reemplazo Inteligente de Aceite Culinario",
+    swapSub: "Grasas culinarias recomendadas con alta resistencia térmica para esta temperatura:",
+    paradoxTitle: "La Paradoja del Punto de Humo: Por qué el AOVE Supera a los Aceites de Semillas",
+    paradoxText: "El punto de humo no determina por sí solo la seguridad al cocinar. El Aceite de Oliva Virgen Extra (AOVE) contiene un 75% de ácido oleico monoinsaturado y abundantes polifenoles antioxidantes (oleocantal, hidroxitirosol) que neutralizan radicales libres. En ensayos de laboratorio (De Alzaa 2018), el AOVE generó significativamente menos aldehídos tóxicos que los aceites de maíz, soja o girasol refinados, cuyos ácidos poliinsaturados se descomponen rápidamente en 4-HNE y acroleína.",
+    copyReportBtn: "📋 Copiar Informe de Oxidación Lipídica",
+    reportCopied: "✓ ¡Informe copiado al portapapeles!",
+    crossLinkTitle: "Explora Otras Herramientas de Seguridad en Cocina:",
+    crossLinkMigration: "Predictor de Migración Química en Contacto Alimentario",
+    crossLinkPan: "Inspector de Rayones y Teflón Dañado",
+    crossLinkScorecard: "Tarjeta de Toxicidad y PFAS en Utensilios",
+    crossLinkSwap: "Calculadora de Sustitución Segura de Materiales",
+    crossLinkChild: "Evaluador de Seguridad Infantil e Ingestiones"
+  },
+  pt: {
+    badge: "Laboratório de Segurança Bioquímica e Oxidação Lipídica",
+    title: "Simulador de Ponto de Fumaça e Formação de Aldeídos Cancerígenos",
+    subtitle: "Simule a oxidação térmica em tempo real, a cinética de peroxidação lipídica e a formação de aldeídos tóxicos (4-HNE, MDA, acroleína) em 20 óleos de cozinha. Compare o ponto de fumaça com a real estabilidade oxidativa para cozinhar com saúde.",
+    controlsTitle: "Parâmetros Térmicos e do Óleo",
+    controlsSub: "Escolha o óleo culinário, temperatura ativa, tempo de exposição térmica e reaproveitamento para avaliar a degradação molecular.",
+    oilLabel: "Selecione o Óleo ou Gordura Culinária",
+    methodLabel: "Método de Cozimento Pré-definido",
+    tempLabel: "Temperatura da Superfície de Cozimento:",
+    durationLabel: "Duração do Aquecimento Ativo:",
+    reuseLabel: "Ciclo de Reutilização da Gordura",
+    diagnosticTitle: "Painel Diagnóstico de Oxidação e Aldeídos",
+    diagnosticSub: "Modelo cinético bioquímico calibrado com normas Codex Alimentarius, UE 2019/343 e evidências IARC.",
+    thermalMarginLabel: "Margem Térmica / Delta de Fumaça",
+    smokePointLabel: "Ponto de Fumaça Teórico",
+    tpmLabel: "Compostos Polares Totais (TPM)",
+    tpmThresholdNote: "Limite regulatório europeu: 24,0% TPM",
+    aldehydesTitle: "Produção de Aldeídos Citotóxicos e Mutagênicos",
+    hneLabel: "4-Hidroxi-2-nonenal (4-HNE)",
+    mdaLabel: "Malondialdeído (MDA)",
+    acroleinLabel: "Acroleína em Vapores Inaláveis",
+    overallGradeLabel: "Classificação de Saúde e Risco Cancerígeno",
+    statusOptimal: "ÓTIMO E TERMICAMENTE ESTÁVEL (Seguro)",
+    statusModerate: "OXIDAÇÃO TÉRMICA MODERADA (Atenção)",
+    statusHazard: "PEROXIDAÇÃO LIPÍDICA PREJUDICIAL (Perigoso)",
+    statusCritical: "DEGRADAÇÃO TÓXICA CRÍTICA (Aldeídos Cancerígenos)",
+    airwayAlertTitle: "⚠️ Alerta de Inalação de Vapores de Acroleína",
+    airwayAlertText: "Os vapores excedem limites seguros das vias aéreas. A acroleína inalada inflama os pulmões e paralisa os cílios respiratórios. Ligue a coifa na potência máxima imediatamente.",
+    swapTitle: "Troca Saudável Recomendada",
+    swapSub: "Óleos mais estáveis e protetores para esta temperatura de cozimento:",
+    paradoxTitle: "O Paradoxo do Ponto de Fumaça: Por que o Azeite Extra Virgem é Superior",
+    paradoxText: "O ponto de fumaça não é o único indicador de segurança culinária. O Azeite de Oliva Extra Virgem (EVOO) possui 75% de gorduras monoinsaturadas e compostos fenólicos protetores que impedem a oxidação em cadeia. Em testes comparativos, o azeite gera muito menos aldeídos tóxicos do que óleos de soja, milho ou girassol refinados, ricos em poli-insaturados instáveis.",
+    copyReportBtn: "📋 Copiar Relatório de Degradação Lipídica",
+    reportCopied: "✓ Relatório copiado para a área de transferência!",
+    crossLinkTitle: "Explore Outras Ferramentas de Segurança Alimentar:",
+    crossLinkMigration: "Preditor de Migração Química de Embalagens",
+    crossLinkPan: "Inspetor de Riscos e Panelas Antiaderentes",
+    crossLinkScorecard: "Placar de Risco de PFAS e Lixiviação Tóxica",
+    crossLinkSwap: "Calculadora de Substituição Segura de Utensílios",
+    crossLinkChild: "Avaliador de Segurança Infantil e Ingestão Acidental"
+  },
+  "zh-cn": {
+    badge: "食品生化安全与油脂氧化动力学实验室",
+    title: "食用油烟点与致癌性醛类生成模拟器",
+    subtitle: "实时模拟20种烹饪油脂在不同温度和加热时间下的热氧化动力学、脂质过氧化反应以及细胞毒性醛类（4-HNE、MDA、丙烯醛）生成速率。科学对比烟点与真实氧化稳定性，拒绝致癌油烟与细胞损伤。",
+    controlsTitle: "烹饪热力学与油脂参数配置",
+    controlsSub: "选择烹饪油脂类别、烹饪表面温度、加热时长和油脂复用次数，精准测算油脂分子降解与毒性生成。",
+    oilLabel: "选择食用油脂或动物脂肪",
+    methodLabel: "预设烹饪方式",
+    tempLabel: "烹饪加热温度：",
+    durationLabel: "持续加热时长：",
+    reuseLabel: "油脂复用与重复油炸轮次",
+    diagnosticTitle: "热降解与醛类毒性风险诊断板",
+    diagnosticSub: "基于国际食品法典标准（Codex）、欧盟2019/343煎炸废油极性组分限制及IARC致癌烟雾研究建立的生化动力学模型。",
+    thermalMarginLabel: "热力安全裕度 / 烟点温差",
+    smokePointLabel: "该油脂标称发烟点",
+    tpmLabel: "总极性化合物含量（TPM）",
+    tpmThresholdNote: "欧盟餐饮废油强制废弃红线：24.0% TPM",
+    aldehydesTitle: "细胞毒性与致突变性醛类释放量",
+    hneLabel: "4-羟基-2-壬烯醛 (4-HNE)",
+    mdaLabel: "丙二醛 (MDA)",
+    acroleinLabel: "丙烯醛挥发烟气浓度",
+    overallGradeLabel: "烹饪健康度与致癌物暴露评级",
+    statusOptimal: "优质且热稳定性卓越（高度安全）",
+    statusModerate: "中度热氧化应激（需控制火候）",
+    statusHazard: "严重脂质过氧化（有害健康）",
+    statusCritical: "极高毒性降解与致癌醛类激增（严禁食用/吸入）",
+    airwayAlertTitle: "⚠️ 高浓度丙烯醛挥发吸入危险警报",
+    airwayAlertText: "油烟中丙烯醛浓度已超标。丙烯醛具有强刺激性与潜在致癌性，会灼伤气道上皮并破坏纤毛清除功能。请立即开启大吸力油烟机并加强厨房通风。",
+    swapTitle: "更耐高温的健康油脂替换方案",
+    swapSub: "针对当前烹饪温度，推荐耐氧化性更优的油脂组合：",
+    paradoxTitle: "“烟点悖论”深度解析：为什么特级初榨橄榄油比种子油更安全？",
+    paradoxText: "烟点绝不是衡量高温烹饪安全性的唯一指标！特级初榨橄榄油（EVOO）富含75%耐氧化的单不饱和油酸及高达300-500ppm的多酚抗氧化物（羟基酪醇、橄榄苦苷）。多项国际前沿实验（如De Alzaa 2018）表明，在常规炒菜和煎炸时，EVOO释放的毒性醛类与极性聚合物远低于烟点高但富含多不饱和脂肪酸（55%-70%）的精炼玉米油、大豆油或葵花籽油。",
+    copyReportBtn: "📋 复制油脂热氧化诊断报告",
+    reportCopied: "✓ 诊断报告已成功复制到剪贴板！",
+    crossLinkTitle: "探索更多厨房安全与材料诊断工具：",
+    crossLinkMigration: "食品接触化学物质迁移动力学预测器",
+    crossLinkPan: "AI不粘锅划痕与涂层破损检测器",
+    crossLinkScorecard: "厨具PFAS毒性溶出综合评分表",
+    crossLinkSwap: "无毒健康厨具材料智能替换计算器",
+    crossLinkChild: "儿童厨房意外与误食毒物急救评估器"
+  },
+  ja: {
+    badge: "生化学的食品安全＆油脂熱酸化速度論ラボ",
+    title: "食用油の発煙点＆発がん性アルデヒド生成シミュレーター",
+    subtitle: "20種類の食用油・調理油について、調理温度・加熱時間・再利用回数に応じた脂質過酸化と毒性アルデヒド（4-HNE、MDA、アクロレイン）の発生動態をリアルタイム解析。発煙点と真の酸化安定性の違いを可視化します。",
+    controlsTitle: "調理熱力学＆油脂パラメータ設定",
+    controlsSub: "食用油の種類、調理温度、加熱時間、油の使い回し回数を指定して熱分解速度を計算します。",
+    oilLabel: "食用油・調理用脂の選択",
+    methodLabel: "調理方法プリセット",
+    tempLabel: "調理面 / 油の加熱温度：",
+    durationLabel: "連続加熱時間：",
+    reuseLabel: "油の再利用・使い回し回数",
+    diagnosticTitle: "熱分解・有毒アルデヒド発生診断パネル",
+    diagnosticSub: "Codex規格、欧州連合(EU 2019/343)総極性物質基準、IARC調理油煙研究に基づく動力学解析。",
+    thermalMarginLabel: "発煙点マージン / 温度差",
+    smokePointLabel: "基準発煙点",
+    tpmLabel: "総極性化合物（TPM）含有率",
+    tpmThresholdNote: "EU油廃棄法定制限：24.0% TPM",
+    aldehydesTitle: "細胞毒性・遺伝毒性アルデヒド発生量",
+    hneLabel: "4-ヒドロキシ-2-ノネナール (4-HNE)",
+    mdaLabel: "マロンジアルデヒド (MDA)",
+    acroleinLabel: "気化アクロレイン揮発濃度",
+    overallGradeLabel: "調理安全性・発がんリスク評価",
+    statusOptimal: "極めて安定・安全（至適範囲）",
+    statusModerate: "軽度〜中度の熱酸化（注意）",
+    statusHazard: "有害な脂質過酸化（危険）",
+    statusCritical: "臨界的熱分解・発がん性アルデヒド多量発生（使用中止推奨）",
+    airwayAlertTitle: "⚠️ アクロレイン吸入有害警告",
+    airwayAlertText: "油煙中のアクロレイン濃度が呼吸器安全基準値を超えています。アクロレインは気道上皮や線毛を傷害し、肺疾患リスクを高めます。直ちに換気扇を最強にし通気してください。",
+    swapTitle: "熱安定性に優れた代替推奨油",
+    swapSub: "この調理温度においてアルデヒド発生が極めて少ないおすすめの油：",
+    paradoxTitle: "発煙点パラドックス：なぜEVオリーブオイルは種子油より安全なのか？",
+    paradoxText: "発煙点が高い＝安全とは限りません。エキストラバージンオリーブオイル(EVOO)は一価不飽和脂肪酸（オレイン酸）が約75%を占め、強力な抗酸化ポリフェノール（ヒドロキシチロソール等）を豊富に含みます。最新の実験研究（De Alzaaら 2018）により、EVOOは多価不飽和脂肪酸が多い精製コーン油・大豆油・ひまわり油に比べ、加熱時の有害アルデヒド生成が圧倒的に少ないことが証明されています。",
+    copyReportBtn: "📋 油脂熱劣化診断レポートをコピー",
+    reportCopied: "✓ 診断レポートをクリップボードにコピーしました！",
+    crossLinkTitle: "関連する厨房安全・素材診断ツール：",
+    crossLinkMigration: "食品接触化学物質移行シミュレーター",
+    crossLinkPan: "AIフライパン傷＆フッ素樹脂劣化判定器",
+    crossLinkScorecard: "調理器具PFAS＆有害物質溶出スコア",
+    crossLinkSwap: "安全な調理器具素材スワップ計算機",
+    crossLinkChild: "小児キッチン誤飲・中毒トリアージ評価器"
+  }
+};
+
+const d = DICT[lang] || DICT.en;
+const prefix = lang === 'en' ? '' : `/${lang}`;
+---
+
+<div class="culinary-oil-simulator-widget bg-canvas border border-hairline rounded-3xl p-6 md:p-10 shadow-sm space-y-10" data-lang={lang}>
+  <!-- Header Badge & Intro -->
+  <div class="space-y-3">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
+      <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+      <span>{d.badge}</span>
+    </div>
+    <h1 class="text-title-xl font-bold text-ink tracking-tight">
+      {d.title}
+    </h1>
+    <p class="text-body text-sm md:text-base leading-relaxed max-w-4xl">
+      {d.subtitle}
+    </p>
+  </div>
+
+  <!-- Interactive Controls Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div class="lg:col-span-6 bg-surface-soft border border-hairline rounded-2xl p-6 space-y-6">
+      <div class="border-b border-hairline pb-3">
+        <h2 class="text-sm font-bold uppercase tracking-wider text-ink flex items-center justify-between">
+          <span>{d.controlsTitle}</span>
+          <span class="text-xs font-normal text-muted font-mono">ASTM / Codex / IOC</span>
+        </h2>
+        <p class="text-xs text-muted mt-1">{d.controlsSub}</p>
+      </div>
+
+      <!-- Oil Selection -->
+      <div class="space-y-2">
+        <label for="oil-select" class="block text-xs font-bold uppercase tracking-wider text-muted">
+          {d.oilLabel}
+        </label>
+        <select 
+          id="oil-select" 
+          class="w-full bg-canvas border border-hairline rounded-xl px-4 py-3 text-sm font-medium text-ink focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all cursor-pointer"
+        >
+          {oilData.oils.map(oil => (
+            <option value={oil.id}>
+              {oil.name} — Smoke: {oil.smokePointF}°F ({oil.smokePointC}°C) [SFA {oil.lipidProfile.sfaPercent}% / MUFA {oil.lipidProfile.mufaPercent}% / PUFA {oil.lipidProfile.pufaPercent}%]
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <!-- Cooking Preset Buttons -->
+      <div class="space-y-2">
+        <label class="block text-xs font-bold uppercase tracking-wider text-muted">
+          {d.methodLabel}
+        </label>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {oilData.cookingMethods.map(m => (
+            <button 
+              type="button" 
+              class="method-preset-btn text-xs font-medium px-3 py-2.5 rounded-xl border border-hairline bg-canvas hover:border-amber-500 hover:text-amber-600 transition-all text-left flex flex-col justify-between"
+              data-temp-f={m.temperatureF}
+              data-duration={m.durationMinutes}
+              data-method-id={m.id}
+            >
+              <span class="font-bold truncate">{m.name.split('/')[0]}</span>
+              <span class="text-[10px] text-muted">{m.temperatureF}°F ({m.temperatureC}°C)</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <!-- Temperature Slider -->
+      <div class="space-y-2 bg-canvas border border-hairline/80 rounded-xl p-4">
+        <div class="flex items-center justify-between text-xs font-semibold">
+          <label for="temp-slider" class="text-muted">{d.tempLabel}</label>
+          <div class="flex items-center gap-1 font-mono text-ink text-sm bg-surface-soft px-2.5 py-1 rounded-md border border-hairline">
+            <span id="temp-f-display" class="font-bold text-amber-600">350</span>
+            <span class="text-xs text-muted">°F</span>
+            <span class="text-muted/60">/</span>
+            <span id="temp-c-display" class="font-bold text-amber-600">177</span>
+            <span class="text-xs text-muted">°C</span>
+          </div>
+        </div>
+        <input 
+          type="range" 
+          id="temp-slider" 
+          min="100" 
+          max="550" 
+          step="5" 
+          value="350"
+          class="w-full h-2 bg-hairline rounded-lg appearance-none cursor-pointer accent-amber-500"
+        />
+        <div class="flex justify-between text-[10px] text-muted font-mono pt-1">
+          <span>100°F (Warm)</span>
+          <span>350°F (Frying)</span>
+          <span>450°F (Stir-fry)</span>
+          <span>550°F (Sear)</span>
+        </div>
+      </div>
+
+      <!-- Duration Slider -->
+      <div class="space-y-2 bg-canvas border border-hairline/80 rounded-xl p-4">
+        <div class="flex items-center justify-between text-xs font-semibold">
+          <label for="duration-slider" class="text-muted">{d.durationLabel}</label>
+          <span class="font-mono text-ink text-sm bg-surface-soft px-2.5 py-1 rounded-md border border-hairline">
+            <strong id="duration-display" class="text-amber-600">15</strong> min
+          </span>
+        </div>
+        <input 
+          type="range" 
+          id="duration-slider" 
+          min="1" 
+          max="120" 
+          step="1" 
+          value="15"
+          class="w-full h-2 bg-hairline rounded-lg appearance-none cursor-pointer accent-amber-500"
+        />
+        <div class="flex justify-between text-[10px] text-muted font-mono pt-1">
+          <span>1 min (Quick sauté)</span>
+          <span>30 min (Deep-fry batch)</span>
+          <span>120 min (Simmer / Bake)</span>
+        </div>
+      </div>
+
+      <!-- Oil Reuse Selector -->
+      <div class="space-y-2">
+        <label for="reuse-select" class="block text-xs font-bold uppercase tracking-wider text-muted">
+          {d.reuseLabel}
+        </label>
+        <select 
+          id="reuse-select" 
+          class="w-full bg-canvas border border-hairline rounded-xl px-4 py-3 text-sm font-medium text-ink focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all cursor-pointer"
+        >
+          {oilData.reuseMultipliers.map(r => (
+            <option value={r.reuseCycle}>
+              {r.name} — {r.riskNote}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+
+    <!-- Real-Time Diagnostic Dashboard -->
+    <div class="lg:col-span-6 bg-surface-soft border border-hairline rounded-2xl p-6 space-y-6 flex flex-col justify-between">
+      <div class="space-y-6">
+        <div class="border-b border-hairline pb-3">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-ink flex items-center justify-between">
+            <span>{d.diagnosticTitle}</span>
+            <span class="text-xs font-normal text-muted font-mono">Kinetic Output</span>
+          </h2>
+          <p class="text-xs text-muted mt-1">{d.diagnosticSub}</p>
+        </div>
+
+        <!-- Overall Health Grade Banner -->
+        <div id="grade-banner" class="rounded-2xl p-5 border transition-all space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-muted">
+              {d.overallGradeLabel}
+            </span>
+            <span id="grade-badge" class="px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase">
+              OPTIMAL
+            </span>
+          </div>
+          <div id="grade-status-text" class="text-base md:text-lg font-bold">
+            {d.statusOptimal}
+          </div>
+          <p id="grade-explanation" class="text-xs leading-relaxed text-body"></p>
+        </div>
+
+        <!-- Key Metrics Cards (Thermal Delta & TPM) -->
+        <div class="grid grid-cols-2 gap-4">
+          <!-- Thermal Delta -->
+          <div class="bg-canvas border border-hairline rounded-xl p-4 space-y-2">
+            <div class="text-[11px] font-bold text-muted uppercase tracking-wider">
+              {d.thermalMarginLabel}
+            </div>
+            <div id="thermal-margin-val" class="text-xl md:text-2xl font-black font-mono">
+              -40°F
+            </div>
+            <div class="text-[10px] text-muted flex items-center justify-between">
+              <span>{d.smokePointLabel}:</span>
+              <span id="oil-smokepoint-text" class="font-bold text-ink">390°F (199°C)</span>
+            </div>
+          </div>
+
+          <!-- Total Polar Materials -->
+          <div class="bg-canvas border border-hairline rounded-xl p-4 space-y-2">
+            <div class="text-[11px] font-bold text-muted uppercase tracking-wider">
+              {d.tpmLabel}
+            </div>
+            <div class="flex items-baseline gap-1">
+              <span id="tpm-val" class="text-xl md:text-2xl font-black font-mono">4.2%</span>
+              <span class="text-xs text-muted">TPM</span>
+            </div>
+            <!-- TPM Progress Bar -->
+            <div class="w-full bg-hairline rounded-full h-1.5 overflow-hidden">
+              <div id="tpm-bar" class="h-full bg-emerald-500 transition-all duration-300" style="width: 15%;"></div>
+            </div>
+            <div class="text-[9px] text-muted truncate">
+              {d.tpmThresholdNote}
+            </div>
+          </div>
+        </div>
+
+        <!-- Aldehydes Breakdown -->
+        <div class="bg-canvas border border-hairline rounded-xl p-5 space-y-3">
+          <div class="text-xs font-bold uppercase tracking-wider text-muted flex items-center justify-between">
+            <span>{d.aldehydesTitle}</span>
+            <span class="text-[10px] text-muted font-normal">µmol/kg &amp; ppm</span>
+          </div>
+
+          <div class="space-y-3 pt-1">
+            <!-- 4-HNE -->
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-body font-medium">{d.hneLabel}</span>
+                <span id="hne-val" class="font-mono font-bold text-ink">8.4 µmol/kg</span>
+              </div>
+              <div class="w-full bg-hairline rounded-full h-1.5 overflow-hidden">
+                <div id="hne-bar" class="h-full bg-emerald-500 transition-all duration-300" style="width: 10%;"></div>
+              </div>
+            </div>
+
+            <!-- MDA -->
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-body font-medium">{d.mdaLabel}</span>
+                <span id="mda-val" class="font-mono font-bold text-ink">12.1 µmol/kg</span>
+              </div>
+              <div class="w-full bg-hairline rounded-full h-1.5 overflow-hidden">
+                <div id="mda-bar" class="h-full bg-emerald-500 transition-all duration-300" style="width: 12%;"></div>
+              </div>
+            </div>
+
+            <!-- Acrolein -->
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-body font-medium">{d.acroleinLabel}</span>
+                <span id="acrolein-val" class="font-mono font-bold text-ink">0.02 ppm</span>
+              </div>
+              <div class="w-full bg-hairline rounded-full h-1.5 overflow-hidden">
+                <div id="acrolein-bar" class="h-full bg-emerald-500 transition-all duration-300" style="width: 8%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Airway Alert Box (Hidden by default, shown when acrolein > 0.1 ppm) -->
+        <div id="airway-alert" class="hidden rounded-xl p-4 bg-rose-500/10 border border-rose-500/30 text-rose-800 dark:text-rose-300 space-y-1">
+          <div class="text-xs font-bold uppercase tracking-wide flex items-center gap-1.5">
+            <span>{d.airwayAlertTitle}</span>
+          </div>
+          <p class="text-xs leading-relaxed">
+            {d.airwayAlertText}
+          </p>
+        </div>
+
+        <!-- Smart Oil Swap Recommendation Box -->
+        <div id="swap-box" class="bg-canvas border border-hairline rounded-xl p-4 space-y-2">
+          <div class="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+            {d.swapTitle}
+          </div>
+          <div id="swap-list" class="flex flex-wrap gap-2 pt-1">
+            <!-- Dynamic swap pills -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <div class="pt-4 border-t border-hairline">
+        <button 
+          id="copy-audit-btn" 
+          type="button" 
+          class="w-full py-3 px-4 rounded-xl bg-ink text-canvas hover:opacity-90 font-medium text-xs md:text-sm transition-all shadow-xs flex items-center justify-center gap-2"
+        >
+          {d.copyReportBtn}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Educational Insight: Smoke Point vs Oxidative Stability Paradox -->
+  <div class="bg-surface-soft border border-hairline rounded-2xl p-6 md:p-8 space-y-4">
+    <div class="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+      <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <h3 class="text-base md:text-lg font-bold text-ink">
+        {d.paradoxTitle}
+      </h3>
+    </div>
+    <p class="text-body text-xs md:text-sm leading-relaxed">
+      {d.paradoxText}
+    </p>
+
+    <!-- Fatty Acid Profile Comparison Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-hairline/60">
+      <div class="bg-canvas border border-hairline rounded-xl p-4 space-y-1">
+        <span class="text-xs font-bold text-emerald-600 block">Saturated Fatty Acids (SFA)</span>
+        <span class="text-[11px] text-muted block font-mono">0 double bonds &bull; Immune to oxidation</span>
+        <p class="text-xs text-body">Ghee (65%), Coconut (91%), Beef Tallow (50%). Thermally unbreakable; will not form 4-HNE.</p>
+      </div>
+      <div class="bg-canvas border border-hairline rounded-xl p-4 space-y-1">
+        <span class="text-xs font-bold text-blue-600 block">Monounsaturated (MUFA / Oleic)</span>
+        <span class="text-[11px] text-muted block font-mono">1 double bond &bull; High thermal resistance</span>
+        <p class="text-xs text-body">EVOO (75%), Avocado Oil (74%), High-Oleic Sunflower (82%). Ideal balance of heart health and thermal stamina.</p>
+      </div>
+      <div class="bg-canvas border border-hairline rounded-xl p-4 space-y-1">
+        <span class="text-xs font-bold text-rose-600 block">Polyunsaturated (PUFA / Linoleic)</span>
+        <span class="text-[11px] text-muted block font-mono">2+ double bonds &bull; Hyper-reactive to heat</span>
+        <p class="text-xs text-body">Corn (59%), Soybean (61%), Sunflower (69%), Grapeseed (74%). Readily decomposes into cytotoxic 4-HNE, MDA, and acrolein.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Companion Tools Navigation -->
+  <div class="border-t border-hairline pt-8 space-y-4">
+    <h4 class="text-xs font-bold uppercase tracking-wider text-muted">
+      {d.crossLinkTitle}
+    </h4>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+      <a href={`${prefix}/tools/food-contact-migration-predictor/`} class="p-3.5 rounded-xl border border-hairline bg-surface-soft hover:border-amber-500/50 hover:bg-canvas transition-all text-xs font-medium text-ink flex items-center justify-between">
+        <span>{d.crossLinkMigration}</span>
+        <span class="text-muted">&rarr;</span>
+      </a>
+      <a href={`${prefix}/tools/pan-scratch-inspector/`} class="p-3.5 rounded-xl border border-hairline bg-surface-soft hover:border-amber-500/50 hover:bg-canvas transition-all text-xs font-medium text-ink flex items-center justify-between">
+        <span>{d.crossLinkPan}</span>
+        <span class="text-muted">&rarr;</span>
+      </a>
+      <a href={`${prefix}/tools/toxic-leaching-scorecard/`} class="p-3.5 rounded-xl border border-hairline bg-surface-soft hover:border-amber-500/50 hover:bg-canvas transition-all text-xs font-medium text-ink flex items-center justify-between">
+        <span>{d.crossLinkScorecard}</span>
+        <span class="text-muted">&rarr;</span>
+      </a>
+      <a href={`${prefix}/tools/material-swap-calculator/`} class="p-3.5 rounded-xl border border-hairline bg-surface-soft hover:border-amber-500/50 hover:bg-canvas transition-all text-xs font-medium text-ink flex items-center justify-between">
+        <span>{d.crossLinkSwap}</span>
+        <span class="text-muted">&rarr;</span>
+      </a>
+      <a href={`${prefix}/tools/child-safety-toxic-ingestion-evaluator/`} class="p-3.5 rounded-xl border border-hairline bg-surface-soft hover:border-amber-500/50 hover:bg-canvas transition-all text-xs font-medium text-ink flex items-center justify-between">
+        <span>{d.crossLinkChild}</span>
+        <span class="text-muted">&rarr;</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script define:vars={{ oilData, d }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    const root = document.querySelector('.culinary-oil-simulator-widget');
+    if (!root) return;
+
+    const oilSelect = root.querySelector('#oil-select');
+    const tempSlider = root.querySelector('#temp-slider');
+    const durationSlider = root.querySelector('#duration-slider');
+    const reuseSelect = root.querySelector('#reuse-select');
+
+    const tempFDisplay = root.querySelector('#temp-f-display');
+    const tempCDisplay = root.querySelector('#temp-c-display');
+    const durationDisplay = root.querySelector('#duration-display');
+
+    const gradeBanner = root.querySelector('#grade-banner');
+    const gradeBadge = root.querySelector('#grade-badge');
+    const gradeStatusText = root.querySelector('#grade-status-text');
+    const gradeExplanation = root.querySelector('#grade-explanation');
+
+    const thermalMarginVal = root.querySelector('#thermal-margin-val');
+    const oilSmokepointText = root.querySelector('#oil-smokepoint-text');
+
+    const tpmVal = root.querySelector('#tpm-val');
+    const tpmBar = root.querySelector('#tpm-bar');
+
+    const hneVal = root.querySelector('#hne-val');
+    const hneBar = root.querySelector('#hne-bar');
+
+    const mdaVal = root.querySelector('#mda-val');
+    const mdaBar = root.querySelector('#mda-bar');
+
+    const acroleinVal = root.querySelector('#acrolein-val');
+    const acroleinBar = root.querySelector('#acrolein-bar');
+
+    const airwayAlert = root.querySelector('#airway-alert');
+    const swapList = root.querySelector('#swap-list');
+    const copyAuditBtn = root.querySelector('#copy-audit-btn');
+
+    const presetBtns = root.querySelectorAll('.method-preset-btn');
+
+    // Preset button click handling
+    presetBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tempF = btn.getAttribute('data-temp-f');
+        const dur = btn.getAttribute('data-duration');
+        if (tempF) tempSlider.value = tempF;
+        if (dur) durationSlider.value = dur;
+        presetBtns.forEach(b => b.classList.remove('border-amber-500', 'bg-amber-500/10'));
+        btn.classList.add('border-amber-500', 'bg-amber-500/10');
+        recalculate();
+      });
+    });
+
+    function recalculate() {
+      const selectedOilId = oilSelect.value;
+      const oil = oilData.oils.find(o => o.id === selectedOilId) || oilData.oils[0];
+      const tempF = parseInt(tempSlider.value, 10);
+      const tempC = Math.round((tempF - 32) * 5 / 9);
+      const durationMin = parseInt(durationSlider.value, 10);
+      const reuseCycle = parseInt(reuseSelect.value, 10);
+      const reuseMeta = oilData.reuseMultipliers.find(r => r.reuseCycle === reuseCycle) || oilData.reuseMultipliers[0];
+
+      // Update temperature displays
+      tempFDisplay.textContent = tempF;
+      tempCDisplay.textContent = tempC;
+      durationDisplay.textContent = durationMin;
+
+      // Thermal Delta
+      const deltaF = tempF - oil.smokePointF;
+      oilSmokepointText.textContent = `${oil.smokePointF}°F (${oil.smokePointC}°C)`;
+
+      if (deltaF > 0) {
+        thermalMarginVal.textContent = `+${deltaF}°F OVER`;
+        thermalMarginVal.className = 'text-xl md:text-2xl font-black font-mono text-rose-600 animate-pulse';
+      } else {
+        thermalMarginVal.textContent = `${deltaF}°F`;
+        thermalMarginVal.className = 'text-xl md:text-2xl font-black font-mono text-emerald-600';
+      }
+
+      // Kinetic Simulation
+      // Base TPM formula as a function of temperature, time, PUFA content, antioxidant protection, and reuse:
+      // PUFA is ~100x more oxidizable than MUFA and ~1000x more than SFA.
+      const pufaFactor = (oil.lipidProfile.pufaPercent / 100) * 3.5;
+      const mufaFactor = (oil.lipidProfile.mufaPercent / 100) * 0.4;
+      const sfaFactor = (oil.lipidProfile.sfaPercent / 100) * 0.05;
+      const unsatScore = (pufaFactor + mufaFactor + sfaFactor);
+
+      // Temperature factor (exponential Arrhenius scaling above 212°F / 100°C)
+      const normalizedTemp = Math.max(0, tempF - 200);
+      const tempKineticFactor = Math.pow(1.012, normalizedTemp);
+
+      // Antioxidant suppression factor
+      const antioxidantProtection = Math.max(0.35, 1 - (oil.antioxidantPpm / 800));
+
+      // Time factor
+      const timeFactor = Math.pow(durationMin / 15, 0.65);
+
+      // Raw TPM accumulation
+      let computedTpm = (2.2 + (unsatScore * tempKineticFactor * timeFactor * antioxidantProtection * oil.degradationRate)) * reuseMeta.factor + reuseMeta.tpmAddition;
+      if (deltaF > 0) {
+        // Severe pyrolysis boost if past smoke point
+        computedTpm += (deltaF * 0.18);
+      }
+      computedTpm = Math.min(65.0, Math.max(1.5, Math.round(computedTpm * 10) / 10));
+
+      tpmVal.textContent = `${computedTpm}%`;
+      const tpmPercentWidth = Math.min(100, Math.round((computedTpm / 30) * 100));
+      tpmBar.style.width = `${tpmPercentWidth}%`;
+
+      if (computedTpm < 14) {
+        tpmBar.className = 'h-full bg-emerald-500 transition-all duration-300';
+      } else if (computedTpm < 24) {
+        tpmBar.className = 'h-full bg-amber-500 transition-all duration-300';
+      } else {
+        tpmBar.className = 'h-full bg-rose-600 transition-all duration-300';
+      }
+
+      // 4-HNE Calculation (derived principally from linoleic omega-6 oxidation)
+      const pufaRatio = oil.lipidProfile.pufaPercent / 100;
+      let hneYield = (computedTpm * pufaRatio * 6.5 * (tempF > 320 ? 1.4 : 0.6) * reuseMeta.factor);
+      if (deltaF > 0) hneYield *= 1.8;
+      hneYield = Math.max(0.5, Math.round(hneYield * 10) / 10);
+      hneVal.textContent = `${hneYield} µmol/kg`;
+      const hneWidth = Math.min(100, Math.round((hneYield / 120) * 100));
+      hneBar.style.width = `${hneWidth}%`;
+      hneBar.className = hneYield < 30 ? 'h-full bg-emerald-500' : (hneYield < 80 ? 'h-full bg-amber-500' : 'h-full bg-rose-600');
+
+      // MDA Calculation
+      let mdaYield = (computedTpm * (pufaRatio * 0.8 + 0.15) * 5.2 * reuseMeta.factor);
+      if (deltaF > 0) mdaYield *= 1.6;
+      mdaYield = Math.max(0.8, Math.round(mdaYield * 10) / 10);
+      mdaVal.textContent = `${mdaYield} µmol/kg`;
+      const mdaWidth = Math.min(100, Math.round((mdaYield / 150) * 100));
+      mdaBar.style.width = `${mdaWidth}%`;
+      mdaBar.className = mdaYield < 40 ? 'h-full bg-emerald-500' : (mdaYield < 100 ? 'h-full bg-amber-500' : 'h-full bg-rose-600');
+
+      // Acrolein Fume Calculation (exponentially spikes as temp approaches and passes smoke point)
+      let acroleinPpm = 0.005;
+      if (tempF > 300) {
+        const proximityToSmoke = Math.max(0, tempF - (oil.smokePointF - 60));
+        acroleinPpm = (0.01 + (proximityToSmoke * 0.003 * (oil.lipidProfile.pufaPercent > 30 ? 1.8 : 1.0)) * Math.sqrt(durationMin / 10)) * reuseMeta.factor;
+      }
+      if (deltaF > 0) {
+        acroleinPpm += (deltaF * 0.015);
+      }
+      acroleinPpm = Math.min(3.5, Math.max(0.01, Math.round(acroleinPpm * 100) / 100));
+      acroleinVal.textContent = `${acroleinPpm} ppm`;
+      const acroleinWidth = Math.min(100, Math.round((acroleinPpm / 0.25) * 100));
+      acroleinBar.style.width = `${acroleinWidth}%`;
+      acroleinBar.className = acroleinPpm < 0.05 ? 'h-full bg-emerald-500' : (acroleinPpm < 0.1 ? 'h-full bg-amber-500' : 'h-full bg-rose-600');
+
+      // Airway Hazard Alert
+      if (acroleinPpm >= 0.1) {
+        airwayAlert.classList.remove('hidden');
+      } else {
+        airwayAlert.classList.add('hidden');
+      }
+
+      // Grade Banner & Evaluation
+      if (computedTpm < 12 && hneYield < 35 && deltaF <= -20 && acroleinPpm < 0.05) {
+        gradeBanner.className = 'rounded-2xl p-5 border bg-emerald-500/10 border-emerald-500/30 text-emerald-950 dark:text-emerald-200 transition-all space-y-2';
+        gradeBadge.className = 'px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase bg-emerald-600 text-white';
+        gradeBadge.textContent = 'GRADE A: OPTIMAL';
+        gradeStatusText.textContent = d.statusOptimal;
+        gradeExplanation.textContent = `${oil.name} is operating well within its thermal and oxidative comfort zone. Total polar materials (${computedTpm}%) are minimal, with virtually no toxic aldehydes or airway irritants formed.`;
+      } else if (computedTpm < 20 && hneYield < 75 && deltaF <= 10 && acroleinPpm < 0.1) {
+        gradeBanner.className = 'rounded-2xl p-5 border bg-amber-500/10 border-amber-500/30 text-amber-950 dark:text-amber-200 transition-all space-y-2';
+        gradeBadge.className = 'px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase bg-amber-600 text-white';
+        gradeBadge.textContent = 'GRADE B: CAUTION';
+        gradeStatusText.textContent = d.statusModerate;
+        gradeExplanation.textContent = `${oil.name} is experiencing moderate thermal oxidation under ${tempF}°F for ${durationMin} minutes. Moderate free radical formation is occurring; consume promptly and avoid reusing this batch of oil.`;
+      } else if (computedTpm < 25 && deltaF <= 25) {
+        gradeBanner.className = 'rounded-2xl p-5 border bg-orange-500/10 border-orange-500/30 text-orange-950 dark:text-orange-200 transition-all space-y-2';
+        gradeBadge.className = 'px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase bg-orange-600 text-white';
+        gradeBadge.textContent = 'GRADE C: HAZARD';
+        gradeStatusText.textContent = d.statusHazard;
+        gradeExplanation.textContent = `High lipid peroxidation detected. 4-HNE (${hneYield} µmol/kg) and polar materials (${computedTpm}%) are elevated. Regular dietary exposure to these oxidized lipids contributes to systemic inflammation and vascular stress.`;
+      } else {
+        gradeBanner.className = 'rounded-2xl p-5 border bg-rose-500/15 border-rose-500/40 text-rose-950 dark:text-rose-200 transition-all space-y-2';
+        gradeBadge.className = 'px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase bg-rose-700 text-white animate-pulse';
+        gradeBadge.textContent = 'GRADE D/F: TOXIC';
+        gradeStatusText.textContent = d.statusCritical;
+        gradeExplanation.textContent = `CRITICAL DEGRADATION WARNING: ${oil.name} is actively decomposing at ${tempF}°F. Total polar compounds (${computedTpm}%) breach the EU 24% legal food safety threshold. Volatile acrolein (${acroleinPpm} ppm) and mutagenic aldehydes are flooding the kitchen air. Discard oil immediately.`;
+      }
+
+      // Smart Swaps List
+      swapList.innerHTML = '';
+      const recommended = oil.swapsForHighHeat && oil.swapsForHighHeat.length > 0 ? oil.swapsForHighHeat : ['avocado-refined', 'ghee'];
+      recommended.forEach(swapId => {
+        const swapOil = oilData.oils.find(o => o.id === swapId);
+        if (swapOil) {
+          const pill = document.createElement('button');
+          pill.type = 'button';
+          pill.className = 'px-3 py-1.5 rounded-lg bg-surface border border-hairline hover:border-amber-500 text-xs font-medium text-ink flex items-center gap-1.5 transition-all';
+          pill.innerHTML = `<strong>${swapOil.name}</strong> <span class="text-muted font-mono text-[10px]">(${swapOil.smokePointF}°F / OSI ${swapOil.oxidativeStabilityHours}h)</span>`;
+          pill.addEventListener('click', () => {
+            oilSelect.value = swapOil.id;
+            recalculate();
+          });
+          swapList.appendChild(pill);
+        }
+      });
+    }
+
+    // Event listeners
+    oilSelect.addEventListener('change', recalculate);
+    tempSlider.addEventListener('input', recalculate);
+    durationSlider.addEventListener('input', recalculate);
+    reuseSelect.addEventListener('change', recalculate);
+
+    // Initial calculation
+    recalculate();
+
+    // Copy Audit Report button
+    copyAuditBtn.addEventListener('click', () => {
+      const selectedOilId = oilSelect.value;
+      const oil = oilData.oils.find(o => o.id === selectedOilId) || oilData.oils[0];
+      const tempF = tempSlider.value;
+      const tempC = Math.round((tempF - 32) * 5 / 9);
+      const durationMin = durationSlider.value;
+      const reuseText = reuseSelect.options[reuseSelect.selectedIndex].text;
+
+      const report = `=====================================================
+ISITKITCHENSAFE - CULINARY OIL OXIDATION & ALDEHYDE AUDIT
+=====================================================
+Date: ${new Date().toISOString().split('T')[0]}
+Evaluated Oil: ${oil.name}
+Standard Smoke Point: ${oil.smokePointF}°F (${oil.smokePointC}°C)
+Fatty Acid Profile: SFA ${oil.lipidProfile.sfaPercent}% | MUFA ${oil.lipidProfile.mufaPercent}% | PUFA ${oil.lipidProfile.pufaPercent}%
+Antioxidant Content: ${oil.polyphenolAntioxidantContent} (~${oil.antioxidantPpm} ppm)
+Oxidative Stability Index (OSI): ${oil.oxidativeStabilityHours} hours
+
+COOKING PARAMETERS:
+- Surface Temperature: ${tempF}°F (${tempC}°C)
+- Heating Duration: ${durationMin} minutes
+- Oil Reuse Cycle: ${reuseText}
+
+DIAGNOSTIC FINDINGS:
+- Thermal Margin: ${thermalMarginVal.textContent}
+- Total Polar Materials (TPM): ${tpmVal.textContent} (EU Discard Limit: 24%)
+- Cytotoxic 4-HNE: ${hneVal.textContent}
+- Mutagenic MDA: ${mdaVal.textContent}
+- Inhaled Acrolein Plume: ${acroleinVal.textContent}
+- Overall Safety Status: ${gradeBadge.textContent} - ${gradeStatusText.textContent}
+
+SCIENTIFIC VERDICT:
+${gradeExplanation.textContent}
+
+Standards Benchmarked: Codex Alimentarius CXS 210-1999, EU Regulation 2019/343, IARC Monograph Vol. 95.
+Generated at: https://isitkitchensafe.com/tools/culinary-oil-smoke-point-simulator/
+=====================================================`;
+
+      navigator.clipboard.writeText(report).then(() => {
+        const originalText = copyAuditBtn.textContent;
+        copyAuditBtn.textContent = d.reportCopied;
+        copyAuditBtn.classList.add('bg-emerald-700', 'text-white');
+        setTimeout(() => {
+          copyAuditBtn.textContent = originalText;
+          copyAuditBtn.classList.remove('bg-emerald-700', 'text-white');
+        }, 2500);
+      });
+    });
+  });
+</script>

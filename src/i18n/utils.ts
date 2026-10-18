@@ -43,7 +43,8 @@ const SPECIAL_PAGES = [
   'tools/plasticizer-microplastic-burden-estimator',
   'tools/food-contact-migration-predictor',
   'tools/commercial-cookware-nsf-inspector',
-  'tools/child-safety-toxic-ingestion-evaluator'
+  'tools/child-safety-toxic-ingestion-evaluator',
+  'tools/culinary-oil-smoke-point-simulator'
 ];
 
 const esSlugs = new Set([

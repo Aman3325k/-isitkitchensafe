@@ -1,0 +1,247 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import CulinaryOilSmokePointSimulator from '../../../components/CulinaryOilSmokePointSimulator.astro';
+import type { SupportedLanguage } from '../../../i18n/ui';
+import { useTranslations, useTranslatedPath } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+const t = useTranslations(lang);
+const tp = useTranslatedPath(lang);
+
+interface LocaleContent {
+  pageTitle: string;
+  pageDescription: string;
+  breadcrumbs: Array<{ label: string; href?: string }>;
+  faqs: Array<{ question: string; answer: string }>;
+  faqHeading: string;
+  faqSub: string;
+}
+
+const CONTENT: Record<SupportedLanguage, LocaleContent> = {
+  en: {} as any,
+  es: {
+    pageTitle: "Simulador de Punto de Humo y Formación de Aldehídos Carcinógenos | IsItKitchenSafe",
+    pageDescription: "Simula la oxidación térmica y la síntesis de aldehídos citotóxicos (4-HNE, MDA, acroleína) en 20 aceites culinarios. Compara el punto de humo con la estabilidad oxidativa real para cocinar sin humos tóxicos.",
+    breadcrumbs: [
+      { label: 'Inicio', href: '/es/' },
+      { label: 'Herramientas', href: '/es/tools/' },
+      { label: 'Simulador de Punto de Humo y Aldehídos' }
+    ],
+    faqHeading: "Preguntas Frecuentes sobre la Oxidación de Aceites y Aldehídos Tóxicos",
+    faqSub: "Respuestas con respaldo bioquímico basadas en el Codex Alimentarius, directivas europeas de fritura e informes del IARC.",
+    faqs: [
+      {
+        question: "¿Por qué el Aceite de Oliva Virgen Extra supera a los aceites de semillas bajo calor intenso?",
+        answer: "Un error culinario habitual es creer que el punto de humo define la seguridad de un aceite al cocinar. En realidad, la descomposición la provoca la oxidación lipídica, no el humo visible. El Aceite de Oliva Virgen Extra (AOVE) contiene un 75% de ácido oleico monoinsaturado (con un solo doble enlace muy resistente al calor) y hasta 500 ppm de antioxidantes fenólicos naturales (oleocantal, hidroxitirosol). En investigaciones de laboratorio (De Alzaa 2018; Prof. Martin Grootveld), el AOVE generó muchísimos menos compuestos polares y aldehídos tóxicos (como el 4-HNE) que los aceites de maíz, soja o girasol refinados, a pesar del supuesto alto punto de humo de estos últimos."
+      },
+      {
+        question: "¿Qué es el 4-HNE (4-Hidroxi-2-nonenal) y qué daño celular ocasiona?",
+        answer: "El 4-HNE es un alquenal citotóxico sumamente reactivo que se forma cuando los ácidos grasos poliinsaturados omega-6 (ácido linoleico de aceites de maíz, soja o girasol) se rompen por peroxidación térmica. El 4-HNE se adhiere mediante aductos de Michael a residuos de histidina, lisina y cisteína en proteínas celulares, inhibiendo la respiración mitocondrial y promoviendo inflamación vascular crónica, aterosclerosis y daño hepático."
+      },
+      {
+        question: "¿Por qué la acroleína del humo del aceite se considera un gas tóxico respiratorio?",
+        answer: "La acroleína (2-propenal) es un aldehído volátil lacrimógeno que surge de la descomposición térmica de la molécula de glicerol cuando la grasa alcanza o rebasa su punto de humo. Catalogada por el IARC como probable carcinógeno humano (Grupo 2A), sus vapores paralizan los cilios bronquiales y necrosan el epitelio respiratorio. Los estudios epidemiológicos vinculan la inhalación continuada de humos de fritura sin ventilación con tasas elevadas de adenocarcinoma de pulmón en cocineros no fumadores."
+      },
+      {
+        question: "¿Cuál es el límite legal europeo de Materiales Polares Totales (TPM) en fritura?",
+        answer: "Las normativas alimentarias de la Unión Europea fijan el límite de descarte obligatorio entre el 24% y el 27% de Materiales Polares Totales (TPM). El TPM cuantifica la proporción de triglicéridos que se han descompuesto en ácidos grasos libres, polímeros oxidados y aldehídos. Superar el 24% de TPM hace que el aceite sea legalmente no apto para consumo humano por su comprobada toxicidad digestiva y vascular."
+      },
+      {
+        question: "¿Por qué reutilizar el aceite de freír multiplica la formación de toxinas?",
+        answer: "Cada vez que el aceite se enfría y recalienta en presencia de humedad y oxígeno, se crean hidroperóxidos residuales que aceleran la degradación posterior a temperaturas mucho más bajas. Reutilizar el aceite reduce su punto de humo entre 15°C y 25°C por ciclo. Al tercer uso, los aceites de semillas poliinsaturados liberan más del triple de aldehídos volátiles que un aceite fresco en el mismo tiempo."
+      },
+      {
+        question: "¿Qué aceites culinarios son los más seguros para sellar y freír a altas temperaturas?",
+        answer: "Para temperaturas superiores a 200°C (400°F), las grasas más estables son las pobres en ácidos poliinsaturados: 1) Aceite de aguacate refinado (punto de humo 271°C, 74% monoinsaturado), 2) Ghee tradicional (mantequilla clarificada, punto de humo 252°C, 65% saturado), 3) Sebo vacuno alimentario (punto de humo 213°C, 50% saturado) y 4) Aceite de girasol alto oleico (punto de humo 232°C, 82% monoinsaturado). Para salteados medios (hasta 190°C), el AOVE sigue siendo insuperable gracias a sus polifenoles protectores."
+      }
+    ]
+  },
+  pt: {
+    pageTitle: "Simulador de Ponto de Fumaça e Formação de Aldeídos Cancerígenos | IsItKitchenSafe",
+    pageDescription: "Simule a degradação térmica de óleos: compare ponto de fumaça com estabilidade oxidativa real em 20 óleos de cozinha. Calcule 4-HNE, MDA e vapores de acroleína em frituras.",
+    breadcrumbs: [
+      { label: 'Início', href: '/pt/' },
+      { label: 'Ferramentas', href: '/pt/tools/' },
+      { label: 'Simulador de Ponto de Fumaça e Aldeídos' }
+    ],
+    faqHeading: "Perguntas Frequentes sobre Oxidação Térmica e Vapores de Óleo",
+    faqSub: "Orientações fundamentadas em cinética bioquímica, limites europeus de TPM e dados de toxicologia alimentar.",
+    faqs: [
+      {
+        question: "Por que o Azeite de Oliva Extra Virgem é mais seguro no calor do que óleos de sementes?",
+        answer: "O ponto de fumaça não é o critério definitivo de segurança na culinária. A degradação do óleo ocorre por oxidação lipídica, e não por fumaça visível. O Azeite de Oliva Extra Virgem (EVOO) possui cerca de 75% de ácido oleico monoinsaturado e grande concentração de polifenóis bioativos (oleocantal, hidroxitirosol). Em estudos laboratoriais comparativos (De Alzaa 2018), o azeite produziu muito menos aldeídos tóxicos e compostos polares do que óleos refinados de milho ou soja, ricos em gorduras poli-insaturadas altamente instáveis ao calor."
+      },
+      {
+        question: "O que é o 4-HNE e quais são os perigos no consumo de alimentos fritos?",
+        answer: "O 4-Hidroxi-2-nonenal (4-HNE) é um alquenal citotóxico derivado da decomposição térmica de ácidos graxos poli-insaturados ômega-6 (ácido linoleico). Ele se liga covalentemente às proteínas celulares e ao DNA, inibindo funções mitocondriais e acelerando processos inflamatórios cardiovasculares, esteatose hepática e aterosclerose."
+      },
+      {
+        question: "Por que a acroleína nos vapores da frigideira é classificada como agente perigoso?",
+        answer: "A acroleína (2-propenal) é um aldehído volátil extremamente irritante, sintetizado pela desidratação do glicerol sob temperaturas que atingem ou ultrapassam o ponto de fumaça. Classificada pelo IARC como provável cancerígeno humano (Grupo 2A), sua inalação ataca as vias aéreas superiores e tem relação epidemiológica direta com câncer pulmonar em cozinheiros expostos a fumaças de fritura sem ventilação adequada."
+      },
+      {
+        question: "Qual é o limite legal europeu para Compostos Polares Totais (TPM) em óleos de fritura?",
+        answer: "A legislação sanitária da União Europeia estabelece que o óleo de fritura deve ser obrigatoriamente descartado ao atingir entre 24% e 27% de Compostos Polares Totais (TPM). O TPM reflete a quantidade de triglicerídeos degradados em polímeros e aldehídos prejudiciais à integridade da mucosa intestinal e à saúde vascular."
+      },
+      {
+        question: "Por que reaproveitar o óleo de fritura aumenta dramaticamente a toxicidade?",
+        answer: "A cada ciclo de uso, o contato com o oxigênio e a água dos alimentos cria hidroperóxidos que atuam como aceleradores da oxidação. Isso derruba o ponto de fumaça em cerca de 20°C a cada reutilização. Ao terceiro ou quarto ciclo, a quantidade de aldehídos cancerígenos liberada chega a triplicar em comparação com o óleo novo."
+      },
+      {
+        question: "Quais são as melhores gorduras para grelhar, selar carnes e fritar em altas temperaturas?",
+        answer: "Para cocção acima de 200°C, prefira gorduras com baixa proporção de poli-insaturados: 1) Óleo de abacate refinado (ponto de fumaça 271°C, 74% monoinsaturado), 2) Ghee tradicional / manteiga clarificada (ponto de fumaça 252°C, 65% saturado), 3) Sebo bovino culinário (ponto de fumaça 213°C) e 4) Óleo de girassol alto oleico (ponto de fumaça 232°C). Para refogados do dia a dia, o azeite extra virgem segue como a melhor escolha nutricional."
+      }
+    ]
+  },
+  "zh-cn": {
+    pageTitle: "食用油发烟点与致癌性醛类生成模拟器 | IsItKitchenSafe",
+    pageDescription: "科学模拟20种烹饪油脂在煎炒油炸下的热氧化反应与毒性醛类（4-HNE、MDA、丙烯醛）生成速率。深入对比发烟点与真实氧化稳定性，拒绝致癌厨房油烟。",
+    breadcrumbs: [
+      { label: '首页', href: '/zh-cn/' },
+      { label: '实用工具', href: '/zh-cn/tools/' },
+      { label: '食用油发烟点与醛类模拟器' }
+    ],
+    faqHeading: "关于食用油热氧化分解与有害醛类的常见疑问",
+    faqSub: "基于国际食品法典委员会（Codex）、欧盟餐饮废油标线及IARC流行病学研究的权威解答。",
+    faqs: [
+      {
+        question: "为什么特级初榨橄榄油（EVOO）在加热时比高发烟点的种子油更安全？",
+        answer: "大众厨房中存在一个严重误区：认为发烟点是衡量食用油高温安全性的唯一指标。事实上，烹饪中的化学危害来自于油脂的脂质过氧化裂解，而非肉眼可见的发烟。特级初榨橄榄油富含约75%的单不饱和油酸（仅含一个双键，化学键高度稳定），并天然含有200至500 ppm的多酚类抗氧化物（橄榄苦苷、羟基酪醇等）。国际权威热力对照实验（如De Alzaa 2018）证实：即便橄榄油名义发烟点约为190-200°C，但在相同煎炒加热条件下，其释放的极性化合物、反式脂肪酸及毒性醛类（如4-HNE）远低于精炼玉米油、大豆油或普通葵花籽油。"
+      },
+      {
+        question: "什么是4-HNE（4-羟基-2-壬烯醛）？它对人体细胞有何毒害？",
+        answer: "4-HNE是由多不饱和脂肪酸中的Omega-6（亚油酸）在高温热氧化时裂解生成的高活性细胞毒性烯醛。4-HNE进入人体后，能通过迈克尔加成反应直接交联破坏酶和蛋白质中的组氨酸、赖氨酸与半胱氨酸残基，抑制细胞线粒体氧化磷酸化，并诱发血管内皮氧化应激。长期摄入反复加热植物油中的4-HNE，与动脉粥样硬化、非酒精性脂肪肝及结直肠癌风险显著正相关。"
+      },
+      {
+        question: "为什么烹饪油烟中的丙烯醛被列为严重呼吸道致癌物？",
+        answer: "丙烯醛（2-丙烯醛）是在油脂接近或超过发烟点时，甘油骨架经热脱水裂解生成的强刺激性挥发性醛类。世界卫生组织国际癌症研究机构（IARC）将其列为2A类可能致癌物。丙烯醛气体极易灼伤呼吸道黏膜，导致气管纤毛麻痹和肺部急性炎症反应。多项流行病学调查发现，中国及亚洲非吸烟女性厨师患肺腺癌的高发诱因之一，正是长期在通风不足环境中吸入爆炒高温油烟中的丙烯醛。"
+      },
+      {
+        question: "欧盟对餐饮油炸用油的总极性化合物（TPM）法定废弃限值是多少？",
+        answer: "根据欧盟统一食品卫生法规及德、法、西等国卫生法典，商业餐饮油炸用油的总极性化合物（TPM / TPC）强制报废红线为24%至27%。TPM检测的是甘油三酯在热裂解后转变为游离脂肪酸、氧化单双甘油酯及二次聚合物的总体比例。当TPM超过24%时，油脂在法律层面上即被判定为变质有害物，严禁继续供人食用。"
+      },
+      {
+        question: "为什么反复重复使用煎炸油会使致癌物成倍激增？",
+        answer: "食用油在每次加热冷却过程中，食材释放的水分和空气中的氧气都会在油中催生原发性脂质氢过氧化物。在后续重复加热时，这些残留过氧化物会充当自催化促氧化剂，使油脂在低得多的温度下迅速发生级联裂解，且发烟点每重复一轮下降10-15°C。到第三至第四次复用时，多不饱和植物油产生的毒性挥发性醛类较新油在同等条件下可暴增300%以上。"
+      },
+      {
+        question: "进行高温爆炒、煎牛排和油炸时，最安全的烹饪油脂是什么？",
+        answer: "对于超过200°C的高温烹饪，最安全的油脂必须具备低多不饱和脂肪酸（PUFA）和极高热稳定性的特征：1) 精炼牛油果油（发烟点达271°C，单不饱和酸74%），2) 传统无水酥油/澄清黄油（Ghee，发烟点252°C，饱和酸65%，已剔除蛋白质），3) 草饲牛油（Tallow，发烟点213°C），4) 高油酸葵花籽油（发烟点232°C，单不饱和酸82%）。日常中火温和炒菜（180°C以下），高品质特级初榨橄榄油依然是营养保护最全面的首选。"
+      }
+    ]
+  },
+  ja: {
+    pageTitle: "食用油の発煙点＆発がん性アルデヒド生成シミュレーター | IsItKitchenSafe",
+    pageDescription: "食用油20種類の加熱分解と毒性アルデヒド（4-HNE、MDA、アクロレイン）の生成動態をシミュレート。発煙点と真の酸化安定性の違いを科学的に解き明かします。",
+    breadcrumbs: [
+      { label: 'ホーム', href: '/ja/' },
+      { label: '診断ツール', href: '/ja/tools/' },
+      { label: '食用油発煙点＆アルデヒドシミュレーター' }
+    ],
+    faqHeading: "食用油の熱酸化と毒性アルデヒドに関するよくある質問",
+    faqSub: "Codex国際規格、EU食用油廃棄基準、IARC調理油煙研究に基づいた生化学的解説。",
+    faqs: [
+      {
+        question: "なぜエキストラバージンオリーブオイルは、発煙点の高い種子油より加熱に強いのですか？",
+        answer: "「発煙点が高い油ほど安全」というのは調理科学における大きな誤解です。加熱時の有害物質発生は発煙ではなく脂質の酸化反応によって決まります。エキストラバージンオリーブオイル(EVOO)は熱に極めて強い一価不飽和脂肪酸（オレイン酸）が約75%を占め、200〜500ppmの天然抗酸化ポリフェノール（オレオカンタール、ヒドロキシチロソール等）を含みます。実験科学研究（De Alzaaら 2018）によると、EVOOは見かけの発煙点（約190〜200°C）に関わらず、多価不飽和脂肪酸の多いコーン油や大豆油、ひまわり油に比べ、加熱時の有害アルデヒド（4-HNE等）発生量が著しく少ないことが確認されています。"
+      },
+      {
+        question: "4-HNE（4-ヒドロキシ-2-ノネナール）とは何ですか？どのような健康リスクがありますか？",
+        answer: "4-HNEは、コーン油や大豆油などに豊富なオメガ6系多価不飽和脂肪酸（リノール酸）が高温で過酸化分解される際に生成する強力な細胞毒性アルケナールです。生体内のタンパク質やDNAのアミノ酸残基と結合して機能を阻害し、ミトコンドリア呼吸不全や血管内皮の炎症を引き起こします。長期的な摂取は動脈硬化や非アルコール性脂肪肝炎、消化器系発がんリスクとの関連が指摘されています。"
+      },
+      {
+        question: "加熱油の煙に含まれるアクロレインが呼吸器に有害とされる理由は何ですか？",
+        answer: "アクロレイン（2-プロペナール）は、油脂が発煙点付近またはそれ以上に達した際に、グリセリン骨格が熱脱水分解して発生する激しい刺激臭を持つ揮発性アルデヒドです。国際がん研究機関(IARC)によりグループ2A（ヒトに対しておそらく発がん性がある）に分類されており、気道線毛の麻痺や気道上皮の壊死を引き起こします。換気の悪い厨房で調理油煙を吸い続けることは、非喫煙者の肺がんリスク上昇の要因とされています。"
+      },
+      {
+        question: "EUにおける油フライ時の総極性化合物（TPM）の法的廃棄基準は何％ですか？",
+        answer: "欧州連合(EU)の食品安全規制基準では、フライ油の総極性化合物（TPM）が24%〜27%に達した時点で法的に使用禁止・廃棄が義務付けられています。TPMはトリグリセリドが熱劣化して生成した遊離脂肪酸や酸化重合体の割合を示し、24%を超えた油は消化器や循環器への毒性リスクから食用不適と判定されます。"
+      },
+      {
+        question: "揚げ油を使い回す（再利用する）と毒性物質が急増するのはなぜですか？",
+        answer: "油を一度加熱して冷却すると、食材の水分や空気中の酸素によって過酸化脂質が生成されます。これを再加熱すると、残存過酸化物が自己触媒として働き、1回目よりはるかに低い温度から酸化連鎖反応が始まります。また再利用ごとに発煙点が10〜15°C低下します。3〜4回再利用した多価不飽和油は、新品の油に比べ有毒アルデヒドの発生量が300%以上増加します。"
+      },
+      {
+        question: "高温の炒め物やステーキ、揚げ物に最も安全なおすすめの油は何ですか？",
+        answer: "200°Cを超える高温調理には、多価不飽和脂肪酸が少なく熱酸化耐性に優れた油が最適です：1) 精製アボカドオイル（発煙点271°C、オレイン酸74%）、2) ギー／澄ましバター（発煙点252°C、飽和脂肪酸65%、タンパク質除去済み）、3) 牛脂（ヘット、発煙点213°C）、4) ハイオレイック（高オレイン酸）ひまわり油（発煙点232°C、オレイン酸82%）。日常の中火炒め（180°C前後）であれば、ポリフェノール豊富なEVオリーブオイルが最も健康的です。"
+      }
+    ]
+  }
+};
+
+const c = CONTENT[lang] || CONTENT.es;
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": c.pageTitle,
+  "url": `https://isitkitchensafe.com/${lang}/tools/culinary-oil-smoke-point-simulator/`,
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript. Requires HTML5.",
+  "description": c.pageDescription,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IsItKitchenSafe",
+    "url": "https://isitkitchensafe.com"
+  }
+};
+---
+
+<Layout title={c.pageTitle} description={c.pageDescription} faqs={c.faqs} availableLocales={availableLocales}>
+  <script type="application/ld+json" set:html={JSON.stringify(webAppSchema)} />
+
+  <main class="container mx-auto px-4 py-8 max-w-5xl space-y-8">
+    <Breadcrumbs items={c.breadcrumbs} />
+
+    <CulinaryOilSmokePointSimulator lang={lang} />
+
+    <!-- FAQ Accordion Section -->
+    <section class="mt-16 bg-surface-soft border border-hairline rounded-3xl p-6 md:p-10 space-y-6">
+      <div class="border-b border-hairline pb-4">
+        <span class="text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400 block mb-1">
+          {c.faqHeading}
+        </span>
+        <h2 class="text-title-lg font-medium text-ink tracking-tight">
+          {c.faqHeading}
+        </h2>
+        <p class="text-xs text-muted">{c.faqSub}</p>
+      </div>
+
+      <div class="space-y-4">
+        {c.faqs.map(faq => (
+          <details class="group p-4 rounded-xl bg-canvas border border-hairline transition-colors open:bg-surface">
+            <summary class="font-medium text-ink cursor-pointer list-none flex items-center justify-between text-sm md:text-base">
+              <span>{faq.question}</span>
+              <span class="text-muted transition-transform group-open:rotate-180 ml-2">&darr;</span>
+            </summary>
+            <p class="text-xs md:text-sm text-body mt-3 pt-3 border-t border-hairline/60 leading-relaxed">
+              {faq.answer}
+            </p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </main>
+</Layout>
