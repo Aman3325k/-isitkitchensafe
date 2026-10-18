@@ -46,7 +46,8 @@ const SPECIAL_PAGES = [
   'tools/child-safety-toxic-ingestion-evaluator',
   'tools/culinary-oil-smoke-point-simulator',
   'tools/sous-vide-plastic-microbial-modeler',
-  'tools/water-filter-efficiency-analyzer'
+  'tools/water-filter-efficiency-analyzer',
+  'tools/air-fryer-acrylamide-calculator'
 ];
 
 const esSlugs = new Set([
