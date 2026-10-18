@@ -51,7 +51,8 @@ const SPECIAL_PAGES = [
   'tools/slow-cooker-safety-simulator',
   'tools/microwave-radiation-leakage-evaluator',
   'tools/induction-cooktop-emf-safety-modeler',
-  'tools/commercial-dishwasher-rinse-aid-modeler'
+  'tools/commercial-dishwasher-rinse-aid-modeler',
+  'tools/pressure-cooker-instant-pot-safety-simulator'
 ];
 
 const esSlugs = new Set([
