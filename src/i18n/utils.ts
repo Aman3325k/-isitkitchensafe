@@ -50,7 +50,8 @@ const SPECIAL_PAGES = [
   'tools/air-fryer-acrylamide-calculator',
   'tools/slow-cooker-safety-simulator',
   'tools/microwave-radiation-leakage-evaluator',
-  'tools/induction-cooktop-emf-safety-modeler'
+  'tools/induction-cooktop-emf-safety-modeler',
+  'tools/commercial-dishwasher-rinse-aid-modeler'
 ];
 
 const esSlugs = new Set([
