@@ -41,7 +41,8 @@ const SPECIAL_PAGES = [
   'tools/thermal-shock-simulator',
   'tools/kitchen-energy-carbon-calculator',
   'tools/plasticizer-microplastic-burden-estimator',
-  'tools/food-contact-migration-predictor'
+  'tools/food-contact-migration-predictor',
+  'tools/commercial-cookware-nsf-inspector'
 ];
 
 const esSlugs = new Set([
