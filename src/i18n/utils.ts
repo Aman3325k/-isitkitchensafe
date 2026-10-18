@@ -44,7 +44,8 @@ const SPECIAL_PAGES = [
   'tools/food-contact-migration-predictor',
   'tools/commercial-cookware-nsf-inspector',
   'tools/child-safety-toxic-ingestion-evaluator',
-  'tools/culinary-oil-smoke-point-simulator'
+  'tools/culinary-oil-smoke-point-simulator',
+  'tools/sous-vide-plastic-microbial-modeler'
 ];
 
 const esSlugs = new Set([
