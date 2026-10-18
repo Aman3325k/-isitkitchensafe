@@ -1,0 +1,351 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import SlowCookerSafetySimulator from '../../../components/SlowCookerSafetySimulator.astro';
+import type { SupportedLanguage } from '../../../i18n/ui';
+import { useTranslations, useTranslatedPath } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+const t = useTranslations(lang);
+const tp = useTranslatedPath(lang);
+
+interface LocaleContent {
+  pageTitle: string;
+  pageDescription: string;
+  breadcrumbs: Array<{ label: string; href?: string }>;
+  faqs: Array<{ question: string; answer: string }>;
+  faqHeading: string;
+  faqSub: string;
+  monoBadge: string;
+  monoTitle: string;
+  monoSub: string;
+  monoSection1Title: string;
+  monoSection1Body: string;
+  monoSection2Title: string;
+  monoSection2Body: string;
+  monoSection3Title: string;
+  monoSection3Body: string;
+  monoSection4Title: string;
+  monoSection4Body: string;
+}
+
+const CONTENT: Record<SupportedLanguage, LocaleContent> = {
+  en: {} as any,
+  es: {
+    pageTitle: "Simulador de Lixiviación de Metales en Ollas Lentas y Proliferación de Esporas | IsItKitchenSafe",
+    pageDescription: "Modelo matemático de seguridad en ollas lentas (crockpot): calcula la lixiviación de plomo y cadmio en esmaltes cerámicos, incubación de esporas de Clostridium perfringens y toxicidad de fitohemaglutinina (PHA) en frijoles rojos.",
+    breadcrumbs: [
+      { label: 'Inicio', href: '/es/' },
+      { label: 'Herramientas', href: '/es/tools/' },
+      { label: 'Simulador de Seguridad en Ollas Lentas' }
+    ],
+    faqHeading: "Preguntas Frecuentes sobre Ollas Lentas, Plomo y Frijoles Rojos",
+    faqSub: "Pautas con respaldo científico de la FDA CPG Sec 545.450, el USDA-FSIS y microbiología clínica.",
+    faqs: [
+      {
+        question: "¿Las ollas lentas contienen plomo tóxico en sus esmaltes cerámicos?",
+        answer: "Las ollas lentas modernas fabricadas por marcas reconocidas para EE. UU. y la UE cumplen normas estrictas como la guía FDA CPG Sec 545.450 y la Proposición 65 de California, limitando el plomo lixiviable a menos de 1.0 ppm (habitualmente < 0.02 ppm). No obstante, ollas vintage anteriores a 1980 y cerámicas artesanales sin regular (como el barro tradicional mexicano vidriado con greta) suelen tener esmaltes con óxido de plomo que liberan altas cantidades tóxicas ante alimentos calientes y ácidos como el tomate o el vinagre."
+      },
+      {
+        question: "¿Por qué cocinar frijoles rojos crudos en una olla lenta causa intoxicación aguda?",
+        answer: "Los frijoles rojos crudos (Phaseolus vulgaris) contienen concentraciones muy altas de fitohemaglutinina (PHA, 20,000-70,000 HAU). Hervir a 100°C durante al menos 10 minutos destruye completamente la toxina. Sin embargo, la función 'Low' de las ollas lentas solo alcanza unos 75°C-82°C. El Libro de Microbios de la FDA advierte que calentar frijoles rojos a 80°C ¡aumenta la toxicidad de la lectina hasta en un 500%! Comer solo 4-5 frijoles mal cocidos provoca vómitos violentos y diarrea aguda en 1 a 3 horas."
+      },
+      {
+        question: "¿Es seguro poner carne congelada directamente en una olla lenta?",
+        answer: "No. El USDA-FSIS desaconseja totalmente colocar piezas grandes de carne congelada directamente en una olla lenta. Como el aparato calienta de forma lenta y gradual, el centro congelado permanece en la zona de peligro térmico (4°C-60°C) durante 4 a 6 horas. Esto permite que las esporas resistentes al calor de Clostridium perfringens y Bacillus cereus germinen y produzcan enterotoxinas antes de alcanzar temperaturas seguras. Descongele siempre la carne en refrigerador."
+      },
+      {
+        question: "¿Qué es el 'cuarteado' o crazing del esmalte y vuelve insegura la olla?",
+        answer: "El cuarteado (crazing) es una red de microfisuras que se forma en el esmalte cuando la arcilla cerámica y el vidrio se dilatan a ritmos distintos por el calor repetido. Aunque en cerámicas sin plomo no libera plomo de inmediato, rompe la barrera impermeable: los jugos y ácidos penetran en la arcilla porosa subyacente, acumulando bacterias y lixiviando impurezas del barro a futuras comidas. Los recipientes muy cuarteados deben cambiarse."
+      },
+      {
+        question: "¿A qué temperatura debe llegar una olla lenta para ser segura?",
+        answer: "Tanto en 'Low' como en 'High', una olla lenta moderna suele alcanzar finalmente la misma temperatura máxima: entre 90°C y 98°C (195°F-209°F). La diferencia radica en la velocidad: 'High' tarda de 1.5 a 2 horas, mientras que 'Low' tarda de 3 a 4 horas. La función de mantener caliente ('Keep Warm') debe mantener el caldo entre 63°C y 74°C (145°F-165°F) para inhibir bacterias sin seguir cocinando el alimento."
+      },
+      {
+        question: "¿Puedo probar el plomo de mi olla lenta vintage en casa?",
+        answer: "Sí, mediante hisopos reactivos de rodizonato de sodio o sulfuro. Tras frotar la superficie limpia durante 30 a 60 segundos, un cambio de color a rojo/rosa confirma plomo reactivo superficial. Si su olla es anterior a 1980 o da positivo en la prueba rápida, retírela de inmediato del uso alimentario."
+      }
+    ],
+    monoBadge: "Monografía Metalúrgica de Esmaltes y Microbiología de Esporas",
+    monoTitle: "Cinética de Intercambio Iónico de Silicatos, Esporas de Clostridium y Desnaturalización de Lectinas",
+    monoSub: "Análisis exhaustivo de la liberación de metales pesados ante calor ácido, dinámica de esporas bacterianas en la zona de peligro y activación de lectinas por debajo del hervor.",
+    monoSection1Title: "Cinética de Lixiviación Ácida en Cerámica Plomada",
+    monoSection1Body: "Históricamente se añadía óxido de plomo (PbO) a los esmaltes de baja temperatura para fundir a 900°C y dar un acabado brillante. Al cocer guisos con ácidos (tomate pH 4.0, vino o vinagre), los iones hidronio intercambian lugar con cationes de Pb²⁺ y Cd²⁺ en la red de silicato. El calor prolongado de 77°C a 93°C acelera este transporte iónico hacia el caldo en hasta un 300% respecto a pruebas a temperatura ambiente.",
+    monoSection2Title: "La Paradoja Tóxica de la Fitohemaglutinina (PHA)",
+    monoSection2Body: "Los frijoles rojos crudos poseen lectinas que dañan las microvellosidades intestinales. Mientras que hervir a 100°C durante 10 minutos desnaturaliza por completo la proteína (< 400 HAU), calentar a temperaturas submáximas de 74°C a 82°C (la temperatura habitual del modo 'Low') desestabiliza parcialmente la molécula sin destruirla, multiplicando su toxicidad aglutinante hasta en 5 veces (más de 100,000 HAU).",
+    monoSection3Title: "Germinación de Endosporas de Clostridium perfringens",
+    monoSection3Body: "Clostridium perfringens genera endosporas resistentes al calor que sobreviven a la cocción inicial. Al colocar carne congelada, el centro permanece en el rango ideal de germinación (43°C–52°C) por más de 4 horas, duplicándose la población cada 10 a 12 minutos y generando enterotoxinas causantes de gastroenteritis aguda.",
+    monoSection4Title: "Cerámicas Vitrificadas Modernas y Reglas Culinarias",
+    monoSection4Body: "Las cerámicas modernas de gres o porcelana se cuecen a más de 1,200°C con fundentes alcalinotérreos no tóxicos y sin plomo. Para máxima seguridad: hierva siempre los frijoles rojos secos 10-30 minutos en estufa antes de pasarlos a la olla lenta, descongele siempre las carnes por completo en el frigorífico y empiece los guisos densos en 'High' la primera hora."
+  },
+  pt: {
+    pageTitle: "Simulador de Lixiviação de Metais em Panelas Elétricas e Esporos | IsItKitchenSafe",
+    pageDescription: "Modelo matemático de segurança para panelas elétricas lentas (slow cookers): calcule a lixiviação de chumbo e cádmio de esmaltes, incubação de esporos de Clostridium perfringens na zona de perigo e toxicidade de fito-hemaglutinina (PHA) em feijão-vermelho.",
+    breadcrumbs: [
+      { label: 'Início', href: '/pt/' },
+      { label: 'Ferramentas', href: '/pt/tools/' },
+      { label: 'Simulador de Segurança em Panelas Elétricas' }
+    ],
+    faqHeading: "Perguntas Frequentes sobre Panelas Lentas, Chumbo e Feijão-Vermelho",
+    faqSub: "Diretrizes baseadas nas normas da FDA CPG Sec 545.450, USDA-FSIS e microbiologia de alimentos.",
+    faqs: [
+      {
+        question: "As panelas elétricas lentas contêm chumbo tóxico no esmalte cerâmico?",
+        answer: "Modelos modernos certificados e vendidos por marcas conceituadas atendem a normas rígidas como a FDA CPG Sec 545.450 e a Proposta 65 da Califórnia, que limitam o chumbo liberado a menos de 1.0 ppm (muitas vezes abaixo de 0.02 ppm). No entanto, aparelhos vintage produzidos antes de 1980 e cerâmicas artesanais sem regulamentação (como panelas de barro tradicionais) frequentemente utilizam óxido de chumbo no esmalte, liberando teores perigosos em contato com caldos quentes e ácidos."
+      },
+      {
+        question: "Por que cozinhar feijão-vermelho cru na panela elétrica causa intoxicação?",
+        answer: "O feijão-vermelho cru (Phaseolus vulgaris) contém grandes quantidades da lectina fito-hemaglutinina (PHA, 20.000 a 70.000 HAU). A fervura a 100°C por pelo menos 10 minutos inativa totalmente a toxina. Contudo, em panelas lentas no modo 'Low' (baixa temperatura, cerca de 75°C-80°C), a toxina não se destrói; pelo contrário, o calor moderado aumenta a toxicidade em até 500%! Ingerir apenas 4 a 5 feijões mal cozidos provoca vômitos intensos e diarreia em 1 a 3 horas."
+      },
+      {
+        question: "É seguro colocar carne congelada diretamente na panela lenta?",
+        answer: "Não. O USDA-FSIS proíbe colocar grandes pedaços de carne congelada diretamente na panela lenta. O aquecimento gradual faz com que o interior da carne permaneça na zona de perigo bacteriano (4°C a 60°C) por 4 a 6 horas, propiciando a proliferação acelerada de esporos de Clostridium perfringens e produção de enterotoxinas resistentes ao calor. Descongele sempre totalmente a carne no refrigerador."
+      },
+      {
+        question: "O que é o craquelamento (crazing) do esmalte cerâmico e quais os riscos?",
+        answer: "O craquelamento é a formação de microfissuras em teia de aranha no esmalte devido à dilatação térmica desigual entre a argila e a camada vítrea. Esse desgaste rompe a barreira impermeável, permitindo que gorduras e caldos penetrem na cerâmica porosa interna, acumulando bactérias e soltando impurezas minerais nos alimentos. Cubas muito craqueladas devem ser substituídas."
+      },
+      {
+        question: "Qual temperatura a panela elétrica deve atingir para garantir segurança?",
+        answer: "Tanto o modo 'Low' quanto o 'High' eventualmente atingem entre 90°C e 98°C (195°F-209°F). O modo 'High' atinge a temperatura mais rápido (1.5 a 2 horas), enquanto o 'Low' leva de 3 a 4 horas. O modo aquecer ('Keep Warm') deve manter o alimento acima de 63°C (145°F) para impedir a multiplicação bacteriana."
+      },
+      {
+        question: "Posso testar a presença de chumbo em panelas vintage em casa?",
+        answer: "Sim, através de testes químicos rápidos com cotonetes de rodizonato de sódio ou sulfeto de sódio. A mudança de cor para rosa ou vermelho indica chumbo reativo na superfície. Se o aparelho for anterior a 1980 ou apresentar teste positivo, retire-o imediatamente do uso alimentar."
+      }
+    ],
+    monoBadge: "Monografia Metalúrgica de Esmaltes e Microbiologia de Esporos",
+    monoTitle: "Cinética de Troca Iônica de Silicatos, Esporos de Clostridium e Desnaturação de Lectinas",
+    monoSub: "Análise profunda sobre a extração de metais pesados por ácidos térmicos, dinâmica de esporos bacterianos na zona de perigo e ativação de lectinas abaixo da fervura.",
+    monoSection1Title: "Cinética de Lixiviação Ácida em Esmaltes de Chumbo",
+    monoSection1Body: "O óxido de chumbo (PbO) era adicionado a esmaltes cerâmicos de baixa queima para fundir a 900°C e proporcionar brilho espelhado. Em contato prolongado com ácidos culinários (tomate, vinho, vinagre) entre 77°C e 93°C, ocorre troca iônica entre íons hidrônio e cátions Pb²⁺/Cd²⁺, acelerando a contaminação do alimento em até 300% em comparação com testes laboratoriais à temperatura ambiente.",
+    monoSection2Title: "O Paradoxo da Toxicidade da Fito-hemaglutinina (PHA)",
+    monoSection2Body: "A lectina do feijão-vermelho danifica as microvilosidades do intestino delgado. Enquanto a fervura completa a 100°C por 10 minutos neutraliza a molécula (< 400 HAU), a exposição a temperaturas brandas de 74°C a 82°C (típicas do modo 'Low') causa desenrolamento parcial da proteína sem destruí-la, aumentando em até 5 vezes a sua capacidade de aglutinação tóxica.",
+    monoSection3Title: "Germinação de Endósporos de Clostridium perfringens",
+    monoSection3Body: "Endósporos de Clostridium perfringens suportam calor moderado. Se carnes congeladas forem colocadas na panela lenta, o miolo demora horas para passar dos 43°C–52°C, temperatura ideal na qual as bactérias se multiplicam a cada 10-12 minutos e liberam enterotoxinas causadoras de intoxicação alimentar aguda.",
+    monoSection4Title: "Cerâmicas Vitrificadas Modernas e Recomendações",
+    monoSection4Body: "Panelas modernas de grés de alta queima (acima de 1.200°C) dispensam chumbo e garantem vitrificação inerte. Para total segurança: ferva sempre os feijões-vermelhos crus por 10 a 30 minutos no fogão antes de usar a panela elétrica, descongele carnes totalmente no refrigerador e utilize a potência 'High' na primeira hora de preparo."
+  },
+  "zh-cn": {
+    pageTitle: "慢炖锅（电炖锅）陶瓷釉面重金属溶出与芽孢细菌孵化模拟器 | IsItKitchenSafe",
+    pageDescription: "基于严谨生化动力学模型：模拟慢炖锅长期低温炖煮下铅（Pb）与镉（Cd）酸性溶出动力学、危险温区内产气荚膜梭菌与蜡样芽孢杆菌繁殖曲线，以及生红腰豆植物红细胞凝集素（PHA）亚沸腾热毒性爆发风险。",
+    breadcrumbs: [
+      { label: '首页', href: '/zh-cn/' },
+      { label: '工具箱', href: '/zh-cn/tools/' },
+      { label: '慢炖锅陶瓷重金属与细菌安全模拟器' }
+    ],
+    faqHeading: "慢炖锅陶瓷铅溶出、冷冻肉与红腰豆凝集素常见问题",
+    faqSub: "符合美国 FDA CPG Sec 545.450 陶瓷铅限值、USDA-FSIS 细菌危险温区及临床微生物学权威规范。",
+    faqs: [
+      {
+        question: "慢炖锅的陶瓷内胆釉面含有剧毒的铅吗？",
+        answer: "正规品牌现代生产的慢炖锅必须通过严格的食品接触材料认证，如美国 FDA CPG Sec 545.450 标准及加州65号提案，浸出铅浓度通常被严格限制在 1.0 ppm 以下（实测多低于 0.02 ppm）。然而，1980年以前生产的古董慢炖锅、未经检测的传统民间粗陶砂锅（如墨西哥传统铅釉土陶 barro vidriado），常含有大量氧化铅熔剂，在炖煮番茄、红酒、香醋等高温酸性汤汁时，会剧烈溶出高浓度剧毒铅与镉（常超标数十至数百倍）。"
+      },
+      {
+        question: "为什么生红腰豆放入慢炖锅炖煮会导致严重急性中毒？",
+        answer: "生红腰豆（Phaseolus vulgaris）天然含有高浓度的植物红细胞凝集素（PHA，通常为 20,000-70,000 HAU）。在 100°C 沸水中剧烈大滚沸 10 分钟以上可彻底破坏该毒素（降至 400 HAU 以下安全值）。但是，慢炖锅的低温档（Low）通常只能加热到 75°C-82°C（未达沸点）。美国 FDA《坏球菌指南》明确指出：在 80°C 左右的亚沸腾温度下加热红腰豆，不仅无法灭活毒素，反而会使凝集素毒性暴增至原先的 5 倍（高达 100,000+ HAU）！仅仅食用 4-5 颗未充分沸煮的红腰豆，即可在 1-3 小时内引发极度剧烈的喷射性呕吐与急性腹泻。"
+      },
+      {
+        question: "可以直接将大块冷冻肉投入慢炖锅炖煮吗？",
+        answer: "绝对不行。美国农业部食品安全检验局（USDA-FSIS）严厉禁止将未完全解冻的大块生肉或冷冻禽类直接放入慢炖锅。因为慢炖锅升温缓慢，冻肉中心往往需要长达 4 至 6 个小时以上才能穿透 4°C 至 60°C 的细菌危险温区。这为耐热产气荚膜梭菌（Clostridium perfringens）和蜡样芽孢杆菌的芽孢提供了绝佳的发芽繁殖环境（最快10-12分钟即可翻倍），在温度上升到致死线前即可产生大量耐热肠毒素。"
+      },
+      {
+        question: "陶瓷内胆出现蜘蛛网状细微裂纹（开片）是否安全？",
+        answer: "开片（crazing）是由于反复热胀冷缩导致陶瓷坯体与表面釉层的膨胀系数不匹配，而在釉面上产生的蛛网状微观裂隙。虽然在无铅陶瓷中开片不会立即释放铅，但它破坏了玻化防渗屏障：食物酸液和油脂会渗透进下方多孔的陶土坯胎中，形成极难清洗的细菌藏匿温床，并在日后的长时间加热中逐渐向汤汁中析出陶土杂质。严重开片的内胆应及时更换。"
+      },
+      {
+        question: "慢炖锅需要达到多高温度才能确保微生物安全？",
+        answer: "现代慢炖锅的低温档（Low）和高温档（High）最终达到的最高温度基本相同，均在 90°C 至 98°C（195°F-209°F）之间，处于微沸状态。区别在于升温速度：High 档大约 1.5 到 2 小时达到微沸，而 Low 档需要 3 到 4 小时。保温档（Keep Warm）应保持在 63°C 至 74°C（145°F-165°F）之间以抑制细菌滋生。如果保温档低于 60°C，细菌便会在温水中高速繁殖。"
+      },
+      {
+        question: "普通消费者如何在家庭中检测老式慢炖锅是否含铅？",
+        answer: "可以使用市售的快速化学检测试纸或棉签（如玫瑰红酸钠 sodium rhodizonate 铅检测试剂）。将内胆清洗干燥后，在表面及磨损开裂处用力摩擦棉签 30-60 秒，若棉签迅速变为粉红或暗红色，即证实表面存在高活性溶出铅。若检测呈阳性或制造年代早于1980年，应立即淘汰该器皿。"
+      }
+    ],
+    monoBadge: "陶瓷釉质冶金化学与食源性芽孢微生物学专论",
+    monoTitle: "硅酸盐离子置换动力学、产气荚膜梭菌芽孢繁殖与植物凝集素热失活",
+    monoSub: "深入解析高温酸性环境下陶瓷釉面重金属的扩散置换、危险温区内细菌芽孢的倍增规律及菜豆凝集素的亚沸腾热毒性爆发机理。",
+    monoSection1Title: "含铅陶瓷釉面的酸性离子置换动力学",
+    monoSection1Body: "在传统陶瓷工艺中，氧化铅（PbO）曾被广泛用作低温熔剂，使釉料在 900°C 左右即可流平形成光亮平滑的玻璃相。当炖煮番茄、酒或醋等酸性食材时，溶液中的水合氢离子（H₃O⁺）会扩散侵入硅酸盐玻璃网络，将未完全固化的二价铅（Pb²⁺）与镉（Cd²⁺）阳离子置换析出至汤液中。慢炖锅 77°C–93°C 的持续加热使得阳离子传质扩散速率比常温实验室浸泡检测高出近 300%。",
+    monoSection2Title: "植物红细胞凝集素（PHA）亚沸腾热毒性反增悖论",
+    monoSection2Body: "生红腰豆中的 PHA 凝集素与小肠微绒毛结合会导致急性肠上皮脱落。彻底破坏其四级蛋白质结构必须在 100°C 沸水中剧烈加热 10 至 30 分钟。而在慢炖锅低温档（74°C–82°C）的亚沸腾温度下，蛋白质分子发生局部构象舒展却无法完全断裂，形成了亲和力极强的中间活化构象，使其凝集毒性比未加热的生豆反而高出 5 倍（暴增至 100,000+ HAU）。",
+    monoSection3Title: "产气荚膜梭菌（C. perfringens）耐热芽孢萌发动能",
+    monoSection3Body: "产气荚膜梭菌形成的内生芽孢极耐热，可耐受 60°C 以上初始热力。如果将大块冷冻肉类直接投入慢炖锅，肉块核心在 43°C–52°C 最适发芽温区内的滞留时间常常超过 4 小时。该菌在该温度下的世代繁殖周期短至 10-12 分钟，在汤汁沸腾前即可产生海量营养体细胞并分泌肠毒素。",
+    monoSection4Title: "现代高温玻化陶瓷与厨房金牌防毒准则",
+    monoSection4Body: "现代合规炖锅采用 1,200°C 以上烧结的炻瓷或硬质瓷，使用无毒碱土金属熔剂完全玻化。为确保慢炖安全，必须严格执行四项基本原则：生红腰豆必须先在炉灶大滚沸 10 分钟以上再移入慢炖锅；所有肉类必须在冰箱冷藏室彻底解冻；致密浓汤前60分钟建议使用 High 档快速跨越危险温区；保温档温度务必确认维持在 63°C 以上。"
+  },
+  ja: {
+    pageTitle: "スロークッカー釉薬重金属溶出＆耐熱芽胞菌繁殖シミュレーター | IsItKitchenSafe",
+    pageDescription: "スロークッカー（電気煮込み鍋）の長時間低温調理における鉛・カドミウムの酸性溶出動力学、4℃〜60℃の細菌危険温度帯におけるウェルシュ菌・セレウス菌芽胞の増殖曲線、および生赤インゲン豆レクチン（PHA）毒性急増リスクを科学的に算出。",
+    breadcrumbs: [
+      { label: 'ホーム', href: '/ja/' },
+      { label: 'ツール一覧', href: '/ja/tools/' },
+      { label: 'スロークッカー安全性＆重金属シミュレーター' }
+    ],
+    faqHeading: "スロークッカーの鉛溶出、冷凍肉直入れ、赤インゲン豆に関するFAQ",
+    faqSub: "米国 FDA CPG Sec 545.450 陶磁器規格、USDA-FSIS 安全基準および臨床微生物学に基づく解説。",
+    faqs: [
+      {
+        question: "スロークッカーの陶器製内鍋から有毒な鉛が溶け出すことはありますか？",
+        answer: "現在日本や欧米の大手メーカーが製造・販売している製品は、FDA CPG Sec 545.450 や食品衛生法などの厳格な規格に適合しており、溶出鉛は極めて微量（通常 0.02 ppm 未満）に抑えられています。しかし、1980年代以前に作られた古いビンテージ鍋や、伝統的な未認証の海外製土鍋（メキシコの伝統的鉛釉陶器など）には、光沢を出すために酸化鉛が使用されていることが多く、トマトや酢、ワインなどの酸性食材を長時間加熱すると高濃度の鉛やカドミウムが溶出する危険があります。"
+      },
+      {
+        question: "生の赤インゲン豆（金時豆）をスロークッカーで煮ると食中毒になるのはなぜですか？",
+        answer: "生の赤インゲン豆（Phaseolus vulgaris）には植物性毒素フィトヘマグルチニン（PHA、20,000〜70,000 HAU）が高濃度で含まれています。100℃で10分以上しっかり沸騰させれば完全に無毒化（400 HAU未満）されますが、スロークッカーの『弱（Low）』設定は通常75℃〜82℃前後の沸騰未満にとどまります。FDAの『Bad Bug Book』によると、80℃前後の不完全な加熱では毒素が分解されないばかりか、毒性が最大5倍（+500%）に激増します！わずか4〜5粒の不完全加熱豆を食べるだけで、1〜3時間以内に激しい嘔吐や下痢を引き起こします。"
+      },
+      {
+        question: "カチコチに凍った冷凍ブロック肉を直接スロークッカーに入れても大丈夫ですか？",
+        answer: "いいえ、非常に危険です。米国農務省（USDA-FSIS）は、冷凍肉をそのままスロークッカーに入れることを固く禁止しています。スロークッカーはゆっくり温度が上がるため、凍った中心部が細菌の危険温度帯（4℃〜60℃）に4〜6時間以上もとどまることになります。この間に耐熱性のウェルシュ菌（Clostridium perfringens）やセレウス菌の芽胞が発芽・増殖し、熱に強い毒素を作り出してしまいます。肉は必ず前もって冷蔵庫で完全に解凍してから調理してください。"
+      },
+      {
+        question: "陶器内鍋の釉薬に見られる細かいひび割れ（貫入 / Crazing）は危険ですか？",
+        answer: "貫入は、陶器本体と表面のガラス質釉薬の熱膨張率の違いによって生じるクモの巣状の細かいひび割れです。無鉛陶器であっても、貫入ができると釉薬の防護膜が破れ、多孔質な土の素地に料理の煮汁や油が染み込みます。そこに細菌が繁殖しやすくなるほか、古い土鍋では土に含まれる微量金属が料理に溶け出す原因となります。ひび割れが目立つ内鍋は交換をおすすめします。"
+      },
+      {
+        question: "スロークッカーは何度まで上がれば安全ですか？",
+        answer: "現代のスロークッカーの『弱（Low）』と『強（High）』は、最終的にはどちらも約90℃〜98℃（沸騰直前）に達します。違いはそこに達するスピードで、強なら約1.5〜2時間、弱なら約3〜4時間かかります。また、保温（Keep Warm）機能は、細菌の増殖を防ぐために必ず63℃（145°F）以上を保つよう設計されています。保温温度が60℃を下回ると細菌が急速に繁殖します。"
+      },
+      {
+        question: "古いスロークッカーの鉛を自宅で検査することはできますか？",
+        answer: "はい、市販の鉛検出テスト綿棒（ロージゾン酸ナトリウム試薬など）で簡易検査が可能です。鍋の内側をよく洗って乾かし、綿棒を表面や傷口に30〜60秒こすりつけます。綿棒がピンクや赤に変色した場合、表面から鉛が溶出している証拠です。1980年以前の製品や陽性反応が出た鍋は直ちに使用を中止してください。"
+      }
+    ],
+    monoBadge: "陶磁器釉薬冶金学＆食中毒芽胞菌微生物学モノグラフ",
+    monoTitle: "ケイ酸塩イオン交換動力学、ウェルシュ菌芽胞繁殖と植物レクチン熱失活",
+    monoSub: "高温酸性環境下における陶器釉薬からの重金属溶出、危険温度帯における耐熱芽胞の急激な増殖曲線、および赤インゲン豆レクチンの亜沸騰毒性活性化の科学的機序。",
+    monoSection1Title: "含鉛陶器釉薬における酸性イオン交換動力学",
+    monoSection1Body: "伝統的な陶芸では、低火度陶器の釉薬の融点を900℃付近まで下げて平滑な光沢を得るために酸化鉛（PbO）が多用されていました。トマトやワイン、酢などの酸性液体と接触すると、液中のオキソニウムイオン（H₃O⁺）がガラス網目構造に侵入し、Pb²⁺やCd²⁺カチオンを煮汁中に置換溶出させます。スロークッカーの77℃〜93℃という持続的な熱流動は、常温浸漬試験に比べ重金属の溶出速度を最大300％加速させます。",
+    monoSection2Title: "植物性毒素フィトヘマグルチニン（PHA）の亜沸騰毒性急増パラドックス",
+    monoSection2Body: "赤インゲン豆のレクチン（PHA）は腸管上皮の微小絨毛を損傷します。完全な熱変性には100℃で10〜30分以上の沸騰が必要ですが、スロークッカーの『弱』設定（74℃〜82℃）のような沸騰未満の温度では、タンパク質の四次構造が部分的にほどけるだけで分解されず、かえって凝集親和性の極めて高い中間構造となり、未加熱の生豆の最大5倍（100,000 HAU以上）まで毒性が急増します。",
+    monoSection3Title: "ウェルシュ菌（C. perfringens）耐熱性芽胞の発芽増殖動態",
+    monoSection3Body: "ウェルシュ菌の耐熱性内生芽胞は初期の加熱に耐え残存します。大きな冷凍肉をそのままスロークッカーに入れると、中心部が発芽の最適温度帯（43℃〜52℃）に4時間以上滞留します。この温度帯での世代時間はわずか10〜12分であり、鍋が殺菌温度に達する前に何百万もの菌が増殖して耐熱性エンテロトキシンを産生します。",
+    monoSection4Title: "現代の高温焼成ガラス質陶器と安全な調理ルール",
+    monoSection4Body: "現代の安全な内鍋は1,200℃以上で焼成された炻器（ストーンウェア）や磁器であり、無毒なアルカリ土類金属を用いて完全にガラス化されています。スロークッカー調理を100％安全に行うためには：生の赤インゲン乾燥豆は必ずコンロの鍋で10〜30分間強火で完全沸騰させてから入れること、肉類は冷蔵庫で完全に解凍してから調理すること、具材が多い場合は最初の1時間を『強』で立ち上げること、そして保温温度が63℃以上を保っていることを確認することが鉄則です。"
+  }
+};
+
+const cur = CONTENT[lang] || CONTENT.es;
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": cur.pageTitle,
+  "url": `https://isitkitchensafe.com${lang === 'en' ? '' : `/${lang}`}/tools/slow-cooker-safety-simulator/`,
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript. Requires HTML5.",
+  "description": cur.pageDescription,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IsItKitchenSafe",
+    "url": "https://isitkitchensafe.com"
+  }
+};
+---
+
+<Layout title={cur.pageTitle} description={cur.pageDescription} faqs={cur.faqs} availableLocales={availableLocales}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(webAppSchema)} />
+
+  <main class="container mx-auto px-4 py-8 max-w-5xl space-y-8">
+    <Breadcrumbs items={cur.breadcrumbs} />
+
+    <SlowCookerSafetySimulator lang={lang} />
+
+    <!-- Scientific Monograph Section -->
+    <section class="bg-surface-soft border border-hairline rounded-3xl p-6 md:p-10 space-y-8">
+      <div class="border-b border-hairline pb-4">
+        <span class="text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400 block mb-1">
+          {cur.monoBadge}
+        </span>
+        <h2 class="text-title-lg font-bold text-ink tracking-tight">
+          {cur.monoTitle}
+        </h2>
+        <p class="text-xs md:text-sm text-body leading-relaxed mt-2">
+          {cur.monoSub}
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-xs md:text-sm text-body leading-relaxed">
+        <div class="space-y-4">
+          <h3 class="text-sm md:text-base font-bold text-ink flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+            {cur.monoSection1Title}
+          </h3>
+          <p>{cur.monoSection1Body}</p>
+        </div>
+
+        <div class="space-y-4">
+          <h3 class="text-sm md:text-base font-bold text-ink flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+            {cur.monoSection2Title}
+          </h3>
+          <p>{cur.monoSection2Body}</p>
+        </div>
+
+        <div class="space-y-4">
+          <h3 class="text-sm md:text-base font-bold text-ink flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+            {cur.monoSection3Title}
+          </h3>
+          <p>{cur.monoSection3Body}</p>
+        </div>
+
+        <div class="space-y-4">
+          <h3 class="text-sm md:text-base font-bold text-ink flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            {cur.monoSection4Title}
+          </h3>
+          <p>{cur.monoSection4Body}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Accordion Section -->
+    <section class="bg-surface-soft border border-hairline rounded-3xl p-6 md:p-10 space-y-6">
+      <div class="border-b border-hairline pb-4">
+        <span class="text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400 block mb-1">
+          {cur.faqHeading}
+        </span>
+        <h2 class="text-title-lg font-bold text-ink tracking-tight">
+          {cur.faqHeading}
+        </h2>
+        <p class="text-xs text-muted">{cur.faqSub}</p>
+      </div>
+
+      <div class="space-y-4">
+        {cur.faqs.map(faq => (
+          <details class="group p-4 rounded-xl bg-canvas border border-hairline transition-colors open:bg-surface">
+            <summary class="font-medium text-ink cursor-pointer list-none flex items-center justify-between text-sm md:text-base">
+              <span>{faq.question}</span>
+              <span class="text-muted transition-transform group-open:rotate-180 ml-2">&darr;</span>
+            </summary>
+            <p class="text-xs md:text-sm text-body mt-3 pt-3 border-t border-hairline/60 leading-relaxed">
+              {faq.answer}
+            </p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </main>
+</Layout>

@@ -47,7 +47,8 @@ const SPECIAL_PAGES = [
   'tools/culinary-oil-smoke-point-simulator',
   'tools/sous-vide-plastic-microbial-modeler',
   'tools/water-filter-efficiency-analyzer',
-  'tools/air-fryer-acrylamide-calculator'
+  'tools/air-fryer-acrylamide-calculator',
+  'tools/slow-cooker-safety-simulator'
 ];
 
 const esSlugs = new Set([
