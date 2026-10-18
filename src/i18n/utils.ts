@@ -48,7 +48,8 @@ const SPECIAL_PAGES = [
   'tools/sous-vide-plastic-microbial-modeler',
   'tools/water-filter-efficiency-analyzer',
   'tools/air-fryer-acrylamide-calculator',
-  'tools/slow-cooker-safety-simulator'
+  'tools/slow-cooker-safety-simulator',
+  'tools/microwave-radiation-leakage-evaluator'
 ];
 
 const esSlugs = new Set([

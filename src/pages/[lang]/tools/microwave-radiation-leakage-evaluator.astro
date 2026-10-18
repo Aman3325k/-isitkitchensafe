@@ -1,0 +1,301 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import MicrowaveRadiationEvaluator from '../../../components/MicrowaveRadiationEvaluator.astro';
+import type { SupportedLanguage } from '../../../i18n/ui';
+import { useTranslations, useTranslatedPath } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+const t = useTranslations(lang);
+const tp = useTranslatedPath(lang);
+
+interface LocaleContent {
+  pageTitle: string;
+  pageDescription: string;
+  breadcrumbs: Array<{ label: string; href?: string }>;
+  faqs: Array<{ question: string; answer: string }>;
+  faqHeading: string;
+  faqSub: string;
+  monoBadge: string;
+  monoTitle: string;
+  monoSub: string;
+  monoSection1Title: string;
+  monoSection1Body: string;
+  monoSection2Title: string;
+  monoSection2Body: string;
+  monoSection3Title: string;
+  monoSection3Body: string;
+  monoSection4Title: string;
+  monoSection4Body: string;
+}
+
+const CONTENT: Record<SupportedLanguage, LocaleContent> = {
+  en: {} as any,
+  es: {
+    pageTitle: "Evaluador de Fugas de Radiación de Microondas y Sellos | IsItKitchenSafe",
+    pageDescription: "Calculadora biofísica de seguridad de microondas: calcule fugas electromagnéticas a 2.45 GHz frente a la norma FDA 21 CFR § 1030.10 (5 mW/cm² a 5 cm), degradación del cancelador de cuarto de onda, interferencia en Wi-Fi y riesgos térmicos en el cristalino ocular.",
+    breadcrumbs: [
+      { label: 'Inicio', href: '/es/' },
+      { label: 'Herramientas', href: '/es/tools/' },
+      { label: 'Evaluador de Radiación de Microondas' }
+    ],
+    faqHeading: "Preguntas Frecuentes sobre Radiación de Microondas, Sellos y Seguridad",
+    faqSub: "Respaldado por la normativa de la FDA CDRH 21 CFR § 1030.10 y las directrices internacionales de la ICNIRP.",
+    faqs: [
+      {
+        question: "¿Los hornos microondas tienen fugas de radiación peligrosa hacia la cocina?",
+        answer: "Todos los hornos microondas emiten trazas ínfimas de radiación electromagnética no ionizante de 2.45 GHz durante su funcionamiento. Sin embargo, en un equipo en buen estado y con sellos limpios, esta fuga es insignificante (entre 0.05 y 0.5 mW/cm² a 5 cm), muy por debajo del límite federal de 5.0 mW/cm² fijado por la FDA bajo la norma 21 CFR § 1030.10. Además, por la ley del inverso del cuadrado, al alejarse 1 metro la radiación disminuye más de un 99.7%."
+      },
+      {
+        question: "¿Cuál es el límite legal de la FDA para la radiación de un microondas?",
+        answer: "La norma federal 21 CFR § 1030.10 de la FDA exige que los microondas nuevos no superen 1.0 mW/cm² medido a 5 cm de cualquier superficie exterior. Para contemplar el desgaste mecánico y el envejecimiento de juntas y bisagras a lo largo de su vida útil, se permite un límite máximo de funcionamiento de 5.0 mW/cm² a 5 cm. Superar este umbral se considera infracción de seguridad."
+      },
+      {
+        question: "¿Cómo funciona el sello de la puerta para evitar escapes sin contacto de metal macizo?",
+        answer: "Utiliza un ingenioso mecanismo físico llamado cancelador de cuarto de onda (choke seal). A 2.45 GHz, la longitud de onda es de 12.24 cm. En el marco de la puerta hay una cavidad perimetral de 3.06 cm de profundidad (exactamente un cuarto de onda, λ/4). Al ingresar la onda, se refleja en el fondo y regresa con un desfase de 180° (media onda), colisionando con la onda entrante y provocando una cancelación destructiva que frena la fuga sin generar arcos eléctricos."
+      },
+      {
+        question: "¿Mirar de cerca un microondas en marcha puede provocar cataratas oculares?",
+        answer: "Mirar con la cara pegada a la ventana (< 10 cm) de un microondas con fugas conlleva riesgo biológico. El cristalino del ojo es avascular (no tiene capilares para disipar calor por flujo sanguíneo) y tiene mucha agua. La radiación microondas provoca agitación dieléctrica; si se acumula calor por encima de 41°C, desnaturaliza las proteínas del cristalino favoreciendo cataratas subcapsulares. Se recomienda mantener al menos 30 cm de distancia."
+      },
+      {
+        question: "¿Por qué el microondas interfiere o corta la conexión WiFi y Bluetooth?",
+        answer: "Tanto los microondas como las redes WiFi de 2.4 GHz y Bluetooth comparten la misma banda ISM (2.400–2.4835 GHz). Mientras que el magnetrón emite de 700 a 1,200 vatios, un router WiFi solo emite 0.1 vatios. Incluso una fuga legal de 1 mW/cm² eleva enormemente el ruido electromagnético en la habitación, provocando pérdidas de paquetes, cortes en streaming o desconexiones de auriculares."
+      },
+      {
+        question: "¿Cómo puedo comprobar el estado del sello del microondas en mi casa?",
+        answer: "Puede realizar una sencilla prueba casera con un billete o una hoja de papel: cierre la puerta atrapando el papel en el marco y tire suavemente. Si el papel sale sin resistencia, la junta ha perdido elasticidad o la bisagra está cedida. También revise que la ranura perimetral esté limpia de grasa quemada."
+      }
+    ],
+    monoBadge: "Monografía de Biofísica Electromagnética e Ingeniería RF",
+    monoTitle: "Vectores de Poynting a 2.45 GHz, Cancelación en Cuarto de Onda y Calentamiento Dieléctrico Ocular",
+    monoSub: "Análisis técnico de apantallamiento electromagnético, impedancia en cavidades resonantes y absorción térmica específica en tejidos biológicos.",
+    monoSection1Title: "Física del Cancelador de Cuarto de Onda (Línea λ/4)",
+    monoSection1Body: "El confinamiento de microondas a 2.45 GHz no puede depender de contacto metálico estricto: imperfecciones o impurezas generarían arcos eléctricos y ozono. Se emplea una cavidad perimetral de 3.06 cm (λ/4). La onda incidente viaja, rebota en el fondo conductor y regresa desfasada 180°, anulando la radiación electromagnética en más de 35 dB sin rozamiento metálico.",
+    monoSection2Title: "Malla de Faraday en la Ventana de Observación",
+    monoSection2Body: "La malla metálica perforada con orificios de 1.5 mm funciona como una matriz de guías de onda por debajo del corte (waveguide below cutoff). A 2.45 GHz, la longitud de onda (122.4 mm) es casi 100 veces mayor que los orificios, haciendo que la onda decaiga exponencialmente en modo evanescente y bloqueando el 99.9% de la potencia microondas mientras deja pasar la luz visible.",
+    monoSection3Title: "Calentamiento Dieléctrico del Cristalino y Cataratas",
+    monoSection3Body: "A 2.45 GHz la radiación no es ionizante pero agita las moléculas de agua. El cristalino humano carece de vascularización para disipar el calor acumulado. Temperaturas locales superiores a 41°C precipitan la desnaturalización de cristalinas. Mantener 30 cm de distancia reduce la densidad de potencia en más del 95% por la ley de atenuación geométrica.",
+    monoSection4Title: "Norma FDA 21 CFR § 1030.10 y Mantenimiento del Sello",
+    monoSection4Body: "La norma de la FDA exige doble interruptor de enclavamiento de seguridad con fusible de monitorización. Con los años, la acumulación de grasa carbonizada en la ranura del choke crea puentes conductores que desajustan la cancelación de fase. La limpieza regular con paño húmedo preserva la resonancia protectora original."
+  },
+  pt: {
+    pageTitle: "Avaliador de Fuga de Radiação de Micro-ondas e Vedação | IsItKitchenSafe",
+    pageDescription: "Calculadora biofísica para avaliação de vazamento de radiação em micro-ondas: estime emissões eletromagnéticas em 2.45 GHz conforme FDA 21 CFR § 1030.10 (5 mW/cm² a 5 cm), atenuação por choke de quarto de onda, interferência em Wi-Fi e risco de catarata térmica ocular.",
+    breadcrumbs: [
+      { label: 'Início', href: '/pt/' },
+      { label: 'Ferramentas', href: '/pt/tools/' },
+      { label: 'Avaliador de Radiação de Micro-ondas' }
+    ],
+    faqHeading: "Perguntas Frequentes sobre Radiação de Micro-ondas e Borrachas de Porta",
+    faqSub: "Em conformidade com a regulamentação norte-americana FDA 21 CFR § 1030.10 e diretrizes ICNIRP.",
+    faqs: [
+      {
+        question: "Fornos micro-ondas vazam radiação perigosa para a cozinha durante o uso?",
+        answer: "Todos os micro-ondas emitem níveis mínimos de radiação não ionizante de 2.45 GHz. Com as vedações em bom estado, esse vazamento fica entre 0.05 e 0.5 mW/cm² a 5 cm, muito abaixo do limite federal máximo de 5.0 mW/cm² estipulado pela FDA. Além disso, a intensidade cai drasticamente com a distância: a 1 metro, a exposição reduz mais de 99.7%."
+      },
+      {
+        question: "Qual é o limite legal da FDA para radiação de micro-ondas?",
+        answer: "Pela norma 21 CFR § 1030.10, micro-ondas novos não podem ultrapassar 1.0 mW/cm² a 5 cm de distância. Ao longo dos anos de uso e desgaste das borrachas, o limite operacional máximo tolerado é de 5.0 mW/cm². Aparelhos que excedem essa margem violam os critérios de segurança e devem ser descartados ou consertados."
+      },
+      {
+        question: "Como a porta retém as ondas sem que o metal fique encostado?",
+        answer: "Usa-se um canal de cancelamento de quarto de onda (choke). A 2.45 GHz, o comprimento de onda é de 12.24 cm. A moldura da porta possui uma ranhura de exatamente 3.06 cm de profundidade (λ/4). As ondas entram, refletem no fundo metálico e retornam com fase invertida de 180°, anulando-se mutuamente sem necessidade de contato condutivo direto que causaria faíscas."
+      },
+      {
+        question: "Olhar de perto para o micro-ondas funcionando pode causar catarata?",
+        answer: "Ficar com o rosto colado à janela (< 10 cm) de um aparelho danificado apresenta riscos reais. O cristalino do olho não tem vasos sanguíneos para dissipar calor e possui alto teor de água. O calor dielétrico acumulado acima de 41°C altera as proteínas do cristalino, podendo acelerar a opacificação da lente ocular. Recomenda-se manter pelo menos 30 cm de distância."
+      },
+      {
+        question: "Por que o micro-ondas derruba a conexão Wi-Fi e o Bluetooth?",
+        answer: "Micro-ondas operam na mesma frequência de 2.45 GHz usada pelo Wi-Fi e Bluetooth (banda ISM). O magnetron gera até 1,200 watts, enquanto um roteador transmite em 0.1 watt. Mesmo um vazamento discreto satura o ambiente com ruído de rádio, provocando perda de pacotes e travamentos de áudio ou vídeo."
+      },
+      {
+        question: "Como testar a vedação da porta do micro-ondas em casa?",
+        answer: "Faça o teste da nota de dinheiro ou folha de papel: prenda o papel na porta e feche o trinco. Se o papel deslizar solto sem atrito ao puxar, a borracha perdeu pressão ou a porta está empenada. Mantenha também as ranhuras limpas de gordura queimada."
+      }
+    ],
+    monoBadge: "Monografia de Biofísica Eletromagnética e Engenharia RF",
+    monoTitle: "Vetores de Poynting a 2.45 GHz, Cancelamento por Choke e Aquecimento Dielétrico Ocular",
+    monoSub: "Avaliação técnica de blindagem eletromagnética, cavidades ressonantes e taxas de absorção específica (SAR) em tecidos humanos.",
+    monoSection1Title: "Física da Cavidade Choke de Quarto de Onda (Linha λ/4)",
+    monoSection1Body: "A contenção de 2.45 GHz não deve depender de contato físico metálico rígido para evitar faíscas e queima da carcaça. Uma ranhura de 3.06 cm (λ/4) faz com que a onda refletida percorra meio comprimento de onda (180°), colidindo e aniquilando a onda incidente por interferência destrutiva, garantindo atenuação superior a 35 dB.",
+    monoSection2Title: "Malha de Faraday e Guias de Onda Subcríticas",
+    monoSection2Body: "A tela preta perfurada com furos de 1.5 mm funciona como uma barreira subcrítica (waveguide below cutoff). A 2.45 GHz o comprimento de onda é 122.4 mm, fazendo com que a onda decaia de forma evanescente nos orifícios minúsculos, impedindo a passagem da radiação enquanto deixa a luz visível passar.",
+    monoSection3Title: "Aquecimento Dielétrico Ocular e Cataratogênese",
+    monoSection3Body: "A radiação de micro-ondas não é ionizante, mas agita dipolarmente as moléculas de água. Por ser avascular, a lente ocular não resfria eficientemente por circulação sanguínea. Temperaturas persistentes acima de 41°C provocam desnaturação das cristalinas. Manter 30 cm de distância reduz a exposição em 95% pela lei do inverso do quadrado.",
+    monoSection4Title: "Norma FDA 21 CFR § 1030.10 e Higiene do Vedante",
+    monoSection4Body: "Os aparelhos exigem duplo intertravamento mecânico com chave monitora. O acúmulo de gordura e açúcares carbonizados nas calhas do choke forma películas condutoras que alteram a impedância da linha, prejudicando a anulação de onda. A limpeza periódica garante a blindagem de fábrica."
+  },
+  'zh-cn': {
+    pageTitle: "微波炉电磁辐射泄漏与门封老化衰减评估器 | IsItKitchenSafe",
+    pageDescription: "权威科学微波炉电磁安全计算器：对标美国 FDA 21 CFR § 1030.10 标准（5 cm 处 ≤ 5 mW/cm²）、四分之一波长抗流槽陷波失谐、2.4 GHz 无线 Wi-Fi 信号干扰及眼部晶状体白内障热沉积风险。",
+    breadcrumbs: [
+      { label: '首页', href: '/zh-cn/' },
+      { label: '实用工具', href: '/zh-cn/tools/' },
+      { label: '微波炉辐射泄漏评估器' }
+    ],
+    faqHeading: "关于微波炉电磁辐射、门封与人体健康的专家解答",
+    faqSub: "严格依据美国 FDA CDRH 21 CFR § 1030.10 法定标准及国际非电离辐射防护委员会（ICNIRP）指南。",
+    faqs: [
+      {
+        question: "家用微波炉在正常运转时会向厨房泄漏危险辐射吗？",
+        answer: "所有微波炉在运转时都会产生极其微量的 2.45 GHz 非电离射频电磁波。但在密封良好、机身未受损的合格设备中，这种泄漏量微乎其微（在 5 cm 处通常仅为 0.05 至 0.5 mW/cm²），远低于美国 FDA 21 CFR § 1030.10 规定的 5.0 mW/cm² 法定终生上限。此外，电磁波在空气中遵循距离反比平方定律衰减，站在 1 米外时场强将骤降 99.7% 以上。"
+      },
+      {
+        question: "美国 FDA 对微波炉电磁辐射泄漏的法定安全上限是多少？",
+        answer: "依据美国联邦法规 FDA 21 CFR § 1030.10：微波炉出厂新机在距任何外表面 5 cm（约 2 英寸）处的辐射功率密度不得超过 1.0 mW/cm²。考虑到机械老化、门铰链松弛与密封胶条硬化，整个使用寿命期间允许的上限为 5.0 mW/cm²。凡超过 5.0 mW/cm² 的设备均属安全不达标，必须检修或报废。"
+      },
+      {
+        question: "微波炉门在金属不直接紧密接触的情况下，是如何阻挡辐射逃逸的？",
+        answer: "微波炉采用了射频工程中的四分之一波长抗流槽（Choke Seal）技术。微波频率为 2.45 GHz，对应波长约为 12.24 cm。在炉门边缘设有一圈深度恰好为 3.06 cm（即 λ/4）的金属凹槽。当微波侵入槽内到达金属底端并反射回到槽口时，往返路径恰为半个波长（180° 相位差），反射波与入射波互相干涉抵消，无需紧密的金属摩擦接触便可阻断 99.9% 以上的辐射。"
+      },
+      {
+        question: "凑近盯着运转中的微波炉看，真的会导致眼睛白内障吗？",
+        answer: "在正常距离观看是安全的，但如果面部紧贴（小于 10 cm）门缝变形或老化的微波炉，确实存在生物学风险。人眼晶状体缺乏血管分布，无法通过血液循环散发热量，且含水量极高。微波非电离辐射会引起水分子介质剧烈振荡产热；若晶状体局部温度超过 41°C，会导致透明晶状体蛋白变性沉淀，诱发后囊下白内障。加热时请务必保持至少 30 cm（1 英尺）距离。"
+      },
+      {
+        question: "为什么微波炉一启动，家里的 Wi-Fi 和蓝牙就会卡顿甚至断开？",
+        answer: "家用微波炉的 2.45 GHz 工作频率与 2.4 GHz 频段 Wi-Fi（1-11 信道）及蓝牙技术完全重叠（同属 ISM 开放频段）。微波炉磁控管功率高达 700 到 1,200 瓦，而 Wi-Fi 路由器的发射功率仅约 0.1 瓦。即便是完全符合法定标准的微量微波泄漏，其电磁信号强度也远高于空气中微弱的 Wi-Fi 信号，从而阻塞信道造成严重丢包。"
+      },
+      {
+        question: "如何在家零成本自行检测微波炉门封是否严密？",
+        answer: "可以使用纸币测试法：将一张纸币夹在炉门四周的密封胶条中关紧炉门，水平向外轻拉；如果纸币无需任何拉力就能顺滑抽出，说明密封胶条老化失去弹性或铰链翘曲。此外，应定期清理门框凹槽内的碳化油垢。"
+      }
+    ],
+    monoBadge: "电磁生物物理学与射频工程技术专论",
+    monoTitle: "2.45 GHz 坡印廷矢量、四分之一波长阻波槽相消与晶状体介质热效应",
+    monoSub: "深入解析微波炉腔体电磁屏蔽、微带阻抗匹配、法拉第穿孔网截止波导及人体组织比吸收率（SAR）。",
+    monoSection1Title: "四分之一波长抗流槽物理原理（λ/4 传输线）",
+    monoSection1Body: "2.45 GHz 微波无法依靠纯金属机械接触密封：微小间隙或氧化物会导致极高的接触电阻，在强电场下引发金属电弧打火并产生有毒臭氧。通过在门周设计深度精确为 3.06 cm（λ/4）的谐振凹槽，微波反射波往返行程恰好为 180° 反相，在槽口形成理想的射频开路（无穷大输入阻抗），实现超过 35 dB 的高频波相消衰减。",
+    monoSection2Title: "法拉第屏蔽视窗的截止波导动力学",
+    monoSection2Body: "观察窗黑色金属冲孔网孔径约为 1.5 mm。在圆形截面波导理论中，主模 TE₁₁ 截止波长约为孔径的 1.706 倍，其截止频率超过 115 GHz。对于 2.45 GHz 的微波而言，网孔处于极深的截止工作区，微波无法以行波传播，只能在穿孔厚度内以渐逝波形式呈指数规律剧烈衰减，提供高达 50 dB 的屏蔽效能。",
+    monoSection3Title: "眼晶状体无血管区介质热损与白内障机理",
+    monoSection3Body: "2.45 GHz 属于非电离辐射，其光子能量不足以打断化学键，其生物损伤纯粹由极性水分子剧烈旋转产热引起。人眼晶状体无任何毛细血管网络，对热负荷缺乏对流散热机制。当温度超过 41°C 时，晶状体核心蛋白结构迅速变性凝聚，形成不可逆的混浊斑块。反比平方定律表明，退后至 1 米处可消除 99% 以上的辐射剂量。",
+    monoSection4Title: "美国 FDA 21 CFR 1030.10 标准与门槽清洁维护",
+    monoSection4Body: "美国联邦法规强制要求微波炉配置双重独立安全联动开关及监控熔断保险丝。然而在日常使用中，飞溅油脂受热碳化后形成的导电碳微粒会附着在抗流凹槽内，改变波导槽的介电常数与特征阻抗，导致相位抵消失效。定期用温肥皂水彻底清洁门框凹槽是确保射频安全的关键。"
+  },
+  ja: {
+    pageTitle: "電子レンジ電磁波漏洩＆ドアパッキン劣化診断シミュレーター | IsItKitchenSafe",
+    pageDescription: "電磁波物理学に基づく電子レンジの高周波漏洩シミュレーター。米国 FDA 21 CFR § 1030.10 基準（5cm位置で ≤ 5 mW/cm²）、チョーク空洞位相打ち消し効率、2.4 GHz Wi-Fi・Bluetooth 電波干渉、水晶体熱性白内障リスクを精密評価。",
+    breadcrumbs: [
+      { label: 'ホーム', href: '/ja/' },
+      { label: '診断ツール一覧', href: '/ja/tools/' },
+      { label: '電子レンジ電磁波漏洩診断' }
+    ],
+    faqHeading: "電子レンジの電磁波漏れ・パッキン寿命・健康影響に関する科学的Q&A",
+    faqSub: "米国 FDA CDRH 21 CFR § 1030.10 法定基準および国際非電離放射線防護委員会（ICNIRP）指標準拠。",
+    faqs: [
+      {
+        question: "通常の使用で電子レンジから危険な電磁波が漏れることはありますか？",
+        answer: "すべての電子レンジは動作中にごく微量の2.45 GHz非電離電磁波を放出します。しかし、ドアに傷や変形がなくパッキンが正常な場合、漏れは5cmの位置で0.05〜0.5 mW/cm²程度と極めて微小であり、米国FDAが定める法定耐用限度（5.0 mW/cm²）をはるかに下回ります。また電磁波は距離の二乗に反比例して減衰するため、1m離れるだけで被ばく量は99.7%以上激減します。"
+      },
+      {
+        question: "米国FDAが定める電子レンジの電磁波放出規制値はいくつですか？",
+        answer: "米国連邦規則 21 CFR § 1030.10 では、新品製造時の基準として外表面から5cm（約2インチ）の位置で 1.0 mW/cm² 以下と規定されています。さらに経年劣化やヒンジの緩みを考慮した生涯許容上限値として 5.0 mW/cm² が設定されています。この基準を超える機器は安全基準違反となり修理または廃棄が推奨されます。"
+      },
+      {
+        question: "金属同士を完全に密着させていないのに、なぜ電波が漏れないのですか？",
+        answer: "電子レンジのドアには「チョーク空洞（1/4波長トラップ）」と呼ばれる高周波技術が組み込まれています。2.45 GHzの波長は約12.24cmで、ドア周囲に深さ約3.06cm（λ/4）の金属溝が掘られています。電磁波がこの溝に入って反射すると位相が180度反転（半波長ズレ）し、入ってくる波とぶつかって打ち消し合います。これにより火花を起こさず電波を99.9%以上遮断します。"
+      },
+      {
+        question: "稼働中の電子レンジを至近距離からのぞき込むと白内障になりますか？",
+        answer: "窓ガラスに顔を押し付けるような至近距離（< 10cm）で劣化・漏れのあるレンジを見つめ続ける行為には生物学的リスクがあります。目の水晶体には血管が存在しないため血流による放熱ができず、熱が蓄積しやすい構造です。マイクロ波の誘電加熱により局所温度が41℃を超えると水晶体タンパク質が変性し白内障を早めるリスクが生じます。調理中は30cm以上離れてください。"
+      },
+      {
+        question: "電子レンジを使うとWi-FiやBluetoothが途切れるのはなぜですか？",
+        answer: "電子レンジ（2.45 GHz）は、Wi-Fi（2.4 GHz帯）やBluetoothと全く同じ周波数帯（ISMバンド）を使用しています。レンジのマグネトロンは700〜1,200Wもの超大電力で発信するため、法律基準内のごくわずかな漏れであっても、出力0.1W程度のWi-Fi信号を圧倒してしまい電波障害を引き起こします。"
+      },
+      {
+        question: "自宅で電子レンジのドアの密閉度を簡単に確認する方法はありますか？",
+        answer: "千円札や紙をドアに挟んで閉め、ゆっくり引き抜く「紙幣挟み込みテスト」が有効です。抵抗なくスルスルと抜けてしまう場合、パッキンの弾性低下やヒンジの緩みで隙間が生じています。またドア枠の溝に溜まった焦げ付き油汚れは電波打ち消しを妨げるため拭き取ってください。"
+      }
+    ],
+    monoBadge: "電磁波生体物理学＆高周波工学専門モノグラフ",
+    monoTitle: "2.45 GHz ポインティングベクトル、1/4波長チョーク位相相殺＆水晶体誘電加熱",
+    monoSub: "家電用電磁波シールド、導波管遮断特性、ファラデー遮蔽メッシュ透過減衰率および生体局所吸収率（SAR）の工学的解析。",
+    monoSection1Title: "1/4波長チョーク空洞物理（λ/4 伝送線路トラップ）",
+    monoSection1Body: "2.45 GHzの高周波閉じ込めに純粋な金属接触を用いると、わずかな接触抵抗で火花放電や有害オゾンが発生します。ドア周囲に深さ3.06cm（λ/4）の溝を設けることで、反射波が往復で180度反転し入射波を打ち消す開放端インピーダンスを形成。物理的接触なしに35 dB以上の電波減衰を実現しています。",
+    monoSection2Title: "ファラデー遮蔽窓の遮断導波管特性",
+    monoSection2Body: "ドアのガラスに配置された1.5mmの微細穴メッシュは、遮断周波数以下の円形導波管として機能します。2.45 GHz（波長122.4mm）は穴径の約80倍大きく、電波はエバネッセント波として指数関数的に急速減衰するため、可視光を通しながら電磁波を50 dB遮断します。",
+    monoSection3Title: "水晶体の無血管誘電加熱と白内障リスク",
+    monoSection3Body: "マイクロ波は非電離放射線でありDNAを直接切断しませんが、水分子を毎秒24.5億回振動させ熱を生じさせます。血管のない水晶体は放熱能力が極めて低く、局所温度が41℃を超えるとタンパク質が凝固し白内障を誘発します。距離の二乗則により1m離れると被ばくは99%激減します。",
+    monoSection4Title: "米国 FDA 21 CFR § 1030.10 規格とドア枠清掃",
+    monoSection4Body: "米連邦規格では二重の安全インターロックと監視スイッチが義務付けられています。長年の使用でチョーク溝に飛散油や焦げが付着すると、導電性カーボン層がチョークの特性インピーダンスを変化させ位相相殺を阻害します。定期的な拭き掃除が本来の遮蔽性能を維持します。"
+  }
+};
+
+const c = CONTENT[lang] || CONTENT.es;
+---
+
+<Layout title={c.pageTitle} description={c.pageDescription} faqs={c.faqs} availableLocales={availableLocales}>
+  <main class="container mx-auto px-4 py-8 max-w-5xl space-y-8">
+    <Breadcrumbs items={c.breadcrumbs} />
+
+    <MicrowaveRadiationEvaluator lang={lang} />
+
+    <!-- Scientific In-Depth Monograph Section -->
+    <section class="bg-surface-soft border border-hairline rounded-3xl p-6 md:p-10 space-y-8">
+      <div class="border-b border-hairline pb-4">
+        <span class="text-xs font-bold uppercase tracking-wider text-violet-700 dark:text-violet-400 block mb-1">
+          {c.monoBadge}
+        </span>
+        <h2 class="text-title-lg font-bold text-ink tracking-tight">
+          {c.monoTitle}
+        </h2>
+        <p class="text-xs md:text-sm text-body leading-relaxed mt-2">
+          {c.monoSub}
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-xs md:text-sm text-body leading-relaxed">
+        <div class="space-y-4">
+          <h3 class="text-sm md:text-base font-bold text-ink flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-violet-500"></span>
+            {c.monoSection1Title}
+          </h3>
+          <p>{c.monoSection1Body}</p>
+        </div>
+
+        <div class="space-y-4">
+          <h3 class="text-sm md:text-base font-bold text-ink flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+            {c.monoSection2Title}
+          </h3>
+          <p>{c.monoSection2Body}</p>
+        </div>
+
+        <div class="space-y-4">
+          <h3 class="text-sm md:text-base font-bold text-ink flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+            {c.monoSection3Title}
+          </h3>
+          <p>{c.monoSection3Body}</p>
+        </div>
+
+        <div class="space-y-4">
+          <h3 class="text-sm md:text-base font-bold text-ink flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+            {c.monoSection4Title}
+          </h3>
+          <p>{c.monoSection4Body}</p>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
