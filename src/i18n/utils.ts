@@ -42,7 +42,8 @@ const SPECIAL_PAGES = [
   'tools/kitchen-energy-carbon-calculator',
   'tools/plasticizer-microplastic-burden-estimator',
   'tools/food-contact-migration-predictor',
-  'tools/commercial-cookware-nsf-inspector'
+  'tools/commercial-cookware-nsf-inspector',
+  'tools/child-safety-toxic-ingestion-evaluator'
 ];
 
 const esSlugs = new Set([
