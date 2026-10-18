@@ -46,7 +46,8 @@ const TOOLS_REGISTRY = [
   { slug: 'microwave-radiation-leakage-evaluator', name: 'Microwave Radiation Leakage & Door Gasket Evaluator', category: 'Electromagnetics' },
   { slug: 'induction-cooktop-emf-safety-modeler', name: 'Induction Cooktop EMF Radiation & Pacemaker Modeler', category: 'Electromagnetics' },
   { slug: 'commercial-dishwasher-rinse-aid-modeler', name: 'Commercial Dishwasher Rinse Aid Gut Barrier Modeler', category: 'Toxicology' },
-  { slug: 'pressure-cooker-instant-pot-safety-simulator', name: 'Pressure Cooker & Instant Pot Explosion Risk Simulator', category: 'Thermodynamics' }
+  { slug: 'pressure-cooker-instant-pot-safety-simulator', name: 'Pressure Cooker & Instant Pot Explosion Risk Simulator', category: 'Thermodynamics' },
+  { slug: 'refrigerator-defrost-safety-modeler', name: 'Refrigerator Defrost Thermostat Failure & Cold Chain Modeler', category: 'Thermodynamics' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -136,7 +137,8 @@ function auditDatasets() {
     'comparisons.json', 'comparisons.es.json', 'comparisons.pt.json', 'comparisons.zh-cn.json', 'comparisons.ja.json',
     'pressure-cooker-safety-data.json', 'dishwasher-rinse-aid-data.json', 'induction-emf-data.json',
     'microwave-radiation-data.json', 'slow-cooker-safety-data.json', 'air-fryer-acrylamide-data.json',
-    'water-filter-efficiency-data.json', 'sous-vide-safety-data.json', 'culinary-oil-smoke-point-data.json'
+    'water-filter-efficiency-data.json', 'sous-vide-safety-data.json', 'culinary-oil-smoke-point-data.json',
+    'refrigerator-defrost-data.json'
   ];
 
   const datasetStats = {};
