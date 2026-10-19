@@ -62,7 +62,8 @@ const SPECIAL_PAGES = [
   'tools/silicone-bakeware-oligomer-analyzer',
   'tools/electric-kettle-nickel-modeler',
   'tools/air-fryer-teflon-fluoropolymer-modeler',
-  'tools/microwave-popcorn-pfas-modeler'
+  'tools/microwave-popcorn-pfas-modeler',
+  'tools/aluminum-foil-acidic-leaching-simulator'
 ];
 
 const esSlugs = new Set([
