@@ -63,7 +63,8 @@ const SPECIAL_PAGES = [
   'tools/electric-kettle-nickel-modeler',
   'tools/air-fryer-teflon-fluoropolymer-modeler',
   'tools/microwave-popcorn-pfas-modeler',
-  'tools/aluminum-foil-acidic-leaching-simulator'
+  'tools/aluminum-foil-acidic-leaching-simulator',
+  'tools/charcoal-gas-grill-pah-hca-modeler'
 ];
 
 const esSlugs = new Set([

@@ -57,7 +57,8 @@ const TOOLS_REGISTRY = [
   { slug: 'electric-kettle-nickel-modeler', name: 'Electric Kettle Nickel Leaching & Scale Thermal Decoupling Modeler', category: 'Materials' },
   { slug: 'air-fryer-teflon-fluoropolymer-modeler', name: 'Air Fryer Teflon Basket Fluoropolymer Degradation & Thermal Micro-Plume Modeler', category: 'Aerodynamics' },
   { slug: 'microwave-popcorn-pfas-modeler', name: 'Microwave Popcorn Bag Fluorinated PFOA / PFAS Surfactant Modeler', category: 'Food Contact Toxicology' },
-  { slug: 'aluminum-foil-acidic-leaching-simulator', name: 'Aluminum Foil & Cookware Acidic Leaching & Neurotoxicity Simulator', category: 'Toxicology' }
+  { slug: 'aluminum-foil-acidic-leaching-simulator', name: 'Aluminum Foil & Cookware Acidic Leaching & Neurotoxicity Simulator', category: 'Toxicology' },
+  { slug: 'charcoal-gas-grill-pah-hca-modeler', name: 'Charcoal vs Gas Grill PAH & HCA Carcinogen Modeler', category: 'Combustion Toxicology' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -72,7 +73,7 @@ function logHeader(title) {
  * 1. Audit All 32 Flagship Interactive Tools across all 5 Locales
  */
 function auditTools() {
-  logHeader('AUDITING 33 FLAGSHIP INTERACTIVE TOOLS (ALL 5 LANGUAGES)');
+  logHeader(`AUDITING ${TOOLS_REGISTRY.length} FLAGSHIP INTERACTIVE TOOLS (ALL 5 LANGUAGES)`);
   const results = [];
   let totalPassing = 0;
   let totalFailing = 0;
@@ -155,7 +156,8 @@ function auditDatasets() {
     'electric-kettle-nickel-data.json',
     'air-fryer-teflon-fluoropolymer-data.json',
     'microwave-popcorn-pfas-data.json',
-    'aluminum-foil-acidic-leaching-data.json'
+    'aluminum-foil-acidic-leaching-data.json',
+    'charcoal-gas-grill-pah-hca-data.json'
   ];
 
   const datasetStats = {};
