@@ -67,7 +67,8 @@ const SPECIAL_PAGES = [
   'tools/charcoal-gas-grill-pah-hca-modeler',
   'tools/canned-food-bpa-leaching-modeler',
   'tools/air-fryer-lipid-oxidation-modeler',
-  'tools/melamine-tableware-formaldehyde-modeler'
+  'tools/melamine-tableware-formaldehyde-modeler',
+  'tools/cast-iron-seasoning-degradation-modeler'
 ];
 
 const esSlugs = new Set([

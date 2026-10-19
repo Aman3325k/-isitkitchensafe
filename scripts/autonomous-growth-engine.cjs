@@ -2,9 +2,9 @@
  * IsItKitchenSafe Autonomous Growth & Ops Engine (v2.0 - All-Day Smart Engine)
  * 
  * Continuous Operations & Growth Engine:
- * - 34 Interactive Diagnostic Tools Health & 5-Language Slug Parity (EN, ES, PT, JA, ZH-CN)
+ * - 38 Interactive Diagnostic Tools Health & 5-Language Slug Parity (EN, ES, PT, JA, ZH-CN)
  * - Cloudflare Pages _redirects budget monitor (2,000 line ceiling) & Edge Middleware sync
- * - Multi-Language Corpus & Database Integrity (46+ data assets)
+ * - Multi-Language Corpus & Database Integrity (50+ data assets)
  * - Structured Data (JSON-LD FAQPage, BreadcrumbList & Article/WebApplication) compliance audit
  * - Core Web Vitals asset optimization, bundle budget, and responsive geometry audit
  * - All-Day Smart Daemon & Scheduler Loop (--daemon, --watch, --quick, --full)
@@ -25,7 +25,7 @@ if (!fs.existsSync(LOGS_DIR)) {
   fs.mkdirSync(LOGS_DIR, { recursive: true });
 }
 
-// 34 Flagship Interactive Tools Registry
+// 38 Flagship Interactive Tools Registry
 const TOOLS_REGISTRY = [
   { slug: 'pan-scratch-inspector', name: 'AI Pan Scratch & Coating Damage Inspector', category: 'Materials', component: 'PanScratchInspector.astro' },
   { slug: 'cookware-brand-transparency-index', name: 'Cookware Brand Transparency & Greenwashing Index', category: 'Materials', component: 'CookwareBrandIndex.astro' },
@@ -63,7 +63,8 @@ const TOOLS_REGISTRY = [
   { slug: 'charcoal-gas-grill-pah-hca-modeler', name: 'Charcoal vs Gas Grill PAH & HCA Carcinogen Modeler', category: 'Combustion Toxicology', component: 'CharcoalGasGrillPahHcaModeler.astro', dataFile: 'charcoal-gas-grill-pah-hca-data.json' },
   { slug: 'canned-food-bpa-leaching-modeler', name: 'Canned Food Bisphenol-A (BPA) & Epoxy Phenolic Liner Leaching Modeler', category: 'Packaging Toxicology', component: 'CannedFoodBpaLeachingModeler.astro', dataFile: 'canned-food-bpa-leaching-data.json' },
   { slug: 'air-fryer-lipid-oxidation-modeler', name: 'Air Fryer vs Deep Fryer Lipid Oxidation & Cytotoxic 4-HNE Aldehyde Modeler', category: 'Biochemistry', component: 'AirFryerLipidOxidationModeler.astro', dataFile: 'air-fryer-lipid-oxidation-data.json' },
-  { slug: 'melamine-tableware-formaldehyde-modeler', name: 'Melamine Tableware Formaldehyde & Cyanuric Acid Leaching Modeler', category: 'Toxicology', component: 'MelamineTablewareSafetyModeler.astro', dataFile: 'melamine-tableware-safety-data.json' }
+  { slug: 'melamine-tableware-formaldehyde-modeler', name: 'Melamine Tableware Formaldehyde & Cyanuric Acid Leaching Modeler', category: 'Toxicology', component: 'MelamineTablewareSafetyModeler.astro', dataFile: 'melamine-tableware-safety-data.json' },
+  { slug: 'cast-iron-seasoning-degradation-modeler', name: 'Cast Iron vs Carbon Steel Reactive Metal Pan Seasoning Degradation Modeler', category: 'Reactive Metallurgy', component: 'CastIronSeasoningDegradationModeler.astro', dataFile: 'cast-iron-seasoning-degradation-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -195,7 +196,8 @@ function auditDatasets() {
     'charcoal-gas-grill-pah-hca-data.json',
     'canned-food-bpa-leaching-data.json',
     'air-fryer-lipid-oxidation-data.json',
-    'melamine-tableware-safety-data.json'
+    'melamine-tableware-safety-data.json',
+    'cast-iron-seasoning-degradation-data.json'
   ];
 
   const datasetStats = {};
@@ -553,9 +555,9 @@ Usage:
 Options:
   (no args)             Run full master cycle (audits + Astro build + link check)
   --quick               Fast validation cycle (< 2s) across all checks
-  --tools               Audit all 34 flagship tools across 5 locales
+  --tools               Audit all 38 flagship tools across 5 locales
   --redirects           Audit Cloudflare Pages redirect limits & edge map
-  --datasets            Audit all 46+ data files and multilingual integrity
+  --datasets            Audit all 50+ data files and multilingual integrity
   --seo                 Audit structured data, JSON-LD, and canonical/hreflang tags
   --cwv                 Audit Core Web Vitals, JS/CSS bundles, and image assets
   --daemon [mins]       Start continuous all-day daemon mode (default 30m)
