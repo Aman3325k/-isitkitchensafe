@@ -68,7 +68,8 @@ const SPECIAL_PAGES = [
   'tools/canned-food-bpa-leaching-modeler',
   'tools/air-fryer-lipid-oxidation-modeler',
   'tools/melamine-tableware-formaldehyde-modeler',
-  'tools/cast-iron-seasoning-degradation-modeler'
+  'tools/cast-iron-seasoning-degradation-modeler',
+  'tools/wooden-utensil-biofilm-modeler'
 ];
 
 const esSlugs = new Set([

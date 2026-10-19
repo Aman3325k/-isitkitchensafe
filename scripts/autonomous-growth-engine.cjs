@@ -64,7 +64,8 @@ const TOOLS_REGISTRY = [
   { slug: 'canned-food-bpa-leaching-modeler', name: 'Canned Food Bisphenol-A (BPA) & Epoxy Phenolic Liner Leaching Modeler', category: 'Packaging Toxicology', component: 'CannedFoodBpaLeachingModeler.astro', dataFile: 'canned-food-bpa-leaching-data.json' },
   { slug: 'air-fryer-lipid-oxidation-modeler', name: 'Air Fryer vs Deep Fryer Lipid Oxidation & Cytotoxic 4-HNE Aldehyde Modeler', category: 'Biochemistry', component: 'AirFryerLipidOxidationModeler.astro', dataFile: 'air-fryer-lipid-oxidation-data.json' },
   { slug: 'melamine-tableware-formaldehyde-modeler', name: 'Melamine Tableware Formaldehyde & Cyanuric Acid Leaching Modeler', category: 'Toxicology', component: 'MelamineTablewareSafetyModeler.astro', dataFile: 'melamine-tableware-safety-data.json' },
-  { slug: 'cast-iron-seasoning-degradation-modeler', name: 'Cast Iron vs Carbon Steel Reactive Metal Pan Seasoning Degradation Modeler', category: 'Reactive Metallurgy', component: 'CastIronSeasoningDegradationModeler.astro', dataFile: 'cast-iron-seasoning-degradation-data.json' }
+  { slug: 'cast-iron-seasoning-degradation-modeler', name: 'Cast Iron vs Carbon Steel Reactive Metal Pan Seasoning Degradation Modeler', category: 'Reactive Metallurgy', component: 'CastIronSeasoningDegradationModeler.astro', dataFile: 'cast-iron-seasoning-degradation-data.json' },
+  { slug: 'wooden-utensil-biofilm-modeler', name: 'Wooden Spoon & Utensil Micro-Crack Bacterial Biofilm & Moisture Trapping Modeler', category: 'Microbiology', component: 'WoodenUtensilBiofilmModeler.astro', dataFile: 'wooden-utensil-biofilm-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -197,7 +198,8 @@ function auditDatasets() {
     'canned-food-bpa-leaching-data.json',
     'air-fryer-lipid-oxidation-data.json',
     'melamine-tableware-safety-data.json',
-    'cast-iron-seasoning-degradation-data.json'
+    'cast-iron-seasoning-degradation-data.json',
+    'wooden-utensil-biofilm-data.json'
   ];
 
   const datasetStats = {};
