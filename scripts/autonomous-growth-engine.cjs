@@ -60,7 +60,8 @@ const TOOLS_REGISTRY = [
   { slug: 'air-fryer-teflon-fluoropolymer-modeler', name: 'Air Fryer Teflon Basket Fluoropolymer Degradation & Thermal Micro-Plume Modeler', category: 'Aerodynamics', component: 'AirFryerTeflonFluoropolymerModeler.astro', dataFile: 'air-fryer-teflon-fluoropolymer-data.json' },
   { slug: 'microwave-popcorn-pfas-modeler', name: 'Microwave Popcorn Bag Fluorinated PFOA / PFAS Surfactant Modeler', category: 'Food Contact Toxicology', component: 'MicrowavePopcornPfasModeler.astro', dataFile: 'microwave-popcorn-pfas-data.json' },
   { slug: 'aluminum-foil-acidic-leaching-simulator', name: 'Aluminum Foil & Cookware Acidic Leaching & Neurotoxicity Simulator', category: 'Toxicology', component: 'AluminumFoilAcidicLeachingSimulator.astro', dataFile: 'aluminum-foil-acidic-leaching-data.json' },
-  { slug: 'charcoal-gas-grill-pah-hca-modeler', name: 'Charcoal vs Gas Grill PAH & HCA Carcinogen Modeler', category: 'Combustion Toxicology', component: 'CharcoalGasGrillPahHcaModeler.astro', dataFile: 'charcoal-gas-grill-pah-hca-data.json' }
+  { slug: 'charcoal-gas-grill-pah-hca-modeler', name: 'Charcoal vs Gas Grill PAH & HCA Carcinogen Modeler', category: 'Combustion Toxicology', component: 'CharcoalGasGrillPahHcaModeler.astro', dataFile: 'charcoal-gas-grill-pah-hca-data.json' },
+  { slug: 'canned-food-bpa-leaching-modeler', name: 'Canned Food Bisphenol-A (BPA) & Epoxy Phenolic Liner Leaching Modeler', category: 'Packaging Toxicology', component: 'CannedFoodBpaLeachingModeler.astro', dataFile: 'canned-food-bpa-leaching-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -189,7 +190,8 @@ function auditDatasets() {
     'air-fryer-teflon-fluoropolymer-data.json',
     'microwave-popcorn-pfas-data.json',
     'aluminum-foil-acidic-leaching-data.json',
-    'charcoal-gas-grill-pah-hca-data.json'
+    'charcoal-gas-grill-pah-hca-data.json',
+    'canned-food-bpa-leaching-data.json'
   ];
 
   const datasetStats = {};

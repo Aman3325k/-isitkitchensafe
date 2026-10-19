@@ -1,0 +1,1001 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import bpaData from '../data/canned-food-bpa-leaching-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  linerLabel: string;
+  linerHelp: string;
+  matrixLabel: string;
+  matrixHelp: string;
+  dentLabel: string;
+  dentHelp: string;
+  tempLabel: string;
+  tempHelp: string;
+  dwellLabel: string;
+  dwellHelp: string;
+  portionLabel: string;
+  portionHelp: string;
+  consumerLabel: string;
+  consumerHelp: string;
+  presetsTitle: string;
+  presetSafe: string;
+  presetAcidicTomato: string;
+  presetTunaOilDent: string;
+  presetBulgingHazard: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  overallScoreLabel: string;
+  bpaConcentrationLabel: string;
+  mealDoseLabel: string;
+  efsaRatioLabel: string;
+  prop65RatioLabel: string;
+  urinaryBiomarkerLabel: string;
+  carcinogenGradeLabel: string;
+  alertTitle: string;
+  tableTitle: string;
+  tableSub: string;
+  colLiner: string;
+  colChemistry: string;
+  colResidual: string;
+  colHydrolytic: string;
+  colLipophilic: string;
+  colRegulatory: string;
+  rulesTitle: string;
+  rulesSub: string;
+  rule1Title: string;
+  rule1Text: string;
+  rule2Title: string;
+  rule2Text: string;
+  rule3Title: string;
+  rule3Text: string;
+  rule4Title: string;
+  rule4Text: string;
+  rule5Title: string;
+  rule5Text: string;
+  copyReportBtn: string;
+  reportCopied: string;
+  crossLinkTitle: string;
+  crossLinkToxicity: string;
+  crossLinkAluminum: string;
+  crossLinkSousVide: string;
+}
+
+const dict: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Food Packaging Toxicology & Endocrine Kinetics",
+    title: "Canned Food Bisphenol-A (BPA) & Epoxy Liner Leaching Modeler",
+    subtitle: "Simulate BADGE epoxy resin degradation, acid-hydrolysis kinetics in canned tomatoes, lipophilic extraction in oily fish, can dent micro-fracturing, and EFSA 2023 Tolerable Daily Intake thresholds.",
+    controlsTitle: "Can Liner, Food Chemistry & Storage Parameters",
+    controlsSub: "Configure internal resin lacquer, food pH and lipid content, can dent severity, warehouse temperature, dwell time, and consumer body weight to calculate real-time endocrine disruptor exposure.",
+    linerLabel: "Internal Can Liner Technology",
+    linerHelp: "Traditional BADGE epoxy releases 15–50 ppb unreacted BPA; modern BPA-NI polyester and polyolefin dispersions achieve 0 ppb bisphenol migration.",
+    matrixLabel: "Canned Food Matrix & Lipophilic Extraction",
+    matrixHelp: "High-acid tomatoes (pH 3.9) accelerate chemical hydrolysis; oily tuna (15% fat) and coconut milk act as continuous non-polar lipophilic chemical sinks.",
+    dentLabel: "Can Structural Integrity & Dent Severity",
+    dentHelp: "Deep creases crack brittle epoxy liners exposing raw steel; rim and double-seam crimp dents rupture sealants, multiplying migration up to 8-fold.",
+    tempLabel: "Storage Temperature Environment",
+    tempHelp: "Warm warehouse and summer garage temperatures (32°C–45°C) accelerate molecular diffusion and polymer relaxation via the Arrhenius equation.",
+    dwellLabel: "Pantry Dwell Time & Shelf Aging",
+    dwellHelp: "Extended storage past 12–24 months allows slow progressive migration of core oligomers; expired cans show accelerated lacquer embrittlement.",
+    portionLabel: "Serving Portion Size (Grams of Food)",
+    portionHelp: "Standard single-meal consumption weight used to calculate total microgram (µg) and nanogram (ng) endocrine disruptor intake.",
+    consumerLabel: "Consumer Profile & Endocrine Sensitivity",
+    consumerHelp: "Calculates individual body weight dose against the EFSA 2023 TDI (0.2 ng/kg bw/day) and pediatric glucuronidation vulnerability.",
+    presetsTitle: "Quick Diagnostic Scenarios",
+    presetSafe: "🏆 Gold Standard: BPA-NI Polyolefin Chickpeas (Pristine Can, Cool Pantry)",
+    presetAcidicTomato: "🥫 High Leaching: Crushed Tomatoes in Aged Epoxy Can (24 Mo, Warm Shelf)",
+    presetTunaOilDent: "🐟 High Risk: Canned Tuna in Olive Oil with Seam Rim Dent",
+    presetBulgingHazard: "🚨 Lethal Hazard: Swollen / Bulging Can (Botulism / Corrosion Discard)",
+    diagnosticTitle: "Real-Time BPA Exposure & Regulatory Audit",
+    diagnosticSub: "Continuous kinetic modeling benchmarked against EFSA 2023 Scientific Opinion (0.2 ng/kg bw/day) and California Proposition 65 MADL.",
+    overallScoreLabel: "Toxicological Safety Rating",
+    bpaConcentrationLabel: "Estimated Leached BPA in Food",
+    mealDoseLabel: "Single-Meal BPA Ingestion Dose",
+    efsaRatioLabel: "EFSA 2023 TDI Comparison (0.2 ng/kg bw)",
+    prop65RatioLabel: "Cal Prop 65 MADL Ceiling (3,000 ng/day)",
+    urinaryBiomarkerLabel: "Predicted Urinary BPA Excretion",
+    carcinogenGradeLabel: "Endocrine Disruption Hazard Grade",
+    alertTitle: "Clinical & Endocrine Toxicology Assessment",
+    tableTitle: "Can Liner Coating Polymer Comparison Matrix",
+    tableSub: "Comparative chemical analysis of traditional epoxy vs next-generation BPA-NI (Non-Intent) food contact barrier lacquers.",
+    colLiner: "Liner System",
+    colChemistry: "Polymer Base Chemistry",
+    colResidual: "BPA Residual",
+    colHydrolytic: "Acid Hydrolytic Stability",
+    colLipophilic: "Lipid Partition Affinity",
+    colRegulatory: "Regulatory Status",
+    rulesTitle: "Evidence-Based Canned Food Safety Rules",
+    rulesSub: "Five clinical packaging safety protocols to eliminate dietary bisphenol and botulinum risks in household kitchens.",
+    rule1Title: "1. The Strict Zero-Tolerance Double Seam Rule",
+    rule1Text: "Never consume food from cans with dents along the top or bottom rim double-seam. Rim dents crush microscopic rubber sealant compounds, causing immediate loss of hermetic seal and severe chemical leaching.",
+    rule2Title: "2. Verify BPA-NI Certification on Acidic Foods",
+    rule2Text: "Always inspect labels for 'BPA-NI' (BPA Non-Intent) or choose glass jars and Tetra Recart cartons for acidic foods like tomatoes, pasta sauces, and pineapple, which dissolve traditional epoxy coatings.",
+    rule3Title: "3. Choose Water-Packed Seafood Over Free Oil",
+    rule3Text: "Bisphenols are lipophilic (log Kow ≈ 3.32) and selectively concentrate in free vegetable or olive oil. Opt for tuna or sardines in water or brine, which exhibit up to 70% lower BPA absorption into the flesh.",
+    rule4Title: "4. Never Heat Cans Directly on Stovetops or Coals",
+    rule4Text: "Heating food directly inside an open metal can causes internal temperatures to spike past 100°C–180°C, blistering the polymer coating and triggering catastrophic migration of bisphenols and cyclic oligomers.",
+    rule5Title: "5. Immediate Discard of Bulging or Hissing Cans",
+    rule5Text: "Any can with swollen, domed lids or that spurts liquid/gas upon puncturing must be sealed in a plastic bag and discarded immediately. Bulging indicates either deadly Clostridium botulinum toxin or acute acid corrosion.",
+    copyReportBtn: "📋 Copy Toxicological Assessment",
+    reportCopied: "✅ Full Diagnostic Report Copied to Clipboard!",
+    crossLinkTitle: "Related Food Contact Toxicology Tools",
+    crossLinkToxicity: "Kitchenware Toxic Leaching & PFAS Risk Scorecard",
+    crossLinkAluminum: "Aluminum Foil & Cookware Acidic Leaching Simulator",
+    crossLinkSousVide: "Sous Vide Plastic Migration & Botulinum Modeler"
+  },
+  es: {
+    badge: "Toxicología de Envases y Cinética Endocrina",
+    title: "Modelador de Lixiviación de Bisfenol A (BPA) en Alimentos Enlatados",
+    subtitle: "Simule la degradación de resinas epoxi BADGE, hidrólisis ácida en tomates enlatados, extracción lipofílica en pescados grasos, microfisuras por abolladuras y límites de la EFSA 2023.",
+    controlsTitle: "Parámetros del Recubrimiento, Alimento y Almacenamiento",
+    controlsSub: "Configure el barniz interior, pH y grasa del alimento, gravedad de la abolladura, temperatura y peso corporal para estimar la exposición a disruptores endocrinos.",
+    linerLabel: "Tecnología de Recubrimiento Interior de la Lata",
+    linerHelp: "El epoxi tradicional con BADGE libera 15–50 ppb de BPA; los recubrimientos modernos de poliéster y poliolefina BPA-NI ofrecen 0 ppb de migración.",
+    matrixLabel: "Matriz del Alimento y Extracción Lipofílica",
+    matrixHelp: "Tomates muy ácidos (pH 3.9) aceleran la hidrólisis; el atún en aceite (15% grasa) y la leche de coco actúan como solventes lipofílicos continuos.",
+    dentLabel: "Integridad Estructural y Gravedad de la Abolladura",
+    dentHelp: "Abolladuras profundas agrietan el epoxi frágil exponiendo el acero crudo; golpes en el borde o doble cierre multiplican la lixiviación hasta por 8.",
+    tempLabel: "Temperatura de Almacenamiento",
+    tempHelp: "Temperaturas cálidas en almacenes o garajes (32°C–45°C) aceleran la difusión molecular según la ecuación cinética de Arrhenius.",
+    dwellLabel: "Tiempo de Permanencia en Despensa",
+    dwellHelp: "Almacenar más de 12–24 meses favorece la migración progresiva de oligómeros; las latas vencidas sufren fragilización del barniz.",
+    portionLabel: "Tamaño de la Porción (Gramos de Alimento)",
+    portionHelp: "Peso de consumo en una sola comida para calcular la ingesta total en microgramos (µg) y nanogramos (ng).",
+    consumerLabel: "Perfil del Consumidor y Sensibilidad Endocrina",
+    consumerHelp: "Calcula la dosis según el peso corporal frente a la TDI de la EFSA 2023 (0.2 ng/kg/día) y la vulnerabilidad pediátrica.",
+    presetsTitle: "Escenarios Diagnósticos Rápidos",
+    presetSafe: "🏆 Estándar de Oro: Garbanzos en Lata de Poliolefina BPA-NI (Lata Intacta, Despensa Fresca)",
+    presetAcidicTomato: "🥫 Alta Lixiviación: Tomates Triturados en Lata Epoxi Antigua (24 Meses, Estante Cálido)",
+    presetTunaOilDent: "🐟 Alto Riesgo: Atún en Aceite de Oliva con Abolladura en el Reborde",
+    presetBulgingHazard: "🚨 Peligro Letal: Lata Hinchada o Abombada (Descarte Inmediato por Botulismo/Corrosión)",
+    diagnosticTitle: "Evaluación de Exposición a BPA y Auditoría Normativa",
+    diagnosticSub: "Modelo cinético continuo comparado con la Opinión Científica de la EFSA 2023 (0.2 ng/kg/día) y la Propuesta 65 de California.",
+    overallScoreLabel: "Calificación de Seguridad Toxicológica",
+    bpaConcentrationLabel: "BPA Estimado Lixiviado en el Alimento",
+    mealDoseLabel: "Dosis de BPA Ingerida por Comida",
+    efsaRatioLabel: "Comparación TDI EFSA 2023 (0.2 ng/kg)",
+    prop65RatioLabel: "Límite MADL Prop 65 de California (3,000 ng/día)",
+    urinaryBiomarkerLabel: "Excreción Urinaria Estimada de BPA",
+    carcinogenGradeLabel: "Grado de Peligro de Disrupción Endocrina",
+    alertTitle: "Evaluación Clínica y Toxicológica Endocrina",
+    tableTitle: "Matriz Comparativa de Polímeros para Latas",
+    tableSub: "Análisis químico comparativo de resinas epoxi tradicionales frente a recubrimientos de última generación BPA-NI.",
+    colLiner: "Sistema de Recubrimiento",
+    colChemistry: "Química del Polímero",
+    colResidual: "BPA Residual",
+    colHydrolytic: "Estabilidad Hidrolítica",
+    colLipophilic: "Afinidad Lipofílica",
+    colRegulatory: "Estado Normativo",
+    rulesTitle: "Reglas de Seguridad para Alimentos Enlatados",
+    rulesSub: "Cinco protocolos científicos para eliminar riesgos de bisfenol y botulismo en la cocina doméstica.",
+    rule1Title: "1. Regla de Cero Tolerancia en el Reborde y Doble Cierre",
+    rule1Text: "Nunca consuma alimentos de latas con abolladuras en el borde superior o inferior. Estas abolladuras destruyen el sellante de goma hermético, provocando contaminación bacteriana y lixiviación severa.",
+    rule2Title: "2. Verifique la Certificación BPA-NI en Alimentos Ácidos",
+    rule2Text: "Busque siempre la certificación 'BPA-NI' (BPA Non-Intent) o elija envases de vidrio o Tetra Recart para tomates, salsas y piñas, que degradan el epoxi tradicional.",
+    rule3Title: "3. Prefiera Pescados en Agua o Salmuera sobre Aceite",
+    rule3Text: "El BPA es lipofílico (log Kow ≈ 3.32) y se concentra en el aceite libre. Elegir atún al natural reduce hasta en un 70% la absorción de bisfenoles en la carne del pescado.",
+    rule4Title: "4. Jamás Caliente Latas Directamente al Fuego",
+    rule4Text: "Calentar comida dentro de la lata metálica hace que la temperatura interior supere los 100°C–180°C, quemando el barniz y multiplicando por 100 la migración de tóxicos.",
+    rule5Title: "5. Descarte Inmediato de Latas Abombadas o con Fugas",
+    rule5Text: "Cualquier lata hinchada o que expulse gas a presión al perforarla debe desecharse en una bolsa sellada sin probarse. El abombamiento indica toxina botulínica mortal o corrosión ácida severa.",
+    copyReportBtn: "📋 Copiar Informe Toxicológico",
+    reportCopied: "✅ ¡Informe Diagnóstico Copiado al Portapapeles!",
+    crossLinkTitle: "Herramientas Relacionadas de Toxicología Alimentaria",
+    crossLinkToxicity: "Marcador de Toxicidad y PFAS en Utensilios de Cocina",
+    crossLinkAluminum: "Simulador de Lixiviación Ácida de Papel de Aluminio",
+    crossLinkSousVide: "Modelador de Migración Plástica en Sous Vide y Botulismo"
+  },
+  pt: {
+    badge: "Toxicologia de Embalagens e Cinética Endócrina",
+    title: "Modelador de Lixiviação de Bisfenol A (BPA) em Alimentos Enlatados",
+    subtitle: "Simule a degradação de resinas epóxi BADGE, hidrólise ácida em tomates, extração lipofílica em peixes gordurosos, microfissuras por amassados e limites da EFSA 2023.",
+    controlsTitle: "Parâmetros do Revestimento, Alimento e Armazenamento",
+    controlsSub: "Configure o verniz interno, pH e gordura do alimento, gravidade do amassado, temperatura e peso corporal para calcular a exposição a desreguladores endócrinos.",
+    linerLabel: "Tecnologia de Revestimento Interno da Lata",
+    linerHelp: "O epóxi BADGE tradicional liberta 15–50 ppb de BPA; os revestimentos modernos de poliéster e poliolefina BPA-NI garantem 0 ppb de migração.",
+    matrixLabel: "Matriz do Alimento e Extração Lipofílica",
+    matrixHelp: "Tomates muito ácidos (pH 3.9) aceleram a hidrólise; atum em azeite (15% gordura) e leite de coco agem como solventes lipofílicos contínuos.",
+    dentLabel: "Integridade Estrutural e Gravidade do Amassado",
+    dentHelp: "Amassados profundos quebram o epóxi frágil expondo o aço; pancadas na borda ou fecho duplo aumentam a lixiviação em até 8 vezes.",
+    tempLabel: "Temperatura de Armazenamento",
+    tempHelp: "Armazenamento em despensas ou garagens quentes (32°C–45°C) acelera a difusão molecular segundo a equação de Arrhenius.",
+    dwellLabel: "Tempo de Armazenamento na Despensa",
+    dwellHelp: "Estocar por mais de 12–24 meses favorece a migração contínua de oligómeros; latas vencidas sofrem fragilização do verniz.",
+    portionLabel: "Tamanho da Porção (Gramas de Alimento)",
+    portionHelp: "Peso de consumo em uma refeição para calcular a ingestão total em microgramas (µg) e nanogramas (ng).",
+    consumerLabel: "Perfil do Consumidor e Sensibilidade Endócrina",
+    consumerHelp: "Calcula a dose pelo peso corporal em relação à TDI da EFSA 2023 (0.2 ng/kg/dia) e à vulnerabilidade hepática pediátrica.",
+    presetsTitle: "Cenários de Diagnóstico Rápido",
+    presetSafe: "🏆 Padrão Ouro: Grão-de-Bico em Lata de Poliolefina BPA-NI (Lata Impecável, Despensa Fresca)",
+    presetAcidicTomato: "🥫 Alta Lixiviação: Tomate Triturado em Lata Epóxi Antiga (24 Meses, Prateleira Quente)",
+    presetTunaOilDent: "🐟 Alto Risco: Atum em Azeite com Amassado na Borda do Fecho",
+    presetBulgingHazard: "🚨 Perigo Letal: Lata Estufada ou Abaulada (Descarte Imediato por Botulismo/Corrosão)",
+    diagnosticTitle: "Avaliação de Exposição ao BPA e Auditoria Regulatória",
+    diagnosticSub: "Modelo cinético contínuo comparado à Opinião Científica da EFSA 2023 (0.2 ng/kg/dia) e à Proposição 65 da Califórnia.",
+    overallScoreLabel: "Classificação de Segurança Toxicológica",
+    bpaConcentrationLabel: "BPA Estimado Lixiviado no Alimento",
+    mealDoseLabel: "Dose de BPA Ingerida por Refeição",
+    efsaRatioLabel: "Comparação TDI EFSA 2023 (0.2 ng/kg)",
+    prop65RatioLabel: "Limite MADL Prop 65 da Califórnia (3.000 ng/dia)",
+    urinaryBiomarkerLabel: "Excreção Urinária Estimada de BPA",
+    carcinogenGradeLabel: "Grau de Perigo de Desregulação Endócrina",
+    alertTitle: "Avaliação Clínica e Toxicológica Endócrina",
+    tableTitle: "Matriz Comparativa de Polímeros para Latas",
+    tableSub: "Análise química comparativa de resinas epóxi tradicionais contra vernizes de última geração BPA-NI.",
+    colLiner: "Sistema de Revestimento",
+    colChemistry: "Química do Polímero",
+    colResidual: "BPA Residual",
+    colHydrolytic: "Estabilidade Hidrolítica",
+    colLipophilic: "Afinidade Lipofílica",
+    colRegulatory: "Status Regulatório",
+    rulesTitle: "Regras Científicas de Segurança para Enlatados",
+    rulesSub: "Cinco protocolos comprovados para eliminar riscos de bisfenol e botulismo na cozinha doméstica.",
+    rule1Title: "1. Tolerância Zero com Amassados na Borda e Fecho Duplo",
+    rule1Text: "Nunca consuma alimentos de latas com amassados no rebordo superior ou inferior. O impacto deforma a vedação de borracha microscópica, causando contaminação e lixiviação química severa.",
+    rule2Title: "2. Verifique a Certificação BPA-NI em Alimentos Ácidos",
+    rule2Text: "Exija a identificação 'BPA-NI' (BPA Non-Intent) ou opte por frascos de vidro e Tetra Recart para molhos de tomate e abacaxi, que atacam o epóxi convencional.",
+    rule3Title: "3. Prefira Pescados em Água ou Salmoura em Vez de Óleo",
+    rule3Text: "O BPA é lipofílico (log Kow ≈ 3.32) e migra maciçamente para a fase oleosa. Escolher atum ao natural reduz em até 70% a concentração de bisfenóis na carne.",
+    rule4Title: "4. Nunca Aqueça Latas Diretamente no Fogão",
+    rule4Text: "Aquecer comida dentro da lata metálica eleva a temperatura interna além de 100°C–180°C, queimando o verniz plástico e multiplicando por 100 a lixiviação de tóxicos.",
+    rule5Title: "5. Descarte Imediato de Latas Estufadas ou que Soltam Gás",
+    rule5Text: "Latas estufadas ou que esguicham líquido/gás ao serem perfuradas devem ser descartadas num saco lacrado sem serem provadas. O estufamento indica toxina botulínica letal ou corrosão ácida.",
+    copyReportBtn: "📋 Copiar Relatório Toxicológico",
+    reportCopied: "✅ Relatório Diagnóstico Copiado para a Área de Transferência!",
+    crossLinkTitle: "Ferramentas Relacionadas de Toxicologia Alimentar",
+    crossLinkToxicity: "Scorecard de Toxicidade e PFAS em Utensílios de Cozinha",
+    crossLinkAluminum: "Simulador de Lixiviação Ácida de Folha de Alumínio",
+    crossLinkSousVide: "Modelador de Migração Plástica em Sous Vide e Botulismo"
+  },
+  'zh-cn': {
+    badge: "食品接触材料毒理学与内分泌干扰动力学",
+    title: "罐头食品双酚A（BPA）与环氧酚醛涂层溶出模拟器",
+    subtitle: "模拟 BADGE 环氧树脂降解、番茄酸水解动力学、油浸海鲜脂质萃取、罐体凹陷微裂纹及欧洲食品安全局（EFSA 2023）耐受摄入量基准。",
+    controlsTitle: "内壁涂层、食品化学基质与仓储环境参数",
+    controlsSub: "配置内壁树脂类型、食品 pH 值与油脂含量、罐身凹陷破损程度、仓储温度、货架存放时长与体重，实时计算内分泌干扰物暴露量。",
+    linerLabel: "罐体内部涂层工艺类型",
+    linerHelp: "传统 BADGE 环氧酚醛树脂含有 15–50 ppb 残留游离 BPA；现代新型 BPA-NI 聚酯和水性聚烯烃分散体（POD）实现 0 ppb 检出。",
+    matrixLabel: "食品化学基质与脂溶性萃取",
+    matrixHelp: "高酸度碎番茄（pH 3.9）加速醚键酸催化水解；油浸金枪鱼（15% 油脂）和椰浆作为持续非极性萃取介质，大幅增加溶出。",
+    dentLabel: "罐体结构完整性与凹陷破损评级",
+    dentHelp: "深折痕凹陷会导致脆性环氧层微观开裂并裸露马口铁；卷边与双重卷封处的凹陷破坏密封橡胶胶泥，使溶出激增高达 8 倍。",
+    tempLabel: "仓储与货架温度环境",
+    tempHelp: "夏季闷热车库或无空调物流仓库（32°C–45°C）依据阿伦尼乌斯动力学方程成倍加速单体分子扩散与聚合物松弛。",
+    dwellLabel: "货架存放与陈化时长",
+    dwellHelp: "存放超过 12–24 个月会使深层交联低聚物持续向内扩散；超过保质期的陈旧罐头涂层发生脆化和深度水解。",
+    portionLabel: "单餐食用分量（食品克数）",
+    portionHelp: "单次膳食实际食用重量，用于精确计算摄入的双酚 A 微克（µg）与纳克（ng）绝对剂量。",
+    consumerLabel: "食用者特征与内分泌敏感性",
+    consumerHelp: "评估个人体重摄入剂量与 EFSA 2023 最新标准（0.2 ng/kg/天）及儿童肝脏葡萄糖醛酸代谢解毒能力的相对风险。",
+    presetsTitle: "快捷诊断情景",
+    presetSafe: "🏆 黄金标准：BPA-NI 聚烯烃涂层鹰嘴豆（罐体完好，阴凉常温）",
+    presetAcidicTomato: "🥫 高溶出风险：陈旧环氧罐碎番茄（存放24个月，高温货架）",
+    presetTunaOilDent: "🐟 重度风险：油浸金枪鱼罐头（顶盖卷边严重凹陷）",
+    presetBulgingHazard: "🚨 致命警报：罐体膨胀鼓盖（疑似肉毒杆菌/严重腐蚀，坚决丢弃）",
+    diagnosticTitle: "实时 BPA 暴露评估与法规基准审计",
+    diagnosticSub: "基于 EFSA 2023 科学意见书（每日耐受摄入量 0.2 ng/kg）及美国加州第 65 号提案每日最大允许剂量（MADL）建模。",
+    overallScoreLabel: "毒理学安全综合评分",
+    bpaConcentrationLabel: "食品中估算溶出 BPA 浓度",
+    mealDoseLabel: "单餐实际摄入 BPA 绝对剂量",
+    efsaRatioLabel: "EFSA 2023 TDI 限量对比 (0.2 ng/kg)",
+    prop65RatioLabel: "加州 65 提案上限对比 (3,000 ng/天)",
+    urinaryBiomarkerLabel: "预估尿液 BPA 排泄生物标志物",
+    carcinogenGradeLabel: "内分泌干扰毒性等级评定",
+    alertTitle: "临床医学与内分泌毒理学诊断",
+    tableTitle: "罐头内壁涂层聚合物对比矩阵",
+    tableSub: "传统环氧树脂与新一代 BPA-NI（非有意添加）食品接触阻隔涂层的化学结构与安全性能横向对比。",
+    colLiner: "涂层体系",
+    colChemistry: "聚合物基础化学",
+    colResidual: "BPA 残留量",
+    colHydrolytic: "耐酸水解稳定性",
+    colLipophilic: "脂溶性萃取亲和力",
+    colRegulatory: "法规合规状态",
+    rulesTitle: "循证科学罐头食品食用安全准则",
+    rulesSub: "五项经同行评审验证的罐头包装安全准则，彻底阻断厨房膳食中的双酚 A 与肉毒梭菌风险。",
+    rule1Title: "1. 罐口卷边与封口处凹陷零容忍原则",
+    rule1Text: "切勿食用罐顶或罐底双重卷封接缝处凹陷的罐头。卷边受撞击会导致内部微观密封密封胶泥挤裂失效，引发严重化学浸出和细菌入侵。",
+    rule2Title: "2. 高酸食品优先选择经认证的 BPA-NI 罐或玻璃瓶",
+    rule2Text: "番茄酱、番茄丁、菠萝等高酸食品极易腐蚀传统环氧涂层。请认准标有“BPA-NI”（无双酚 A 添加）的罐头，或优先选用玻璃罐及无菌纸盒包装。",
+    rule3Title: "3. 鱼类海鲜优先选水浸而非油浸",
+    rule3Text: "双酚 A 为强亲脂性化合物（log Kow ≈ 3.32），高度富集在植物油中。选用水浸或盐水浸金枪鱼，可使鱼肉吸附的双酚 A 减少多达 70%。",
+    rule4Title: "4. 严禁用明火或炉灶直接加热开盖罐头",
+    rule4Text: "将食品留在原金属罐内直接放在炉灶、烤网或火堆上加热，会导致罐壁温度飙升至 100°C–180°C，使内壁塑料涂层瞬间脱落分解并大量释放单体。",
+    rule5Title: "5. 鼓盖、鼓胀或开罐喷气的罐头坚决直接丢弃",
+    rule5Text: "任何盖面鼓起、按压有弹性或开罐时喷出酸性气体的罐头，必须密封于塑料袋内直接丢弃，严禁尝鲜。胀罐极可能存在致命的肉毒杆菌外毒素。",
+    copyReportBtn: "📋 复制毒理诊断评估报告",
+    reportCopied: "✅ 完整诊断报告已复制到剪贴板！",
+    crossLinkTitle: "相关食品接触材料安全工具",
+    crossLinkToxicity: "厨房用品毒性溶出与 PFAS 风险评分卡",
+    crossLinkAluminum: "铝箔与铝锅酸性烹饪神经毒性溶出模拟器",
+    crossLinkSousVide: "低温慢煮真空袋微塑料迁移与肉毒杆菌模型"
+  },
+  ja: {
+    badge: "食品包装毒性学＆内分泌撹乱動力学",
+    title: "缶詰ビスフェノールA（BPA）＆エポキシ樹脂溶出モデラー",
+    subtitle: "BADGEエポキシ樹脂の分解、トマト缶の酸加水分解、油浸魚の親脂性抽出、缶の打痕亀裂、および欧州EFSA 2023年耐容一日摂取量（TDI）基準を精密シミュレーション。",
+    controlsTitle: "内面樹脂ライニング、食品化学、保管条件パラメータ",
+    controlsSub: "内面樹脂の種類、食品のpHと脂質比率、打痕凹みの重症度、保管温度、棚保管期間、体重を設定し、内分泌撹乱物質の暴露量をリアルタイム算出します。",
+    linerLabel: "缶内面コーティング技術",
+    linerHelp: "従来のBADGEエポキシは15〜50 ppbの未反応BPAを溶出します。最新のBPA-NIポリエステルや水性ポリオレフィン（POD）は0 ppbを達成しています。",
+    matrixLabel: "食品マトリックス＆脂溶性抽出特性",
+    matrixHelp: "高酸性トマト（pH 3.9）はエステル結合の酸加水分解を加速します。油漬けツナ（15%油脂）やココナッツミルクは親脂性溶媒としてBPAを強力に抽出します。",
+    dentLabel: "缶の構造健全性＆打痕凹みの深さ",
+    dentHelp: "鋭い打痕は脆いエポキシ層を割いて素地鋼を露出させます。天底の巻締め（ダブルシーム）部分の凹みはシーラントを破壊し溶出量を最大8倍に跳ね上げます。",
+    tempLabel: "保管温度環境",
+    tempHelp: "夏季の高温ガレージや空調のない倉庫（32°C〜45°C）では、アレニウス式に従って分子拡散とポリマーの緩和速度が急激に上昇します。",
+    dwellLabel: "パントリー保管期間＆経年変化",
+    dwellHelp: "12〜24ヶ月を超える長期保管はオリゴマーの継続拡散を促します。賞味期限切れの缶詰ではライニング樹脂の脆化が進みます。",
+    portionLabel: "摂取ポーションサイズ（食品のグラム数）",
+    portionHelp: "1食あたりの推定摂取重量。BPAの総マイクログラム（µg）およびナノグラム（ng）摂取量を計算します。",
+    consumerLabel: "喫食者プロファイル＆内分泌感受性",
+    consumerHelp: "体重あたりの摂取量をEFSA 2023年基準（0.2 ng/kg体重/日）および小児の肝臓グルクロン酸抱合能力と照合して評価します。",
+    presetsTitle: "クイックシミュレーション",
+    presetSafe: "🏆 ゴールド水準：BPA-NIポリオレフィン缶ひよこ豆（無傷缶、冷暗所保管）",
+    presetAcidicTomato: "🥫 高溶出リスク：旧式エポキシ缶トマトペースト（24ヶ月保管、高温棚）",
+    presetTunaOilDent: "🐟 重大リスク：オリーブ油漬けツナ缶（缶縁巻締め部に打痕あり）",
+    presetBulgingHazard: "🚨 致命的危険：膨張・膨らんだ缶（ボツリヌス菌/激しい腐食、即廃棄）",
+    diagnosticTitle: "リアルタイムBPA暴露診断＆国際規制基準評価",
+    diagnosticSub: "欧州食品安全機関（EFSA 2023）科学的意見書（0.2 ng/kg/日）および米国カリフォルニア州プロポジション65（MADL）に基づく解析。",
+    overallScoreLabel: "毒性学的安全性スコア",
+    bpaConcentrationLabel: "食品中推定溶出BPA濃度",
+    mealDoseLabel: "1食あたりのBPA総摂取量",
+    efsaRatioLabel: "EFSA 2023 TDI 基準比較 (0.2 ng/kg)",
+    prop65RatioLabel: "加州プロポジション65 上限比較 (3,000 ng/日)",
+    urinaryBiomarkerLabel: "推定尿中BPA排泄バイオマーカー",
+    carcinogenGradeLabel: "内分泌撹乱危険度分類",
+    alertTitle: "臨床・内分泌毒性医学的評価",
+    tableTitle: "缶内面コーティングポリマー比較マトリックス",
+    tableSub: "従来のエポキシ樹脂と次世代型BPA-NI（意図的無添加）食品接触バリア塗料の化学特性比較。",
+    colLiner: "ライニング体系",
+    colChemistry: "基礎ポリマー化学",
+    colResidual: "BPA残留濃度",
+    colHydrolytic: "耐酸加水分解性",
+    colLipophilic: "脂溶性抽出親和度",
+    colRegulatory: "規制適合状況",
+    rulesTitle: "科学的エビデンスに基づく缶詰安全利用原則",
+    rulesSub: "家庭のキッチンから食事性ビスフェノールおよびボツリヌス中毒リスクを完全に排除する5つの安全規則。",
+    rule1Title: "1. 缶縁・巻締め（ダブルシーム）の打痕は絶対廃棄ルール",
+    rule1Text: "缶の上下縁の巻締め部に凹みや変形がある缶詰は絶対に食べてはいけません。微細なゴム製シーラントが破損し、気密性の喪失と激しい化学物質溶出が発生します。",
+    rule2Title: "2. 酸性食品はBPA-NI認証またはガラス瓶を選ぶ",
+    rule2Text: "トマト、パスタソース、パイナップルなどの強酸性食品はエポキシを急速に劣化させます。『BPA-NI』表記の缶詰、ガラス瓶、またはテトラ・リカルト容器を選んでください。",
+    rule3Title: "3. 魚介缶詰はオイル漬けではなく水煮（水漬け）を選ぶ",
+    rule3Text: "BPAは強い脂溶性（log Kow ≈ 3.32）を持ち、遊離油に優先的に溶出します。水煮や塩水漬けのツナを選ぶことで、魚肉へのBPA移行を最大70%カットできます。",
+    rule4Title: "4. 缶詰を直接火やコンロにかけて加熱しない",
+    rule4Text: "缶を開けてそのままコンロや直火にかけると、缶内壁の温度が100°C〜180°Cに達し、内面樹脂が熱分解して化学物質が大量に食品へ溶出します。",
+    rule5Title: "5. 蓋が膨らんだ缶やガスが噴き出す缶は即座に廃棄",
+    rule5Text: "天面が膨らんでいる缶や、穴を開けた瞬間にガスや液体が吹き出す缶は、絶対に味見せず袋に入れて捨ててください。致死性のボツリヌス菌毒素か強酸腐食の兆候です。",
+    copyReportBtn: "📋 毒性診断レポートをコピー",
+    reportCopied: "✅ 完全な診断レポートをクリップボードにコピーしました！",
+    crossLinkTitle: "関連する食品接触材料安全性ツール",
+    crossLinkToxicity: "調理器具の有害物質溶出＆PFASスコアカード",
+    crossLinkAluminum: "アルミホイル＆アルミ鍋の酸性加熱溶出シミュレーター",
+    crossLinkSousVide: "低温調理（真空調理）プラスチック移行＆ボツリヌス菌モデラー"
+  }
+};
+
+const c = dict[lang];
+---
+
+<div class="bg-surface border border-hairline rounded-3xl p-6 md:p-10 shadow-xs mb-12">
+  <!-- Interactive Header Badge -->
+  <div class="flex flex-wrap items-center justify-between gap-3 border-b border-hairline/80 pb-6 mb-8">
+    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-rose-100 text-rose-900 border border-rose-200">
+      <span class="inline-block w-2 h-2 rounded-full bg-rose-600 animate-pulse"></span>
+      {c.badge}
+    </div>
+    <span class="text-xs text-muted font-mono">
+      EFSA 2023 TDI (0.2 ng/kg) &bull; BADGE Kinetics &bull; Cal Prop 65 MADL
+    </span>
+  </div>
+
+  <!-- Presets Bar -->
+  <div class="mb-8">
+    <label class="block text-xs font-bold uppercase tracking-wider text-muted mb-3">
+      {c.presetsTitle}
+    </label>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+      <button 
+        type="button" 
+        id="preset-safe" 
+        class="text-left p-3 rounded-xl border border-hairline bg-surface-soft hover:bg-emerald-50 hover:border-emerald-300 text-xs font-medium text-ink transition-all"
+      >
+        {c.presetSafe}
+      </button>
+      <button 
+        type="button" 
+        id="preset-acidic" 
+        class="text-left p-3 rounded-xl border border-hairline bg-surface-soft hover:bg-rose-50 hover:border-rose-300 text-xs font-medium text-ink transition-all"
+      >
+        {c.presetAcidicTomato}
+      </button>
+      <button 
+        type="button" 
+        id="preset-tuna-dent" 
+        class="text-left p-3 rounded-xl border border-hairline bg-surface-soft hover:bg-amber-50 hover:border-amber-300 text-xs font-medium text-ink transition-all"
+      >
+        {c.presetTunaOilDent}
+      </button>
+      <button 
+        type="button" 
+        id="preset-bulging" 
+        class="text-left p-3 rounded-xl border border-hairline bg-surface-soft hover:bg-red-50 hover:border-red-400 text-xs font-medium text-ink transition-all"
+      >
+        {c.presetBulgingHazard}
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Controls Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-10">
+    <div class="lg:col-span-7 space-y-6">
+      <div class="border-b border-hairline pb-4">
+        <h3 class="text-lg font-bold text-ink mb-1">{c.controlsTitle}</h3>
+        <p class="text-xs text-body leading-relaxed">{c.controlsSub}</p>
+      </div>
+
+      <!-- Liner Selector -->
+      <div>
+        <label for="can-liner-select" class="block text-sm font-semibold text-ink mb-1">
+          {c.linerLabel}
+        </label>
+        <select 
+          id="can-liner-select" 
+          class="w-full bg-surface-soft border border-hairline rounded-xl px-4 py-2.5 text-sm font-medium text-ink focus:ring-2 focus:ring-rose-500 focus:outline-none"
+        >
+          {bpaData.canLinerTypes.map((liner) => (
+            <option value={liner.id} selected={liner.id === 'traditional-epoxy-badge'}>
+              {liner.name} ({liner.bpaResidualPpb > 0 ? `~${liner.bpaResidualPpb} ppb BPA Residual` : '0 ppb BPA-NI'})
+            </option>
+          ))}
+        </select>
+        <p class="text-xs text-muted mt-1 leading-relaxed">{c.linerHelp}</p>
+      </div>
+
+      <!-- Food Matrix Selector -->
+      <div>
+        <label for="food-matrix-select" class="block text-sm font-semibold text-ink mb-1">
+          {c.matrixLabel}
+        </label>
+        <select 
+          id="food-matrix-select" 
+          class="w-full bg-surface-soft border border-hairline rounded-xl px-4 py-2.5 text-sm font-medium text-ink focus:ring-2 focus:ring-rose-500 focus:outline-none"
+        >
+          {bpaData.foodMatrixProfiles.map((food) => (
+            <option value={food.id} selected={food.id === 'acidic-crushed-tomatoes'}>
+              {food.name} (pH {food.ph} &bull; {food.fatPercent}% Fat &bull; {food.category})
+            </option>
+          ))}
+        </select>
+        <p class="text-xs text-muted mt-1 leading-relaxed">{c.matrixHelp}</p>
+      </div>
+
+      <!-- Can Dent Severity Selector -->
+      <div>
+        <label for="can-dent-select" class="block text-sm font-semibold text-ink mb-1">
+          {c.dentLabel}
+        </label>
+        <select 
+          id="can-dent-select" 
+          class="w-full bg-surface-soft border border-hairline rounded-xl px-4 py-2.5 text-sm font-medium text-ink focus:ring-2 focus:ring-rose-500 focus:outline-none"
+        >
+          {bpaData.canDentProfiles.map((dent) => (
+            <option value={dent.id} selected={dent.id === 'pristine-undamaged'}>
+              {dent.name} ({dent.structuralRiskMultiplier}x Migration Factor)
+            </option>
+          ))}
+        </select>
+        <p class="text-xs text-muted mt-1 leading-relaxed">{c.dentHelp}</p>
+      </div>
+
+      <!-- Storage Temperature & Shelf Dwell Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label for="storage-temp-select" class="block text-sm font-semibold text-ink mb-1">
+            {c.tempLabel}
+          </label>
+          <select 
+            id="storage-temp-select" 
+            class="w-full bg-surface-soft border border-hairline rounded-xl px-3.5 py-2.5 text-sm font-medium text-ink focus:ring-2 focus:ring-rose-500 focus:outline-none"
+          >
+            {bpaData.storageConditions.map((cond) => (
+              <option value={cond.id} selected={cond.id === 'ambient-kitchen'}>
+                {cond.name}
+              </option>
+            ))}
+          </select>
+          <p class="text-xs text-muted mt-1 leading-relaxed">{c.tempHelp}</p>
+        </div>
+
+        <div>
+          <label for="storage-dwell-select" class="block text-sm font-semibold text-ink mb-1">
+            {c.dwellLabel}
+          </label>
+          <select 
+            id="storage-dwell-select" 
+            class="w-full bg-surface-soft border border-hairline rounded-xl px-3.5 py-2.5 text-sm font-medium text-ink focus:ring-2 focus:ring-rose-500 focus:outline-none"
+          >
+            {bpaData.storageDwellTimes.map((dwell) => (
+              <option value={dwell.id} selected={dwell.id === 'standard-12-months'}>
+                {dwell.label}
+              </option>
+            ))}
+          </select>
+          <p class="text-xs text-muted mt-1 leading-relaxed">{c.dwellHelp}</p>
+        </div>
+      </div>
+
+      <!-- Portion Size Slider & Consumer Select -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label for="portion-size-input" class="text-sm font-semibold text-ink">
+              {c.portionLabel}
+            </label>
+            <span id="portion-display" class="text-sm font-bold text-rose-600 font-mono">
+              200g
+            </span>
+          </div>
+          <input 
+            type="range" 
+            id="portion-size-input" 
+            min="50" 
+            max="500" 
+            step="25" 
+            value="200" 
+            class="w-full accent-rose-600 cursor-pointer py-1"
+          />
+          <p class="text-xs text-muted mt-1 leading-relaxed">{c.portionHelp}</p>
+        </div>
+
+        <div>
+          <label for="consumer-select" class="block text-sm font-semibold text-ink mb-1">
+            {c.consumerLabel}
+          </label>
+          <select 
+            id="consumer-select" 
+            class="w-full bg-surface-soft border border-hairline rounded-xl px-3.5 py-2.5 text-sm font-medium text-ink focus:ring-2 focus:ring-rose-500 focus:outline-none"
+          >
+            {bpaData.consumerProfiles.map((con) => (
+              <option value={con.id} selected={con.id === 'adult-average'}>
+                {con.label}
+              </option>
+            ))}
+          </select>
+          <p class="text-xs text-muted mt-1 leading-relaxed">{c.consumerHelp}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Real-Time Diagnostic Display -->
+    <div class="lg:col-span-5 flex flex-col justify-between">
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-6 shadow-xs">
+        <div class="border-b border-hairline pb-4 mb-5">
+          <h3 class="text-base font-bold text-ink mb-1">{c.diagnosticTitle}</h3>
+          <p class="text-xs text-muted leading-relaxed">{c.diagnosticSub}</p>
+        </div>
+
+        <!-- Grade Display Card -->
+        <div id="safety-grade-card" class="p-4 rounded-xl border mb-6 transition-colors bg-amber-50 border-amber-200 text-amber-900">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-muted">
+              {c.carcinogenGradeLabel}
+            </span>
+            <span id="safety-grade-badge" class="px-2.5 py-1 rounded-md text-xs font-extrabold uppercase text-white bg-amber-600">
+              GRADE B (MODERATE EXPOSURE)
+            </span>
+          </div>
+          <p id="safety-grade-desc" class="text-xs leading-relaxed font-medium">
+            Moderate dietary bisphenol exposure. Exceeds revised 2023 EFSA immunotoxicity guidance ceiling.
+          </p>
+        </div>
+
+        <!-- Metric 1: Concentration in Food -->
+        <div class="space-y-4 mb-6">
+          <div class="flex items-center justify-between border-b border-hairline/60 pb-3">
+            <div>
+              <div class="text-xs text-muted">{c.bpaConcentrationLabel}</div>
+              <div class="text-xs font-mono text-muted/80">Part-per-billion (ppb)</div>
+            </div>
+            <div id="stat-bpa-conc" class="text-lg font-extrabold font-mono text-ink">
+              18.4 µg/kg (ppb)
+            </div>
+          </div>
+
+          <!-- Metric 2: Meal Absolute Dose -->
+          <div class="flex items-center justify-between border-b border-hairline/60 pb-3">
+            <div>
+              <div class="text-xs text-muted">{c.mealDoseLabel}</div>
+              <div class="text-xs font-mono text-muted/80">Micrograms / Nanograms per meal</div>
+            </div>
+            <div id="stat-meal-dose" class="text-sm font-bold font-mono text-ink">
+              3.68 µg (3,680 ng)
+            </div>
+          </div>
+
+          <!-- Metric 3: EFSA 2023 TDI Exceedance -->
+          <div class="flex items-center justify-between border-b border-hairline/60 pb-3">
+            <div>
+              <div class="text-xs text-muted">{c.efsaRatioLabel}</div>
+              <div class="text-xs font-mono text-muted/80">0.2 ng/kg bw/day (Immune Th17 cell dysregulation)</div>
+            </div>
+            <div id="stat-efsa-ratio" class="text-sm font-extrabold font-mono text-rose-600">
+              26,285% of Daily TDI
+            </div>
+          </div>
+
+          <!-- Metric 4: California Prop 65 MADL -->
+          <div class="flex items-center justify-between border-b border-hairline/60 pb-3">
+            <div>
+              <div class="text-xs text-muted">{c.prop65RatioLabel}</div>
+              <div class="text-xs font-mono text-muted/80">3,000 ng/day (Female reproductive toxicity)</div>
+            </div>
+            <div id="stat-prop65-ratio" class="text-sm font-bold font-mono text-ink">
+              122% of MADL
+            </div>
+          </div>
+
+          <!-- Metric 5: Urinary Biomarker Prediction -->
+          <div class="flex items-center justify-between pb-1">
+            <div>
+              <div class="text-xs text-muted">{c.urinaryBiomarkerLabel}</div>
+              <div class="text-xs font-mono text-muted/80">NHANES urinary BPA equivalent (24h post-meal)</div>
+            </div>
+            <div id="stat-urinary-biomarker" class="text-sm font-bold font-mono text-ink">
+              2.45 µg/g creatinine
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Clinical Diagnostic Alert Box -->
+        <div class="p-3.5 rounded-xl bg-surface border border-hairline text-xs text-body leading-relaxed mb-4">
+          <div class="font-bold text-ink flex items-center gap-1.5 mb-1.5">
+            <span>🔬</span>
+            <span>{c.alertTitle}</span>
+          </div>
+          <div id="diagnostic-alert-text">
+            Evaluating food contact migration kinetics...
+          </div>
+        </div>
+
+        <!-- Copy Report Button -->
+        <button 
+          type="button" 
+          id="btn-copy-report" 
+          class="w-full py-2.5 px-4 rounded-xl border border-hairline bg-surface hover:bg-surface-strong font-semibold text-xs text-ink transition-colors flex items-center justify-center gap-2"
+        >
+          {c.copyReportBtn}
+        </button>
+        <p id="copy-confirmation" class="text-[11px] text-emerald-600 font-medium text-center mt-2 hidden">
+          {c.reportCopied}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comparison Table: Polymer Coating Chemistry -->
+  <div class="border-t border-hairline pt-8 mb-10">
+    <div class="mb-4">
+      <h3 class="text-base font-bold text-ink mb-1">{c.tableTitle}</h3>
+      <p class="text-xs text-muted">{c.tableSub}</p>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs border border-hairline rounded-xl overflow-hidden">
+        <thead class="bg-surface-soft border-b border-hairline text-muted uppercase font-bold">
+          <tr>
+            <th class="p-3">{c.colLiner}</th>
+            <th class="p-3">{c.colChemistry}</th>
+            <th class="p-3">{c.colResidual}</th>
+            <th class="p-3">{c.colHydrolytic}</th>
+            <th class="p-3">{c.colLipophilic}</th>
+            <th class="p-3">{c.colRegulatory}</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline">
+          {bpaData.canLinerTypes.map((liner) => (
+            <tr class="hover:bg-surface-soft/60 transition-colors">
+              <td class="p-3 font-semibold text-ink">{liner.name}</td>
+              <td class="p-3 font-mono text-[11px] text-body">{liner.resinChemistry}</td>
+              <td class="p-3 font-mono font-bold text-ink">
+                {liner.bpaResidualPpb > 0 ? `${liner.bpaResidualPpb} ppb` : '0 ppb (BPA-NI)'}
+              </td>
+              <td class="p-3 text-body">{liner.hydrolyticStability}</td>
+              <td class="p-3 text-body">{liner.lipophilicPartition}</td>
+              <td class="p-3 text-[11px] text-muted">{liner.regulatoryStatus}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Evidence-Based Safety Rules -->
+  <div class="border-t border-hairline pt-8 mb-10">
+    <div class="mb-6">
+      <h3 class="text-base font-bold text-ink mb-1">{c.rulesTitle}</h3>
+      <p class="text-xs text-muted">{c.rulesSub}</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+      <div class="p-4 rounded-xl bg-surface-soft border border-hairline">
+        <div class="font-bold text-ink mb-1">{c.rule1Title}</div>
+        <p class="text-body leading-relaxed">{c.rule1Text}</p>
+      </div>
+      <div class="p-4 rounded-xl bg-surface-soft border border-hairline">
+        <div class="font-bold text-ink mb-1">{c.rule2Title}</div>
+        <p class="text-body leading-relaxed">{c.rule2Text}</p>
+      </div>
+      <div class="p-4 rounded-xl bg-surface-soft border border-hairline">
+        <div class="font-bold text-ink mb-1">{c.rule3Title}</div>
+        <p class="text-body leading-relaxed">{c.rule3Text}</p>
+      </div>
+      <div class="p-4 rounded-xl bg-surface-soft border border-hairline">
+        <div class="font-bold text-ink mb-1">{c.rule4Title}</div>
+        <p class="text-body leading-relaxed">{c.rule4Text}</p>
+      </div>
+      <div class="p-4 rounded-xl bg-surface-soft border border-hairline lg:col-span-2">
+        <div class="font-bold text-ink mb-1">{c.rule5Title}</div>
+        <p class="text-body leading-relaxed">{c.rule5Text}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Related Tools Cross-Links -->
+  <div class="border-t border-hairline pt-8">
+    <div class="text-xs font-bold uppercase tracking-wider text-muted mb-3">
+      {c.crossLinkTitle}
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+      <a 
+        href={lang === 'en' ? "/tools/toxic-leaching-scorecard/" : `/${lang}/tools/toxic-leaching-scorecard/`}
+        class="p-3 rounded-xl bg-surface-soft hover:bg-surface-strong border border-hairline transition-colors block"
+      >
+        <span class="font-semibold text-ink block mb-0.5">{c.crossLinkToxicity} &rarr;</span>
+        <span class="text-muted text-[11px]">PFAS, lead glazes &amp; microplastic scoring</span>
+      </a>
+      <a 
+        href={lang === 'en' ? "/tools/aluminum-foil-acidic-leaching-simulator/" : `/${lang}/tools/aluminum-foil-acidic-leaching-simulator/`}
+        class="p-3 rounded-xl bg-surface-soft hover:bg-surface-strong border border-hairline transition-colors block"
+      >
+        <span class="font-semibold text-ink block mb-0.5">{c.crossLinkAluminum} &rarr;</span>
+        <span class="text-muted text-[11px]">Acidic food Al dissolution &amp; neurotoxicity</span>
+      </a>
+      <a 
+        href={lang === 'en' ? "/tools/sous-vide-plastic-microbial-modeler/" : `/${lang}/tools/sous-vide-plastic-microbial-modeler/`}
+        class="p-3 rounded-xl bg-surface-soft hover:bg-surface-strong border border-hairline transition-colors block"
+      >
+        <span class="font-semibold text-ink block mb-0.5">{c.crossLinkSousVide} &rarr;</span>
+        <span class="text-muted text-[11px]">Vacuum bag plasticizer migration &amp; botulism</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script define:vars={{ bpaData, lang }}>
+  // Interactive Simulation Logic
+  const linerSelect = document.getElementById('can-liner-select');
+  const matrixSelect = document.getElementById('food-matrix-select');
+  const dentSelect = document.getElementById('can-dent-select');
+  const tempSelect = document.getElementById('storage-temp-select');
+  const dwellSelect = document.getElementById('storage-dwell-select');
+  const portionInput = document.getElementById('portion-size-input');
+  const portionDisplay = document.getElementById('portion-display');
+  const consumerSelect = document.getElementById('consumer-select');
+
+  const statBpaConc = document.getElementById('stat-bpa-conc');
+  const statMealDose = document.getElementById('stat-meal-dose');
+  const statEfsaRatio = document.getElementById('stat-efsa-ratio');
+  const statProp65Ratio = document.getElementById('stat-prop65-ratio');
+  const statUrinary = document.getElementById('stat-urinary-biomarker');
+
+  const gradeCard = document.getElementById('safety-grade-card');
+  const gradeBadge = document.getElementById('safety-grade-badge');
+  const gradeDesc = document.getElementById('safety-grade-desc');
+  const alertText = document.getElementById('diagnostic-alert-text');
+  const btnCopy = document.getElementById('btn-copy-report');
+  const copyConfirm = document.getElementById('copy-confirmation');
+
+  function calculateLeaching() {
+    const liner = bpaData.canLinerTypes.find(l => l.id === linerSelect.value) || bpaData.canLinerTypes[0];
+    const food = bpaData.foodMatrixProfiles.find(f => f.id === matrixSelect.value) || bpaData.foodMatrixProfiles[0];
+    const dent = bpaData.canDentProfiles.find(d => d.id === dentSelect.value) || bpaData.canDentProfiles[0];
+    const temp = bpaData.storageConditions.find(t => t.id === tempSelect.value) || bpaData.storageConditions[0];
+    const dwell = bpaData.storageDwellTimes.find(w => w.id === dwellSelect.value) || bpaData.storageDwellTimes[0];
+    const portionG = parseInt(portionInput.value, 10);
+    const consumer = bpaData.consumerProfiles.find(c => c.id === consumerSelect.value) || bpaData.consumerProfiles[0];
+
+    portionDisplay.textContent = `${portionG}g`;
+
+    // Mathematical modeling
+    // Base migration rate calculation: liner residual (ppb) * food leaching multiplier * dent multiplier * temp Arrhenius * dwell multiplier
+    let estimatedBpaPpb = 0;
+    if (liner.bpaResidualPpb > 0) {
+      estimatedBpaPpb = (liner.bpaResidualPpb * (food.leachingMultiplier / 3.0) * dent.structuralRiskMultiplier * temp.arrheniusMultiplier * dwell.dwellMultiplier);
+    } else {
+      // BPA-NI coating: zero BPA, but severe dent or bulging can release tin/iron or coating breakdown
+      if (dent.id === 'hydrogen-swell-bulging') {
+        estimatedBpaPpb = 0.5; // Trace non-specific artifact
+      } else {
+        estimatedBpaPpb = 0.0;
+      }
+    }
+
+    // Single meal ingested dose in micrograms and nanograms
+    const mealDoseUg = estimatedBpaPpb * (portionG / 1000);
+    const mealDoseNg = mealDoseUg * 1000;
+
+    // EFSA 2023 TDI: 0.2 ng/kg bw/day. Consumer daily allowed = consumer.bodyWeightKg * 0.2 ng
+    const dailyTdiAllowedNg = consumer.bodyWeightKg * 0.2;
+    const efsaExceedancePercent = dailyTdiAllowedNg > 0 ? Math.round((mealDoseNg / dailyTdiAllowedNg) * 100) : 0;
+
+    // California Prop 65 MADL: 3,000 ng/day
+    const prop65Percent = Math.round((mealDoseNg / 3000.0) * 100);
+
+    // Urinary biomarker excretion estimate (steady-state excretion model ~ 0.65 ratio)
+    const urinaryBpa = (mealDoseUg * 0.65).toFixed(2);
+
+    // Render Stats
+    statBpaConc.textContent = `${estimatedBpaPpb.toFixed(2)} µg/kg (ppb)`;
+    statMealDose.textContent = `${mealDoseUg.toFixed(2)} µg (${Math.round(mealDoseNg).toLocaleString()} ng)`;
+    statEfsaRatio.textContent = `${efsaExceedancePercent.toLocaleString()}% of Daily TDI`;
+    statProp65Ratio.textContent = `${prop65Percent}% of MADL`;
+    statUrinary.textContent = `${urinaryBpa} µg/g creatinine`;
+
+    // Grade and status classification
+    let gradeLabel = 'GRADE A (EXCELLENT / COMPLIANT)';
+    let gradeColor = 'bg-emerald-600';
+    let cardBg = 'bg-emerald-50 border-emerald-200 text-emerald-900';
+    let desc = 'Outstanding packaging safety. Zero or negligible bisphenol exposure, well within clinical safety guidelines.';
+
+    if (dent.id === 'hydrogen-swell-bulging') {
+      gradeLabel = 'LETHAL HAZARD: IMMEDIATE DISCARD';
+      gradeColor = 'bg-red-700 animate-pulse';
+      cardBg = 'bg-red-50 border-red-400 text-red-950';
+      desc = 'DO NOT EAT OR TASTE. Swollen can indicates fatal Clostridium botulinum neurotoxin or dangerous internal acid-metal hydrogen gas pressure.';
+    } else if (dent.id === 'double-seam-rim-dent' || estimatedBpaPpb > 50 || efsaExceedancePercent > 50000) {
+      gradeLabel = 'GRADE D (CRITICAL ENDOCRINE / SEAM HAZARD)';
+      gradeColor = 'bg-rose-700';
+      cardBg = 'bg-rose-50 border-rose-300 text-rose-950';
+      desc = 'Severe chemical leaching and compromised hermetic seal. Substantial migration of endocrine-disrupting bisphenols exceeding safety baselines by orders of magnitude.';
+    } else if (estimatedBpaPpb > 15 || efsaExceedancePercent > 5000) {
+      gradeLabel = 'GRADE C (HIGH EXCEEDANCE)';
+      gradeColor = 'bg-amber-600';
+      cardBg = 'bg-amber-50 border-amber-200 text-amber-900';
+      desc = 'Elevated bisphenol migration due to acidic food hydrolysis, warm storage, or dented metal walls. Substantially exceeds the 2023 EFSA immunotoxicity guidance.';
+    } else if (estimatedBpaPpb > 0) {
+      gradeLabel = 'GRADE B (MODERATE EXPOSURE)';
+      gradeColor = 'bg-yellow-600';
+      cardBg = 'bg-yellow-50 border-yellow-200 text-yellow-900';
+      desc = 'Moderate exposure typical of traditional epoxy-lined cans. Meets historical FDA standards but surpasses strict European 2023 revised guidelines.';
+    }
+
+    gradeCard.className = `p-4 rounded-xl border mb-6 transition-colors ${cardBg}`;
+    gradeBadge.className = `px-2.5 py-1 rounded-md text-xs font-extrabold uppercase text-white ${gradeColor}`;
+    gradeBadge.textContent = gradeLabel;
+    gradeDesc.textContent = desc;
+
+    // Narrative synthesis
+    let narrative = '';
+    if (dent.id === 'hydrogen-swell-bulging') {
+      narrative = '🚨 WARNING: Bulging can ends indicate anaerobic bacterial fermentation or catastrophic internal tinplate dissolution. Discard can immediately in a sealed bag.';
+    } else if (liner.bpaResidualPpb === 0) {
+      narrative = `✅ BPA-NI coating verified. The ${liner.name} prevents bisphenol monomer migration into ${food.name}. `;
+      if (dent.id !== 'pristine-undamaged') {
+        narrative += `However, structural denting (${dent.name}) risks pinhole corrosion and loss of hermetic sterility.`;
+      }
+    } else {
+      narrative = `⚠️ Traditional epoxy lacquer releases bisphenols under ${food.category} conditions. `;
+      if (food.ph < 4.2) {
+        narrative += `High acidity (pH ${food.ph}) accelerates hydrolytic cleavage of ether linkages. `;
+      }
+      if (food.fatPercent > 10) {
+        narrative += `High lipid content (${food.fatPercent}%) acts as a lipophilic sink, extracting non-polar BADGE. `;
+      }
+      if (temp.arrheniusMultiplier > 1.5) {
+        narrative += `Elevated storage temperature (${temp.tempC}°C) multiplies molecular diffusion speed by ${temp.arrheniusMultiplier}x. `;
+      }
+      if (dent.structuralRiskMultiplier > 1.5) {
+        narrative += `Dent micro-fractures accelerate localized leaching by ${dent.structuralRiskMultiplier}x. `;
+      }
+      narrative += `Single-meal intake reaches ${efsaExceedancePercent.toLocaleString()}% of the revised 2023 EFSA immunotoxicity guidance.`;
+    }
+
+    alertText.textContent = narrative;
+  }
+
+  // Event Listeners
+  linerSelect?.addEventListener('change', calculateLeaching);
+  matrixSelect?.addEventListener('change', calculateLeaching);
+  dentSelect?.addEventListener('change', calculateLeaching);
+  tempSelect?.addEventListener('change', calculateLeaching);
+  dwellSelect?.addEventListener('change', calculateLeaching);
+  portionInput?.addEventListener('input', calculateLeaching);
+  consumerSelect?.addEventListener('change', calculateLeaching);
+
+  // Presets
+  document.getElementById('preset-safe')?.addEventListener('click', () => {
+    linerSelect.value = 'bpa-ni-polyolefin';
+    matrixSelect.value = 'chickpeas-black-beans';
+    dentSelect.value = 'pristine-undamaged';
+    tempSelect.value = 'cool-dark-cellar';
+    dwellSelect.value = 'mid-6-months';
+    portionInput.value = '200';
+    consumerSelect.value = 'adult-average';
+    calculateLeaching();
+  });
+
+  document.getElementById('preset-acidic')?.addEventListener('click', () => {
+    linerSelect.value = 'traditional-epoxy-badge';
+    matrixSelect.value = 'acidic-crushed-tomatoes';
+    dentSelect.value = 'minor-body-dent';
+    tempSelect.value = 'warm-summer-garage';
+    dwellSelect.value = 'aged-24-months';
+    portionInput.value = '250';
+    consumerSelect.value = 'adult-average';
+    calculateLeaching();
+  });
+
+  document.getElementById('preset-tuna-dent')?.addEventListener('click', () => {
+    linerSelect.value = 'traditional-epoxy-badge';
+    matrixSelect.value = 'canned-tuna-olive-oil';
+    dentSelect.value = 'double-seam-rim-dent';
+    tempSelect.value = 'ambient-kitchen';
+    dwellSelect.value = 'standard-12-months';
+    portionInput.value = '150';
+    consumerSelect.value = 'pregnant-nursing';
+    calculateLeaching();
+  });
+
+  document.getElementById('preset-bulging')?.addEventListener('click', () => {
+    linerSelect.value = 'vinyl-organosol';
+    matrixSelect.value = 'acidic-pineapple-juice';
+    dentSelect.value = 'hydrogen-swell-bulging';
+    tempSelect.value = 'warm-summer-garage';
+    dwellSelect.value = 'expired-36-months';
+    portionInput.value = '200';
+    consumerSelect.value = 'adult-average';
+    calculateLeaching();
+  });
+
+  // Copy Report
+  btnCopy?.addEventListener('click', () => {
+    const reportText = `[IsItKitchenSafe - Canned Food BPA & Epoxy Liner Leaching Diagnostic Report]
+Liner Technology: ${linerSelect.options[linerSelect.selectedIndex].text}
+Food Matrix: ${matrixSelect.options[matrixSelect.selectedIndex].text}
+Can Integrity: ${dentSelect.options[dentSelect.selectedIndex].text}
+Storage Temp: ${tempSelect.options[tempSelect.selectedIndex].text}
+Dwell Time: ${dwellSelect.options[dwellSelect.selectedIndex].text}
+Portion: ${portionInput.value}g
+Consumer Profile: ${consumerSelect.options[consumerSelect.selectedIndex].text}
+
+Diagnostic Results:
+- Estimated BPA Leached: ${statBpaConc.textContent}
+- Single-Meal Dose: ${statMealDose.textContent}
+- EFSA 2023 TDI Comparison: ${statEfsaRatio.textContent}
+- California Prop 65 MADL: ${statProp65Ratio.textContent}
+- Urinary Biomarker Estimate: ${statUrinary.textContent}
+- Safety Rating: ${gradeBadge.textContent}
+- Clinical Assessment: ${alertText.textContent}
+
+Audited at: ${new Date().toISOString()} via https://isitkitchensafe.com/tools/canned-food-bpa-leaching-modeler/`;
+
+    navigator.clipboard.writeText(reportText).then(() => {
+      copyConfirm?.classList.remove('hidden');
+      setTimeout(() => copyConfirm?.classList.add('hidden'), 3500);
+    });
+  });
+
+  // Initial Calculation
+  calculateLeaching();
+</script>
