@@ -56,7 +56,8 @@ const SPECIAL_PAGES = [
   'tools/refrigerator-defrost-safety-modeler',
   'tools/cast-iron-seasoning-polymerization-analyzer',
   'tools/range-hood-extraction-efficiency-modeler',
-  'tools/cutting-board-microplastic-pathogen-analyzer'
+  'tools/cutting-board-microplastic-pathogen-analyzer',
+  'tools/blender-blade-cavitation-safety-modeler'
 ];
 
 const esSlugs = new Set([

@@ -23,7 +23,7 @@ if (!fs.existsSync(LOGS_DIR)) {
   fs.mkdirSync(LOGS_DIR, { recursive: true });
 }
 
-// 25 Flagship Interactive Tools Registry
+// 27 Flagship Interactive Tools Registry
 const TOOLS_REGISTRY = [
   { slug: 'pan-scratch-inspector', name: 'AI Pan Scratch & Coating Damage Inspector', category: 'Materials' },
   { slug: 'cookware-brand-transparency-index', name: 'Cookware Brand Transparency & Greenwashing Index', category: 'Materials' },
@@ -50,7 +50,8 @@ const TOOLS_REGISTRY = [
   { slug: 'refrigerator-defrost-safety-modeler', name: 'Refrigerator Defrost Thermostat Failure & Cold Chain Modeler', category: 'Thermodynamics' },
   { slug: 'cast-iron-seasoning-polymerization-analyzer', name: 'Cast Iron Seasoning & Free Radical Peroxide Analyzer', category: 'Materials' },
   { slug: 'range-hood-extraction-efficiency-modeler', name: 'Kitchen Exhaust Range Hood VOC, NO2 & PM2.5 Extraction Efficiency Modeler', category: 'Air Quality' },
-  { slug: 'cutting-board-microplastic-pathogen-analyzer', name: 'Plastic Cutting Board Microplastic & Biofilm Analyzer', category: 'Microbiology' }
+  { slug: 'cutting-board-microplastic-pathogen-analyzer', name: 'Plastic Cutting Board Microplastic & Biofilm Analyzer', category: 'Microbiology' },
+  { slug: 'blender-blade-cavitation-safety-modeler', name: 'Blender Blade Friction Thermal Degradation & Micro-Cavitation Safety Modeler', category: 'Fluid Dynamics' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -62,10 +63,10 @@ function logHeader(title) {
 }
 
 /**
- * 1. Audit All 25 Flagship Interactive Tools across all 5 Locales
+ * 1. Audit All 27 Flagship Interactive Tools across all 5 Locales
  */
 function auditTools() {
-  logHeader('AUDITING 26 FLAGSHIP INTERACTIVE TOOLS (ALL 5 LANGUAGES)');
+  logHeader('AUDITING 27 FLAGSHIP INTERACTIVE TOOLS (ALL 5 LANGUAGES)');
   const results = [];
   let totalPassing = 0;
   let totalFailing = 0;
@@ -142,7 +143,7 @@ function auditDatasets() {
     'microwave-radiation-data.json', 'slow-cooker-safety-data.json', 'air-fryer-acrylamide-data.json',
     'water-filter-efficiency-data.json', 'sous-vide-safety-data.json', 'culinary-oil-smoke-point-data.json',
     'refrigerator-defrost-data.json', 'cast-iron-seasoning-data.json', 'range-hood-safety-data.json',
-    'cutting-board-safety-data.json'
+    'cutting-board-safety-data.json', 'blender-cavitation-safety-data.json'
   ];
 
   const datasetStats = {};
@@ -175,7 +176,7 @@ function runMasterBuild() {
   let buildSuccess = false;
 
   try {
-    buildOutput = execSync('npm run build', { cwd: PROJECT_ROOT, encoding: 'utf8', stdio: 'pipe' });
+    buildOutput = execSync('npm run build', { cwd: PROJECT_ROOT, encoding: 'utf8', stdio: 'pipe', maxBuffer: 50 * 1024 * 1024 });
     buildSuccess = true;
   } catch (err) {
     buildOutput = (err.stdout || '') + '\n' + (err.stderr || '');
