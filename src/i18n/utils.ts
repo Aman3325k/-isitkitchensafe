@@ -55,7 +55,8 @@ const SPECIAL_PAGES = [
   'tools/pressure-cooker-instant-pot-safety-simulator',
   'tools/refrigerator-defrost-safety-modeler',
   'tools/cast-iron-seasoning-polymerization-analyzer',
-  'tools/range-hood-extraction-efficiency-modeler'
+  'tools/range-hood-extraction-efficiency-modeler',
+  'tools/cutting-board-microplastic-pathogen-analyzer'
 ];
 
 const esSlugs = new Set([

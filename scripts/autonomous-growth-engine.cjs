@@ -49,7 +49,8 @@ const TOOLS_REGISTRY = [
   { slug: 'pressure-cooker-instant-pot-safety-simulator', name: 'Pressure Cooker & Instant Pot Explosion Risk Simulator', category: 'Thermodynamics' },
   { slug: 'refrigerator-defrost-safety-modeler', name: 'Refrigerator Defrost Thermostat Failure & Cold Chain Modeler', category: 'Thermodynamics' },
   { slug: 'cast-iron-seasoning-polymerization-analyzer', name: 'Cast Iron Seasoning & Free Radical Peroxide Analyzer', category: 'Materials' },
-  { slug: 'range-hood-extraction-efficiency-modeler', name: 'Kitchen Exhaust Range Hood VOC, NO2 & PM2.5 Extraction Efficiency Modeler', category: 'Air Quality' }
+  { slug: 'range-hood-extraction-efficiency-modeler', name: 'Kitchen Exhaust Range Hood VOC, NO2 & PM2.5 Extraction Efficiency Modeler', category: 'Air Quality' },
+  { slug: 'cutting-board-microplastic-pathogen-analyzer', name: 'Plastic Cutting Board Microplastic & Biofilm Analyzer', category: 'Microbiology' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -64,7 +65,7 @@ function logHeader(title) {
  * 1. Audit All 25 Flagship Interactive Tools across all 5 Locales
  */
 function auditTools() {
-  logHeader('AUDITING 25 FLAGSHIP INTERACTIVE TOOLS (ALL 5 LANGUAGES)');
+  logHeader('AUDITING 26 FLAGSHIP INTERACTIVE TOOLS (ALL 5 LANGUAGES)');
   const results = [];
   let totalPassing = 0;
   let totalFailing = 0;
@@ -140,7 +141,8 @@ function auditDatasets() {
     'pressure-cooker-safety-data.json', 'dishwasher-rinse-aid-data.json', 'induction-emf-data.json',
     'microwave-radiation-data.json', 'slow-cooker-safety-data.json', 'air-fryer-acrylamide-data.json',
     'water-filter-efficiency-data.json', 'sous-vide-safety-data.json', 'culinary-oil-smoke-point-data.json',
-    'refrigerator-defrost-data.json', 'cast-iron-seasoning-data.json', 'range-hood-safety-data.json'
+    'refrigerator-defrost-data.json', 'cast-iron-seasoning-data.json', 'range-hood-safety-data.json',
+    'cutting-board-safety-data.json'
   ];
 
   const datasetStats = {};
