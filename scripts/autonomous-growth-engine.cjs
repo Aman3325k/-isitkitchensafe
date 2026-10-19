@@ -53,7 +53,8 @@ const TOOLS_REGISTRY = [
   { slug: 'cutting-board-microplastic-pathogen-analyzer', name: 'Plastic Cutting Board Microplastic & Biofilm Analyzer', category: 'Microbiology' },
   { slug: 'blender-blade-cavitation-safety-modeler', name: 'Blender Blade Friction Thermal Degradation & Micro-Cavitation Safety Modeler', category: 'Fluid Dynamics' },
   { slug: 'toaster-element-acrylamide-safety-simulator', name: 'Toaster & Convection Oven Nichrome Element Hexavalent Chromium & Acrylamide Risk Simulator', category: 'Thermal Physics' },
-  { slug: 'silicone-bakeware-oligomer-analyzer', name: 'Silicone Bakeware Cyclic Thermal Breakdown & Oligomer Volatilization Analyzer', category: 'Materials' }
+  { slug: 'silicone-bakeware-oligomer-analyzer', name: 'Silicone Bakeware Cyclic Thermal Breakdown & Oligomer Volatilization Analyzer', category: 'Materials' },
+  { slug: 'electric-kettle-nickel-modeler', name: 'Electric Kettle Nickel Leaching & Scale Thermal Decoupling Modeler', category: 'Materials' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -147,7 +148,8 @@ function auditDatasets() {
     'refrigerator-defrost-data.json', 'cast-iron-seasoning-data.json', 'range-hood-safety-data.json',
     'cutting-board-safety-data.json', 'blender-cavitation-safety-data.json',
     'toaster-element-acrylamide-data.json',
-    'silicone-bakeware-oligomer-data.json'
+    'silicone-bakeware-oligomer-data.json',
+    'electric-kettle-nickel-data.json'
   ];
 
   const datasetStats = {};
