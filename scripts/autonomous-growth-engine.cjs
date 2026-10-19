@@ -23,7 +23,7 @@ if (!fs.existsSync(LOGS_DIR)) {
   fs.mkdirSync(LOGS_DIR, { recursive: true });
 }
 
-// 22 Flagship Interactive Tools Registry
+// 24 Flagship Interactive Tools Registry
 const TOOLS_REGISTRY = [
   { slug: 'pan-scratch-inspector', name: 'AI Pan Scratch & Coating Damage Inspector', category: 'Materials' },
   { slug: 'cookware-brand-transparency-index', name: 'Cookware Brand Transparency & Greenwashing Index', category: 'Materials' },
@@ -47,7 +47,8 @@ const TOOLS_REGISTRY = [
   { slug: 'induction-cooktop-emf-safety-modeler', name: 'Induction Cooktop EMF Radiation & Pacemaker Modeler', category: 'Electromagnetics' },
   { slug: 'commercial-dishwasher-rinse-aid-modeler', name: 'Commercial Dishwasher Rinse Aid Gut Barrier Modeler', category: 'Toxicology' },
   { slug: 'pressure-cooker-instant-pot-safety-simulator', name: 'Pressure Cooker & Instant Pot Explosion Risk Simulator', category: 'Thermodynamics' },
-  { slug: 'refrigerator-defrost-safety-modeler', name: 'Refrigerator Defrost Thermostat Failure & Cold Chain Modeler', category: 'Thermodynamics' }
+  { slug: 'refrigerator-defrost-safety-modeler', name: 'Refrigerator Defrost Thermostat Failure & Cold Chain Modeler', category: 'Thermodynamics' },
+  { slug: 'cast-iron-seasoning-polymerization-analyzer', name: 'Cast Iron Seasoning & Free Radical Peroxide Analyzer', category: 'Materials' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -59,10 +60,10 @@ function logHeader(title) {
 }
 
 /**
- * 1. Audit All 22 Flagship Interactive Tools across all 5 Locales
+ * 1. Audit All 24 Flagship Interactive Tools across all 5 Locales
  */
 function auditTools() {
-  logHeader('AUDITING 22 FLAGSHIP INTERACTIVE TOOLS (ALL 5 LANGUAGES)');
+  logHeader('AUDITING 24 FLAGSHIP INTERACTIVE TOOLS (ALL 5 LANGUAGES)');
   const results = [];
   let totalPassing = 0;
   let totalFailing = 0;
@@ -138,7 +139,7 @@ function auditDatasets() {
     'pressure-cooker-safety-data.json', 'dishwasher-rinse-aid-data.json', 'induction-emf-data.json',
     'microwave-radiation-data.json', 'slow-cooker-safety-data.json', 'air-fryer-acrylamide-data.json',
     'water-filter-efficiency-data.json', 'sous-vide-safety-data.json', 'culinary-oil-smoke-point-data.json',
-    'refrigerator-defrost-data.json'
+    'refrigerator-defrost-data.json', 'cast-iron-seasoning-data.json'
   ];
 
   const datasetStats = {};

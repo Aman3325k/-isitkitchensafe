@@ -53,7 +53,8 @@ const SPECIAL_PAGES = [
   'tools/induction-cooktop-emf-safety-modeler',
   'tools/commercial-dishwasher-rinse-aid-modeler',
   'tools/pressure-cooker-instant-pot-safety-simulator',
-  'tools/refrigerator-defrost-safety-modeler'
+  'tools/refrigerator-defrost-safety-modeler',
+  'tools/cast-iron-seasoning-polymerization-analyzer'
 ];
 
 const esSlugs = new Set([
