@@ -62,7 +62,8 @@ const TOOLS_REGISTRY = [
   { slug: 'aluminum-foil-acidic-leaching-simulator', name: 'Aluminum Foil & Cookware Acidic Leaching & Neurotoxicity Simulator', category: 'Toxicology', component: 'AluminumFoilAcidicLeachingSimulator.astro', dataFile: 'aluminum-foil-acidic-leaching-data.json' },
   { slug: 'charcoal-gas-grill-pah-hca-modeler', name: 'Charcoal vs Gas Grill PAH & HCA Carcinogen Modeler', category: 'Combustion Toxicology', component: 'CharcoalGasGrillPahHcaModeler.astro', dataFile: 'charcoal-gas-grill-pah-hca-data.json' },
   { slug: 'canned-food-bpa-leaching-modeler', name: 'Canned Food Bisphenol-A (BPA) & Epoxy Phenolic Liner Leaching Modeler', category: 'Packaging Toxicology', component: 'CannedFoodBpaLeachingModeler.astro', dataFile: 'canned-food-bpa-leaching-data.json' },
-  { slug: 'air-fryer-lipid-oxidation-modeler', name: 'Air Fryer vs Deep Fryer Lipid Oxidation & Cytotoxic 4-HNE Aldehyde Modeler', category: 'Biochemistry', component: 'AirFryerLipidOxidationModeler.astro', dataFile: 'air-fryer-lipid-oxidation-data.json' }
+  { slug: 'air-fryer-lipid-oxidation-modeler', name: 'Air Fryer vs Deep Fryer Lipid Oxidation & Cytotoxic 4-HNE Aldehyde Modeler', category: 'Biochemistry', component: 'AirFryerLipidOxidationModeler.astro', dataFile: 'air-fryer-lipid-oxidation-data.json' },
+  { slug: 'melamine-tableware-formaldehyde-modeler', name: 'Melamine Tableware Formaldehyde & Cyanuric Acid Leaching Modeler', category: 'Toxicology', component: 'MelamineTablewareSafetyModeler.astro', dataFile: 'melamine-tableware-safety-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -193,7 +194,8 @@ function auditDatasets() {
     'aluminum-foil-acidic-leaching-data.json',
     'charcoal-gas-grill-pah-hca-data.json',
     'canned-food-bpa-leaching-data.json',
-    'air-fryer-lipid-oxidation-data.json'
+    'air-fryer-lipid-oxidation-data.json',
+    'melamine-tableware-safety-data.json'
   ];
 
   const datasetStats = {};

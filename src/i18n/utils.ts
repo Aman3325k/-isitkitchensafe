@@ -66,7 +66,8 @@ const SPECIAL_PAGES = [
   'tools/aluminum-foil-acidic-leaching-simulator',
   'tools/charcoal-gas-grill-pah-hca-modeler',
   'tools/canned-food-bpa-leaching-modeler',
-  'tools/air-fryer-lipid-oxidation-modeler'
+  'tools/air-fryer-lipid-oxidation-modeler',
+  'tools/melamine-tableware-formaldehyde-modeler'
 ];
 
 const esSlugs = new Set([
