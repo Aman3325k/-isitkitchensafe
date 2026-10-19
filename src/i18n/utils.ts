@@ -54,7 +54,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-dishwasher-rinse-aid-modeler',
   'tools/pressure-cooker-instant-pot-safety-simulator',
   'tools/refrigerator-defrost-safety-modeler',
-  'tools/cast-iron-seasoning-polymerization-analyzer'
+  'tools/cast-iron-seasoning-polymerization-analyzer',
+  'tools/range-hood-extraction-efficiency-modeler'
 ];
 
 const esSlugs = new Set([
