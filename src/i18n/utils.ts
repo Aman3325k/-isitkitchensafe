@@ -61,7 +61,8 @@ const SPECIAL_PAGES = [
   'tools/toaster-element-acrylamide-safety-simulator',
   'tools/silicone-bakeware-oligomer-analyzer',
   'tools/electric-kettle-nickel-modeler',
-  'tools/air-fryer-teflon-fluoropolymer-modeler'
+  'tools/air-fryer-teflon-fluoropolymer-modeler',
+  'tools/microwave-popcorn-pfas-modeler'
 ];
 
 const esSlugs = new Set([

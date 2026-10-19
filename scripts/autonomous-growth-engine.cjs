@@ -23,7 +23,7 @@ if (!fs.existsSync(LOGS_DIR)) {
   fs.mkdirSync(LOGS_DIR, { recursive: true });
 }
 
-// 31 Flagship Interactive Tools Registry
+// 32 Flagship Interactive Tools Registry
 const TOOLS_REGISTRY = [
   { slug: 'pan-scratch-inspector', name: 'AI Pan Scratch & Coating Damage Inspector', category: 'Materials' },
   { slug: 'cookware-brand-transparency-index', name: 'Cookware Brand Transparency & Greenwashing Index', category: 'Materials' },
@@ -55,7 +55,8 @@ const TOOLS_REGISTRY = [
   { slug: 'toaster-element-acrylamide-safety-simulator', name: 'Toaster & Convection Oven Nichrome Element Hexavalent Chromium & Acrylamide Risk Simulator', category: 'Thermal Physics' },
   { slug: 'silicone-bakeware-oligomer-analyzer', name: 'Silicone Bakeware Cyclic Thermal Breakdown & Oligomer Volatilization Analyzer', category: 'Materials' },
   { slug: 'electric-kettle-nickel-modeler', name: 'Electric Kettle Nickel Leaching & Scale Thermal Decoupling Modeler', category: 'Materials' },
-  { slug: 'air-fryer-teflon-fluoropolymer-modeler', name: 'Air Fryer Teflon Basket Fluoropolymer Degradation & Thermal Micro-Plume Modeler', category: 'Aerodynamics' }
+  { slug: 'air-fryer-teflon-fluoropolymer-modeler', name: 'Air Fryer Teflon Basket Fluoropolymer Degradation & Thermal Micro-Plume Modeler', category: 'Aerodynamics' },
+  { slug: 'microwave-popcorn-pfas-modeler', name: 'Microwave Popcorn Bag Fluorinated PFOA / PFAS Surfactant Modeler', category: 'Food Contact Toxicology' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -67,10 +68,10 @@ function logHeader(title) {
 }
 
 /**
- * 1. Audit All 31 Flagship Interactive Tools across all 5 Locales
+ * 1. Audit All 32 Flagship Interactive Tools across all 5 Locales
  */
 function auditTools() {
-  logHeader('AUDITING 31 FLAGSHIP INTERACTIVE TOOLS (ALL 5 LANGUAGES)');
+  logHeader('AUDITING 32 FLAGSHIP INTERACTIVE TOOLS (ALL 5 LANGUAGES)');
   const results = [];
   let totalPassing = 0;
   let totalFailing = 0;
@@ -151,7 +152,8 @@ function auditDatasets() {
     'toaster-element-acrylamide-data.json',
     'silicone-bakeware-oligomer-data.json',
     'electric-kettle-nickel-data.json',
-    'air-fryer-teflon-fluoropolymer-data.json'
+    'air-fryer-teflon-fluoropolymer-data.json',
+    'microwave-popcorn-pfas-data.json'
   ];
 
   const datasetStats = {};
