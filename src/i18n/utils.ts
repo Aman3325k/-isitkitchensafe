@@ -58,7 +58,8 @@ const SPECIAL_PAGES = [
   'tools/range-hood-extraction-efficiency-modeler',
   'tools/cutting-board-microplastic-pathogen-analyzer',
   'tools/blender-blade-cavitation-safety-modeler',
-  'tools/toaster-element-acrylamide-safety-simulator'
+  'tools/toaster-element-acrylamide-safety-simulator',
+  'tools/silicone-bakeware-oligomer-analyzer'
 ];
 
 const esSlugs = new Set([

@@ -23,7 +23,7 @@ if (!fs.existsSync(LOGS_DIR)) {
   fs.mkdirSync(LOGS_DIR, { recursive: true });
 }
 
-// 28 Flagship Interactive Tools Registry
+// 29 Flagship Interactive Tools Registry
 const TOOLS_REGISTRY = [
   { slug: 'pan-scratch-inspector', name: 'AI Pan Scratch & Coating Damage Inspector', category: 'Materials' },
   { slug: 'cookware-brand-transparency-index', name: 'Cookware Brand Transparency & Greenwashing Index', category: 'Materials' },
@@ -52,7 +52,8 @@ const TOOLS_REGISTRY = [
   { slug: 'range-hood-extraction-efficiency-modeler', name: 'Kitchen Exhaust Range Hood VOC, NO2 & PM2.5 Extraction Efficiency Modeler', category: 'Air Quality' },
   { slug: 'cutting-board-microplastic-pathogen-analyzer', name: 'Plastic Cutting Board Microplastic & Biofilm Analyzer', category: 'Microbiology' },
   { slug: 'blender-blade-cavitation-safety-modeler', name: 'Blender Blade Friction Thermal Degradation & Micro-Cavitation Safety Modeler', category: 'Fluid Dynamics' },
-  { slug: 'toaster-element-acrylamide-safety-simulator', name: 'Toaster & Convection Oven Nichrome Element Hexavalent Chromium & Acrylamide Risk Simulator', category: 'Thermal Physics' }
+  { slug: 'toaster-element-acrylamide-safety-simulator', name: 'Toaster & Convection Oven Nichrome Element Hexavalent Chromium & Acrylamide Risk Simulator', category: 'Thermal Physics' },
+  { slug: 'silicone-bakeware-oligomer-analyzer', name: 'Silicone Bakeware Cyclic Thermal Breakdown & Oligomer Volatilization Analyzer', category: 'Materials' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -64,10 +65,10 @@ function logHeader(title) {
 }
 
 /**
- * 1. Audit All 28 Flagship Interactive Tools across all 5 Locales
+ * 1. Audit All 29 Flagship Interactive Tools across all 5 Locales
  */
 function auditTools() {
-  logHeader('AUDITING 28 FLAGSHIP INTERACTIVE TOOLS (ALL 5 LANGUAGES)');
+  logHeader('AUDITING 29 FLAGSHIP INTERACTIVE TOOLS (ALL 5 LANGUAGES)');
   const results = [];
   let totalPassing = 0;
   let totalFailing = 0;
@@ -145,7 +146,8 @@ function auditDatasets() {
     'water-filter-efficiency-data.json', 'sous-vide-safety-data.json', 'culinary-oil-smoke-point-data.json',
     'refrigerator-defrost-data.json', 'cast-iron-seasoning-data.json', 'range-hood-safety-data.json',
     'cutting-board-safety-data.json', 'blender-cavitation-safety-data.json',
-    'toaster-element-acrylamide-data.json'
+    'toaster-element-acrylamide-data.json',
+    'silicone-bakeware-oligomer-data.json'
   ];
 
   const datasetStats = {};
