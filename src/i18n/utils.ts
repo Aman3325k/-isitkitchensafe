@@ -60,7 +60,8 @@ const SPECIAL_PAGES = [
   'tools/blender-blade-cavitation-safety-modeler',
   'tools/toaster-element-acrylamide-safety-simulator',
   'tools/silicone-bakeware-oligomer-analyzer',
-  'tools/electric-kettle-nickel-modeler'
+  'tools/electric-kettle-nickel-modeler',
+  'tools/air-fryer-teflon-fluoropolymer-modeler'
 ];
 
 const esSlugs = new Set([
