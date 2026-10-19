@@ -69,7 +69,8 @@ const SPECIAL_PAGES = [
   'tools/air-fryer-lipid-oxidation-modeler',
   'tools/melamine-tableware-formaldehyde-modeler',
   'tools/cast-iron-seasoning-degradation-modeler',
-  'tools/wooden-utensil-biofilm-modeler'
+  'tools/wooden-utensil-biofilm-modeler',
+  'tools/copper-cookware-toxicity-modeler'
 ];
 
 const esSlugs = new Set([
