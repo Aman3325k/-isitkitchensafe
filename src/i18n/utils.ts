@@ -65,7 +65,8 @@ const SPECIAL_PAGES = [
   'tools/microwave-popcorn-pfas-modeler',
   'tools/aluminum-foil-acidic-leaching-simulator',
   'tools/charcoal-gas-grill-pah-hca-modeler',
-  'tools/canned-food-bpa-leaching-modeler'
+  'tools/canned-food-bpa-leaching-modeler',
+  'tools/air-fryer-lipid-oxidation-modeler'
 ];
 
 const esSlugs = new Set([
