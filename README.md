@@ -25,13 +25,22 @@ npm run dev
 npm run build
 ```
 
-## Autonomous Growth & Ops Engine (v2.0)
+## Autonomous Growth & Ops Engine (v2.0 - All-Day Smart Engine)
 
-Continuous operations and automated growth engine with multi-language telemetry, bundle budgets, schema audits, and daemon monitoring:
+Continuous operations and automated growth engine with multi-language telemetry, bundle budgets, schema audits, component parity, sitemap health, topical opportunity intelligence, and background daemon monitoring:
 
 ```sh
-# Run fast validation (<2s) across tools, redirects, datasets, schemas, and CWV budgets
+# Run fast validation (<2s) across tools, parity, redirects, datasets, schemas, and CWV budgets
 npm run ops:quick
+
+# Run topical opportunity & autonomous growth radar
+npm run ops:growth
+
+# Run component registry parity audit (0 orphans)
+npm run ops:parity
+
+# Run sitemap XML and search engine indexing coverage audit
+npm run ops:sitemaps
 
 # Run targeted audits
 npm run ops:seo        # Structured data (JSON-LD FAQPage, BreadcrumbList) & canonicals
@@ -50,7 +59,8 @@ npm run ops:engine
 ## Scale & Metrics
 - **9,897 Static Pages** across 11 verticals and 5 languages (EN, ES, PT, JA, ZH-CN)
 - **43 Flagship Interactive Tools** with 100% multilingual parity (215 tool pages)
-- **Zero Dead Links** (898,000+ hrefs audited with 100% resolution)
+- **Zero Dead Links** (894,920 hrefs audited with 100% resolution)
+- **9,739 Indexed URLs** in verified XML Sitemaps (`sitemap-index.xml`, `sitemap-0.xml`)
 - **Cloudflare Edge Middleware** fallback synchronization (`functions/_redirects-map.js`)
 - **100% JSON-LD Schema Compliance** on all tool and reference pages
 
