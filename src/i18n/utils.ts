@@ -78,7 +78,8 @@ const SPECIAL_PAGES = [
   'tools/glass-cooktop-fracture-simulator',
   'tools/dishwasher-thermal-sanitize-calculator',
   'tools/food-processor-blade-fatigue-modeler',
-  'tools/refrigerator-cross-contamination-modeler'
+  'tools/refrigerator-cross-contamination-modeler',
+  'tools/gas-stove-benzene-no2-calculator'
 ];
 
 const esSlugs = new Set([

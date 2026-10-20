@@ -1,0 +1,1007 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import modelData from '../data/gas-stove-benzene-no2-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  burnerLabel: string;
+  burnerHelp: string;
+  fuelLabel: string;
+  fuelHelp: string;
+  placementLabel: string;
+  placementHelp: string;
+  roomLabel: string;
+  roomHelp: string;
+  ventLabel: string;
+  ventHelp: string;
+  achLabel: string;
+  achHelp: string;
+  durationLabel: string;
+  durationHelp: string;
+  presetsTitle: string;
+  presetPasta: string;
+  presetDuctless: string;
+  presetHoliday: string;
+  presetRearHood: string;
+  presetInduction: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  peakNo2Label: string;
+  peakBenzeneLabel: string;
+  hoodCaptureLabel: string;
+  decayTimeLabel: string;
+  asthmaRiskLabel: string;
+  airQualityStatusLabel: string;
+  primaryRiskLabel: string;
+  actionProtocolLabel: string;
+  physicsTitle: string;
+  physicsSub: string;
+  tableTitle: string;
+  tableSub: string;
+  colTech: string;
+  colCapture: string;
+  colNo2Removal: string;
+  colFrontVsRear: string;
+  colVerdict: string;
+  rulesTitle: string;
+  rulesSub: string;
+  rule1Title: string;
+  rule1Text: string;
+  rule2Title: string;
+  rule2Text: string;
+  rule3Title: string;
+  rule3Text: string;
+  rule4Title: string;
+  rule4Text: string;
+  copyReportBtn: string;
+  copiedFeedback: string;
+}
+
+const DICTIONARY: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Combustion Toxicology & Indoor Air Quality Modeler",
+    title: "Gas Stove Benzene & Indoor Nitrogen Dioxide (NO2) Exposure Calculator",
+    subtitle: "Simulate methane thermal fixation into nitrogen dioxide, fugitive benzene emissions, range hood fluid capture physics, and indoor respiratory accumulation.",
+    controlsTitle: "Combustion Appliance & Kitchen Ventilation Configuration",
+    controlsSub: "Configure gas burner firing rate, fuel chemistry, burner placement, room cubic volume, building air exchange (ACH), and overhead exhaust ventilation.",
+    burnerLabel: "Gas Burner Output & Firing Configuration:",
+    burnerHelp: "Small simmer burner (5k BTU) vs standard medium (9k BTU) vs rapid power burner (15k BTU) vs multi-burner holiday cook.",
+    fuelLabel: "Fuel Source & Chemical Profile:",
+    fuelHelp: "Pipeline natural gas (methane + trace BTEX) vs liquid propane (LPG) vs clean electric induction baseline.",
+    placementLabel: "Burner Physical Location on Cooktop:",
+    placementHelp: "Rear burner (under hood suction cone) vs front burner (overhang spillover past shallow hoods).",
+    roomLabel: "Kitchen Volume & Architectural Geometry:",
+    roomHelp: "Compact studio kitchen (20 m³) vs suburban home kitchen (45 m³) vs open-concept great room (110 m³).",
+    ventLabel: "Overhead Range Hood Exhaust System:",
+    ventHelp: "No hood installed / OFF vs ductless charcoal recirculating vs ducted low (150 CFM) vs high-flow ducted (400 CFM) vs pro baffle (700+ CFM).",
+    achLabel: "Building Envelope Air Exchange Rate (ACH):",
+    achHelp: "Tight passive house (0.2 ACH) vs standard modern (0.5 ACH) vs drafty older home (1.0 ACH) vs open window cross-breeze (2.5 ACH).",
+    durationLabel: "Active Cooking Duration (Minutes):",
+    durationHelp: "Continuous burner operation time (5 to 180 minutes). Standard dinner sauté/boil runs 20–45 mins.",
+    presetsTitle: "Critical Real-World Household Scenarios & Scientific Presets:",
+    presetPasta: "Small Apartment Pasta Boil - Unventilated (Severe Acute NO2 & Benzene Spike)",
+    presetDuctless: "Ductless Recirculating Charcoal Hood Myth (Zero NO2 Removal)",
+    presetHoliday: "Holiday Multi-Burner Feast in Energy-Tight Home (Massive Whole-Home Accumulation)",
+    presetRearHood: "Rear Burner + 400 CFM Exterior Ducted Hood Best Practice (Optimal Capture)",
+    presetInduction: "Clean Electric Induction Switch (Zero Combustion Emissions Baseline)",
+    diagnosticTitle: "Indoor Air Quality & Toxicological Exposure Scorecard",
+    diagnosticSub: "Real-time peak NO2 and benzene concentrations, EPA/WHO regulatory threshold status, and clearance kinetics.",
+    peakNo2Label: "Peak Indoor Nitrogen Dioxide (NO2)",
+    peakBenzeneLabel: "Peak Indoor Benzene (C6H6)",
+    hoodCaptureLabel: "Effective Hood Capture Efficiency",
+    decayTimeLabel: "Natural Clearance Time to Safe Baseline",
+    asthmaRiskLabel: "Pediatric Respiratory & Asthma Hazard",
+    airQualityStatusLabel: "Indoor Air Quality Hazard Tier",
+    primaryRiskLabel: "Primary Predicted Toxicological Risk",
+    actionProtocolLabel: "Mandatory Ventilation & Mitigation Protocol",
+    physicsTitle: "Combustion Chemistry & Mass Balance Differential Dispersion",
+    physicsSub: "Governing equations for thermal NOx synthesis (Zeldovich mechanism), benzene vaporization, and dynamic single-zone mass balance.",
+    tableTitle: "Range Hood Ventilation Technology Comparison Matrix",
+    tableSub: "Exhaust airflow, true chemical gas capture efficiency, front vs rear burner performance, and health verdict.",
+    colTech: "Ventilation Technology",
+    colCapture: "Base Capture %",
+    colNo2Removal: "NO2 Gas Scrubbing",
+    colFrontVsRear: "Burner Position Bias",
+    colVerdict: "Indoor Air Health Verdict",
+    rulesTitle: "4 Non-Negotiable Gas Stove Indoor Air Quality Rules",
+    rulesSub: "Evidence-based guidelines derived from Stanford University, Lawrence Berkeley National Laboratory, WHO, and EPA studies.",
+    rule1Title: "1. The Back Burner Mandate: Always Cook High-Heat on Rear Grates",
+    rule1Text: "Overhead residential range hoods typically project only 15 to 18 inches over a 24-to-30-inch deep range. When cooking on front burners, the thermal convective plume expands beyond the suction zone, spilling over 60% of combustion emissions into the room. Always place boiling pots, frying pans, and high-heat skillets on rear burners where the wall boundary layer and direct hood overhang capture up to 2.5x more combustion pollutants.",
+    rule2Title: "2. The Ductless Charcoal Myth: Carbon Filters Cannot Capture Nitrogen Dioxide",
+    rule2Text: "Ductless recirculating range hoods pass air through aluminum mesh grease screens and thin activated carbon mats before blowing the exhaust back into the kitchen. While carbon traps large grease droplets and mild odors, nitrogen dioxide is a low-molecular-weight reactive gas that passes straight through without adsorption. Recirculating hoods provide 0% chemical removal of NO2, creating a dangerous false sense of safety.",
+    rule3Title: "3. The Pre-Ignition Exhaust Protocol: Turn Hood On 1 Minute Before Striking Flame",
+    rule3Text: "Never wait until you see smoke or smell grease to turn on your range hood. Combustion starts the microsecond the burner clicks, instantly synthesizing NO2 and vaporizing fugitive benzene. Turn the exhaust hood on high at least one minute prior to lighting burners to establish a stable convective negative-pressure draft corridor above the cooktop.",
+    rule4Title: "4. The Electric Induction Transition: The Ultimate Clean Air Solution",
+    rule4Text: "Transitioning from gas to electric induction completely eliminates combustion by-products at the source. Peer-reviewed epidemiological studies attribute 12.7% of all childhood asthma cases in the United States to gas stove emissions. Induction cooktops generate 0 ppb NO2, 0 µg benzene, and 0 ppm carbon monoxide, heating pots with 90% thermal efficiency while maintaining pristine indoor air quality.",
+    copyReportBtn: "📋 Copy Air Quality Safety Report",
+    copiedFeedback: "✓ Air Quality Safety Report Copied to Clipboard!"
+  },
+  es: {
+    badge: "Toxicología de Combustión y Calidad del Aire Interior",
+    title: "Calculadora de Exposición a Benceno y Dióxido de Nitrógeno (NO2) en Cocinas de Gas",
+    subtitle: "Simule la fijación térmica de metano en dióxido de nitrógeno, emisiones fugitivas de benceno, física de captura de campanas extractoras y acumulación respiratoria.",
+    controlsTitle: "Configuración de Quemadores de Gas y Ventilación de Cocina",
+    controlsSub: "Configure potencia de quemadores, tipo de gas combustible, posición de fuego, volumen cúbico, tasa de renovación (ACH) y sistema de extracción.",
+    burnerLabel: "Configuración y Potencia del Quemador de Gas:",
+    burnerHelp: "Fuego lento (5k BTU) vs fuego estándar (9k BTU) vs quemador rápido (15k BTU) vs banquete festivo con múltiples fuegos y horno.",
+    fuelLabel: "Tipo de Combustible y Perfil Químico:",
+    fuelHelp: "Gas natural de red (metano + trazas BTEX) vs propano líquido (GLP) vs inducción eléctrica (cero emisiones).",
+    placementLabel: "Ubicación del Quemador en la Placa:",
+    placementHelp: "Quemador trasero (bajo el cono de succión de la campana) vs quemador delantero (fuga fuera del alcance de la campana).",
+    roomLabel: "Volumen y Geometría de la Cocina:",
+    roomHelp: "Cocina pequeña tipo estudio (20 m³) vs cocina de casa unifamiliar (45 m³) vs salón con cocina abierta (110 m³).",
+    ventLabel: "Sistema de Campana Extractora:",
+    ventHelp: "Sin campana o apagada vs campana de recirculación con filtro de carbón vs campana con salida al exterior baja (150 CFM) vs alta (400 CFM) vs profesional (700+ CFM).",
+    achLabel: "Tasa de Renovación de Aire del Hogar (ACH):",
+    achHelp: "Casa hermética pasiva (0,2 ACH) vs construcción moderna estándar (0,5 ACH) vs casa antigua con filtraciones (1,0 ACH) vs ventana abierta con corriente (2,5 ACH).",
+    durationLabel: "Tiempo de Cocinado Continuo (Minutos):",
+    durationHelp: "Duración de los quemadores encendidos (5 a 180 minutos). Un cocinado estándar suele durar 20–45 minutos.",
+    presetsTitle: "Escenarios Críticos y Preajustes Científicos:",
+    presetPasta: "Hervir Pasta en Apartamento Pequeño sin Ventilación (Pico Tóxico Grave de NO2 y Benceno)",
+    presetDuctless: "Mito de la Campana de Recirculación de Carbón (Cero Eliminación de NO2)",
+    presetHoliday: "Comida Festiva con Múltiples Fuegos en Casa Hermética (Acumulación Extrema en Todo el Hogar)",
+    presetRearHood: "Quemador Trasero + Campana con Salida de 400 CFM (Captura Óptima Recomendada)",
+    presetInduction: "Cambio a Inducción Eléctrica Limpia (Línea Base con Cero Emisiones de Combustión)",
+    diagnosticTitle: "Balance de Calidad del Aire y Exposición Toxicológica",
+    diagnosticSub: "Concentraciones pico de NO2 y benceno en tiempo real, comparación con límites OMS/EPA y tiempo de purga.",
+    peakNo2Label: "Concentración Pico de NO2 en Interior",
+    peakBenzeneLabel: "Concentración Pico de Benceno (C6H6)",
+    hoodCaptureLabel: "Eficiencia Real de Captura de la Campana",
+    decayTimeLabel: "Tiempo de Purga Natural a Nivel Seguro",
+    asthmaRiskLabel: "Riesgo de Asma Infantil e Irritación Bronquial",
+    airQualityStatusLabel: "Nivel de Peligro para la Salud Respiratoria",
+    primaryRiskLabel: "Principal Riesgo Toxicológico Predicho",
+    actionProtocolLabel: "Protocolo Obligatorio de Ventilación y Mitigación",
+    physicsTitle: "Química de Combustión y Ecuación Diferencial de Balance de Masa",
+    physicsSub: "Ecuaciones para la síntesis de NOx térmico (mecanismo Zeldovich), dispersión de benceno y balance dinámico en zona única.",
+    tableTitle: "Matriz Comparativa de Tecnologías de Extracción en Cocina",
+    tableSub: "Caudal de aire, eficiencia real de eliminación de gases, sesgo quemador delantero vs trasero y veredicto de salud.",
+    colTech: "Tecnología de Ventilación",
+    colCapture: "Captura Base %",
+    colNo2Removal: "Eliminación de Gas NO2",
+    colFrontVsRear: "Efecto Quemador Delantero/Trasero",
+    colVerdict: "Veredicto de Calidad del Aire",
+    rulesTitle: "4 Reglas Fundamentales para la Calidad del Aire en Cocinas de Gas",
+    rulesSub: "Pautas basadas en investigaciones de la Universidad de Stanford, Lawrence Berkeley National Laboratory y la OMS.",
+    rule1Title: "1. La Regla del Fuego Trasero: Cocine Siempre en los Quemadores Posteriores",
+    rule1Text: "Las campanas domésticas estándar solo cubren de 35 a 45 cm de profundidad en placas de 60 a 75 cm. Al cocinar en los quemadores delanteros, más del 60% de los humos y gases se escapan al ambiente. Cocinar en los fuegos traseros permite aprovechar el efecto pared y la cobertura directa de la campana, capturando hasta 2,5 veces más contaminantes.",
+    rule2Title: "2. El Mito del Filtro de Carbón: El Carbón Activo No Retiene el Dióxido de Nitrógeno",
+    rule2Text: "Las campanas de recirculación que devuelven el aire al interior retienen grasa con sus filtros de aluminio, pero el NO2 es un gas reactivo de bajo peso molecular que atraviesa el carbón activo sin absorberse. Estas campanas ofrecen un 0% de purificación química de NO2, generando una falsa sensación de protección.",
+    rule3Title: "3. Encienda la Campana un Minuto Antes de Encender la Llama",
+    rule3Text: "No espere a que haya humo o grasa visible para activar la campana. La combustión genera NO2 y vaporiza benceno desde el primer segundo. Poner la campana a velocidad alta un minuto antes crea un flujo de presión negativa continuo sobre la placa.",
+    rule4Title: "4. La Inducción Eléctrica: La Solución Definitiva para el Aire Limpio",
+    rule4Text: "Pasar de gas a inducción elimina de raíz los contaminantes de combustión. En EE.UU., el 12,7% del asma infantil se atribuye al uso de cocinas de gas. La inducción genera 0 ppb de NO2, 0 µg de benceno y 0 ppm de monóxido de carbono, protegiendo los pulmones de toda la familia.",
+    copyReportBtn: "📋 Copiar Informe de Calidad del Aire",
+    copiedFeedback: "✓ ¡Informe Copiado al Portapapeles!"
+  },
+  pt: {
+    badge: "Toxicologia de Combustão e Qualidade do Ar Interior",
+    title: "Calculadora de Exposição a Benzeno e Dióxido de Nitrogênio (NO2) em Fogões a Gás",
+    subtitle: "Simule a fixação térmica do metano em NO2, emissões fugitivas de benzeno, aerodinâmica de coifas e acúmulo respiratório doméstico.",
+    controlsTitle: "Configuração de Queimadores a Gás e Ventilação da Cozinha",
+    controlsSub: "Configure potência das chamas, tipo de gás combustível, posição da boca, volume cúbico, taxa de renovação de ar (ACH) e exaustão.",
+    burnerLabel: "Potência e Chamas dos Queimadores a Gás:",
+    burnerHelp: "Fogo brando (5k BTU) vs boca média diária (9k BTU) vs queimador rápido (15k BTU) vs cozimento de festa com 4 bocas e forno.",
+    fuelLabel: "Tipo de Combustível e Perfil Químico:",
+    fuelHelp: "Gás natural encanado (metano + traços BTEX) vs GLP botijão (propano) vs indução elétrica limpa.",
+    placementLabel: "Posição da Boca na Superfície do Fogão:",
+    placementHelp: "Boca traseira (sob a área de sucção da coifa) vs boca dianteira (fuga de gases além do alcance da coifa).",
+    roomLabel: "Volume e Dimensões da Cozinha:",
+    roomHelp: "Cozinha pequena de estúdio (20 m³) vs cozinha residencial padrão (45 m³) vs conceito aberto integrado (110 m³).",
+    ventLabel: "Sistema de Coifa ou Depurador de Ar:",
+    ventHelp: "Sem coifa ou desligada vs depurador de recirculação com carvão vs coifa com duto externo baixa (150 CFM) vs alta (400 CFM) vs profissional (700+ CFM).",
+    achLabel: "Taxa de Troca de Ar da Residência (ACH):",
+    achHelp: "Casa super-vedada / passiva (0,2 ACH) vs moderna padrão (0,5 ACH) vs casa antiga com frestas (1,0 ACH) vs janela aberta com correnteza (2,5 ACH).",
+    durationLabel: "Tempo Contínuo de Chamas Acessas (Minutos):",
+    durationHelp: "Duração dos queimadores ligados (5 a 180 minutos). Preparo normal de refeições leva de 20 a 45 minutos.",
+    presetsTitle: "Cenários Críticos e Predefinições Científicas:",
+    presetPasta: "Ferver Macarrão em Apartamento Sem Ventilação (Pico Crítico de NO2 e Benzeno)",
+    presetDuctless: "Mito do Depurador com Filtro de Carvão (Zero Remoção de NO2)",
+    presetHoliday: "Ceia Festiva com 4 Bocas em Casa Vedada (Acúmulo Severo por Toda a Casa)",
+    presetRearHood: "Boca Traseira + Coifa Externa de 400 CFM (Captura Eficiente Recomendada)",
+    presetInduction: "Troca por Indução Elétrica (Padrão de Referência 100% Limpo)",
+    diagnosticTitle: "Painel de Qualidade do Ar e Exposição Toxicológica",
+    diagnosticSub: "Concentrações máximas de NO2 e benzeno em tempo real, conformidade com padrões OMS/EPA e taxa de dispersão.",
+    peakNo2Label: "Pico de Dióxido de Nitrogênio (NO2)",
+    peakBenzeneLabel: "Pico de Benzeno (C6H6)",
+    hoodCaptureLabel: "Eficiência Real de Captura da Coifa",
+    decayTimeLabel: "Tempo de Depuração Natural até Nível Seguro",
+    asthmaRiskLabel: "Risco de Asma Infantil e Irritação Respiratória",
+    airQualityStatusLabel: "Nível de Perigo para a Saúde do Ar",
+    primaryRiskLabel: "Principal Risco Toxicológico Previsto",
+    actionProtocolLabel: "Protocolo Mandatório de Ventilação e Redução",
+    physicsTitle: "Química de Combustão e Equação Diferencial de Balanço de Massa",
+    physicsSub: "Equações de síntese de NOx térmico (mecanismo Zeldovich), dispersão de benzeno e balanço dinâmico em zona única.",
+    tableTitle: "Matriz Comparativa de Tecnologias de Exaustão de Cozinha",
+    tableSub: "Vazão de ar, capacidade real de captura de gases, impacto da posição da boca e avaliação para a saúde.",
+    colTech: "Tecnologia de Exaustão",
+    colCapture: "Captura Base %",
+    colNo2Removal: "Remoção de Gás NO2",
+    colFrontVsRear: "Diferença Boca Dianteira/Traseira",
+    colVerdict: "Veredito de Saúde do Ar",
+    rulesTitle: "4 Regras Indispensáveis para a Qualidade do Ar com Fogão a Gás",
+    rulesSub: "Diretrizes embasadas em pesquisas da Universidade de Stanford, Lawrence Berkeley National Laboratory e OMS.",
+    rule1Title: "1. Regra das Bocas Traseiras: Cozinhe Sempre no Fundo do Fogão",
+    rule1Text: "A maioria das coifas domésticas projeta-se apenas de 35 a 45 cm sobre fogões de 60 a 75 cm de profundidade. Ao cozinhar nas bocas dianteiras, mais de 60% dos gases de combustão escapam para o ambiente. Usar as bocas traseiras aproveita o efeito parede e garante captura até 2,5 vezes maior dos poluentes.",
+    rule2Title: "2. O Mito do Depurador com Carvão: Carvão Ativado Não Filtra NO2",
+    rule2Text: "Depuradores sem duto externo retêm gotas de gordura, mas o dióxido de nitrogênio é um gás leve e reativo que atravessa o carvão sem ser retido, retornando direto para o ambiente. Eles oferecem 0% de remoção de NO2, dando uma falsa sensação de segurança.",
+    rule3Title: "3. Ligue a Coifa Um Minuto Antes de Acender o Fogo",
+    rule3Text: "Não espere ver fumaça ou sentir cheiro forte. O NO2 e o benzeno são liberados desde o instante da faísca. Ligar a coifa previamente estabelece uma corrente de pressão negativa que puxa os gases imediatamente.",
+    rule4Title: "4. Indução Elétrica: A Solução Definitiva para Ar Puro",
+    rule4Text: "A troca de gás por indução elimina 100% dos poluentes de combustão. Nos Estados Unidos, 12,7% dos casos de asma pediátrica são atribuídos ao fogão a gás. A indução produz 0 ppb de NO2, 0 µg de benzeno e 0 ppm de monóxido de carbono.",
+    copyReportBtn: "📋 Copiar Relatório de Qualidade do Ar",
+    copiedFeedback: "✓ Relatório Copiado para a Área de Transferência!"
+  },
+  'zh-cn': {
+    badge: "燃烧毒理学与室内空气质量模拟引擎",
+    title: "燃气灶苯与二氧化氮（NO2）室内暴露测算模型",
+    subtitle: "基于甲烷高温热力型氮氧化物生成（热泽尔多维奇反应）、未完全燃烧苯微量挥发、吸油烟机气动力捕集效率及密闭空间一阶质量守恒动力学模型。",
+    controlsTitle: "燃气灶燃烧工况与厨房空气动力学参数配置",
+    controlsSub: "精确设置燃烧热负荷、燃料组分化学剖面、炉眼安装位置、厨房立方容积、建筑自然换气率（ACH）及排油烟机捕集能力。",
+    burnerLabel: "燃气炉具热负荷与燃烧状态：",
+    burnerHelp: "文火慢炖小炉眼（5k BTU）vs 常见中火日常眼（9k BTU）vs 大火爆炒强力眼（15k BTU）vs 节日多炉眼+烤箱全负荷轰炸。",
+    fuelLabel: "燃料气源物理化学属性：",
+    fuelHelp: "管道天然气（主成分甲烷+微量BTEX芳烃）vs 瓶装液化石油气（丙烷）vs 零排放电磁感应灶基准。",
+    placementLabel: "炉眼在灶台上的物理空间排布：",
+    placementHelp: "后炉眼（位于油烟机负压捕集锥核心区，贴壁康达效应加持）vs 前炉眼（超出浅罩油烟机有效投影区，直扑面门）。",
+    roomLabel: "厨房建筑空间几何净容积：",
+    roomHelp: "紧凑单身公寓小厨房（20 m³）vs 标准单户住宅厨房（45 m³）vs 开放式客餐厅一体空间（110 m³）。",
+    ventLabel: "吸油烟机与机械排风配置：",
+    ventHelp: "无烟机或烹饪时未开启 vs 内循环活性炭油烟机（对NO2去除率为0）vs 低风量直排烟机（150 CFM）vs 强力大吸力直排（400 CFM）vs 商用深罩弧形离心风机（700+ CFM）。",
+    achLabel: "建筑围护结构自然空气渗透率（ACH）：",
+    achHelp: "被动式高气密节能住宅（0.2 ACH，污染物长时间滞留）vs 现代建筑规范标准（0.5 ACH）vs 存在缝隙的老式住宅（1.0 ACH）vs 开窗对流换气（2.5 ACH）。",
+    durationLabel: "持续点火烹饪时长（分钟）：",
+    durationHelp: "燃气灶明火燃烧时长（5至180分钟）。日常炒菜煮汤通常为20至45分钟。",
+    presetsTitle: "核心现实暴露场景与科学预设模版：",
+    presetPasta: "小公寓不通风大火煮面（极度严重NO2与苯急性超标）",
+    presetDuctless: "内循环无管道活性炭油烟机陷阱（对NO2零吸附）",
+    presetHoliday: "高气密节能住宅节日多眼全开烹饪（全屋毒性重度累积）",
+    presetRearHood: "后炉眼烹饪 + 400 CFM大吸力外排烟机最佳实践（高效截留）",
+    presetInduction: "升级无火电磁感应灶（彻底根除燃烧污染源基准）",
+    diagnosticTitle: "室内空气质量与毒理学暴露诊断记分卡",
+    diagnosticSub: "实时计算NO2与苯峰值浓度、对比WHO与美国EPA法定空气质量红线、测算自然稀释净化半衰期。",
+    peakNo2Label: "室内二氧化氮（NO2）峰值浓度",
+    peakBenzeneLabel: "室内高致癌苯（C6H6）峰值浓度",
+    hoodCaptureLabel: "排油烟机有效气态捕集率",
+    decayTimeLabel: "自然通风稀释至安全基准时长",
+    asthmaRiskLabel: "儿童呼吸道敏感与诱发哮喘危险级",
+    airQualityStatusLabel: "室内空气健康威胁评级",
+    primaryRiskLabel: "主要预测毒理学健康损害机制",
+    actionProtocolLabel: "强制性空气防护与排烟治理规程",
+    physicsTitle: "燃烧产物化学机理与单箱质量守恒微分方程",
+    physicsSub: "高温热泽尔多维奇反应机制、苯逃逸释放动力学及室内一阶浓度累积方程。",
+    tableTitle: "吸油烟机通风净化技术综合对比矩阵",
+    tableSub: "排风风量、气态毒物实际清除率、前后炉眼空间偏差及长期健康评估。",
+    colTech: "通风排气技术",
+    colCapture: "基础捕集率",
+    colNo2Removal: "NO2气态吸收力",
+    colFrontVsRear: "前后炉眼偏差",
+    colVerdict: "室内空气健康判决",
+    rulesTitle: "燃气灶室内空气安全4大铁律",
+    rulesSub: "根据斯坦福大学、劳伦斯伯克利国家实验室、世界卫生组织（WHO）最新同行评审文献提炼。",
+    rule1Title: "1. 优先使用后炉眼铁律：后排烹饪让有效排烟率提升2.5倍",
+    rule1Text: "普通家用油烟机深度通常仅38-45厘米，无法完整遮盖深达60厘米的标准灶台。在前排炉眼烹饪时，高温热羽流会直接越过油烟机前缘溢散入室内。大火爆炒或沸水煮锅务必放置于后排炉眼，依靠墙壁附面层引导将燃烧产物高效吸入负压区。",
+    rule2Title: "2. 破解内循环炭网神话：活性炭完全无法拦截二氧化氮气体",
+    rule2Text: "无烟道内循环油烟机虽能用铝网阻隔大颗粒油脂，但NO2属于超轻分子量极性活性气体，会径直穿透薄薄的活性炭毡并被风扇再次吹向烹饪者。内循环烟机对燃烧有害气体的去除率为0%，切勿被其除味功能误导。",
+    rule3Title: "3. 提前一分钟预启排风：在火星点燃前建立负压风道",
+    rule3Text: "切勿等到油烟呛鼻才想起开烟机。燃气灶点火的一瞬间即刻发生高温固氮反应释放NO2，并挥发微量苯。烹饪前至少提前1分钟开启烟机高档位，构建稳定的向外抽吸空气流场。",
+    rule4Title: "4. 电磁感应灶升级：从源头彻底消灭室内燃烧污染",
+    rule4Text: "彻底停用明火燃气灶、改用电磁灶（Induction）是解决室内空气恶化的终极方案。流行病学研究证实，美国12.7%的儿童哮喘由燃气灶直接诱发。电磁灶产生0 ppb NO2、0 µg苯和0 ppm一氧化碳，热效率高达90%，为全家呼吸健康筑起铜墙铁壁。",
+    copyReportBtn: "📋 复制空气质量诊断报告",
+    copiedFeedback: "✓ 空气质量诊断报告已复制至剪贴板！"
+  },
+  ja: {
+    badge: "燃焼毒性学＆室内空気質モデリング",
+    title: "ガスコンロ由来ベンゼン＆二酸化窒素（NO2）室内吸入リスク計算機",
+    subtitle: "メタンの高温熱解離によるNO2生成（ゼルドビッチ機構）、ベンゼン揮発、換気扇の気流捕集物理、呼吸器曝露レベルを科学的にシミュレート。",
+    controlsTitle: "ガスコンロ燃焼条件＆キッチンの気流条件設定",
+    controlsSub: "コンロ火力、燃料ガス組成、バーナーの前後位置、キッチンの気積容積、住宅の換気回数（ACH）、レンジフードの排気能力を設定します。",
+    burnerLabel: "ガスコンロの火力・使用バーナー構成：",
+    burnerHelp: "とろ火弱バーナー（5k BTU）vs 標準中バーナー（9k BTU）vs 強火力バーナー（15k BTU）vs オーブン併用の全開調理。",
+    fuelLabel: "使用ガス燃料の種類と化学プロファイル：",
+    fuelHelp: "都市ガス（主成分メタン＋微量BTEX芳香族）vs プロパンガス（LPG）vs ゼロエミッションのIHクッキングヒーター。",
+    placementLabel: "使用するバーナーの位置（前後）：",
+    placementHelp: "奥側バーナー（フード吸引コーンの直下で壁面コアンダ効果あり）vs 手前側バーナー（フードの奥行き不足で室内へ流出）。",
+    roomLabel: "キッチンの気積容積・レイアウト：",
+    roomHelp: "ワンルームの狭小キッチン（20 m³）vs 戸建て住宅の標準キッチン（45 m³）vs アイランド型LDK（110 m³）。",
+    ventLabel: "レンジフード・換気設備：",
+    ventHelp: "換気扇なし・停止中 vs 活性炭フィルター循環型（NO2除去率0%）vs 弱運転・直排（150 CFM）vs 強運転・直排（400 CFM）vs プロ仕様深型（700+ CFM）。",
+    achLabel: "住宅の換気回数・気密性（ACH）：",
+    achHelp: "高気密パッシブハウス（0.2 ACH、滞留リスク大）vs 現代の高断熱住宅（0.5 ACH）vs 隙間風のある従来住宅（1.0 ACH）vs 窓開放・通風（2.5 ACH）。",
+    durationLabel: "点火調理の継続時間（分）：",
+    durationHelp: "コンロ使用時間（5〜180分）。一般的な炒め物や煮炊きは20〜45分程度です。",
+    presetsTitle: "代表的な室内汚染シナリオ＆科学的プリセット：",
+    presetPasta: "狭小アパートで換気扇未稼働のパスタ茹で（深刻なNO2＆ベンゼン濃度急上昇）",
+    presetDuctless: "排気ダクトなし循環型フードの罠（NO2吸着率ほぼ0％）",
+    presetHoliday: "高気密住宅で複数バーナー同時使用（家全体への深刻なガス拡散）",
+    presetRearHood: "奥バーナー使用＋強排気フード適正稼働（推奨される最良換気策）",
+    presetInduction: "IHクッキングヒーターへの完全移行（燃焼ガスゼロの清浄ベースライン）",
+    diagnosticTitle: "室内空気環境＆毒性曝露診断スコアカード",
+    diagnosticSub: "リアルタイムNO2およびベンゼン最高濃度、WHO・EPA環境基準超過判定、安全水準への減衰時間を表示。",
+    peakNo2Label: "室内NO2（二酸化窒素）最高濃度",
+    peakBenzeneLabel: "室内ベンゼン（C6H6）最高濃度",
+    hoodCaptureLabel: "レンジフード実効ガス捕集率",
+    decayTimeLabel: "安全水準への自然換気減衰時間",
+    asthmaRiskLabel: "小児気管支刺激＆喘息発症リスク度",
+    airQualityStatusLabel: "室内空気健康ハザード評価",
+    primaryRiskLabel: "予測される主要毒性生体影響",
+    actionProtocolLabel: "必須とされる換気改善・排気プロトコル",
+    physicsTitle: "燃焼生成反応化学＆単一空間物質収支微分モデル",
+    physicsSub: "熱ゼルドビッチ機構によるNOx生成、ベンゼン揮発、1次希釈減衰物質収支式。",
+    tableTitle: "レンジフード排気技術別性能比較マトリクス",
+    tableSub: "排気風量、有害ガス実効捕集率、手前・奥バーナー位置差、健康リスク総合判定。",
+    colTech: "換気排気方式",
+    colCapture: "基本捕集率",
+    colNo2Removal: "NO2ガス除去能",
+    colFrontVsRear: "前後バーナー位置格差",
+    colVerdict: "空気質安全判定",
+    rulesTitle: "ガスコンロ使用時の室内空気安全4大原則",
+    rulesSub: "スタンフォード大学、ローレンス・バークレー国立研究所、WHOの研究に基づくガイドライン。",
+    rule1Title: "1. 奥側バーナー優先の原則：奥で調理するだけで捕集効率が2.5倍に",
+    rule1Text: "一般的なレンジフードの奥行きは約40〜45cmで、コンロ手前側を完全に覆えません。手前のバーナーで調理すると、燃焼ガスの60%以上が室内に漏れ出します。湯沸かしや強火調理は必ず奥側バーナーで行い、フードの吸引域と壁面気流を活用して吸入を防ぎましょう。",
+    rule2Title: "2. 循環型フィルターの誤解：活性炭は二酸化窒素を除去できない",
+    rule2Text: "ダクトのない循環型レンジフードは油煙を金網で受け止めますが、分子の小さい二酸化窒素ガスは活性炭を素通りして室内に吹き戻されます。NO2の化学除去率は0％であり、安全だと過信するのは大変危険です。",
+    rule3Title: "3. 点火1分前からの換気扇起動：気流の吸引路をあらかじめ確立",
+    rule3Text: "煙や匂いが出てから換気扇を回すのでは手遅れです。点火した瞬間からNO2と未燃焼ベンゼンが放出されます。火をつける1分前にはレンジフードを強運転で回し、安定した負圧吸引気流を作っておきましょう。",
+    rule4Title: "4. IHクッキングヒーターへの刷新：室内燃焼汚染の根本的解決",
+    rule4Text: "ガスからIHへの移行は、燃焼有害物質を根絶する最善の選択です。米国の小児喘息の約12.7％がガスコンロに起因すると報告されています。IHならNO2もベンゼンも一酸化炭素もゼロで、熱効率90％の快適かつクリーンな空気が保たれます。",
+    copyReportBtn: "📋 空気環境診断レポートをコピー",
+    copiedFeedback: "✓ レポートをクリップボードにコピーしました！"
+  }
+};
+
+const d = DICTIONARY[lang] || DICTIONARY.en;
+---
+
+<div class="gas-stove-calculator my-8 font-sans" data-lang={lang}>
+  <!-- Top Hero Header Badge -->
+  <div class="bg-surface-soft border border-hairline rounded-2xl p-6 md:p-8 mb-8">
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+      <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-extrabold uppercase font-mono tracking-wider bg-amber-500/10 text-amber-950 border border-amber-500/20">
+        <span>🔥</span> {d.badge}
+      </span>
+      <span class="text-xs text-muted font-mono">Stanford 2022/2023 &bull; LBNL &bull; WHO &bull; EPA NAAQS</span>
+    </div>
+    <h2 class="text-2xl md:text-3xl font-extrabold text-ink tracking-tight mb-2">
+      {d.title}
+    </h2>
+    <p class="text-sm md:text-base text-muted leading-relaxed max-w-4xl">
+      {d.subtitle}
+    </p>
+  </div>
+
+  <!-- Presets Bar -->
+  <div class="bg-surface-soft border border-hairline rounded-2xl p-6 mb-8">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="text-base">🧪</span>
+      <h3 class="text-xs font-bold uppercase tracking-wider text-ink">{d.presetsTitle}</h3>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+      <button type="button" class="preset-btn text-left p-3 rounded-xl border border-rose-500/30 bg-rose-500/5 hover:bg-rose-500/15 text-rose-950 transition-colors" data-preset="preset-apartment-pasta">
+        ⚠️ {d.presetPasta}
+      </button>
+      <button type="button" class="preset-btn text-left p-3 rounded-xl border border-orange-500/30 bg-orange-500/5 hover:bg-orange-500/15 text-orange-950 transition-colors" data-preset="preset-ductless-fallacy">
+        🧴 {d.presetDuctless}
+      </button>
+      <button type="button" class="preset-btn text-left p-3 rounded-xl border border-purple-500/30 bg-purple-500/5 hover:bg-purple-500/15 text-purple-950 transition-colors" data-preset="preset-holiday-feast">
+        🦃 {d.presetHoliday}
+      </button>
+      <button type="button" class="preset-btn text-left p-3 rounded-xl border border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/15 text-blue-950 transition-colors" data-preset="preset-rear-pro-hood">
+        🛡️ {d.presetRearHood}
+      </button>
+      <button type="button" class="preset-btn text-left p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-950 transition-colors font-semibold md:col-span-2 lg:col-span-2" data-preset="preset-induction-clean">
+        ⚡ {d.presetInduction}
+      </button>
+    </div>
+  </div>
+
+  <!-- Interactive Grid: Controls & Diagnostics -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-10">
+    <!-- Controls (7 Cols) -->
+    <div class="lg:col-span-7 bg-surface-soft border border-hairline rounded-2xl p-6 space-y-6">
+      <div class="border-b border-hairline pb-4">
+        <h3 class="text-lg font-bold text-ink mb-1">{d.controlsTitle}</h3>
+        <p class="text-xs text-muted">{d.controlsSub}</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <!-- 1. Burner Firing Rate -->
+        <div>
+          <label for="gs-burner" class="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
+            {d.burnerLabel}
+          </label>
+          <select id="gs-burner" class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs text-ink font-medium focus:ring-2 focus:ring-amber-500 focus:outline-none">
+            {modelData.burnerConfigurations.map(b => (
+              <option value={b.id} selected={b.id === 'power-large'}>{b.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1 leading-snug">{d.burnerHelp}</p>
+        </div>
+
+        <!-- 2. Fuel Profile -->
+        <div>
+          <label for="gs-fuel" class="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
+            {d.fuelLabel}
+          </label>
+          <select id="gs-fuel" class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs text-ink font-medium focus:ring-2 focus:ring-amber-500 focus:outline-none">
+            {modelData.fuelSources.map(f => (
+              <option value={f.id}>{f.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1 leading-snug">{d.fuelHelp}</p>
+        </div>
+
+        <!-- 3. Placement (Front vs Rear) -->
+        <div>
+          <label for="gs-placement" class="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
+            {d.placementLabel}
+          </label>
+          <select id="gs-placement" class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs text-ink font-medium focus:ring-2 focus:ring-amber-500 focus:outline-none">
+            {modelData.burnerPlacement.map(p => (
+              <option value={p.id} selected={p.id === 'front-burner'}>{p.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1 leading-snug">{d.placementHelp}</p>
+        </div>
+
+        <!-- 4. Room Volume -->
+        <div>
+          <label for="gs-room" class="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
+            {d.roomLabel}
+          </label>
+          <select id="gs-room" class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs text-ink font-medium focus:ring-2 focus:ring-amber-500 focus:outline-none">
+            {modelData.kitchenVolumes.map(v => (
+              <option value={v.id} selected={v.id === 'studio-apartment'}>{v.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1 leading-snug">{d.roomHelp}</p>
+        </div>
+
+        <!-- 5. Range Hood Exhaust System -->
+        <div>
+          <label for="gs-vent" class="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
+            {d.ventLabel}
+          </label>
+          <select id="gs-vent" class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs text-ink font-medium focus:ring-2 focus:ring-amber-500 focus:outline-none">
+            {modelData.ventilationSystems.map(v => (
+              <option value={v.id}>{v.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1 leading-snug">{d.ventHelp}</p>
+        </div>
+
+        <!-- 6. Building Air Exchange (ACH) -->
+        <div>
+          <label for="gs-ach" class="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
+            {d.achLabel}
+          </label>
+          <select id="gs-ach" class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs text-ink font-medium focus:ring-2 focus:ring-amber-500 focus:outline-none">
+            {modelData.buildingAirExchange.map(a => (
+              <option value={a.id} selected={a.id === 'tight-passive'}>{a.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1 leading-snug">{d.achHelp}</p>
+        </div>
+      </div>
+
+      <!-- Cooking Duration Slider -->
+      <div class="space-y-4 pt-2 border-t border-hairline">
+        <div>
+          <div class="flex justify-between items-center mb-1 text-xs font-bold">
+            <span class="text-ink">{d.durationLabel}</span>
+            <span class="font-mono text-amber-800 font-extrabold text-sm" id="duration-val">30 mins</span>
+          </div>
+          <input type="range" id="gs-duration" min="5" max="180" step="5" value="30" class="w-full accent-amber-600 cursor-pointer" />
+          <div class="flex justify-between text-[10px] text-muted font-mono mt-0.5">
+            <span>5 mins (Quick reheat)</span>
+            <span>30 mins (Dinner sauté/boil)</span>
+            <span>180 mins (Slow stock/holiday)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Diagnostics Scorecard (5 Cols) -->
+    <div class="lg:col-span-5 bg-surface-soft border border-hairline rounded-2xl p-6 flex flex-col justify-between">
+      <div>
+        <div class="border-b border-hairline pb-3 mb-5">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-bold text-ink">{d.diagnosticTitle}</h3>
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase font-mono tracking-wider" id="hazard-badge">
+              CRITICAL HAZARD
+            </span>
+          </div>
+          <p class="text-xs text-muted mt-0.5">{d.diagnosticSub}</p>
+        </div>
+
+        <!-- Key Metrics Cards -->
+        <div class="space-y-4">
+          <!-- Peak NO2 Metric -->
+          <div class="bg-surface border border-hairline rounded-xl p-3.5">
+            <div class="flex justify-between items-center text-xs mb-1">
+              <span class="font-bold text-muted uppercase tracking-wider">{d.peakNo2Label}</span>
+              <span class="font-mono font-bold text-rose-800 text-sm" id="no2-stat">362 ppb (681 µg/m³)</span>
+            </div>
+            <div class="w-full bg-hairline/40 rounded-full h-2 overflow-hidden">
+              <div class="bg-rose-600 h-2 rounded-full transition-all duration-300" id="no2-bar" style="width: 95%;"></div>
+            </div>
+            <div class="text-[11px] text-rose-700 font-semibold mt-1.5" id="no2-detail">
+              ⚠️ Exceeds EPA 1-Hr Standard (100 ppb) by 3.6x | WHO 1-Hr (106 ppb) by 3.4x
+            </div>
+          </div>
+
+          <!-- Peak Benzene Metric -->
+          <div class="bg-surface border border-hairline rounded-xl p-3.5">
+            <div class="flex justify-between items-center text-xs mb-1">
+              <span class="font-bold text-muted uppercase tracking-wider">{d.peakBenzeneLabel}</span>
+              <span class="font-mono font-bold text-purple-900 text-sm" id="benzene-stat">12.8 µg/m³ (4.0 ppb)</span>
+            </div>
+            <div class="w-full bg-hairline/40 rounded-full h-2 overflow-hidden">
+              <div class="bg-purple-600 h-2 rounded-full transition-all duration-300" id="benzene-bar" style="width: 48%;"></div>
+            </div>
+            <div class="text-[11px] text-muted mt-1.5" id="benzene-detail">
+              Exceeds California OEHHA 8-Hr Chronic REL (3.0 µg/m³) by 4.3x
+            </div>
+          </div>
+
+          <!-- Range Hood Capture & Clearance Time -->
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-surface border border-hairline rounded-xl p-3">
+              <div class="text-[10px] font-bold text-muted uppercase tracking-wider">{d.hoodCaptureLabel}</div>
+              <div class="font-mono font-bold text-ink text-sm mt-0.5" id="hood-capture-stat">0.0% Capture</div>
+              <div class="text-[10px] text-muted mt-0.5" id="hood-capture-detail">100% emissions indoors</div>
+            </div>
+            <div class="bg-surface border border-hairline rounded-xl p-3">
+              <div class="text-[10px] font-bold text-muted uppercase tracking-wider">{d.decayTimeLabel}</div>
+              <div class="font-mono font-bold text-ink text-sm mt-0.5" id="clearance-stat">15.8 Hours</div>
+              <div class="text-[10px] text-muted mt-0.5" id="clearance-detail">Until NO2 &lt; 15 ppb</div>
+            </div>
+          </div>
+
+          <!-- Pediatric Asthma & Health Hazard -->
+          <div class="bg-surface border border-hairline rounded-xl p-3.5">
+            <div class="flex justify-between items-center text-xs mb-1">
+              <span class="font-bold text-muted uppercase tracking-wider">{d.asthmaRiskLabel}</span>
+              <span class="font-mono font-bold text-rose-800 text-xs" id="asthma-stat">HIGH RISK (Gruenwald 12.7% PAF)</span>
+            </div>
+            <div class="text-[11px] text-muted leading-tight mt-1" id="asthma-detail">
+              High acute NO2 exposure triggers bronchial hyperresponsiveness, airway inflammation, and nocturnal coughing in pediatric subjects.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Box & Copy Report -->
+      <div class="mt-6 pt-4 border-t border-hairline space-y-3">
+        <div class="text-xs">
+          <div class="font-bold text-ink mb-1">{d.actionProtocolLabel}:</div>
+          <div class="text-muted leading-relaxed" id="action-stat">
+            Immediately open opposite kitchen windows to establish cross-ventilation. If an exterior hood is present, switch to maximum blower speed and relocate cooking pans to the rear burners.
+          </div>
+        </div>
+
+        <button type="button" id="copy-report-btn" class="w-full py-2.5 px-4 rounded-xl bg-ink hover:bg-black text-white text-center font-bold text-xs tracking-wider transition-colors shadow-xs flex items-center justify-center gap-2">
+          {d.copyReportBtn}
+        </button>
+        <div id="copy-feedback" class="text-center text-[11px] font-bold text-emerald-800 hidden">
+          {d.copiedFeedback}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mathematical Physics & Combustion Mechanics Section -->
+  <div class="bg-surface-soft border border-hairline rounded-2xl p-6 md:p-8 mb-10">
+    <div class="mb-6">
+      <h3 class="text-xl font-bold text-ink mb-1">{d.physicsTitle}</h3>
+      <p class="text-xs text-muted">{d.physicsSub}</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-xs">
+      <div class="bg-surface border border-hairline rounded-xl p-4">
+        <div class="text-muted text-[10px] uppercase font-bold tracking-wider mb-2">1. Thermal NOx Synthesis (Zeldovich Mechanism)</div>
+        <div class="font-bold text-ink text-sm mb-2">N₂ + O₂ ⇄ 2 NO → 2 NO₂</div>
+        <p class="text-[11px] text-muted font-sans leading-relaxed">
+          At methane combustion temperatures (&gt;1,800°C), atmospheric nitrogen dissociates and oxidizes into nitric oxide (NO), which rapidly oxidizes in ambient air to toxic nitrogen dioxide (NO2).
+        </p>
+      </div>
+
+      <div class="bg-surface border border-hairline rounded-xl p-4">
+        <div class="text-muted text-[10px] uppercase font-bold tracking-wider mb-2">2. Single-Zone Dynamic Mass Balance</div>
+        <div class="font-bold text-ink text-sm mb-2">dC/dt = [E·(1 - CE)] / V - (k_ach · C)</div>
+        <p class="text-[11px] text-muted font-sans leading-relaxed">
+          Dynamic indoor pollutant concentration is governed by generation rate (E), range hood capture efficiency (CE), room volume (V), and hourly air exchange rate (k_ach = ACH / 60 min).
+        </p>
+      </div>
+
+      <div class="bg-surface border border-hairline rounded-xl p-4">
+        <div class="text-muted text-[10px] uppercase font-bold tracking-wider mb-2">3. Unsteady Concentration Solution</div>
+        <div class="font-bold text-ink text-sm mb-2">C(t) = C_ss · [1 - exp(-k_ach · t)]</div>
+        <p class="text-[11px] text-muted font-sans leading-relaxed">
+          Concentration rises asymptotically toward steady-state C_ss = E_net / (V · k_ach). In airtight homes (0.2 ACH), dilution is so slow that even a 20-minute cook generates dangerous peak concentrations.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Engineering Comparison Table -->
+  <div class="bg-surface-soft border border-hairline rounded-2xl p-6 md:p-8 mb-10 overflow-x-auto">
+    <div class="mb-4">
+      <h3 class="text-lg font-bold text-ink mb-1">{d.tableTitle}</h3>
+      <p class="text-xs text-muted">{d.tableSub}</p>
+    </div>
+    <table class="w-full text-left text-xs border-collapse">
+      <thead>
+        <tr class="border-b border-hairline text-[11px] font-bold text-muted uppercase tracking-wider">
+          <th class="py-2.5 pr-4">{d.colTech}</th>
+          <th class="py-2.5 px-4">{d.colCapture}</th>
+          <th class="py-2.5 px-4">{d.colNo2Removal}</th>
+          <th class="py-2.5 px-4">{d.colFrontVsRear}</th>
+          <th class="py-2.5 pl-4">{d.colVerdict}</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-hairline">
+        <tr>
+          <td class="py-3 pr-4 font-bold text-ink">No Range Hood / Hood Off</td>
+          <td class="py-3 px-4 font-mono text-rose-800 font-bold">0%</td>
+          <td class="py-3 px-4 text-rose-800">0% (All gas remains indoors)</td>
+          <td class="py-3 px-4 text-muted">100% room exposure</td>
+          <td class="py-3 pl-4 text-rose-800 font-bold">Dangerous Indoor Air Violation</td>
+        </tr>
+        <tr>
+          <td class="py-3 pr-4 font-bold text-ink">Ductless Recirculating Charcoal Hood</td>
+          <td class="py-3 px-4 font-mono text-amber-800 font-bold">5% – 10%</td>
+          <td class="py-3 px-4 text-amber-800">0% (Carbon cannot adsorb NO2)</td>
+          <td class="py-3 px-4 text-muted">Blasts NO2 back into kitchen</td>
+          <td class="py-3 pl-4 text-amber-800 font-semibold">Deceptive Ineffective Trap</td>
+        </tr>
+        <tr>
+          <td class="py-3 pr-4 font-bold text-ink">Standard Under-Cabinet Ducted (150 CFM)</td>
+          <td class="py-3 px-4 font-mono text-ink">30% – 45%</td>
+          <td class="py-3 px-4 text-ink">30% – 45% (Vented outside)</td>
+          <td class="py-3 px-4 text-muted">Rear: 50% | Front: &lt;25%</td>
+          <td class="py-3 pl-4 text-ink">Marginal / Front Spills Over</td>
+        </tr>
+        <tr>
+          <td class="py-3 pr-4 font-bold text-ink">High-Flow Ducted Range Hood (400 CFM)</td>
+          <td class="py-3 px-4 font-mono text-emerald-800 font-bold">65% – 75%</td>
+          <td class="py-3 px-4 text-emerald-800">65% – 75% (Vented outside)</td>
+          <td class="py-3 px-4 text-muted">Rear: 85% | Front: 55%</td>
+          <td class="py-3 pl-4 text-emerald-800 font-semibold">Effective Residential Standard</td>
+        </tr>
+        <tr>
+          <td class="py-3 pr-4 font-bold text-ink">Commercial Pro Baffle Canopy (700+ CFM)</td>
+          <td class="py-3 px-4 font-mono text-emerald-900 font-bold">85% – 95%</td>
+          <td class="py-3 px-4 text-emerald-900">85% – 95% (Vented outside)</td>
+          <td class="py-3 px-4 text-muted">Deep canopy covers front grates</td>
+          <td class="py-3 pl-4 text-emerald-900 font-bold">Maximum Protection</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 4 Non-Negotiable IAQ Rules -->
+  <div class="bg-surface-soft border border-hairline rounded-2xl p-6 md:p-8">
+    <div class="mb-6">
+      <h3 class="text-xl font-bold text-ink mb-1">{d.rulesTitle}</h3>
+      <p class="text-xs text-muted">{d.rulesSub}</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs leading-relaxed">
+      <div class="bg-surface border border-hairline rounded-xl p-5">
+        <h4 class="font-bold text-ink text-sm mb-2">{d.rule1Title}</h4>
+        <p class="text-muted">{d.rule1Text}</p>
+      </div>
+      <div class="bg-surface border border-hairline rounded-xl p-5">
+        <h4 class="font-bold text-ink text-sm mb-2">{d.rule2Title}</h4>
+        <p class="text-muted">{d.rule2Text}</p>
+      </div>
+      <div class="bg-surface border border-hairline rounded-xl p-5">
+        <h4 class="font-bold text-ink text-sm mb-2">{d.rule3Title}</h4>
+        <p class="text-muted">{d.rule3Text}</p>
+      </div>
+      <div class="bg-surface border border-hairline rounded-xl p-5">
+        <h4 class="font-bold text-ink text-sm mb-2">{d.rule4Title}</h4>
+        <p class="text-muted">{d.rule4Text}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import modelData from '../data/gas-stove-benzene-no2-data.json';
+
+  function initGasStoveCalculator() {
+    const root = document.querySelector('.gas-stove-calculator');
+    if (!root) return;
+
+    const burnerSelect = root.querySelector('#gs-burner') as HTMLSelectElement;
+    const fuelSelect = root.querySelector('#gs-fuel') as HTMLSelectElement;
+    const placementSelect = root.querySelector('#gs-placement') as HTMLSelectElement;
+    const roomSelect = root.querySelector('#gs-room') as HTMLSelectElement;
+    const ventSelect = root.querySelector('#gs-vent') as HTMLSelectElement;
+    const achSelect = root.querySelector('#gs-ach') as HTMLSelectElement;
+    const durationInput = root.querySelector('#gs-duration') as HTMLInputElement;
+    const durationVal = root.querySelector('#duration-val');
+
+    const hazardBadge = root.querySelector('#hazard-badge');
+    const no2Stat = root.querySelector('#no2-stat');
+    const no2Bar = root.querySelector('#no2-bar') as HTMLElement;
+    const no2Detail = root.querySelector('#no2-detail');
+    const benzeneStat = root.querySelector('#benzene-stat');
+    const benzeneBar = root.querySelector('#benzene-bar') as HTMLElement;
+    const benzeneDetail = root.querySelector('#benzene-detail');
+    const hoodCaptureStat = root.querySelector('#hood-capture-stat');
+    const hoodCaptureDetail = root.querySelector('#hood-capture-detail');
+    const clearanceStat = root.querySelector('#clearance-stat');
+    const clearanceDetail = root.querySelector('#clearance-detail');
+    const asthmaStat = root.querySelector('#asthma-stat');
+    const asthmaDetail = root.querySelector('#asthma-detail');
+    const actionStat = root.querySelector('#action-stat');
+    const copyReportBtn = root.querySelector('#copy-report-btn');
+    const copyFeedback = root.querySelector('#copy-feedback');
+
+    if (!burnerSelect || !durationInput) return;
+
+    function calculate() {
+      const burner = modelData.burnerConfigurations.find(b => b.id === burnerSelect.value) || modelData.burnerConfigurations[2];
+      const fuel = modelData.fuelSources.find(f => f.id === fuelSelect.value) || modelData.fuelSources[0];
+      const placement = modelData.burnerPlacement.find(p => p.id === placementSelect.value) || modelData.burnerPlacement[1];
+      const room = modelData.kitchenVolumes.find(v => v.id === roomSelect.value) || modelData.kitchenVolumes[0];
+      const vent = modelData.ventilationSystems.find(v => v.id === ventSelect.value) || modelData.ventilationSystems[0];
+      const achObj = modelData.buildingAirExchange.find(a => a.id === achSelect.value) || modelData.buildingAirExchange[0];
+
+      const durationMins = parseInt(durationInput.value, 10);
+      if (durationVal) durationVal.textContent = `${durationMins} mins`;
+
+      // 1. Raw Emission Rates
+      const rawNo2Rate_mg_min = burner.no2EmissionMgPerMin * fuel.no2Multiplier;
+      const rawBenzeneRate_ug_min = burner.benzeneEmissionUgPerMin * fuel.benzeneMultiplier;
+
+      // 2. Hood Capture Efficiency
+      let effectiveCapture = vent.baseCaptureEfficiency * placement.captureEfficiencyMultiplier;
+      if (effectiveCapture > 0.95) effectiveCapture = 0.95;
+      if (effectiveCapture < 0.0) effectiveCapture = 0.0;
+      if (vent.id === 'no-hood-or-off') effectiveCapture = 0.0;
+
+      const netNo2Rate_mg_min = rawNo2Rate_mg_min * (1 - effectiveCapture);
+      const netBenzeneRate_ug_min = rawBenzeneRate_ug_min * (1 - effectiveCapture);
+
+      // 3. Mass Balance Concentration Dynamic Rise
+      // dC/dt = E_net / V - k * C
+      const V = room.volumeM3; // m3
+      const k = achObj.ach / 60.0; // 1/min
+
+      // C(t) = (E_net / (V * k)) * (1 - exp(-k * t))
+      let peakNo2_mg_m3 = 0;
+      let peakBenzene_ug_m3 = 0;
+
+      if (k > 0 && V > 0) {
+        peakNo2_mg_m3 = (netNo2Rate_mg_min / (V * k)) * (1 - Math.exp(-k * durationMins));
+        peakBenzene_ug_m3 = (netBenzeneRate_ug_min / (V * k)) * (1 - Math.exp(-k * durationMins));
+      } else if (V > 0) {
+        peakNo2_mg_m3 = (netNo2Rate_mg_min * durationMins) / V;
+        peakBenzene_ug_m3 = (netBenzeneRate_ug_min * durationMins) / V;
+      }
+
+      // Convert NO2 to ppb: 1 mg/m3 = 1000 ug/m3. ppb = (ug/m3 * 24.45) / 46.01
+      const peakNo2_ug_m3 = peakNo2_mg_m3 * 1000.0;
+      const peakNo2_ppb = (peakNo2_ug_m3 * 24.45) / 46.01;
+
+      // Benzene in ppb: (ug/m3 * 24.45) / 78.11
+      const peakBenzene_ppb = (peakBenzene_ug_m3 * 24.45) / 78.11;
+
+      // 4. Natural Clearance Time until NO2 < 15 ppb (safe background)
+      let clearanceHours = 0;
+      const targetNo2_ppb = 15.0;
+      if (peakNo2_ppb > targetNo2_ppb && k > 0) {
+        const decayMins = -Math.log(targetNo2_ppb / peakNo2_ppb) / k;
+        clearanceHours = decayMins / 60.0;
+      }
+
+      // 5. Update UI Stats
+      // Capture
+      const capturePct = (effectiveCapture * 100).toFixed(1);
+      if (hoodCaptureStat) hoodCaptureStat.textContent = `${capturePct}% Capture`;
+      if (hoodCaptureDetail) {
+        if (effectiveCapture <= 0.05) {
+          hoodCaptureDetail.textContent = '100% emissions stay indoors';
+        } else if (effectiveCapture >= 0.75) {
+          hoodCaptureDetail.textContent = 'High exterior evacuation';
+        } else {
+          hoodCaptureDetail.textContent = 'Partial containment; spillover occurs';
+        }
+      }
+
+      // Clearance
+      if (clearanceStat) {
+        if (peakNo2_ppb <= targetNo2_ppb) {
+          clearanceStat.textContent = 'Baseline Safe';
+        } else {
+          clearanceStat.textContent = `${clearanceHours.toFixed(1)} Hours`;
+        }
+      }
+      if (clearanceDetail) {
+        clearanceDetail.textContent = `Until NO2 < 15 ppb (WHO 24h: 13.3 ppb)`;
+      }
+
+      // NO2 Display
+      if (no2Stat) {
+        no2Stat.textContent = `${Math.round(peakNo2_ppb)} ppb (${Math.round(peakNo2_ug_m3)} µg/m³)`;
+      }
+      if (no2Bar) {
+        const barWidth = Math.min(100, Math.max(5, (peakNo2_ppb / 350.0) * 100));
+        no2Bar.style.width = `${barWidth}%`;
+        if (peakNo2_ppb < 50) {
+          no2Bar.className = 'bg-emerald-600 h-2 rounded-full transition-all duration-300';
+        } else if (peakNo2_ppb < 100) {
+          no2Bar.className = 'bg-amber-500 h-2 rounded-full transition-all duration-300';
+        } else {
+          no2Bar.className = 'bg-rose-600 h-2 rounded-full transition-all duration-300';
+        }
+      }
+
+      if (no2Detail) {
+        if (peakNo2_ppb === 0) {
+          no2Detail.textContent = '✓ Zero Combustion Emissions (Electric Baseline)';
+          no2Detail.className = 'text-[11px] text-emerald-800 font-semibold mt-1.5';
+        } else if (peakNo2_ppb <= 50) {
+          no2Detail.textContent = '✓ Well Below EPA 1-Hr Standard (100 ppb) & WHO (106 ppb)';
+          no2Detail.className = 'text-[11px] text-emerald-800 font-semibold mt-1.5';
+        } else if (peakNo2_ppb <= 100) {
+          no2Detail.textContent = `⚠️ Approaching EPA 1-Hr Standard (100 ppb) — Moderate Exposure`;
+          no2Detail.className = 'text-[11px] text-amber-800 font-semibold mt-1.5';
+        } else {
+          const timesEpa = (peakNo2_ppb / 100.0).toFixed(1);
+          no2Detail.textContent = `⚠️ Exceeds EPA 1-Hr Standard (100 ppb) by ${timesEpa}x | WHO (106 ppb) by ${(peakNo2_ppb / 106.0).toFixed(1)}x`;
+          no2Detail.className = 'text-[11px] text-rose-800 font-semibold mt-1.5';
+        }
+      }
+
+      // Benzene Display
+      if (benzeneStat) {
+        benzeneStat.textContent = `${peakBenzene_ug_m3.toFixed(1)} µg/m³ (${peakBenzene_ppb.toFixed(2)} ppb)`;
+      }
+      if (benzeneBar) {
+        const bBarWidth = Math.min(100, Math.max(5, (peakBenzene_ug_m3 / 27.0) * 100));
+        benzeneBar.style.width = `${bBarWidth}%`;
+      }
+      if (benzeneDetail) {
+        if (peakBenzene_ug_m3 === 0) {
+          benzeneDetail.textContent = '✓ Zero Benzene Emissions (Electric Baseline)';
+        } else if (peakBenzene_ug_m3 > 27.0) {
+          benzeneDetail.textContent = `🚨 Exceeds California OEHHA 1-Hr Acute REL (27 µg/m³)! Known Carcinogen.`;
+        } else if (peakBenzene_ug_m3 > 3.0) {
+          const timesRel = (peakBenzene_ug_m3 / 3.0).toFixed(1);
+          benzeneDetail.textContent = `Exceeds California OEHHA 8-Hr Chronic REL (3.0 µg/m³) by ${timesRel}x`;
+        } else {
+          benzeneDetail.textContent = `Within California OEHHA 8-Hr Chronic REL (3.0 µg/m³) threshold`;
+        }
+      }
+
+      // Hazard Badge & Asthma
+      if (hazardBadge) {
+        if (fuel.id === 'electric-induction') {
+          hazardBadge.textContent = 'CLEAN AIR BASELINE';
+          hazardBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase font-mono tracking-wider bg-emerald-500/20 text-emerald-900 border border-emerald-500/30';
+        } else if (peakNo2_ppb > 200 || peakBenzene_ug_m3 > 27.0) {
+          hazardBadge.textContent = 'CRITICAL TOXIC HAZARD';
+          hazardBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase font-mono tracking-wider bg-rose-500/20 text-rose-950 border border-rose-500/30';
+        } else if (peakNo2_ppb > 100 || peakBenzene_ug_m3 > 3.0) {
+          hazardBadge.textContent = 'HAZARDOUS EXPOSURE';
+          hazardBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase font-mono tracking-wider bg-amber-500/20 text-amber-950 border border-amber-500/30';
+        } else {
+          hazardBadge.textContent = 'MODERATE EXPOSURE';
+          hazardBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase font-mono tracking-wider bg-blue-500/20 text-blue-950 border border-blue-500/30';
+        }
+      }
+
+      if (asthmaStat) {
+        if (fuel.id === 'electric-induction') {
+          asthmaStat.textContent = 'ZERO COMBUSTION RISK';
+          asthmaStat.className = 'font-mono font-bold text-emerald-800 text-xs';
+        } else if (peakNo2_ppb > 150) {
+          asthmaStat.textContent = 'SEVERE ACUTE HAZARD (Gruenwald 12.7% PAF)';
+          asthmaStat.className = 'font-mono font-bold text-rose-800 text-xs';
+        } else if (peakNo2_ppb > 80) {
+          asthmaStat.textContent = 'ELEVATED RESPIRATORY BURDEN';
+          asthmaStat.className = 'font-mono font-bold text-amber-800 text-xs';
+        } else {
+          asthmaStat.textContent = 'LOW ACUTE RESPIRATORY RISK';
+          asthmaStat.className = 'font-mono font-bold text-emerald-800 text-xs';
+        }
+      }
+
+      if (actionStat) {
+        if (fuel.id === 'electric-induction') {
+          actionStat.textContent = 'No combustion hazard. Standard cooking vapor ventilation is adequate for odor and moisture control.';
+        } else if (peakNo2_ppb > 200) {
+          actionStat.textContent = 'IMMEDIATE ACTION REQUIRED: Open exterior windows and doors for emergency cross-ventilation. Switch range hood to maximum speed. Move all active pots to the rear burners.';
+        } else if (peakNo2_ppb > 100) {
+          actionStat.textContent = 'VENTILATION MANDATE: Ensure range hood is running at high speed and crack a nearby kitchen window. Keep children and asthmatics out of the kitchen during unvented cooking.';
+        } else {
+          actionStat.textContent = 'Continue operating exterior exhaust hood throughout cooking. Maintain burner use on rear positions whenever possible.';
+        }
+      }
+    }
+
+    // Attach Event Listeners
+    burnerSelect.addEventListener('change', calculate);
+    fuelSelect.addEventListener('change', calculate);
+    placementSelect.addEventListener('change', calculate);
+    roomSelect.addEventListener('change', calculate);
+    ventSelect.addEventListener('change', calculate);
+    achSelect.addEventListener('change', calculate);
+    durationInput.addEventListener('input', calculate);
+
+    // Preset Buttons
+    const presetBtns = root.querySelectorAll('.preset-btn');
+    presetBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const presetId = btn.getAttribute('data-preset');
+        const p = modelData.realWorldPresets.find(pr => pr.id === presetId);
+        if (!p) return;
+
+        burnerSelect.value = p.burnerId;
+        fuelSelect.value = p.fuelId;
+        placementSelect.value = p.placementId;
+        roomSelect.value = p.kitchenId;
+        ventSelect.value = p.hoodId;
+        achSelect.value = p.achId;
+        durationInput.value = p.durationMins.toString();
+
+        calculate();
+      });
+    });
+
+    // Copy Report Button
+    if (copyReportBtn) {
+      copyReportBtn.addEventListener('click', () => {
+        const report = `=== ISITKITCHENSAFE GAS STOVE INDOOR AIR QUALITY REPORT ===
+Generated: ${new Date().toISOString()}
+Burner: ${burnerSelect.options[burnerSelect.selectedIndex]?.text}
+Fuel: ${fuelSelect.options[fuelSelect.selectedIndex]?.text}
+Position: ${placementSelect.options[placementSelect.selectedIndex]?.text}
+Kitchen Volume: ${roomSelect.options[roomSelect.selectedIndex]?.text}
+Exhaust System: ${ventSelect.options[ventSelect.selectedIndex]?.text}
+Building Air Exchange: ${achSelect.options[achSelect.selectedIndex]?.text}
+Duration: ${durationInput.value} minutes
+
+RESULTS & TOXICOLOGICAL DIAGNOSTICS:
+- Peak Indoor NO2: ${no2Stat?.textContent || ''}
+- Peak Indoor Benzene: ${benzeneStat?.textContent || ''}
+- Hood Capture Efficiency: ${hoodCaptureStat?.textContent || ''}
+- Clearance to Safe Baseline (<15 ppb): ${clearanceStat?.textContent || ''}
+- Asthma Hazard Status: ${asthmaStat?.textContent || ''}
+- Mitigation Protocol: ${actionStat?.textContent || ''}
+=============================================================`;
+
+        navigator.clipboard.writeText(report).then(() => {
+          if (copyFeedback) {
+            copyFeedback.classList.remove('hidden');
+            setTimeout(() => {
+              copyFeedback.classList.add('hidden');
+            }, 3000);
+          }
+        });
+      });
+    }
+
+    // Initial run
+    calculate();
+  }
+
+  document.addEventListener('DOMContentLoaded', initGasStoveCalculator);
+  if (document.readyState === 'interactive' || document.readyState === 'complete') {
+    initGasStoveCalculator();
+  }
+</script>
