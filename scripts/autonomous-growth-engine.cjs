@@ -68,7 +68,8 @@ const TOOLS_REGISTRY = [
   { slug: 'wooden-utensil-biofilm-modeler', name: 'Wooden Spoon & Utensil Micro-Crack Bacterial Biofilm & Moisture Trapping Modeler', category: 'Microbiology', component: 'WoodenUtensilBiofilmModeler.astro', dataFile: 'wooden-utensil-biofilm-data.json' },
   { slug: 'copper-cookware-toxicity-modeler', name: 'Copper Cookware & Brass Acidic Food Leaching & Verdigris Modeler', category: 'Metallurgy & Toxicology', component: 'CopperCookwareToxicityModeler.astro', dataFile: 'copper-cookware-toxicity-data.json' },
   { slug: 'microwave-plastic-steam-cover-modeler', name: 'Microwave Plastic Steam Cover Phthalate Condensate Dripping Modeler', category: 'Toxicology', component: 'MicrowavePlasticSteamCoverModeler.astro', dataFile: 'microwave-plastic-steam-cover-data.json' },
-  { slug: 'stainless-steel-heavy-metal-leaching-modeler', name: 'Stainless Steel Cookware Heavy Metal (Nickel & Chromium) Acidic Leaching Modeler', category: 'Metallurgy & Toxicology', component: 'StainlessSteelHeavyMetalLeachingModeler.astro', dataFile: 'stainless-steel-heavy-metal-data.json' }
+  { slug: 'stainless-steel-heavy-metal-leaching-modeler', name: 'Stainless Steel Cookware Heavy Metal (Nickel & Chromium) Acidic Leaching Modeler', category: 'Metallurgy & Toxicology', component: 'StainlessSteelHeavyMetalLeachingModeler.astro', dataFile: 'stainless-steel-heavy-metal-data.json' },
+  { slug: 'oven-self-cleaning-pyrolysis-simulator', name: 'Oven Self-Cleaning Pyrolysis Fume & Fluoropolymer PTFE Off-Gassing Simulator', category: 'Thermal Physics & Toxicology', component: 'OvenSelfCleaningPyrolysisSimulator.astro', dataFile: 'oven-self-cleaning-pyrolysis-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -205,7 +206,8 @@ function auditDatasets() {
     'wooden-utensil-biofilm-data.json',
     'copper-cookware-toxicity-data.json',
     'microwave-plastic-steam-cover-data.json',
-    'stainless-steel-heavy-metal-data.json'
+    'stainless-steel-heavy-metal-data.json',
+    'oven-self-cleaning-pyrolysis-data.json'
   ];
 
   const datasetStats = {};

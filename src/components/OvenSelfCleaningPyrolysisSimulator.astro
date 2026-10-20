@@ -1,0 +1,1033 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import pyrolysisData from '../data/oven-self-cleaning-pyrolysis-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  cycleLabel: string;
+  cycleHelp: string;
+  soilLabel: string;
+  soilHelp: string;
+  fluoropolymerLabel: string;
+  fluoropolymerHelp: string;
+  ventilationLabel: string;
+  ventilationHelp: string;
+  vulnerabilityLabel: string;
+  vulnerabilityHelp: string;
+  presetsTitle: string;
+  presetStandard: string;
+  presetHeavySoil: string;
+  presetBirdAlert: string;
+  presetTeflonMat: string;
+  presetSteamClean: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  hazardScoreLabel: string;
+  peakTempLabel: string;
+  pm25Label: string;
+  coPeakLabel: string;
+  ufpLabel: string;
+  avianRiskLabel: string;
+  humanRiskLabel: string;
+  alertTitle: string;
+  tableTitle: string;
+  tableSub: string;
+  colCycle: string;
+  colTemp: string;
+  colDuration: string;
+  colUfpRate: string;
+  colCoPlume: string;
+  colAvianStatus: string;
+  rulesTitle: string;
+  rulesSub: string;
+  rule1Title: string;
+  rule1Text: string;
+  rule2Title: string;
+  rule2Text: string;
+  rule3Title: string;
+  rule3Text: string;
+  rule4Title: string;
+  rule4Text: string;
+  copyReportBtn: string;
+  copiedFeedback: string;
+}
+
+const DICTIONARY: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Thermal Physics & Pyrolysis Toxicology Simulator",
+    title: "Oven Self-Cleaning Pyrolysis Fume & Fluoropolymer Off-Gassing Simulator",
+    subtitle: "Simulate 500°C (932°F) pyrolytic thermal decomposition, PTFE gasket and component degradation, toxic carbon monoxide spikes, and avian respiratory lethality risks.",
+    controlsTitle: "Simulation Parameters & Environmental Factors",
+    controlsSub: "Configure your oven cleaning cycle, grease soil burden, gasket materials, kitchen ventilation rate, and domestic living profile.",
+    cycleLabel: "Self-Cleaning Thermal Cycle Mode:",
+    cycleHelp: "Select heating intensity and duration (factory pyrolytic vs hydrothermal steam clean).",
+    soilLabel: "Cavity Soil & Grease Burden:",
+    soilHelp: "Mass of baked-on oils, animal fats, and carbonized food deposits inside the oven.",
+    fluoropolymerLabel: "Internal Gasket & Component Materials:",
+    fluoropolymerHelp: "Presence of fluoropolymers (PTFE/FEP) in perimeter door seals, fan wiring, or accessories.",
+    ventilationLabel: "Kitchen Ventilation & Dilution Rate:",
+    ventilationHelp: "Exhaust hood CFM rating and room air exchange rate (ACH).",
+    vulnerabilityLabel: "Household Biological Profile:",
+    vulnerabilityHelp: "Occupant vulnerability tier, respiratory sensitivity, or presence of pet birds.",
+    presetsTitle: "Quick Simulation Presets:",
+    presetStandard: "Standard 3-Hr Cycle (Clean Kitchen, No Birds)",
+    presetHeavySoil: "Encrusted Spill (Apartment, No Active Hood)",
+    presetBirdAlert: "CRITICAL: Pet Bird (Parrot / Cockatiel in Home)",
+    presetTeflonMat: "CATASTROPHIC: Forgotten Teflon Liner Left Inside",
+    presetSteamClean: "Safe Low-Temp Steam Clean (Non-Toxic)",
+    diagnosticTitle: "Pyrolytic Diagnostic Scorecard & Emissions Output",
+    diagnosticSub: "Real-time thermodynamic modeling against EPA, OSHA, NIOSH, and avian veterinary lethality benchmarks.",
+    hazardScoreLabel: "Overall Plume Hazard Index",
+    peakTempLabel: "Peak Cavity Temperature",
+    pm25Label: "Peak Indoor PM2.5 Plume",
+    coPeakLabel: "Peak Carbon Monoxide (CO)",
+    ufpLabel: "PTFE Ultrafine Particle Shedding",
+    avianRiskLabel: "Pet Bird Acute Lethality Risk",
+    humanRiskLabel: "Human Polymer Fume Fever Odds",
+    alertTitle: "Clinical & Environmental Safety Status",
+    tableTitle: "Pyrolytic Thermal Cycle & Emission Benchmark Matrix",
+    tableSub: "Comparison of oven cleaning mechanisms, peak temperatures, particulate shedding, and biological safety profiles.",
+    colCycle: "Cycle Mechanism",
+    colTemp: "Peak Temp (°F / °C)",
+    colDuration: "Cycle Time",
+    colUfpRate: "PTFE Ultrafine Particles",
+    colCoPlume: "CO Emission Plume",
+    colAvianStatus: "Avian Safety Profile",
+    rulesTitle: "Fire Marshal & Veterinary Evidence-Based Protocols",
+    rulesSub: "Critical kitchen rules to eliminate toxic pyrolytic fume exposure and prevent catastrophic appliance damage.",
+    rule1Title: "1. The 100% Avian Evacuation Mandate (Zero Birds on Premises)",
+    rule1Text: "Never run a pyrolytic self-cleaning cycle while pet birds (parakeets, cockatiels, macaws, canaries) are anywhere inside the home. Avian respiratory systems feature rigid parabronchial lungs and air sacs with an ultra-thin blood-gas barrier. Inhaling fluoropolymer pyrolysis gases (carbonyl fluoride COF2) or sub-100nm ultrafine particles causes fatal pulmonary hemorrhage and suffocation within 15–30 minutes, even rooms away on another floor. Birds must be relocated completely off-site for at least 24 hours.",
+    rule2Title: "2. The Mandatory Rack & Accessory Strip Rule",
+    rule2Text: "Always remove all chrome, nickel-plated, or non-stick racks, rotisserie spits, thermometer probes, and aftermarket floor liners before activating self-clean. Extreme 900°F heat destroys rack chrome plating (causing permanent discoloration and warping), pyrolyzes non-stick finishes, and vaporizes forgotten Teflon mats into concentrated toxic organofluorine plumes.",
+    rule3Title: "3. Maximum Exterior Ventilation & Kitchen Exclusion Protocol",
+    rule3Text: "Always turn your exterior-vented range hood to maximum CFM, open opposing windows to establish a continuous cross-breeze, close interior doors leading to bedrooms, and vacate the kitchen for the entire 3-to-4 hour cycle and subsequent 2-hour cooling period. Recirculating microwave hoods only redistribute carbon monoxide and ultrafine particulates into the living quarters.",
+    rule4Title: "4. Prefer the Chemical-Free Hydrothermal Baking Soda Alternative",
+    rule4Text: "Instead of pyrolytic self-cleaning—which stresses oven electronic control boards (often causing blown thermal fuses or failed door latches)—use the non-toxic active saponification method: coat interior enamel with a thick paste of 1/2 cup baking soda and 3 tbsp water overnight, then spritz with white vinegar to lift carbonized grease without a single toxic fume.",
+    copyReportBtn: "Copy Comprehensive Diagnostic Report",
+    copiedFeedback: "Report Copied to Clipboard!"
+  },
+  es: {
+    badge: "Simulador de Física Térmica y Toxicología de Pirolisis",
+    title: "Simulador de Humos de Autolimpieza de Horno y Gases de PTFE",
+    subtitle: "Simule la descomposición térmica a 500°C (932°F), degradación de juntas de teflón, picos de monóxido de carbono y letalidad respiratoria en aves.",
+    controlsTitle: "Parámetros de Simulación y Factores Ambientales",
+    controlsSub: "Configure el ciclo de limpieza, suciedad de grasa, juntas, ventilación y perfil biológico del hogar.",
+    cycleLabel: "Modo de Ciclo de Autolimpieza:",
+    cycleHelp: "Seleccione intensidad y duración (pirolítico de fábrica vs vapor hidrotérmico).",
+    soilLabel: "Nivel de Grasa y Suciedad del Horno:",
+    soilHelp: "Masa de aceites horneados, grasas animales y restos carbonizados en el interior.",
+    fluoropolymerLabel: "Materiales de Juntas y Componentes:",
+    fluoropolymerHelp: "Presencia de fluoropolímeros (PTFE/FEP) en sellos de puerta, cables o accesorios.",
+    ventilationLabel: "Ventilación de Cocina y Tasa de Renovación:",
+    ventilationHelp: "Capacidad de extracción de la campana (CFM) y tasa de intercambio de aire (ACH).",
+    vulnerabilityLabel: "Perfil Biológico de los Habitantes:",
+    vulnerabilityHelp: "Sensibilidad respiratoria, presencia de niños, asma o aves domésticas.",
+    presetsTitle: "Preajustes Rápidos de Simulación:",
+    presetStandard: "Ciclo Estándar 3 Horas (Cocina Limpia, Sin Aves)",
+    presetHeavySoil: "Grasa Incrustada (Apartamento Sin Campana Exterior)",
+    presetBirdAlert: "CRÍTICO: Ave Doméstica en el Hogar (Loro / Ninfa)",
+    presetTeflonMat: "CATÁSTROFE: Protector de Teflón Olvidado Dentro",
+    presetSteamClean: "Limpieza Segura a Vapor a Baja Temperatura",
+    diagnosticTitle: "Panel Diagnóstico de Emisiones Pirolíticas",
+    diagnosticSub: "Modelado termodinámico frente a estándares EPA, OSHA, NIOSH y veterinarios aviares.",
+    hazardScoreLabel: "Índice General de Peligro de Humos",
+    peakTempLabel: "Temperatura Máxima en Cavidad",
+    pm25Label: "Pico de Partículas PM2.5 en Interior",
+    coPeakLabel: "Pico de Monóxido de Carbono (CO)",
+    ufpLabel: "Emisión de Nanoplásticos y Partículas PTFE",
+    avianRiskLabel: "Riesgo de Letalidad en Aves Domésticas",
+    humanRiskLabel: "Probabilidad de Fiebre por Humos de Polímeros",
+    alertTitle: "Estado de Seguridad Ambiental y Sanitaria",
+    tableTitle: "Matriz de Ciclos Térmicos y Emisiones Pirolíticas",
+    tableSub: "Comparación de mecanismos de limpieza, temperaturas pico y perfil de seguridad biológica.",
+    colCycle: "Mecanismo del Ciclo",
+    colTemp: "Temp. Pico (°F / °C)",
+    colDuration: "Duración",
+    colUfpRate: "Partículas Finas PTFE",
+    colCoPlume: "Emisión de Monóxido CO",
+    colAvianStatus: "Seguridad para Aves",
+    rulesTitle: "Protocolos Clave de Bomberos y Veterinarios",
+    rulesSub: "Reglas críticas para eliminar la exposición a humos tóxicos y evitar daños en el electrodoméstico.",
+    rule1Title: "1. Mandato Absoluto de Evacuación de Aves (Cero Aves en Casa)",
+    rule1Text: "Jamás active la autolimpieza pirolítica con aves en el hogar. El sistema respiratorio de las aves es extremadamente sensible. El fluoruro de carbonilo (COF2) y partículas ultrafinas de teflón causan hemorragia pulmonar fatal en 15-30 minutos, incluso en habitaciones alejadas.",
+    rule2Title: "2. Regla Obligatoria de Retirar Todas las Rejillas y Accesorios",
+    rule2Text: "Retire siempre las rejillas cromadas, sondas térmicas y protectores antiadherentes antes del ciclo. Los 500°C destruyen el cromado y vaporizan los protectores de teflón liberando densas nubes tóxicas.",
+    rule3Title: "3. Ventilación Exterior Máxima y Exclusión de la Cocina",
+    rule3Text: "Encienda la campana extractora al máximo con salida al exterior, abra ventanas cruzadas y cierre puertas hacia dormitorios durante las 3-4 horas del ciclo y el enfriamiento.",
+    rule4Title: "4. Prefiera el Método Natural de Bicarbonato y Vinagre",
+    rule4Text: "Evite la pirolisis extrema que desgasta los circuitos electrónicos del horno aplicando una pasta de bicarbonato y agua durante la noche, enjuagando luego con vinagre.",
+    copyReportBtn: "Copiar Informe de Seguridad",
+    copiedFeedback: "¡Informe Copiado al Portapapeles!"
+  },
+  pt: {
+    badge: "Simulador de Física Térmica e Toxicologia de Pirólise",
+    title: "Simulador de Fumaça de Autolimpeza de Forno e Gases de PTFE",
+    subtitle: "Simule a decomposição térmica a 500°C (932°F), degradação de vedação de teflon, picos de monóxido de carbono e letalidade em aves de estimação.",
+    controlsTitle: "Parâmetros da Simulação e Fatores Ambientais",
+    controlsSub: "Configure o ciclo térmico, nível de gordura, materiais de vedação, exaustão da cozinha e perfil biológico.",
+    cycleLabel: "Modo do Ciclo de Autolimpeza:",
+    cycleHelp: "Selecione a intensidade térmica e duração (pirolítico de fábrica vs vapor hidrotérmico).",
+    soilLabel: "Nível de Sujeira e Gordura no Forno:",
+    soilHelp: "Massa de óleos queimados, gorduras e resíduos carbonizados no interior.",
+    fluoropolymerLabel: "Materiais de Vedações e Componentes:",
+    fluoropolymerHelp: "Presença de fluoropolímeros (PTFE/FEP) em gaxetas, cabos ou acessórios.",
+    ventilationLabel: "Ventilação da Cozinha e Renovação de Ar:",
+    ventilationHelp: "Potência da coifa exaustora (CFM) e trocas de ar por hora (ACH).",
+    vulnerabilityLabel: "Perfil Biológico dos Moradores:",
+    vulnerabilityHelp: "Sensibilidade respiratória, presença de crianças, asma ou pássaros domésticos.",
+    presetsTitle: "Predefinições Rápidas de Simulação:",
+    presetStandard: "Ciclo Padrão de 3 Horas (Cozinha Limpa, Sem Pássaros)",
+    presetHeavySoil: "Gordura Incrustada (Apartamento Sem Coifa Externa)",
+    presetBirdAlert: "CRÍTICO: Pássaro de Estimação em Casa (Calopsita / Papagaio)",
+    presetTeflonMat: "CATÁSTROFE: Protetor de Teflon Esquecido Dentro",
+    presetSteamClean: "Limpeza Segura a Vapor em Baixa Temperatura",
+    diagnosticTitle: "Painel Diagnóstico de Emissões Pirolíticas",
+    diagnosticSub: "Modelagem termodinâmica contra parâmetros EPA, OSHA, NIOSH e veterinários.",
+    hazardScoreLabel: "Índice de Risco da Fumaça",
+    peakTempLabel: "Temperatura Máxima na Cavidade",
+    pm25Label: "Pico de Material Particulado PM2.5",
+    coPeakLabel: "Pico de Monóxido de Carbono (CO)",
+    ufpLabel: "Emissão de Partículas Ultrafinas de PTFE",
+    avianRiskLabel: "Risco de Letalidade em Pássaros",
+    humanRiskLabel: "Chance de Febre dos Fumos de Polímero",
+    alertTitle: "Estado de Segurança Ambiental e Clínica",
+    tableTitle: "Matriz de Ciclos Térmicos e Emissões Pirolíticas",
+    tableSub: "Comparação de mecanismos de limpeza, temperaturas pico e perfil de segurança.",
+    colCycle: "Mecanismo do Ciclo",
+    colTemp: "Temp. Máxima (°F / °C)",
+    colDuration: "Duração",
+    colUfpRate: "Partículas Finas PTFE",
+    colCoPlume: "Emissão de Monóxido CO",
+    colAvianStatus: "Segurança de Pássaros",
+    rulesTitle: "Protocolos de Bombeiros e Veterinários",
+    rulesSub: "Regras indispensáveis para eliminar fumaça tóxica e prevenir danos graves ao forno.",
+    rule1Title: "1. Mandato Inegociável de Evacuação de Aves",
+    rule1Text: "Nunca execute a autolimpeza pirolítica com aves no imóvel. O sistema respiratório das aves absorve instantaneamente gases de pirólise de teflon (COF2), causando hemorragia pulmonar fatal em 15 a 30 minutos.",
+    rule2Title: "2. Regra Obrigatória de Remoção de Grades e Acessórios",
+    rule2Text: "Remova sempre grades cromadas, bandejas e esteiras protetoras antes do ciclo. O calor extremo de 500°C destrói o acabamento e vaporiza esteiras antiaderentes em gases altamente nocivos.",
+    rule3Title: "3. Ventilação Externa Máxima e Isolamento da Cozinha",
+    rule3Text: "Ligue a coifa com saída externa na potência máxima e abra janelas para ventilação cruzada, mantendo portas dos quartos fechadas durante o ciclo e o resfriamento.",
+    rule4Title: "4. Prefira o Método Não Tóxico de Bicarbonato e Vinagre",
+    rule4Text: "Evite submeter o aparelho ao estresse de 500°C usando uma pasta de bicarbonato e água durante a noite, removendo resíduos com vinagre branco sem nenhum vapor nocivo.",
+    copyReportBtn: "Copiar Relatório de Segurança",
+    copiedFeedback: "Relatório Copiado para a Área de Transferência!"
+  },
+  "zh-cn": {
+    badge: "热物理学与高温热解毒理学模拟器",
+    title: "烤箱高温自清洁热解烟尘与聚四氟乙烯PTFE热解毒气模拟器",
+    subtitle: "深度模拟烤箱500°C（932°F）极限高温自清洁过程中的油脂热解裂解、PTFE密封圈与内衬氟聚合物释放、一氧化碳骤升及宠物鸟致命肺出血风险。",
+    controlsTitle: "模拟环境控制与关键参数设定",
+    controlsSub: "配置自清洁模式、烤箱油污载荷、密封条材质、厨房排风换气速率及室内生物耐受等级。",
+    cycleLabel: "自清洁热循环模式选择：",
+    cycleHelp: "选择加热强度与持续时长（原厂高温热解模式 vs 低温蒸汽水解清洁）。",
+    soilLabel: "内胆油污与烘烤残留载荷：",
+    soilHelp: "附着在内胆底面及侧壁的烘烤油垢、动物脂肪与碳化食物残渣总质量。",
+    fluoropolymerLabel: "密封条与内部氟聚合物部件配置：",
+    fluoropolymerHelp: "炉门密封圈涂层、热风循环风机绝缘及烤箱内部防粘配件材质。",
+    ventilationLabel: "厨房排烟排风与气流稀释速率：",
+    ventilationHelp: "油烟机排风风量（CFM/m³）及厨房与起居室空气交换速率（ACH）。",
+    vulnerabilityLabel: "家庭成员生物暴露敏感度：",
+    vulnerabilityHelp: "室内人员呼吸道脆弱等级、婴幼儿哮喘以及宠物鸟（鹦鹉/玄凤）存在情况。",
+    presetsTitle: "快速场景预设：",
+    presetStandard: "标准3小时清洁（清洁内胆，无鸟家庭）",
+    presetHeavySoil: "重度焦黑油垢（公寓密闭，无强力外排）",
+    presetBirdAlert: "【极度危险】室内饲养鹦鹉/宠物鸟",
+    presetTeflonMat: "【灾难事故】遗忘特氟龙烤箱保护垫在内",
+    presetSteamClean: "安全低温水蒸气水解清洁（零毒害）",
+    diagnosticTitle: "热解烟尘浓度与毒理风险诊断面板",
+    diagnosticSub: "基于美国EPA空气质量指数、OSHA一氧化碳限量及禽类兽医毒理学标准实时测算。",
+    hazardScoreLabel: "全屋烟雾综合危害指数",
+    peakTempLabel: "内胆峰值热解温度",
+    pm25Label: "室内PM2.5烟尘峰值浓度",
+    coPeakLabel: "一氧化碳（CO）峰值浓度",
+    ufpLabel: "PTFE纳米超细微粒释放量",
+    avianRiskLabel: "宠物鸟急性呼吸致死风险",
+    humanRiskLabel: "人体聚合物烟尘热发病几率",
+    alertTitle: "临床与环境安全综合诊断状态",
+    tableTitle: "烤箱清洁机制与热解排放对照基准矩阵",
+    tableSub: "不同清洁模式的最高温度、有机氟热解分解产物及生物安全影响详表。",
+    colCycle: "清洁机制分类",
+    colTemp: "峰值温度 (°F / °C)",
+    colDuration: "运行耗时",
+    colUfpRate: "PTFE超细微颗粒",
+    colCoPlume: "一氧化碳羽流",
+    colAvianStatus: "禽类安全评级",
+    rulesTitle: "消防与禽类兽医学循证安全规程",
+    rulesSub: "避免高温热解气体中毒与保护家电设备寿命的权威准则。",
+    rule1Title: "1. 宠物鸟100%强制撤离规程（屋内严禁留有任何禽类）",
+    rule1Text: "在进行高温热解自清洁时，绝不可在屋内保留任何宠物鸟（虎皮鹦鹉、玄凤、灰鹦鹉）。鸟类拥有特殊的单向流副支气管气囊系统，血气屏障极薄。吸入微量氟碳热解气体（氟化羰COF2）或超细纳米粒子会在15–30分钟内引发急性大面积肺水肿与内出血死亡。必须在开启前将鸟类转移至其他建筑至少24小时。",
+    rule2Title: "2. 强制取出所有烤网与防粘配件法则",
+    rule2Text: "自清洁前必须取出所有镀铬烤架、温度探针以及铺在底部的防粘垫。900°F极温会损坏镀铬层导致变形变色，若遗忘特氟龙垫，整张垫子将发生剧烈热解汽化，释放高浓度致命毒气。",
+    rule3Title: "3. 开启最大抽油烟机并开窗对流",
+    rule3Text: "清洁全程及降温阶段必须将外排油烟机开至最大档，打开对流窗户，关闭通往卧室的房门。室内循环过滤式油烟机无法过滤一氧化碳及超细微粒。",
+    rule4Title: "4. 首选小苏打与白醋安全手工皂化法",
+    rule4Text: "极端高温易导致烤箱电子主板及温控保险丝过热损坏。推荐使用半杯小苏打与适量温水调成糊状涂抹内胆静置过夜，次日喷洒白醋擦拭，利用天然皂化轻松去油，完全无有害烟雾。",
+    copyReportBtn: "复制完整诊断与安全报告",
+    copiedFeedback: "诊断报告已复制至剪贴板！"
+  },
+  ja: {
+    badge: "熱物理学＆熱分解毒性シミュレーター",
+    title: "オーブン自動熱分解清掃 排煙＆テフロンPTFEガス発生シミュレーター",
+    subtitle: "500°C（932°F）の極限高温熱分解、PTFEパッキンの劣化、有毒一酸化炭素（CO）の急増、および小鳥・インコの呼吸器致命リスクを科学的にシミュレート。",
+    controlsTitle: "シミュレーション環境とパラメータ設定",
+    controlsSub: "クリーニングサイクル、油汚れの量、パッキン素材、換気扇の排気性能、同居家族・ペットの条件を設定します。",
+    cycleLabel: "セルフクリーニング熱サイクルモード：",
+    cycleHelp: "加熱強度と運転時間を選択（メーカー高温熱分解 vs 低温スチーム洗浄）。",
+    soilLabel: "庫内の油汚れ・焦げ付き付着量：",
+    soilHelp: "壁面や底面に焼き付いた調理油、動物性脂肪、炭化汚れの総重量。",
+    fluoropolymerLabel: "パッキンおよび内部フッ素樹脂部品：",
+    fluoropolymerHelp: "ドア密閉パッキン、ファン配線被覆、庫内トレイのPTFE有無。",
+    ventilationLabel: "キッチンの換気・外気置換速度：",
+    ventilationHelp: "レンジフードの排気風量（CFM）および部屋の換気回数（ACH）。",
+    vulnerabilityLabel: "家庭内の呼吸器感受性プロファイル：",
+    vulnerabilityHelp: "乳幼児、喘息患者、または飼育中の愛鳥（インコ・オウム）の有無。",
+    presetsTitle: "クイック再現プリセット：",
+    presetStandard: "標準3時間サイクル（油汚れ少・鳥なし家庭）",
+    presetHeavySoil: "油焦げ重度（密閉マンション・換気不十分）",
+    presetBirdAlert: "【超危険】室内でインコ・オウムを飼育中",
+    presetTeflonMat: "【大惨事】フッ素オーブン保護シートの入れ忘れ",
+    presetSteamClean: "安全な低温スチーム水蒸気洗浄（無害）",
+    diagnosticTitle: "熱分解排煙・有毒ガス診断スコアカード",
+    diagnosticSub: "米国EPA空気質指数、OSHA一酸化炭素基準、鳥類獣医学データに基づくリアルタイム解析。",
+    hazardScoreLabel: "室内煙霧総合危険度指数",
+    peakTempLabel: "庫内最高到達温度",
+    pm25Label: "室内PM2.5煙霧ピーク濃度",
+    coPeakLabel: "一酸化炭素（CO）ピーク濃度",
+    ufpLabel: "PTFE超微粒子（UFP）放出量",
+    avianRiskLabel: "愛鳥の急性中毒・致死リスク",
+    humanRiskLabel: "ヒトのポリマーヒューム熱発症確率",
+    alertTitle: "環境・健康安全総合ステータス",
+    tableTitle: "オーブン清掃メカニズム別 排煙比較マトリクス",
+    tableSub: "各清掃方式の到達温度、フッ素分解生成物、微粒子濃度、生体安全性の比較。",
+    colCycle: "清掃方式",
+    colTemp: "最高温度 (°F / °C)",
+    colDuration: "所要時間",
+    colUfpRate: "PTFEナノ微粒子",
+    colCoPlume: "CO排煙濃度",
+    colAvianStatus: "愛鳥への安全性",
+    rulesTitle: "消防機関＆鳥類獣医師が警告する必須安全手順",
+    rulesSub: "有害ガスの吸入を防ぎ、オーブン故障を回避するための最重要ルール。",
+    rule1Title: "1. 鳥類の完全避難命令（家の中に1羽も残さない）",
+    rule1Text: "セルフクリーニング機能を作動させる際、絶対に家の中にインコやオウムなどの小鳥を残さないでください。鳥の呼吸器（気嚢システム）は極めて敏感で、フッ素熱分解ガス（フッ化カルボニル COF2）や超微粒子を吸入すると、わずか15〜30分で重篤な肺出血を起こし窒息死します。作動前に対象の鳥を別宅へ避難させてください。",
+    rule2Title: "2. 全ての焼き網・シートの完全取り出し義務",
+    rule2Text: "自走開始前に、クロムメッキの網、温度計プローブ、底面の汚れ防止シートを必ず外してください。500°Cの熱で網のメッキが劣化し、フッ素加工シートを残すと劇物ガスとなって瞬時に蒸発します。",
+    rule3Title: "3. 換気扇の最大運転とキッチンの立ち入り禁止",
+    rule3Text: "屋外排気型レンジフードを最強運転にし、対角の窓を開けて空気の通り道を作り、寝室へのドアを閉めてください。循環式フードは有毒ガスをろ過できません。",
+    rule4Title: "4. 重曹とクエン酸・酢による安全な手動洗浄を推奨",
+    rule4Text: "500°Cの超高温はオーブンの基板や温度ヒューズにも大きな熱ストレスを与えます。重曹ペーストを一晩塗布して翌朝拭き取る天然アルカリ洗浄なら、有害ガスゼロで安全に焦げ付きを落とせます。",
+    copyReportBtn: "完全診断レポートをコピー",
+    copiedFeedback: "レポートをクリップボードにコピーしました！"
+  }
+};
+
+const t = DICTIONARY[lang] || DICTIONARY.en;
+---
+
+<div class="oven-pyrolysis-simulator bg-surface-soft border border-hairline rounded-3xl p-6 md:p-10 shadow-xs mb-12">
+  <!-- Top Header Banner -->
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-6 border-b border-hairline/80 pb-6">
+    <div class="flex items-center gap-2">
+      <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-orange-950/20 text-orange-600 font-bold text-lg">
+        🔥
+      </span>
+      <span class="text-xs font-bold uppercase tracking-wider text-orange-700 bg-orange-50 px-3 py-1 rounded-full border border-orange-200">
+        {t.badge}
+      </span>
+    </div>
+    <span class="text-xs font-mono text-muted bg-canvas px-3 py-1 rounded-lg border border-hairline">
+      500°C (932°F) Pyrolysis • CO &amp; PTFE Toxicosis
+    </span>
+  </div>
+
+  <div class="mb-8">
+    <h2 class="text-2xl md:text-3xl font-extrabold text-ink tracking-tight mb-2">
+      {t.title}
+    </h2>
+    <p class="text-body text-sm md:text-base leading-relaxed text-muted max-w-4xl">
+      {t.subtitle}
+    </p>
+  </div>
+
+  <!-- Quick Scenario Presets -->
+  <div class="bg-canvas border border-hairline rounded-2xl p-5 mb-8">
+    <span class="text-caption text-xs font-bold uppercase tracking-wider text-muted block mb-3">
+      {t.presetsTitle}
+    </span>
+    <div class="flex flex-wrap gap-2">
+      <button 
+        type="button" 
+        class="preset-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-surface-soft hover:bg-orange-100/70 border border-hairline text-ink transition-colors"
+        data-preset="standard"
+      >
+        {t.presetStandard}
+      </button>
+      <button 
+        type="button" 
+        class="preset-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-surface-soft hover:bg-orange-100/70 border border-hairline text-ink transition-colors"
+        data-preset="heavy-soil"
+      >
+        {t.presetHeavySoil}
+      </button>
+      <button 
+        type="button" 
+        class="preset-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-50 hover:bg-rose-100 border border-rose-300 text-rose-800 transition-colors"
+        data-preset="bird-alert"
+      >
+        ⚠️ {t.presetBirdAlert}
+      </button>
+      <button 
+        type="button" 
+        class="preset-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-950/20 hover:bg-red-900/30 border border-red-500 text-red-700 transition-colors"
+        data-preset="teflon-mat"
+      >
+        🚨 {t.presetTeflonMat}
+      </button>
+      <button 
+        type="button" 
+        class="preset-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 transition-colors"
+        data-preset="steam-clean"
+      >
+        🌱 {t.presetSteamClean}
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Grid: Controls vs Live Diagnostics -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-10">
+    <!-- Controls Column (7 Cols) -->
+    <div class="lg:col-span-7 space-y-6 bg-canvas border border-hairline rounded-2xl p-6 md:p-8">
+      <div>
+        <h3 class="text-lg font-bold text-ink mb-1">{t.controlsTitle}</h3>
+        <p class="text-xs text-muted mb-4">{t.controlsSub}</p>
+      </div>
+
+      <!-- Control 1: Cycle Mode -->
+      <div>
+        <label for="cycle-select" class="block text-sm font-semibold text-ink mb-1">
+          {t.cycleLabel}
+        </label>
+        <p class="text-xs text-muted mb-2">{t.cycleHelp}</p>
+        <select 
+          id="cycle-select" 
+          class="w-full bg-surface-soft border border-hairline rounded-xl px-4 py-2.5 text-sm text-ink font-medium focus:outline-none focus:ring-2 focus:ring-orange-500"
+        >
+          {pyrolysisData.cycleModes.map((c) => (
+            <option value={c.id} selected={c.id === 'mode-standard-3hr'}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <!-- Control 2: Soil Burden -->
+      <div>
+        <label for="soil-select" class="block text-sm font-semibold text-ink mb-1">
+          {t.soilLabel}
+        </label>
+        <p class="text-xs text-muted mb-2">{t.soilHelp}</p>
+        <select 
+          id="soil-select" 
+          class="w-full bg-surface-soft border border-hairline rounded-xl px-4 py-2.5 text-sm text-ink font-medium focus:outline-none focus:ring-2 focus:ring-orange-500"
+        >
+          {pyrolysisData.soilLoads.map((s) => (
+            <option value={s.id} selected={s.id === 'soil-moderate'}>
+              {s.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <!-- Control 3: Gasket & Fluoropolymers -->
+      <div>
+        <label for="gasket-select" class="block text-sm font-semibold text-ink mb-1">
+          {t.fluoropolymerLabel}
+        </label>
+        <p class="text-xs text-muted mb-2">{t.fluoropolymerHelp}</p>
+        <select 
+          id="gasket-select" 
+          class="w-full bg-surface-soft border border-hairline rounded-xl px-4 py-2.5 text-sm text-ink font-medium focus:outline-none focus:ring-2 focus:ring-orange-500"
+        >
+          {pyrolysisData.fluoropolymerSources.map((g) => (
+            <option value={g.id} selected={g.id === 'fp-silicone-ptfe-gasket'}>
+              {g.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <!-- Control 4: Ventilation Environment -->
+      <div>
+        <label for="vent-select" class="block text-sm font-semibold text-ink mb-1">
+          {t.ventilationLabel}
+        </label>
+        <p class="text-xs text-muted mb-2">{t.ventilationHelp}</p>
+        <select 
+          id="vent-select" 
+          class="w-full bg-surface-soft border border-hairline rounded-xl px-4 py-2.5 text-sm text-ink font-medium focus:outline-none focus:ring-2 focus:ring-orange-500"
+        >
+          {pyrolysisData.ventilationEnvironments.map((v) => (
+            <option value={v.id} selected={v.id === 'vent-recirculating-hood'}>
+              {v.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <!-- Control 5: Living Profile & Bird Check -->
+      <div>
+        <label for="vuln-select" class="block text-sm font-semibold text-ink mb-1">
+          {t.vulnerabilityLabel}
+        </label>
+        <p class="text-xs text-muted mb-2">{t.vulnerabilityHelp}</p>
+        <select 
+          id="vuln-select" 
+          class="w-full bg-surface-soft border border-hairline rounded-xl px-4 py-2.5 text-sm text-ink font-medium focus:outline-none focus:ring-2 focus:ring-orange-500"
+        >
+          {pyrolysisData.vulnerabilityProfiles.map((p) => (
+            <option value={p.id} selected={p.id === 'vuln-healthy-adult'}>
+              {p.name}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+
+    <!-- Live Diagnostics Column (5 Cols) -->
+    <div class="lg:col-span-5 space-y-4">
+      <div class="bg-canvas border border-hairline rounded-2xl p-6 shadow-xs">
+        <span class="text-caption text-xs font-bold uppercase tracking-wider text-muted block mb-1">
+          {t.diagnosticTitle}
+        </span>
+        <h4 class="text-base font-bold text-ink mb-4">{t.diagnosticSub}</h4>
+
+        <!-- Main Gauge Card: Hazard Score -->
+        <div id="gauge-container" class="rounded-2xl p-5 mb-5 border transition-all bg-amber-50 border-amber-300">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold uppercase tracking-wider text-muted">
+              {t.hazardScoreLabel}
+            </span>
+            <span id="hazard-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-200 text-amber-900">
+              MODERATE CAUTION
+            </span>
+          </div>
+          <div class="flex items-baseline gap-2 mb-2">
+            <span id="hazard-score" class="text-4xl md:text-5xl font-black text-ink tracking-tight font-mono">
+              64
+            </span>
+            <span class="text-sm text-muted font-bold">/ 100</span>
+          </div>
+          <div class="w-full bg-hairline rounded-full h-2.5 overflow-hidden">
+            <div id="hazard-progress" class="h-2.5 bg-amber-500 transition-all duration-300" style="width: 64%;"></div>
+          </div>
+        </div>
+
+        <!-- Metric 1: Peak Temperature -->
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div class="bg-surface-soft border border-hairline rounded-xl p-3.5">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted block mb-1">
+              {t.peakTempLabel}
+            </span>
+            <div class="flex items-baseline gap-1">
+              <span id="metric-temp" class="text-xl font-extrabold text-ink font-mono">
+                875°F
+              </span>
+              <span id="metric-temp-c" class="text-xs text-muted font-mono">
+                (468°C)
+              </span>
+            </div>
+            <span id="metric-temp-sub" class="text-[11px] text-orange-600 block mt-1 font-medium">
+              Active Grease Pyrolysis
+            </span>
+          </div>
+
+          <!-- Metric 2: Peak CO -->
+          <div class="bg-surface-soft border border-hairline rounded-xl p-3.5">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted block mb-1">
+              {t.coPeakLabel}
+            </span>
+            <div class="flex items-baseline gap-1">
+              <span id="metric-co" class="text-xl font-extrabold text-ink font-mono">
+                28
+              </span>
+              <span class="text-xs text-muted font-mono">ppm</span>
+            </div>
+            <span id="metric-co-sub" class="text-[11px] text-muted block mt-1 font-medium">
+              Near WHO 1-Hr Limit
+            </span>
+          </div>
+        </div>
+
+        <!-- Metric 3: PM2.5 -->
+        <div class="bg-surface-soft border border-hairline rounded-xl p-3.5 mb-3">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted">
+              {t.pm25Label}
+            </span>
+            <span id="pm25-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+              UNHEALTHY (AQI)
+            </span>
+          </div>
+          <div class="flex items-baseline gap-1.5">
+            <span id="metric-pm25" class="text-2xl font-black text-ink font-mono">
+              184
+            </span>
+            <span class="text-xs text-muted font-mono">μg/m³ (EPA ceiling: 55)</span>
+          </div>
+        </div>
+
+        <!-- Metric 4: PTFE Ultrafine Particles -->
+        <div class="bg-surface-soft border border-hairline rounded-xl p-3.5 mb-3">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted">
+              {t.ufpLabel}
+            </span>
+            <span id="ufp-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800">
+              HIGH PARTICULATE
+            </span>
+          </div>
+          <div class="flex items-baseline gap-1.5">
+            <span id="metric-ufp" class="text-2xl font-black text-ink font-mono">
+              72,000
+            </span>
+            <span class="text-xs text-muted font-mono">UFP / cm³</span>
+          </div>
+        </div>
+
+        <!-- Metric 5 & 6: Avian Lethality & Human Fume Fever Risk -->
+        <div class="space-y-2 pt-2 border-t border-hairline">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-muted font-medium">{t.avianRiskLabel}:</span>
+            <span id="metric-avian-risk" class="font-bold font-mono text-rose-600">
+              CRITICAL / LETHAL (100%)
+            </span>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-muted font-medium">{t.humanRiskLabel}:</span>
+            <span id="metric-human-risk" class="font-bold font-mono text-ink">
+              35% (Chills / Throat Burning)
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dynamic Alert Banner -->
+      <div id="dynamic-alert-card" class="rounded-2xl p-5 border transition-all bg-rose-50 border-rose-300 text-rose-900">
+        <div class="flex items-start gap-3">
+          <span id="alert-icon" class="text-2xl flex-shrink-0">⚠️</span>
+          <div>
+            <h5 id="alert-title" class="text-sm font-bold mb-1">
+              {t.alertTitle}: Elevated Thermal Pyrolysis Hazard
+            </h5>
+            <p id="alert-desc" class="text-xs leading-relaxed opacity-95">
+              Sustained 468°C heat is actively degrading fluoropolymers and pyrolyzing grease. Evacuate all pet birds immediately and exhaust kitchen with maximum cross-ventilation.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Copy Action Button -->
+      <button 
+        type="button" 
+        id="copy-report-btn" 
+        class="w-full py-3 px-4 rounded-xl bg-ink hover:bg-black text-white text-center font-medium text-xs md:text-sm transition-colors shadow-xs flex items-center justify-center gap-2"
+      >
+        <span>📋</span>
+        <span id="copy-btn-text">{t.copyReportBtn}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Benchmarking Table: Oven Thermal Cycles -->
+  <div class="bg-canvas border border-hairline rounded-2xl p-6 md:p-8 mb-10 overflow-x-auto">
+    <div class="mb-4">
+      <h3 class="text-lg font-bold text-ink mb-1">{t.tableTitle}</h3>
+      <p class="text-xs text-muted">{t.tableSub}</p>
+    </div>
+
+    <table class="w-full text-left text-xs border-collapse min-w-[640px]">
+      <thead>
+        <tr class="border-b border-hairline bg-surface-soft text-ink font-semibold">
+          <th class="py-3 px-3">{t.colCycle}</th>
+          <th class="py-3 px-3">{t.colTemp}</th>
+          <th class="py-3 px-3">{t.colDuration}</th>
+          <th class="py-3 px-3">{t.colUfpRate}</th>
+          <th class="py-3 px-3">{t.colCoPlume}</th>
+          <th class="py-3 px-3">{t.colAvianStatus}</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-hairline text-muted">
+        <tr class="hover:bg-surface-soft/60">
+          <td class="py-3 px-3 font-semibold text-ink">Light Soil (Pyrolytic)</td>
+          <td class="py-3 px-3 font-mono">800°F (427°C)</td>
+          <td class="py-3 px-3 font-mono">2.0 Hours</td>
+          <td class="py-3 px-3 font-mono">45,000 / cm³</td>
+          <td class="py-3 px-3 font-mono">15–25 ppm</td>
+          <td class="py-3 px-3 font-semibold text-rose-600">Lethal (Teflon toxicosis)</td>
+        </tr>
+        <tr class="hover:bg-surface-soft/60 bg-surface-soft/20">
+          <td class="py-3 px-3 font-semibold text-ink">Standard Self-Clean</td>
+          <td class="py-3 px-3 font-mono">875°F (468°C)</td>
+          <td class="py-3 px-3 font-mono">3.0 Hours</td>
+          <td class="py-3 px-3 font-mono">75,000 / cm³</td>
+          <td class="py-3 px-3 font-mono">30–50 ppm</td>
+          <td class="py-3 px-3 font-semibold text-rose-600">Fatal within 15–30 min</td>
+        </tr>
+        <tr class="hover:bg-surface-soft/60">
+          <td class="py-3 px-3 font-semibold text-ink">Heavy Encrusted Soil</td>
+          <td class="py-3 px-3 font-mono">932°F (500°C)</td>
+          <td class="py-3 px-3 font-mono">4.5 Hours</td>
+          <td class="py-3 px-3 font-mono">150,000+ / cm³</td>
+          <td class="py-3 px-3 font-mono">60–120 ppm</td>
+          <td class="py-3 px-3 font-semibold text-rose-700">Instant Severe Lethality</td>
+        </tr>
+        <tr class="hover:bg-surface-soft/60 bg-emerald-50/50">
+          <td class="py-3 px-3 font-semibold text-emerald-900">AquaClean / Steam Assist</td>
+          <td class="py-3 px-3 font-mono text-emerald-800">250°F (121°C)</td>
+          <td class="py-3 px-3 font-mono text-emerald-800">40 Minutes</td>
+          <td class="py-3 px-3 font-mono text-emerald-800">0 (Zero PTFE Breakdown)</td>
+          <td class="py-3 px-3 font-mono text-emerald-800">0 ppm</td>
+          <td class="py-3 px-3 font-semibold text-emerald-700">100% Safe for All Birds</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Evidence-Based Fire Marshal & Veterinary Protocols -->
+  <div class="bg-canvas border border-hairline rounded-2xl p-6 md:p-8">
+    <div class="mb-6">
+      <span class="text-caption text-xs font-bold uppercase tracking-wider text-muted block mb-1">
+        Evidence-Based Standards
+      </span>
+      <h3 class="text-lg font-bold text-ink">{t.rulesTitle}</h3>
+      <p class="text-xs text-muted">{t.rulesSub}</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-surface-soft border border-hairline rounded-xl p-5">
+        <h4 class="text-sm font-bold text-ink mb-2 text-rose-700">{t.rule1Title}</h4>
+        <p class="text-xs leading-relaxed text-muted">{t.rule1Text}</p>
+      </div>
+      <div class="bg-surface-soft border border-hairline rounded-xl p-5">
+        <h4 class="text-sm font-bold text-ink mb-2 text-amber-700">{t.rule2Title}</h4>
+        <p class="text-xs leading-relaxed text-muted">{t.rule2Text}</p>
+      </div>
+      <div class="bg-surface-soft border border-hairline rounded-xl p-5">
+        <h4 class="text-sm font-bold text-ink mb-2 text-blue-700">{t.rule3Title}</h4>
+        <p class="text-xs leading-relaxed text-muted">{t.rule3Text}</p>
+      </div>
+      <div class="bg-surface-soft border border-hairline rounded-xl p-5">
+        <h4 class="text-sm font-bold text-ink mb-2 text-emerald-700">{t.rule4Title}</h4>
+        <p class="text-xs leading-relaxed text-muted">{t.rule4Text}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script define:vars={{ pyrolysisData, lang, t }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    const cycleSelect = document.getElementById('cycle-select');
+    const soilSelect = document.getElementById('soil-select');
+    const gasketSelect = document.getElementById('gasket-select');
+    const ventSelect = document.getElementById('vent-select');
+    const vulnSelect = document.getElementById('vuln-select');
+
+    const hazardScoreEl = document.getElementById('hazard-score');
+    const hazardBadgeEl = document.getElementById('hazard-badge');
+    const hazardProgressEl = document.getElementById('hazard-progress');
+    const gaugeContainerEl = document.getElementById('gauge-container');
+
+    const metricTempEl = document.getElementById('metric-temp');
+    const metricTempCEl = document.getElementById('metric-temp-c');
+    const metricTempSubEl = document.getElementById('metric-temp-sub');
+    const metricCoEl = document.getElementById('metric-co');
+    const metricCoSubEl = document.getElementById('metric-co-sub');
+    const metricPm25El = document.getElementById('metric-pm25');
+    const pm25BadgeEl = document.getElementById('pm25-badge');
+    const metricUfpEl = document.getElementById('metric-ufp');
+    const ufpBadgeEl = document.getElementById('ufp-badge');
+    const metricAvianRiskEl = document.getElementById('metric-avian-risk');
+    const metricHumanRiskEl = document.getElementById('metric-human-risk');
+
+    const alertCardEl = document.getElementById('dynamic-alert-card');
+    const alertIconEl = document.getElementById('alert-icon');
+    const alertTitleEl = document.getElementById('alert-title');
+    const alertDescEl = document.getElementById('alert-desc');
+
+    const copyBtn = document.getElementById('copy-report-btn');
+    const copyBtnText = document.getElementById('copy-btn-text');
+    const presetBtns = document.querySelectorAll('.preset-btn');
+
+    function calculate() {
+      const cycleId = cycleSelect.value;
+      const soilId = soilSelect.value;
+      const gasketId = gasketSelect.value;
+      const ventId = ventSelect.value;
+      const vulnId = vulnSelect.value;
+
+      const cycle = pyrolysisData.cycleModes.find(c => c.id === cycleId) || pyrolysisData.cycleModes[1];
+      const soil = pyrolysisData.soilLoads.find(s => s.id === soilId) || pyrolysisData.soilLoads[1];
+      const gasket = pyrolysisData.fluoropolymerSources.find(g => g.id === gasketId) || pyrolysisData.fluoropolymerSources[1];
+      const vent = pyrolysisData.ventilationEnvironments.find(v => v.id === ventId) || pyrolysisData.ventilationEnvironments[1];
+      const vuln = pyrolysisData.vulnerabilityProfiles.find(p => p.id === vulnId) || pyrolysisData.vulnerabilityProfiles[0];
+
+      // Steam clean special zero-pyrolysis branch
+      const isSteamClean = cycle.id === 'mode-steam-clean-low';
+
+      let peakTempF = cycle.peakTempF;
+      let peakTempC = cycle.peakTempC;
+
+      // Calculate PM2.5 (μg/m³) in room (standard 40m³ kitchen volume)
+      let pm25EmissionMg = soil.basePm25EmissionMg * cycle.pyrolysisIntensityMultiplier;
+      let roomVolumeM3 = 40.0;
+      let effectiveAch = vent.airChangesPerHour;
+      let roomPm25 = isSteamClean ? 8.0 : Math.round((pm25EmissionMg / (roomVolumeM3 * (effectiveAch * 0.8 + 0.3))) * 1.5);
+      if (roomPm25 < 5) roomPm25 = 5;
+
+      // Calculate Carbon Monoxide (ppm)
+      let coGrams = soil.baseCoEmissionGrams * cycle.pyrolysisIntensityMultiplier;
+      let roomCoPpm = isSteamClean ? 1.0 : Math.round((coGrams * 24.45 / (roomVolumeM3 * 0.028 * (effectiveAch * 0.9 + 0.2))) * 0.45);
+      if (roomCoPpm < 1) roomCoPpm = 1;
+
+      // Calculate PTFE Ultrafine Particles (UFP / cm³)
+      let ufpBaseline = gasket.ufpSheddingBaseline;
+      let ufpRate = isSteamClean ? 400 : Math.round(ufpBaseline * cycle.pyrolysisIntensityMultiplier * (1 / (effectiveAch * 0.4 + 0.6)));
+
+      // If forgotten teflon mat was left inside, skyrocket UFP
+      if (soil.id === 'soil-catastrophic-liner' && !isSteamClean) {
+        ufpRate = Math.max(ufpRate, 2400000);
+      }
+
+      // Calculate Hazard Score (0 - 100)
+      let hazardScore = 0;
+      if (!isSteamClean) {
+        hazardScore = Math.min(100, Math.round(
+          (roomPm25 / 12.0) + (roomCoPpm * 1.1) + (ufpRate / 40000.0 * 20.0) + (vuln.avianRiskFactor * 35.0)
+        ));
+        if (soil.id === 'soil-catastrophic-liner') hazardScore = 100;
+        if (hazardScore < 15) hazardScore = 15;
+      } else {
+        hazardScore = 4;
+      }
+
+      // Avian Risk
+      let isBirdPresent = vuln.id === 'vuln-pet-bird';
+      let avianRiskText = '0% (Safe / No Birds)';
+      if (isBirdPresent) {
+        if (isSteamClean) {
+          avianRiskText = '0% (Completely Safe with Steam)';
+        } else if (ufpRate > 35000 || peakTempC >= 260) {
+          avianRiskText = '100% FATAL LETHALITY (Avian Hemorrhage within 15-30m)';
+        } else {
+          avianRiskText = '65% Severe Toxicosis Risk';
+        }
+      }
+
+      // Human Fume Fever & Asthma Odds
+      let humanRiskText = 'Minimal (<5%)';
+      if (!isSteamClean) {
+        if (ufpRate > 150000 || roomCoPpm > 45) {
+          humanRiskText = vuln.id === 'vuln-asthma-copd' 
+            ? '95% Immediate Severe Bronchospasm' 
+            : '70% Teflon Flu (Chills, Chest Pain, Fever)';
+        } else if (ufpRate > 60000 || roomCoPpm > 25) {
+          humanRiskText = vuln.id === 'vuln-asthma-copd'
+            ? '60% Acute Asthma Attack'
+            : '35% Mucous Membrane Irritation / Headache';
+        } else {
+          humanRiskText = '15% Mild Throat Scratch / Eye Watering';
+        }
+      }
+
+      // Render Outputs
+      hazardScoreEl.textContent = hazardScore;
+      hazardProgressEl.style.width = `${hazardScore}%`;
+      metricTempEl.textContent = `${peakTempF}°F`;
+      metricTempCEl.textContent = `(${peakTempC}°C)`;
+      metricCoEl.textContent = roomCoPpm;
+      metricPm25El.textContent = roomPm25;
+      metricUfpEl.textContent = ufpRate.toLocaleString();
+      metricAvianRiskEl.textContent = avianRiskText;
+      metricHumanRiskEl.textContent = humanRiskText;
+
+      // Update Gauge Styling & Badges
+      if (hazardScore <= 20) {
+        hazardBadgeEl.textContent = 'MINIMAL RISK / SAFE';
+        hazardBadgeEl.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800';
+        gaugeContainerEl.className = 'rounded-2xl p-5 mb-5 border transition-all bg-emerald-50 border-emerald-300';
+        hazardProgressEl.className = 'h-2.5 bg-emerald-500 transition-all duration-300';
+        metricTempSubEl.textContent = 'Non-Pyrolytic Hydrothermal';
+        metricTempSubEl.className = 'text-[11px] text-emerald-700 block mt-1 font-medium';
+      } else if (hazardScore <= 60) {
+        hazardBadgeEl.textContent = 'MODERATE CAUTION';
+        hazardBadgeEl.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800';
+        gaugeContainerEl.className = 'rounded-2xl p-5 mb-5 border transition-all bg-amber-50 border-amber-300';
+        hazardProgressEl.className = 'h-2.5 bg-amber-500 transition-all duration-300';
+        metricTempSubEl.textContent = 'Active Surface Pyrolysis';
+        metricTempSubEl.className = 'text-[11px] text-amber-700 block mt-1 font-medium';
+      } else if (hazardScore <= 85) {
+        hazardBadgeEl.textContent = 'HIGH HAZARD ALERT';
+        hazardBadgeEl.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-orange-100 text-orange-900';
+        gaugeContainerEl.className = 'rounded-2xl p-5 mb-5 border transition-all bg-orange-50 border-orange-400';
+        hazardProgressEl.className = 'h-2.5 bg-orange-600 transition-all duration-300';
+        metricTempSubEl.textContent = 'Thermal Decomposition Zone';
+        metricTempSubEl.className = 'text-[11px] text-orange-700 block mt-1 font-medium';
+      } else {
+        hazardBadgeEl.textContent = 'CRITICAL EMERGENCY LEVEL';
+        hazardBadgeEl.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-200 text-rose-950 font-black animate-pulse';
+        gaugeContainerEl.className = 'rounded-2xl p-5 mb-5 border transition-all bg-rose-100/90 border-rose-500';
+        hazardProgressEl.className = 'h-2.5 bg-rose-600 transition-all duration-300';
+        metricTempSubEl.textContent = 'Extreme Pyrolytic Off-Gassing';
+        metricTempSubEl.className = 'text-[11px] text-rose-800 block mt-1 font-bold';
+      }
+
+      // Update PM2.5 Badge
+      if (roomPm25 > 250) {
+        pm25BadgeEl.textContent = 'HAZARDOUS (EPA AQI)';
+        pm25BadgeEl.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-200 text-rose-900';
+      } else if (roomPm25 > 55) {
+        pm25BadgeEl.textContent = 'UNHEALTHY (AQI)';
+        pm25BadgeEl.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800';
+      } else {
+        pm25BadgeEl.textContent = 'GOOD / MODERATE';
+        pm25BadgeEl.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800';
+      }
+
+      // Update UFP Badge
+      if (ufpRate > 150000) {
+        ufpBadgeEl.textContent = 'ACUTE FUME FEVER TIER';
+        ufpBadgeEl.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-200 text-rose-900';
+      } else if (ufpRate > 50000) {
+        ufpBadgeEl.textContent = 'AVIAN LETHAL RANGE';
+        ufpBadgeEl.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-200 text-orange-900';
+      } else {
+        ufpBadgeEl.textContent = 'LOW PARTICULATE';
+        ufpBadgeEl.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800';
+      }
+
+      // Update Alert Card
+      if (isBirdPresent && !isSteamClean) {
+        alertCardEl.className = 'rounded-2xl p-5 border transition-all bg-rose-100 border-rose-500 text-rose-950';
+        alertIconEl.textContent = '🚨';
+        alertTitleEl.textContent = 'CRITICAL BIRD EVACUATION ALERT: LETHAL TEFLON TOXICOSIS';
+        alertDescEl.textContent = 'Avian lungs will absorb pyrolyzed fluorocarbon gases and ultrafine particulates within minutes, resulting in rapid fatal pulmonary hemorrhage and suffocation. Remove all pet birds completely off the property before starting!';
+      } else if (isSteamClean) {
+        alertCardEl.className = 'rounded-2xl p-5 border transition-all bg-emerald-50 border-emerald-300 text-emerald-900';
+        alertIconEl.textContent = '🌱';
+        alertTitleEl.textContent = 'Non-Toxic Hydrothermal Operation';
+        alertDescEl.textContent = 'Cavity temperature is capped at 121°C (250°F). Zero fluoropolymers are degraded, zero carbon monoxide is generated, and air quality remains completely safe for pet birds, infants, and asthmatics.';
+      } else if (soil.id === 'soil-catastrophic-liner') {
+        alertCardEl.className = 'rounded-2xl p-5 border transition-all bg-rose-100 border-rose-600 text-rose-950';
+        alertIconEl.textContent = '☠️';
+        alertTitleEl.textContent = 'CATASTROPHIC TEFLON MAT PYROLYSIS ALERT';
+        alertDescEl.textContent = 'A non-stick PTFE liner left inside during a 500°C self-cleaning cycle vaporizes tens of grams of pure fluoropolymer directly into lethal carbonyl fluoride (COF2) and perfluoroisobutylene (PFIB). Abort cycle immediately if safe, open all windows, and evacuate.';
+      } else if (hazardScore > 75) {
+        alertCardEl.className = 'rounded-2xl p-5 border transition-all bg-orange-100 border-orange-400 text-orange-950';
+        alertIconEl.textContent = '⚠️';
+        alertTitleEl.textContent = 'Severe Indoor Air Quality Degradation';
+        alertDescEl.textContent = 'Particulate matter PM2.5 and CO emissions exceed domestic safety ceilings. Ensure maximum exterior exhaust ventilation and keep vulnerable individuals out of the kitchen.';
+      } else {
+        alertCardEl.className = 'rounded-2xl p-5 border transition-all bg-amber-50 border-amber-300 text-amber-900';
+        alertIconEl.textContent = '⚠️';
+        alertTitleEl.textContent = 'Standard Pyrolysis Cycle Caution';
+        alertDescEl.textContent = 'Moderate acrolein and particulate fumes detected. Run range hood on high, open opposing windows for cross-ventilation, and verify all interior racks have been removed.';
+      }
+    }
+
+    // Attach Change Listeners
+    [cycleSelect, soilSelect, gasketSelect, ventSelect, vulnSelect].forEach(sel => {
+      sel.addEventListener('change', calculate);
+    });
+
+    // Preset Buttons
+    presetBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const p = btn.getAttribute('data-preset');
+        if (p === 'standard') {
+          cycleSelect.value = 'mode-standard-3hr';
+          soilSelect.value = 'soil-moderate';
+          gasketSelect.value = 'fp-silicone-ptfe-gasket';
+          ventSelect.value = 'vent-recirculating-hood';
+          vulnSelect.value = 'vuln-healthy-adult';
+        } else if (p === 'heavy-soil') {
+          cycleSelect.value = 'mode-heavy-4hr';
+          soilSelect.value = 'soil-heavy';
+          gasketSelect.value = 'fp-convection-wiring';
+          ventSelect.value = 'vent-closed-apartment';
+          vulnSelect.value = 'vuln-asthma-copd';
+        } else if (p === 'bird-alert') {
+          cycleSelect.value = 'mode-standard-3hr';
+          soilSelect.value = 'soil-moderate';
+          gasketSelect.value = 'fp-silicone-ptfe-gasket';
+          ventSelect.value = 'vent-recirculating-hood';
+          vulnSelect.value = 'vuln-pet-bird';
+        } else if (p === 'teflon-mat') {
+          cycleSelect.value = 'mode-heavy-4hr';
+          soilSelect.value = 'soil-catastrophic-liner';
+          gasketSelect.value = 'fp-forgotten-mat';
+          ventSelect.value = 'vent-closed-apartment';
+          vulnSelect.value = 'vuln-pet-bird';
+        } else if (p === 'steam-clean') {
+          cycleSelect.value = 'mode-steam-clean-low';
+          soilSelect.value = 'soil-trace';
+          gasketSelect.value = 'fp-vitreous-fiberglass';
+          ventSelect.value = 'vent-ducted-hood-med';
+          vulnSelect.value = 'vuln-healthy-adult';
+        }
+        calculate();
+      });
+    });
+
+    // Copy Report to Clipboard
+    copyBtn.addEventListener('click', async () => {
+      const report = `=====================================================================
+ISITKITCHENSAFE OVEN PYROLYSIS & PTFE OFF-GASSING REPORT
+=====================================================================
+Cycle Mode:       ${cycleSelect.options[cycleSelect.selectedIndex].text}
+Soil Load:        ${soilSelect.options[soilSelect.selectedIndex].text}
+Internal Gasket:  ${gasketSelect.options[gasketSelect.selectedIndex].text}
+Ventilation:      ${ventSelect.options[ventSelect.selectedIndex].text}
+Biological Tier:  ${vulnSelect.options[vulnSelect.selectedIndex].text}
+
+DIAGNOSTIC OUTCOMES:
+- Hazard Score:       ${hazardScoreEl.textContent} / 100 (${hazardBadgeEl.textContent})
+- Peak Cavity Temp:   ${metricTempEl.textContent} ${metricTempCEl.textContent}
+- Peak Indoor PM2.5:  ${metricPm25El.textContent} μg/m³ (${pm25BadgeEl.textContent})
+- Peak Carbon Monox:  ${metricCoEl.textContent} ppm
+- PTFE Ultrafine:     ${metricUfpEl.textContent} UFP/cm³ (${ufpBadgeEl.textContent})
+- Avian Lethality:    ${metricAvianRiskEl.textContent}
+- Human Fume Fever:   ${metricHumanRiskEl.textContent}
+
+EVIDENCE-BASED SAFETY DIRECTIVES:
+1. Birds: Must be 100% evacuated off-premises for 24h prior to pyrolytic cleaning.
+2. Racks & Liners: All chrome racks, pans, and non-stick mats must be removed.
+3. Ventilation: Run exterior-vented ducted hood on high + open cross-breeze windows.
+4. Non-Toxic Option: Use baking soda + water paste overnight + vinegar spritz.
+=====================================================================
+Generated by IsItKitchenSafe.com (Evidence-Based Appliance Safety Tools)`;
+
+      try {
+        await navigator.clipboard.writeText(report);
+        const originalText = copyBtnText.textContent;
+        copyBtnText.textContent = t.copiedFeedback;
+        setTimeout(() => {
+          copyBtnText.textContent = originalText;
+        }, 2500);
+      } catch (err) {
+        console.error('Failed to copy to clipboard:', err);
+      }
+    });
+
+    // Initial Calculation Run
+    calculate();
+  });
+</script>
