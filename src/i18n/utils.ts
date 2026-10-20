@@ -74,7 +74,8 @@ const SPECIAL_PAGES = [
   'tools/microwave-plastic-steam-cover-modeler',
   'tools/stainless-steel-heavy-metal-leaching-modeler',
   'tools/oven-self-cleaning-pyrolysis-simulator',
-  'tools/freezer-burn-sublimation-modeler'
+  'tools/freezer-burn-sublimation-modeler',
+  'tools/glass-cooktop-fracture-simulator'
 ];
 
 const esSlugs = new Set([

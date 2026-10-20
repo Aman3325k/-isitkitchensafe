@@ -2,7 +2,7 @@
  * IsItKitchenSafe Autonomous Growth & Ops Engine (v2.0 - All-Day Smart Engine)
  * 
  * Continuous Operations & Growth Engine:
- * - 43 Interactive Diagnostic Tools Health & 5-Language Slug Parity (EN, ES, PT, JA, ZH-CN)
+ * - 45 Interactive Diagnostic Tools Health & 5-Language Slug Parity (EN, ES, PT, JA, ZH-CN)
  * - Cloudflare Pages _redirects budget monitor (2,000 line ceiling) & Edge Middleware sync
  * - Multi-Language Corpus & Database Integrity (55+ critical data assets)
  * - Structured Data (JSON-LD FAQPage, BreadcrumbList & Article/WebApplication) compliance audit
@@ -27,7 +27,7 @@ if (!fs.existsSync(LOGS_DIR)) {
   fs.mkdirSync(LOGS_DIR, { recursive: true });
 }
 
-// 43 Flagship Interactive Tools Registry
+// 45 Flagship Interactive Tools Registry
 const TOOLS_REGISTRY = [
   { slug: 'pan-scratch-inspector', name: 'AI Pan Scratch & Coating Damage Inspector', category: 'Materials', component: 'PanScratchInspector.astro' },
   { slug: 'cookware-brand-transparency-index', name: 'Cookware Brand Transparency & Greenwashing Index', category: 'Materials', component: 'CookwareBrandIndex.astro' },
@@ -72,7 +72,8 @@ const TOOLS_REGISTRY = [
   { slug: 'microwave-plastic-steam-cover-modeler', name: 'Microwave Plastic Steam Cover Phthalate Condensate Dripping Modeler', category: 'Toxicology', component: 'MicrowavePlasticSteamCoverModeler.astro', dataFile: 'microwave-plastic-steam-cover-data.json' },
   { slug: 'stainless-steel-heavy-metal-leaching-modeler', name: 'Stainless Steel Cookware Heavy Metal (Nickel & Chromium) Acidic Leaching Modeler', category: 'Metallurgy & Toxicology', component: 'StainlessSteelHeavyMetalLeachingModeler.astro', dataFile: 'stainless-steel-heavy-metal-data.json' },
   { slug: 'oven-self-cleaning-pyrolysis-simulator', name: 'Oven Self-Cleaning Pyrolysis Fume & Fluoropolymer PTFE Off-Gassing Simulator', category: 'Thermal Physics & Toxicology', component: 'OvenSelfCleaningPyrolysisSimulator.astro', dataFile: 'oven-self-cleaning-pyrolysis-data.json' },
-  { slug: 'freezer-burn-sublimation-modeler', name: 'Freezer Burn, Ice Sublimation & Lipid Peroxidation Modeler', category: 'Thermodynamics & Food Science', component: 'FreezerBurnSublimationModeler.astro', dataFile: 'freezer-burn-sublimation-data.json' }
+  { slug: 'freezer-burn-sublimation-modeler', name: 'Freezer Burn, Ice Sublimation & Lipid Peroxidation Modeler', category: 'Thermodynamics & Food Science', component: 'FreezerBurnSublimationModeler.astro', dataFile: 'freezer-burn-sublimation-data.json' },
+  { slug: 'glass-cooktop-fracture-simulator', name: 'Glass Cooktop Point-Load & Thermal Shock Fracture Simulator', category: 'Ceramic Physics', component: 'GlassCooktopFractureSimulator.astro', dataFile: 'glass-cooktop-fracture-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -236,7 +237,8 @@ function auditDatasets() {
     'microwave-plastic-steam-cover-data.json',
     'stainless-steel-heavy-metal-data.json',
     'oven-self-cleaning-pyrolysis-data.json',
-    'freezer-burn-sublimation-data.json'
+    'freezer-burn-sublimation-data.json',
+    'glass-cooktop-fracture-data.json'
   ];
 
   const datasetStats = {};
@@ -487,24 +489,17 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Glass Cooktop Point-Load & Thermal Shock Fracture Simulator',
-      category: 'Ceramic Physics',
-      intent: 'Models ceramic glass radiant and induction cooktop point impacts, cast iron dragging shear stresses, concentrated sugar pitting, and thermal shock delta.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '85,000+ US impressions'
-    },
-    {
       title: 'Dishwasher Thermal Sanitize & Norovirus Lethality Calculator',
       category: 'Microbiology & Sanitation',
       intent: 'Models NSF/ANSI 184 residential and commercial sanitize cycles (150°F wash, 160°F final rinse dwell), thermal decimal reduction (D-value) of human norovirus, Salmonella, and Listeria.',
-      priority: 'HIGH',
+      priority: 'CRITICAL_HIGH',
       estimatedMonthlyVolume: '65,000+ US impressions'
     },
     {
       title: 'Food Processor Centrifugal Stress & Polycarbonate Blade Fatigue Modeler',
       category: 'Materials Physics',
       intent: 'Models high-torque S-blade shear stress fatigue, dishwasher stress crazing of polycarbonate work bowls, and stainless steel micro-chipping into food.',
-      priority: 'MEDIUM',
+      priority: 'HIGH',
       estimatedMonthlyVolume: '42,000+ US impressions'
     },
     {
@@ -513,6 +508,13 @@ function auditGrowthOpportunities() {
       intent: 'Models raw poultry drip capillarity, convection fan microbial aerosol dispersal onto open produce, and chemical sanitization contact times.',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '38,000+ US impressions'
+    },
+    {
+      title: 'Gas Stove Benzene & Indoor Nitrogen Dioxide (NO2) Exposure Calculator',
+      category: 'Combustion Toxicology',
+      intent: 'Models methane incomplete combustion, benzene fugitive emissions, indoor NO2 spike thresholds, and range hood capture face velocities.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '55,000+ US impressions'
     }
   ];
 
@@ -805,7 +807,7 @@ Usage:
 Options:
   (no args)             Run full master cycle (audits + Astro build + link check)
   --quick               Fast validation cycle (< 2s) across all checks
-  --tools               Audit all 43 flagship tools across 5 locales (215 pages)
+  --tools               Audit all 45 flagship tools across 5 locales (215 pages)
   --parity              Verify tool registry vs. Astro component parity (0 orphans)
   --redirects           Audit Cloudflare Pages redirect limits & edge map
   --datasets            Audit all 55+ data files and multilingual integrity
