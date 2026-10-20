@@ -75,7 +75,8 @@ const SPECIAL_PAGES = [
   'tools/stainless-steel-heavy-metal-leaching-modeler',
   'tools/oven-self-cleaning-pyrolysis-simulator',
   'tools/freezer-burn-sublimation-modeler',
-  'tools/glass-cooktop-fracture-simulator'
+  'tools/glass-cooktop-fracture-simulator',
+  'tools/dishwasher-thermal-sanitize-calculator'
 ];
 
 const esSlugs = new Set([

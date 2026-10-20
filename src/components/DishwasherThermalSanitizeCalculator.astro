@@ -1,0 +1,920 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import sanitizeData from '../data/dishwasher-thermal-sanitize-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  cycleLabel: string;
+  cycleHelp: string;
+  pathogenLabel: string;
+  pathogenHelp: string;
+  detergentLabel: string;
+  detergentHelp: string;
+  soilLabel: string;
+  soilHelp: string;
+  hydraulicLabel: string;
+  hydraulicHelp: string;
+  presetsTitle: string;
+  presetGastro: string;
+  presetRawChicken: string;
+  presetBabyBottles: string;
+  presetNestedBowls: string;
+  presetSporeMyth: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  logReductionLabel: string;
+  killPercentageLabel: string;
+  nsfComplianceLabel: string;
+  effectiveTempLabel: string;
+  dValueLabel: string;
+  chemBoostLabel: string;
+  clinicalRiskLabel: string;
+  actionProtocolLabel: string;
+  mechanicsTitle: string;
+  mechanicsSub: string;
+  tableTitle: string;
+  tableSub: string;
+  colPathogen: string;
+  colType: string;
+  colD60: string;
+  colTargetLog: string;
+  colRisk: string;
+  rulesTitle: string;
+  rulesSub: string;
+  rule1Title: string;
+  rule1Text: string;
+  rule2Title: string;
+  rule2Text: string;
+  rule3Title: string;
+  rule3Text: string;
+  rule4Title: string;
+  rule4Text: string;
+  copyReportBtn: string;
+  copiedFeedback: string;
+}
+
+const DICTIONARY: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Microbiology & NSF/ANSI 184 Warewashing Modeler",
+    title: "Dishwasher Thermal Sanitize & Norovirus Lethality Calculator",
+    subtitle: "Model time-temperature thermal inactivation, D-value decimal reduction, and chemical oxygen bleach synergy across human norovirus, Salmonella, Listeria, and bacterial endospores.",
+    controlsTitle: "Dishwasher Cycle & Microbiological Inoculum Parameters",
+    controlsSub: "Configure appliance wash/rinse thermal cycles, target microbial pathogens, detergent bleach chemistry, organic soil shields, and hydraulic spray arm conditions.",
+    cycleLabel: "Dishwasher Wash & Rinse Cycle:",
+    cycleHelp: "Select the thermal profile, rinse dwell duration, and heated dry parameters of your appliance.",
+    pathogenLabel: "Target Microbial Pathogen or Bio-Indicator:",
+    pathogenHelp: "Select bacterial, viral, or spore organism with specific D-values and thermal resistance z-values.",
+    detergentLabel: "Detergent Chemistry & Active Oxidizers:",
+    detergentHelp: "Sodium percarbonate oxygen bleach vs standard enzyme gels vs eco neutral formulas.",
+    soilLabel: "Organic Soil & Food Shielding Matrix:",
+    soilHelp: "Clean pre-rinsed surfaces vs greasy lipid films vs dehydrated protein/starch matrices.",
+    hydraulicLabel: "Hydraulic Spray Arm & Racking Loading:",
+    hydraulicHelp: "Unobstructed water jet impingement vs nested bowls vs physically blocked spray arms.",
+    presetsTitle: "High-Intent Household Presets:",
+    presetGastro: "Household Stomach Flu (Norovirus) on NSF Sanitize Cycle",
+    presetRawChicken: "Raw Chicken Cutting Board & Plate Washed on Eco Wash",
+    presetBabyBottles: "Infant Baby Bottles & Teats on NSF Sanitize Cycle",
+    presetNestedBowls: "Overcrowded Nested Bowls with Dried Cheese on Normal Wash",
+    presetSporeMyth: "Home Canning Myth: Attempting to Sterilize C. Botulinum Spores",
+    diagnosticTitle: "Thermal Lethality & Sanitation Scorecard",
+    diagnosticSub: "Real-time Bigelow decimal reduction calculations, NSF/ANSI 184 standard verification, and clinical safety assessment.",
+    logReductionLabel: "Total Microbial Log Reduction",
+    killPercentageLabel: "Pathogen Inactivation Lethality",
+    nsfComplianceLabel: "NSF/ANSI 184 Sanitize Standard",
+    effectiveTempLabel: "Effective Plate Peak Temperature",
+    dValueLabel: "Decimal Reduction Time (D_T at Peak)",
+    chemBoostLabel: "Chemical Bleach Log Synergy",
+    clinicalRiskLabel: "Microbiological Hazard & Clinical Risk",
+    actionProtocolLabel: "Recommended Household Action Protocol",
+    mechanicsTitle: "Microbiology Kinetics & Thermal Inactivation Mechanics",
+    mechanicsSub: "Mathematical formulas governing thermal destruction of foodborne microorganisms in domestic warewashing.",
+    tableTitle: "Pathogen Thermal Resistance Reference Matrix (D-Values & z-Values)",
+    tableSub: "Comparison of heat resistance across foodborne bacteria, enteric viruses, and bacterial endospores.",
+    colPathogen: "Microorganism",
+    colType: "Classification",
+    colD60: "D-Value at 60°C (140°F)",
+    colTargetLog: "NSF/FSIS Log Target",
+    colRisk: "Clinical Health Threat",
+    rulesTitle: "4 Critical Kitchen Warewashing Sanitation Rules",
+    rulesSub: "Evidence-based protocols to maximize viral and bacterial lethality and eliminate cross-contamination.",
+    rule1Title: "1. The Norovirus Sanitize Mandate: Always Use Sanitize + Oxygen Bleach Pods",
+    rule1Text: "Human norovirus is an extraordinarily hardy non-enveloped virus that can survive standard 110°F–120°F (43°C–49°C) eco washes. When stomach flu is present in the home, you MUST run the certified Sanitize cycle (reaching 155°F–160°F / 68°C–71°C final rinse) and use powder or multi-chamber pods formulated with sodium percarbonate. The hot water releases active hydrogen peroxide which oxidizes the viral protein capsid, preventing household outbreaks.",
+    rule2Title: "2. The Stalled Spray Arm Check: Spin Arms Before Every Cycle",
+    rule2Text: "Before closing the door, manually spin both upper and lower spray arms 360 degrees with your hand. A single tall cutting board, pan handle, or spatula protruding through the rack can block arm rotation. A stalled spray arm leaves up to 70% of dishware in a stagnant shadow zone with a 20°F (11°C) temperature drop, resulting in total sanitization failure.",
+    rule3Title: "3. The Bacterial Endospore Limitation: Dishwashers CANNOT Sterilize Canning Jars",
+    rule3Text: "A widespread home canning myth suggests running glass jars through a dishwasher sanitize cycle sterilizes them for canning. This is dangerously false! Dishwashers peak at 160°F (71°C). Bacterial endospores of Clostridium botulinum survive boiling water (212°F / 100°C) for hours and require pressurized autoclaves at 240°F–250°F (116°C–121°C). Always use approved pressure canners for low-acid canning.",
+    rule4Title: "4. The Rinse Aid Rapid-Drying Rule: Deprive Bacteria of Residual Moisture",
+    rule4Text: "Microorganisms require free water (water activity a_w > 0.85) to survive and proliferate after a wash finishes. High-quality liquid rinse aid lowers water surface tension, causing hot water to sheet off dishware in seconds. Rapid drying denies surviving bacteria the damp environment needed to re-grow biofilms inside dark, humid dishwasher cabinets.",
+    copyReportBtn: "📋 Copy Sanitization Report",
+    copiedFeedback: "✓ Sanitization Report Copied to Clipboard!"
+  },
+  es: {
+    badge: "Microbiología y Modelo de Higienización NSF/ANSI 184",
+    title: "Calculadora de Higienización Térmica y Letalidad contra Norovirus en Lavavajillas",
+    subtitle: "Simule inactivación térmica tiempo-temperatura, reducción decimal valor D y sinergia de blanqueadores oxigenados contra norovirus, Salmonella, Listeria y esporas.",
+    controlsTitle: "Parámetros del Ciclo de Lavado y Carga Microbiológica",
+    controlsSub: "Configure los ciclos térmicos del lavavajillas, patógenos diana, blanqueador del detergente, escudos de grasa o almidón y estado de los brazos difusores.",
+    cycleLabel: "Ciclo de Lavado y Aclarado del Lavavajillas:",
+    cycleHelp: "Seleccione el perfil térmico, duración del aclarado final y secado con calor.",
+    pathogenLabel: "Patógeno Microbiano o Bioindicador:",
+    pathogenHelp: "Seleccione bacteria, virus o espora con sus valores D de resistencia térmica específicos.",
+    detergentLabel: "Química del Detergente y Oxidantes Activos:",
+    detergentHelp: "Polvo con percarbonato de sodio vs geles con enzimas vs fórmulas neutras ecológicas.",
+    soilLabel: "Restos Orgánicos y Matriz de Blindaje:",
+    soilHelp: "Platos preaclarados vs capas de grasa animal vs almidones y huevo deshidratados.",
+    hydraulicLabel: "Disposición Hidráulica y Brazos Difusores:",
+    hydraulicHelp: "Chorros sin obstrucción vs platos y cuencos amontonados vs brazo bloqueado.",
+    presetsTitle: "Casos Prácticos Frecuentes:",
+    presetGastro: "Brote de Gastroenteritis (Norovirus) en Ciclo Sanitize NSF",
+    presetRawChicken: "Tabla de Pollo Crudo y Plato Lavados en Modo Eco",
+    presetBabyBottles: "Biberones y Tetinas de Bebé en Ciclo Sanitize NSF",
+    presetNestedBowls: "Cuencos Amontonados con Queso Seco en Lavado Normal",
+    presetSporeMyth: "Mito de Conservas: Intentar Esterilizar Esporas de C. Botulinum",
+    diagnosticTitle: "Resultados de Letalidad Térmica e Higienización",
+    diagnosticSub: "Cálculos en tiempo real del modelo de Bigelow, cumplimiento del estándar NSF/ANSI 184 y evaluación de riesgo clínico.",
+    logReductionLabel: "Reducción Logarítmica Total",
+    killPercentageLabel: "Porcentaje de Inactivación Microbiana",
+    nsfComplianceLabel: "Estándar NSF/ANSI 184 Sanitize",
+    effectiveTempLabel: "Temperatura Pico Efectiva en la Vajilla",
+    dValueLabel: "Tiempo de Reducción Decimal (Valor D_T en Pico)",
+    chemBoostLabel: "Aporte Químico del Percarbonato",
+    clinicalRiskLabel: "Peligro Microbiológico y Riesgo Clínico",
+    actionProtocolLabel: "Protocolo de Acción Recomendado",
+    mechanicsTitle: "Cinética Microbiológica y Mecánica de Inactivación Térmica",
+    mechanicsSub: "Fórmulas matemáticas que rigen la destrucción de patógenos en el lavado de vajilla doméstico.",
+    tableTitle: "Matriz de Resistencia Térmica de Patógenos (Valores D y z)",
+    tableSub: "Comparación de termorresistencia entre bacterias de transmisión alimentaria, virus entéricos y esporas.",
+    colPathogen: "Microorganismo",
+    colType: "Clasificación",
+    colD60: "Valor D a 60°C (minutos)",
+    colTargetLog: "Objetivo Log NSF/FSIS",
+    colRisk: "Amenaza para la Salud",
+    rulesTitle: "4 Reglas Críticas de Higienización en el Lavavajillas",
+    rulesSub: "Protocolos científicos para maximizar la letalidad contra virus y bacterias y evitar infecciones cruzadas.",
+    rule1Title: "1. Mandato contra el Norovirus: Use Ciclo Sanitize y Detergente con Percarbonato",
+    rule1Text: "El norovirus humano es un virus sin envoltura muy resistente que sobrevive a los lavados eco a 40°C–45°C. Si hay gastroenteritis en casa, DEBE usar el ciclo Sanitize certificado (con aclarado final a 68°C–71°C) y pastillas con percarbonato sódico. El agua caliente libera peróxido de hidrógeno que destruye la cápsula del virus.",
+    rule2Title: "2. Revise los Brazos Difusores: Gírelos a Mano Antes de Empezar",
+    rule2Text: "Antes de cerrar la puerta, gire los brazos difusores 360 grados con la mano. Una tabla de cortar alta o una cuchara larga pueden trabar el brazo. Un aspersor atascado deja el 70% de los platos en una zona fría con una caída de 11°C, arruinando la desinfección.",
+    rule3Title: "3. Límite de las Esporas: El Lavavajillas NO Esteriliza Botes de Conserva",
+    rule3Text: "Existe la peligrosa creencia de que lavar los frascos en el lavavajillas los esteriliza para hacer conservas caseras. ¡Es falso y peligroso! El lavavajillas alcanza unos 71°C, mientras que las esporas de Clostridium botulinum resisten el agua hirviendo (100°C) durante horas. Las conservas de baja acidez requieren olla a presión a 121°C.",
+    rule4Title: "4. Regla del Secado Rápido con Abrillantador: Sin Humedad no hay Bacterias",
+    rule4Text: "Las bacterias necesitan agua libre para sobrevivir tras el lavado. El abrillantador líquido reduce la tensión superficial del agua, haciendo que resbale de inmediato. La vajilla seca en minutos impide que las bacterias residuales formen biopelículas en el interior húmedo del lavavajillas.",
+    copyReportBtn: "📋 Copiar Informe de Higienización",
+    copiedFeedback: "✓ ¡Informe Copiado al Portapapeles!"
+  },
+  pt: {
+    badge: "Microbiologia e Modelo de Higienização NSF/ANSI 184",
+    title: "Calculadora de Higienização Térmica e Letalidade de Norovírus em Lava-Louças",
+    subtitle: "Simule inativação térmica tempo-temperatura, redução decimal valor D e sinergia de alvejante oxigenado contra norovírus, Salmonella, Listeria e esporos.",
+    controlsTitle: "Parâmetros do Ciclo de Lavagem e Inóculo Microbiológico",
+    controlsSub: "Configure os ciclos térmicos da lava-louças, patógenos-alvo, alvejante no detergente, blindagem por gordura/amido e rotação dos braços aspersores.",
+    cycleLabel: "Ciclo de Lavagem e Enxágue da Lava-Louças:",
+    cycleHelp: "Selecione o perfil térmico, tempo de enxágue final e secagem com aquecimento.",
+    pathogenLabel: "Patógeno Microbiano ou Bioindicador:",
+    pathogenHelp: "Selecione a bactéria, vírus ou esporo com seus valores D e z específicos.",
+    detergentLabel: "Química do Detergente e Oxidantes Ativos:",
+    detergentHelp: "Pó com percarbonato de sódio vs géis com enzimas vs fórmulas ecológicas neutras.",
+    soilLabel: "Resíduos Orgânicos e Matriz de Proteção:",
+    soilHelp: "Pratos pré-enxaguados vs filmes de gordura animal vs crostas secas de amido e ovo.",
+    hydraulicLabel: "Carga Hidráulica e Rotação dos Aspersores:",
+    hydraulicHelp: "Jatos livres desobstruídos vs tigelas amontoadas vs braço travado mecanicamente.",
+    presetsTitle: "Casos Práticos do Cotidiano:",
+    presetGastro: "Surto de Gastroenterite (Norovírus) em Ciclo Sanitize NSF",
+    presetRawChicken: "Tábua de Frango Cru e Prato Lavados em Ciclo Eco",
+    presetBabyBottles: "Mamadeiras e Bicos de Bebê em Ciclo Sanitize NSF",
+    presetNestedBowls: "Tigelas Sobrepostas com Queijo Seco em Lavagem Normal",
+    presetSporeMyth: "Mito de Conservas: Tentar Esterilizar Esporos de C. Botulinum",
+    diagnosticTitle: "Resultados de Letalidade Térmica e Higienização",
+    diagnosticSub: "Cálculos em tempo real do modelo de Bigelow, verificação da norma NSF/ANSI 184 e análise de risco clínico.",
+    logReductionLabel: "Redução Logarítmica Total",
+    killPercentageLabel: "Porcentagem de Inativação Microbiana",
+    nsfComplianceLabel: "Padrão NSF/ANSI 184 Sanitize",
+    effectiveTempLabel: "Temperatura Pico Efetiva na Louça",
+    dValueLabel: "Tempo de Redução Decimal (Valor D_T no Pico)",
+    chemBoostLabel: "Ganho Químico por Percarbonato",
+    clinicalRiskLabel: "Perigo Microbiológico e Risco Clínico",
+    actionProtocolLabel: "Protocolo de Ação Recomendado",
+    mechanicsTitle: "Cinética Microbiológica e Mecânica de Inativação Térmica",
+    mechanicsSub: "Fórmulas matemáticas que regem a destruição térmica de micro-organismos na lava-louças.",
+    tableTitle: "Matriz de Resistência Térmica de Patógenos (Valores D e z)",
+    tableSub: "Comparação de termorresistência entre bactérias patogênicas, vírus entéricos e esporos bacterianos.",
+    colPathogen: "Micro-organismo",
+    colType: "Classificação",
+    colD60: "Valor D a 60°C (minutos)",
+    colTargetLog: "Meta Log NSF/FSIS",
+    colRisk: "Ameaça à Saúde",
+    rulesTitle: "4 Regras Críticas de Higienização na Lava-Louças",
+    rulesSub: "Diretrizes com respaldo científico para eliminar vírus e bactérias e evitar contaminação cruzada.",
+    rule1Title: "1. Mandato contra o Norovírus: Use Ciclo Sanitize e Detergente com Percarbonato",
+    rule1Text: "O norovírus humano é extremamente resistente e sobrevive a lavagens ecológicas a 40°C–45°C. Em caso de gastroenterite na família, utilize OBRIGATORIAMENTE o ciclo Sanitize certificado (enxágue a 68°C–71°C) e pastilhas com percarbonato de sódio, liberando peróxido de hidrogênio que quebra a cápsula viral.",
+    rule2Title: "2. Verifique os Aspersores: Gire-os Manualmente Antes de Ligar",
+    rule2Text: "Antes de fechar a porta, gire os braços aspersores superior e inferior com a mão. Uma tábua alta ou espátula longa pode bloquear o giro. O aspersor parado deixa 70% da louça em zona fria com queda de até 11°C, comprometendo toda a desinfecção.",
+    rule3Title: "3. O Limite dos Esporos: A Lava-Louças NÃO Esteriliza Potes de Conserva",
+    rule3Text: "Acreditar que a lava-louças esteriliza potes para conservas caseiras é um mito perigoso. Ela atinge no máximo 71°C, enquanto os esporos de Clostridium botulinum sobrevivem à água fervente (100°C) por horas. Alimentos de baixa acidez exigem panela de pressão a 121°C.",
+    rule4Title: "4. Regra da Secagem com Secante: Sem Água Não Há Proliferação",
+    rule4Text: "Bactérias precisam de umidade livre para se multiplicar após a lavagem. O líquido secante quebra a tensão superficial da água, fazendo com que escorra rapidamente. Louças secas em minutos impedem o surgimento de biofilmes no ambiente escuro e quente da máquina.",
+    copyReportBtn: "📋 Copiar Relatório de Higienização",
+    copiedFeedback: "✓ Relatório Copiado para a Área de Transferência!"
+  },
+  'zh-cn': {
+    badge: "微生物学与 NSF/ANSI 184 餐具消毒工程模型",
+    title: "洗碗机高温除菌与诺如病毒致死率计算器",
+    subtitle: "基于热力学与微生物动力学模型，测算洗碗机时间-温度消杀曲线、D值对数级衰减、过碳酸钠氧系漂白协同除菌及肉毒杆菌芽孢灭活阈值。",
+    controlsTitle: "洗碗机运行程序与微生物污染参数设置",
+    controlsSub: "配置洗碗机水温与漂洗驻留时间、目标病原微生物、洗涤剂化学氧化活性、食物残渣生物膜屏蔽及喷淋臂水力阻挡状态。",
+    cycleLabel: "洗碗机运行程序与水温：",
+    cycleHelp: "选择洗碗机主洗/漂洗峰值温度、高温漂洗时长及加热烘干设置。",
+    pathogenLabel: "目标病原微生物或生物指示物：",
+    pathogenHelp: "选择具有特定 D 值（热致死时间）和 z 值的细菌、病毒或芽孢。",
+    detergentLabel: "洗涤剂化学配方与活性氧成分：",
+    detergentHelp: "含过碳酸钠的高碱性洗碗粉/三合一凝珠 vs 普通酵素凝胶 vs 环保中性洗涤剂。",
+    soilLabel: "有机物残留与食物油污屏蔽基质：",
+    soilHelp: "冲洗干净餐具 vs 动物油脂疏水膜 vs 干燥顽固蛋液淀粉硬壳。",
+    hydraulicLabel: "喷淋臂水力冲刷与摆放工况：",
+    hydraulicHelp: "无遮挡360度强力冲刷 vs 深度重叠碗碟盲区 vs 高盘卡死喷淋臂。",
+    presetsTitle: "常见高频家庭场景预设：",
+    presetGastro: "家庭突发诺如病毒胃肠炎（NSF高温消毒程序）",
+    presetRawChicken: "切生鸡肉砧板与餐盘使用节能环保程序清洗",
+    presetBabyBottles: "婴儿奶瓶与硅胶奶嘴使用 NSF 消毒程序清洗",
+    presetNestedBowls: "重叠碗碟附着干酪使用普通洗涤程序",
+    presetSporeMyth: "自制果酱罐头迷信：试图用洗碗机灭活肉毒杆菌芽孢",
+    diagnosticTitle: "热致死率动力学与卫生安全评估面板",
+    diagnosticSub: "实时计算 Bigelow 对数级杀灭率、NSF/ANSI 184 标准达标认证及临床感染风险等级。",
+    logReductionLabel: "微生物总对数杀灭率 (Log Reduction)",
+    killPercentageLabel: "病原微生物灭活百分比",
+    nsfComplianceLabel: "NSF/ANSI 184 消毒认证状态",
+    effectiveTempLabel: "餐具表面实际峰值有效水温",
+    dValueLabel: "峰值温度十倍致死时间 (D_T 值)",
+    chemBoostLabel: "过碳酸钠化学氧化灭菌增益",
+    clinicalRiskLabel: "微生物危害与临床健康威胁",
+    actionProtocolLabel: "科学操作与应急消杀指南",
+    mechanicsTitle: "微生物动力学与热力杀灭机制深度解析",
+    mechanicsSub: "解析家庭餐具清洗中控制食源性致病菌与无包膜病毒热力裂解的物理化学公式。",
+    tableTitle: "常见致病微生物热阻特性参考表 (D值与z值)",
+    tableSub: "对比食源性细菌、无包膜肠道病毒与细菌内生芽孢的热稳定性及消杀要求。",
+    colPathogen: "微生物种类",
+    colType: "生物学分类",
+    colD60: "60°C 下 D 值 (分钟)",
+    colTargetLog: "NSF/FSIS 杀灭目标",
+    colRisk: "临床致病危险",
+    rulesTitle: "洗碗机科学高温消毒 4 大核心红线",
+    rulesSub: "基于微生物学与公共卫生指南的操作准则，杜绝病原体二次污染。",
+    rule1Title: "1. 诺如病毒应对准则：必须开启 Sanitize 消毒程序并配合氧系漂白洗碗粉",
+    rule1Text: "人类诺如病毒是一种非常顽固的无包膜单链 RNA 病毒，在 40°C–45°C 的环保洗程序中无法灭活。当家中有成员发生急性肠胃炎时，必须选择带 NSF 184 认证的 Sanitize 高温消毒程序（最终漂洗达 68°C–71°C 并维持足够时间），且必须搭配含过碳酸钠（活性氧）的洗碗粉或多合一凝珠，利用双氧水活性氧氧化衣壳蛋白彻底杀灭病毒。",
+    rule2Title: "2. 喷淋臂卡死自检：启动洗碗机前务必手动旋转一圈",
+    rule2Text: "关门启动前，务必用手将上下喷淋臂各自旋转 360 度。锅铲把手、长刀或超大砧板若卡住喷淋臂，喷淋臂将处于静止状态，导致高达 70% 的餐具处于冷水死角，局部水温骤降超过 11°C，导致洗涤除菌完全失效。",
+    rule3Title: "3. 细菌芽孢灭活极限：洗碗机绝不能用于自制罐头的灭菌",
+    rule3Text: "民间常有使用洗碗机消毒程序对果酱或肉类罐头瓶灭菌的说法，这是极度危险的致命误区！洗碗机最高温度仅约 71°C，而肉毒杆菌（C. botulinum）的内生芽孢在 100°C 沸水中仍可存活数小时。低酸度自制罐头必须使用 121°C 的医用级高压压力罐进行灭菌。",
+    rule4Title: "4. 光亮剂快速干燥法则：剥夺细菌残存水分滋生温床",
+    rule4Text: "微生物在洗涤完成后若想继续增殖，必须依赖游离水（水分活度 a_w > 0.85）。液体光亮剂（漂洗剂）能大幅降低水分子表面张力，使水流呈薄膜状快速滑落。餐具在几分钟内彻底干燥，剥夺残留细菌在密闭潮湿箱体内形成生物膜的水分条件。",
+    copyReportBtn: "📋 复制消杀评估报告",
+    copiedFeedback: "✓ 消杀评估报告已复制至剪贴板！"
+  },
+  ja: {
+    badge: "微生物学＆NSF/ANSI 184 食器洗浄衛生工学モデラー",
+    title: "食洗機熱消毒・ノロウイルス致死率計算シミュレーター",
+    subtitle: "熱力学と微生物死滅速度論（Bigelowモデル）に基づき、食洗機の温度・滞留時間、D値対数減少率、酸素系漂白剤シナジー、芽胞耐熱限界を算出します。",
+    controlsTitle: "食洗機洗浄プログラムと微生物汚染パラメータ設定",
+    controlsSub: "洗浄・すすぎ温度プロファイル、対象病原菌・ウイルス、洗剤の化学的酸化能、有機物汚れシールド、ノズル水力条件を設定します。",
+    cycleLabel: "食洗機コースと運転温度：",
+    cycleHelp: "洗浄温度、高温すすぎ保持時間、ヒーター乾燥の有無を選択します。",
+    pathogenLabel: "対象微生物または指標菌：",
+    pathogenHelp: "固有の耐熱性（D値・z値）を持つ細菌、ウイルス、芽胞を選択します。",
+    detergentLabel: "洗剤の化学組成と活性酸素成分：",
+    detergentHelp: "過炭酸ナトリウム配合粉末/ジェルタブ vs 酵素のみ中性液体洗剤。",
+    soilLabel: "有機物汚れ・食品残渣シールド：",
+    soilHelp: "予洗い済み平滑面 vs 油脂疎水性皮膜 vs 乾燥卵・デンプン被膜。",
+    hydraulicLabel: "回転ノズルと食器の配置工況：",
+    hydraulicHelp: "全方位直接噴射 vs 重ね置きによる死角 vs 障害物によるノズル停止。",
+    presetsTitle: "代表的な家庭内シナリオプリセット：",
+    presetGastro: "家庭内ノロウイルス胃腸炎発生時（NSF高温除菌コース）",
+    presetRawChicken: "生鶏肉を切ったまな板と皿をエコ節電コースで洗浄",
+    presetBabyBottles: "乳幼児用哺乳瓶と乳首パーツをNSF除菌コースで洗浄",
+    presetNestedBowls: "チーズが乾燥付着した重ね置き皿を標準コースで洗浄",
+    presetSporeMyth: "保存食の誤信：ボツリヌス菌芽胞の食洗機滅菌を試行",
+    diagnosticTitle: "熱致死率動力学＆衛生安全性診断スコアカード",
+    diagnosticSub: "Bigelowモデル対数死滅率のリアルタイム計算、NSF/ANSI 184基準判定、臨床感染リスクの評価。",
+    logReductionLabel: "微生物総対数減少率 (Log Reduction)",
+    killPercentageLabel: "病原微生物不活化率（致死率％）",
+    nsfComplianceLabel: "NSF/ANSI 184 除菌規格判定",
+    effectiveTempLabel: "食器表面実効ピーク温度",
+    dValueLabel: "ピーク温度での90%死滅時間 (D_T値)",
+    chemBoostLabel: "過炭酸ナトリウム化学的死滅ゲイン",
+    clinicalRiskLabel: "微生物学的危険度と臨床リスク",
+    actionProtocolLabel: "推奨される科学的対処手順",
+    mechanicsTitle: "微生物熱死滅速度論と消毒メカニズム",
+    mechanicsSub: "家庭用食器洗浄における病原性細菌およびノンエンベロープウイルスの熱分解を支配する計算式。",
+    tableTitle: "病原微生物耐熱特性マトリクス（D値およびz値）",
+    tableSub: "食中毒起因細菌、腸管系ウイルス、細菌芽胞の耐熱性パラメータ比較。",
+    colPathogen: "微生物名",
+    colType: "分類",
+    colD60: "60°CでのD値 (分)",
+    colTargetLog: "NSF/FSIS目標対数",
+    colRisk: "臨床的健康影響",
+    rulesTitle: "食洗機による衛生除菌の4大鉄則",
+    rulesSub: "感染症拡大と二次汚染を防ぐための科学的根拠に基づいた手順。",
+    rule1Title: "1. ノロウイルス対策の鉄則：Sanitizeコース＋酸素系漂白粉末洗剤を使用",
+    rule1Text: "ヒトノロウイルスはエンベロープを持たない強固なカプシド構造を持ち、40°C–45°Cのエコ洗浄では不活化できません。胃腸炎発症時は、必ずNSF 184認証のSanitizeコース（最終すすぎ68°C–71°C維持）を選択し、過炭酸ナトリウムを含む粉末洗剤を使用してください。高温で発生する過酸化水素ラジカルがカプシドを酸化分解します。",
+    rule2Title: "2. ノズル回転の手動点検：運転開始前に必ず手で360度回す",
+    rule2Text: "扉を閉める前に、上下のノズルを手で回してください。まな板の角やお玉の柄が引っかかるとノズルが停止し、食器の70%が温水死角（11°C以上の温度低下）となり、除菌効果が完全に喪失します。",
+    rule3Title: "3. 細菌芽胞の限界：食洗機は保存瓶の滅菌には使えない",
+    rule3Text: "食洗機の除菌機能で手作りジャムやピクルスの瓶を滅菌できるという誤信がありますが、極めて危険です。食洗機は最高でも約71°Cであり、ボツリヌス菌（C. botulinum）の耐熱性芽胞は100°Cの熱湯でも数時間生存します。低酸性食品の瓶詰めには121°Cの圧力釜（圧力鍋）が必須です。",
+    rule4Title: "4. リンス剤による急速乾燥：残留水分を奪い細菌の再増殖を防止",
+    rule4Text: "洗浄完了後に細菌が増殖するには自由水（水分活性 a_w > 0.85）が必要です。液状リンス剤（乾燥仕上げ剤）は水の表面張力を低下させ、水滴を残さず数分で完全乾燥させます。湿気のある庫内でのバイオフィルム再形成を物理的に遮断します。",
+    copyReportBtn: "📋 除菌診断レポートをコピー",
+    copiedFeedback: "✓ レポートをクリップボードにコピーしました！"
+  }
+};
+
+const d = DICTIONARY[lang] || DICTIONARY.en;
+---
+
+<div class="bg-surface-soft border border-hairline rounded-3xl p-6 md:p-10 shadow-xs my-8" id="dishwasher-sanitize-calc-app">
+  <!-- Badge & Header -->
+  <div class="mb-8">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-emerald-100 text-emerald-950 mb-3 border border-emerald-200">
+      <span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+      {d.badge}
+    </div>
+    <h2 class="text-2xl md:text-3xl font-bold text-ink tracking-tight mb-2">
+      {d.title}
+    </h2>
+    <p class="text-sm md:text-base text-muted leading-relaxed">
+      {d.subtitle}
+    </p>
+  </div>
+
+  <!-- Presets Strip -->
+  <div class="mb-8 bg-surface-strong/40 border border-hairline rounded-2xl p-4">
+    <div class="text-xs font-bold uppercase tracking-wider text-muted mb-3 flex items-center gap-2">
+      <span>⚡</span>
+      {d.presetsTitle}
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <button 
+        type="button" 
+        class="preset-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-canvas hover:bg-surface-strong border border-hairline text-ink transition-colors cursor-pointer"
+        data-preset="preset-gastro-outbreak"
+      >
+        🦠 {d.presetGastro}
+      </button>
+      <button 
+        type="button" 
+        class="preset-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-canvas hover:bg-surface-strong border border-hairline text-ink transition-colors cursor-pointer"
+        data-preset="preset-raw-chicken-eco"
+      >
+        🍗 {d.presetRawChicken}
+      </button>
+      <button 
+        type="button" 
+        class="preset-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-canvas hover:bg-surface-strong border border-hairline text-ink transition-colors cursor-pointer"
+        data-preset="preset-baby-bottles-sanitize"
+      >
+        🍼 {d.presetBabyBottles}
+      </button>
+      <button 
+        type="button" 
+        class="preset-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-canvas hover:bg-surface-strong border border-hairline text-ink transition-colors cursor-pointer"
+        data-preset="preset-nested-bowls-normal"
+      >
+        🥣 {d.presetNestedBowls}
+      </button>
+      <button 
+        type="button" 
+        class="preset-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-canvas hover:bg-surface-strong border border-hairline text-ink transition-colors cursor-pointer"
+        data-preset="preset-spore-myth"
+      >
+        ⚠️ {d.presetSporeMyth}
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Grid: Controls + Live Diagnostic Scorecard -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-12">
+    <!-- Controls Column (7 cols) -->
+    <div class="lg:col-span-7 space-y-6">
+      <div class="border-b border-hairline pb-3">
+        <h3 class="text-lg font-bold text-ink flex items-center gap-2">
+          <span>🎛️</span>
+          {d.controlsTitle}
+        </h3>
+        <p class="text-xs text-muted">{d.controlsSub}</p>
+      </div>
+
+      <!-- 1. Cycle Selector -->
+      <div>
+        <label for="ds-cycle" class="block text-xs font-semibold text-ink uppercase tracking-wider mb-1.5">
+          {d.cycleLabel}
+        </label>
+        <select 
+          id="ds-cycle" 
+          class="w-full bg-canvas border border-hairline rounded-xl px-3.5 py-2.5 text-sm text-ink focus:outline-hidden focus:ring-2 focus:ring-emerald-500 font-medium cursor-pointer"
+        >
+          {sanitizeData.cycleTypes.map(c => (
+            <option value={c.id} selected={c.id === 'nsf-184-sanitize'}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+        <p class="text-xs text-muted mt-1" id="ds-cycle-desc">
+          {sanitizeData.cycleTypes.find(c => c.id === 'nsf-184-sanitize')?.description}
+        </p>
+      </div>
+
+      <!-- 2. Pathogen Selector -->
+      <div>
+        <label for="ds-pathogen" class="block text-xs font-semibold text-ink uppercase tracking-wider mb-1.5">
+          {d.pathogenLabel}
+        </label>
+        <select 
+          id="ds-pathogen" 
+          class="w-full bg-canvas border border-hairline rounded-xl px-3.5 py-2.5 text-sm text-ink focus:outline-hidden focus:ring-2 focus:ring-emerald-500 font-medium cursor-pointer"
+        >
+          {sanitizeData.pathogens.map(p => (
+            <option value={p.id} selected={p.id === 'norovirus-gii4'}>
+              {p.name} [{p.microbeType}]
+            </option>
+          ))}
+        </select>
+        <p class="text-xs text-muted mt-1" id="ds-pathogen-desc">
+          {sanitizeData.pathogens.find(p => p.id === 'norovirus-gii4')?.clinicalRisk}
+        </p>
+      </div>
+
+      <!-- 3. Detergent Chemistry Selector -->
+      <div>
+        <label for="ds-detergent" class="block text-xs font-semibold text-ink uppercase tracking-wider mb-1.5">
+          {d.detergentLabel}
+        </label>
+        <select 
+          id="ds-detergent" 
+          class="w-full bg-canvas border border-hairline rounded-xl px-3.5 py-2.5 text-sm text-ink focus:outline-hidden focus:ring-2 focus:ring-emerald-500 font-medium cursor-pointer"
+        >
+          {sanitizeData.detergentFormulations.map(det => (
+            <option value={det.id} selected={det.id === 'alkaline-powder-percarbonate'}>
+              {det.name}
+            </option>
+          ))}
+        </select>
+        <p class="text-xs text-muted mt-1" id="ds-detergent-desc">
+          {sanitizeData.detergentFormulations.find(det => det.id === 'alkaline-powder-percarbonate')?.description}
+        </p>
+      </div>
+
+      <!-- Two-col: Soil Matrix + Hydraulic Spacing -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Soil Matrix -->
+        <div>
+          <label for="ds-soil" class="block text-xs font-semibold text-ink uppercase tracking-wider mb-1.5">
+            {d.soilLabel}
+          </label>
+          <select 
+            id="ds-soil" 
+            class="w-full bg-canvas border border-hairline rounded-xl px-3 py-2 text-xs text-ink focus:outline-hidden focus:ring-2 focus:ring-emerald-500 font-medium cursor-pointer"
+          >
+            {sanitizeData.soilShieldingMatrices.map(s => (
+              <option value={s.id} selected={s.id === 'clean-prerinse'}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <!-- Hydraulic Spacing -->
+        <div>
+          <label for="ds-hydraulic" class="block text-xs font-semibold text-ink uppercase tracking-wider mb-1.5">
+            {d.hydraulicLabel}
+          </label>
+          <select 
+            id="ds-hydraulic" 
+            class="w-full bg-canvas border border-hairline rounded-xl px-3 py-2 text-xs text-ink focus:outline-hidden focus:ring-2 focus:ring-emerald-500 font-medium cursor-pointer"
+          >
+            {sanitizeData.hydraulicLoadFactors.map(h => (
+              <option value={h.id} selected={h.id === 'optimal-spacing'}>
+                {h.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <!-- Live Dwell Time Fine-Tune Slider -->
+      <div class="bg-canvas border border-hairline rounded-xl p-4 space-y-2">
+        <div class="flex items-center justify-between text-xs">
+          <span class="font-semibold text-ink">Final Rinse Thermal Dwell Adjustment:</span>
+          <span class="font-mono text-emerald-800 font-bold" id="ds-dwell-val">14 minutes</span>
+        </div>
+        <input 
+          type="range" 
+          id="ds-dwell-slider" 
+          min="1" 
+          max="30" 
+          step="1" 
+          value="14" 
+          class="w-full accent-emerald-600 cursor-pointer"
+        />
+        <div class="flex justify-between text-[10px] text-muted font-mono">
+          <span>1 min (Quick rinse)</span>
+          <span>14 min (NSF 184 Dwell)</span>
+          <span>30 min (Commercial soak)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Diagnostic Scorecard (5 cols) -->
+    <div class="lg:col-span-5 bg-canvas border-2 border-hairline rounded-3xl p-6 shadow-sm space-y-6" id="ds-scorecard">
+      <div class="border-b border-hairline pb-4 flex items-center justify-between">
+        <div>
+          <h3 class="text-base font-bold text-ink flex items-center gap-2">
+            <span>🔬</span>
+            {d.diagnosticTitle}
+          </h3>
+          <p class="text-xs text-muted">{d.diagnosticSub}</p>
+        </div>
+        <span id="ds-nsf-pill" class="px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-950 border border-emerald-300">
+          NSF 184 COMPLIANT
+        </span>
+      </div>
+
+      <!-- Big Metric 1: Log Reduction -->
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-5 text-center">
+        <div class="text-xs font-bold uppercase tracking-wider text-muted mb-1">
+          {d.logReductionLabel}
+        </div>
+        <div class="text-4xl md:text-5xl font-extrabold text-emerald-800 font-mono tracking-tight" id="ds-log-reduction">
+          &gt; 5.2-log
+        </div>
+        <div class="text-sm font-semibold text-emerald-950 mt-1" id="ds-kill-pct">
+          99.9994% Inactivation Lethality
+        </div>
+      </div>
+
+      <!-- Quick Stats Grid -->
+      <div class="grid grid-cols-2 gap-3 text-xs">
+        <div class="bg-surface-soft border border-hairline rounded-xl p-3">
+          <span class="text-muted block text-[11px] mb-0.5">{d.effectiveTempLabel}</span>
+          <span class="font-mono font-bold text-ink text-sm" id="ds-peak-temp">158°F (70°C)</span>
+        </div>
+        <div class="bg-surface-soft border border-hairline rounded-xl p-3">
+          <span class="text-muted block text-[11px] mb-0.5">{d.dValueLabel}</span>
+          <span class="font-mono font-bold text-ink text-sm" id="ds-d-value">0.15 min</span>
+        </div>
+        <div class="bg-surface-soft border border-hairline rounded-xl p-3">
+          <span class="text-muted block text-[11px] mb-0.5">{d.chemBoostLabel}</span>
+          <span class="font-mono font-bold text-ink text-sm" id="ds-chem-boost">+1.8 Log (Percarbonate)</span>
+        </div>
+        <div class="bg-surface-soft border border-hairline rounded-xl p-3">
+          <span class="text-muted block text-[11px] mb-0.5">{d.nsfComplianceLabel}</span>
+          <span class="font-mono font-bold text-emerald-800 text-sm" id="ds-nsf-status">PASS (≥ 5-Log)</span>
+        </div>
+      </div>
+
+      <!-- Clinical Risk Box -->
+      <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-xs space-y-2" id="ds-risk-box">
+        <div class="font-bold text-amber-950 flex items-center gap-1.5 text-xs">
+          <span>⚠️</span>
+          {d.clinicalRiskLabel}
+        </div>
+        <p class="text-amber-900 leading-relaxed" id="ds-risk-text">
+          Norovirus (GII.4) requires 60°C–70°C for multiple minutes to achieve 4-log reduction. The current cycle successfully meets the clinical lethality threshold, eliminating active cross-contamination risks across household dishes.
+        </p>
+      </div>
+
+      <!-- Copy Report Button -->
+      <div>
+        <button 
+          type="button" 
+          id="ds-copy-btn" 
+          class="w-full py-2.5 px-4 rounded-xl bg-ink text-canvas hover:bg-ink/90 font-semibold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+        >
+          {d.copyReportBtn}
+        </button>
+        <p id="ds-copied-msg" class="text-center text-xs text-emerald-700 font-medium mt-1.5 hidden">
+          {d.copiedFeedback}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Microbiology Kinetics & Formulas Strip -->
+  <div class="bg-canvas border border-hairline rounded-2xl p-6 md:p-8 mb-12">
+    <div class="mb-4">
+      <h3 class="text-lg font-bold text-ink flex items-center gap-2">
+        <span>📐</span>
+        {d.mechanicsTitle}
+      </h3>
+      <p class="text-xs text-muted">{d.mechanicsSub}</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+      <div class="bg-surface-soft border border-hairline rounded-xl p-4">
+        <div class="text-muted text-[11px] uppercase font-bold mb-1">1. Bigelow Thermal Death Kinetics (D-Value)</div>
+        <div class="text-ink font-semibold mb-1">D_T = D_ref &middot; 10^((T_ref - T_eff) / z)</div>
+        <p class="text-muted font-sans text-[11px]">
+          Calculates the minutes required at effective plate temperature T_eff to achieve a 90% (1-log) destruction of the target pathogen.
+        </p>
+      </div>
+
+      <div class="bg-surface-soft border border-hairline rounded-xl p-4">
+        <div class="text-muted text-[11px] uppercase font-bold mb-1">2. Total Thermal &amp; Chemical Log Reduction</div>
+        <div class="text-ink font-semibold mb-1">Log_Red = (t_rinse + 0.4 &middot; t_dry) / (D_T &middot; S_matrix) + Chem_Boost</div>
+        <p class="text-muted font-sans text-[11px]">
+          Integrates high-temperature rinse dwell and heated dry air against soil shielding factors, plus active percarbonate oxygen bleaching.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reference Matrix Table -->
+  <div class="bg-canvas border border-hairline rounded-2xl p-6 md:p-8 mb-12 overflow-x-auto">
+    <div class="mb-4">
+      <h3 class="text-lg font-bold text-ink flex items-center gap-2">
+        <span>📊</span>
+        {d.tableTitle}
+      </h3>
+      <p class="text-xs text-muted">{d.tableSub}</p>
+    </div>
+
+    <table class="w-full text-left text-xs text-ink border-collapse">
+      <thead>
+        <tr class="border-b border-hairline text-muted uppercase text-[11px]">
+          <th class="py-2.5 pr-4 font-bold">{d.colPathogen}</th>
+          <th class="py-2.5 pr-4 font-bold">{d.colType}</th>
+          <th class="py-2.5 pr-4 font-bold">{d.colD60}</th>
+          <th class="py-2.5 pr-4 font-bold">{d.colTargetLog}</th>
+          <th class="py-2.5 font-bold">{d.colRisk}</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-hairline">
+        {sanitizeData.pathogens.map(p => (
+          <tr class="hover:bg-surface-soft/60 transition-colors">
+            <td class="py-3 pr-4 font-semibold text-ink">{p.name}</td>
+            <td class="py-3 pr-4 text-muted font-mono">{p.microbeType}</td>
+            <td class="py-3 pr-4 font-mono">{p.dRefTempC === 100 ? '> 1,000 min' : `${p.dRefMin} min`}</td>
+            <td class="py-3 pr-4 font-mono font-bold text-emerald-800">{p.targetLogReduction > 0 ? `≥ ${p.targetLogReduction}-log` : 'N/A (Autoclave)'}</td>
+            <td class="py-3 text-muted">{p.clinicalRisk}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 4 Critical Sanitization Rules -->
+  <div class="bg-surface-strong/30 border border-hairline rounded-3xl p-6 md:p-10">
+    <div class="mb-6">
+      <h3 class="text-xl font-bold text-ink flex items-center gap-2">
+        <span>🛡️</span>
+        {d.rulesTitle}
+      </h3>
+      <p class="text-xs text-muted">{d.rulesSub}</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-muted">
+      <div class="bg-canvas border border-hairline rounded-2xl p-5 space-y-2">
+        <h4 class="font-bold text-ink text-sm text-emerald-950 flex items-center gap-1.5">
+          <span>1.</span>
+          {d.rule1Title}
+        </h4>
+        <p class="leading-relaxed">{d.rule1Text}</p>
+      </div>
+
+      <div class="bg-canvas border border-hairline rounded-2xl p-5 space-y-2">
+        <h4 class="font-bold text-ink text-sm text-emerald-950 flex items-center gap-1.5">
+          <span>2.</span>
+          {d.rule2Title}
+        </h4>
+        <p class="leading-relaxed">{d.rule2Text}</p>
+      </div>
+
+      <div class="bg-canvas border border-hairline rounded-2xl p-5 space-y-2">
+        <h4 class="font-bold text-ink text-sm text-red-950 flex items-center gap-1.5">
+          <span>3.</span>
+          {d.rule3Title}
+        </h4>
+        <p class="leading-relaxed">{d.rule3Text}</p>
+      </div>
+
+      <div class="bg-canvas border border-hairline rounded-2xl p-5 space-y-2">
+        <h4 class="font-bold text-ink text-sm text-emerald-950 flex items-center gap-1.5">
+          <span>4.</span>
+          {d.rule4Title}
+        </h4>
+        <p class="leading-relaxed">{d.rule4Text}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Embedded Client Script for Reactive Simulation -->
+<script define:vars={{ sanitizeData, lang }}>
+  (function() {
+    const cycleSelect = document.getElementById('ds-cycle');
+    const pathogenSelect = document.getElementById('ds-pathogen');
+    const detergentSelect = document.getElementById('ds-detergent');
+    const soilSelect = document.getElementById('ds-soil');
+    const hydraulicSelect = document.getElementById('ds-hydraulic');
+    const dwellSlider = document.getElementById('ds-dwell-slider');
+    const dwellValText = document.getElementById('ds-dwell-val');
+
+    const cycleDesc = document.getElementById('ds-cycle-desc');
+    const pathogenDesc = document.getElementById('ds-pathogen-desc');
+    const detergentDesc = document.getElementById('ds-detergent-desc');
+
+    const nsfPill = document.getElementById('ds-nsf-pill');
+    const logReductionText = document.getElementById('ds-log-reduction');
+    const killPctText = document.getElementById('ds-kill-pct');
+    const peakTempText = document.getElementById('ds-peak-temp');
+    const dValueText = document.getElementById('ds-d-value');
+    const chemBoostText = document.getElementById('ds-chem-boost');
+    const nsfStatusText = document.getElementById('ds-nsf-status');
+    const riskBox = document.getElementById('ds-risk-box');
+    const riskText = document.getElementById('ds-risk-text');
+
+    const copyBtn = document.getElementById('ds-copy-btn');
+    const copiedMsg = document.getElementById('ds-copied-msg');
+
+    if (!cycleSelect || !pathogenSelect || !logReductionText) return;
+
+    function recalculate() {
+      const cycleId = cycleSelect.value;
+      const pathogenId = pathogenSelect.value;
+      const detergentId = detergentSelect.value;
+      const soilId = soilSelect.value;
+      const hydraulicId = hydraulicSelect.value;
+      const customDwell = parseInt(dwellSlider.value, 10);
+
+      dwellValText.textContent = `${customDwell} minutes`;
+
+      const cycle = sanitizeData.cycleTypes.find(c => c.id === cycleId) || sanitizeData.cycleTypes[0];
+      const pathogen = sanitizeData.pathogens.find(p => p.id === pathogenId) || sanitizeData.pathogens[0];
+      const detergent = sanitizeData.detergentFormulations.find(d => d.id === detergentId) || sanitizeData.detergentFormulations[0];
+      const soil = sanitizeData.soilShieldingMatrices.find(s => s.id === soilId) || sanitizeData.soilShieldingMatrices[0];
+      const hydraulic = sanitizeData.hydraulicLoadFactors.find(h => h.id === hydraulicId) || sanitizeData.hydraulicLoadFactors[0];
+
+      if (cycleDesc) cycleDesc.textContent = cycle.description;
+      if (pathogenDesc) pathogenDesc.textContent = pathogen.clinicalRisk;
+      if (detergentDesc) detergentDesc.textContent = detergent.description;
+
+      // Effective Peak Temperature
+      const effectivePeakTempC = Math.max(20, cycle.rinseTempC - hydraulic.tempDropDeltaC);
+      const effectivePeakTempF = Math.round((effectivePeakTempC * 9 / 5) + 32);
+      peakTempText.textContent = `${effectivePeakTempF}°F (${effectivePeakTempC}°C)`;
+
+      // Bacterial Endospore Special Case
+      if (pathogen.id === 'clostridium-spores') {
+        logReductionText.textContent = '0.0-log';
+        logReductionText.className = 'text-4xl md:text-5xl font-extrabold text-red-600 font-mono tracking-tight';
+        killPctText.textContent = '0.00% Lethality (Total Ineffective)';
+        dValueText.textContent = '> 1,000 min';
+        chemBoostText.textContent = '+0.0 Log (Immune)';
+        nsfStatusText.textContent = 'FAIL (Requires 121°C Autoclave)';
+        nsfStatusText.className = 'font-mono font-bold text-red-600 text-sm';
+        nsfPill.textContent = 'STERILIZATION FAILURE';
+        nsfPill.className = 'px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-red-100 text-red-950 border border-red-300';
+
+        riskBox.className = 'bg-red-50 border border-red-200 rounded-2xl p-4 text-xs space-y-2';
+        riskText.textContent = 'CRITICAL FOOD SAFETY ALERT: Bacterial endospores from Clostridium botulinum completely survive all residential and commercial dishwasher cycles. Dishwashers lack the pressurized steam (121°C / 250°F at 15 PSI) required to denature endospores. NEVER use a dishwasher to sterilize canning jars for home preservation.';
+        return;
+      }
+
+      // Calculate D-value at effective temperature using Bigelow equation:
+      // D_T = D_ref * 10^((T_ref - T_eff) / z)
+      const exponent = (pathogen.dRefTempC - effectivePeakTempC) / pathogen.zValueC;
+      const dValueAtPeak = pathogen.dRefMin * Math.pow(10, exponent);
+
+      let dValueDisplay = '';
+      if (dValueAtPeak < 0.01) {
+        dValueDisplay = `< 0.01 min (${(dValueAtPeak * 60).toFixed(1)}s)`;
+      } else if (dValueAtPeak > 999) {
+        dValueDisplay = '> 1,000 min';
+      } else {
+        dValueDisplay = `${dValueAtPeak.toFixed(2)} min`;
+      }
+      dValueText.textContent = dValueDisplay;
+
+      // Chemical Boost
+      const chemBoost = detergent.chemicalLogBoost * (detergent.hasActiveOxygenBleach ? detergent.capsidDisruptionFactor : 1.0);
+      chemBoostText.textContent = `+${chemBoost.toFixed(1)} Log (${detergent.hasActiveOxygenBleach ? 'Percarbonate' : 'Surfactants'})`;
+
+      // Thermal Log Reduction
+      const effectiveDwellTime = customDwell + (cycle.heatedDry ? (cycle.heatedDryMin * 0.4) : 0);
+      const effectiveDValue = dValueAtPeak * soil.shieldingMultiplier;
+      const thermalLogRed = effectiveDValue > 0 ? (effectiveDwellTime / effectiveDValue) : 0;
+      const totalLogRed = Math.min(12.0, thermalLogRed + chemBoost);
+
+      // Kill percentage
+      let killPct = 0;
+      if (totalLogRed >= 6.0) {
+        killPct = 99.9999;
+      } else if (totalLogRed <= 0) {
+        killPct = 0;
+      } else {
+        killPct = (1 - Math.pow(10, -totalLogRed)) * 100;
+      }
+
+      logReductionText.textContent = totalLogRed >= 7 ? '> 7.0-log' : `${totalLogRed.toFixed(1)}-log`;
+      killPctText.textContent = totalLogRed >= 5 ? `${killPct.toFixed(4)}% Complete Inactivation` : `${killPct.toFixed(2)}% Inactivation (Inadequate)`;
+
+      // NSF 184 Evaluation
+      const meetsNSF = totalLogRed >= pathogen.targetLogReduction && effectivePeakTempF >= 148;
+
+      if (meetsNSF) {
+        logReductionText.className = 'text-4xl md:text-5xl font-extrabold text-emerald-800 font-mono tracking-tight';
+        nsfPill.textContent = 'NSF 184 COMPLIANT';
+        nsfPill.className = 'px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-950 border border-emerald-300';
+        nsfStatusText.textContent = `PASS (≥ ${pathogen.targetLogReduction}-Log)`;
+        nsfStatusText.className = 'font-mono font-bold text-emerald-800 text-sm';
+
+        riskBox.className = 'bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-xs space-y-2';
+        riskText.textContent = `Thermal pasteurization and chemical oxidation successfully exceeded the required ${pathogen.targetLogReduction}-log kill threshold. Target organism (${pathogen.name}) reduced to non-infectious levels with zero cross-contamination risk.`;
+      } else {
+        logReductionText.className = 'text-4xl md:text-5xl font-extrabold text-amber-800 font-mono tracking-tight';
+        nsfPill.textContent = 'DEFICIENT SANITIZE';
+        nsfPill.className = 'px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-950 border border-amber-300';
+        nsfStatusText.textContent = `FAIL (< ${pathogen.targetLogReduction}-Log Target)`;
+        nsfStatusText.className = 'font-mono font-bold text-amber-800 text-sm';
+
+        riskBox.className = 'bg-amber-50 border border-amber-200 rounded-2xl p-4 text-xs space-y-2';
+        riskText.textContent = `WARNING: Cycle failed to achieve the clinical ${pathogen.targetLogReduction}-log reduction standard. Viable pathogens (${pathogen.name}) may remain adhered to tableware and cutlery surfaces. Select the certified Sanitize cycle or switch to an oxygen bleach detergent.`;
+      }
+    }
+
+    // Preset click listeners
+    const presetBtns = document.querySelectorAll('.preset-btn');
+    presetBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const presetId = this.getAttribute('data-preset');
+        const preset = sanitizeData.presets.find(p => p.id === presetId);
+        if (!preset) return;
+
+        cycleSelect.value = preset.cycle;
+        pathogenSelect.value = preset.pathogen;
+        detergentSelect.value = preset.detergent;
+        soilSelect.value = preset.soil;
+        hydraulicSelect.value = preset.hydraulic;
+
+        const cycleObj = sanitizeData.cycleTypes.find(c => c.id === preset.cycle);
+        if (cycleObj) {
+          dwellSlider.value = cycleObj.rinseDwellMin;
+        }
+
+        recalculate();
+      });
+    });
+
+    cycleSelect.addEventListener('change', () => {
+      const cycleObj = sanitizeData.cycleTypes.find(c => c.id === cycleSelect.value);
+      if (cycleObj) {
+        dwellSlider.value = cycleObj.rinseDwellMin;
+      }
+      recalculate();
+    });
+
+    pathogenSelect.addEventListener('change', recalculate);
+    detergentSelect.addEventListener('change', recalculate);
+    soilSelect.addEventListener('change', recalculate);
+    hydraulicSelect.addEventListener('change', recalculate);
+    dwellSlider.addEventListener('input', recalculate);
+
+    // Initial calculation
+    recalculate();
+
+    // Copy Report
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        const report = `ISITKITCHENSAFE DISHWASHER THERMAL SANITIZE REPORT
+==================================================
+Date: ${new Date().toISOString()}
+Cycle: ${cycleSelect.options[cycleSelect.selectedIndex].text}
+Pathogen: ${pathogenSelect.options[pathogenSelect.selectedIndex].text}
+Detergent: ${detergentSelect.options[detergentSelect.selectedIndex].text}
+Dwell Time: ${dwellSlider.value} minutes
+Effective Peak Temp: ${peakTempText.textContent}
+Total Microbial Log Reduction: ${logReductionText.textContent} (${killPctText.textContent})
+NSF/ANSI 184 Status: ${nsfPill.textContent}
+D_T (Peak D-Value): ${dValueText.textContent}
+Chemical Synergy: ${chemBoostText.textContent}
+Assessment: ${riskText.textContent}
+==================================================
+Powered by IsItKitchenSafe Autonomous Growth & Ops Engine`;
+
+        navigator.clipboard.writeText(report).then(() => {
+          if (copiedMsg) {
+            copiedMsg.classList.remove('hidden');
+            setTimeout(() => copiedMsg.classList.add('hidden'), 3500);
+          }
+        });
+      });
+    }
+  })();
+</script>
