@@ -1,0 +1,973 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import modelData from '../data/refrigerator-cross-contamination-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  proteinLabel: string;
+  proteinHelp: string;
+  elevationLabel: string;
+  elevationHelp: string;
+  shelfLabel: string;
+  shelfHelp: string;
+  fanLabel: string;
+  fanHelp: string;
+  foodLabel: string;
+  foodHelp: string;
+  disinfectantLabel: string;
+  disinfectantHelp: string;
+  purgeVolumeLabel: string;
+  purgeVolumeHelp: string;
+  durationLabel: string;
+  durationHelp: string;
+  presetsTitle: string;
+  presetPoultryWire: string;
+  presetGroundBeefGlass: string;
+  presetSeafoodMelonFan: string;
+  presetVinegarFailure: string;
+  presetUsdaGoldStandard: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  cascadeRiskLabel: string;
+  aerosolDepositionLabel: string;
+  pathogenGrowthLabel: string;
+  biohazardLevelLabel: string;
+  disinfectantKillLabel: string;
+  residualOrganismsLabel: string;
+  primaryFailureModeLabel: string;
+  actionProtocolLabel: string;
+  physicsTitle: string;
+  physicsSub: string;
+  tableTitle: string;
+  tableSub: string;
+  colShelf: string;
+  colCapacity: string;
+  colCascade: string;
+  colCapillarity: string;
+  colCleanability: string;
+  rulesTitle: string;
+  rulesSub: string;
+  rule1Title: string;
+  rule1Text: string;
+  rule2Title: string;
+  rule2Text: string;
+  rule3Title: string;
+  rule3Text: string;
+  rule4Title: string;
+  rule4Text: string;
+  copyReportBtn: string;
+  copiedFeedback: string;
+}
+
+const DICTIONARY: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Microbiology & Aerosol Physics Modeler",
+    title: "Refrigerator Cross-Contamination & Bio-Aerosol Modeler",
+    subtitle: "Simulate raw poultry exudate drip capillarity, convection fan microbial aerosol dispersal, Listeria psychrotrophic growth, and chemical sanitization kinetics.",
+    controlsTitle: "Refrigerator Compartment & Inoculum Configuration",
+    controlsSub: "Select raw protein source, initial shelf elevation, shelf construction, fan airflow velocity, target receptor food, sanitizer chemistry, and dwell time.",
+    proteinLabel: "Raw Protein Purge Exudate Source:",
+    proteinHelp: "Raw poultry purge (Salmonella & Campylobacter) vs ground beef (STEC E. coli) vs seafood liquor (Listeria) vs pork.",
+    elevationLabel: "Raw Protein Storage Elevation / Shelf Zone:",
+    elevationHelp: "Top shelf (Ready-to-Eat zone) vs middle shelf vs bottom shelf (coldest tier) vs door bin (warmest/unstable).",
+    shelfLabel: "Refrigerator Shelf Construction & Spill Barrier:",
+    shelfHelp: "Open coated wire rack (0 mL barrier) vs flat tempered glass vs SpillGuard rimmed glass (350 mL) vs crisper drawer.",
+    fanLabel: "Frost-Free Convection Fan & Airflow Profile:",
+    fanHelp: "Multi-Flow continuous high velocity (2.2 m/s) vs intermittent cyclic (1.1 m/s) vs static natural cold-plate.",
+    foodLabel: "Exposed Receptor Food (Target Substrate):",
+    foodHelp: "Uncovered cut cantaloupe (aw 0.99, pH 6.4) vs open leafy salad greens vs soft cheese vs airtight glass snapware.",
+    disinfectantLabel: "Spill Sanitizer Chemistry & Contact Agent:",
+    disinfectantHelp: "Dilute bleach (200 ppm NaOCl) vs dual-chain Quat spray vs 3% H2O2 vs 5% white vinegar vs warm soapy water.",
+    purgeVolumeLabel: "Liquid Purge Leakage Volume (mL):",
+    purgeVolumeHelp: "Volume of escaped packaging juice (5 mL to 80 mL). Standard whole thawed chicken sheds 35–50 mL.",
+    durationLabel: "Unnoticed Residence / Storage Time (Hours):",
+    durationHelp: "Duration spill remains in refrigerator prior to discovery (1 to 72 hours).",
+    presetsTitle: "Critical Real-World Household Hazard Presets:",
+    presetPoultryWire: "Thawing Chicken Leaking on Open Wire Rack over Salad Greens (Catastrophic Drip Inoculation)",
+    presetGroundBeefGlass: "Ground Beef Purge Overflowing Flat Glass Shelf Cascading Down Rear Liner (STEC Biofilm)",
+    presetSeafoodMelonFan: "Raw Salmon Liquor in High-Flow Frost-Free Fridge over Cut Melon (Listeria Bio-Aerosol Outbreak)",
+    presetVinegarFailure: "Cleaning Leaked Poultry Juice with 5% Vinegar Sponge (Dangerous Domestic Myth Failure)",
+    presetUsdaGoldStandard: "USDA Master Protocol: Raw Poultry in Rimmed Catch Tray on Bottom Shelf (Zero Cross-Contamination)",
+    diagnosticTitle: "Microbiological Inoculum & Cross-Contamination Scorecard",
+    diagnosticSub: "Real-time drip cascade physics, fan aerosol deposition, psychrotrophic growth kinetics, and sanitizer residual log reduction.",
+    cascadeRiskLabel: "Gravitational Drip Cascade & Overflow",
+    aerosolDepositionLabel: "Circulating Bio-Aerosol Deposition",
+    pathogenGrowthLabel: "Psychrotrophic Proliferation Factor",
+    biohazardLevelLabel: "Overall Cross-Contamination Hazard",
+    disinfectantKillLabel: "Sanitizer Disinfection Efficacy",
+    residualOrganismsLabel: "Estimated Live Pathogen Residual",
+    primaryFailureModeLabel: "Primary Predicted Biological Failure Mode",
+    actionProtocolLabel: "Mandatory Corrective Action & Sanitation Protocol",
+    physicsTitle: "Capillary Fluid Dynamics & Bio-Aerosol Stokes Settling Mechanics",
+    physicsSub: "Governing equations for gravitational film runoff, Stokes particle terminal velocity, and Bigelow thermal/chemical D-value kinetics.",
+    tableTitle: "Refrigerator Shelf Engineering Comparison Matrix",
+    tableSub: "Containment capacity, cascade pass-through percentage, capillary spread risk, and biofilm cleanability.",
+    colShelf: "Shelf Construction Design",
+    colCapacity: "Containment Capacity",
+    colCascade: "Cascade Pass-Through %",
+    colCapillarity: "Capillary Spread Risk",
+    colCleanability: "Biofilm Cleanability",
+    rulesTitle: "4 Non-Negotiable Refrigerator Food Safety & Zoning Rules",
+    rulesSub: "Evidence-based guidelines derived from USDA FSIS, FDA Food Code, and CDC foodborne outbreak investigations.",
+    rule1Title: "1. The Bottom Shelf Rimmed Basin Mandate: Raw Meats Never Ride High",
+    rule1Text: "Raw poultry, beef, pork, and seafood must ALWAYS reside on the lowest shelf of the refrigerator, placed inside a dedicated rimmed plastic or stainless steel tray. A single leaking retail package can shed 40–60 mL of purge containing up to 20 million Salmonella cells. Storing meats on upper or middle shelves guarantees that gravity will cascade infectious liquid through wire grids or shelf seams directly into fresh produce below.",
+    rule2Title: "2. The Cut Melon Immediate Cover Rule: Prevent Psychrotrophic Listeria Colonization",
+    rule2Text: "Once sliced, cantaloupe, watermelon, and honeydew possess high water activity (aw 0.99) and near-neutral flesh (pH 6.2–6.6) that create an ideal culture broth for Listeria monocytogenes. Forced-air convection fans in modern frost-free refrigerators aerosolize droplets from uncovered foods, depositing bacteria onto fruit surfaces where Listeria doubles every 24 hours at 4°C (39°F). Always store sliced melons in sealed hermetic snap-lid containers.",
+    rule3Title: "3. The 5% Vinegar Myth Debunked: Vinegar Fails to Sanitize Raw Poultry Spills",
+    rule3Text: "Household 5% distilled white vinegar is acetic acid, not an EPA-registered hospital-grade disinfectant. While it descales mineral deposits, Listeria and Salmonella possess robust acid-tolerance response (ATR) systems that resist mild acids in cold environments. Vinegar achieves less than a 2-log reduction, leaving over 10,000 live pathogen cells per square inch. Always use dilute bleach (200 ppm) or 3% hydrogen peroxide for raw meat spills.",
+    rule4Title: "4. The 40°F (4.4°C) Critical Ceiling: Verify Cold Air with an Appliance Thermometer",
+    rule4Text: "Built-in refrigerator digital dials display target setpoints, not actual interior shelf temperatures. Door bins routinely hover between 42°F and 48°F (5.5°C–8.8°C), while middle shelves can experience warm drafts during frequent openings. Keep an independent liquid or bimetallic dial thermometer submerged on the center shelf to confirm steady operation below 38°F (3.3°C) to halt Salmonella and E. coli proliferation.",
+    copyReportBtn: "📋 Copy Microbiological Safety Report",
+    copiedFeedback: "✓ Microbiological Safety Report Copied to Clipboard!"
+  },
+  es: {
+    badge: "Microbiología y Física de Bioaerosoles",
+    title: "Simulador de Contaminación Cruzada y Bioaerosoles en el Frigorífico",
+    subtitle: "Simule la capilaridad del goteo de carne cruda, dispersión de bioaerosoles por ventilación forzada, proliferación de Listeria a bajas temperaturas y cinética de desinfección química.",
+    controlsTitle: "Configuración del Compartimento y Carga Bacteriana",
+    controlsSub: "Seleccione fuente de carne cruda, altura del estante, tipo de balda, velocidad del ventilador No Frost, alimento receptor y desinfectante.",
+    proteinLabel: "Fuente de Exudado de Carne Cruda:",
+    proteinHelp: "Pollo crudo (Salmonella y Campylobacter) vs carne picada (E. coli STEC) vs pescado y marisco (Listeria) vs cerdo.",
+    elevationLabel: "Altura del Estante donde se Coloca la Carne:",
+    elevationHelp: "Estante superior (zona de comida lista) vs estante medio vs estante inferior (zona más fría) vs balcones de la puerta.",
+    shelfLabel: "Diseño del Estante y Barrera Antiderrames:",
+    shelfHelp: "Rejilla de alambre abierta (0 mL) vs vidrio templado liso vs vidrio SpillGuard con borde sellado (350 mL) vs cajón de verduras.",
+    fanLabel: "Ventilador de Convección No Frost:",
+    fanHelp: "Multi-Flow continuo de alta velocidad (2,2 m/s) vs intermitente (1,1 m/s) vs frío estático natural sin ventilador.",
+    foodLabel: "Alimento Receptor Expuesto (Sustrato Diana):",
+    foodHelp: "Melón cortado destapado (aw 0,99, pH 6,4) vs ensalada de hojas verdes abierta vs queso tierno vs táper de cristal hermético.",
+    disinfectantLabel: "Desinfectante Químico para la Limpieza:",
+    disinfectantHelp: "Lejía diluida (200 ppm NaOCl) vs spray de amonio cuaternario vs agua oxigenada 3% vs vinagre blanco 5% vs agua tibia con jabón.",
+    purgeVolumeLabel: "Volumen de Líquido Exudado Filtrado (mL):",
+    purgeVolumeHelp: "Cantidad de jugo de carne derramado (5 mL a 80 mL). Un pollo descongelando suele soltar entre 35 y 50 mL.",
+    durationLabel: "Tiempo de Permanencia sin Descubrir (Horas):",
+    durationHelp: "Horas que permanece el derrame en el frigorífico antes de limpiarse (1 a 72 horas).",
+    presetsTitle: "Casos Prácticos de Riesgo en el Hogar:",
+    presetPoultryWire: "Pollo Descongelando en Rejilla Abierta sobre Lechuga (Goteo Directo Infeccioso Catastrófico)",
+    presetGroundBeefGlass: "Jugo de Carne Picada Rebosando Balda de Vidrio hacia la Pared Trasera (Biofilm de STEC)",
+    presetSeafoodMelonFan: "Exudado de Salmón en Frigo No Frost de Alto Flujo sobre Melón Cortado (Aerosol de Listeria)",
+    presetVinegarFailure: "Limpieza de Jugo de Pollo con Esponja y Vinagre al 5% (Fallo por Mito Doméstico Peligroso)",
+    presetUsdaGoldStandard: "Protocolo Dorado USDA: Carne en Bandeja Antigoteo en el Estante Inferior (Cero Contaminación)",
+    diagnosticTitle: "Evaluación Microbiológica y Riesgo de Contaminación Cruzada",
+    diagnosticSub: "Física de caída por gravedad, aerosolización por ventilador, cinética de crecimiento bacteriano y reducción logarítmica.",
+    cascadeRiskLabel: "Cascada de Goteo y Desbordamiento por Gravedad",
+    aerosolDepositionLabel: "Depósito de Bioaerosoles Circulantes",
+    pathogenGrowthLabel: "Multiplicación de Patógenos en Frío",
+    biohazardLevelLabel: "Nivel Global de Peligro Biológico",
+    disinfectantKillLabel: "Eficacia de Eliminación del Desinfectante",
+    residualOrganismsLabel: "Bacterias Vivas Residuales Estimadas",
+    primaryFailureModeLabel: "Modo Principal Previsto de Fallo Sanitario",
+    actionProtocolLabel: "Protocolo Correctivo y Sanitización Obligatoria",
+    physicsTitle: "Dinámica Capilar de Fluidos y Ley de Sedimentación de Stokes",
+    physicsSub: "Ecuaciones de escorrentía por gravedad, velocidad terminal de partículas aerosolizadas y valores D de reducción química.",
+    tableTitle: "Matriz Comparativa de Ingeniería de Baldas de Frigorífico",
+    tableSub: "Capacidad de retención, porcentaje de paso de goteo, riesgo de capilaridad y facilidad de desinfección.",
+    colShelf: "Diseño del Estante",
+    colCapacity: "Capacidad de Retención",
+    colCascade: "Paso de Cascada %",
+    colCapillarity: "Riesgo de Capilaridad",
+    colCleanability: "Facilidad de Limpieza",
+    rulesTitle: "4 Reglas Inquebrantables de Seguridad y Zonificación en el Frigorífico",
+    rulesSub: "Pautas basadas en las directrices del USDA FSIS, Código Alimentario de la FDA y estudios de brotes del CDC.",
+    rule1Title: "1. Mandato del Estante Inferior con Bandeja: La Carne Cruda Nunca Arriba",
+    rule1Text: "El pollo crudo, la ternera y el pescado deben colocarse SIEMPRE en el estante inferior dentro de una bandeja honda lavable. Un paquete de pollo puede perder 50 mL de líquido con 20 millones de bacterias Salmonella. Colocarlo en baldas superiores hace que la gravedad filtre el jugo infeccioso directamente sobre alimentos crudos o listos para comer.",
+    rule2Title: "2. Regla del Melón Cortado Hermético: Evite la Colonización por Listeria",
+    rule2Text: "Al cortarse, el melón y la sandía tienen alta actividad de agua (aw 0,99) y un pH casi neutro (6,2–6,6), siendo un caldo de cultivo perfecto para Listeria monocytogenes. El ventilador No Frost convierte microgotas en aerosoles que se depositan en el melón, donde la bacteria se duplica cada 24 horas a 4°C. Guárdelo siempre en recipientes con tapa hermética.",
+    rule3Title: "3. El Peligroso Mito del Vinagre: No Desinfecta Derrames de Pollo Crudo",
+    rule3Text: "El vinagre blanco al 5% es ácido acético doméstico, no un desinfectante hospitalario registrado por la EPA. Listeria y Salmonella toleran la acidez a bajas temperaturas y sobreviven al vinagre, dejando miles de bacterias vivas por centímetro cuadrado. Para derrames de carne cruda use siempre lejía diluida (200 ppm) o agua oxigenada al 3%.",
+    rule4Title: "4. Límite Crítico de 4°C: Compruebe el Frío con un Termómetro Físico",
+    rule4Text: "La rueda o pantalla digital del frigorífico marca el ajuste deseado, no la temperatura real de las baldas. Los balcones de la puerta suelen estar a 6°C–9°C, superando el límite seguro. Mantenga un termómetro de aguja o de líquido en el estante central para verificar que la temperatura se mantiene siempre por debajo de 3,3°C–4°C.",
+    copyReportBtn: "📋 Copiar Informe Microbiológico",
+    copiedFeedback: "✓ ¡Informe Microbiológico Copiado al Portapapeles!"
+  },
+  pt: {
+    badge: "Microbiologia e Física de Bioaerossóis",
+    title: "Simulador de Contaminação Cruzada e Bioaerossóis na Geladeira",
+    subtitle: "Simule a capilaridade do gotejamento de carnes cruas, dispersão de bioaerossóis por ventiladores No Frost, crescimento psicrotrófico de Listeria e cinética de desinfecção.",
+    controlsTitle: "Configuração do Compartimento e Carga Bacteriana",
+    controlsSub: "Configure a fonte de carne crua, prateleira, tipo de grade/vidro, velocidade da ventilação No Frost, alimento vulnerável e produto de limpeza.",
+    proteinLabel: "Fonte de Exudado de Carne Crua:",
+    proteinHelp: "Frango cru (Salmonella e Campylobacter) vs carne moída (E. coli STEC) vs peixe e frutos do mar (Listeria) vs suíno.",
+    elevationLabel: "Altura da Prateleira onde a Carne Está Guardada:",
+    elevationHelp: "Prateleira superior (comidas prontas) vs intermediária vs inferior (mais fria) vs prateleiras da porta.",
+    shelfLabel: "Tipo de Prateleira e Barreira Antivazamento:",
+    shelfHelp: "Grade de aramado aberta (0 mL) vs vidro temperado liso vs vidro com borda vedada SpillGuard (350 mL) vs gaveta de legumes.",
+    fanLabel: "Ventilador de Convecção No Frost:",
+    fanHelp: "Multi-Flow contínuo de alta vazão (2,2 m/s) vs intermitente (1,1 m/s) vs estático natural sem ventilador.",
+    foodLabel: "Alimento Receptor Vulnerável (Alvo):",
+    foodHelp: "Melão fatiado descoberto (aw 0,99, pH 6,4) vs folhas verdes abertas vs queijo mole vs pote de vidro hermético.",
+    disinfectantLabel: "Produto Químico Sanitizante para Limpeza:",
+    disinfectantHelp: "Água sanitária diluída (200 ppm) vs spray de quaternário de amônio vs água oxigenada 3% vs vinagre branco 5% vs água morna com sabão.",
+    purgeVolumeLabel: "Volume de Líquido Exudado Vazado (mL):",
+    purgeVolumeHelp: "Volume de caldo de carne derramado (5 mL a 80 mL). Um frango descongelando costuma soltar de 35 a 50 mL.",
+    durationLabel: "Tempo de Permanência sem Notar (Horas):",
+    durationHelp: "Tempo em que o líquido fica na geladeira antes de ser limpo (1 a 72 horas).",
+    presetsTitle: "Cenários Críticos de Risco Doméstico:",
+    presetPoultryWire: "Frango Descongelando em Grade de Aramado sobre Folhas de Salada (Inoculação Catastrófica Direta)",
+    presetGroundBeefGlass: "Suco de Carne Moída Transbordando Vidro Liso até a Parede Traseira (Biofilme de E. coli STEC)",
+    presetSeafoodMelonFan: "Caldo de Salmão em Geladeira No Frost com Ventilador Forte sobre Melão Aberto (Aerossol de Listeria)",
+    presetVinegarFailure: "Limpeza de Suco de Frango com Esponja e Vinagre 5% (Falha Grave por Mito Doméstico)",
+    presetUsdaGoldStandard: "Padrão Ouro USDA: Carne Crua em Bandeja com Bordas na Prateleira Inferior (Zero Contaminação)",
+    diagnosticTitle: "Laudo Microbiológico e Risco de Contaminação Cruzada",
+    diagnosticSub: "Cálculos de escorrimento por gravidade, deposição de aerossóis, multiplicação bacteriana e redução logarítmica.",
+    cascadeRiskLabel: "Escorrimento e Queda por Gravidade",
+    aerosolDepositionLabel: "Deposição de Bioaerossóis Circulantes",
+    pathogenGrowthLabel: "Multiplicação Psicrotrófica em Frigoconservação",
+    biohazardLevelLabel: "Nível Global de Perigo Biológico",
+    disinfectantKillLabel: "Eficácia de Eliminação do Desinfetante",
+    residualOrganismsLabel: "Bactérias Vivas Residuais Estimadas",
+    primaryFailureModeLabel: "Principal Modo Previsto de Falha Sanitária",
+    actionProtocolLabel: "Protocolo Corretivo e Higienização Obrigatória",
+    physicsTitle: "Dinâmica Capilar de Fluidos e Lei de Sedimentação de Stokes",
+    physicsSub: "Equações de escoamento laminar, velocidade terminal de partículas de aerossol e valores D de redução química.",
+    tableTitle: "Matriz Comparativa de Engenharia de Prateleiras",
+    tableSub: "Capacidade de contenção, porcentagem de gotejamento passante, risco de capilaridade e facilidade de limpeza.",
+    colShelf: "Design da Prateleira",
+    colCapacity: "Capacidade de Retenção",
+    colCascade: "Passagem de Queda %",
+    colCapillarity: "Risco de Capilaridade",
+    colCleanability: "Facilidade de Limpeza",
+    rulesTitle: "4 Regras Inegociáveis de Segurança e Zoneamento na Geladeira",
+    rulesSub: "Diretrizes baseadas no USDA FSIS, Código Alimentar da FDA e investigações epidemiológicas do CDC.",
+    rule1Title: "1. Mandato da Prateleira Inferior com Bandeja: Carne Crua Nunca Fica no Alto",
+    rule1Text: "Frango, carne bovina e peixes crus devem ficar SEMPRE na prateleira mais baixa, acomodados dentro de uma bandeja funda. Uma embalagem de frango pode verter 50 mL de líquido com 20 milhões de células de Salmonella. Deixá-los em cima faz com que o líquido escorra pelas frestas diretamente para legumes e verduras.",
+    rule2Title: "2. Regra do Melão Cortado Fechado: Impeça a Colonização por Listeria",
+    rule2Text: "Melão e melancia fatiados têm altíssima atividade de água (aw 0,99) e pH quase neutro, sendo o ambiente ideal para Listeria monocytogenes. O vento do ventilador No Frost espalha microgotas que pousam no melão, onde a bactéria dobra de número a cada 24 horas a 4°C. Guarde sempre em potes herméticos com tampa.",
+    rule3Title: "3. O Mito Perigoso do Vinagre: Não Esteriliza Caldo de Frango Cru",
+    rule3Text: "O vinagre de álcool 5% não é um desinfetante hospitalar aprovado pela EPA. Listeria e Salmonella resistem à acidez fraca em ambiente refrigerado. O vinagre reduz menos de 2 logs, deixando milhares de bactérias ativas na superfície. Use sempre água sanitária diluída (200 ppm) ou água oxigenada 3% para higienizar derrames de carnes cruas.",
+    rule4Title: "4. Teto Crítico de 4°C: Monitore a Temperatura com Termômetro Físico",
+    rule4Text: "O visor digital da geladeira mostra apenas a regulagem do termostato, não o calor real nas gavetas. As prateleiras da porta costumam ficar entre 6°C e 9°C, acima do limite seguro. Tenha um termômetro analógico na prateleira central para certificar que a temperatura permaneça estável abaixo de 3,5°C a 4°C.",
+    copyReportBtn: "📋 Copiar Laudo Microbiológico",
+    copiedFeedback: "✓ Laudo Microbiológico Copiado para a Área de Transferência!"
+  },
+  'zh-cn': {
+    badge: "微生物学与气溶胶流体动力学工程模型",
+    title: "冰箱生肉交叉污染与对流风机生物气溶胶扩散模拟器",
+    subtitle: "基于流体毛细动力学与食源性致病菌热化学消杀模型，测算生禽肉渗血重力滴落穿透率、风冷风机微米级气溶胶扩散距离、李斯特菌嗜冷繁殖动力学及化学消毒剂杀灭Log值。",
+    controlsTitle: "冰箱物理舱室与致病菌接种源参数配置",
+    controlsSub: "配置生肉蛋白渗出液种类、存放搁架层高、搁板物理阻隔结构、风冷循环风速、暴露食材靶标及化学消毒剂配方。",
+    proteinLabel: "生肉蛋白渗漏汁液（Purge）来源：",
+    proteinHelp: "生鸡肉/火鸡渗液（沙门氏菌与空肠弯曲菌） vs 生牛肉馅渗出液（出血性大肠杆菌STEC） vs 生三文鱼汁水（李斯特菌） vs 生猪肉。",
+    elevationLabel: "生肉存放层高与物理分区：",
+    elevationHelp: "顶层搁架（即食食品区） vs 中层搁架 vs 底层搁架（温度最低区） vs 冰箱门侧置物架（温差最大）。",
+    shelfLabel: "搁板工程结构与防溢漏挡板：",
+    shelfHelp: "涂层镂空钢丝铁线架（0 mL阻隔） vs 平面钢化玻璃板 vs SpillGuard封装防溢包边玻璃板（350 mL） vs 果蔬保鲜抽屉内胆。",
+    fanLabel: "风冷无霜强制对流风机风道模型：",
+    fanHelp: "Multi-Flow多风道持续高速风机（2.2 m/s） vs 恒温间歇式对流风机（1.1 m/s） vs 直冷微风对流冷板。",
+    foodLabel: "暴露的高风险靶标食材（受体基质）：",
+    foodHelp: "未封口切开哈密瓜（aw 0.99，中性pH） vs 敞口清洗生菜沙拉 vs 软质未杀菌奶酪 vs 气密锁扣玻璃保鲜盒。",
+    disinfectantLabel: "表面化学消杀清洗剂配方：",
+    disinfectantHelp: "稀释含氯消毒液（200 ppm次氯酸钠） vs 双链季铵盐消毒喷雾 vs 3%过氧化氢（双氧水） vs 5%白醋 vs 温热洗洁精水。",
+    purgeVolumeLabel: "生肉包装破损渗漏液体积（mL）：",
+    purgeVolumeHelp: "渗漏血水体积（5 mL至80 mL）。整只冷鲜解冻鸡通常渗出35–50 mL高浓度细菌汁水。",
+    durationLabel: "渗漏未被发现的滞留时间（小时）：",
+    durationHelp: "渗漏汁液在冰箱内滞留的时间（1至72小时）。",
+    presetsTitle: "家庭高危实际事故典型预设：",
+    presetPoultryWire: "解冻生鸡肉在铁丝网格架滴漏至下方生菜沙拉（灾难性垂直滴落接种）",
+    presetGroundBeefGlass: "牛肉馅渗血漫过平玻璃板沿冰箱背板顺流直下（STEC大肠杆菌生物膜）",
+    presetSeafoodMelonFan: "生三文鱼汁水在强风冷冰箱中吹拂至敞口切片哈密瓜（李斯特菌气溶胶爆发）",
+    presetVinegarFailure: "误用5%食用白醋海绵擦拭生鸡肉血水（危险民间偏方失效/二次涂抹）",
+    presetUsdaGoldStandard: "USDA黄金法则：生禽肉置于底层搁架深盘中（零交叉污染风险）",
+    diagnosticTitle: "微生物学接种负荷与交叉污染综合评估看板",
+    diagnosticSub: "重力滴落穿透流体计算、循环风气溶胶沉降密度、嗜冷菌增殖倍数及化学消杀残留Log分析。",
+    cascadeRiskLabel: "重力垂直滴落与溢流风险",
+    aerosolDepositionLabel: "风道循环生物气溶胶沉降量",
+    pathogenGrowthLabel: "嗜冷菌低温增殖倍数",
+    biohazardLevelLabel: "综合生物安全危害等级",
+    disinfectantKillLabel: "化学消毒剂杀灭效率",
+    residualOrganismsLabel: "预估残留活菌菌落数（CFU）",
+    primaryFailureModeLabel: "主要预测生物污染破坏模式",
+    actionProtocolLabel: "强制纠正措施与规范消杀方案",
+    physicsTitle: "毛细流体动力学与斯托克斯气溶胶沉降机理",
+    physicsSub: "重力液膜流动控制方程、斯托克斯微粒沉降终速及化学Bigelow D值灭活动力学。",
+    tableTitle: "冰箱搁架工程阻隔性能对比矩阵",
+    tableSub: "液体滞留容积、滴漏穿透百分比、毛细扩散风险及生物膜彻底清洗度。",
+    colShelf: "搁板工程结构",
+    colCapacity: "最大液体滞留容积",
+    colCascade: "滴漏下渗穿透率",
+    colCapillarity: "毛细侧向扩散风险",
+    colCleanability: "生物膜清洗难度",
+    rulesTitle: "4条不可妥协的冰箱食品安全与分区法则",
+    rulesSub: "严格依据美国农业部FSIS、美国FDA食品法规及疾控中心CDC食源性疫情溯源报告制定。",
+    rule1Title: "1. 底层托盘强制归位法则：生肉绝不可高置于熟食之上",
+    rule1Text: "生鸡肉、牛肉和海鲜必须且只能存放在冰箱最底层的搁架上，并装在专用的带沿托盘或大碗中。一盒超市生鸡肉可渗出40–50 mL带菌血水（含2000万个沙门氏菌）。若置于上层或中层，重力会驱使带菌液体顺着网格或玻璃边缘垂直渗漏，直接淋洒在下方的草莓、熟肉和沙拉蔬菜上。",
+    rule2Title: "2. 切开瓜果密封法则：严防嗜冷单增李斯特菌气溶胶定植",
+    rule2Text: "哈密瓜与西瓜切开后，果肉水分活度高达aw 0.99，且pH呈弱酸偏中性（6.2–6.6），是单增李斯特菌完美的培养基。风冷无霜冰箱的风机会将未盖紧的生肉血滴蒸发为微米级飞沫核，在风道中循环沉降在果肉上。李斯特菌在4°C冷藏环境下依然能每24小时分裂增殖一代。切开瓜果必须装入密封锁扣保鲜盒。",
+    rule3Title: "3. 破除食用白醋消毒谣言：白醋无法杀灭生禽肉滴漏病原体",
+    rule3Text: "家庭常用的5%食用白醋仅为稀醋酸，根本不是EPA注册的医用级或食品接触级消毒剂。李斯特菌和沙门氏菌在低温环境下具有强烈的酸耐受反应（ATR），白醋对这类细菌的杀灭率不足2-log（99%以下），每平方厘米依然存活上万个活菌。处理生肉渗液必须使用稀释84消毒液（200 ppm次氯酸钠）或3%双氧水擦拭。",
+    rule4Title: "4. 4°C（40°F）临界红线法则：必须使用物理温度计校准冰箱冷度",
+    rule4Text: "冰箱外部的数字旋钮仅代表设定目标，并非搁架内部真实温度。门侧置物架由于频繁开门，温度常年徘徊在6°C–9°C危险区间。必须在中间搁架常备一个专用机械指针或液体温度计，确保实际核心温度稳定在3.3°C以下，从物理层面遏制沙门氏菌和大肠杆菌的快速分裂繁殖。",
+    copyReportBtn: "📋 复制微生物安全工程报告",
+    copiedFeedback: "✓ 微生物安全工程报告已成功复制到剪贴板！"
+  },
+  ja: {
+    badge: "微生物学＆バイオエアロゾル流体力学モデル",
+    title: "冷蔵庫生肉交差汚染＆対流ファン浮遊菌拡散シミュレーター",
+    subtitle: "生鶏肉ドリップの重力流下毛管現象、ファン式冷却による微小バイオエアロゾルの庫内拡散、リステリア菌の低温増殖速度、化学消毒剤の致死Log値を精密に解析します。",
+    controlsTitle: "冷蔵室コンパートメント＆菌負荷パラメーター設定",
+    controlsSub: "生肉ドリップの種類、配置棚の段、棚板の構造、冷却ファンの風速、汚染リスクを受ける食品、使用する消毒剤を設定してください。",
+    proteinLabel: "生肉ドリップ（Exudate）の発生源：",
+    proteinHelp: "生鶏肉ドリップ（サルモネラ菌＆カンピロバクター） vs 牛ひき肉汁（病原性大腸菌STEC） vs 生鮭・魚介ドリップ（リステリア菌） vs 豚肉。",
+    elevationLabel: "生肉を置く棚の位置（段の高さ）：",
+    elevationHelp: "最上段（調理済み食品ゾーン） vs 中段 vs 最下段（最も冷える安全ゾーン） vs ドアポケット（温度変化大）。",
+    shelfLabel: "棚板の構造と液体せき止め性能：",
+    shelfHelp: "ワイヤー格子スチール棚（遮断力0 mL） vs フラット強化ガラス棚 vs SpillGuardフチ付き密閉ガラス棚（350 mL） vs 野菜室ケース。",
+    fanLabel: "ファン式（ファン循環）冷却の風速プロファイル：",
+    fanHelp: "Multi-Flow連続高風速ファン（2.2 m/s） vs 間欠サーモファン（1.1 m/s） vs 直冷式自然対流プレート。",
+    foodLabel: "汚染を受ける無防備な食品（受体基質）：",
+    foodHelp: "ラップなしカットメロン（aw 0.99、中性pH） vs 開封済みカットサラダ菜 vs 柔らかい生乳チーズ vs 密閉ロック式耐熱ガラス容器。",
+    disinfectantLabel: "拭き取りに使用する化学消毒剤：",
+    disinfectantHelp: "希釈次亜塩素酸ナトリウム（200 ppm） vs 第4級アンモニウム塩スプレー vs 3%過酸化水素水 vs 5%穀物酢 vs 温水洗剤拭き。",
+    purgeVolumeLabel: "生肉パックからのドリップ漏出量（mL）：",
+    purgeVolumeHelp: "漏れ出たドリップ液の総量（5 mL〜80 mL）。丸鶏1羽の解凍時で通常35〜50 mLの菌液が流出します。",
+    durationLabel: "漏出に気づかないままの放置時間（時間）：",
+    durationHelp: "庫内でドリップが放置・拡散されている時間（1〜72時間）。",
+    presetsTitle: "家庭内で起こる重大リスクの代表的プリセット：",
+    presetPoultryWire: "ワイヤー棚で解凍した生鶏肉が下の生サラダへ直接滴下（最悪の重力汚染）",
+    presetGroundBeefGlass: "牛ひき肉汁がフラットガラス棚からあふれて背面壁を伝い落下（大腸菌バイオフィルム）",
+    presetSeafoodMelonFan: "強力ファン式冷蔵庫内で生鮭ドリップからカットメロンへ浮遊（リステリア感染症）",
+    presetVinegarFailure: "生鶏肉のドリップを5%の食酢とスポンジで拭き掃除（危険な民間療法の誤信）",
+    presetUsdaGoldStandard: "USDAゴールドマスター：生肉は深皿に載せて最下段に隔離（交差汚染リスク0%）",
+    diagnosticTitle: "微生物学的汚染負荷＆交差汚染リスク判定カード",
+    diagnosticSub: "重力落下流体力学、ファン浮遊菌沈着密度、低温菌増殖予測、消毒剤残留菌Log値を瞬時に算出。",
+    cascadeRiskLabel: "重力滴下＆オーバーフロー流下リスク",
+    aerosolDepositionLabel: "循環ファン浮遊菌（バイオエアロゾル）沈着量",
+    pathogenGrowthLabel: "低温環境（4℃以下）での病原菌増殖率",
+    biohazardLevelLabel: "総合バイオハザード危険度",
+    disinfectantKillLabel: "消毒剤による病原菌殺滅効果",
+    residualOrganismsLabel: "推定生存病原菌数（残存CFU）",
+    primaryFailureModeLabel: "予測される主要な生物学的汚染モード",
+    actionProtocolLabel: "必須の是正措置＆消毒エンジニアリング手順",
+    physicsTitle: "毛細管流体力学とストークスの微粒子沈降理論",
+    physicsSub: "重力液膜流出方程式、浮遊微粒子の終末沈降速度、化学的Bigelow D値死滅キネティクス。",
+    tableTitle: "冷蔵庫棚板の流体遮断性能比較マトリクス",
+    tableSub: "液体保持容量、下層透過率、毛細管拡散リスク、バイオフィルム清掃性。",
+    colShelf: "棚板の構造設計",
+    colCapacity: "最大液体保持容量",
+    colCascade: "下段への滴下透過率",
+    colCapillarity: "毛管拡散リスク",
+    colCleanability: "清掃・消毒の容易さ",
+    rulesTitle: "冷蔵庫の食品安全・ゾーニングにおける4大鉄則",
+    rulesSub: "米国農務省FSIS、FDA食品衛生基準、CDC疫学調査報告に基づく科学的ガイドライン。",
+    rule1Title: "1. 最下段＆受け皿配置の絶対原則：生肉は絶対に上段に置かない",
+    rule1Text: "生鶏肉、生牛肉、魚介類は必ず冷蔵庫の『最下段』に置き、フチのある専用トレーや深皿に乗せてください。パック1つから数千万個のサルモネラ菌を含む40mL以上のドリップが漏れ出します。上段や中段に置くと、重力で下の段のカットフルーツやサラダへ菌液がシャワーのように降り注ぎます。",
+    rule2Title: "2. カットフルーツの密閉義務：低温増殖するリステリア菌の定植を防ぐ",
+    rule2Text: "カットしたメロンやスイカは水分活性が極めて高く（aw 0.99）、中性に近いためリステリア菌にとって最高の増殖基質です。ファン式冷蔵庫の風はドリップの微小粒子を巻き上げて庫内に循環させます。リステリア菌は4℃の冷蔵庫でも24時間ごとに倍増します。切った果物は必ず密閉容器に入れてください。",
+    rule3Title: "3. 食酢消毒の危険な誤解：お酢では生鶏肉のサルモネラ菌を殺せない",
+    rule3Text: "家庭用のお酢（酸度5%）はEPA認可の殺菌剤ではありません。リステリア菌やサルモネラ菌は低温下で酸耐性タンパク質（ATR）を発現させ、弱酸に耐えて生き残ります。お酢での殺菌力は2-log以下にとどまり、数万個の菌が生きたまま残ります。生肉のドリップには次亜塩素酸ナトリウム（200 ppm）または3%過酸化水素水を使用してください。",
+    rule4Title: "4. 4℃（40°F）の臨界レッドライン：庫内用温度計で実温を確認する",
+    rule4Text: "冷蔵庫のダイヤル表示は設定値にすぎず、実際の棚の温度とは異なります。ドアポケットは頻繁な開閉で6℃〜9℃まで上昇し、菌の危険水域に入ります。中央の棚に独立した庫内温度計を設置し、芯温が確実に3.3℃〜4℃以下に保たれているかを常時監視してください。",
+    copyReportBtn: "📋 微生物安全レポートをコピー",
+    copiedFeedback: "✓ 微生物安全レポートをクリップボードにコピーしました！"
+  }
+};
+
+const d = DICTIONARY[lang] || DICTIONARY.en;
+---
+
+<section class="bg-surface border border-hairline rounded-3xl p-6 md:p-10 shadow-sm transition-all" id="refrigerator-contamination-tool">
+  <!-- Top Badge & Title -->
+  <div class="mb-8">
+    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-500/10 text-rose-900 border border-rose-500/20 mb-3">
+      <span>🦠</span>
+      {d.badge}
+    </div>
+    <h2 class="text-2xl md:text-4xl font-extrabold text-ink tracking-tight mb-3">
+      {d.title}
+    </h2>
+    <p class="text-muted text-sm md:text-base leading-relaxed max-w-4xl">
+      {d.subtitle}
+    </p>
+  </div>
+
+  <!-- Presets Bar -->
+  <div class="bg-surface-soft border border-hairline rounded-2xl p-4 md:p-5 mb-8">
+    <div class="text-xs font-bold uppercase tracking-wider text-muted mb-3 flex items-center gap-1.5">
+      <span>⚡</span>
+      {d.presetsTitle}
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-xs font-medium">
+      <button type="button" class="preset-btn text-left p-3 rounded-xl border border-rose-500/30 bg-rose-500/5 hover:bg-rose-500/15 text-rose-950 transition-colors" data-preset="poultry-wire">
+        ⚠️ {d.presetPoultryWire}
+      </button>
+      <button type="button" class="preset-btn text-left p-3 rounded-xl border border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/15 text-amber-950 transition-colors" data-preset="beef-glass">
+        🥩 {d.presetGroundBeefGlass}
+      </button>
+      <button type="button" class="preset-btn text-left p-3 rounded-xl border border-purple-500/30 bg-purple-500/5 hover:bg-purple-500/15 text-purple-950 transition-colors" data-preset="seafood-melon">
+        🍈 {d.presetSeafoodMelonFan}
+      </button>
+      <button type="button" class="preset-btn text-left p-3 rounded-xl border border-orange-500/30 bg-orange-500/5 hover:bg-orange-500/15 text-orange-950 transition-colors" data-preset="vinegar-fail">
+        🧴 {d.presetVinegarFailure}
+      </button>
+      <button type="button" class="preset-btn text-left p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-950 transition-colors font-semibold" data-preset="usda-gold">
+        🛡️ {d.presetUsdaGoldStandard}
+      </button>
+    </div>
+  </div>
+
+  <!-- Interactive Grid: Controls & Diagnostics -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-10">
+    <!-- Controls (7 Cols) -->
+    <div class="lg:col-span-7 bg-surface-soft border border-hairline rounded-2xl p-6 space-y-6">
+      <div class="border-b border-hairline pb-4">
+        <h3 class="text-lg font-bold text-ink mb-1">{d.controlsTitle}</h3>
+        <p class="text-xs text-muted">{d.controlsSub}</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <!-- 1. Protein Purge Source -->
+        <div>
+          <label for="rc-protein" class="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
+            {d.proteinLabel}
+          </label>
+          <select id="rc-protein" class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs text-ink font-medium focus:ring-2 focus:ring-rose-500 focus:outline-none">
+            {modelData.rawProteinPurgeSources.map(p => (
+              <option value={p.id}>{p.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1 leading-snug">{d.proteinHelp}</p>
+        </div>
+
+        <!-- 2. Elevation / Zone -->
+        <div>
+          <label for="rc-elevation" class="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
+            {d.elevationLabel}
+          </label>
+          <select id="rc-elevation" class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs text-ink font-medium focus:ring-2 focus:ring-rose-500 focus:outline-none">
+            {modelData.refrigeratorZoning.map(z => (
+              <option value={z.id} selected={z.id === 'top-shelf'}>{z.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1 leading-snug">{d.elevationHelp}</p>
+        </div>
+
+        <!-- 3. Shelf Design -->
+        <div>
+          <label for="rc-shelf" class="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
+            {d.shelfLabel}
+          </label>
+          <select id="rc-shelf" class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs text-ink font-medium focus:ring-2 focus:ring-rose-500 focus:outline-none">
+            {modelData.shelfDesigns.map(s => (
+              <option value={s.id}>{s.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1 leading-snug">{d.shelfHelp}</p>
+        </div>
+
+        <!-- 4. Fan Profile -->
+        <div>
+          <label for="rc-fan" class="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
+            {d.fanLabel}
+          </label>
+          <select id="rc-fan" class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs text-ink font-medium focus:ring-2 focus:ring-rose-500 focus:outline-none">
+            {modelData.convectionFanDispersal.map(f => (
+              <option value={f.id}>{f.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1 leading-snug">{d.fanHelp}</p>
+        </div>
+
+        <!-- 5. Exposed Receptor Food -->
+        <div>
+          <label for="rc-food" class="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
+            {d.foodLabel}
+          </label>
+          <select id="rc-food" class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs text-ink font-medium focus:ring-2 focus:ring-rose-500 focus:outline-none">
+            {modelData.targetReceptorFoods.map(f => (
+              <option value={f.id}>{f.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1 leading-snug">{d.foodHelp}</p>
+        </div>
+
+        <!-- 6. Disinfectant Agent -->
+        <div>
+          <label for="rc-disinfectant" class="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
+            {d.disinfectantLabel}
+          </label>
+          <select id="rc-disinfectant" class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs text-ink font-medium focus:ring-2 focus:ring-rose-500 focus:outline-none">
+            {modelData.disinfectantEfficacy.map(m => (
+              <option value={m.id} selected={m.id === 'white-vinegar-5pct'}>{m.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1 leading-snug">{d.disinfectantHelp}</p>
+        </div>
+      </div>
+
+      <!-- Sliders: Purge Volume & Duration -->
+      <div class="space-y-4 pt-2 border-t border-hairline">
+        <!-- Purge Volume Slider -->
+        <div>
+          <div class="flex justify-between items-center mb-1 text-xs font-bold">
+            <span class="text-ink">{d.purgeVolumeLabel}</span>
+            <span class="font-mono text-rose-800 font-extrabold text-sm" id="volume-val">40 mL</span>
+          </div>
+          <input type="range" id="rc-volume" min="5" max="80" step="5" value="40" class="w-full accent-rose-600 cursor-pointer" />
+          <div class="flex justify-between text-[10px] text-muted font-mono mt-0.5">
+            <span>5 mL (Minor drip)</span>
+            <span>40 mL (Typical poultry tray)</span>
+            <span>80 mL (Heavy thaw flood)</span>
+          </div>
+        </div>
+
+        <!-- Duration Slider -->
+        <div>
+          <div class="flex justify-between items-center mb-1 text-xs font-bold">
+            <span class="text-ink">{d.durationLabel}</span>
+            <span class="font-mono text-rose-800 font-extrabold text-sm" id="duration-val">24 hrs</span>
+          </div>
+          <input type="range" id="rc-duration" min="1" max="72" step="1" value="24" class="w-full accent-rose-600 cursor-pointer" />
+          <div class="flex justify-between text-[10px] text-muted font-mono mt-0.5">
+            <span>1 hr (Prompt notice)</span>
+            <span>24 hrs (Overnight leak)</span>
+            <span>72 hrs (Weekend incubation)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Diagnostics Scorecard (5 Cols) -->
+    <div class="lg:col-span-5 bg-surface-soft border border-hairline rounded-2xl p-6 flex flex-col justify-between">
+      <div>
+        <div class="border-b border-hairline pb-3 mb-5">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-bold text-ink">{d.diagnosticTitle}</h3>
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase font-mono tracking-wider" id="hazard-badge">
+              CRITICAL BIOHAZARD
+            </span>
+          </div>
+          <p class="text-xs text-muted mt-0.5">{d.diagnosticSub}</p>
+        </div>
+
+        <!-- Key Metrics Cards -->
+        <div class="space-y-4">
+          <!-- Cascade & Overflow Metric -->
+          <div class="bg-surface border border-hairline rounded-xl p-3.5">
+            <div class="flex justify-between items-center text-xs mb-1">
+              <span class="font-bold text-muted uppercase tracking-wider">{d.cascadeRiskLabel}</span>
+              <span class="font-mono font-bold text-ink text-sm" id="cascade-stat">100% Cascade (40 mL Leak)</span>
+            </div>
+            <div class="w-full bg-hairline/40 rounded-full h-2 overflow-hidden">
+              <div class="bg-rose-600 h-2 rounded-full transition-all duration-300" id="cascade-bar" style="width: 100%;"></div>
+            </div>
+            <div class="text-[11px] text-muted mt-1.5" id="cascade-detail">Direct gravity fall across 3 lower food zones</div>
+          </div>
+
+          <!-- Bio-Aerosol Deposition -->
+          <div class="bg-surface border border-hairline rounded-xl p-3.5">
+            <div class="flex justify-between items-center text-xs mb-1">
+              <span class="font-bold text-muted uppercase tracking-wider">{d.aerosolDepositionLabel}</span>
+              <span class="font-mono font-bold text-ink text-sm" id="aerosol-stat">680 CFU/cm²</span>
+            </div>
+            <div class="w-full bg-hairline/40 rounded-full h-2 overflow-hidden">
+              <div class="bg-purple-600 h-2 rounded-full transition-all duration-300" id="aerosol-bar" style="width: 82%;"></div>
+            </div>
+            <div class="text-[11px] text-muted mt-1.5" id="aerosol-detail">High convection fan velocity disperses droplets to melon</div>
+          </div>
+
+          <!-- Psychrotrophic Growth Multiplier -->
+          <div class="bg-surface border border-hairline rounded-xl p-3.5">
+            <div class="flex justify-between items-center text-xs mb-1">
+              <span class="font-bold text-muted uppercase tracking-wider">{d.pathogenGrowthLabel}</span>
+              <span class="font-mono font-bold text-ink text-sm" id="growth-stat">+2.8 Log10 (630x Growth)</span>
+            </div>
+            <div class="text-[11px] text-muted mt-1" id="growth-detail">Listeria actively replicating in neutral fruit sugars</div>
+          </div>
+
+          <!-- Disinfectant Kill & Residual Pathogens -->
+          <div class="bg-surface border border-hairline rounded-xl p-3.5">
+            <div class="flex justify-between items-center text-xs mb-1">
+              <span class="font-bold text-muted uppercase tracking-wider">{d.disinfectantKillLabel}</span>
+              <span class="font-mono font-bold text-amber-700 text-sm" id="kill-stat">1.6 Log10 (97.5% Kill)</span>
+            </div>
+            <div class="text-xs font-bold text-ink mt-2 flex justify-between">
+              <span class="text-muted">{d.residualOrganismsLabel}:</span>
+              <span class="font-mono text-rose-800" id="residual-stat">~450,000 Live CFU Remaining</span>
+            </div>
+            <div class="text-[11px] text-rose-700 font-semibold mt-1" id="residual-warning">⚠️ Vinegar leaves millions of active Salmonella cells!</div>
+          </div>
+        </div>
+
+        <!-- Failure Mode Box -->
+        <div class="mt-4 bg-rose-50 border border-rose-200 rounded-xl p-3 text-xs text-rose-950">
+          <div class="font-bold uppercase tracking-wider text-[10px] text-rose-800 mb-0.5">{d.primaryFailureModeLabel}</div>
+          <div class="font-semibold leading-snug" id="failure-mode-text">
+            Catastrophic vertical drip inoculation onto exposed salad greens followed by sub-lethal vinegar cleaning failure.
+          </div>
+        </div>
+
+        <!-- Action Protocol Box -->
+        <div class="mt-3 bg-surface border border-hairline rounded-xl p-3 text-xs text-ink">
+          <div class="font-bold uppercase tracking-wider text-[10px] text-muted mb-0.5">{d.actionProtocolLabel}</div>
+          <div class="leading-relaxed text-muted text-[11px]" id="protocol-text">
+            Immediately discard contaminated receptor food. Prepare 200 ppm dilute bleach (1 tbsp/gallon). Wipe ABS plastic liner with 2-minute wet dwell. Transfer raw proteins to a rimmed tray on the bottom shelf.
+          </div>
+        </div>
+      </div>
+
+      <!-- Copy Report Button -->
+      <div class="mt-6 pt-4 border-t border-hairline">
+        <button type="button" id="copy-report-btn" class="w-full py-2.5 px-4 rounded-xl bg-ink hover:bg-ink/90 text-surface text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2">
+          <span>{d.copyReportBtn}</span>
+        </button>
+        <div id="copy-feedback" class="text-center text-[11px] text-emerald-800 font-bold mt-1.5 hidden">
+          {d.copiedFeedback}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Refrigerator Shelf Engineering Comparison Table -->
+  <div class="border-t border-hairline pt-8 mb-10">
+    <div class="mb-4">
+      <h3 class="text-lg md:text-xl font-bold text-ink">{d.tableTitle}</h3>
+      <p class="text-xs md:text-sm text-muted">{d.tableSub}</p>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs border-collapse">
+        <thead>
+          <tr class="border-b border-hairline bg-surface-soft text-muted uppercase text-[10px] tracking-wider">
+            <th class="py-3 px-4 font-bold">{d.colShelf}</th>
+            <th class="py-3 px-4 font-bold">{d.colCapacity}</th>
+            <th class="py-3 px-4 font-bold">{d.colCascade}</th>
+            <th class="py-3 px-4 font-bold">{d.colCapillarity}</th>
+            <th class="py-3 px-4 font-bold">{d.colCleanability}</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline">
+          {modelData.shelfDesigns.map(s => (
+            <tr class="hover:bg-surface-soft/50 transition-colors">
+              <td class="py-3 px-4 font-semibold text-ink">{s.name}</td>
+              <td class="py-3 px-4 font-mono font-bold text-rose-800">{s.fluidContainmentCapacity_mL} mL</td>
+              <td class="py-3 px-4 font-mono font-bold">{s.verticalCascadePassThroughPct}%</td>
+              <td class="py-3 px-4 text-muted">{s.capillarySpreadRisk}</td>
+              <td class="py-3 px-4 text-muted">{s.cleanabilityIndex}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 4 Non-Negotiable Refrigerator Safety Rules -->
+  <div class="border-t border-hairline pt-8">
+    <div class="mb-6">
+      <h3 class="text-xl md:text-2xl font-bold text-ink tracking-tight">{d.rulesTitle}</h3>
+      <p class="text-xs md:text-sm text-muted">{d.rulesSub}</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-5">
+        <h4 class="font-bold text-rose-950 text-sm mb-2">{d.rule1Title}</h4>
+        <p class="text-xs text-muted leading-relaxed">{d.rule1Text}</p>
+      </div>
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-5">
+        <h4 class="font-bold text-rose-950 text-sm mb-2">{d.rule2Title}</h4>
+        <p class="text-xs text-muted leading-relaxed">{d.rule2Text}</p>
+      </div>
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-5">
+        <h4 class="font-bold text-rose-950 text-sm mb-2">{d.rule3Title}</h4>
+        <p class="text-xs text-muted leading-relaxed">{d.rule3Text}</p>
+      </div>
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-5">
+        <h4 class="font-bold text-rose-950 text-sm mb-2">{d.rule4Title}</h4>
+        <p class="text-xs text-muted leading-relaxed">{d.rule4Text}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script is:inline define:vars={{ modelData }}>
+  (function() {
+    const proteinSelect = document.getElementById('rc-protein');
+    const elevationSelect = document.getElementById('rc-elevation');
+    const shelfSelect = document.getElementById('rc-shelf');
+    const fanSelect = document.getElementById('rc-fan');
+    const foodSelect = document.getElementById('rc-food');
+    const disinfectantSelect = document.getElementById('rc-disinfectant');
+    const volumeSlider = document.getElementById('rc-volume');
+    const durationSlider = document.getElementById('rc-duration');
+    const volumeVal = document.getElementById('volume-val');
+    const durationVal = document.getElementById('duration-val');
+
+    const hazardBadge = document.getElementById('hazard-badge');
+    const cascadeStat = document.getElementById('cascade-stat');
+    const cascadeBar = document.getElementById('cascade-bar');
+    const cascadeDetail = document.getElementById('cascade-detail');
+    const aerosolStat = document.getElementById('aerosol-stat');
+    const aerosolBar = document.getElementById('aerosol-bar');
+    const aerosolDetail = document.getElementById('aerosol-detail');
+    const growthStat = document.getElementById('growth-stat');
+    const growthDetail = document.getElementById('growth-detail');
+    const killStat = document.getElementById('kill-stat');
+    const residualStat = document.getElementById('residual-stat');
+    const residualWarning = document.getElementById('residual-warning');
+    const failureModeText = document.getElementById('failure-mode-text');
+    const protocolText = document.getElementById('protocol-text');
+    const copyReportBtn = document.getElementById('copy-report-btn');
+    const copyFeedback = document.getElementById('copy-feedback');
+
+    function updateCalculations() {
+      if (!proteinSelect || !shelfSelect) return;
+
+      const protein = modelData.rawProteinPurgeSources.find(p => p.id === proteinSelect.value);
+      const elevation = modelData.refrigeratorZoning.find(z => z.id === elevationSelect.value);
+      const shelf = modelData.shelfDesigns.find(s => s.id === shelfSelect.value);
+      const fan = modelData.convectionFanDispersal.find(f => f.id === fanSelect.value);
+      const food = modelData.targetReceptorFoods.find(f => f.id === foodSelect.value);
+      const disinfectant = modelData.disinfectantEfficacy.find(m => m.id === disinfectantSelect.value);
+
+      const volume = parseInt(volumeSlider.value, 10);
+      const duration = parseInt(durationSlider.value, 10);
+
+      volumeVal.textContent = volume + ' mL';
+      durationVal.textContent = duration + ' hrs';
+
+      // 1. Drip Cascade Calculation
+      const capacity = shelf.fluidContainmentCapacity_mL;
+      let cascadePct = 0;
+      let spilledVolume = 0;
+
+      if (shelf.id === 'open-wire-racks') {
+        cascadePct = 100;
+        spilledVolume = volume;
+      } else if (volume > capacity) {
+        spilledVolume = volume - capacity;
+        cascadePct = Math.min(100, Math.round((spilledVolume / volume) * shelf.verticalCascadePassThroughPct));
+      } else {
+        cascadePct = 0;
+        spilledVolume = 0;
+      }
+
+      // Elevation multiplier
+      let elevationImpact = 1.0;
+      if (elevation.id === 'top-shelf') elevationImpact = 3.0;
+      else if (elevation.id === 'middle-shelf') elevationImpact = 2.0;
+      else if (elevation.id === 'bottom-shelf') elevationImpact = 0.2;
+      else if (elevation.id === 'door-bins') elevationImpact = 2.2;
+
+      // 2. Aerosol Deposition Calculation
+      let fanSpeed = fan.airVelocity_ms;
+      let aerosolDensity = 0;
+      if (food.id === 'sealed-glass-container') {
+        aerosolDensity = 0;
+      } else {
+        const baseAerosol = (protein.initialPathogenCFU_per_mL / 1000) * (volume / 20) * 0.05;
+        aerosolDensity = Math.round(baseAerosol * (fanSpeed / 1.5) * Math.min(duration / 12, 2.5));
+      }
+
+      // 3. Microbial Proliferation Multiplier
+      let zoneTemp = elevation.typicalTempC;
+      let growthFactor = 1.0;
+      let logGrowth = 0;
+
+      if (food.id === 'sealed-glass-container') {
+        growthFactor = 0;
+        logGrowth = 0;
+      } else {
+        if (zoneTemp > 4.4) {
+          // Temperature abuse zone (door bins / warm top)
+          logGrowth = (duration / 12) * 1.4;
+        } else if (zoneTemp >= 2.0) {
+          // Normal fridge zone
+          logGrowth = (duration / 24) * 0.7;
+        } else {
+          // Cold bottom shelf
+          logGrowth = (duration / 48) * 0.2;
+        }
+        growthFactor = Math.pow(10, Math.min(logGrowth, 4.5));
+      }
+
+      // 4. Disinfectant Residual
+      const initialCFU = protein.initialPathogenCFU_per_mL * volume;
+      const killLog = disinfectant.logReduction_5min;
+      const killPercent = disinfectant.percentKill;
+      const survivingFraction = Math.max(0.000001, Math.pow(10, -killLog));
+      const residualCFU = Math.round(initialCFU * survivingFraction);
+
+      // 5. Total Hazard Index (0 to 100)
+      let hazardScore = 0;
+      if (food.id === 'sealed-glass-container' && elevation.id === 'bottom-shelf' && capacity >= volume && disinfectant.epaRegistered) {
+        hazardScore = 12; // Perfectly safe protocol
+      } else {
+        if (cascadePct > 0 && elevation.id !== 'bottom-shelf') hazardScore += 45;
+        if (aerosolDensity > 200) hazardScore += 25;
+        if (food.id === 'cut-cantaloupe-melon' || food.id === 'soft-cheeses-deli') hazardScore += 20;
+        if (!disinfectant.epaRegistered) hazardScore += 20;
+        if (duration > 18) hazardScore += 10;
+      }
+      hazardScore = Math.min(100, hazardScore);
+
+      // Render UI
+      if (hazardScore >= 75) {
+        hazardBadge.textContent = 'CRITICAL BIOHAZARD';
+        hazardBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase font-mono tracking-wider bg-rose-600 text-white animate-pulse';
+      } else if (hazardScore >= 40) {
+        hazardBadge.textContent = 'ELEVATED RISK';
+        hazardBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase font-mono tracking-wider bg-amber-500 text-amber-950 font-bold';
+      } else {
+        hazardBadge.textContent = 'LOW RISK / SAFE';
+        hazardBadge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase font-mono tracking-wider bg-emerald-600 text-white font-bold';
+      }
+
+      cascadeStat.textContent = cascadePct === 0 ? '0% (Fully Contained)' : `${cascadePct}% Cascade (${spilledVolume} mL Overspill)`;
+      cascadeBar.style.width = Math.max(4, cascadePct) + '%';
+      if (cascadePct === 0) {
+        cascadeBar.className = 'bg-emerald-500 h-2 rounded-full transition-all duration-300';
+        cascadeDetail.textContent = `Shelf holds ${capacity} mL; safely contained without lower tier dripping.`;
+      } else {
+        cascadeBar.className = 'bg-rose-600 h-2 rounded-full transition-all duration-300';
+        cascadeDetail.textContent = `Gravity drains ${spilledVolume} mL down through ${elevation.name.toLowerCase()} onto foods below.`;
+      }
+
+      aerosolStat.textContent = food.id === 'sealed-glass-container' ? '0 CFU/cm² (Barrier Protected)' : `${aerosolDensity.toLocaleString()} CFU/cm²`;
+      aerosolBar.style.width = Math.min(100, Math.max(5, (aerosolDensity / 1200) * 100)) + '%';
+      if (food.id === 'sealed-glass-container') {
+        aerosolBar.className = 'bg-emerald-500 h-2 rounded-full transition-all duration-300';
+        aerosolDetail.textContent = 'Hermetic container prevents all airborne particulate colonization.';
+      } else {
+        aerosolBar.className = 'bg-purple-600 h-2 rounded-full transition-all duration-300';
+        aerosolDetail.textContent = `${fan.name}: micro-aerosols circulate across compartment and deposit on ${food.name.toLowerCase()}.`;
+      }
+
+      growthStat.textContent = food.id === 'sealed-glass-container' ? '0x (No Substrate Access)' : `+${logGrowth.toFixed(1)} Log10 (~${Math.round(growthFactor)}x Multiplication)`;
+      growthDetail.textContent = `${protein.primaryPathogens.split('&')[0].trim()} at ${zoneTemp}°C (${elevation.typicalTempF}°F) in ${food.name.split('(')[0].trim()}.`;
+
+      killStat.textContent = `${killLog.toFixed(1)} Log10 (${killPercent.toFixed(2)}% Kill)`;
+      residualStat.textContent = residualCFU < 10 ? '< 10 CFU (Safe Sanitize)' : `~${residualCFU.toLocaleString()} Live CFU Remaining`;
+
+      if (disinfectant.id === 'white-vinegar-5pct') {
+        residualWarning.textContent = '⚠️ Vinegar myth: Leaves thousands of active Salmonella cells on plastic walls!';
+        residualWarning.className = 'text-[11px] text-rose-700 font-semibold mt-1 block';
+      } else if (disinfectant.id === 'warm-soapy-water') {
+        residualWarning.textContent = '⚠️ Soap wipe mobilizes live bacteria across cleaning rag without chemical kill!';
+        residualWarning.className = 'text-[11px] text-rose-700 font-semibold mt-1 block';
+      } else {
+        residualWarning.textContent = '✓ EPA-compliant chemical sanitizer destroys vegetative bacterial membrane.';
+        residualWarning.className = 'text-[11px] text-emerald-800 font-semibold mt-1 block';
+      }
+
+      // Predicted Failure Mode
+      if (elevation.id !== 'bottom-shelf' && cascadePct > 0) {
+        failureModeText.textContent = `Vertical gravitational cascade: Purge from ${protein.name.split('/')[0].trim()} on ${elevation.name.split('(')[0].trim()} drips through ${shelf.name.split('(')[0].trim()} into ${food.name.split('(')[0].trim()}.`;
+      } else if (aerosolDensity > 350) {
+        failureModeText.textContent = `Aerosol transmission: Forced convection fan pulls drying poultry juices into turbulent airstream, settling on exposed ${food.name.split('(')[0].trim()}.`;
+      } else if (!disinfectant.epaRegistered) {
+        failureModeText.textContent = `Chemical sanitization failure: Using ${disinfectant.name.split('(')[0].trim()} fails to achieve 5-log kill, spreading live ${protein.primaryPathogens.split('&')[0].trim()} across shelf surfaces.`;
+      } else {
+        failureModeText.textContent = 'Controlled containment: Leak-proof tray placement and EPA-registered sanitizer eliminate cross-contamination pathways.';
+      }
+
+      // Protocol recommendation
+      if (hazardScore >= 75) {
+        protocolText.textContent = `URGENT ACTION: 1) Immediately discard ${food.name.split('(')[0].trim()} (no kill step before ingestion). 2) Remove all affected shelves and wash with hot soapy water, followed by dilute bleach (200 ppm) with a 2-minute wet dwell. 3) Move raw meats to the BOTTOM shelf in a dedicated rimmed catch pan.`;
+      } else if (hazardScore >= 40) {
+        protocolText.textContent = `CORRECTIVE ACTION: 1) Inspect and wash exterior packaging of adjacent items. 2) Apply 3% hydrogen peroxide or hospital-grade Quat spray to contaminated shelf. 3) Seal all produce and cut melons in airtight containers.`;
+      } else {
+        protocolText.textContent = `OPTIMAL HYGIENE: Continue storing raw proteins in a dedicated rimmed container on the bottom shelf (33°F–36°F). Verify temperature with an appliance thermometer weekly.`;
+      }
+    }
+
+    // Attach Preset Handlers
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const preset = this.getAttribute('data-preset');
+        if (preset === 'poultry-wire') {
+          proteinSelect.value = 'raw-poultry';
+          elevationSelect.value = 'top-shelf';
+          shelfSelect.value = 'open-wire-racks';
+          fanSelect.value = 'fan-continuous-high';
+          foodSelect.value = 'washed-leafy-greens';
+          disinfectantSelect.value = 'white-vinegar-5pct';
+          volumeSlider.value = '45';
+          durationSlider.value = '24';
+        } else if (preset === 'beef-glass') {
+          proteinSelect.value = 'raw-ground-beef';
+          elevationSelect.value = 'middle-shelf';
+          shelfSelect.value = 'flat-tempered-glass';
+          fanSelect.value = 'fan-intermittent-standard';
+          foodSelect.value = 'soft-cheeses-deli';
+          disinfectantSelect.value = 'warm-soapy-water';
+          volumeSlider.value = '35';
+          durationSlider.value = '18';
+        } else if (preset === 'seafood-melon') {
+          proteinSelect.value = 'raw-seafood-shellfish';
+          elevationSelect.value = 'top-shelf';
+          shelfSelect.value = 'flat-tempered-glass';
+          fanSelect.value = 'fan-continuous-high';
+          foodSelect.value = 'cut-cantaloupe-melon';
+          disinfectantSelect.value = 'hydrogen-peroxide-3pct';
+          volumeSlider.value = '25';
+          durationSlider.value = '36';
+        } else if (preset === 'vinegar-fail') {
+          proteinSelect.value = 'raw-poultry';
+          elevationSelect.value = 'middle-shelf';
+          shelfSelect.value = 'open-wire-racks';
+          fanSelect.value = 'fan-continuous-high';
+          foodSelect.value = 'washed-leafy-greens';
+          disinfectantSelect.value = 'white-vinegar-5pct';
+          volumeSlider.value = '30';
+          durationSlider.value = '12';
+        } else if (preset === 'usda-gold') {
+          proteinSelect.value = 'raw-poultry';
+          elevationSelect.value = 'bottom-shelf';
+          shelfSelect.value = 'spill-proof-rimmed-glass';
+          fanSelect.value = 'fan-intermittent-standard';
+          foodSelect.value = 'sealed-glass-container';
+          disinfectantSelect.value = 'sodium-hypochlorite-bleach';
+          volumeSlider.value = '40';
+          durationSlider.value = '24';
+        }
+        updateCalculations();
+      });
+    });
+
+    // Copy Report Event
+    if (copyReportBtn) {
+      copyReportBtn.addEventListener('click', function() {
+        const text = `=== IsItKitchenSafe Refrigerator Cross-Contamination Report ===\n` +
+          `Date: ${new Date().toISOString()}\n` +
+          `Protein Source: ${proteinSelect.options[proteinSelect.selectedIndex].text}\n` +
+          `Shelf Zone: ${elevationSelect.options[elevationSelect.selectedIndex].text}\n` +
+          `Shelf Design: ${shelfSelect.options[shelfSelect.selectedIndex].text}\n` +
+          `Fan Profile: ${fanSelect.options[fanSelect.selectedIndex].text}\n` +
+          `Target Receptor: ${foodSelect.options[foodSelect.selectedIndex].text}\n` +
+          `Purge Volume: ${volumeSlider.value} mL | Duration: ${durationSlider.value} hrs\n` +
+          `Hazard Rating: ${hazardBadge.textContent.trim()}\n` +
+          `Drip Cascade: ${cascadeStat.textContent}\n` +
+          `Bio-Aerosol Density: ${aerosolStat.textContent}\n` +
+          `Sanitizer Efficacy: ${killStat.textContent} | Residual CFU: ${residualStat.textContent}\n` +
+          `Failure Mode: ${failureModeText.textContent.trim()}\n` +
+          `Required Action: ${protocolText.textContent.trim()}\n` +
+          `Evidence Standard: USDA FSIS & CDC Cross-Contamination Guidelines\n` +
+          `https://isitkitchensafe.com/tools/refrigerator-cross-contamination-modeler/`;
+
+        navigator.clipboard.writeText(text).then(() => {
+          copyFeedback.classList.remove('hidden');
+          setTimeout(() => {
+            copyFeedback.classList.add('hidden');
+          }, 3500);
+        });
+      });
+    }
+
+    [proteinSelect, elevationSelect, shelfSelect, fanSelect, foodSelect, disinfectantSelect].forEach(el => {
+      if (el) el.addEventListener('change', updateCalculations);
+    });
+    [volumeSlider, durationSlider].forEach(el => {
+      if (el) el.addEventListener('input', updateCalculations);
+    });
+
+    updateCalculations();
+  })();
+</script>

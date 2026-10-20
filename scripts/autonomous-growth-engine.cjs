@@ -75,7 +75,8 @@ const TOOLS_REGISTRY = [
   { slug: 'freezer-burn-sublimation-modeler', name: 'Freezer Burn, Ice Sublimation & Lipid Peroxidation Modeler', category: 'Thermodynamics & Food Science', component: 'FreezerBurnSublimationModeler.astro', dataFile: 'freezer-burn-sublimation-data.json' },
   { slug: 'glass-cooktop-fracture-simulator', name: 'Glass Cooktop Point-Load & Thermal Shock Fracture Simulator', category: 'Ceramic Physics', component: 'GlassCooktopFractureSimulator.astro', dataFile: 'glass-cooktop-fracture-data.json' },
   { slug: 'dishwasher-thermal-sanitize-calculator', name: 'Dishwasher Thermal Sanitize & Norovirus Lethality Calculator', category: 'Microbiology & Sanitation', component: 'DishwasherThermalSanitizeCalculator.astro', dataFile: 'dishwasher-thermal-sanitize-data.json' },
-  { slug: 'food-processor-blade-fatigue-modeler', name: 'Food Processor Centrifugal Stress & Polycarbonate Blade Fatigue Modeler', category: 'Materials Physics', component: 'FoodProcessorBladeFatigueModeler.astro', dataFile: 'food-processor-blade-fatigue-data.json' }
+  { slug: 'food-processor-blade-fatigue-modeler', name: 'Food Processor Centrifugal Stress & Polycarbonate Blade Fatigue Modeler', category: 'Materials Physics', component: 'FoodProcessorBladeFatigueModeler.astro', dataFile: 'food-processor-blade-fatigue-data.json' },
+  { slug: 'refrigerator-cross-contamination-modeler', name: 'Refrigerator Cross-Contamination & Bio-Aerosol Modeler', category: 'Microbiology & Aerosol Physics', component: 'RefrigeratorCrossContaminationModeler.astro', dataFile: 'refrigerator-cross-contamination-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -493,24 +494,17 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Refrigerator Cross-Contamination & Bio-Aerosol Modeler',
-      category: 'Microbiology & Aerosol Physics',
-      intent: 'Models raw poultry drip capillarity, convection fan microbial aerosol dispersal onto open produce, and chemical sanitization contact times.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '46,000+ US impressions'
-    },
-    {
       title: 'Gas Stove Benzene & Indoor Nitrogen Dioxide (NO2) Exposure Calculator',
       category: 'Combustion Toxicology',
       intent: 'Models methane incomplete combustion, benzene fugitive emissions, indoor NO2 spike thresholds, and range hood capture face velocities.',
-      priority: 'HIGH',
+      priority: 'CRITICAL_HIGH',
       estimatedMonthlyVolume: '55,000+ US impressions'
     },
     {
       title: 'Microwave Egg Superheating & Steam Cavitation Explosion Simulator',
       category: 'Fluid Physics & Thermodynamics',
       intent: 'Models yolk dielectric loss tangent superheating (reaching 110°C–120°C in liquid state), vapor pressure buildup against protein vitelline membrane, and violent cavitation acoustic blast upon fork puncture.',
-      priority: 'MEDIUM',
+      priority: 'HIGH',
       estimatedMonthlyVolume: '48,000+ US impressions'
     },
     {
@@ -519,6 +513,13 @@ function auditGrowthOpportunities() {
       intent: 'Models thermal depolymerization of platinum vs peroxide-cured silicone spatulas when in contact with 200°C+ cooking oils, calculating cyclic oligomer (D4-D6) volatilization and migration into fatty foods.',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '39,000+ US impressions'
+    },
+    {
+      title: 'Wooden Cutting Board Deep-Groove Pathogen Desorption & Sanitization Modeler',
+      category: 'Microbiology & Surface Chemistry',
+      intent: 'Models capillary trapping of Salmonella and Campylobacter within wood xylem vessels vs knife scars in plastic, calculating dehydration kinetics and sanitization efficacy across maple, teak, and end-grain acacia.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '42,000+ US impressions'
     }
   ];
 

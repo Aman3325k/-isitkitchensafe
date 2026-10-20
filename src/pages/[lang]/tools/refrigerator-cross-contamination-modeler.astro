@@ -1,0 +1,283 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import RefrigeratorCrossContaminationModeler from '../../../components/RefrigeratorCrossContaminationModeler.astro';
+import type { SupportedLanguage } from '../../../i18n/ui';
+import { useTranslations, useTranslatedPath } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+const t = useTranslations(lang);
+const tp = useTranslatedPath(lang);
+
+interface LocaleContent {
+  pageTitle: string;
+  pageDescription: string;
+  breadcrumbs: Array<{ label: string; href?: string }>;
+  faqs: Array<{ question: string; answer: string }>;
+  monoBadge: string;
+  monoTitle: string;
+  monoSub: string;
+  section1Title: string;
+  section1Body: string;
+  section2Title: string;
+  section2Body: string;
+  section3Title: string;
+  section3Body: string;
+}
+
+const CONTENT: Record<SupportedLanguage, LocaleContent> = {
+  en: {} as any,
+  es: {
+    pageTitle: "Simulador de Contaminación Cruzada y Bioaerosoles en el Frigorífico | IsItKitchenSafe",
+    pageDescription: "Simule la capilaridad del goteo de pollo crudo, la dispersión de bioaerosoles por ventiladores No Frost, la proliferación de Listeria a 4°C y la cinética de desinfección química.",
+    breadcrumbs: [
+      { label: 'Inicio', href: '/es/' },
+      { label: 'Herramientas', href: '/es/tools/' },
+      { label: 'Simulador de Contaminación Cruzada en Frigorífico' }
+    ],
+    faqs: [
+      {
+        question: "¿Cuál es el lugar más seguro para guardar pollo y carne cruda en el frigorífico?",
+        answer: "El estante inferior es el único lugar seguro para pollo, ternera y pescado crudos. Un paquete estándar puede soltar de 30 a 50 mL de líquido con hasta 20 millones de bacterias Salmonella y Campylobacter. Guardar carne en las baldas superiores permite que la gravedad filtre el jugo infeccioso a través de las rejillas directamente sobre verduras, quesos y sobras de comida situadas abajo. Además, la carne cruda debe colocarse siempre dentro de un plato o bandeja con bordes para contener fugas."
+      },
+      {
+        question: "¿Puede el ventilador del frigorífico No Frost propagar bacterias por el aire a comida destapada?",
+        answer: "Sí. Los frigoríficos No Frost modernos cuentan con ventiladores de circulación forzada que soplan a velocidades de entre 1,0 y 2,5 m/s. Cuando hay jugos de carne derramados o recipientes sin tapar, el flujo de aire seca la superficie y transforma las microgotas en núcleos de bioaerosol (1–5 µm). Estos aerosoles permanecen flotando en las corrientes de aire y se depositan en menos de 90 minutos sobre alimentos vulnerables sin cocinar, como melón cortado, ensaladas verdes y quesos blandos."
+      },
+      {
+        question: "¿El vinagre blanco desinfecta los derrames de carne cruda en las baldas del frigorífico?",
+        answer: "No. El vinagre blanco común al 5% es ácido acético, no un desinfectante hospitalario registrado por la EPA. Patógenos como Listeria monocytogenes y Salmonella poseen mecanismos genéticos de respuesta de tolerancia al ácido (ATR) que les permiten resistir en frío a medios débilmente ácidos. El vinagre logra una reducción de menos de 2 logs (99%), dejando más de 10.000 bacterias vivas por pulgada cuadrada. Debe usarse siempre lejía diluida (200 ppm) o agua oxigenada al 3% con al menos 2 minutos de contacto húmedo."
+      },
+      {
+        question: "¿Pueden las bacterias Listeria multiplicarse dentro de un frigorífico frío?",
+        answer: "Sí. Listeria monocytogenes es una bacteria psicrotrófica capaz de multiplicarse a temperaturas de entre -0,4°C y 4°C. Mientras que bacterias comunes como Salmonella o E. coli entran en estado latente por debajo de 4,4°C, Listeria continúa dividiéndose y duplica su población cada 24 a 36 horas en alimentos con alta humedad y pH neutro como melones cortados, embutidos y quesos frescos sin pasteurizar."
+      },
+      {
+        question: "¿Por qué nunca se deben guardar huevos ni carne cruda en los balcones de la puerta del frigorífico?",
+        answer: "Los balcones de la puerta son la zona más cálida y con mayores oscilaciones térmicas de todo el electrodoméstico. Cada vez que se abre la puerta, entra aire caliente de la cocina y la temperatura sube a entre 6°C y 9°C (42°F–48°F), superando el límite de seguridad alimentaria de 4°C. Estas baldas están pensadas exclusivamente para salsas con conservantes y alta acidez como mostaza, mayonesa comercial, vinagretas y refrescos."
+      },
+      {
+        question: "¿Cómo se debe limpiar y desinfectar el frigorífico tras una fuga de jugo de pollo crudo?",
+        answer: "Siga estos pasos: 1) Deseche de inmediato cualquier alimento listo para comer o verdura donde haya caído el líquido (no hay cocción posterior para eliminar Salmonella). 2) Retire la balda afectada y lávela en el fregadero con agua caliente y jabón para retirar grasa y proteína. 3) Rocíe la balda y las paredes internas con un desinfectante eficaz (lejía diluida a 200 ppm o agua oxigenada 3%) dejándolo actuar húmedo durante 2 minutos completos. 4) Seque con papel de cocina desechable y coloque la carne cruda en una bandeja honda en el estante inferior."
+      }
+    ],
+    monoBadge: "Microbiología y Dinámica de Bioaerosoles",
+    monoTitle: "Simulador de Contaminación Cruzada y Bioaerosoles en el Frigorífico",
+    monoSub: "Análisis del goteo capilar de pollo crudo, dispersión de bioaerosoles por ventilación No Frost, multiplicación de Listeria a 4°C y cinética de desinfección.",
+    section1Title: "Escorrentía por Gravedad y Capilaridad: Por Qué las Rejillas Garantizan 100% de Caída",
+    section1Body: "Los envases de carne cruda desprenden un exudado líquido de baja viscosidad que se esparce con extrema facilidad por capilaridad. En las baldas de rejilla de alambre abiertas, la tensión superficial no puede salvar el espacio entre barras, provocando que el 100% del líquido caiga hacia los alimentos inferiores, contaminando verduras y embutidos listos para el consumo.",
+    section2Title: "Dinámica de Bioaerosoles en Frigoríficos No Frost: Velocidad Terminal de Stokes",
+    section2Body: "Los ventiladores de los sistemas No Frost generan corrientes de aire de hasta 2,5 m/s. Al soplar sobre charcos de jugo de carne, evaporan microgotas que pasan al aire en forma de núcleos de bioaerosol de 1 a 5 micrómetros. La velocidad de caída de estas partículas es tan reducida que quedan suspendidas en el aire y viajan entre las baldas, aterrizando sobre frutas abiertas y ensaladas.",
+    section3Title: "Cinética de Listeria en Frío y el Peligroso Mito del Vinagre Blanco al 5%",
+    section3Body: "El vinagre doméstico al 5% es ácido acético débil. Listeria monocytogenes y Salmonella desarrollan proteínas de choque frío y tolerancia al ácido que neutralizan la acidez a 4°C. El vinagre no alcanza una reducción de 2 logs, dejando miles de bacterias vivas. Para una desinfección completa y segura frente a exudados de carne cruda, es indispensable usar lejía diluida a 200 ppm o agua oxigenada al 3%.",
+  },
+  pt: {
+    pageTitle: "Simulador de Contaminação Cruzada e Bioaerossóis na Geladeira | IsItKitchenSafe",
+    pageDescription: "Simule a capilaridade do gotejamento de frango cru, a dispersão de bioaerossóis por ventiladores No Frost, o crescimento de Listeria a 4°C e a cinética de desinfecção.",
+    breadcrumbs: [
+      { label: 'Início', href: '/pt/' },
+      { label: 'Ferramentas', href: '/pt/tools/' },
+      { label: 'Simulador de Contaminação Cruzada na Geladeira' }
+    ],
+    faqs: [
+      {
+        question: "Qual é o local mais seguro para guardar frango e carnes cruas na geladeira?",
+        answer: "A prateleira mais baixa (fundo da geladeira) é o único local seguro para frango, carne bovina e pescados crus. Uma embalagem de frango pode verter de 30 a 50 mL de líquido com até 20 milhões de células de Salmonella e Campylobacter. Guardar carnes nas prateleiras superiores permite que a gravidade derrame o caldo infeccioso por grades aramadas ou bordas de vidro diretamente sobre saladas, queijos e alimentos prontos guardados embaixo. Além disso, as carnes cruas devem ficar sempre dentro de uma travessa ou bandeja com bordas."
+      },
+      {
+        question: "O ventilador da geladeira No Frost pode espalhar bactérias pelo ar para comidas abertas?",
+        answer: "Sim. Geladeiras modernas No Frost utilizam ventiladores de circulação forçada com velocidades de ar entre 1,0 e 2,5 m/s. Quando há líquidos de carnes derramados ou potes sem tampa, a ventilação seca a superfície e transforma as gotículas em núcleos de bioaerossóis microscópicos (1–5 µm). Essas partículas ficam suspensas nas correntes de ar e se depositam em menos de 90 minutos sobre alimentos desprotegidos, como melão fatiado, folhas verdes e queijos frescos."
+      },
+      {
+        question: "Vinagre branco desinfeta derramamentos de carne crua nas prateleiras da geladeira?",
+        answer: "Não. O vinagre de álcool 5% é apenas ácido acético fraco, e não um sanitizante hospitalar regulamentado. Bactérias como Listeria monocytogenes e Salmonella possuem defesas genéticas de resposta à tolerância ácida (ATR) que as protegem no frio. O vinagre alcança menos de 2 logs de redução (menos de 99%), deixando mais de 10.000 bactérias vivas por polegada quadrada. Vazamentos de carnes cruas exigem água sanitária diluída (200 ppm) ou água oxigenada 3% com pelo menos 2 minutos de contato úmido."
+      },
+      {
+        question: "A bactéria Listeria consegue se multiplicar dentro de uma geladeira fria?",
+        answer: "Sim. A Listeria monocytogenes é uma bactéria psicrotrófica capaz de se multiplicar ativamente a temperaturas de -0,4°C a 4°C. Enquanto bactérias comuns como Salmonella entram em dormência abaixo de 4,4°C, a Listeria continua se dividindo, dobrando sua população a cada 24 a 36 horas em alimentos úmidos e pouco ácidos, como melão fatiado, frios fatiados e queijos de leite cru."
+      },
+      {
+        question: "Por que nunca se deve guardar ovos ou carne crua na porta da geladeira?",
+        answer: "A porta da geladeira é a parte mais quente e sujeita a variações bruscas de calor de todo o aparelho. A cada abertura de porta, o ar quente da cozinha atinge as prateleiras da porta, elevando a temperatura para 6°C a 9°C (42°F–48°F), ultrapassando a marca segura de 4°C. A porta foi projetada exclusivamente para molhos com conservantes e alta acidez, como mostarda, conservas e bebidas."
+      },
+      {
+        question: "Como higienizar e desinfetar a geladeira após o vazamento de caldo de frango cru?",
+        answer: "Siga o protocolo em 4 etapas: 1) Descarte imediatamente qualquer alimento pronto ou hortaliça atingido pelo líquido (não haverá cozimento posterior para destruir a Salmonella). 2) Remova a prateleira e lave na pia com água morna e detergente para remover gordura e proteínas. 3) Borrife a prateleira e as paredes internas com água sanitária diluída (200 ppm) ou água oxigenada 3%, mantendo a superfície molhada por 2 minutos. 4) Seque com papel toalha descartável e passe a guardar carnes cruas em bandeja funda na prateleira inferior."
+      }
+    ],
+    monoBadge: "Microbiologia e Física de Bioaerossóis",
+    monoTitle: "Simulador de Contaminação Cruzada e Bioaerossóis na Geladeira",
+    monoSub: "Análise do gotejamento de frango cru, dispersão de bioaerossóis por ventiladores No Frost, proliferação de Listeria a 4°C e desinfecção química.",
+    section1Title: "Escoamento Gravitacional e Capilaridade: Por Que Grades Aramadas Permitem 100% de Queda",
+    section1Body: "Embalagens de carne crua vertem líquidos aquosos de baixíssima viscosidade. Em prateleiras de grade de arame, a tensão superficial não consegue conter o fluido entre os vãos, garantindo que 100% do líquido caia sobre as prateleiras de baixo, contaminando legumes, queijos e alimentos prontos para consumo.",
+    section2Title: "Dinâmica de Bioaerossóis em Geladeiras No Frost: Velocidade Terminal de Stokes",
+    section2Body: "Ventiladores No Frost sopram ar a até 2,5 m/s. Ao atingir poças de caldo de carne, microgotículas são arrancadas e transportadas pelo ar na forma de bioaerossóis de 1 a 5 micrômetros. Sua velocidade de assentamento é tão baixa que elas permanecem flutuando e viajam entre as prateleiras, depositando-se sobre frutas e saladas expostas.",
+    section3Title: "Cinética da Listeria no Frio e o Erro Fatal do Vinagre Branco Doméstico",
+    section3Body: "O vinagre comum ao 5% não elimina patógenos de carnes cruas. Listeria e Salmonella ativam proteínas de tolerância ácida no frio, resistindo ao vinagre e deixando milhares de bactérias viáveis nas superfícies. Para desinfecção segura de carnes cruas, é essencial utilizar água sanitária diluída (200 ppm) ou água oxigenada a 3%.",
+  },
+  'zh-cn': {
+    pageTitle: "冰箱生肉交叉污染与对流风机生物气溶胶扩散模拟器 | IsItKitchenSafe",
+    pageDescription: "基于流体毛细动力学与食源性致病菌热化学消杀模型，测算生禽肉渗血重力滴落穿透率、风冷风机微米级气溶胶扩散距离、李斯特菌嗜冷繁殖动力学及化学消毒剂杀灭Log值。",
+    breadcrumbs: [
+      { label: '首页', href: '/zh-cn/' },
+      { label: '安全工具箱', href: '/zh-cn/tools/' },
+      { label: '冰箱生肉交叉污染与气溶胶扩散模拟器' }
+    ],
+    faqs: [
+      {
+        question: "生鸡肉与生肉存放在冰箱哪个位置最安全？",
+        answer: "最底层的搁架是存放生鸡肉、牛肉和海鲜唯一安全的位置。一盒冷鲜生鸡肉可渗出30至50 mL带菌血水（含高达2000万个沙门氏菌和空肠弯曲菌）。若置于上层或中层，重力会驱使渗液顺着铁丝网或玻璃边缘垂直渗漏，直接淋洒在下方的草莓、熟食和新鲜蔬菜上。此外，生肉必须盛放在专用的带沿托盘或深盘中，以防包装塑料薄膜破损漏液。"
+      },
+      {
+        question: "风冷无霜冰箱的风机会通过空气把细菌吹到敞口食物上吗？",
+        answer: "会的。现代风冷无霜冰箱配有强制对流风机，循环风速在1.0至2.5 m/s之间。当有未密封的生肉血水或滴漏污渍时，强风吹拂会加速表面水分蒸发，将液滴雾化为微米级的飞沫核（1–5微米）。这些生物气溶胶悬浮在循环气流中，可在60至90分钟内沉降扩散至未盖紧的高危即食食材上（如切开的哈密瓜、西瓜、沙拉生菜和软质奶酪）。"
+      },
+      {
+        question: "食用白醋可以擦拭消毒冰箱里的生肉血水吗？",
+        answer: "不可以。常用的5%食用白醋仅为稀醋酸溶液，并非美国EPA或国家权威机构认证的医用或食品接触级消毒剂。单增李斯特菌和沙门氏菌具有低温酸耐受响应（ATR）防御基因，能在4°C弱酸环境中顽强存活。实验证明白醋杀灭率低于2-log（99%以下），每平方英寸残留上万个活性致病菌。擦拭生肉渗液必须使用稀释84含氯消毒液（200 ppm）或3%双氧水，并保持湿润接触至少2分钟。"
+      },
+      {
+        question: "李斯特菌在寒冷的冰箱冷藏室里还能分裂繁殖吗？",
+        answer: "可以。单增李斯特菌是一种独特的嗜冷性致病菌，在-0.4°C至4°C的冷藏温度下依然具备旺盛的分裂繁殖能力。沙门氏菌和大肠杆菌在4.4°C以下通常进入休眠停滞状态，但李斯特菌在切开的瓜果、熟肉和软质奶酪等高水分中性基质上，每24至36小时即可翻倍增殖一代，是全球冷藏食品致死性食物中毒疫情的首要元凶。"
+      },
+      {
+        question: "为什么严禁把鸡蛋和生肉放在冰箱门侧的置物架上？",
+        answer: "冰箱门侧置物架是整台冰箱温度最高、温差波动最剧烈的危险区域。每次开关冰箱门，室温热空气都会涌入门架，使温度在5.5°C至8.8°C（42°F–48°F）之间频繁跳跃，严重突破4°C的食品安全冷藏红线，极大地加速细菌分裂。门架仅适用于存放耐储且富含防腐酸性成分的调味酱料（如芥末酱、食用醋、酱油和碳酸饮料）。"
+      },
+      {
+        question: "生鸡肉汁漏在冰箱隔板上后，标准消杀处理步骤是什么？",
+        answer: "严格执行四步消杀法：1）立即彻底丢弃所有被血水滴溅或位于其正下方的即食食品和新鲜果蔬（这些食材无后续熟化加热灭菌步骤）。2）拆卸受污染的搁架，在水槽中使用洗洁精与热水刷洗，彻底剥离油脂与蛋白质土壤。3）向干净的搁架及相邻冰箱内壁均匀喷洒有效消毒剂（200 ppm次氯酸钠稀释液或3%过氧化氢），保持湿润静置反应2分钟以上。4）使用一次性厨房纸巾擦干，并将生肉移至底层带沿托盘中存放。"
+      }
+    ],
+    monoBadge: "微生物学与生物气溶胶流体动力学",
+    monoTitle: "冰箱生肉交叉污染与对流风机气溶胶扩散模拟器",
+    monoSub: "精准测算生禽肉渗血重力滴漏毛细流淌、风冷风机微粒气溶胶飞沫沉降、4°C李斯特菌分裂增殖及化学消杀效能。",
+    section1Title: "重力滴漏流体力学与毛细扩散：为何铁丝网格架下渗率高达100%",
+    section1Body: "生肉渗出血水属于低粘度水性蛋白溶液，在毛细润湿效应下迅速向边缘铺展。在镂空的涂层铁丝网架上，表面张力无法跨越超过15毫米的网格间隙，重力迫使100%的带菌液体垂直滴漏，污染中层乳制品及底层果蔬抽屉，造成严重的食源性疾病隐患。",
+    section2Title: "风冷无霜冰箱内的气溶胶动力学：斯托克斯沉降终速方程",
+    section2Body: "风冷冰箱风速高达2.5 m/s。强气流吹拂未封闭的肉汁时，微米级液滴被剥离卷入风道，形成1至5微米的飞沫核气溶胶。根据斯托克斯定律，这类超细颗粒在空气中的重力沉降速度极慢，会长时间悬浮在循环气流中，跨越物理隔板沉降在敞口的切开瓜果和沙拉菜叶上。",
+    section3Title: "李斯特菌嗜冷繁殖机制与食用白醋消毒的致命认知误区",
+    section3Body: "民间盛传白醋可消毒厨房，但在冷藏环境下白醋对李斯特菌和沙门氏菌无效。细菌在低温下激活酸耐受保护机制，白醋擦拭后仍残留海量活菌。彻底阻断交叉污染链条，必须采用底层托盘物理隔离，并使用稀释含氯消毒液或3%双氧水完成有效消杀。",
+  },
+  ja: {
+    pageTitle: "冷蔵庫生肉交差汚染＆対流ファン浮遊菌拡散シミュレーター | IsItKitchenSafe",
+    pageDescription: "生鶏肉ドリップの毛管流下、ファン式冷蔵庫の対流による微小バイオエアロゾル拡散、4℃でのリステリア菌低温増殖、化学消毒剤の殺滅キネティクスを科学的に検証します。",
+    breadcrumbs: [
+      { label: 'ホーム', href: '/ja/' },
+      { label: 'ツール一覧', href: '/ja/tools/' },
+      { label: '冷蔵庫交差汚染＆浮遊菌拡散シミュレーター' }
+    ],
+    faqs: [
+      {
+        question: "生肉や生鶏肉を冷蔵庫で保管する最も安全な場所はどこですか？",
+        answer: "生鶏肉、生牛肉、魚介類を置く唯一安全な場所は『冷蔵庫の最下段』です。市販の生肉パックからは数千万個のサルモネラ菌やカンピロバクターを含む30〜50mLのドリップが漏れ出します。上段や中段に置くと、重力によってワイヤー棚の隙間やガラス棚のフチから菌液が滴下し、下の生野菜やチーズ、作り置き料理に直接降り注ぎます。さらに、生肉は必ずフチのある専用トレーや深皿に入れて保管してください。"
+      },
+      {
+        question: "ファン式（ファン循環冷却）冷蔵庫は空気感染のように菌を食品に拡散させますか？",
+        answer: "はい、拡散します。現代のファン式ノンフロン冷蔵庫は庫内の霜を防ぐために1.0〜2.5m/sの風速で冷気を循環させています。生肉のドリップがこぼれていたりパックが開いたままだと、強風で表面が乾燥し、微小な液滴が1〜5マイクロメートルのバイオエアロゾル（飛沫核）となって空気中に舞い上がります。この浮遊菌は気流に乗って棚を超え、ラップをしていないカットメロンやサラダ菜、柔らかいチーズに60〜90分以内に降り積もります。"
+      },
+      {
+        question: "穀物酢（お酢）で冷蔵庫の生肉ドリップを安全に除菌できますか？",
+        answer: "いいえ、できません。一般的な酸度5%の食酢は希釈酢酸であり、EPA認可の医療用・食品衛生用殺菌剤ではありません。リステリア菌やサルモネラ菌は低温環境下で酸耐性タンパク質（ATR）を発現させ、弱酸に耐える遺伝的防御機構を持っています。お酢による殺菌力は2-log（99%）未満にとどまり、拭き取った後も1平方インチあたり1万個以上の生きた菌が残ります。生肉のドリップには希釈した次亜塩素酸ナトリウム（200 ppm）または3%過酸化水素水を用いて、2分間以上の接触時間を保ってください。"
+      },
+      {
+        question: "リステリア菌は冷たい冷蔵庫（4℃）の中でも増殖できますか？",
+        answer: "はい、盛んに増殖します。リステリア・モノサイトゲネスは-0.4℃〜4℃の低温下でも細胞分裂できる代表的な『低温細菌（嗜冷菌）』です。サルモネラ菌や大腸菌は4.4℃以下で増殖を休止しますが、リステリア菌は水分が多く中性付近の食品（カットメロン、生ハム、ナチュラルチーズなど）の上で24〜36時間ごとに倍増し、重篤な敗血症や流産を引き起こす危険な食中毒の原因となります。"
+      },
+      {
+        question: "卵や生肉を冷蔵庫のドアポケットに置いてはいけない理由は？",
+        answer: "ドアポケットは冷蔵庫の中で最も温度が高く、温度変化が極めて激しいゾーンです。ドアを開けるたびに室内の暖かい空気が入り込み、温度は6℃〜9℃まで急上昇し、食品衛生の安全限界である4℃を大幅にオーバーします。ドアポケットは酸度が高く保存性の高い調味料（マスタード、市販マヨネーズ、ドレッシング、清涼飲料水）専用の保管場所です。"
+      },
+      {
+        question: "生鶏肉のドリップがこぼれた後の正しい除菌・清掃手順は？",
+        answer: "4段階の清掃手順を実行してください：1）ドリップが垂れたり直下にあった『そのまま食べる食品や野菜』は加熱殺菌工程がないため直ちに廃棄する。2）汚れた棚板を取り外し、シンクで洗剤とお湯を使って油分とタンパク質の汚れを完全に洗い流す。3）清潔にした棚板と庫内の壁に有効な除菌剤（希釈次亜塩素酸ナトリウム200 ppmまたは3%過酸化水素水）をスプレーし、濡れた状態で最低2分間静置する。4）使い捨てのキッチンペーパーで拭き取り、生肉は最下段の深皿トレーに移す。"
+      }
+    ],
+    monoBadge: "微生物学＆バイオエアロゾル流体力学",
+    monoTitle: "冷蔵庫生肉交差汚染＆対流ファン浮遊菌拡散シミュレーター",
+    monoSub: "生鶏肉ドリップの重力流下、ファン循環気流による飛沫核エアロゾル拡散、4℃でのリステリア菌増殖、化学殺菌剤の致死キネティクスを解析。",
+    section1Title: "重力流下と毛管現象：なぜワイヤー棚は100%下段へ滴下するのか",
+    section1Body: "生肉から出るドリップは粘度が低く、毛細管現象によって棚の表面を速やかに広がります。網目状のワイヤー棚では表面張力で液滴を支えきれず、漏れ出た菌液の100%が重力によって下段へ落下し、生食用の野菜や乳製品を直撃します。",
+    section2Title: "ファン式冷蔵庫のエアロゾル力学：ストークスの微粒子終末沈降速度",
+    section2Body: "ファン式冷蔵庫は最大2.5m/sの循環風を吹き出します。こぼれた肉汁から剥ぎ取られた微小液滴は1〜5マイクロメートルのバイオエアロゾルとなります。ストークスの法則が示す通り、微小粒子の沈降速度は風速に比べて極めて遅いため、空気中を浮遊して棚を超え、むき出しの果物やサラダに沈着します。",
+    section3Title: "リステリア菌の低温増殖と『食酢で除菌できる』という危険な民間神話",
+    section3Body: "家庭用の食酢（酸度5%）は生肉の病原菌に対して効果が不十分です。リステリア菌やサルモネラ菌は低温下で酸耐性を発現させて生き延びます。お酢拭きでは菌を完全に殺せず、ふきんで周囲に塗り広げる二次汚染を招きます。生肉のドリップ処理には次亜塩素酸ナトリウムや過酸化水素水を必ず使用してください。",
+  }
+};
+
+const c = CONTENT[lang] || CONTENT.es;
+---
+
+<Layout title={c.pageTitle} description={c.pageDescription} faqs={c.faqs} availableLocales={availableLocales}>
+  <!-- Breadcrumbs -->
+  <div class="bg-surface-soft border-b border-hairline py-1">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <Breadcrumbs items={c.breadcrumbs} className="mb-0" />
+    </div>
+  </div>
+
+  <div class="max-w-[1280px] mx-auto px-6 py-10 md:py-16">
+    <!-- Header -->
+    <header class="max-w-4xl mb-10">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-rose-500/10 text-rose-950 mb-3 border border-rose-500/20">
+        <span>🦠</span>
+        {c.monoBadge}
+      </div>
+      <h1 class="text-3xl md:text-5xl font-extrabold text-ink tracking-tight mb-4 leading-tight">
+        {c.monoTitle}
+      </h1>
+      <p class="text-base md:text-lg text-muted leading-relaxed">
+        {c.monoSub}
+      </p>
+    </header>
+
+    <!-- Interactive Component -->
+    <RefrigeratorCrossContaminationModeler lang={lang} />
+
+    <!-- Deep Dive Articles -->
+    <section class="prose max-w-none text-ink border-t border-hairline pt-12 mt-12 space-y-12">
+      <article>
+        <h2 class="text-2xl md:text-3xl font-bold tracking-tight mb-4">
+          {c.section1Title}
+        </h2>
+        <p class="text-sm md:text-base leading-relaxed text-muted mb-4">
+          {c.section1Body}
+        </p>
+      </article>
+
+      <article class="bg-surface-soft border border-hairline rounded-2xl p-6 md:p-8">
+        <h2 class="text-xl md:text-2xl font-bold tracking-tight text-rose-950 mb-4 flex items-center gap-2">
+          <span>💨</span>
+          {c.section2Title}
+        </h2>
+        <p class="text-sm leading-relaxed text-muted mb-4">
+          {c.section2Body}
+        </p>
+      </article>
+
+      <article>
+        <h2 class="text-2xl md:text-3xl font-bold tracking-tight mb-4">
+          {c.section3Title}
+        </h2>
+        <p class="text-sm md:text-base leading-relaxed text-muted mb-4">
+          {c.section3Body}
+        </p>
+      </article>
+    </section>
+  </div>
+</Layout>

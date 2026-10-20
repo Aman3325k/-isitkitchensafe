@@ -77,7 +77,8 @@ const SPECIAL_PAGES = [
   'tools/freezer-burn-sublimation-modeler',
   'tools/glass-cooktop-fracture-simulator',
   'tools/dishwasher-thermal-sanitize-calculator',
-  'tools/food-processor-blade-fatigue-modeler'
+  'tools/food-processor-blade-fatigue-modeler',
+  'tools/refrigerator-cross-contamination-modeler'
 ];
 
 const esSlugs = new Set([
