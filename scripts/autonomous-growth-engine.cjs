@@ -74,7 +74,8 @@ const TOOLS_REGISTRY = [
   { slug: 'oven-self-cleaning-pyrolysis-simulator', name: 'Oven Self-Cleaning Pyrolysis Fume & Fluoropolymer PTFE Off-Gassing Simulator', category: 'Thermal Physics & Toxicology', component: 'OvenSelfCleaningPyrolysisSimulator.astro', dataFile: 'oven-self-cleaning-pyrolysis-data.json' },
   { slug: 'freezer-burn-sublimation-modeler', name: 'Freezer Burn, Ice Sublimation & Lipid Peroxidation Modeler', category: 'Thermodynamics & Food Science', component: 'FreezerBurnSublimationModeler.astro', dataFile: 'freezer-burn-sublimation-data.json' },
   { slug: 'glass-cooktop-fracture-simulator', name: 'Glass Cooktop Point-Load & Thermal Shock Fracture Simulator', category: 'Ceramic Physics', component: 'GlassCooktopFractureSimulator.astro', dataFile: 'glass-cooktop-fracture-data.json' },
-  { slug: 'dishwasher-thermal-sanitize-calculator', name: 'Dishwasher Thermal Sanitize & Norovirus Lethality Calculator', category: 'Microbiology & Sanitation', component: 'DishwasherThermalSanitizeCalculator.astro', dataFile: 'dishwasher-thermal-sanitize-data.json' }
+  { slug: 'dishwasher-thermal-sanitize-calculator', name: 'Dishwasher Thermal Sanitize & Norovirus Lethality Calculator', category: 'Microbiology & Sanitation', component: 'DishwasherThermalSanitizeCalculator.astro', dataFile: 'dishwasher-thermal-sanitize-data.json' },
+  { slug: 'food-processor-blade-fatigue-modeler', name: 'Food Processor Centrifugal Stress & Polycarbonate Blade Fatigue Modeler', category: 'Materials Physics', component: 'FoodProcessorBladeFatigueModeler.astro', dataFile: 'food-processor-blade-fatigue-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -240,7 +241,8 @@ function auditDatasets() {
     'oven-self-cleaning-pyrolysis-data.json',
     'freezer-burn-sublimation-data.json',
     'glass-cooktop-fracture-data.json',
-    'dishwasher-thermal-sanitize-data.json'
+    'dishwasher-thermal-sanitize-data.json',
+    'food-processor-blade-fatigue-data.json'
   ];
 
   const datasetStats = {};
@@ -491,24 +493,17 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Food Processor Centrifugal Stress & Polycarbonate Blade Fatigue Modeler',
-      category: 'Materials Physics',
-      intent: 'Models high-torque S-blade shear stress fatigue, dishwasher stress crazing of polycarbonate work bowls, and stainless steel micro-chipping into food.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '42,000+ US impressions'
-    },
-    {
       title: 'Refrigerator Cross-Contamination & Bio-Aerosol Modeler',
       category: 'Microbiology & Aerosol Physics',
       intent: 'Models raw poultry drip capillarity, convection fan microbial aerosol dispersal onto open produce, and chemical sanitization contact times.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '38,000+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '46,000+ US impressions'
     },
     {
       title: 'Gas Stove Benzene & Indoor Nitrogen Dioxide (NO2) Exposure Calculator',
       category: 'Combustion Toxicology',
       intent: 'Models methane incomplete combustion, benzene fugitive emissions, indoor NO2 spike thresholds, and range hood capture face velocities.',
-      priority: 'MEDIUM',
+      priority: 'HIGH',
       estimatedMonthlyVolume: '55,000+ US impressions'
     },
     {
@@ -517,6 +512,13 @@ function auditGrowthOpportunities() {
       intent: 'Models yolk dielectric loss tangent superheating (reaching 110°C–120°C in liquid state), vapor pressure buildup against protein vitelline membrane, and violent cavitation acoustic blast upon fork puncture.',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '48,000+ US impressions'
+    },
+    {
+      title: 'Silicone Spatula & Utensil High-Heat Oligomer Leaching Modeler',
+      category: 'Polymer Chemistry & Food Contact',
+      intent: 'Models thermal depolymerization of platinum vs peroxide-cured silicone spatulas when in contact with 200°C+ cooking oils, calculating cyclic oligomer (D4-D6) volatilization and migration into fatty foods.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '39,000+ US impressions'
     }
   ];
 
