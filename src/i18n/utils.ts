@@ -71,7 +71,8 @@ const SPECIAL_PAGES = [
   'tools/cast-iron-seasoning-degradation-modeler',
   'tools/wooden-utensil-biofilm-modeler',
   'tools/copper-cookware-toxicity-modeler',
-  'tools/microwave-plastic-steam-cover-modeler'
+  'tools/microwave-plastic-steam-cover-modeler',
+  'tools/stainless-steel-heavy-metal-leaching-modeler'
 ];
 
 const esSlugs = new Set([

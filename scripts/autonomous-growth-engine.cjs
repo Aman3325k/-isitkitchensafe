@@ -67,7 +67,8 @@ const TOOLS_REGISTRY = [
   { slug: 'cast-iron-seasoning-degradation-modeler', name: 'Cast Iron vs Carbon Steel Reactive Metal Pan Seasoning Degradation Modeler', category: 'Reactive Metallurgy', component: 'CastIronSeasoningDegradationModeler.astro', dataFile: 'cast-iron-seasoning-degradation-data.json' },
   { slug: 'wooden-utensil-biofilm-modeler', name: 'Wooden Spoon & Utensil Micro-Crack Bacterial Biofilm & Moisture Trapping Modeler', category: 'Microbiology', component: 'WoodenUtensilBiofilmModeler.astro', dataFile: 'wooden-utensil-biofilm-data.json' },
   { slug: 'copper-cookware-toxicity-modeler', name: 'Copper Cookware & Brass Acidic Food Leaching & Verdigris Modeler', category: 'Metallurgy & Toxicology', component: 'CopperCookwareToxicityModeler.astro', dataFile: 'copper-cookware-toxicity-data.json' },
-  { slug: 'microwave-plastic-steam-cover-modeler', name: 'Microwave Plastic Steam Cover Phthalate Condensate Dripping Modeler', category: 'Toxicology', component: 'MicrowavePlasticSteamCoverModeler.astro', dataFile: 'microwave-plastic-steam-cover-data.json' }
+  { slug: 'microwave-plastic-steam-cover-modeler', name: 'Microwave Plastic Steam Cover Phthalate Condensate Dripping Modeler', category: 'Toxicology', component: 'MicrowavePlasticSteamCoverModeler.astro', dataFile: 'microwave-plastic-steam-cover-data.json' },
+  { slug: 'stainless-steel-heavy-metal-leaching-modeler', name: 'Stainless Steel Cookware Heavy Metal (Nickel & Chromium) Acidic Leaching Modeler', category: 'Metallurgy & Toxicology', component: 'StainlessSteelHeavyMetalLeachingModeler.astro', dataFile: 'stainless-steel-heavy-metal-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -203,7 +204,8 @@ function auditDatasets() {
     'cast-iron-seasoning-degradation-data.json',
     'wooden-utensil-biofilm-data.json',
     'copper-cookware-toxicity-data.json',
-    'microwave-plastic-steam-cover-data.json'
+    'microwave-plastic-steam-cover-data.json',
+    'stainless-steel-heavy-metal-data.json'
   ];
 
   const datasetStats = {};

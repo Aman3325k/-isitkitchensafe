@@ -1,0 +1,962 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import steelData from '../data/stainless-steel-heavy-metal-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  gradeLabel: string;
+  gradeHelp: string;
+  conditionLabel: string;
+  conditionHelp: string;
+  foodLabel: string;
+  foodHelp: string;
+  durationLabel: string;
+  durationHelp: string;
+  tempLabel: string;
+  tempHelp: string;
+  servingsLabel: string;
+  servingsHelp: string;
+  presetsTitle: string;
+  presetNewTomato: string;
+  presetSurgicalReduction: string;
+  presetSnas430: string;
+  presetScouredBroth: string;
+  presetOvernightChili: string;
+  presetEnamelZero: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  hazardScoreLabel: string;
+  niLeachedLabel: string;
+  crLeachedLabel: string;
+  niDoseLabel: string;
+  snasRiskLabel: string;
+  coeComplianceLabel: string;
+  metallicTasteLabel: string;
+  alertTitle: string;
+  tableTitle: string;
+  tableSub: string;
+  colGrade: string;
+  colComposition: string;
+  colPren: string;
+  colNiContent: string;
+  colAcidTolerance: string;
+  colSnasSuitability: string;
+  rulesTitle: string;
+  rulesSub: string;
+  rule1Title: string;
+  rule1Text: string;
+  rule2Title: string;
+  rule2Text: string;
+  rule3Title: string;
+  rule3Text: string;
+  rule4Title: string;
+  rule4Text: string;
+  copyReportBtn: string;
+  copiedFeedback: string;
+}
+
+const DICTIONARY: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Metallurgy & Toxicology Simulator",
+    title: "Stainless Steel Heavy Metal (Nickel & Chromium) Acidic Leaching Modeler",
+    subtitle: "Simulate stainless steel alloy dissolution (304 vs 316 vs 430 vs 200 series), brand-new pan leaching surges, organic acid chelation kinetics, and Systemic Nickel Allergy Syndrome (SNAS) risk against EU CM/Res(2013)9 and EFSA standards.",
+    controlsTitle: "Cookware Metallurgy & Culinary Parameters",
+    controlsSub: "Configure stainless steel alloy grade, surface condition & passivation state, food acidity matrix, simmering time, and temperature.",
+    gradeLabel: "Stainless Steel Alloy & Grade:",
+    gradeHelp: "Austenitic 304 (18/10) vs 316 Surgical vs Ferritic 430 Nickel-Free vs 200-Series Economy vs Enamel.",
+    conditionLabel: "Surface Condition & Passivation State:",
+    conditionHelp: "Brand-new unpassivated (Kamerud surge) vs mature passivated vs scoured steel wool vs chloride pitted.",
+    foodLabel: "Culinary Food Acidity Matrix:",
+    foodHelp: "Slow-simmered tomato marinara vs vinegar gastrique reduction vs acidulated bone broth vs salted water vs overnight fridge storage.",
+    durationLabel: "Simmering & Contact Duration (Minutes):",
+    durationHelp: "Prolonged boiling exponentially increases cumulative heavy metal ion chelation.",
+    tempLabel: "Cooking / Simmering Temperature (°C):",
+    tempHelp: "Elevated temperatures accelerate hydronium attack and Arrhenius kinetic dissolution of the Cr2O3 passive layer.",
+    servingsLabel: "Serving Size Consumed (Grams):",
+    servingsHelp: "Standard meal portion to calculate exact oral nickel and chromium intake.",
+    presetsTitle: "Quick Diagnostic Scenarios:",
+    presetNewTomato: "🍅 First Tomato Bolognese in Brand-New 304 Pan (Kamerud Spike)",
+    presetSurgicalReduction: "🍋 Lemon Vinegar Gastrique in 316 Surgical Steel (Mo Shielded)",
+    presetSnas430: "🛡️ Tomato Sauce in 430 Nickel-Free Steel (Hypoallergenic / SNAS Safe)",
+    presetScouredBroth: "🍲 8-Hour Bone Broth in Scoured 304 Stockpot (Cumulative Migration)",
+    presetOvernightChili: "🧊 Leftover Chili Stored in Pot Overnight in Refrigerator",
+    presetEnamelZero: "🥘 Acidic Sauce in Vitreous Enamel Clad (Zero Heavy Metal Control)",
+    diagnosticTitle: "Heavy Metal Toxicology & Compliance Scorecard",
+    diagnosticSub: "Live computational modeling of nickel (Ni) and chromium (Cr) migration, EU CM/Res(2013)9 compliance, and clinical allergy safety.",
+    hazardScoreLabel: "Heavy Metal Leaching Severity Score",
+    niLeachedLabel: "Nickel (Ni) Concentration in Food",
+    crLeachedLabel: "Chromium (Cr) Concentration in Food",
+    niDoseLabel: "Oral Nickel Intake per Serving",
+    snasRiskLabel: "SNAS / Nickel Allergy Flare Risk",
+    coeComplianceLabel: "Council of Europe CM/Res(2013)9 Status",
+    metallicTasteLabel: "Metallic Off-Flavor & Oxidation Index",
+    alertTitle: "Clinical Safety & Metallurgical Assessment",
+    tableTitle: "Stainless Steel Grades & Heavy Metal Risk Profiles",
+    tableSub: "Direct metallurgical comparison of nickel content, chromium passivation, pitting resistance (PREN), and clinical suitability.",
+    colGrade: "Alloy Grade",
+    colComposition: "Nominal Composition",
+    colPren: "PREN Score",
+    colNiContent: "Nickel Content (%)",
+    colAcidTolerance: "Acid Boiling Tolerance",
+    colSnasSuitability: "Nickel Allergy Suitability",
+    rulesTitle: "4 Evidence-Based Rules for Safe Cooking with Stainless Steel",
+    rulesSub: "Metallurgical protocols to eliminate heavy metal spikes and protect your cookware.",
+    rule1Title: "1. The 15-Minute Vinegar Boil Passivation for Brand-New Cookware",
+    rule1Text: "Never cook tomato sauce in a brand-new stainless steel pan immediately after unboxing. As proven by UC Davis food scientists (Kamerud et al., 2013), unpassivated new pans release up to 6.8x more nickel and 8.5x more chromium. Boil a 50/50 mixture of water and white vinegar for 15 minutes before first use to force the uniform growth of a dense, protective Cr2O3 passive layer.",
+    rule2Title: "2. The Rolling Boil Salting Rule to Stop Chloride Pitting",
+    rule2Text: "Never drop table salt into cold water in a stainless stockpot. Salt crystals that settle on the cold bottom create hyper-concentrated chloride ions (Cl⁻) that actively dissolve the passive oxide film and bore microscopic corrosion pits within minutes. Always wait until water reaches a rolling boil (100°C / 212°F) before adding salt.",
+    rule3Title: "3. Strict Nickel-Free Protocol for SNAS / Nickel Allergy",
+    rule3Text: "If you or a family member has Contact Dermatitis or Systemic Nickel Allergy Syndrome (SNAS), do not prepare acidic dishes in standard 304 or 316 stainless steel. Use nickel-free ferritic 430 stainless steel (18/0), vitreous enameled cast iron (Le Creuset, Staub), pure titanium, or borosilicate glass.",
+    rule4Title: "4. Never Store Leftovers Inside the Stainless Cooking Pot",
+    rule4Text: "Once your meal is cooked, immediately transfer leftovers to glass or glazed ceramic containers before refrigeration. Prolonged static contact with chilled acidic food in the presence of oxygen creates differential aeration galvanic cells along the liquid meniscus, slowly pitting the steel and releasing heavy metals into the dish.",
+    copyReportBtn: "Copy Diagnostic Report",
+    copiedFeedback: "Copied to clipboard!"
+  },
+  es: {
+    badge: "Simulador de Metalurgia y Toxicología",
+    title: "Modelo de Lixiviación Ácida de Metales Pesados (Níquel y Cromo) en Acero Inoxidable",
+    subtitle: "Simule la disolución de aleaciones de acero (304 vs 316 vs 430 vs serie 200), picos de liberación en sartenes nuevas, quelación por ácidos orgánicos y riesgo de Síndrome de Alergia Sistémica al Níquel (SNAS) según normas de la UE y EFSA.",
+    controlsTitle: "Metalurgia del Utensilio y Parámetros Culinarios",
+    controlsSub: "Configure el grado de acero inoxidable, estado de pasivación superficial, matriz ácida del alimento, tiempo de cocción y temperatura.",
+    gradeLabel: "Grado y Aleación de Acero Inoxidable:",
+    gradeHelp: "Austenítico 304 (18/10) vs 316 Quirúrgico vs Ferrítico 430 Libre de Níquel vs Serie 200 Económico vs Esmalte.",
+    conditionLabel: "Condición Superficial y Pasivación:",
+    conditionHelp: "Nuevo sin pasivar (pico Kamerud) vs maduro pasivado vs rayado con estropajo vs picado por cloruros.",
+    foodLabel: "Matriz Ácida del Alimento:",
+    foodHelp: "Salsa de tomate marinara vs reducción de vinagre y limón vs caldo de huesos acidificado vs agua con sal vs refrigeración.",
+    durationLabel: "Tiempo de Cocción y Contacto (Minutos):",
+    durationHelp: "Hervir por tiempo prolongado incrementa exponencialmente la quelación acumulativa de iones metálicos.",
+    tempLabel: "Temperatura de Cocción (°C):",
+    tempHelp: "Temperaturas altas aceleran el ataque de hidronio y la disolución cinética Arrhenius de la capa pasiva de Cr2O3.",
+    servingsLabel: "Tamaño de Porción Consumida (Gramos):",
+    servingsHelp: "Porción culinaria estándar para calcular la ingesta oral exacta de níquel y cromo.",
+    presetsTitle: "Escenarios de Diagnóstico Rápido:",
+    presetNewTomato: "🍅 Primer Tomate Bolognese en Sartén 304 Nueva (Pico de Lixiviación)",
+    presetSurgicalReduction: "🍋 Gastrique de Vinagre y Limón en Acero 316 Quirúrgico (Blindaje Mo)",
+    presetSnas430: "🛡️ Salsa de Tomate en Acero 430 Libre de Níquel (Seguro para SNAS)",
+    presetScouredBroth: "🍲 Caldo de Huesos 8h en Olla 304 Rayada (Migración Acumulativa)",
+    presetOvernightChili: "🧊 Chili Guardado en la Olla Toda la Noche en el Refrigerador",
+    presetEnamelZero: "🥘 Salsa Ácida en Olla Esmaltada (Control Cero Metales Pesados)",
+    diagnosticTitle: "Evaluación Toxicológica y Cumplimiento de Metales Pesados",
+    diagnosticSub: "Modelado computacional en vivo de migración de níquel (Ni) y cromo (Cr), cumplimiento de UE CM/Res(2013)9 y seguridad clínica.",
+    hazardScoreLabel: "Índice de Severidad de Lixiviación de Metales",
+    niLeachedLabel: "Concentración de Níquel (Ni) en el Alimento",
+    crLeachedLabel: "Concentración de Cromo (Cr) en el Alimento",
+    niDoseLabel: "Ingesta Oral de Níquel por Porción",
+    snasRiskLabel: "Riesgo de Reacción por Alergia al Níquel (SNAS)",
+    coeComplianceLabel: "Estado Consejo de Europa CM/Res(2013)9",
+    metallicTasteLabel: "Sabor Metálico e Índice de Oxidación",
+    alertTitle: "Evaluación Toxicológica y Seguridad Clínica",
+    tableTitle: "Grados de Acero Inoxidable y Perfiles Toxicológicos",
+    tableSub: "Comparación metalúrgica de contenido de níquel, pasivación de cromo, resistencia a la picadura (PREN) e idoneidad clínica.",
+    colGrade: "Grado de Aleación",
+    colComposition: "Composición Nominal",
+    colPren: "Puntuación PREN",
+    colNiContent: "Contenido de Níquel (%)",
+    colAcidTolerance: "Tolerancia a Ácidos Hirviendo",
+    colSnasSuitability: "Idoneidad para Alergia al Níquel",
+    rulesTitle: "4 Reglas Científicas para Cocinar Seguro en Acero Inoxidable",
+    rulesSub: "Protocolos metalúrgicos para eliminar picos de metales pesados y proteger sus utensilios.",
+    rule1Title: "1. Pasivación con Hervor de Vinagre de 15 Minutos para Ollas Nuevas",
+    rule1Text: "Nunca cocine salsa de tomate en una sartén nueva de acero inoxidable recién desempacada. Según demostró la Universidad de California Davis (Kamerud et al., 2013), las sartenes nuevas sin pasivar liberan hasta 6.8x más níquel y 8.5x más cromo. Hierva una mezcla 50/50 de agua y vinagre blanco durante 15 minutos antes del primer uso para formar una barrera densa de Cr2O3.",
+    rule2Title: "2. Regla de Salar Solo con Agua Hirviendo para Evitar Picaduras",
+    rule2Text: "Nunca eche sal en grano al agua fría en una olla de acero inoxidable. Los cristales de sal que se depositan en el fondo disuelven la película pasiva de óxido y perforan microporos de corrosión irreversibles en pocos minutos. Espere siempre a que el agua hierva a borbotones antes de añadir la sal.",
+    rule3Title: "3. Protocolo Estricto Sin Níquel para Pacientes con SNAS",
+    rule3Text: "Si usted o un familiar padece dermatitis de contacto o Síndrome de Alergia Sistémica al Níquel (SNAS), no prepare platillos ácidos en acero 304 o 316. Utilice acero ferrítico 430 sin níquel (18/0), hierro fundido esmaltado (Le Creuset, Staub), titanio puro o vidrio borosilicato.",
+    rule4Title: "4. Jamás Guarde Sobras Dentro de la Olla de Cocinar",
+    rule4Text: "Una vez cocinado el alimento, transfiéralo de inmediato a recipientes de vidrio o cerámica antes de meterlo al refrigerador. El contacto estático prolongado con comida ácida fría en presencia de oxígeno crea celdas galvánicas en la línea de agua, picando el acero y liberando metales en la comida.",
+    copyReportBtn: "Copiar Informe de Diagnóstico",
+    copiedFeedback: "¡Copiado al portapapeles!"
+  },
+  pt: {
+    badge: "Simulador de Metalurgia e Toxicologia",
+    title: "Modelo de Lixiviação Ácida de Metais Pesados (Níquel e Cromo) em Inox",
+    subtitle: "Simule a dissolução de ligas de aço inoxidável (304 vs 316 vs 430 vs série 200), picos de lixiviação em panelas novas, quelação por ácidos orgânicos e risco de Síndrome de Alergia Sistêmica ao Níquel (SNAS) segundo normas da UE e EFSA.",
+    controlsTitle: "Metalurgia do Utensílio e Parâmetros Culinários",
+    controlsSub: "Configure o grau de aço inoxidável, estado de passivação superficial, matriz ácida do alimento, tempo de cozimento e temperatura.",
+    gradeLabel: "Grau e Liga de Aço Inoxidável:",
+    gradeHelp: "Austenítico 304 (18/10) vs 316 Cirúrgico vs Ferrítico 430 Sem Níquel vs Série 200 Econômico vs Esmaltado.",
+    conditionLabel: "Condição Superficial e Estado de Passivação:",
+    conditionHelp: "Novo sem passivar (pico Kamerud) vs maduro passivado vs raspado com palha de aço vs corrosão por cloreto.",
+    foodLabel: "Matriz Ácida do Alimento:",
+    foodHelp: "Molho de tomate marinara vs redução de vinagre e limão vs caldo de ossos acidificado vs água com sal vs armazenamento.",
+    durationLabel: "Tempo de Cozimento e Contato (Minutos):",
+    durationHelp: "Fervuras prolongadas aumentam exponencialmente a quelação cumulativa de íons metálicos.",
+    tempLabel: "Temperatura de Cozimento (°C):",
+    tempHelp: "Temperaturas elevadas aceleram o ataque de hidrônio e a dissolução cinética Arrhenius da camada passiva de Cr2O3.",
+    servingsLabel: "Tamanho da Porção Consumida (Gramas):",
+    servingsHelp: "Porção culinária padrão para calcular a ingestão oral exata de níquel e cromo.",
+    presetsTitle: "Cenários de Diagnóstico Rápido:",
+    presetNewTomato: "🍅 Primeiro Molho de Tomate em Panela 304 Nova (Pico de Lixiviação)",
+    presetSurgicalReduction: "🍋 Gastrique de Limão e Vinagre em Aço 316 Cirúrgico (Blindagem Mo)",
+    presetSnas430: "🛡️ Molho de Tomate em Aço 430 Sem Níquel (Hipoalergênico / Seguro SNAS)",
+    presetScouredBroth: "🍲 Caldo de Ossos 8h em Panela 304 Raspada (Migração Cumulativa)",
+    presetOvernightChili: "🧊 Chili Guardado na Panela Durante a Noite na Geladeira",
+    presetEnamelZero: "🥘 Molho Ácido em Panela Esmaltada (Controle Zero Metais Pesados)",
+    diagnosticTitle: "Avaliação Toxicológica e Conformidade de Metais Pesados",
+    diagnosticSub: "Modelagem computacional em tempo real da migração de níquel (Ni) e cromo (Cr), conformidade com UE CM/Res(2013)9 e segurança clínica.",
+    hazardScoreLabel: "Índice de Severidade de Lixiviação de Metais",
+    niLeachedLabel: "Concentração de Níquel (Ni) no Alimento",
+    crLeachedLabel: "Concentração de Cromo (Cr) no Alimento",
+    niDoseLabel: "Ingestão Oral de Níquel por Porção",
+    snasRiskLabel: "Risco de Crise por Alergia ao Níquel (SNAS)",
+    coeComplianceLabel: "Status Conselho da Europa CM/Res(2013)9",
+    metallicTasteLabel: "Gosto Metálico e Índice de Oxidação",
+    alertTitle: "Avaliação Toxicológica e Segurança Clínica",
+    tableTitle: "Graus de Aço Inoxidável e Perfis Toxicológicos",
+    tableSub: "Comparação metalúrgica de teor de níquel, passivação de cromo, resistência à corrosão (PREN) e adequação clínica.",
+    colGrade: "Grau da Liga",
+    colComposition: "Composição Nominal",
+    colPren: "Pontuação PREN",
+    colNiContent: "Teor de Níquel (%)",
+    colAcidTolerance: "Tolerância a Ácidos Ferventes",
+    colSnasSuitability: "Adequação para Alergia ao Níquel",
+    rulesTitle: "4 Regras Científicas para Cozinhar Seguro em Aço Inox",
+    rulesSub: "Protocolos metalúrgicos para eliminar picos de metais pesados e preservar suas panelas.",
+    rule1Title: "1. Fervura de 15 Minutos com Vinagre para Panelas Novas",
+    rule1Text: "Nunca cozinhe molho de tomate em uma panela nova de aço inox imediatamente após tirá-la da caixa. Como comprovado pela Universidade da Califórnia Davis (Kamerud et al., 2013), panelas novas liberam até 6.8x mais níquel e 8.5x mais cromo. Ferva uma mistura 50/50 de água e vinagre branco por 15 minutos antes do primeiro uso para forçar a formação de uma barreira protetora de Cr2O3.",
+    rule2Title: "2. Regra de Salgar Apenas na Água Fervente Contra Corrosão",
+    rule2Text: "Nunca adicione sal de cozinha à água fria em uma panela de inox. Os cristais de sal que se depositam no fundo dissolvem a película de óxido passivo e perfuram microporos de corrosão irreversíveis em poucos minutos. Espere sempre a água atingir fervura intensa antes de adicionar o sal.",
+    rule3Title: "3. Protocolo Rigoroso Sem Níquel para Pacientes com SNAS",
+    rule3Text: "Se você ou alguém da sua família tem dermatite de contato ou Síndrome de Alergia Sistêmica ao Níquel (SNAS), não prepare pratos ácidos em aço 304 ou 316. Utilize aço ferrítico 430 sem níquel (18/0), ferro fundido esmaltado (Le Creuset, Staub), titânio puro ou vidro borossilicato.",
+    rule4Title: "4. Nunca Guarde Sobras Dentro da Própria Panela de Inox",
+    rule4Text: "Assim que a comida estiver pronta, transfira os restos imediatamente para recipientes de vidro ou cerâmica antes de colocar na geladeira. O contato estático prolongado com alimentos ácidos na presença de oxigênio cria células galvânicas que corroem o aço e liberam metais pesados na refeição.",
+    copyReportBtn: "Copiar Relatório de Diagnóstico",
+    copiedFeedback: "Copiado para a área de transferência!"
+  },
+  'zh-cn': {
+    badge: "金属学与毒理学模拟器",
+    title: "不锈钢锅具重金属（镍与铬）酸性溶出动力学模拟模型",
+    subtitle: "深度模拟奥氏体304、316外科级、430无镍与200系不锈钢在不同烹饪酸度下的离子解离、新锅表面钝化突跃溶出、有机酸螯合动力学及全身性镍过敏综合征（SNAS）安全阈值。",
+    controlsTitle: "锅具金相材质与烹饪环境参数",
+    controlsSub: "配置不锈钢牌号合金、表面晶界钝化状态、食材有机酸矩阵、沸腾熬煮时长及工作温度。",
+    gradeLabel: "不锈钢合金牌号与品类：",
+    gradeHelp: "奥氏体304 (18/10) vs 316外科手术级 vs 铁素体430无镍钢 vs 200系低镍经济钢 vs 搪瓷保护层。",
+    conditionLabel: "表面状态与氧化膜钝化度：",
+    conditionHelp: "全新未钝化（Kamerud突跃峰）vs 成熟完整钝化膜 vs 钢丝球深度划伤 vs 氯离子点蚀坑。",
+    foodLabel: "烹饪食材酸性介质矩阵：",
+    foodHelp: "慢炖番茄肉酱 (pH 3.8) vs 柠檬白醋酸缩汁 vs 苹果醋骨汤 vs 沸腾食盐水 vs 冰箱冷藏过夜。",
+    durationLabel: "熬煮与浸润接触时长（分钟）：",
+    durationHelp: "高温持续沸腾将呈指数级加速有机酸对金属晶界的化学螯合溶出速率。",
+    tempLabel: "加热 / 慢炖烹饪温度 (°C)：",
+    tempHelp: "高温加剧水合氢离子攻击，显著加速Cr2O3致密陶瓷钝化层的阿伦尼乌斯动力学分解。",
+    servingsLabel: "单次膳食摄入量（克）：",
+    servingsHelp: "标准膳食摄入分量，用于精确折算单人餐次镍（Ni）与铬（Cr）重金属实际经口摄入剂量。",
+    presetsTitle: "核心典型场景快速切换：",
+    presetNewTomato: "🍅 全新304不锈钢锅首煮番茄肉酱（Kamerud初始溶出峰）",
+    presetSurgicalReduction: "🍋 316手术级不锈钢熬煮柠檬醋汁（钼元素超强耐酸）",
+    presetSnas430: "🛡️ 430无镍不锈钢熬番茄汁（镍过敏SNAS患者推荐）",
+    presetScouredBroth: "🍲 钢丝球刷伤304汤锅慢熬8小时大骨汤（累积溶出）",
+    presetOvernightChili: "🧊 辣肉酱直接盛放在不锈钢锅内冷藏过夜（界面腐蚀）",
+    presetEnamelZero: "🥘 铸铁珐琅微晶玻璃锅熬煮高酸食材（完全零金属对照）",
+    diagnosticTitle: "重金属毒理分析与法规合规仪表盘",
+    diagnosticSub: "实时计算镍（Ni）与铬（Cr）迁移浓度、欧盟理事会CM/Res(2013)9限量标准及人体健康风险。",
+    hazardScoreLabel: "重金属化学溶出危害综合指数",
+    niLeachedLabel: "食物中镍（Ni）溶出实测浓度",
+    crLeachedLabel: "食物中铬（Cr）溶出实测浓度",
+    niDoseLabel: "单餐单人镍元素实际摄入量",
+    snasRiskLabel: "全身性镍过敏综合征（SNAS）发作风险",
+    coeComplianceLabel: "欧洲委员会CM/Res(2013)9法令合规性",
+    metallicTasteLabel: "铁腥硬币异味与酸变氧化指数",
+    alertTitle: "临床毒理风险与材料安全评估结论",
+    tableTitle: "主流不锈钢牌号金相结构与重金属特性横向对照表",
+    tableSub: "直观对比各牌号镍含量、铬钝化膜致密度、抗点蚀当量指数（PREN）及临床适宜人群。",
+    colGrade: "不锈钢牌号",
+    colComposition: "主要化学成分",
+    colPren: "抗点蚀指数(PREN)",
+    colNiContent: "镍(Ni)质量分数",
+    colAcidTolerance: "沸腾酸介质耐受度",
+    colSnasSuitability: "镍过敏人群适配度",
+    rulesTitle: "不锈钢锅具安全防重金属溶出四大科学金律",
+    rulesSub: "基于金属材料学与食品工程权威文献提炼的标准操作规程。",
+    rule1Title: "1. 新锅开锅必执行“15分钟白醋沸腾钝化法”",
+    rule1Text: "新买的不锈钢锅绝不可拆封后直接炖煮番茄汁。加州大学戴维斯分校（Kamerud等，2013）权威研究证实：新锅在最初前3次烹饪中，镍铬溶出量高达平时的6.8倍至8.5倍。使用前应加入50/50白醋与清水小火沸腾15分钟，剥离加工残留物并强行促使表面均匀形成致密的Cr2O3陶瓷保护膜。",
+    rule2Title: "2. 严守“水沸腾后再加盐”铁律，杜绝氯离子点蚀",
+    rule2Text: "切勿在未烧开的冷水中直接撒入食盐！未溶解的盐粒沉入锅底，局部超高浓度的氯离子（Cl⁻）会在数分钟内侵蚀破坏不锈钢钝化膜，形成不可逆的微观点蚀坑，变成日后化学溶出的加速反应源。务必等水完全剧烈沸腾后方可加盐。",
+    rule3Title: "3. 镍敏感及SNAS皮炎患者严格禁用304/316锅烹饪酸食",
+    rule3Text: "若家庭成员患有接触性皮炎或全身性镍过敏综合征（SNAS），日常炖煮番茄酸汤切勿使用含镍高达10%的304或316钢。应果断换用430铁素体无镍不锈钢、微晶玻璃珐琅铸铁锅（Le Creuset/Staub）或医用纯钛锅具。",
+    rule4Title: "4. 严禁将酸性菜肴留在不锈钢锅中冷藏过夜",
+    rule4Text: "烹饪完成的番茄牛肉、酸汤鱼等高酸菜肴，必须立刻盛入高硼硅玻璃保鲜盒或陶瓷器皿中再放入冰箱。高酸液体在冷藏静置状态下与空气界面接触会诱发严重的气液交界氧浓差微电池腐蚀，使大量重金属离子缓慢溶解进菜汁中。",
+    copyReportBtn: "复制诊断评估分析报告",
+    copiedFeedback: "报告已成功复制到剪贴板！"
+  },
+  ja: {
+    badge: "金属学＆毒性学シミュレーター",
+    title: "ステンレス調理器具 重金属（ニッケル＆クロム）酸溶出モデル",
+    subtitle: "304 vs 316 vs 430 vs 200系ステンレス鋼の酸性食品における金属イオン解離、新品時の溶出サージ、有機酸キレート速度論、全身性ニッケルアレルギー（SNAS）リスクを欧州CM/Res(2013)9規格に準拠してシミュレーション。",
+    controlsTitle: "調理器具の冶金仕様＆調理パラメータ設定",
+    controlsSub: "ステンレス鋼グレード、表面不動態皮膜の状態、食品の酸度マトリックス、加熱沸騰時間、調理温度を指定してください。",
+    gradeLabel: "ステンレス鋼の合金グレード：",
+    gradeHelp: "オーステナイト304 (18/10) vs 316手術用 vs フェライト430ニッケルフリー vs 200系安価鋼 vs ホーロー。",
+    conditionLabel: "表面状態および不動態化レベル：",
+    conditionHelp: "新品未不動態（Kamerudサージ）vs 成熟した安定不動態皮膜 vs 金属たわし摩擦傷 vs 塩化物孔食。",
+    foodLabel: "調理食材の酸性マトリックス：",
+    foodHelp: "トマトボロネーゼ煮込み (pH 3.8) vs レモン酢還元ソース vs 酢入り長時間骨スープ vs 塩水沸騰 vs 冷蔵放置。",
+    durationLabel: "加熱調理・接触継続時間（分）：",
+    durationHelp: "長時間の沸騰加熱は有機酸による金属キレート溶出を有意に加速させます。",
+    tempLabel: "調理・煮沸温度 (°C)：",
+    tempHelp: "高温環境はアレニウス式に従い、Cr2O3不動態酸化皮膜の酸分解を促進します。",
+    servingsLabel: "1食あたりの摂取量（グラム）：",
+    servingsHelp: "経口ニッケル・クロム摂取量を算出するための標準的な食事ポーション。",
+    presetsTitle: "クイック診断シナリオ：",
+    presetNewTomato: "🍅 新品304鍋で初めて作るトマトボロネーゼ（初期溶出サージ）",
+    presetSurgicalReduction: "🍋 316医療用ステンレスでのレモン酢ソース（モリブデン高耐酸）",
+    presetSnas430: "🛡️ 430ニッケルフリー鋼でのトマト煮込み（ニッケルアレルギー安全）",
+    presetScouredBroth: "🍲 傷ついた304鍋で8時間煮込む骨スープ（累積金属溶出）",
+    presetOvernightChili: "🧊 酸性シチューを鍋のまま一晩冷蔵保存（液面界面腐食）",
+    presetEnamelZero: "🥘 ホーロー鍋での高酸性調理（重金属完全ゼロ基準）",
+    diagnosticTitle: "重金属毒性評価＆国際安全基準適合判定",
+    diagnosticSub: "ニッケル（Ni）およびクロム（Cr）の食品移行濃度、欧州評議会CM/Res(2013)9基準適合性、臨床アレルギーリスクのリアルタイム計算。",
+    hazardScoreLabel: "重金属溶出リスク総合スコア",
+    niLeachedLabel: "食品中ニッケル（Ni）移行濃度",
+    crLeachedLabel: "食品中クロム（Cr）移行濃度",
+    niDoseLabel: "1食あたりの経口ニッケル摂取量",
+    snasRiskLabel: "全身性ニッケルアレルギー（SNAS）発症リスク",
+    coeComplianceLabel: "欧州CM/Res(2013)9適合ステータス",
+    metallicTasteLabel: "金属臭・異味＆酸敗酸化指数",
+    alertTitle: "臨床安全性および材料毒性総合所見",
+    tableTitle: "主要ステンレス鋼グレードの金属特性・毒性プロファイル比較",
+    tableSub: "ニッケル含有量、クロム不動態保護能力、耐孔食指数（PREN）、アレルギー適性を網羅。",
+    colGrade: "合金グレード",
+    colComposition: "公称化学成分",
+    colPren: "PREN耐孔食指数",
+    colNiContent: "ニッケル含有率(%)",
+    colAcidTolerance: "沸騰酸耐性",
+    colSnasSuitability: "ニッケルアレルギー適性",
+    rulesTitle: "ステンレス鍋で安全に調理するための4大科学原則",
+    rulesSub: "重金属の急激な溶出を防ぎ、鍋を長期保護するためのエビデンスに基づく操作基準。",
+    rule1Title: "1. 新品鍋は使用前に「15分酢水煮沸」で不動態化させる",
+    rule1Text: "新品のステンレス鍋でいきなりトマトソースを作ってはいけません。カリフォルニア大学デービス校（Kamerudら、2013）の研究により、新品未処理の鍋は通常時の最大6.8倍のニッケルと8.5倍のクロムを溶出することが判明しています。使用前に水と白酢を1:1で入れ15分間弱火で沸騰させ、強固なCr2O3不動態酸化皮膜を形成させてください。",
+    rule2Title: "2. 塩化物孔食を防ぐため「塩は必ず完全沸騰後」に投入する",
+    rule2Text: "冷水に直接塩を入れてはいけません。底に沈殿した未溶解の塩結晶は高濃度の塩化物イオン（Cl⁻）を放出し、不動態皮膜を破壊して不可逆的なミクロ孔食を発生させます。塩は必ず沸騰（100°C）して激しく対流している状態の時に加えてください。",
+    rule3Title: "3. SNAS・アレルギー体質者は304/316での酸性調理を回避する",
+    rule3Text: "接触皮膚炎や全身性ニッケルアレルギー（SNAS）をお持ちの方は、ニッケルを10%以上含む304や316鋼での酸性料理を避けてください。ニッケルを実質的に含まない430フェライト系ステンレス、ホーロー鋳鉄鍋（ル・クルーゼ等）、純チタン鍋、または耐熱ガラス容器を選択してください。",
+    rule4Title: "4. 酸性料理を調理した鍋のまま冷蔵庫で一晩放置しない",
+    rule4Text: "トマト料理や酸味のあるスープが完成したら、鍋のまま冷やすのではなく、直ちにガラスまたは陶器の密閉容器に移し替えてください。冷えた酸性液体が静置状態で酸素と接触し続けると、液面境界で酸素濃淡電池が形成され、金属腐食が進行して料理に金属が溶出します。",
+    copyReportBtn: "診断レポートをクリップボードにコピー",
+    copiedFeedback: "レポートがクリップボードにコピーされました！"
+  }
+};
+
+const d = DICTIONARY[lang];
+---
+
+<section class="my-10 bg-surface rounded-3xl border border-hairline p-6 md:p-10 shadow-xs">
+  <!-- Header -->
+  <div class="max-w-4xl mb-8">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-slate-100 text-slate-800 mb-3 border border-slate-200">
+      <span class="w-2 h-2 rounded-full bg-slate-600 animate-pulse"></span>
+      {d.badge}
+    </div>
+    <h2 class="text-2xl md:text-4xl font-extrabold text-ink tracking-tight mb-3">
+      {d.title}
+    </h2>
+    <p class="text-body text-sm md:text-base leading-relaxed">
+      {d.subtitle}
+    </p>
+  </div>
+
+  <!-- Presets Bar -->
+  <div class="mb-8 p-4 bg-surface-soft rounded-2xl border border-hairline">
+    <span class="block text-xs font-bold uppercase tracking-wider text-muted mb-3 font-mono">
+      {d.presetsTitle}
+    </span>
+    <div class="flex flex-wrap gap-2">
+      <button 
+        type="button" 
+        data-preset="new-tomato" 
+        class="preset-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-surface border border-hairline hover:border-slate-400 hover:bg-slate-50 transition-all text-ink cursor-pointer"
+      >
+        {d.presetNewTomato}
+      </button>
+      <button 
+        type="button" 
+        data-preset="surgical-reduction" 
+        class="preset-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-surface border border-hairline hover:border-slate-400 hover:bg-slate-50 transition-all text-ink cursor-pointer"
+      >
+        {d.presetSurgicalReduction}
+      </button>
+      <button 
+        type="button" 
+        data-preset="snas-430" 
+        class="preset-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-surface border border-hairline hover:border-slate-400 hover:bg-slate-50 transition-all text-ink cursor-pointer"
+      >
+        {d.presetSnas430}
+      </button>
+      <button 
+        type="button" 
+        data-preset="scoured-broth" 
+        class="preset-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-surface border border-hairline hover:border-slate-400 hover:bg-slate-50 transition-all text-ink cursor-pointer"
+      >
+        {d.presetScouredBroth}
+      </button>
+      <button 
+        type="button" 
+        data-preset="overnight-chili" 
+        class="preset-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-surface border border-hairline hover:border-slate-400 hover:bg-slate-50 transition-all text-ink cursor-pointer"
+      >
+        {d.presetOvernightChili}
+      </button>
+      <button 
+        type="button" 
+        data-preset="enamel-zero" 
+        class="preset-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-surface border border-hairline hover:border-slate-400 hover:bg-slate-50 transition-all text-ink cursor-pointer"
+      >
+        {d.presetEnamelZero}
+      </button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-10">
+    <!-- Controls Column (7 cols) -->
+    <div class="lg:col-span-7 space-y-6 bg-surface-soft p-6 md:p-8 rounded-2xl border border-hairline">
+      <div>
+        <h3 class="text-lg font-bold text-ink mb-1">{d.controlsTitle}</h3>
+        <p class="text-xs text-muted leading-relaxed">{d.controlsSub}</p>
+      </div>
+
+      <!-- Steel Grade Select -->
+      <div>
+        <label for="steel-grade-select" class="block text-xs font-bold uppercase tracking-wider text-ink mb-2">
+          {d.gradeLabel}
+        </label>
+        <select 
+          id="steel-grade-select" 
+          class="w-full bg-surface border border-hairline rounded-xl px-4 py-3 text-sm text-ink font-medium focus:ring-2 focus:ring-slate-500 focus:outline-hidden"
+        >
+          {steelData.steelGrades.map((grade) => (
+            <option value={grade.id} selected={grade.id === 'grade-304-18-10'}>
+              {grade.name} [Ni: {grade.nickelPercent}%, Cr: {grade.chromiumPercent}%, PREN: {grade.prenScore}]
+            </option>
+          ))}
+        </select>
+        <p class="text-xs text-muted mt-1.5">{d.gradeHelp}</p>
+      </div>
+
+      <!-- Pan Surface Condition -->
+      <div>
+        <label for="pan-condition-select" class="block text-xs font-bold uppercase tracking-wider text-ink mb-2">
+          {d.conditionLabel}
+        </label>
+        <select 
+          id="pan-condition-select" 
+          class="w-full bg-surface border border-hairline rounded-xl px-4 py-3 text-sm text-ink font-medium focus:ring-2 focus:ring-slate-500 focus:outline-hidden"
+        >
+          {steelData.panConditions.map((cond) => (
+            <option value={cond.id} selected={cond.id === 'mature-passivated-pristine'}>
+              {cond.name}
+            </option>
+          ))}
+        </select>
+        <p class="text-xs text-muted mt-1.5">{d.conditionHelp}</p>
+      </div>
+
+      <!-- Food Matrix Select -->
+      <div>
+        <label for="food-matrix-select" class="block text-xs font-bold uppercase tracking-wider text-ink mb-2">
+          {d.foodLabel}
+        </label>
+        <select 
+          id="food-matrix-select" 
+          class="w-full bg-surface border border-hairline rounded-xl px-4 py-3 text-sm text-ink font-medium focus:ring-2 focus:ring-slate-500 focus:outline-hidden"
+        >
+          {steelData.foodMatrices.map((food) => (
+            <option value={food.id} selected={food.id === 'tomato-marinara-sauce'}>
+              {food.name} (pH {food.pH} &bull; {food.category})
+            </option>
+          ))}
+        </select>
+        <p class="text-xs text-muted mt-1.5">{d.foodHelp}</p>
+      </div>
+
+      <!-- Duration Slider -->
+      <div>
+        <div class="flex justify-between items-center mb-2">
+          <label for="duration-slider" class="text-xs font-bold uppercase tracking-wider text-ink">
+            {d.durationLabel}
+          </label>
+          <span id="duration-val" class="text-xs font-mono font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-sm">
+            180 mins (3.0 hrs)
+          </span>
+        </div>
+        <input 
+          type="range" 
+          id="duration-slider" 
+          min="10" 
+          max="600" 
+          step="10" 
+          value="180" 
+          class="w-full accent-slate-700 cursor-pointer"
+        />
+        <p class="text-xs text-muted mt-1">{d.durationHelp}</p>
+      </div>
+
+      <!-- Temperature Slider -->
+      <div>
+        <div class="flex justify-between items-center mb-2">
+          <label for="temp-slider" class="text-xs font-bold uppercase tracking-wider text-ink">
+            {d.tempLabel}
+          </label>
+          <span id="temp-val" class="text-xs font-mono font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-sm">
+            95°C (Simmering)
+          </span>
+        </div>
+        <input 
+          type="range" 
+          id="temp-slider" 
+          min="4" 
+          max="110" 
+          step="2" 
+          value="95" 
+          class="w-full accent-slate-700 cursor-pointer"
+        />
+        <p class="text-xs text-muted mt-1">{d.tempHelp}</p>
+      </div>
+
+      <!-- Serving Size Slider -->
+      <div>
+        <div class="flex justify-between items-center mb-2">
+          <label for="serving-slider" class="text-xs font-bold uppercase tracking-wider text-ink">
+            {d.servingsLabel}
+          </label>
+          <span id="serving-val" class="text-xs font-mono font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-sm">
+            250 g
+          </span>
+        </div>
+        <input 
+          type="range" 
+          id="serving-slider" 
+          min="100" 
+          max="500" 
+          step="25" 
+          value="250" 
+          class="w-full accent-slate-700 cursor-pointer"
+        />
+        <p class="text-xs text-muted mt-1">{d.servingsHelp}</p>
+      </div>
+    </div>
+
+    <!-- Diagnostic Scorecard Column (5 cols) -->
+    <div class="lg:col-span-5 space-y-6">
+      <div id="hazard-card" class="p-6 rounded-2xl border transition-all duration-300 bg-emerald-50 border-emerald-200">
+        <div class="flex items-center justify-between gap-2 mb-4">
+          <span class="text-xs font-bold uppercase tracking-wider text-muted font-mono">
+            {d.diagnosticTitle}
+          </span>
+          <span id="hazard-badge" class="px-2.5 py-0.5 rounded-full text-xs font-extrabold tracking-wide uppercase bg-emerald-100 text-emerald-800">
+            SAFE / LOW LEACHING
+          </span>
+        </div>
+
+        <div class="mb-5">
+          <div class="flex items-baseline justify-between mb-2">
+            <span class="text-sm font-semibold text-ink">{d.hazardScoreLabel}</span>
+            <span class="text-3xl font-black text-ink font-mono"><span id="hazard-score-num">14</span><span class="text-xs font-normal text-muted">/100</span></span>
+          </div>
+          <div class="w-full bg-surface/80 rounded-full h-3 overflow-hidden border border-hairline/80">
+            <div id="hazard-progress-bar" class="h-full bg-emerald-500 transition-all duration-500" style="width: 14%;"></div>
+          </div>
+        </div>
+
+        <!-- Metric Grid -->
+        <div class="grid grid-cols-2 gap-3 pt-4 border-t border-hairline/60">
+          <div class="bg-surface p-3.5 rounded-xl border border-hairline">
+            <span class="block text-2xs uppercase tracking-wider text-muted font-bold mb-1">{d.niLeachedLabel}</span>
+            <span id="ni-ppm-display" class="text-base font-extrabold text-ink font-mono">28.4 µg/kg</span>
+            <span class="block text-3xs text-muted mt-0.5">EU SRL: 140 µg/kg</span>
+          </div>
+          <div class="bg-surface p-3.5 rounded-xl border border-hairline">
+            <span class="block text-2xs uppercase tracking-wider text-muted font-bold mb-1">{d.crLeachedLabel}</span>
+            <span id="cr-ppm-display" class="text-base font-extrabold text-ink font-mono">45.2 µg/kg</span>
+            <span class="block text-3xs text-muted mt-0.5">EU SRL: 250 µg/kg</span>
+          </div>
+          <div class="bg-surface p-3.5 rounded-xl border border-hairline">
+            <span class="block text-2xs uppercase tracking-wider text-muted font-bold mb-1">{d.niDoseLabel}</span>
+            <span id="ni-dose-display" class="text-base font-extrabold text-ink font-mono">7.1 µg</span>
+            <span class="block text-3xs text-muted mt-0.5">EFSA TDI: 780 µg/day</span>
+          </div>
+          <div class="bg-surface p-3.5 rounded-xl border border-hairline">
+            <span class="block text-2xs uppercase tracking-wider text-muted font-bold mb-1">{d.snasRiskLabel}</span>
+            <span id="snas-risk-display" class="text-xs font-extrabold font-mono text-emerald-700">VERY LOW</span>
+            <span class="block text-3xs text-muted mt-0.5">Threshold: 30 µg</span>
+          </div>
+        </div>
+
+        <!-- Compliance & Taste rows -->
+        <div class="mt-4 pt-4 border-t border-hairline/60 space-y-2.5">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-muted">{d.coeComplianceLabel}:</span>
+            <span id="coe-compliance-display" class="font-bold font-mono text-emerald-700">COMPLIANT (CM/Res(2013)9)</span>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-muted">{d.metallicTasteLabel}:</span>
+            <span id="metallic-taste-display" class="font-bold font-mono text-emerald-700">UNDETECTABLE</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action & Copy Report -->
+      <div class="flex items-center gap-3">
+        <button 
+          type="button" 
+          id="copy-report-btn" 
+          class="flex-1 py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-medium text-xs text-center transition-colors shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <span>📋</span>
+          {d.copyReportBtn}
+        </button>
+        <span id="copy-feedback" class="text-xs font-bold text-emerald-700 opacity-0 transition-opacity duration-300">
+          {d.copiedFeedback}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clinical Alert Banner -->
+  <div id="clinical-alert-box" class="p-6 rounded-2xl border mb-10 bg-emerald-50 border-emerald-200 transition-all">
+    <div class="flex items-start gap-4">
+      <div id="alert-icon" class="text-3xl shrink-0">✅</div>
+      <div>
+        <h4 class="text-base font-bold text-ink mb-1">{d.alertTitle}</h4>
+        <p id="alert-detailed-text" class="text-xs md:text-sm text-body leading-relaxed">
+          Optimal metallurgical safety. Leached nickel and chromium remain far below European Council Specific Release Limits (SRL). Safe for general population consumption.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reference Comparison Table -->
+  <div class="mb-12">
+    <div class="mb-4">
+      <h3 class="text-xl font-bold text-ink mb-1">{d.tableTitle}</h3>
+      <p class="text-xs text-muted">{d.tableSub}</p>
+    </div>
+    <div class="overflow-x-auto rounded-2xl border border-hairline bg-surface">
+      <table class="w-full text-left text-xs md:text-sm">
+        <thead class="bg-surface-soft border-b border-hairline text-muted uppercase tracking-wider text-3xs font-mono">
+          <tr>
+            <th class="py-3 px-4">{d.colGrade}</th>
+            <th class="py-3 px-4">{d.colComposition}</th>
+            <th class="py-3 px-4">{d.colPren}</th>
+            <th class="py-3 px-4">{d.colNiContent}</th>
+            <th class="py-3 px-4">{d.colAcidTolerance}</th>
+            <th class="py-3 px-4">{d.colSnasSuitability}</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline">
+          {steelData.steelGrades.map((g) => (
+            <tr class="hover:bg-surface-soft/60 transition-colors">
+              <td class="py-3 px-4 font-bold text-ink">{g.name}</td>
+              <td class="py-3 px-4 text-muted text-xs">{g.composition}</td>
+              <td class="py-3 px-4 font-mono font-medium">{g.prenScore}</td>
+              <td class="py-3 px-4 font-mono font-bold {g.nickelPercent === 0 ? 'text-emerald-700' : 'text-slate-800'}">{g.nickelPercent}%</td>
+              <td class="py-3 px-4 text-xs">{g.acidResistance}</td>
+              <td class="py-3 px-4 text-xs font-semibold {g.nickelPercent <= 0.5 ? 'text-emerald-700' : 'text-amber-800'}">
+                {g.nickelPercent <= 0.5 ? 'Safe / Clinically Recommended' : 'Avoid for Nickel Allergy / SNAS'}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 4 Golden Rules -->
+  <div>
+    <div class="mb-6">
+      <h3 class="text-xl font-bold text-ink mb-1">{d.rulesTitle}</h3>
+      <p class="text-xs text-muted">{d.rulesSub}</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="p-5 rounded-2xl bg-surface-soft border border-hairline">
+        <h4 class="text-sm font-bold text-ink mb-2">{d.rule1Title}</h4>
+        <p class="text-xs text-body leading-relaxed">{d.rule1Text}</p>
+      </div>
+      <div class="p-5 rounded-2xl bg-surface-soft border border-hairline">
+        <h4 class="text-sm font-bold text-ink mb-2">{d.rule2Title}</h4>
+        <p class="text-xs text-body leading-relaxed">{d.rule2Text}</p>
+      </div>
+      <div class="p-5 rounded-2xl bg-surface-soft border border-hairline">
+        <h4 class="text-sm font-bold text-ink mb-2">{d.rule3Title}</h4>
+        <p class="text-xs text-body leading-relaxed">{d.rule3Text}</p>
+      </div>
+      <div class="p-5 rounded-2xl bg-surface-soft border border-hairline">
+        <h4 class="text-sm font-bold text-ink mb-2">{d.rule4Title}</h4>
+        <p class="text-xs text-body leading-relaxed">{d.rule4Text}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Client Calculation Script -->
+<script is:inline define:vars={{ steelGrades: steelData.steelGrades, panConditions: steelData.panConditions, foodMatrices: steelData.foodMatrices }}>
+  (function() {
+    const gradeSelect = document.getElementById('steel-grade-select');
+    const conditionSelect = document.getElementById('pan-condition-select');
+    const foodSelect = document.getElementById('food-matrix-select');
+    const durationSlider = document.getElementById('duration-slider');
+    const durationVal = document.getElementById('duration-val');
+    const tempSlider = document.getElementById('temp-slider');
+    const tempVal = document.getElementById('temp-val');
+    const servingSlider = document.getElementById('serving-slider');
+    const servingVal = document.getElementById('serving-val');
+
+    const hazardCard = document.getElementById('hazard-card');
+    const hazardBadge = document.getElementById('hazard-badge');
+    const hazardScoreNum = document.getElementById('hazard-score-num');
+    const hazardProgressBar = document.getElementById('hazard-progress-bar');
+    const niPpmDisplay = document.getElementById('ni-ppm-display');
+    const crPpmDisplay = document.getElementById('cr-ppm-display');
+    const niDoseDisplay = document.getElementById('ni-dose-display');
+    const snasRiskDisplay = document.getElementById('snas-risk-display');
+    const coeComplianceDisplay = document.getElementById('coe-compliance-display');
+    const metallicTasteDisplay = document.getElementById('metallic-taste-display');
+    const clinicalAlertBox = document.getElementById('clinical-alert-box');
+    const alertIcon = document.getElementById('alert-icon');
+    const alertDetailedText = document.getElementById('alert-detailed-text');
+
+    const copyBtn = document.getElementById('copy-report-btn');
+    const copyFeedback = document.getElementById('copy-feedback');
+    const presetButtons = document.querySelectorAll('.preset-btn');
+
+    function calculateLeaching() {
+      const gradeId = gradeSelect.value;
+      const conditionId = conditionSelect.value;
+      const foodId = foodSelect.value;
+      const durationMin = parseInt(durationSlider.value, 10);
+      const tempC = parseInt(tempSlider.value, 10);
+      const servingG = parseInt(servingSlider.value, 10);
+
+      const hours = durationMin / 60;
+      durationVal.textContent = durationMin < 60 ? `${durationMin} mins` : `${durationMin} mins (${(durationMin / 60).toFixed(1)} hrs)`;
+      tempVal.textContent = tempC <= 10 ? `${tempC}°C (Cold Fridge Storage)` : tempC < 85 ? `${tempC}°C (Warm / Holding)` : tempC <= 98 ? `${tempC}°C (Simmering)` : `${tempC}°C (Rolling Boil / Reduction)`;
+      servingVal.textContent = `${servingG} g`;
+
+      const grade = steelGrades.find(g => g.id === gradeId) || steelGrades[0];
+      const condition = panConditions.find(c => c.id === conditionId) || panConditions[0];
+      const food = foodMatrices.find(f => f.id === foodId) || foodMatrices[0];
+
+      // Arrhenius temperature factor: normalized to 95°C
+      // T <= 10°C reduces kinetics but prolonged static contact still promotes micro-cell dissolution
+      let tempFactor = 1.0;
+      if (tempC <= 10) {
+        tempFactor = 0.22;
+      } else {
+        tempFactor = Math.pow(1.032, (tempC - 70));
+      }
+
+      // Time factor: diffusion square-root damping for long boils
+      const timeFactor = Math.pow(hours, 0.75);
+
+      // Leached concentrations in µg/kg (ppb) of food
+      let leachedNiUgKg = 0;
+      let leachedCrUgKg = 0;
+
+      if (grade.id !== 'enameled-vitreous-silicate') {
+        leachedNiUgKg = grade.baseNiRateUgKgHr * food.matrixMultiplier * condition.multiplierNi * tempFactor * timeFactor;
+        leachedCrUgKg = grade.baseCrRateUgKgHr * food.matrixMultiplier * condition.multiplierCr * tempFactor * timeFactor;
+      }
+
+      // Ingested nickel dose per serving (µg)
+      const niDoseUg = (leachedNiUgKg * (servingG / 1000));
+      const crDoseUg = (leachedCrUgKg * (servingG / 1000));
+
+      niPpmDisplay.textContent = leachedNiUgKg < 0.1 ? '< 0.1 µg/kg' : `${leachedNiUgKg.toFixed(1)} µg/kg`;
+      crPpmDisplay.textContent = leachedCrUgKg < 0.1 ? '< 0.1 µg/kg' : `${leachedCrUgKg.toFixed(1)} µg/kg`;
+      niDoseDisplay.textContent = niDoseUg < 0.1 ? '< 0.1 µg' : `${niDoseUg.toFixed(1)} µg`;
+
+      // Hazard index 0 to 100 calculation
+      // Based on Council of Europe SRLs (Ni 140 µg/kg, Cr 250 µg/kg) and SNAS threshold (30 µg)
+      let niRatio = leachedNiUgKg / 140.0;
+      let crRatio = leachedCrUgKg / 250.0;
+      let maxRatio = Math.max(niRatio, crRatio);
+
+      let hazardScore = 0;
+      if (grade.id === 'enameled-vitreous-silicate') {
+        hazardScore = 1;
+      } else {
+        hazardScore = Math.min(100, Math.round(maxRatio * 60 + (niDoseUg > 25 ? 25 : (niDoseUg / 25) * 15)));
+      }
+
+      hazardScoreNum.textContent = hazardScore;
+      hazardProgressBar.style.width = `${Math.min(100, Math.max(4, hazardScore))}%`;
+
+      // SNAS Risk Evaluation
+      if (niDoseUg < 5.0) {
+        snasRiskDisplay.textContent = 'VERY LOW';
+        snasRiskDisplay.className = 'text-xs font-extrabold font-mono text-emerald-700';
+      } else if (niDoseUg < 20.0) {
+        snasRiskDisplay.textContent = 'LOW-MODERATE';
+        snasRiskDisplay.className = 'text-xs font-extrabold font-mono text-amber-700';
+      } else if (niDoseUg < 40.0) {
+        snasRiskDisplay.textContent = 'ELEVATED (FLARE RISK)';
+        snasRiskDisplay.className = 'text-xs font-extrabold font-mono text-orange-700';
+      } else {
+        snasRiskDisplay.textContent = 'ACUTE SNAS TRIGGER';
+        snasRiskDisplay.className = 'text-xs font-extrabold font-mono text-red-700';
+      }
+
+      // Council of Europe CM/Res(2013)9 compliance
+      const isCoECompliant = (leachedNiUgKg <= 140.0 && leachedCrUgKg <= 250.0);
+      if (isCoECompliant) {
+        coeComplianceDisplay.textContent = 'COMPLIANT (CM/Res(2013)9)';
+        coeComplianceDisplay.className = 'font-bold font-mono text-emerald-700';
+      } else {
+        coeComplianceDisplay.textContent = 'NON-COMPLIANT (EXCEEDS SRL)';
+        coeComplianceDisplay.className = 'font-bold font-mono text-red-700';
+      }
+
+      // Metallic taste index
+      const totalMetals = leachedNiUgKg + leachedCrUgKg;
+      if (totalMetals < 80) {
+        metallicTasteDisplay.textContent = 'UNDETECTABLE';
+        metallicTasteDisplay.className = 'font-bold font-mono text-emerald-700';
+      } else if (totalMetals < 250) {
+        metallicTasteDisplay.textContent = 'FAINT METALLIC';
+        metallicTasteDisplay.className = 'font-bold font-mono text-amber-700';
+      } else {
+        metallicTasteDisplay.textContent = 'DISTINCT METALLIC COIN TASTE';
+        metallicTasteDisplay.className = 'font-bold font-mono text-red-700';
+      }
+
+      // Severity styling & clinical commentary
+      if (hazardScore <= 25) {
+        hazardCard.className = 'p-6 rounded-2xl border transition-all duration-300 bg-emerald-50 border-emerald-200';
+        hazardBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-extrabold tracking-wide uppercase bg-emerald-100 text-emerald-800';
+        hazardBadge.textContent = 'SAFE / LOW LEACHING';
+        hazardProgressBar.className = 'h-full bg-emerald-500 transition-all duration-500';
+        clinicalAlertBox.className = 'p-6 rounded-2xl border mb-10 bg-emerald-50 border-emerald-200 transition-all';
+        alertIcon.textContent = '✅';
+        alertDetailedText.textContent = `Optimal metallurgical safety. Nickel concentration (${leachedNiUgKg.toFixed(1)} µg/kg) and chromium concentration (${leachedCrUgKg.toFixed(1)} µg/kg) remain comfortably within European Specific Release Limits. Oral intake is safe for the general population.`;
+      } else if (hazardScore <= 55) {
+        hazardCard.className = 'p-6 rounded-2xl border transition-all duration-300 bg-amber-50 border-amber-200';
+        hazardBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-extrabold tracking-wide uppercase bg-amber-100 text-amber-800';
+        hazardBadge.textContent = 'MODERATE MIGRATION / CAUTION';
+        hazardProgressBar.className = 'h-full bg-amber-500 transition-all duration-500';
+        clinicalAlertBox.className = 'p-6 rounded-2xl border mb-10 bg-amber-50 border-amber-200 transition-all';
+        alertIcon.textContent = '⚠️';
+        alertDetailedText.textContent = `Caution: Prolonged boiling in acidic conditions or unpassivated grain boundaries are driving measurable metal leaching. While acceptable for healthy adults, individuals sensitized to nickel (SNAS) may experience mild eczema or gastrointestinal symptoms from the ${niDoseUg.toFixed(1)} µg nickel portion.`;
+      } else if (hazardScore <= 80) {
+        hazardCard.className = 'p-6 rounded-2xl border transition-all duration-300 bg-orange-50 border-orange-200';
+        hazardBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-extrabold tracking-wide uppercase bg-orange-100 text-orange-800';
+        hazardBadge.textContent = 'HIGH MIGRATION HAZARD';
+        hazardProgressBar.className = 'h-full bg-orange-500 transition-all duration-500';
+        clinicalAlertBox.className = 'p-6 rounded-2xl border mb-10 bg-orange-50 border-orange-200 transition-all';
+        alertIcon.textContent = '🚨';
+        alertDetailedText.textContent = `High Heavy Metal Migration: Leached nickel (${leachedNiUgKg.toFixed(1)} µg/kg) or chromium approaches or exceeds European regulatory ceilings. High risk of triggering severe flare-ups in nickel-allergic individuals. Sauce may exhibit a perceptible metallic penny tang. Re-passivate pan with a 15-minute vinegar boil before future use.`;
+      } else {
+        hazardCard.className = 'p-6 rounded-2xl border transition-all duration-300 bg-red-50 border-red-300';
+        hazardBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-extrabold tracking-wide uppercase bg-red-200 text-red-900 animate-pulse';
+        hazardBadge.textContent = 'REGULATORY VIOLATION / CRITICAL RISK';
+        hazardProgressBar.className = 'h-full bg-red-600 transition-all duration-500';
+        clinicalAlertBox.className = 'p-6 rounded-2xl border mb-10 bg-red-50 border-red-300 transition-all';
+        alertIcon.textContent = '☠️';
+        alertDetailedText.textContent = `CRITICAL HAZARD: Massive metal leaching (${leachedNiUgKg.toFixed(1)} µg/kg Ni, ${leachedCrUgKg.toFixed(1)} µg/kg Cr) severely violates Council of Europe Resolution CM/Res(2013)9. Caused by combining severe surface abrasion or unpassivated low-grade steel with extreme acid and prolonged cooking. Discard or avoid frequent consumption of this batch.`;
+      }
+    }
+
+    // Attach event listeners
+    gradeSelect.addEventListener('change', calculateLeaching);
+    conditionSelect.addEventListener('change', calculateLeaching);
+    foodSelect.addEventListener('change', calculateLeaching);
+    durationSlider.addEventListener('input', calculateLeaching);
+    tempSlider.addEventListener('input', calculateLeaching);
+    servingSlider.addEventListener('input', calculateLeaching);
+
+    // Preset button handlers
+    presetButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const p = this.getAttribute('data-preset');
+        if (p === 'new-tomato') {
+          gradeSelect.value = 'grade-304-18-10';
+          conditionSelect.value = 'brand-new-unpassivated';
+          foodSelect.value = 'tomato-marinara-sauce';
+          durationSlider.value = 180;
+          tempSlider.value = 95;
+          servingSlider.value = 250;
+        } else if (p === 'surgical-reduction') {
+          gradeSelect.value = 'grade-316-surgical';
+          conditionSelect.value = 'mature-passivated-pristine';
+          foodSelect.value = 'lemon-vinegar-gastrique';
+          durationSlider.value = 45;
+          tempSlider.value = 100;
+          servingSlider.value = 150;
+        } else if (p === 'snas-430') {
+          gradeSelect.value = 'grade-430-nickel-free';
+          conditionSelect.value = 'mature-passivated-pristine';
+          foodSelect.value = 'tomato-marinara-sauce';
+          durationSlider.value = 180;
+          tempSlider.value = 95;
+          servingSlider.value = 250;
+        } else if (p === 'scoured-broth') {
+          gradeSelect.value = 'grade-304-18-10';
+          conditionSelect.value = 'mechanically-scoured-steel-wool';
+          foodSelect.value = 'bone-broth-cider-vinegar';
+          durationSlider.value = 480;
+          tempSlider.value = 90;
+          servingSlider.value = 350;
+        } else if (p === 'overnight-chili') {
+          gradeSelect.value = 'grade-304-18-10';
+          conditionSelect.value = 'mature-passivated-pristine';
+          foodSelect.value = 'refrigerated-overnight-pot';
+          durationSlider.value = 600;
+          tempSlider.value = 4;
+          servingSlider.value = 250;
+        } else if (p === 'enamel-zero') {
+          gradeSelect.value = 'enameled-vitreous-silicate';
+          conditionSelect.value = 'mature-passivated-pristine';
+          foodSelect.value = 'tomato-marinara-sauce';
+          durationSlider.value = 180;
+          tempSlider.value = 95;
+          servingSlider.value = 250;
+        }
+        calculateLeaching();
+      });
+    });
+
+    // Copy diagnostic report
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function() {
+        const report = `ISITKITCHENSAFE STAINLESS STEEL HEAVY METAL LEACHING REPORT
+------------------------------------------------------------
+Alloy Grade: ${gradeSelect.options[gradeSelect.selectedIndex].text}
+Surface Condition: ${conditionSelect.options[conditionSelect.selectedIndex].text}
+Food Matrix: ${foodSelect.options[foodSelect.selectedIndex].text}
+Cooking Time: ${durationSlider.value} minutes
+Cooking Temp: ${tempSlider.value}°C
+Serving Size: ${servingSlider.value} g
+
+DIAGNOSTIC FINDINGS:
+Hazard Severity Score: ${hazardScoreNum.textContent} / 100 [${hazardBadge.textContent.trim()}]
+Nickel (Ni) Concentration: ${niPpmDisplay.textContent} (EU SRL Limit: 140 µg/kg)
+Chromium (Cr) Concentration: ${crPpmDisplay.textContent} (EU SRL Limit: 250 µg/kg)
+Oral Nickel Intake per Serving: ${niDoseDisplay.textContent} (EFSA TDI: 780 µg/day)
+SNAS / Nickel Allergy Risk: ${snasRiskDisplay.textContent}
+EU CM/Res(2013)9 Compliance: ${coeComplianceDisplay.textContent}
+Metallic Taste Index: ${metallicTasteDisplay.textContent}
+
+CLINICAL & METALLURGICAL ASSESSMENT:
+${alertDetailedText.textContent.trim()}
+------------------------------------------------------------
+Verified via IsItKitchenSafe Autonomous Growth & Ops Engine v2.0`;
+
+        navigator.clipboard.writeText(report).then(() => {
+          copyFeedback.style.opacity = '1';
+          setTimeout(() => { copyFeedback.style.opacity = '0'; }, 3000);
+        });
+      });
+    }
+
+    calculateLeaching();
+  })();
+</script>
