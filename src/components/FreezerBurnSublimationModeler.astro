@@ -1,0 +1,909 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import freezerBurnData from '../data/freezer-burn-sublimation-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  foodLabel: string;
+  foodHelp: string;
+  packagingLabel: string;
+  packagingHelp: string;
+  envLabel: string;
+  envHelp: string;
+  durationLabel: string;
+  durationHelp: string;
+  thicknessLabel: string;
+  thicknessHelp: string;
+  presetsTitle: string;
+  presetSteakStore: string;
+  presetChickenVacuum: string;
+  presetSalmonTorn: string;
+  presetGroundBeefAuto: string;
+  presetDeepFreeze: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  severityLabel: string;
+  sublimationLabel: string;
+  rancidityLabel: string;
+  toughnessLabel: string;
+  safetyStatusLabel: string;
+  palatabilityLabel: string;
+  trimmingTitle: string;
+  salvageTitle: string;
+  visualTitle: string;
+  tableTitle: string;
+  tableSub: string;
+  colFood: string;
+  colOptimal: string;
+  colMoisture: string;
+  colOxidationRisk: string;
+  colSalvage: string;
+  rulesTitle: string;
+  rulesSub: string;
+  rule1Title: string;
+  rule1Text: string;
+  rule2Title: string;
+  rule2Text: string;
+  rule3Title: string;
+  rule3Text: string;
+  rule4Title: string;
+  rule4Text: string;
+  copyReportBtn: string;
+  copiedFeedback: string;
+}
+
+const DICTIONARY: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Thermodynamics & Food Science Sublimation Simulator",
+    title: "Freezer Burn, Ice Sublimation & Lipid Peroxidation Modeler",
+    subtitle: "Simulate solid ice sublimation kinetics, pore desiccation, myoglobin discoloration, cytotoxic lipid peroxidation (MDA), and culinary salvage protocols.",
+    controlsTitle: "Storage Parameters & Environmental Factors",
+    controlsSub: "Configure your food substrate, barrier packaging, freezer thermal cycling, and total storage duration.",
+    foodLabel: "Food Substrate & Moisture Matrix:",
+    foodHelp: "Select protein or produce matrix, water fraction, and lipid fatty acid profile.",
+    packagingLabel: "Moisture & Oxygen Barrier Packaging:",
+    packagingHelp: "Material vapor transmission rate (WVTR) and trapped internal air volume.",
+    envLabel: "Freezer Climate & Defrost Cycling:",
+    envHelp: "Freezer operating temperature and thermal defrost swing frequency.",
+    durationLabel: "Storage Duration in Freezer:",
+    durationHelp: "Months in frozen storage. Sublimation kinetics compound exponentially over time.",
+    thicknessLabel: "Cut Geometry & Thickness:",
+    thicknessHelp: "Surface area to volume ratio affects core penetration depth of desiccation.",
+    presetsTitle: "Quick Simulation Presets:",
+    presetSteakStore: "Supermarket Steak in Store Foam Wrap (3 Months)",
+    presetChickenVacuum: "Vacuum-Sealed Chicken Breast (12 Months)",
+    presetSalmonTorn: "Fatty Salmon in Torn / Loose Bag (4 Months)",
+    presetGroundBeefAuto: "Ground Beef in Frost-Free Freezer (6 Months)",
+    presetDeepFreeze: "Deep Chest Freezer Beef Roast (-20°F, 18 Months)",
+    diagnosticTitle: "Freezer Burn Diagnostic Scorecard",
+    diagnosticSub: "Biochemical desiccation, lipid auto-oxidation, and culinary salvage modeling.",
+    severityLabel: "Freezer Burn Severity Index",
+    sublimationLabel: "Sublimative Mass Loss",
+    rancidityLabel: "Lipid Rancidity (TBARS MDA)",
+    toughnessLabel: "Myofibrillar Toughness Factor",
+    safetyStatusLabel: "USDA Microbiological Safety",
+    palatabilityLabel: "Culinary Palatability Rating",
+    trimmingTitle: "Surgical Knife Trimming Protocol",
+    salvageTitle: "Culinary Rescue & Wet-Heat Cooking Method",
+    visualTitle: "Visual Tissue Progression & Optical Phase",
+    tableTitle: "Freezer Sublimation & Matrix Sensitivity Benchmarks",
+    tableSub: "Comparison of protein water retention, lipid sensitivity, and shelf life.",
+    colFood: "Food Substrate",
+    colOptimal: "Peak Freshness",
+    colMoisture: "Water %",
+    colOxidationRisk: "Oxidation Risk",
+    colSalvage: "Optimal Rescue Technique",
+    rulesTitle: "Evidence-Based Food Science & USDA Freezing Protocols",
+    rulesSub: "Critical scientific principles governing ice crystal vapor pressure and lipid preservation.",
+    rule1Title: "1. The USDA Food Safety Absolute: Freezer Burn Is NOT Food Poisoning",
+    rule1Text: "Freezer burn looks unappealing and creates a tough, cardboard-like mouthfeel, but it is 100% biologically safe. At 0°F (-18°C) or below, bacterial, fungal, and viral pathogens (such as Salmonella, E. coli, Listeria, and Clostridium) are completely arrested in dormant stasis. Consuming freezer-burned meat will never cause microbial food poisoning or bacterial gastroenteritis.",
+    rule2Title: "2. The Thermodynamics of Sublimation: Why Frost Snow Forms Inside Packaging",
+    rule2Text: "Sublimation occurs when solid ice transitions directly into water vapor without melting into liquid. In frost-free freezers, heating coils periodically raise temperature by 15°F–25°F to melt evaporator coil ice. This thermal swing drives a massive water vapor pressure differential ($P_{ice} > P_{air}$), forcing moisture to evacuate food cells. That evaporated moisture then condenses as snowy frost crystals onto package walls, leaving empty 'honeycombed' dry cells behind.",
+    rule3Title: "3. The 2-Millimeter Knife Trimming Mandate",
+    rule3Text: "Freezer burn desiccation and toxic lipid peroxidation are heavily concentrated in the outermost 1.5 to 3 millimeters of meat tissue. By using a sharp boning knife to shave away the grayish-tan, leathery outer crust before cooking, you eliminate over 90% of oxidized malondialdehyde and cardboard off-flavors, leaving the tender, hydrated muscle underneath virtually unharmed.",
+    rule4Title: "4. The Wet-Heat Cooking Mandate: Never Dry-Sear Freezer-Burned Meat",
+    rule4Text: "Desiccated myofibrillar muscle fibers have suffered irreversible protein cross-linking and lost their hydration envelope. If you pan-sear or grill freezer-burned meat with dry heat, the surface fibers char into tough, leathery leather. Instead, always use wet-heat braising, stewing, pressure cooking, or slow-simmering with acidic liquids (wine, vinegar, citrus, or tomato sauce) to soften collagen and re-infuse gelatinous moisture.",
+    copyReportBtn: "Copy Comprehensive Diagnostic Report",
+    copiedFeedback: "Report Copied to Clipboard!"
+  },
+  es: {
+    badge: "Simulador de Sublimación y Ciencia de los Alimentos",
+    title: "Modelo de Quemadura por Congelación y Peroxidación Lipídica",
+    subtitle: "Simule la cinética de sublimación de hielo, desecación de poros, decoloración de mioglobina, peroxidación lipídica tóxica (MDA) y protocolos de rescate culinario.",
+    controlsTitle: "Parámetros de Almacenamiento y Factores Ambientales",
+    controlsSub: "Configure el alimento, el envase protector, los ciclos de descongelación del congelador y la duración del almacenamiento.",
+    foodLabel: "Sustrato de Alimento y Matriz de Humedad:",
+    foodHelp: "Seleccione el tipo de proteína o vegetal, porcentaje de agua y perfil de ácidos grasos.",
+    packagingLabel: "Envase y Barrera contra Oxígeno y Vapor:",
+    packagingHelp: "Tasa de transmisión de vapor de agua (WVTR) y volumen de aire atrapado.",
+    envLabel: "Ambiente del Congelador y Ciclos No-Frost:",
+    envHelp: "Temperatura del congelador y frecuencia de ciclos térmicos de descongelación.",
+    durationLabel: "Duración en el Congelador:",
+    durationHelp: "Meses de almacenamiento. La sublimación aumenta de forma exponencial con el tiempo.",
+    thicknessLabel: "Espesor y Geometría de la Pieza:",
+    thicknessHelp: "La relación superficie/volumen determina la profundidad de la desecación.",
+    presetsTitle: "Preajustes Rápidos:",
+    presetSteakStore: "Filete en Bandeja de Supermercado (3 Meses)",
+    presetChickenVacuum: "Pechuga de Pollo al Vacío (12 Meses)",
+    presetSalmonTorn: "Salmón Graso en Bolsa Rota / Suelta (4 Meses)",
+    presetGroundBeefAuto: "Carne Picada en Congelador No-Frost (6 Meses)",
+    presetDeepFreeze: "Asado en Arcón Congelador (-29°C, 18 Meses)",
+    diagnosticTitle: "Evaluación de Quemadura por Congelación",
+    diagnosticSub: "Desecación bioquímica, autooxidación de lípidos y rescate culinario.",
+    severityLabel: "Índice de Quemadura por Congelación",
+    sublimationLabel: "Pérdida de Masa por Sublimación",
+    rancidityLabel: "Rancidez Lipídica (MDA TBARS)",
+    toughnessLabel: "Factor de Dureza Proteica",
+    safetyStatusLabel: "Seguridad Microbiológica USDA",
+    palatabilityLabel: "Calificación de Palatabilidad",
+    trimmingTitle: "Protocolo de Recorte Quirúrgico con Cuchillo",
+    salvageTitle: "Técnica Culinaria de Rescate en Húmedo",
+    visualTitle: "Progresión Visual del Tejido",
+    tableTitle: "Matriz de Sublimación y Sensibilidad",
+    tableSub: "Comparación de retención de agua, oxidación y vida útil.",
+    colFood: "Alimento",
+    colOptimal: "Frescura Óptima",
+    colMoisture: "Agua %",
+    colOxidationRisk: "Riesgo Oxidación",
+    colSalvage: "Técnica de Rescate",
+    rulesTitle: "Reglas Científicas Basadas en Evidencia (USDA)",
+    rulesSub: "Principios termodinámicos de presión de vapor de hielo y preservación de grasas.",
+    rule1Title: "1. Regla Absoluta de la USDA: La Quemadura NO Causa Intoxicación",
+    rule1Text: "La quemadura por frío tiene un aspecto desagradable y textura correosa, pero es 100% segura microbiológicamente. A 0°F (-18°C) o menos, las bacterias y mohos (Salmonella, E. coli, Listeria) quedan en latencia total y no proliferan. Comer carne quemada por el hielo jamás causará intoxicación alimentaria bacteriana.",
+    rule2Title: "2. Termodinámica de la Sublimación: Por Qué se Forma Nieve Dentro de la Bolsa",
+    rule2Text: "La sublimación es el paso directo de hielo sólido a vapor sin fundirse. En congeladores no-frost, las resistencias aumentan periódicamente la temperatura para derretir la escarcha. Esta oscilación genera una presión de vapor que extrae el agua celular, condensándola como nieve en el plástico y dejando poros vacíos y secos.",
+    rule3Title: "3. El Mandato del Recorte de 2 Milímetros",
+    rule3Text: "La desecación y la oxidación lipídica se concentran en los primeros 1,5 a 3 mm externos. Al cortar con un cuchillo afilado esa corteza seca y pálida antes de cocinar, se elimina más del 90% de los compuestos rancios, dejando el músculo interior intacto y jugoso.",
+    rule4Title: "4. Mandato de Cocción Húmeda: Jamás Cocinar a la Plancha o Frito Seco",
+    rule4Text: "Las fibras musculares desecadas han perdido su capa de hidratación. Cocinarlas a fuego seco o a la plancha las convierte en cuero duro. En su lugar, utilice guisos, estofados a fuego lento o salsas con ácidos (vino, tomate, limón) para ablandar el colágeno y reponer humedad.",
+    copyReportBtn: "Copiar Informe de Diagnóstico",
+    copiedFeedback: "¡Informe Copiado al Portapapeles!"
+  },
+  pt: {
+    badge: "Simulador de Termodinâmica e Sublimação Alimentar",
+    title: "Modelador de Queimadura de Congelamento e Peroxidação Lipídica",
+    subtitle: "Simule a cinética de sublimação de gelo, dessecação de poros, descoloração de mioglobina, oxidação de gorduras (MDA) e resgate culinário.",
+    controlsTitle: "Parâmetros de Armazenamento e Fatores Ambientais",
+    controlsSub: "Configure o alimento, a embalagem de barreira, os ciclos de degelo e o tempo total no congelador.",
+    foodLabel: "Alimento e Matriz de Umidade:",
+    foodHelp: "Selecione o tipo de proteína ou vegetal, porcentagem de água e perfil lipídico.",
+    packagingLabel: "Embalagem e Barreira contra Oxigênio e Vapor:",
+    packagingHelp: "Taxa de transmissão de vapor de água (WVTR) e ar retido no interior.",
+    envLabel: "Ambiente do Congelador e Ciclos Frost-Free:",
+    envHelp: "Temperatura de congelamento e variações térmicas de descongelamento automático.",
+    durationLabel: "Tempo de Armazenamento no Congelador:",
+    durationHelp: "Meses congelado. A sublimação cresce progressivamente com o tempo.",
+    thicknessLabel: "Espessura e Geometria da Peça:",
+    thicknessHelp: "A relação superfície/volume determina a profundidade do ressecamento.",
+    presetsTitle: "Predefinições Rápidas:",
+    presetSteakStore: "Bife na Bandeja do Supermercado (3 Meses)",
+    presetChickenVacuum: "Peito de Frango a Vácuo (12 Meses)",
+    presetSalmonTorn: "Salmão Gordo em Saco Rasgado / Frouxo (4 Meses)",
+    presetGroundBeefAuto: "Carne Moída em Freezer Frost-Free (6 Meses)",
+    presetDeepFreeze: "Carne em Freezer Horizontal (-29°C, 18 Meses)",
+    diagnosticTitle: "Cartão de Diagnóstico de Queimadura de Frio",
+    diagnosticSub: "Dessecação bioquímica, auto-oxidação de lipídios e recuperação culinária.",
+    severityLabel: "Índice de Queimadura de Congelamento",
+    sublimationLabel: "Perda de Massa por Sublimação",
+    rancidityLabel: "Rancidez Lipídica (MDA TBARS)",
+    toughnessLabel: "Fator de Rigidez Muscular",
+    safetyStatusLabel: "Segurança Microbiológica USDA",
+    palatabilityLabel: "Classificação de Palatabilidade",
+    trimmingTitle: "Protocolo de Corte Cirúrgico com Faca",
+    salvageTitle: "Método Culinário de Resgate Úmido",
+    visualTitle: "Progressão Visual do Tecido",
+    tableTitle: "Matriz de Sublimação e Sensibilidade",
+    tableSub: "Comparação de retenção de água, rancidez e vida útil no freezer.",
+    colFood: "Alimento",
+    colOptimal: "Frescor Ideal",
+    colMoisture: "Água %",
+    colOxidationRisk: "Risco Oxidação",
+    colSalvage: "Técnica de Resgate",
+    rulesTitle: "Regras Científicas e Normas USDA de Congelamento",
+    rulesSub: "Princípios termodinâmicos de pressão de vapor de gelo e conservação de lipídios.",
+    rule1Title: "1. Regra Absoluta da USDA: Queimadura de Gelo NÃO É Intoxicação",
+    rule1Text: "A queimadura de frio afeta a aparência e textura, tornando o alimento fibroso e ressecado, mas é 100% segura. A 0°F (-18°C) ou menos, bactérias (Salmonella, E. coli, Listeria) não proliferam. Comer carne com queimadura de gelo nunca causará infecção bacteriana alimentar.",
+    rule2Title: "2. Termodinâmica da Sublimação: Por Que Cristais de Neve se Formam no Saco",
+    rule2Text: "A sublimação ocorre quando o gelo vira vapor sem passar pelo estado líquido. Em freezers frost-free, ciclos de aquecimento aumentam a temperatura para derreter o gelo das serpentinas, gerando gradiente de pressão que extrai a água das células para dentro da embalagem.",
+    rule3Title: "3. O Mandato de Aparar 2 Milímetros com Faca",
+    rule3Text: "A dessecação e a oxidação de gorduras ficam confinadas nos primeiros 1,5 a 3 milímetros externos. Retirar essa crosta pálida e endurecida com faca afiada elimina mais de 90% dos compostos rançosos, preservando o interior macio.",
+    rule4Title: "4. Mandato do Calor Úmido: Nunca Grelhar Carne Ressecada",
+    rule4Text: "As fibras musculares desidratadas perderam sua capacidade de retenção hídrica. Se fritar ou grelhar em calor seco, viram borracha. Prepare sempre ensopados, cozidos lentos ou carnes de panela com molhos ácidos (tomate, vinho) para amaciar o colágeno.",
+    copyReportBtn: "Copiar Relatório de Diagnóstico",
+    copiedFeedback: "Relatório Copiado para a Área de Transferência!"
+  },
+  "zh-cn": {
+    badge: "热力学与食品科学冰晶升华模拟器",
+    title: "冷冻灼伤、水分升华与脂质过氧化测算模型",
+    subtitle: "模拟固态冰升华动力学、微孔干燥萎缩、肌红蛋白氧化变色、细胞毒性脂质过氧化（MDA）与烹饪挽救指南。",
+    controlsTitle: "冷冻储存参数与环境设定",
+    controlsSub: "配置食材基质、包装阻隔性能、冰箱化霜温变循环以及总储存月数。",
+    foodLabel: "食材类型与水分矩阵：",
+    foodHelp: "选择肉类或蔬果类型、水分含量及多不饱和脂肪酸比例。",
+    packagingLabel: "包装阻隔与排气密封等级：",
+    packagingHelp: "水蒸气透过率（WVTR）与包装内残留空气体积。",
+    envLabel: "冷冻室温控与风冷除霜机制：",
+    envHelp: "冷冻设定温度与周期性自动加热除霜温差波动。",
+    durationLabel: "冷冻储存时长：",
+    durationHelp: "冷冻月数。升华速率随时间呈复合累积效应。",
+    thicknessLabel: "食材切割几何与厚度：",
+    thicknessHelp: "比表面积大小决定水分升华向肉质核心渗透的深度。",
+    presetsTitle: "快速场景预设：",
+    presetSteakStore: "超市保鲜膜盒装牛排（冷冻3个月）",
+    presetChickenVacuum: "真空密封保鲜袋鸡胸肉（冷冻12个月）",
+    presetSalmonTorn: "破损普通塑料袋多脂三文鱼（冷冻4个月）",
+    presetGroundBeefAuto: "风冷无霜冰箱牛肉末（冷冻6个月）",
+    presetDeepFreeze: "直冷深冷卧式冷柜牛大排（-29°C，冷冻18个月）",
+    diagnosticTitle: "冷冻灼伤诊断卡与损伤评估",
+    diagnosticSub: "生物化学细胞脱水、油脂氧化酸败与厨房抢救方案。",
+    severityLabel: "冷冻灼伤综合严重度指数",
+    sublimationLabel: "冰晶升华脱水质量损失",
+    rancidityLabel: "脂质酸败过氧化值（MDA）",
+    toughnessLabel: "肌纤维韧性变性因子",
+    safetyStatusLabel: "USDA 微生物安全合格认证",
+    palatabilityLabel: "风味口感可食度评分",
+    trimmingTitle: "外科手术级刀削去损方案",
+    salvageTitle: "烹饪救援：湿热慢炖挽救技术",
+    visualTitle: "肉质外观病理变色阶段",
+    tableTitle: "基质升华速率与耐藏性基准对照表",
+    tableSub: "各类食材水分保留率、氧化易感性与保质期科学对比。",
+    colFood: "食材品类",
+    colOptimal: "最佳赏味期",
+    colMoisture: "水分占比",
+    colOxidationRisk: "氧化风险等级",
+    colSalvage: "最佳挽救工艺",
+    rulesTitle: "基于科学实验与 USDA 的冷冻食品准则",
+    rulesSub: "阐释冰蒸气压差动力学及避免油脂酸败的关键科学原理。",
+    rule1Title: "1. 美国农业部（USDA）铁律：冷冻灼伤绝不等于细菌食物中毒",
+    rule1Text: "冷冻灼伤虽然导致肉质外观发白发黄、口感如硬纸板般干柴，但在微生物学上是 100% 绝对安全的。在 0°F（-18°C）或更低温度下，所有致病细菌与霉菌（沙门氏菌、大肠杆菌、李斯特菌等）均处于完全休眠状态。食用冷冻灼伤的肉类绝不会引起细菌性食物中毒。",
+    rule2Title: "2. 冰晶升华热力学：包装内为什么会结出一层“白雪”",
+    rule2Text: "升华指固态冰不经液态直接转化为水蒸气的相变。在无霜风冷冰箱中，加热器每隔 8-12 小时启动化霜，产生 10°C 左右的温差，驱动巨大的冰水蒸气压差（$P_{冰} > P_{空气}$），强行将食材表层水分抽离并在袋壁凝华成厚霜，使肉质留下海绵状空心孔隙。",
+    rule3Title: "3. 削去表层 2 毫米的外科手术法则",
+    rule3Text: "冷冻灼伤脱水和带有纸板哈喇味的脂质过氧化物（丙二醛 MDA）主要集中在肉质最外层的 1.5 到 3 毫米深度。在烹饪前用锋利的剔骨刀削去这一层干燥皮革状表皮，即可切除超过 90% 的氧化哈喇味，内部肉质依然多汁柔软。",
+    rule4Title: "4. 湿热慢炖法则：绝不可干热煎烤冷冻灼伤肉",
+    rule4Text: "脱水肌原纤维已失去水合保护层，分子发生不可逆交联。如果直接干煎或烧烤，表层会炭化变硬为橡胶状。必须采用湿热慢炖法（如红烧、罗宋汤、高压锅慢炖），配合酸性物质（番茄、葡萄酒、醋）软化胶原蛋白，重新渗入丰沛汤汁。",
+    copyReportBtn: "复制完整诊断与抢救报告",
+    copiedFeedback: "报告已成功复制到剪贴板！"
+  },
+  ja: {
+    badge: "熱力学・食品科学 氷結晶昇華シミュレーター",
+    title: "冷凍焼け・氷昇華・脂質過酸化モデラー",
+    subtitle: "固形氷の直接昇華キネティクス、組織の多孔質脱水乾燥、ミオグロビン酸化変色、有害脂質過酸化（MDA）および調理レスキュープロトコルを検証します。",
+    controlsTitle: "保存条件設定および環境パラメータ",
+    controlsSub: "食品マトリクス、包装バリア性能、自動霜取りサイクル、冷凍保存期間を指定してください。",
+    foodLabel: "食品マトリクス（水分・脂肪組成）：",
+    foodHelp: "肉・魚・野菜の種類、水分含有率および多価不飽和脂肪酸の割合を選択。",
+    packagingLabel: "包装材の水分・酸素ガスバリア性能：",
+    packagingHelp: "水蒸気透過度（WVTR）および袋内に残存する空気体積比率。",
+    envLabel: "冷凍庫の冷却方式・霜取りサイクル：",
+    envHelp: "庫内設定温度およびファン式（間接冷却）自動ヒーター昇温の有無。",
+    durationLabel: "冷凍保存期間：",
+    durationHelp: "冷凍保存月数。時間の経過とともに氷の昇華脱水が指数関数的に進行します。",
+    thicknessLabel: "食材の厚みと形状：",
+    thicknessHelp: "表面積対体積比により、内部芯部への乾燥浸透深さが変化します。",
+    presetsTitle: "クイックシミュレーション設定：",
+    presetSteakStore: "スーパーのラップ包装牛ステーキ（冷凍3ヶ月）",
+    presetChickenVacuum: "真空パック保存の鶏むね肉（冷凍12ヶ月）",
+    presetSalmonTorn: "破れた袋に入った脂乗りサーモン（冷凍4ヶ月）",
+    presetGroundBeefAuto: "自動霜取り冷凍庫の牛ひき肉（冷凍6ヶ月）",
+    presetDeepFreeze: "直冷式チェストフリーザーの牛塊肉（-29°C、18ヶ月）",
+    diagnosticTitle: "冷凍焼け診断スコアカード",
+    diagnosticSub: "生化学的脱水乾燥度、油脂酸化度（MDA）、調理レスキュー判定。",
+    severityLabel: "冷凍焼け総合深刻度指数",
+    sublimationLabel: "氷昇華による水分質量損失率",
+    rancidityLabel: "脂質過酸化（酸敗度 TBARS MDA）",
+    toughnessLabel: "筋原線維硬化・変性係数",
+    safetyStatusLabel: "USDA 微生物学的安全性判定",
+    palatabilityLabel: "食味・食感クオリティ評価",
+    trimmingTitle: "ナイフによる外科的トリミング基準",
+    salvageTitle: "湿熱調理によるレスキュー調理法",
+    visualTitle: "組織の外観・色調変化プロセス",
+    tableTitle: "昇華耐性および食品マトリクス比較基準表",
+    tableSub: "水分保持率、酸化感受性、賞味期間の科学的比較。",
+    colFood: "対象食品",
+    colOptimal: "最適賞味期間",
+    colMoisture: "水分比率",
+    colOxidationRisk: "酸化リスク",
+    colSalvage: "推奨レスキュー法",
+    rulesTitle: "USDAおよび食品科学に基づく根拠プロトコル",
+    rulesSub: "氷蒸気圧差による乾燥メカニズムと脂質保護の必須原則。",
+    rule1Title: "1. 米国農務省（USDA）の鉄則：冷凍焼けは食中毒ではない",
+    rule1Text: "冷凍焼けした肉は白っぽく変色しパサついてダンボールのように硬くなりますが、微生物学的には100%完全に安全です。0°F（-18°C）以下ではサルモネラ菌や大腸菌、リステリア菌などのすべての病原菌が完全休眠状態になります。冷凍焼けした肉を食べても細菌性食中毒を起こすことは決してありません。",
+    rule2Title: "2. 氷昇華の熱力学：袋の中に雪のような霜が溜まる理由",
+    rule2Text: "昇華とは固体（氷）が液体を経ずに直接気体（水蒸気）へと変化する現象です。ファン式（自動霜取り）冷凍庫ではヒーターが定期的に作動して温度が上昇します。この温度変動によって生じる強力な氷蒸気圧差が細胞から水分を吸い出し、袋の内壁に雪状の霜となって結晶化し、肉に蜂の巣状の空洞を残します。",
+    rule3Title: "3. 外側2mmをナイフで削ぎ落とすトリミング原則",
+    rule3Text: "冷凍焼けによる組織乾燥と古い油のような異臭（マロンジアルデヒド MDA）は、肉の最外層1.5〜3mm深さに集中しています。調理前に切れ味の良いナイフでこのパサついた外皮を薄く削ぎ落とすだけで、酸化成分の90%以上を除去でき、内部のジューシーな肉質を救出できます。",
+    rule4Title: "4. 湿熱調理の鉄則：乾燥した冷凍焼け肉を決してそのまま焼かない",
+    rule4Text: "脱水した筋原線維タンパク質は不可逆的に架橋変性しており、水分保持力を失っています。フライパンでそのまま焼くとゴムのように硬化します。必ずワイン、トマト、出汁などの水分と酸味を加えた煮込み料理（シチュー、カレー、ポトフ、角煮）でコラーゲンをゼラチン化させて水分を補給してください。",
+    copyReportBtn: "詳細診断レポートをコピー",
+    copiedFeedback: "レポートをクリップボードにコピーしました！"
+  }
+};
+
+const d = DICTIONARY[lang] || DICTIONARY.en;
+const data = freezerBurnData;
+---
+
+<div class="bg-surface border border-hairline rounded-3xl p-6 md:p-10 shadow-sm transition-all duration-300 hover:shadow-md mb-12">
+  <!-- Badge & Header -->
+  <div class="flex flex-wrap items-center justify-between gap-4 border-b border-hairline pb-6 mb-8">
+    <div>
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-sky-100 text-sky-950 mb-3 border border-sky-200">
+        <span class="inline-block w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span>
+        {d.badge}
+      </div>
+      <h2 class="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">
+        {d.title}
+      </h2>
+      <p class="text-sm md:text-base text-muted mt-2 max-w-3xl leading-relaxed">
+        {d.subtitle}
+      </p>
+    </div>
+
+    <!-- Live USDA Safety Seal -->
+    <div class="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-3 text-emerald-950">
+      <div class="text-2xl">🛡️</div>
+      <div>
+        <div class="text-xs font-bold uppercase tracking-wider text-emerald-800">USDA FSIS Clearance</div>
+        <div class="text-sm font-semibold text-emerald-900">100% Pathogen Inactive (&le; 0°F)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Presets Bar -->
+  <div class="mb-8 bg-surface-soft border border-hairline rounded-2xl p-4 md:p-5">
+    <div class="text-xs font-bold uppercase tracking-wider text-muted mb-3 flex items-center gap-2">
+      <span>⚡</span> {d.presetsTitle}
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <button type="button" class="preset-btn px-3 py-1.5 rounded-xl text-xs font-medium bg-canvas border border-hairline hover:border-accent hover:text-accent transition-all text-ink cursor-pointer" data-preset="steak-store">
+        🥩 {d.presetSteakStore}
+      </button>
+      <button type="button" class="preset-btn px-3 py-1.5 rounded-xl text-xs font-medium bg-canvas border border-hairline hover:border-accent hover:text-accent transition-all text-ink cursor-pointer" data-preset="chicken-vacuum">
+        🍗 {d.presetChickenVacuum}
+      </button>
+      <button type="button" class="preset-btn px-3 py-1.5 rounded-xl text-xs font-medium bg-canvas border border-hairline hover:border-accent hover:text-accent transition-all text-ink cursor-pointer" data-preset="salmon-torn">
+        🐟 {d.presetSalmonTorn}
+      </button>
+      <button type="button" class="preset-btn px-3 py-1.5 rounded-xl text-xs font-medium bg-canvas border border-hairline hover:border-accent hover:text-accent transition-all text-ink cursor-pointer" data-preset="ground-auto">
+        🍔 {d.presetGroundBeefAuto}
+      </button>
+      <button type="button" class="preset-btn px-3 py-1.5 rounded-xl text-xs font-medium bg-canvas border border-hairline hover:border-accent hover:text-accent transition-all text-ink cursor-pointer" data-preset="deep-freeze">
+        ❄️ {d.presetDeepFreeze}
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Grid: Controls Left, Scorecard Right -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <!-- Left Column: Controls (5 cols) -->
+    <div class="lg:col-span-5 space-y-6 bg-surface-soft border border-hairline rounded-2xl p-6">
+      <div>
+        <h3 class="text-base font-bold text-ink flex items-center gap-2">
+          <span>⚙️</span> {d.controlsTitle}
+        </h3>
+        <p class="text-xs text-muted mt-1 leading-relaxed">
+          {d.controlsSub}
+        </p>
+      </div>
+
+      <!-- Food Substrate Matrix -->
+      <div>
+        <label for="fb-food-matrix" class="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
+          {d.foodLabel}
+        </label>
+        <select id="fb-food-matrix" class="w-full bg-canvas border border-hairline rounded-xl px-3.5 py-2.5 text-sm text-ink font-medium focus:outline-none focus:ring-2 focus:ring-accent transition-all cursor-pointer">
+          {data.foodMatrices.map(m => (
+            <option value={m.id} selected={m.id === 'matrix-beef-steak'}>
+              {m.name} ({m.waterPercent}% Water | {m.fatPercent}% Fat)
+            </option>
+          ))}
+        </select>
+        <span class="block text-[11px] text-muted mt-1.5">
+          {d.foodHelp}
+        </span>
+      </div>
+
+      <!-- Packaging Type -->
+      <div>
+        <label for="fb-packaging-type" class="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
+          {d.packagingLabel}
+        </label>
+        <select id="fb-packaging-type" class="w-full bg-canvas border border-hairline rounded-xl px-3.5 py-2.5 text-sm text-ink font-medium focus:outline-none focus:ring-2 focus:ring-accent transition-all cursor-pointer">
+          {data.packagingTypes.map(p => (
+            <option value={p.id} selected={p.id === 'pack-supermarket-tray'}>
+              {p.name}
+            </option>
+          ))}
+        </select>
+        <span class="block text-[11px] text-muted mt-1.5">
+          {d.packagingHelp}
+        </span>
+      </div>
+
+      <!-- Freezer Climate & Defrost Cycling -->
+      <div>
+        <label for="fb-freezer-env" class="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
+          {d.envLabel}
+        </label>
+        <select id="fb-freezer-env" class="w-full bg-canvas border border-hairline rounded-xl px-3.5 py-2.5 text-sm text-ink font-medium focus:outline-none focus:ring-2 focus:ring-accent transition-all cursor-pointer">
+          {data.freezerEnvironments.map(e => (
+            <option value={e.id} selected={e.id === 'env-auto-defrost'}>
+              {e.name}
+            </option>
+          ))}
+        </select>
+        <span class="block text-[11px] text-muted mt-1.5">
+          {d.envHelp}
+        </span>
+      </div>
+
+      <!-- Storage Duration Slider -->
+      <div>
+        <div class="flex items-center justify-between mb-1.5">
+          <label for="fb-duration-months" class="text-xs font-bold uppercase tracking-wider text-ink">
+            {d.durationLabel}
+          </label>
+          <span id="fb-duration-val" class="text-sm font-extrabold text-accent bg-accent/10 px-2 py-0.5 rounded-md">
+            4 Months
+          </span>
+        </div>
+        <input
+          type="range"
+          id="fb-duration-months"
+          min="1"
+          max="24"
+          step="1"
+          value="4"
+          class="w-full h-2 bg-hairline rounded-lg appearance-none cursor-pointer accent-accent"
+        />
+        <div class="flex justify-between text-[10px] text-muted mt-1 font-mono">
+          <span>1 Month</span>
+          <span>6 Mo</span>
+          <span>12 Mo</span>
+          <span>24+ Months</span>
+        </div>
+        <span class="block text-[11px] text-muted mt-1.5">
+          {d.durationHelp}
+        </span>
+      </div>
+
+      <!-- Thickness & Geometry -->
+      <div>
+        <div class="flex items-center justify-between mb-1.5">
+          <label for="fb-cut-thickness" class="text-xs font-bold uppercase tracking-wider text-ink">
+            {d.thicknessLabel}
+          </label>
+          <span id="fb-thickness-val" class="text-sm font-extrabold text-accent bg-accent/10 px-2 py-0.5 rounded-md">
+            1.0 inch / 25 mm (Standard Cut)
+          </span>
+        </div>
+        <input
+          type="range"
+          id="fb-cut-thickness"
+          min="10"
+          max="80"
+          step="5"
+          value="25"
+          class="w-full h-2 bg-hairline rounded-lg appearance-none cursor-pointer accent-accent"
+        />
+        <div class="flex justify-between text-[10px] text-muted mt-1 font-mono">
+          <span>10 mm (Thin Cutlet)</span>
+          <span>25 mm (Steak)</span>
+          <span>50 mm (Thick Roast)</span>
+          <span>80 mm (Whole Bird)</span>
+        </div>
+        <span class="block text-[11px] text-muted mt-1.5">
+          {d.thicknessHelp}
+        </span>
+      </div>
+    </div>
+
+    <!-- Right Column: Diagnostic Output (7 cols) -->
+    <div class="lg:col-span-7 space-y-6">
+      <div class="bg-surface border border-hairline rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center justify-between border-b border-hairline pb-4 mb-5">
+          <div>
+            <h3 class="text-lg font-bold text-ink">
+              {d.diagnosticTitle}
+            </h3>
+            <p class="text-xs text-muted mt-0.5">
+              {d.diagnosticSub}
+            </p>
+          </div>
+          <div id="fb-badge-severity" class="px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300">
+            Moderate Desiccation
+          </div>
+        </div>
+
+        <!-- Severity Meter Bar -->
+        <div class="space-y-2 mb-6">
+          <div class="flex items-center justify-between text-xs font-semibold text-ink">
+            <span>{d.severityLabel}</span>
+            <span id="fb-severity-pct" class="font-bold text-sm">48%</span>
+          </div>
+          <div class="w-full h-3 bg-surface-soft border border-hairline rounded-full overflow-hidden p-0.5">
+            <div id="fb-severity-bar" class="h-full bg-gradient-to-r from-emerald-500 via-amber-500 to-rose-600 rounded-full transition-all duration-500" style="width: 48%;"></div>
+          </div>
+        </div>
+
+        <!-- 4 Key Diagnostic Metrics -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5 mb-6 text-center">
+          <div class="bg-surface-soft border border-hairline rounded-xl p-3.5">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-muted mb-1">{d.sublimationLabel}</div>
+            <div id="fb-sublimation-val" class="text-lg font-black text-ink">8.4%</div>
+            <div class="text-[10px] text-muted mt-0.5">Cellular water loss</div>
+          </div>
+          <div class="bg-surface-soft border border-hairline rounded-xl p-3.5">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-muted mb-1">{d.rancidityLabel}</div>
+            <div id="fb-rancidity-val" class="text-lg font-black text-amber-600">0.78 mg/kg</div>
+            <div class="text-[10px] text-muted mt-0.5">MDA Aldehydes</div>
+          </div>
+          <div class="bg-surface-soft border border-hairline rounded-xl p-3.5">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-muted mb-1">{d.toughnessLabel}</div>
+            <div id="fb-toughness-val" class="text-lg font-black text-ink">2.1x</div>
+            <div class="text-[10px] text-muted mt-0.5">Shear resistance</div>
+          </div>
+          <div class="bg-surface-soft border border-hairline rounded-xl p-3.5">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-muted mb-1">{d.palatabilityLabel}</div>
+            <div id="fb-palatability-val" class="text-lg font-black text-amber-600">3.0 / 5</div>
+            <div class="text-[10px] text-muted mt-0.5">Culinary quality</div>
+          </div>
+        </div>
+
+        <!-- Dynamic Visual Tissue Progression Card -->
+        <div class="bg-surface-soft border border-hairline rounded-xl p-4 mb-6">
+          <div class="text-xs font-bold uppercase tracking-wider text-ink mb-1 flex items-center gap-2">
+            <span>🔬</span> {d.visualTitle}
+          </div>
+          <p id="fb-visual-desc" class="text-xs text-muted leading-relaxed">
+            Vibrant cherry red (oxymyoglobin) transitioning to dull grayish-brown metmyoglobin with dry tan leathery patches on outer edges.
+          </p>
+        </div>
+
+        <!-- Dynamic Trimming Protocol Card -->
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
+          <div class="text-xs font-bold uppercase tracking-wider text-amber-900 mb-1.5 flex items-center gap-2">
+            <span>🔪</span> {d.trimmingTitle}
+          </div>
+          <div class="flex items-start gap-3">
+            <div id="fb-trim-depth-badge" class="bg-amber-200 text-amber-950 font-black text-sm px-2.5 py-1 rounded-lg shrink-0">
+              1.8 mm
+            </div>
+            <p id="fb-trim-advice" class="text-xs text-amber-900 leading-relaxed font-medium">
+              Trim grayish-brown dry rind (1.5–2.5 mm depth) with a sharp chef's knife before cooking. Interior muscle fibers remain juicy and flavorful.
+            </p>
+          </div>
+        </div>
+
+        <!-- Dynamic Cooking Salvage Method Card -->
+        <div class="bg-sky-50 border border-sky-200 rounded-xl p-4 mb-6">
+          <div class="text-xs font-bold uppercase tracking-wider text-sky-950 mb-1.5 flex items-center gap-2">
+            <span>🍲</span> {d.salvageTitle}
+          </div>
+          <p id="fb-salvage-technique" class="text-xs text-sky-900 leading-relaxed font-medium">
+            Low-and-slow braising in acidic wine/tomato liquids, beef bourguignon, pot roast, or shredded beef chili. Avoid quick high-heat dry grilling.
+          </p>
+        </div>
+
+        <!-- Action Button: Copy Report -->
+        <div class="pt-2">
+          <button
+            type="button"
+            id="fb-copy-btn"
+            class="w-full py-3 px-4 rounded-xl text-sm font-bold bg-ink text-canvas hover:opacity-90 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+          >
+            <span>📋</span>
+            <span id="fb-copy-btn-text">{d.copyReportBtn}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Benchmarks Table Section -->
+  <div class="mt-12 pt-8 border-t border-hairline">
+    <div class="mb-6">
+      <h3 class="text-xl font-bold text-ink">
+        {d.tableTitle}
+      </h3>
+      <p class="text-sm text-muted mt-1">
+        {d.tableSub}
+      </p>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs border border-hairline rounded-2xl overflow-hidden">
+        <thead class="bg-surface-soft border-b border-hairline text-ink font-bold uppercase tracking-wider text-[11px]">
+          <tr>
+            <th class="py-3 px-4">{d.colFood}</th>
+            <th class="py-3 px-4">{d.colOptimal}</th>
+            <th class="py-3 px-4">{d.colMoisture}</th>
+            <th class="py-3 px-4">{d.colOxidationRisk}</th>
+            <th class="py-3 px-4">{d.colSalvage}</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline text-muted">
+          {data.foodMatrices.map(m => (
+            <tr class="hover:bg-surface-soft/60 transition-colors">
+              <td class="py-3 px-4 font-semibold text-ink">{m.name}</td>
+              <td class="py-3 px-4">{m.optimalMonths} Months</td>
+              <td class="py-3 px-4">{m.waterPercent}%</td>
+              <td class="py-3 px-4">
+                <span class={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
+                  m.lipidOxidationSensitivity > 1.5 ? 'bg-rose-100 text-rose-800' :
+                  m.lipidOxidationSensitivity > 1.0 ? 'bg-amber-100 text-amber-800' :
+                  'bg-emerald-100 text-emerald-800'
+                }`}>
+                  {m.lipidOxidationSensitivity > 1.5 ? 'High (Rancid Odors)' :
+                   m.lipidOxidationSensitivity > 1.0 ? 'Moderate (Cardboard)' : 'Low (Mild Dryness)'}
+                </span>
+              </td>
+              <td class="py-3 px-4 text-ink font-medium">{m.salvageCookingTechnique}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Evidence-Based Rules Section -->
+  <div class="mt-12 pt-8 border-t border-hairline">
+    <div class="mb-6">
+      <h3 class="text-xl font-bold text-ink">
+        {d.rulesTitle}
+      </h3>
+      <p class="text-sm text-muted mt-1">
+        {d.rulesSub}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-5">
+        <h4 class="text-sm font-bold text-ink mb-2 flex items-center gap-2">
+          <span>🛡️</span> {d.rule1Title}
+        </h4>
+        <p class="text-xs text-muted leading-relaxed">
+          {d.rule1Text}
+        </p>
+      </div>
+
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-5">
+        <h4 class="text-sm font-bold text-ink mb-2 flex items-center gap-2">
+          <span>🌡️</span> {d.rule2Title}
+        </h4>
+        <p class="text-xs text-muted leading-relaxed">
+          {d.rule2Text}
+        </p>
+      </div>
+
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-5">
+        <h4 class="text-sm font-bold text-ink mb-2 flex items-center gap-2">
+          <span>🔪</span> {d.rule3Title}
+        </h4>
+        <p class="text-xs text-muted leading-relaxed">
+          {d.rule3Text}
+        </p>
+      </div>
+
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-5">
+        <h4 class="text-sm font-bold text-ink mb-2 flex items-center gap-2">
+          <span>🍲</span> {d.rule4Title}
+        </h4>
+        <p class="text-xs text-muted leading-relaxed">
+          {d.rule4Text}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reactive Client-Side Simulation Script -->
+<script define:vars={{ data, d }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    const foodSelect = document.getElementById('fb-food-matrix');
+    const packSelect = document.getElementById('fb-packaging-type');
+    const envSelect = document.getElementById('fb-freezer-env');
+    const durationSlider = document.getElementById('fb-duration-months');
+    const durationVal = document.getElementById('fb-duration-val');
+    const thicknessSlider = document.getElementById('fb-cut-thickness');
+    const thicknessVal = document.getElementById('fb-thickness-val');
+
+    // Outputs
+    const severityBadge = document.getElementById('fb-badge-severity');
+    const severityPct = document.getElementById('fb-severity-pct');
+    const severityBar = document.getElementById('fb-severity-bar');
+    const sublimationVal = document.getElementById('fb-sublimation-val');
+    const rancidityVal = document.getElementById('fb-rancidity-val');
+    const toughnessVal = document.getElementById('fb-toughness-val');
+    const palatabilityVal = document.getElementById('fb-palatability-val');
+    const visualDesc = document.getElementById('fb-visual-desc');
+    const trimDepthBadge = document.getElementById('fb-trim-depth-badge');
+    const trimAdvice = document.getElementById('fb-trim-advice');
+    const salvageTechnique = document.getElementById('fb-salvage-technique');
+    const copyBtn = document.getElementById('fb-copy-btn');
+    const copyBtnText = document.getElementById('fb-copy-btn-text');
+
+    function calculate() {
+      if (!foodSelect || !packSelect || !envSelect || !durationSlider || !thicknessSlider) return;
+
+      const foodId = foodSelect.value;
+      const packId = packSelect.value;
+      const envId = envSelect.value;
+      const months = parseInt(durationSlider.value, 10);
+      const thicknessMm = parseInt(thicknessSlider.value, 10);
+
+      const food = data.foodMatrices.find(m => m.id === foodId) || data.foodMatrices[0];
+      const pack = data.packagingTypes.find(p => p.id === packId) || data.packagingTypes[0];
+      const env = data.freezerEnvironments.find(e => e.id === envId) || data.freezerEnvironments[0];
+
+      // Update Slider labels
+      if (durationVal) durationVal.textContent = `${months} Month${months > 1 ? 's' : ''}`;
+      if (thicknessVal) thicknessVal.textContent = `${thicknessMm} mm (${(thicknessMm / 25.4).toFixed(1)} inch)`;
+
+      // Sublimation Kinetics Model:
+      // Base rate per month ~ 0.95% water loss under standard packaging at 0°F
+      // Multipliers: packaging transmission, freezer vapor delta, matrix sublimation resistance
+      const monthlyRate = 1.15 * pack.sublimationMultiplier * env.vaporPressureDiffFactor / food.sublimationResistanceFactor;
+      // Exponential saturation curve: loss% = maxWater * (1 - e^(-rate * t / 100))
+      const theoreticalLossPct = food.waterPercent * (1 - Math.exp(-monthlyRate * (months / 12) * 0.35));
+      const waterLossPct = Math.min(food.waterPercent * 0.45, Math.max(0.4, theoreticalLossPct));
+
+      // Lipid Peroxidation (MDA Aldehyde) Model:
+      // Base MDA ~ 0.15 mg/kg (fresh)
+      // Driven by oxygen barrier, duration, lipid sensitivity, and fat fraction
+      const mdaIncrease = (months / 6) * pack.oxidationMultiplier * env.vaporPressureDiffFactor * food.lipidOxidationSensitivity * (food.polyunsaturatedPercent / 20);
+      const mdaScore = Math.min(4.5, Math.max(0.12, 0.15 + mdaIncrease));
+
+      // Protein Toughness Shear Factor:
+      // Cross-linking scales with water loss percentage
+      const toughnessFactor = Math.min(3.8, Math.max(1.0, 1.0 + (waterLossPct / 10) * 1.3));
+
+      // Freezer Burn Severity Index (0 to 100):
+      // Composite of water loss fraction and MDA oxidation
+      const severityScore = Math.min(100, Math.round((waterLossPct / (food.waterPercent * 0.35)) * 60 + (mdaScore / 2.5) * 40));
+
+      // Palatability Score (1.0 to 5.0):
+      const rawPalatability = 5.0 - (severityScore / 100) * 4.0;
+      const palatabilityScore = Math.max(1.0, Math.min(5.0, rawPalatability)).toFixed(1);
+
+      // Trimming Depth (mm):
+      // Penetration depth depends on thickness, duration, and sublimation
+      const trimDepthMm = Math.min(Math.round(thicknessMm * 0.25 * 10) / 10, Math.max(0.5, (waterLossPct * 0.22 * env.vaporPressureDiffFactor).toFixed(1)));
+
+      // Render Outputs
+      if (severityPct) severityPct.textContent = `${severityScore}%`;
+      if (severityBar) severityBar.style.width = `${severityScore}%`;
+      if (sublimationVal) sublimationVal.textContent = `${waterLossPct.toFixed(1)}%`;
+      if (rancidityVal) {
+        rancidityVal.textContent = `${mdaScore.toFixed(2)} mg/kg`;
+        rancidityVal.className = `text-lg font-black ${
+          mdaScore > 1.5 ? 'text-rose-600' :
+          mdaScore > 0.8 ? 'text-amber-600' :
+          'text-emerald-600'
+        }`;
+      }
+      if (toughnessVal) toughnessVal.textContent = `${toughnessFactor.toFixed(1)}x`;
+      if (palatabilityVal) {
+        palatabilityVal.textContent = `${palatabilityScore} / 5`;
+        palatabilityVal.className = `text-lg font-black ${
+          parseFloat(palatabilityScore) >= 4.0 ? 'text-emerald-600' :
+          parseFloat(palatabilityScore) >= 2.5 ? 'text-amber-600' :
+          'text-rose-600'
+        }`;
+      }
+
+      // Severity Badge
+      if (severityBadge) {
+        if (severityScore < 20) {
+          severityBadge.textContent = 'Pristine / Negligible Loss';
+          severityBadge.className = 'px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-100 text-emerald-900 border border-emerald-300';
+        } else if (severityScore < 45) {
+          severityBadge.textContent = 'Mild Surface Desiccation';
+          severityBadge.className = 'px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-sky-100 text-sky-900 border border-sky-300';
+        } else if (severityScore < 70) {
+          severityBadge.textContent = 'Moderate Freezer Burn';
+          severityBadge.className = 'px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300';
+        } else {
+          severityBadge.textContent = 'Severe Peroxidation & Toughness';
+          severityBadge.className = 'px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-rose-100 text-rose-900 border border-rose-300';
+        }
+      }
+
+      // Dynamic Guidance
+      if (visualDesc) visualDesc.textContent = food.visualProgression;
+      if (trimDepthBadge) trimDepthBadge.textContent = `${trimDepthMm} mm`;
+      if (trimAdvice) trimAdvice.textContent = food.trimmingAdvice;
+      if (salvageTechnique) salvageTechnique.textContent = food.salvageCookingTechnique;
+    }
+
+    // Attach Event Listeners
+    [foodSelect, packSelect, envSelect, durationSlider, thicknessSlider].forEach(el => {
+      if (el) el.addEventListener('input', calculate);
+    });
+
+    // Preset Buttons
+    const presetBtns = document.querySelectorAll('.preset-btn');
+    presetBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const type = btn.getAttribute('data-preset');
+        if (type === 'steak-store') {
+          foodSelect.value = 'matrix-beef-steak';
+          packSelect.value = 'pack-supermarket-tray';
+          envSelect.value = 'env-auto-defrost';
+          durationSlider.value = '3';
+          thicknessSlider.value = '25';
+        } else if (type === 'chicken-vacuum') {
+          foodSelect.value = 'matrix-poultry-skinless';
+          packSelect.value = 'pack-vacuum-sealed';
+          envSelect.value = 'env-standard-manual';
+          durationSlider.value = '12';
+          thicknessSlider.value = '25';
+        } else if (type === 'salmon-torn') {
+          foodSelect.value = 'matrix-fatty-fish';
+          packSelect.value = 'pack-loose-torn';
+          envSelect.value = 'env-auto-defrost';
+          durationSlider.value = '4';
+          thicknessSlider.value = '20';
+        } else if (type === 'ground-auto') {
+          foodSelect.value = 'matrix-ground-beef';
+          packSelect.value = 'pack-freezer-ziploc-pressed';
+          envSelect.value = 'env-auto-defrost';
+          durationSlider.value = '6';
+          thicknessSlider.value = '15';
+        } else if (type === 'deep-freeze') {
+          foodSelect.value = 'matrix-beef-steak';
+          packSelect.value = 'pack-aluminum-foil-double';
+          envSelect.value = 'env-deep-freeze';
+          durationSlider.value = '18';
+          thicknessSlider.value = '50';
+        }
+        calculate();
+      });
+    });
+
+    // Copy Report Button
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        const food = data.foodMatrices.find(m => m.id === foodSelect.value);
+        const report = `=====================================================
+ISITKITCHENSAFE FREEZER BURN & SUBLIMATION REPORT
+Food Substrate: ${food ? food.name : foodSelect.value}
+Storage Time: ${durationSlider.value} Months
+Freezer Burn Severity: ${severityPct ? severityPct.textContent : ''}
+Sublimation Moisture Loss: ${sublimationVal ? sublimationVal.textContent : ''}
+Lipid Rancidity (MDA): ${rancidityVal ? rancidityVal.textContent : ''}
+Muscle Toughness Factor: ${toughnessVal ? toughnessVal.textContent : ''}
+Palatability Rating: ${palatabilityVal ? palatabilityVal.textContent : ''}
+USDA Safety Clearance: 100% Pathogen Inactive (Zero Bacterial Food Poisoning Risk)
+Trimming Guideline: ${trimDepthBadge ? trimDepthBadge.textContent : ''} - ${trimAdvice ? trimAdvice.textContent : ''}
+Culinary Salvage Method: ${salvageTechnique ? salvageTechnique.textContent : ''}
+=====================================================
+https://isitkitchensafe.com/tools/freezer-burn-sublimation-modeler/`;
+
+        navigator.clipboard.writeText(report).then(() => {
+          if (copyBtnText) copyBtnText.textContent = d.copiedFeedback;
+          setTimeout(() => {
+            if (copyBtnText) copyBtnText.textContent = d.copyReportBtn;
+          }, 3000);
+        }).catch(() => {
+          alert('Report generated and printed to console.');
+          console.log(report);
+        });
+      });
+    }
+
+    // Initial run
+    calculate();
+  });
+</script>

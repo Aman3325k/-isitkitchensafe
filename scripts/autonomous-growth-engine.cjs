@@ -71,7 +71,8 @@ const TOOLS_REGISTRY = [
   { slug: 'copper-cookware-toxicity-modeler', name: 'Copper Cookware & Brass Acidic Food Leaching & Verdigris Modeler', category: 'Metallurgy & Toxicology', component: 'CopperCookwareToxicityModeler.astro', dataFile: 'copper-cookware-toxicity-data.json' },
   { slug: 'microwave-plastic-steam-cover-modeler', name: 'Microwave Plastic Steam Cover Phthalate Condensate Dripping Modeler', category: 'Toxicology', component: 'MicrowavePlasticSteamCoverModeler.astro', dataFile: 'microwave-plastic-steam-cover-data.json' },
   { slug: 'stainless-steel-heavy-metal-leaching-modeler', name: 'Stainless Steel Cookware Heavy Metal (Nickel & Chromium) Acidic Leaching Modeler', category: 'Metallurgy & Toxicology', component: 'StainlessSteelHeavyMetalLeachingModeler.astro', dataFile: 'stainless-steel-heavy-metal-data.json' },
-  { slug: 'oven-self-cleaning-pyrolysis-simulator', name: 'Oven Self-Cleaning Pyrolysis Fume & Fluoropolymer PTFE Off-Gassing Simulator', category: 'Thermal Physics & Toxicology', component: 'OvenSelfCleaningPyrolysisSimulator.astro', dataFile: 'oven-self-cleaning-pyrolysis-data.json' }
+  { slug: 'oven-self-cleaning-pyrolysis-simulator', name: 'Oven Self-Cleaning Pyrolysis Fume & Fluoropolymer PTFE Off-Gassing Simulator', category: 'Thermal Physics & Toxicology', component: 'OvenSelfCleaningPyrolysisSimulator.astro', dataFile: 'oven-self-cleaning-pyrolysis-data.json' },
+  { slug: 'freezer-burn-sublimation-modeler', name: 'Freezer Burn, Ice Sublimation & Lipid Peroxidation Modeler', category: 'Thermodynamics & Food Science', component: 'FreezerBurnSublimationModeler.astro', dataFile: 'freezer-burn-sublimation-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -234,7 +235,8 @@ function auditDatasets() {
     'copper-cookware-toxicity-data.json',
     'microwave-plastic-steam-cover-data.json',
     'stainless-steel-heavy-metal-data.json',
-    'oven-self-cleaning-pyrolysis-data.json'
+    'oven-self-cleaning-pyrolysis-data.json',
+    'freezer-burn-sublimation-data.json'
   ];
 
   const datasetStats = {};
@@ -485,17 +487,10 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Freezer Burn, Ice Sublimation & Lipid Peroxidation Modeler',
-      category: 'Thermodynamics & Food Science',
-      intent: 'Answers "Can you eat freezer burned meat?", modeling protein denaturation, ice crystal pore desiccation, cytotoxic lipid aldehydes, and palatability triage.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '140,000+ US impressions'
-    },
-    {
       title: 'Glass Cooktop Point-Load & Thermal Shock Fracture Simulator',
       category: 'Ceramic Physics',
       intent: 'Models ceramic glass radiant and induction cooktop point impacts, cast iron dragging shear stresses, concentrated sugar pitting, and thermal shock delta.',
-      priority: 'HIGH',
+      priority: 'CRITICAL_HIGH',
       estimatedMonthlyVolume: '85,000+ US impressions'
     },
     {
@@ -511,6 +506,13 @@ function auditGrowthOpportunities() {
       intent: 'Models high-torque S-blade shear stress fatigue, dishwasher stress crazing of polycarbonate work bowls, and stainless steel micro-chipping into food.',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '42,000+ US impressions'
+    },
+    {
+      title: 'Refrigerator Cross-Contamination & Bio-Aerosol Modeler',
+      category: 'Microbiology & Aerosol Physics',
+      intent: 'Models raw poultry drip capillarity, convection fan microbial aerosol dispersal onto open produce, and chemical sanitization contact times.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '38,000+ US impressions'
     }
   ];
 

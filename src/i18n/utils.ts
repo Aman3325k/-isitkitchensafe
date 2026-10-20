@@ -73,7 +73,8 @@ const SPECIAL_PAGES = [
   'tools/copper-cookware-toxicity-modeler',
   'tools/microwave-plastic-steam-cover-modeler',
   'tools/stainless-steel-heavy-metal-leaching-modeler',
-  'tools/oven-self-cleaning-pyrolysis-simulator'
+  'tools/oven-self-cleaning-pyrolysis-simulator',
+  'tools/freezer-burn-sublimation-modeler'
 ];
 
 const esSlugs = new Set([
