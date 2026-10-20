@@ -77,7 +77,8 @@ const TOOLS_REGISTRY = [
   { slug: 'dishwasher-thermal-sanitize-calculator', name: 'Dishwasher Thermal Sanitize & Norovirus Lethality Calculator', category: 'Microbiology & Sanitation', component: 'DishwasherThermalSanitizeCalculator.astro', dataFile: 'dishwasher-thermal-sanitize-data.json' },
   { slug: 'food-processor-blade-fatigue-modeler', name: 'Food Processor Centrifugal Stress & Polycarbonate Blade Fatigue Modeler', category: 'Materials Physics', component: 'FoodProcessorBladeFatigueModeler.astro', dataFile: 'food-processor-blade-fatigue-data.json' },
   { slug: 'refrigerator-cross-contamination-modeler', name: 'Refrigerator Cross-Contamination & Bio-Aerosol Modeler', category: 'Microbiology & Aerosol Physics', component: 'RefrigeratorCrossContaminationModeler.astro', dataFile: 'refrigerator-cross-contamination-data.json' },
-  { slug: 'gas-stove-benzene-no2-calculator', name: 'Gas Stove Benzene & Indoor Nitrogen Dioxide (NO2) Exposure Calculator', category: 'Combustion Toxicology', component: 'GasStoveBenzeneNo2Calculator.astro', dataFile: 'gas-stove-benzene-no2-data.json' }
+  { slug: 'gas-stove-benzene-no2-calculator', name: 'Gas Stove Benzene & Indoor Nitrogen Dioxide (NO2) Exposure Calculator', category: 'Combustion Toxicology', component: 'GasStoveBenzeneNo2Calculator.astro', dataFile: 'gas-stove-benzene-no2-data.json' },
+  { slug: 'microwave-egg-explosion-simulator', name: 'Microwave Egg Superheating & Steam Cavitation Explosion Simulator', category: 'Fluid Physics & Thermodynamics', component: 'MicrowaveEggExplosionSimulator.astro', dataFile: 'microwave-egg-explosion-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -495,24 +496,17 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Microwave Egg Superheating & Steam Cavitation Explosion Simulator',
-      category: 'Fluid Physics & Thermodynamics',
-      intent: 'Models yolk dielectric loss tangent superheating (reaching 110°C–120°C in liquid state), vapor pressure buildup against protein vitelline membrane, and violent cavitation acoustic blast upon fork puncture.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '48,000+ US impressions'
-    },
-    {
       title: 'Silicone Spatula & Utensil High-Heat Oligomer Leaching Modeler',
       category: 'Polymer Chemistry & Food Contact',
       intent: 'Models thermal depolymerization of platinum vs peroxide-cured silicone spatulas when in contact with 200°C+ cooking oils, calculating cyclic oligomer (D4-D6) volatilization and migration into fatty foods.',
-      priority: 'HIGH',
+      priority: 'CRITICAL_HIGH',
       estimatedMonthlyVolume: '39,000+ US impressions'
     },
     {
       title: 'Wooden Cutting Board Deep-Groove Pathogen Desorption & Sanitization Modeler',
       category: 'Microbiology & Surface Chemistry',
       intent: 'Models capillary trapping of Salmonella and Campylobacter within wood xylem vessels vs knife scars in plastic, calculating dehydration kinetics and sanitization efficacy across maple, teak, and end-grain acacia.',
-      priority: 'MEDIUM',
+      priority: 'HIGH',
       estimatedMonthlyVolume: '42,000+ US impressions'
     },
     {
@@ -521,6 +515,13 @@ function auditGrowthOpportunities() {
       intent: 'Models fatty acid pyrolytic aerosolization from previous cooking residue baked onto air fryer heating elements and fan cowls, calculating resuspension rates of Benzo[a]pyrene and particulate PM2.5 in uncleaned appliances.',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '37,000+ US impressions'
+    },
+    {
+      title: 'Commercial Ice Machine Psychrophilic Mold & Legionella Bio-Aerosol Modeler',
+      category: 'Environmental Microbiology & Plumbing',
+      intent: 'Models condensation tray psychrophilic biofilm growth (Cladosporium and Pseudomonas), laminar water sheet shear detachment, and Legionella pneumophila ultrasonic bio-aerosolization in domestic and commercial ice makers.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '34,000+ US impressions'
     }
   ];
 

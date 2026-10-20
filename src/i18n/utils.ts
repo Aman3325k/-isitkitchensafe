@@ -79,7 +79,8 @@ const SPECIAL_PAGES = [
   'tools/dishwasher-thermal-sanitize-calculator',
   'tools/food-processor-blade-fatigue-modeler',
   'tools/refrigerator-cross-contamination-modeler',
-  'tools/gas-stove-benzene-no2-calculator'
+  'tools/gas-stove-benzene-no2-calculator',
+  'tools/microwave-egg-explosion-simulator'
 ];
 
 const esSlugs = new Set([
