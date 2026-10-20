@@ -70,7 +70,8 @@ const SPECIAL_PAGES = [
   'tools/melamine-tableware-formaldehyde-modeler',
   'tools/cast-iron-seasoning-degradation-modeler',
   'tools/wooden-utensil-biofilm-modeler',
-  'tools/copper-cookware-toxicity-modeler'
+  'tools/copper-cookware-toxicity-modeler',
+  'tools/microwave-plastic-steam-cover-modeler'
 ];
 
 const esSlugs = new Set([
