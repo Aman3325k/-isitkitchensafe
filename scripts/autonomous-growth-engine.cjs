@@ -2,7 +2,7 @@
  * IsItKitchenSafe Autonomous Growth & Ops Engine (v2.0 - All-Day Smart Engine)
  * 
  * Continuous Operations & Growth Engine:
- * - 53 Interactive Diagnostic Tools Health & 5-Language Slug Parity (EN, ES, PT, JA, ZH-CN)
+ * - 54 Interactive Diagnostic Tools Health & 5-Language Slug Parity (EN, ES, PT, JA, ZH-CN)
  * - Cloudflare Pages _redirects budget monitor (2,000 line ceiling) & Edge Middleware sync
  * - Multi-Language Corpus & Database Integrity (66+ critical data assets)
  * - Structured Data (JSON-LD FAQPage, BreadcrumbList & Article/WebApplication) compliance audit
@@ -27,7 +27,7 @@ if (!fs.existsSync(LOGS_DIR)) {
   fs.mkdirSync(LOGS_DIR, { recursive: true });
 }
 
-// 53 Flagship Interactive Tools Registry
+// 54 Flagship Interactive Tools Registry
 const TOOLS_REGISTRY = [
   { slug: 'pan-scratch-inspector', name: 'AI Pan Scratch & Coating Damage Inspector', category: 'Materials', component: 'PanScratchInspector.astro' },
   { slug: 'cookware-brand-transparency-index', name: 'Cookware Brand Transparency & Greenwashing Index', category: 'Materials', component: 'CookwareBrandIndex.astro' },
@@ -81,7 +81,8 @@ const TOOLS_REGISTRY = [
   { slug: 'microwave-egg-explosion-simulator', name: 'Microwave Egg Superheating & Steam Cavitation Explosion Simulator', category: 'Fluid Physics & Thermodynamics', component: 'MicrowaveEggExplosionSimulator.astro', dataFile: 'microwave-egg-explosion-data.json' },
   { slug: 'silicone-spatula-oligomer-leaching-modeler', name: 'Silicone Spatula & Utensil High-Heat Oligomer Leaching Modeler', category: 'Polymer Chemistry & Food Contact', component: 'SiliconeSpatulaOligomerModeler.astro', dataFile: 'silicone-spatula-oligomer-data.json' },
   { slug: 'wooden-cutting-board-pathogen-modeler', name: 'Wooden Cutting Board Deep-Groove Pathogen Desorption & Sanitization Modeler', category: 'Microbiology & Surface Chemistry', component: 'WoodenCuttingBoardPathogenModeler.astro', dataFile: 'wooden-cutting-board-pathogen-data.json' },
-  { slug: 'air-fryer-pah-resuspension-modeler', name: 'Air Fryer Polycyclic Aromatic Hydrocarbon (PAH) Thermal Resuspension & Inhalation Modeler', category: 'Aerosol Toxicology & Physics', component: 'AirFryerPahResuspensionModeler.astro', dataFile: 'air-fryer-pah-resuspension-data.json' }
+  { slug: 'air-fryer-pah-resuspension-modeler', name: 'Air Fryer Polycyclic Aromatic Hydrocarbon (PAH) Thermal Resuspension & Inhalation Modeler', category: 'Aerosol Toxicology & Physics', component: 'AirFryerPahResuspensionModeler.astro', dataFile: 'air-fryer-pah-resuspension-data.json' },
+  { slug: 'commercial-ice-machine-biofilm-modeler', name: 'Commercial Ice Machine Psychrophilic Mold & Legionella Bio-Aerosol Modeler', category: 'Environmental Microbiology & Plumbing', component: 'CommercialIceMachineBiofilmModeler.astro', dataFile: 'commercial-ice-machine-biofilm-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -254,7 +255,8 @@ function auditDatasets() {
     'microwave-egg-explosion-data.json',
     'silicone-spatula-oligomer-data.json',
     'wooden-cutting-board-pathogen-data.json',
-    'air-fryer-pah-resuspension-data.json'
+    'air-fryer-pah-resuspension-data.json',
+    'commercial-ice-machine-biofilm-data.json'
   ];
 
   const datasetStats = {};
@@ -505,24 +507,17 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Ice Machine Psychrophilic Mold & Legionella Bio-Aerosol Modeler',
-      category: 'Environmental Microbiology & Plumbing',
-      intent: 'Models condensation tray psychrophilic biofilm growth (Cladosporium and Pseudomonas), laminar water sheet shear detachment, and Legionella pneumophila ultrasonic bio-aerosolization in domestic and commercial ice makers.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '34,000+ US impressions'
-    },
-    {
       title: 'Commercial Steam Table Psychrophilic & Bacillus cereus Spore Kinetics Modeler',
       category: 'Microbiology & Thermal Processing',
       intent: 'Models heat-tolerant spore germination of Bacillus cereus and Clostridium perfringens in bulk holding pans (40°C–60°C), calculating enterotoxin synthesis and cooling curve compliance under FDA Food Code 3-501.14.',
-      priority: 'HIGH',
+      priority: 'CRITICAL_HIGH',
       estimatedMonthlyVolume: '31,000+ US impressions'
     },
     {
       title: 'Plastic Blender Jar Microcrack Bisphenol-A & Phthalate Hydrolysis Modeler',
       category: 'Polymer Chemistry & Food Contact',
       intent: 'Models polycarbonate and Eastman Ethan microcrack hydrolytic cleavage during high-speed blending of acidic smoothies and boiling soups, calculating BPA and BPA-alternative cyclic oligomer leaching.',
-      priority: 'MEDIUM',
+      priority: 'HIGH',
       estimatedMonthlyVolume: '28,000+ US impressions'
     },
     {
@@ -531,6 +526,13 @@ function auditGrowthOpportunities() {
       intent: 'Models ceramic-glass cooktop interfacial acoustic stress, mechanical resonance from mismatched induction cookware bases, and micro-crack expansion under rapid thermal transients (20°C to 240°C in 30s).',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '26,000+ US impressions'
+    },
+    {
+      title: 'Espresso Machine Thermoblock Heavy Metal Leaching & Lead Descaling Modeler',
+      category: 'Metallurgy & Fluid Dynamics',
+      intent: 'Models brass boiler and thermoblock lead and copper leaching during high-temperature (92°C–96°C) 9-bar extraction and citric/sulfamic acid descaling corrosion under NSF/ANSI 372 standards.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '24,000+ US impressions'
     }
   ];
 

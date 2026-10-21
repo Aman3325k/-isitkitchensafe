@@ -83,7 +83,8 @@ const SPECIAL_PAGES = [
   'tools/microwave-egg-explosion-simulator',
   'tools/silicone-spatula-oligomer-leaching-modeler',
   'tools/wooden-cutting-board-pathogen-modeler',
-  'tools/air-fryer-pah-resuspension-modeler'
+  'tools/air-fryer-pah-resuspension-modeler',
+  'tools/commercial-ice-machine-biofilm-modeler'
 ];
 
 const esSlugs = new Set([
@@ -381,3 +382,4 @@ export function getApplianceIn(appliance: string, lang: SupportedLanguage = 'en'
   }
   return `in the ${appliance}`;
 }
+
