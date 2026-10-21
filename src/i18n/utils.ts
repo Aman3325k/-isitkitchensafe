@@ -88,7 +88,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-steam-table-spore-modeler',
   'tools/plastic-blender-jar-hydrolysis-modeler',
   'tools/induction-cooktop-delamination-modeler',
-  'tools/espresso-machine-heavy-metal-modeler'
+  'tools/espresso-machine-heavy-metal-modeler',
+  'tools/commercial-conveyor-toaster-modeler'
 ];
 
 const esSlugs = new Set([
