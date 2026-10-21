@@ -91,7 +91,8 @@ const SPECIAL_PAGES = [
   'tools/espresso-machine-heavy-metal-modeler',
   'tools/commercial-conveyor-toaster-modeler',
   'tools/sous-vide-pouch-delamination-modeler',
-  'tools/immersion-blender-grease-leaching-modeler'
+  'tools/immersion-blender-grease-leaching-modeler',
+  'tools/cold-brew-nitro-biofilm-modeler'
 ];
 
 const esSlugs = new Set([
