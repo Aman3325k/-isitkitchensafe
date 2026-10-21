@@ -84,7 +84,8 @@ const SPECIAL_PAGES = [
   'tools/silicone-spatula-oligomer-leaching-modeler',
   'tools/wooden-cutting-board-pathogen-modeler',
   'tools/air-fryer-pah-resuspension-modeler',
-  'tools/commercial-ice-machine-biofilm-modeler'
+  'tools/commercial-ice-machine-biofilm-modeler',
+  'tools/commercial-steam-table-spore-modeler'
 ];
 
 const esSlugs = new Set([
