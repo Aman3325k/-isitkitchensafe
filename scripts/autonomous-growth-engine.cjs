@@ -92,7 +92,8 @@ const TOOLS_REGISTRY = [
   { slug: 'immersion-blender-grease-leaching-modeler', name: 'Immersion Blender Rotor Shearing & Motor Bearing Grease Leaching Modeler', category: 'Tribology & Food Safety Physics', component: 'ImmersionBlenderGreaseLeachingModeler.astro', dataFile: 'immersion-blender-grease-leaching-data.json' },
   { slug: 'cold-brew-nitro-biofilm-modeler', name: 'Cold Brew Commercial Nitro Dispenser Biofilm & Pressure Line Modeler', category: 'Environmental Microbiology & Plumbing', component: 'ColdBrewNitroBiofilmModeler.astro', dataFile: 'cold-brew-nitro-biofilm-data.json' },
   { slug: 'commercial-charbroiler-pah-modeler', name: 'Commercial Charbroiler Radiant Heat Flare-Up & Polycyclic Aromatic Hydrocarbon (PAH) Emission Modeler', category: 'Combustion Toxicology & Fluid Dynamics', component: 'CommercialCharbroilerPahModeler.astro', dataFile: 'commercial-charbroiler-pah-data.json' },
-  { slug: 'commercial-induction-wok-shatter-modeler', name: 'Commercial Induction Wok Thermal Shock Ceramic Basin Shatter Modeler', category: 'Ceramic Physics & High-Frequency Electromagnetics', component: 'CommercialInductionWokShatterModeler.astro', dataFile: 'induction-wok-shatter-data.json' }
+  { slug: 'commercial-induction-wok-shatter-modeler', name: 'Commercial Induction Wok Thermal Shock Ceramic Basin Shatter Modeler', category: 'Ceramic Physics & High-Frequency Electromagnetics', component: 'CommercialInductionWokShatterModeler.astro', dataFile: 'induction-wok-shatter-data.json' },
+  { slug: 'commercial-conveyor-pizza-oven-modeler', name: 'Commercial Conveyor Pizza Oven Thermal Plume & Carbon Monoxide Dispersion Modeler', category: 'Thermal Physics & Industrial Ventilation', component: 'CommercialConveyorPizzaOvenModeler.astro', dataFile: 'conveyor-pizza-oven-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -274,7 +275,10 @@ function auditDatasets() {
     'commercial-conveyor-toaster-data.json',
     'sous-vide-pouch-delamination-data.json',
     'immersion-blender-grease-leaching-data.json',
-    'cold-brew-nitro-biofilm-data.json'
+    'cold-brew-nitro-biofilm-data.json',
+    'commercial-charbroiler-pah-data.json',
+    'induction-wok-shatter-data.json',
+    'conveyor-pizza-oven-data.json'
   ];
 
   const datasetStats = {};
@@ -525,24 +529,17 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Conveyor Pizza Oven Thermal Plume & Carbon Monoxide Dispersion Modeler',
-      category: 'Thermal Physics & Industrial Ventilation',
-      intent: 'Models 450°C continuous quartz/forced-air deck plume velocity, localized incomplete combustion CO pockets, and particulate crust spallation in unhooded high-throughput pizzerias under NFPA 96 and ANSI Z83.11 standards.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '19,200+ US impressions'
-    },
-    {
       title: 'Commercial Soft-Serve Ice Cream Machine Heat-Treatment Cycle & Listeria Persistence Modeler',
       category: 'Dairy Microbiology & Thermal Kinetics',
       intent: 'Models overnight pasteurization failure kinetics, psychrotolerant Listeria monocytogenes biofilm recalcitrance in stainless freeze cylinders, and scraping blade polymer fatigue under FDA Food Code 2022 § 4-402.12.',
-      priority: 'HIGH',
+      priority: 'CRITICAL_HIGH',
       estimatedMonthlyVolume: '16,500+ US impressions'
     },
     {
       title: 'Commercial Immersion Circulator Water Bath Biofilm & Thermal Stratification Modeler',
       category: 'Microbiology & Thermal Engineering',
       intent: 'Models prolonged 54°C cook cycle bacterial biofilm survival, heating coil calcification, and thermal inversion dead zones under high-volume sous vide commercial banquet production.',
-      priority: 'MEDIUM',
+      priority: 'HIGH',
       estimatedMonthlyVolume: '14,000+ US impressions'
     },
     {
@@ -551,6 +548,13 @@ function auditGrowthOpportunities() {
       intent: 'Models radiant ceramic burner grease spatter ignition, exhaust duct creosote condensation rates, and continuous polycyclic hydrocarbon emissions during commercial batch chicken roasting.',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '12,800+ US impressions'
+    },
+    {
+      title: 'Commercial Blast Chiller Evaporator Coil Psychrotrophic Spore & Airflow Defrost Modeler',
+      category: 'Refrigeration Physics & Pathogen Dynamics',
+      intent: 'Models 90-minute hot food pull-down boundary layer air velocity (70°C to 3°C), evaporator fan bio-aerosol cross-contamination, and Clostridium perfringens spore germination curves under HACCP FDA criteria.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '11,400+ US impressions'
     }
   ];
 
