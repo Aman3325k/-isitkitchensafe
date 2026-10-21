@@ -88,7 +88,8 @@ const TOOLS_REGISTRY = [
   { slug: 'induction-cooktop-delamination-modeler', name: 'Induction Cooktop Thermal Shock Delamination & Acoustic Micro-Crack Modeler', category: 'Electromechanical & Ceramic Physics', component: 'InductionCooktopDelaminationModeler.astro', dataFile: 'induction-delamination-data.json' },
   { slug: 'espresso-machine-heavy-metal-modeler', name: 'Espresso Machine Thermoblock Heavy Metal Leaching & Lead Descaling Modeler', category: 'Metallurgy & Fluid Dynamics', component: 'EspressoMachineHeavyMetalModeler.astro', dataFile: 'espresso-machine-heavy-metal-data.json' },
   { slug: 'commercial-conveyor-toaster-modeler', name: 'Commercial Conveyor Toaster Nichrome Filament Cr(VI) & Acrylamide Surface Modeler', category: 'Thermal Physics & Industrial Toxicology', component: 'CommercialConveyorToasterModeler.astro', dataFile: 'commercial-conveyor-toaster-data.json' },
-  { slug: 'sous-vide-pouch-delamination-modeler', name: 'Sous Vide High-Temperature Pouch Seam Delamination & Microplastic Modeler', category: 'Polymer Chemistry & Food Contact', component: 'SousVidePouchDelaminationModeler.astro', dataFile: 'sous-vide-pouch-delamination-data.json' }
+  { slug: 'sous-vide-pouch-delamination-modeler', name: 'Sous Vide High-Temperature Pouch Seam Delamination & Microplastic Modeler', category: 'Polymer Chemistry & Food Contact', component: 'SousVidePouchDelaminationModeler.astro', dataFile: 'sous-vide-pouch-delamination-data.json' },
+  { slug: 'immersion-blender-grease-leaching-modeler', name: 'Immersion Blender Rotor Shearing & Motor Bearing Grease Leaching Modeler', category: 'Tribology & Food Safety Physics', component: 'ImmersionBlenderGreaseLeachingModeler.astro', dataFile: 'immersion-blender-grease-leaching-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -267,7 +268,9 @@ function auditDatasets() {
     'plastic-blender-jar-hydrolysis-data.json',
     'induction-delamination-data.json',
     'espresso-machine-heavy-metal-data.json',
-    'commercial-conveyor-toaster-data.json'
+    'commercial-conveyor-toaster-data.json',
+    'sous-vide-pouch-delamination-data.json',
+    'immersion-blender-grease-leaching-data.json'
   ];
 
   const datasetStats = {};
@@ -518,25 +521,18 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Immersion Blender Rotor Shearing & Motor Bearing Grease Leaching Modeler',
-      category: 'Tribology & Food Safety Physics',
-      intent: 'Models sub-surface PTFE shaft seal wear, centrifugal hydrocarbon lubricant migration, and cavitation shear forces during high-viscosity hot soup puréeing.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '23,500+ US impressions'
-    },
-    {
       title: 'Cold Brew Commercial Nitro Dispenser Biofilm & Pressure Line Modeler',
       category: 'Environmental Microbiology & Plumbing',
       intent: 'Models psychrotrophic bacterial biofilm adhesion, fungal hyphae growth, and gas line back-pressure stagnation in high-pressure commercial cold brew nitro draft lines under NSF/ANSI 18.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '19,000+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '21,500+ US impressions'
     },
     {
       title: 'Commercial Charbroiler Radiant Heat Flare-Up & Polycyclic Aromatic Hydrocarbon (PAH) Emission Modeler',
       category: 'Combustion Toxicology & Fluid Dynamics',
       intent: 'Models open gas radiant charbroiler grease flare-ups, convective plume velocity, and benzo[a]pyrene surface adsorption during high-temperature commercial burger and steak grilling.',
-      priority: 'MEDIUM',
-      estimatedMonthlyVolume: '17,500+ US impressions'
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '18,500+ US impressions'
     },
     {
       title: 'Commercial Induction Wok Thermal Shock Ceramic Basin Shatter Modeler',
@@ -544,6 +540,13 @@ function auditGrowthOpportunities() {
       intent: 'Models localized 35 kW eddy-current thermal gradients, acoustic transducer cavitation, and concave ceramic glass shock fracture during rapid cold-liquid quenching and wok tossing under commercial Chinese kitchen duty cycles.',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '16,000+ US impressions'
+    },
+    {
+      title: 'Commercial Conveyor Pizza Oven Thermal Plume & Carbon Monoxide Dispersion Modeler',
+      category: 'Thermal Physics & Industrial Ventilation',
+      intent: 'Models 450°C continuous quartz/forced-air deck plume velocity, localized incomplete combustion CO pockets, and particulate crust spallation in unhooded high-throughput pizzerias.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '14,500+ US impressions'
     }
   ];
 

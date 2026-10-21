@@ -90,7 +90,8 @@ const SPECIAL_PAGES = [
   'tools/induction-cooktop-delamination-modeler',
   'tools/espresso-machine-heavy-metal-modeler',
   'tools/commercial-conveyor-toaster-modeler',
-  'tools/sous-vide-pouch-delamination-modeler'
+  'tools/sous-vide-pouch-delamination-modeler',
+  'tools/immersion-blender-grease-leaching-modeler'
 ];
 
 const esSlugs = new Set([
