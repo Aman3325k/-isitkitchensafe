@@ -82,7 +82,8 @@ const SPECIAL_PAGES = [
   'tools/gas-stove-benzene-no2-calculator',
   'tools/microwave-egg-explosion-simulator',
   'tools/silicone-spatula-oligomer-leaching-modeler',
-  'tools/wooden-cutting-board-pathogen-modeler'
+  'tools/wooden-cutting-board-pathogen-modeler',
+  'tools/air-fryer-pah-resuspension-modeler'
 ];
 
 const esSlugs = new Set([
