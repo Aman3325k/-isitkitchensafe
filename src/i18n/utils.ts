@@ -85,7 +85,8 @@ const SPECIAL_PAGES = [
   'tools/wooden-cutting-board-pathogen-modeler',
   'tools/air-fryer-pah-resuspension-modeler',
   'tools/commercial-ice-machine-biofilm-modeler',
-  'tools/commercial-steam-table-spore-modeler'
+  'tools/commercial-steam-table-spore-modeler',
+  'tools/plastic-blender-jar-hydrolysis-modeler'
 ];
 
 const esSlugs = new Set([

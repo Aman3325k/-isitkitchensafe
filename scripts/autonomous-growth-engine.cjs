@@ -83,7 +83,8 @@ const TOOLS_REGISTRY = [
   { slug: 'wooden-cutting-board-pathogen-modeler', name: 'Wooden Cutting Board Deep-Groove Pathogen Desorption & Sanitization Modeler', category: 'Microbiology & Surface Chemistry', component: 'WoodenCuttingBoardPathogenModeler.astro', dataFile: 'wooden-cutting-board-pathogen-data.json' },
   { slug: 'air-fryer-pah-resuspension-modeler', name: 'Air Fryer Polycyclic Aromatic Hydrocarbon (PAH) Thermal Resuspension & Inhalation Modeler', category: 'Aerosol Toxicology & Physics', component: 'AirFryerPahResuspensionModeler.astro', dataFile: 'air-fryer-pah-resuspension-data.json' },
   { slug: 'commercial-ice-machine-biofilm-modeler', name: 'Commercial Ice Machine Psychrophilic Mold & Legionella Bio-Aerosol Modeler', category: 'Environmental Microbiology & Plumbing', component: 'CommercialIceMachineBiofilmModeler.astro', dataFile: 'commercial-ice-machine-biofilm-data.json' },
-  { slug: 'commercial-steam-table-spore-modeler', name: 'Commercial Steam Table Psychrophilic & Bacillus cereus Spore Kinetics Modeler', category: 'Microbiology & Thermal Processing', component: 'CommercialSteamTableSporeModeler.astro', dataFile: 'commercial-steam-table-spore-data.json' }
+  { slug: 'commercial-steam-table-spore-modeler', name: 'Commercial Steam Table Psychrophilic & Bacillus cereus Spore Kinetics Modeler', category: 'Microbiology & Thermal Processing', component: 'CommercialSteamTableSporeModeler.astro', dataFile: 'commercial-steam-table-spore-data.json' },
+  { slug: 'plastic-blender-jar-hydrolysis-modeler', name: 'Plastic Blender Jar Microcrack Bisphenol-A & Phthalate Hydrolysis Modeler', category: 'Polymer Chemistry & Food Contact', component: 'PlasticBlenderJarHydrolysisModeler.astro', dataFile: 'plastic-blender-jar-hydrolysis-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -258,7 +259,8 @@ function auditDatasets() {
     'wooden-cutting-board-pathogen-data.json',
     'air-fryer-pah-resuspension-data.json',
     'commercial-ice-machine-biofilm-data.json',
-    'commercial-steam-table-spore-data.json'
+    'commercial-steam-table-spore-data.json',
+    'plastic-blender-jar-hydrolysis-data.json'
   ];
 
   const datasetStats = {};
@@ -509,32 +511,32 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Plastic Blender Jar Microcrack Bisphenol-A & Phthalate Hydrolysis Modeler',
-      category: 'Polymer Chemistry & Food Contact',
-      intent: 'Models polycarbonate and Eastman Ethan microcrack hydrolytic cleavage during high-speed blending of acidic smoothies and boiling soups, calculating BPA and BPA-alternative cyclic oligomer leaching.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '28,000+ US impressions'
-    },
-    {
       title: 'Induction Cooktop Thermal Shock Delamination & Acoustic Micro-Crack Modeler',
       category: 'Electromechanical & Ceramic Physics',
       intent: 'Models ceramic-glass cooktop interfacial acoustic stress, mechanical resonance from mismatched induction cookware bases, and micro-crack expansion under rapid thermal transients (20°C to 240°C in 30s).',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '26,000+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '28,000+ US impressions'
     },
     {
       title: 'Espresso Machine Thermoblock Heavy Metal Leaching & Lead Descaling Modeler',
       category: 'Metallurgy & Fluid Dynamics',
       intent: 'Models brass boiler and thermoblock lead and copper leaching during high-temperature (92°C–96°C) 9-bar extraction and citric/sulfamic acid descaling corrosion under NSF/ANSI 372 standards.',
-      priority: 'MEDIUM',
-      estimatedMonthlyVolume: '24,000+ US impressions'
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '26,000+ US impressions'
     },
     {
       title: 'Commercial Conveyor Toaster Nichrome Filament Cr(VI) & Acrylamide Surface Modeler',
       category: 'Thermal Physics & Toxicology',
       intent: 'Models rapid radiative heat transfer (280°C–340°C), nichrome wire oxide spallation, and surface Maillard acrylamide generation across high-throughput commercial bun and bread toasters.',
       priority: 'MEDIUM',
-      estimatedMonthlyVolume: '22,000+ US impressions'
+      estimatedMonthlyVolume: '24,000+ US impressions'
+    },
+    {
+      title: 'Sous Vide High-Temperature Pouch Seam Delamination & Microplastic Modeler',
+      category: 'Polymer Chemistry & Food Contact',
+      intent: 'Models polyethylene/polyamide multi-layer pouch seal creep, microplastic shed, and plasticizer migration during prolonged high-temperature (85°C–90°C) vegetable and root starch water-bath braising.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '21,000+ US impressions'
     }
   ];
 
