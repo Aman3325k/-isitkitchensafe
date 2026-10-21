@@ -2,7 +2,7 @@
  * IsItKitchenSafe Autonomous Growth & Ops Engine (v2.0 - All-Day Smart Engine)
  * 
  * Continuous Operations & Growth Engine:
- * - 57 Interactive Diagnostic Tools Health & 5-Language Slug Parity (EN, ES, PT, JA, ZH-CN)
+ * - 58 Interactive Diagnostic Tools Health & 5-Language Slug Parity (EN, ES, PT, JA, ZH-CN)
  * - Cloudflare Pages _redirects budget monitor (2,000 line ceiling) & Edge Middleware sync
  * - Multi-Language Corpus & Database Integrity (66+ critical data assets)
  * - Structured Data (JSON-LD FAQPage, BreadcrumbList & Article/WebApplication) compliance audit
@@ -27,7 +27,7 @@ if (!fs.existsSync(LOGS_DIR)) {
   fs.mkdirSync(LOGS_DIR, { recursive: true });
 }
 
-// 57 Flagship Interactive Tools Registry
+// 58 Flagship Interactive Tools Registry
 const TOOLS_REGISTRY = [
   { slug: 'pan-scratch-inspector', name: 'AI Pan Scratch & Coating Damage Inspector', category: 'Materials', component: 'PanScratchInspector.astro' },
   { slug: 'cookware-brand-transparency-index', name: 'Cookware Brand Transparency & Greenwashing Index', category: 'Materials', component: 'CookwareBrandIndex.astro' },
@@ -85,7 +85,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-ice-machine-biofilm-modeler', name: 'Commercial Ice Machine Psychrophilic Mold & Legionella Bio-Aerosol Modeler', category: 'Environmental Microbiology & Plumbing', component: 'CommercialIceMachineBiofilmModeler.astro', dataFile: 'commercial-ice-machine-biofilm-data.json' },
   { slug: 'commercial-steam-table-spore-modeler', name: 'Commercial Steam Table Psychrophilic & Bacillus cereus Spore Kinetics Modeler', category: 'Microbiology & Thermal Processing', component: 'CommercialSteamTableSporeModeler.astro', dataFile: 'commercial-steam-table-spore-data.json' },
   { slug: 'plastic-blender-jar-hydrolysis-modeler', name: 'Plastic Blender Jar Microcrack Bisphenol-A & Phthalate Hydrolysis Modeler', category: 'Polymer Chemistry & Food Contact', component: 'PlasticBlenderJarHydrolysisModeler.astro', dataFile: 'plastic-blender-jar-hydrolysis-data.json' },
-  { slug: 'induction-cooktop-delamination-modeler', name: 'Induction Cooktop Thermal Shock Delamination & Acoustic Micro-Crack Modeler', category: 'Electromechanical & Ceramic Physics', component: 'InductionCooktopDelaminationModeler.astro', dataFile: 'induction-delamination-data.json' }
+  { slug: 'induction-cooktop-delamination-modeler', name: 'Induction Cooktop Thermal Shock Delamination & Acoustic Micro-Crack Modeler', category: 'Electromechanical & Ceramic Physics', component: 'InductionCooktopDelaminationModeler.astro', dataFile: 'induction-delamination-data.json' },
+  { slug: 'espresso-machine-heavy-metal-modeler', name: 'Espresso Machine Thermoblock Heavy Metal Leaching & Lead Descaling Modeler', category: 'Metallurgy & Fluid Dynamics', component: 'EspressoMachineHeavyMetalModeler.astro', dataFile: 'espresso-machine-heavy-metal-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -262,7 +263,8 @@ function auditDatasets() {
     'commercial-ice-machine-biofilm-data.json',
     'commercial-steam-table-spore-data.json',
     'plastic-blender-jar-hydrolysis-data.json',
-    'induction-delamination-data.json'
+    'induction-delamination-data.json',
+    'espresso-machine-heavy-metal-data.json'
   ];
 
   const datasetStats = {};
@@ -513,24 +515,17 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Espresso Machine Thermoblock Heavy Metal Leaching & Lead Descaling Modeler',
-      category: 'Metallurgy & Fluid Dynamics',
-      intent: 'Models brass boiler and thermoblock lead and copper leaching during high-temperature (92°C–96°C) 9-bar extraction and citric/sulfamic acid descaling corrosion under NSF/ANSI 372 standards.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '28,000+ US impressions'
-    },
-    {
       title: 'Commercial Conveyor Toaster Nichrome Filament Cr(VI) & Acrylamide Surface Modeler',
       category: 'Thermal Physics & Toxicology',
       intent: 'Models rapid radiative heat transfer (280°C–340°C), nichrome wire oxide spallation, and surface Maillard acrylamide generation across high-throughput commercial bun and bread toasters.',
-      priority: 'HIGH',
+      priority: 'CRITICAL_HIGH',
       estimatedMonthlyVolume: '24,000+ US impressions'
     },
     {
       title: 'Sous Vide High-Temperature Pouch Seam Delamination & Microplastic Modeler',
       category: 'Polymer Chemistry & Food Contact',
       intent: 'Models polyethylene/polyamide multi-layer pouch seal creep, microplastic shed, and plasticizer migration during prolonged high-temperature (85°C–90°C) vegetable and root starch water-bath braising.',
-      priority: 'MEDIUM',
+      priority: 'HIGH',
       estimatedMonthlyVolume: '21,000+ US impressions'
     },
     {
@@ -539,6 +534,13 @@ function auditGrowthOpportunities() {
       intent: 'Models sub-surface PTFE shaft seal wear, centrifugal hydrocarbon lubricant migration, and cavitation shear forces during high-viscosity hot soup puréeing.',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '19,000+ US impressions'
+    },
+    {
+      title: 'Cold Brew Commercial Nitro Dispenser Biofilm & Pressure Line Modeler',
+      category: 'Environmental Microbiology & Plumbing',
+      intent: 'Models psychrotrophic bacterial biofilm adhesion, fungal hyphae growth, and gas line back-pressure stagnation in high-pressure commercial cold brew nitro draft lines under NSF/ANSI 18.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '17,500+ US impressions'
     }
   ];
 
