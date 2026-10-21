@@ -27,7 +27,7 @@ if (!fs.existsSync(LOGS_DIR)) {
   fs.mkdirSync(LOGS_DIR, { recursive: true });
 }
 
-// 58 Flagship Interactive Tools Registry
+// 60 Flagship Interactive Tools Registry
 const TOOLS_REGISTRY = [
   { slug: 'pan-scratch-inspector', name: 'AI Pan Scratch & Coating Damage Inspector', category: 'Materials', component: 'PanScratchInspector.astro' },
   { slug: 'cookware-brand-transparency-index', name: 'Cookware Brand Transparency & Greenwashing Index', category: 'Materials', component: 'CookwareBrandIndex.astro' },
@@ -87,7 +87,8 @@ const TOOLS_REGISTRY = [
   { slug: 'plastic-blender-jar-hydrolysis-modeler', name: 'Plastic Blender Jar Microcrack Bisphenol-A & Phthalate Hydrolysis Modeler', category: 'Polymer Chemistry & Food Contact', component: 'PlasticBlenderJarHydrolysisModeler.astro', dataFile: 'plastic-blender-jar-hydrolysis-data.json' },
   { slug: 'induction-cooktop-delamination-modeler', name: 'Induction Cooktop Thermal Shock Delamination & Acoustic Micro-Crack Modeler', category: 'Electromechanical & Ceramic Physics', component: 'InductionCooktopDelaminationModeler.astro', dataFile: 'induction-delamination-data.json' },
   { slug: 'espresso-machine-heavy-metal-modeler', name: 'Espresso Machine Thermoblock Heavy Metal Leaching & Lead Descaling Modeler', category: 'Metallurgy & Fluid Dynamics', component: 'EspressoMachineHeavyMetalModeler.astro', dataFile: 'espresso-machine-heavy-metal-data.json' },
-  { slug: 'commercial-conveyor-toaster-modeler', name: 'Commercial Conveyor Toaster Nichrome Filament Cr(VI) & Acrylamide Surface Modeler', category: 'Thermal Physics & Industrial Toxicology', component: 'CommercialConveyorToasterModeler.astro', dataFile: 'commercial-conveyor-toaster-data.json' }
+  { slug: 'commercial-conveyor-toaster-modeler', name: 'Commercial Conveyor Toaster Nichrome Filament Cr(VI) & Acrylamide Surface Modeler', category: 'Thermal Physics & Industrial Toxicology', component: 'CommercialConveyorToasterModeler.astro', dataFile: 'commercial-conveyor-toaster-data.json' },
+  { slug: 'sous-vide-pouch-delamination-modeler', name: 'Sous Vide High-Temperature Pouch Seam Delamination & Microplastic Modeler', category: 'Polymer Chemistry & Food Contact', component: 'SousVidePouchDelaminationModeler.astro', dataFile: 'sous-vide-pouch-delamination-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -517,30 +518,30 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Sous Vide High-Temperature Pouch Seam Delamination & Microplastic Modeler',
-      category: 'Polymer Chemistry & Food Contact',
-      intent: 'Models polyethylene/polyamide multi-layer pouch seal creep, microplastic shed, and plasticizer migration during prolonged high-temperature (85°C–90°C) vegetable and root starch water-bath braising.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '21,000+ US impressions'
-    },
-    {
       title: 'Immersion Blender Rotor Shearing & Motor Bearing Grease Leaching Modeler',
       category: 'Tribology & Food Safety Physics',
       intent: 'Models sub-surface PTFE shaft seal wear, centrifugal hydrocarbon lubricant migration, and cavitation shear forces during high-viscosity hot soup puréeing.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '19,000+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '23,500+ US impressions'
     },
     {
       title: 'Cold Brew Commercial Nitro Dispenser Biofilm & Pressure Line Modeler',
       category: 'Environmental Microbiology & Plumbing',
       intent: 'Models psychrotrophic bacterial biofilm adhesion, fungal hyphae growth, and gas line back-pressure stagnation in high-pressure commercial cold brew nitro draft lines under NSF/ANSI 18.',
-      priority: 'MEDIUM',
-      estimatedMonthlyVolume: '17,500+ US impressions'
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '19,000+ US impressions'
     },
     {
       title: 'Commercial Charbroiler Radiant Heat Flare-Up & Polycyclic Aromatic Hydrocarbon (PAH) Emission Modeler',
       category: 'Combustion Toxicology & Fluid Dynamics',
       intent: 'Models open gas radiant charbroiler grease flare-ups, convective plume velocity, and benzo[a]pyrene surface adsorption during high-temperature commercial burger and steak grilling.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '17,500+ US impressions'
+    },
+    {
+      title: 'Commercial Induction Wok Thermal Shock Ceramic Basin Shatter Modeler',
+      category: 'Ceramic Physics & High-Frequency Electromagnetics',
+      intent: 'Models localized 35 kW eddy-current thermal gradients, acoustic transducer cavitation, and concave ceramic glass shock fracture during rapid cold-liquid quenching and wok tossing under commercial Chinese kitchen duty cycles.',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '16,000+ US impressions'
     }
@@ -835,7 +836,7 @@ Usage:
 Options:
   (no args)             Run full master cycle (audits + Astro build + link check)
   --quick               Fast validation cycle (< 2s) across all checks
-  --tools               Audit all 53 flagship tools across 5 locales (265 pages)
+  --tools               Audit all 60 flagship tools across 5 locales (300 pages)
   --parity              Verify tool registry vs. Astro component parity (0 orphans)
   --redirects           Audit Cloudflare Pages redirect limits & edge map
   --datasets            Audit all 66+ data files and multilingual integrity

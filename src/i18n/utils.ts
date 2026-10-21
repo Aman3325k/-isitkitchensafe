@@ -89,7 +89,8 @@ const SPECIAL_PAGES = [
   'tools/plastic-blender-jar-hydrolysis-modeler',
   'tools/induction-cooktop-delamination-modeler',
   'tools/espresso-machine-heavy-metal-modeler',
-  'tools/commercial-conveyor-toaster-modeler'
+  'tools/commercial-conveyor-toaster-modeler',
+  'tools/sous-vide-pouch-delamination-modeler'
 ];
 
 const esSlugs = new Set([
