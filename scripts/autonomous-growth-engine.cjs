@@ -2,7 +2,7 @@
  * IsItKitchenSafe Autonomous Growth & Ops Engine (v2.0 - All-Day Smart Engine)
  * 
  * Continuous Operations & Growth Engine:
- * - 46 Interactive Diagnostic Tools Health & 5-Language Slug Parity (EN, ES, PT, JA, ZH-CN)
+ * - 51 Interactive Diagnostic Tools Health & 5-Language Slug Parity (EN, ES, PT, JA, ZH-CN)
  * - Cloudflare Pages _redirects budget monitor (2,000 line ceiling) & Edge Middleware sync
  * - Multi-Language Corpus & Database Integrity (55+ critical data assets)
  * - Structured Data (JSON-LD FAQPage, BreadcrumbList & Article/WebApplication) compliance audit
@@ -27,7 +27,7 @@ if (!fs.existsSync(LOGS_DIR)) {
   fs.mkdirSync(LOGS_DIR, { recursive: true });
 }
 
-// 46 Flagship Interactive Tools Registry
+// 51 Flagship Interactive Tools Registry
 const TOOLS_REGISTRY = [
   { slug: 'pan-scratch-inspector', name: 'AI Pan Scratch & Coating Damage Inspector', category: 'Materials', component: 'PanScratchInspector.astro' },
   { slug: 'cookware-brand-transparency-index', name: 'Cookware Brand Transparency & Greenwashing Index', category: 'Materials', component: 'CookwareBrandIndex.astro' },
@@ -78,7 +78,8 @@ const TOOLS_REGISTRY = [
   { slug: 'food-processor-blade-fatigue-modeler', name: 'Food Processor Centrifugal Stress & Polycarbonate Blade Fatigue Modeler', category: 'Materials Physics', component: 'FoodProcessorBladeFatigueModeler.astro', dataFile: 'food-processor-blade-fatigue-data.json' },
   { slug: 'refrigerator-cross-contamination-modeler', name: 'Refrigerator Cross-Contamination & Bio-Aerosol Modeler', category: 'Microbiology & Aerosol Physics', component: 'RefrigeratorCrossContaminationModeler.astro', dataFile: 'refrigerator-cross-contamination-data.json' },
   { slug: 'gas-stove-benzene-no2-calculator', name: 'Gas Stove Benzene & Indoor Nitrogen Dioxide (NO2) Exposure Calculator', category: 'Combustion Toxicology', component: 'GasStoveBenzeneNo2Calculator.astro', dataFile: 'gas-stove-benzene-no2-data.json' },
-  { slug: 'microwave-egg-explosion-simulator', name: 'Microwave Egg Superheating & Steam Cavitation Explosion Simulator', category: 'Fluid Physics & Thermodynamics', component: 'MicrowaveEggExplosionSimulator.astro', dataFile: 'microwave-egg-explosion-data.json' }
+  { slug: 'microwave-egg-explosion-simulator', name: 'Microwave Egg Superheating & Steam Cavitation Explosion Simulator', category: 'Fluid Physics & Thermodynamics', component: 'MicrowaveEggExplosionSimulator.astro', dataFile: 'microwave-egg-explosion-data.json' },
+  { slug: 'silicone-spatula-oligomer-leaching-modeler', name: 'Silicone Spatula & Utensil High-Heat Oligomer Leaching Modeler', category: 'Polymer Chemistry & Food Contact', component: 'SiliconeSpatulaOligomerModeler.astro', dataFile: 'silicone-spatula-oligomer-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -245,7 +246,11 @@ function auditDatasets() {
     'freezer-burn-sublimation-data.json',
     'glass-cooktop-fracture-data.json',
     'dishwasher-thermal-sanitize-data.json',
-    'food-processor-blade-fatigue-data.json'
+    'food-processor-blade-fatigue-data.json',
+    'refrigerator-cross-contamination-data.json',
+    'gas-stove-benzene-no2-data.json',
+    'microwave-egg-explosion-data.json',
+    'silicone-spatula-oligomer-data.json'
   ];
 
   const datasetStats = {};
@@ -496,24 +501,17 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Silicone Spatula & Utensil High-Heat Oligomer Leaching Modeler',
-      category: 'Polymer Chemistry & Food Contact',
-      intent: 'Models thermal depolymerization of platinum vs peroxide-cured silicone spatulas when in contact with 200°C+ cooking oils, calculating cyclic oligomer (D4-D6) volatilization and migration into fatty foods.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '39,000+ US impressions'
-    },
-    {
       title: 'Wooden Cutting Board Deep-Groove Pathogen Desorption & Sanitization Modeler',
       category: 'Microbiology & Surface Chemistry',
       intent: 'Models capillary trapping of Salmonella and Campylobacter within wood xylem vessels vs knife scars in plastic, calculating dehydration kinetics and sanitization efficacy across maple, teak, and end-grain acacia.',
-      priority: 'HIGH',
+      priority: 'CRITICAL_HIGH',
       estimatedMonthlyVolume: '42,000+ US impressions'
     },
     {
       title: 'Air Fryer Polycyclic Aromatic Hydrocarbon (PAH) Thermal Resuspension & Inhalation Modeler',
       category: 'Aerosol Toxicology & Physics',
       intent: 'Models fatty acid pyrolytic aerosolization from previous cooking residue baked onto air fryer heating elements and fan cowls, calculating resuspension rates of Benzo[a]pyrene and particulate PM2.5 in uncleaned appliances.',
-      priority: 'MEDIUM',
+      priority: 'HIGH',
       estimatedMonthlyVolume: '37,000+ US impressions'
     },
     {
@@ -522,6 +520,13 @@ function auditGrowthOpportunities() {
       intent: 'Models condensation tray psychrophilic biofilm growth (Cladosporium and Pseudomonas), laminar water sheet shear detachment, and Legionella pneumophila ultrasonic bio-aerosolization in domestic and commercial ice makers.',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '34,000+ US impressions'
+    },
+    {
+      title: 'Commercial Steam Table Psychrophilic & Bacillus cereus Spore Kinetics Modeler',
+      category: 'Microbiology & Thermal Processing',
+      intent: 'Models heat-tolerant spore germination of Bacillus cereus and Clostridium perfringens in bulk holding pans (40°C–60°C), calculating enterotoxin synthesis and cooling curve compliance under FDA Food Code 3-501.14.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '31,000+ US impressions'
     }
   ];
 
