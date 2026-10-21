@@ -81,7 +81,8 @@ const SPECIAL_PAGES = [
   'tools/refrigerator-cross-contamination-modeler',
   'tools/gas-stove-benzene-no2-calculator',
   'tools/microwave-egg-explosion-simulator',
-  'tools/silicone-spatula-oligomer-leaching-modeler'
+  'tools/silicone-spatula-oligomer-leaching-modeler',
+  'tools/wooden-cutting-board-pathogen-modeler'
 ];
 
 const esSlugs = new Set([
