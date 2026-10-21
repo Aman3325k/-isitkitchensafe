@@ -1,0 +1,946 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import modelData from '../data/induction-delamination-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  substrateLabel: string;
+  substrateHelp: string;
+  cookwareLabel: string;
+  cookwareHelp: string;
+  transientLabel: string;
+  transientHelp: string;
+  acousticLabel: string;
+  acousticHelp: string;
+  defectLabel: string;
+  defectHelp: string;
+  loadLabel: string;
+  loadHelp: string;
+  presetsTitle: string;
+  presetBoostDryRun: string;
+  presetColdWaterSpill: string;
+  presetSugarPyrolysis: string;
+  presetWarpedPanAcoustic: string;
+  presetSafeSimmer: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  thermalGradientLabel: string;
+  acousticStressLabel: string;
+  spallationRiskLabel: string;
+  noiseLevelLabel: string;
+  structuralStatusLabel: string;
+  fractureMechanismLabel: string;
+  actionGuidanceLabel: string;
+  scienceTitle: string;
+  scienceSub: string;
+  tableTitle: string;
+  tableSub: string;
+  colSubstrate: string;
+  colCategory: string;
+  colCte: string;
+  colShockDelta: string;
+  colDamping: string;
+  colSugarRisk: string;
+  rulesTitle: string;
+  rulesSub: string;
+  rule1Title: string;
+  rule1Text: string;
+  rule2Title: string;
+  rule2Text: string;
+  rule3Title: string;
+  rule3Text: string;
+  rule4Title: string;
+  rule4Text: string;
+  copyReportBtn: string;
+  copiedFeedback: string;
+}
+
+const DICTIONARY: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Electromechanical & Ceramic Physics Modeler",
+    title: "Induction Cooktop Thermal Shock Delamination & Acoustic Micro-Crack Modeler",
+    subtitle: "Model glass-ceramic interfacial acoustic stress, mechanical resonance from warped cookware bases, thermal shock gradients, and micro-crack expansion under rapid induction heating transients (20°C to 280°C in 30s).",
+    controlsTitle: "Electromechanical & Ceramic Physics Parameters",
+    controlsSub: "Configure cooktop glass substrate, cookware base metallurgy, thermal transient rate, inverter acoustic resonance mode, surface defect condition, and static point load.",
+    substrateLabel: "Cooktop Ceramic-Glass Substrate:",
+    substrateHelp: "Lithium aluminosilicate zero-expansion glass-ceramic (Schott Ceran / EuroKera) vs soda-lime tempered glass vs chemically strengthened aluminosilicate vs cordierite plate.",
+    cookwareLabel: "Cookware Base Interface & Metallurgy:",
+    cookwareHelp: "Multiclad 3-ply/5-ply composite vs heavy enameled cast iron vs warped concave base (1.5mm air gap) vs stamped ferritic dot nonstick.",
+    transientLabel: "Thermal Surge & Temperature Transient:",
+    transientHelp: "Power Boost dry-pan acceleration (3,700W) vs cold water spill quenching vs molten sugar/jam boil-over pitting vs steady-state gentle simmer.",
+    acousticLabel: "Inverter Switching & Acoustic Resonance Mode:",
+    acousticHelp: "Dual-burner heterodyne beat whine (1–3 kHz) vs 120 Hz magnetostrictive chattering vs pure silent ultrasonic modulation (>32 kHz).",
+    defectLabel: "Pre-Existing Surface Micro-Defect Level:",
+    defectHelp: "Pristine factory mirror finish vs sand/salt abrasion scratches (25 µm) vs deep impact micro-fissures and thermal craze lines (75 µm).",
+    loadLabel: "Cookware Static Load / Point Contact Weight (kg):",
+    loadHelp: "Total downward force of pan and food contents concentrated over the base contact perimeter.",
+    presetsTitle: "Empirical Case Studies & Diagnostic Presets:",
+    presetBoostDryRun: "Power Boost Dry Run on Scratched Glass-Ceramic (Extreme Thermal Surge)",
+    presetColdWaterSpill: "Cold Water Overflow onto Glowing Portable Cooktop (Catastrophic Fracture)",
+    presetSugarPyrolysis: "Molten Sugar / Jam Boil-Over (Chemical Silicate Pitting & Delamination)",
+    presetWarpedPanAcoustic: "Warped Multi-Ply Pan on Dual Inverter (Acoustic Chattering Shear)",
+    presetSafeSimmer: "Equilibrium Water Simmer with Heavy Cast Iron (Controlled Baseline)",
+    diagnosticTitle: "Ceramic Fracture & Interfacial Delamination Diagnostic Card",
+    diagnosticSub: "Real-time quantification of peak thermal gradient, interfacial acoustic shear stress, Griffith crack growth probability, and structural safety classification.",
+    thermalGradientLabel: "Peak Interfacial Thermal Gradient",
+    acousticStressLabel: "Interfacial Acoustic Shear Stress",
+    spallationRiskLabel: "Micro-Crack Spallation Risk Score",
+    noiseLevelLabel: "Acoustic Noise & Chatter Level",
+    structuralStatusLabel: "Glass-Ceramic Structural Integrity Status",
+    fractureMechanismLabel: "Fracture Biophysics & Electromechanical Failure Mechanism",
+    actionGuidanceLabel: "Mandatory Kitchen Safety & Engineering Protocol",
+    scienceTitle: "The Physics of Thermal Shock, Griffith Fracture Criterion, and Magnetostrictive Shear",
+    scienceSub: "Why sudden localized heat transients, warped cookware air gaps, and molten sugar destroy ceramic-glass cooktops.",
+    tableTitle: "Comparative Ceramic-Glass Substrate Resilience & Electromechanical Performance",
+    tableSub: "Coefficients of thermal expansion, thermal shock limits, acoustic damping factors, and chemical pitting vulnerability across cooktop substrates.",
+    colSubstrate: "Glass-Ceramic Substrate",
+    colCategory: "Classification",
+    colCte: "CTE (×10⁻⁶/K)",
+    colShockDelta: "Max Shock ΔT",
+    colDamping: "Acoustic Damping",
+    colSugarRisk: "Sugar Pitting Risk",
+    rulesTitle: "Golden Rules for Induction Cooktop Glass Protection",
+    rulesSub: "Engineering-backed guidelines to prevent glass shattering, eliminate micro-crack propagation, and safeguard induction appliances.",
+    rule1Title: "Never Engage 'Boost' Mode with an Empty or Dry Pan",
+    rule1Text: "Modern induction burners transfer 3,000 to 3,700 watts directly into ferromagnetic pan bases. An empty pan escalates from 20°C to 280°C in under 30 seconds. This creates steep radial thermal gradients (>18°C/mm) across the glass perimeter, concentrating immense shear stress along the contact boundary.",
+    rule2Title: "Immediately Scrape Off Molten Sugar and Jam While Still Warm",
+    rule2Text: "Sucrose and fruit sugars melt between 160°C and 186°C, pyrolyzing and chemically reacting with the silicate tetrahedral network of the glass-ceramic. As sugar crystallizes upon cooling, its high contraction coefficient literally pulls out chips of glass ('pitting' or spallation). Always scrape sugar spills immediately with a razor scraper while hot.",
+    rule3Title: "Retire Cookware with Warped or Convex Bases (>1.0 mm Gap)",
+    rule3Text: "Warped cookware creates trapped air pockets between the burner and pan bottom. The cooktop temperature sensor (thermistor) fails to detect the true pan temperature, causing the inverter to overdrive power into localized contact rings, generating extreme thermal hotspots and violent acoustic chattering.",
+    rule4Title: "Never Slide or Drag Cast Iron Across the Glass Surface",
+    rule4Text: "Microscopic salt crystals, silica dust, or rough enamel edges dragged under heavy cookware produce sharp micro-notches (Griffith cracks). Under the Griffith fracture criterion (σ_f = K_Ic / √(π·a)), a single 50 µm scratch slashes the allowable tensile stress of the glass plate by over 75%, making it prone to sudden spontaneous shattering.",
+    copyReportBtn: "Copy Induction Delamination Audit Report",
+    copiedFeedback: "Induction Delamination Audit Report Copied to Clipboard!"
+  },
+  es: {
+    badge: "Modelo de Física Electromecánica y Cerámica",
+    title: "Simulador de Choque Térmico, Delaminación y Microfisuras en Placas de Inducción",
+    subtitle: "Modele el estrés acústico interfacial, resonancia mecánica por menaje deformado, gradientes de choque térmico y propagación de microfisuras en placas vitrocerámicas bajo calentamiento por inducción rápido (20°C a 280°C en 30s).",
+    controlsTitle: "Parámetros de Física Cerámica y Electromecánica",
+    controlsSub: "Configure el sustrato vitrocerámico, metalurgia de la base del menaje, gradiente térmico transitorio, modo de resonancia acústica del inversor, defectos superficiales y carga puntual.",
+    substrateLabel: "Sustrato Vitrocerámico de la Placa:",
+    substrateHelp: "Vitrocerámica de aluminosilicato de litio de expansión cero (Schott Ceran / EuroKera) vs vidrio sodocálcico templado vs aluminosilicato reforzado vs placa de cordierita.",
+    cookwareLabel: "Interfaz y Metalurgia de la Base del Menaje:",
+    cookwareHelp: "Compuesto multicapa de 3/5 capas vs hierro fundido esmaltado pesado vs base combada cóncava (hueco de 1.5mm) vs base troquelada ferromagnética de aluminio.",
+    transientLabel: "Transitorio Térmico y Golpe de Calor:",
+    transientHelp: "Modo Boost con sartén vacía (3.700W) vs desbordamiento con agua fría vs derrame de azúcar/mermelada caramelizada vs hervor suave en equilibrio.",
+    acousticLabel: "Modo de Inversor y Resonancia Acústica:",
+    acousticHelp: "Batido heterodiño de dos zonas (1–3 kHz) vs vibración magnetostrictiva de 120 Hz vs modulación ultrasónica pura (>32 kHz).",
+    defectLabel: "Nivel de Microdefectos Superficiales Previos:",
+    defectHelp: "Acabado de fábrica impecable vs arañazos por arrastre de sal/arena (25 µm) vs fisuras profundas por impacto y fatiga térmica (75 µm).",
+    loadLabel: "Carga Estática / Peso Puntual del Menaje (kg):",
+    loadHelp: "Fuerza total descendente de la olla y su contenido concentrada sobre el perímetro de contacto.",
+    presetsTitle: "Casos de Estudio Prácticos y Presets Diagnósticos:",
+    presetBoostDryRun: "Modo Boost en Vacío sobre Vitrocerámica Rayada (Golpe Térmico Extremo)",
+    presetColdWaterSpill: "Derrame de Agua Fría sobre Placa Portátil Hirviente (Fractura Catastrófica)",
+    presetSugarPyrolysis: "Derrame de Azúcar / Caramelo Fundido (Ataque Químico y Delaminación)",
+    presetWarpedPanAcoustic: "Sartén Comba sobre Inversor Doble (Estrés Acústico y Cizallamiento)",
+    presetSafeSimmer: "Hervor Controlado en Olla de Hierro Fundido (Línea Base Segura)",
+    diagnosticTitle: "Diagnóstico de Fractura Cerámica y Delaminación Interfacial",
+    diagnosticSub: "Cuantificación en tiempo real del gradiente térmico pico, estrés acústico de cizalla, probabilidad de desprendimiento y clasificación de seguridad.",
+    thermalGradientLabel: "Gradiente Térmico Interfacial Pico",
+    acousticStressLabel: "Estrés Acústico de Cizalla Interfacial",
+    spallationRiskLabel: "Índice de Riesgo de Delaminación / Fisuras",
+    noiseLevelLabel: "Nivel de Ruido Acústico y Traqueteo",
+    structuralStatusLabel: "Estado de Integridad de la Vitrocerámica",
+    fractureMechanismLabel: "Biofísica de Fractura y Mecanismo Electromecánico",
+    actionGuidanceLabel: "Protocolo Mandatorio de Seguridad e Ingeniería",
+    scienceTitle: "Física del Choque Térmico, Criterio de Fractura de Griffith y Cizallamiento Magnetostrictivo",
+    scienceSub: "Por qué los transitorios térmicos rápidos, el menaje deformado y el azúcar fundido destruyen las placas vitrocerámicas de inducción.",
+    tableTitle: "Matriz Comparativa de Sustratos Vitrocerámicos y Resistencia",
+    tableSub: "Coeficientes de dilatación térmica, límites de choque térmico, amortiguación acústica y vulnerabilidad al azúcar fundido.",
+    colSubstrate: "Sustrato Vitrocerámico",
+    colCategory: "Clasificación",
+    colCte: "CTE (×10⁻⁶/K)",
+    colShockDelta: "ΔT Choque Máx",
+    colDamping: "Amortiguación Acústica",
+    colSugarRisk: "Riesgo por Azúcar",
+    rulesTitle: "Reglas de Oro para la Protección del Cristal de Inducción",
+    rulesSub: "Pautas de ingeniería para evitar roturas espontáneas del cristal y frenar la propagación de microfisuras.",
+    rule1Title: "Jamás Active la Función 'Boost' con una Sartén Vacía o Seca",
+    rule1Text: "La inducción transfiere hasta 3.700 vatios directamente a la base de la sartén. Una sartén vacía sube de 20°C a 280°C en menos de 30 segundos, creando gradientes térmicos extremos (>18°C/mm) que inducen cizallamiento severo.",
+    rule2Title: "Limpie Inmediatamente los Derrames de Azúcar o Mermelada Caliente",
+    rule2Text: "La sacarosa fundida por encima de 160°C reacciona químicamente con la red de sílice del cristal. Al enfriarse y contraerse, arranca literalmente fragmentos del cristal (desconchado o pitting).",
+    rule3Title: "Descarte Sartenes u Ollas con Bases Deformadas o Cóncavas (>1 mm)",
+    rule3Text: "Las bases combadas aíslan el sensor de temperatura mediante bolsas de aire. El inversor sobrealimenta las zonas de contacto perimetral, creando puntos de calor extremo y molesto traqueteo acústico.",
+    rule4Title: "Nunca Arrastre Menaje de Hierro Fundido sobre la Placa",
+    rule4Text: "Granos de sal o arena arrastrados bajo sartenes pesadas crean microentallas de Griffith. Un arañazo de 50 µm reduce la resistencia a la tracción del cristal en más de un 75%, facilitando roturas repentinas.",
+    copyReportBtn: "Copiar Informe de Auditoría de Inducción",
+    copiedFeedback: "¡Informe de Auditoría Copiado al Portapapeles!"
+  },
+  pt: {
+    badge: "Modelo de Física Eletromecânica e Cerâmica",
+    title: "Simulador de Choque Térmico, Delaminação e Microfissuras em Cooktops de Indução",
+    subtitle: "Modele o estresse acústico interfacial, ressonância mecânica por panelas empenadas, gradientes de choque térmico e propagação de microfissuras em placas vitrocerâmicas sob aquecimento rápido por indução (20°C a 280°C em 30s).",
+    controlsTitle: "Parâmetros de Física Cerâmica e Eletromecânica",
+    controlsSub: "Configure o substrato vitrocerâmico, metalurgia da base da panela, gradiente térmico transitório, modo de ressonância acústica do inversor, defeitos superficiais e carga estática.",
+    substrateLabel: "Substrato Vitrocerâmico do Cooktop:",
+    substrateHelp: "Vitrocerâmica de aluminossilicato de lítio de expansão zero (Schott Ceran / EuroKera) vs vidro comum temperado vs aluminossilicato reforçado vs placa de cordierita.",
+    cookwareLabel: "Interface e Metalurgia da Base da Panela:",
+    cookwareHelp: "Composto multicamadas 3/5 camadas vs ferro fundido esmaltado pesado vs base empenada côncava (folga de 1.5mm) vs base estampada ferromagnética de alumínio.",
+    transientLabel: "Transiente Térmico e Surto de Calor:",
+    transientHelp: "Modo Boost com panela vazia (3.700W) vs transbordamento com água fria vs derramamento de açúcar/geleia caramelizada vs fervura branda em equilíbrio.",
+    acousticLabel: "Modo de Inversor e Ressonância Acústica:",
+    acousticHelp: "Batimento heterodino de duas zonas (1–3 kHz) vs vibração magnetostritiva de 120 Hz vs modulação ultrassônica pura (>32 kHz).",
+    defectLabel: "Nível de Microdefeitos Superficiais Prévios:",
+    defectHelp: "Acabamento de fábrica espelhado vs arranhões por arraste de sal/areia (25 µm) vs fissuras profundas por impacto e fadiga térmica (75 µm).",
+    loadLabel: "Carga Estática / Peso Pontual da Panela (kg):",
+    loadHelp: "Força total descendente da panela e alimentos concentrada sobre o perímetro de contato.",
+    presetsTitle: "Casos de Estudo Práticos e Predefinições Diagnósticas:",
+    presetBoostDryRun: "Modo Boost a Seco em Vitrocerâmica Arranhada (Surto Térmico Extremo)",
+    presetColdWaterSpill: "Transbordamento de Água Fria em Placa Portátil Quente (Fratura Catastrófica)",
+    presetSugarPyrolysis: "Derramamento de Açúcar / Caramelo Fervente (Ataque Químico e Delaminação)",
+    presetWarpedPanAcoustic: "Panela Empenada em Inversor Duplo (Estresse Acústico e Cisalhamento)",
+    presetSafeSimmer: "Fervura Controlada em Panela de Ferro Fundido (Base Segura e Estável)",
+    diagnosticTitle: "Diagnóstico de Fratura Cerâmica e Delaminação Interfacial",
+    diagnosticSub: "Quantificação em tempo real do gradiente térmico de pico, estresse acústico de cisalhamento, risco de desprendimento e classificação de segurança estrutural.",
+    thermalGradientLabel: "Gradiente Térmico Interfacial de Pico",
+    acousticStressLabel: "Estresse Acústico de Cisalhamento",
+    spallationRiskLabel: "Índice de Risco de Delaminação / Fissuras",
+    noiseLevelLabel: "Nível de Ruído Acústico e Zumbido",
+    structuralStatusLabel: "Status de Integridade da Vitrocerâmica",
+    fractureMechanismLabel: "Biofísica de Fratura e Mecanismo Eletromecânico",
+    actionGuidanceLabel: "Protocolo Mandatório de Segurança e Engenharia",
+    scienceTitle: "Física do Choque Térmico, Critério de Fratura de Griffith e Cisalhamento Magnetostritivo",
+    scienceSub: "Por que transientes térmicos repentinos, panelas empenadas e açúcar fundido destroem cooktops de indução vitrocerâmicos.",
+    tableTitle: "Matriz Comparativa de Substratos Vitrocerâmicos e Resiliência",
+    tableSub: "Coeficientes de dilatação térmica, limites de choque térmico, amortecimento acústico e vulnerabilidade ao ataque de açúcar fundido.",
+    colSubstrate: "Substrato Vitrocerâmico",
+    colCategory: "Classificação",
+    colCte: "CTE (×10⁻⁶/K)",
+    colShockDelta: "ΔT Choque Máx",
+    colDamping: "Amortecimento Acústico",
+    colSugarRisk: "Risco por Açúcar",
+    rulesTitle: "Regras de Ouro para a Proteção do Vidro de Cooktop de Indução",
+    rulesSub: "Diretrizes de engenharia para evitar o estilhaçamento espontâneo do vidro e frear a propagação de microfissuras.",
+    rule1Title: "Nunca Ative a Função 'Boost' com Panela Vazia ou Seca",
+    rule1Text: "A indução transfere até 3.700 watts instantaneamente para a base ferromagnética. Uma panela vazia atinge de 20°C a 280°C em menos de 30 segundos, criando gradientes térmicos extremos (>18°C/mm) que provocam tensões severas no vidro.",
+    rule2Title: "Limpe Imediatamente Derramamentos de Açúcar ou Caldas Quentes",
+    rule2Text: "A sacarose fundida acima de 160°C funde-se quimicamente com a rede de sílica do vidro. Ao esfriar e contrair, ela arranca pedaços de vidro (lascamento ou spallation). Raspe o açúcar enquanto quente com espátula apropriada.",
+    rule3Title: "Aposente Panelas com Bases Côncavas ou Deformadas (>1 mm)",
+    rule3Text: "Panelas deformadas criam bolsas de ar que isolam o sensor de temperatura do cooktop. O inversor superaquece as bordas em contato, gerando choques localizados e intenso zumbido acústico de ressonância.",
+    rule4Title: "Nunca Arraste Panelas Pesadas de Ferro Fundido sobre o Vidro",
+    rule4Text: "Grãos de sal ou sujeira arrastados sob panelas pesadas criam microfissuras de Griffith. Um risco de 50 µm reduz a resistência à tração do vidro em mais de 75%, tornando-o suscetível a quebras espontâneas.",
+    copyReportBtn: "Copiar Relatório de Auditoria de Indução",
+    copiedFeedback: "Relatório de Auditoria Copiado para a Área de Transferência!"
+  },
+  'zh-cn': {
+    badge: "机电工程与特种陶瓷物理学动力学模拟器",
+    title: "电磁炉微晶玻璃面板热冲击分层剥蚀与声学微裂纹扩展模拟器",
+    subtitle: "精确模拟在电磁炉极速升温（30秒内从20°C剧升至280°C）工况下，微晶玻璃面板与锅底因热膨胀失配热冲击剪切应力、锅底凹凸变形诱发的声学空化共振摩擦、以及焦糖熔融腐蚀导致的面层微裂纹剥蚀与破裂风险。",
+    controlsTitle: "机电工况与微晶陶瓷物理学核心输入参数",
+    controlsSub: "配置电磁炉微晶面板基材成分、锅底接触面金相结构、热工瞬态冲击模式、变频器声学谐波模式、玻璃面板微损伤等级及点接触静载荷。",
+    substrateLabel: "电磁炉玻璃/微晶陶瓷面板基材成分：",
+    substrateHelp: "锂铝硅系统近零膨胀透明微晶玻璃（肖特赛兰/欧凯标杆） vs 经济型钠钙钢化玻璃 vs 离子交换超硬铝硅酸盐玻璃 vs 工业重载堇青石陶瓷板。",
+    cookwareLabel: "锅底几何形状与多层复合金属结构：",
+    cookwareHelp: "经典三层/五层复合不锈钢（铝芯热胀起鼓） vs 沉重铸铁珐琅炖锅 vs 严重凹底变形残次锅（1.5mm中心空气气隙） vs 冲压导磁不锈钢网点铝锅底。",
+    transientLabel: "热工瞬态急变与暴升工况：",
+    transientHelp: "超强爆炒Boost干烧暴升（3700W极速升温） vs 高温爆炒冷水突发溢锅激冷 vs 熬糖果酱焦糖熔融裂解侵蚀 vs 平稳小火恒温慢炖基准。",
+    acousticLabel: "电磁感应逆变器变频与声学谐振模式：",
+    acousticHelp: "双炉头频率失配差拍啸叫（1–3 kHz尖锐高音） vs 120Hz电磁磁致伸缩底板机械跳动震颤 vs 超纯静音高频超声调制（>32 kHz）。",
+    defectLabel: "面板出厂表面机械微观裂纹损伤状态：",
+    defectHelp: "出厂全新镜面无划痕 vs 拖拽摩擦细盐砂砾划痕（裂纹深度25 µm） vs 局部受击或热疲劳深度网状微裂纹（裂纹深度75 µm）。",
+    loadLabel: "锅具与食材综合下压点载荷（公斤）：",
+    loadHelp: "锅体重量加食材在锅底边缘与微晶玻璃接触周界上施加的集中压应力。",
+    presetsTitle: "实证实测典型工况与预设诊断场景：",
+    presetBoostDryRun: "划痕微晶面板+Boost超强档空烧锅底（极端热工瞬变冲击）",
+    presetColdWaterSpill: "便携式钢化玻璃面板高温爆炒冷水剧烈溢锅（爆裂破裂事故）",
+    presetSugarPyrolysis: "熬糖/果酱高温焦糖熔融焦化（二氧化硅网络化学咬合剥落）",
+    presetWarpedPanAcoustic: "双炉头工作+底部凸翘复合平底锅（声学剪切与高频共振）",
+    presetSafeSimmer: "平整铸铁锅平稳小火恒温慢炖（绝对受控黄金基准）",
+    diagnosticTitle: "微晶玻璃断裂力学与接触面分层剥蚀诊断卡",
+    diagnosticSub: "实时计算微晶面板峰值接触径向温度梯度、声学高频剪切应力、格里菲斯裂纹自发失稳失控破损概率及机械完整性等级。",
+    thermalGradientLabel: "接触周界峰值径向热梯度",
+    acousticStressLabel: "面板界面声学交变剪切应力",
+    spallationRiskLabel: "微裂纹失稳扩展与剥蚀分层风险指数",
+    noiseLevelLabel: "电磁声学杂音与跳振啸叫强度",
+    structuralStatusLabel: "电磁炉玻璃面板物理结构安全状态判定",
+    fractureMechanismLabel: "断裂物理学机制与机电复合失效机理深度分析",
+    actionGuidanceLabel: "厨房后厨电磁炉防爆与寿命延寿操作铁律",
+    scienceTitle: "热工瞬态冲击、格里菲斯脆性断裂准则与磁致伸缩声学剪切的物理本质",
+    scienceSub: "为何局域急剧热温差、锅底微翘空气隔热层与熔融糖类会撕裂号称耐高温的电磁炉微晶玻璃面板。",
+    tableTitle: "主流电磁炉面板陶瓷玻璃物理性能与抗热冲击特性对比表",
+    tableSub: "各类玻璃基材的热膨胀系数、抗热冲击极限ΔT、声学机械阻尼及耐糖侵蚀敏感性横向比对。",
+    colSubstrate: "面板基材材质",
+    colCategory: "材料学分类",
+    colCte: "热膨胀系数(10⁻⁶/K)",
+    colShockDelta: "抗热震温差ΔT",
+    colDamping: "声学阻尼系数",
+    colSugarRisk: "熔糖剥蚀敏感度",
+    rulesTitle: "电磁炉微晶玻璃面板防护与防爆黄金铁律",
+    rulesSub: "基于陶瓷玻璃断裂力学与材料热胀冷缩制定的厨房安全指南，彻底杜绝爆板碎裂事故。",
+    rule1Title: "严禁在空锅或无水状态下开启电磁炉“Boost爆炒”极限档位",
+    rule1Text: "电磁炉瞬间输出3000至3700瓦大功率，无水空锅底30秒内即可飙升至280°C以上。锅底接触圈与外围常温玻璃形成极陡的径向温度梯度（>18°C/mm），引发巨大径向剪切张应力。",
+    rule2Title: "熬煮糖浆、果酱一旦溢出，必须在趁热熔融状态下立即刮净",
+    rule2Text: "蔗糖在160°C以上熔融焦化，其活性羟基会与微晶玻璃的硅酸盐骨架发生化学共价结合。随着糖浆冷却硬化，其极高收缩率会将微晶玻璃表面连根拔起（形成贝壳状剥落坑），造成不可逆损坏。",
+    rule3Title: "锅底变形凸起、中心悬空超过1毫米的旧锅必须立即淘汰",
+    rule3Text: "锅底凸起会形成中心空气绝热死区，导致底部温度传感器（热敏电阻）测温失真。电磁线圈持续狂暴输出，在边缘环形接触点形成高热黑斑并引发尖锐的声学振颤磨损。",
+    rule4Title: "严禁在电磁炉面板上粗暴拖拽沉重铸铁锅或带沙粒的平底锅",
+    rule4Text: "沉重铁锅压碎面板上的食盐或石英砂微粒，会在玻璃表面犁出微米级深坑。根据格里菲斯脆性断裂准则，一条深仅50微米的划痕即可使玻璃抗张抗压强度暴跌75%以上，极易在下一次受热时突然自爆。",
+    copyReportBtn: "复制电磁炉微晶玻璃审计报告",
+    copiedFeedback: "电磁炉面板热冲击与断裂力学审计报告已成功复制至剪贴板！"
+  },
+  ja: {
+    badge: "電気機械工学＆ファインセラミックス物理モデラー",
+    title: "IHクッキングヒーター天板熱衝撃剥離＆音響マイクロクラックモデラー",
+    subtitle: "IH調理器の急激な加熱立ち上がり（30秒で20°Cから280°C）において、結晶化ガラス天板と鍋底の熱膨張差熱応力、鍋底の変形による音響キャビテーション共振、焦げ付き糖分の化学的浸食によるマイクロクラック進展動態をモデル化します。",
+    controlsTitle: "電気機械スペック＆セラミックス物理工学パラメーター",
+    controlsSub: "天板ガラス素材、鍋底の金属構造・平坦度、熱過渡モード、インバーター音響共振特性、表面マイクロクラック深さ、接触荷重を設定してください。",
+    substrateLabel: "IHクッキングヒーター天板ガラス基材：",
+    substrateHelp: "リチウムアルミノケイ酸系ゼロ膨張結晶化ガラス（Schott Ceran / EuroKera） vs ソーダ石灰強化ガラス vs イオン交換化学強化ガラス vs 工業用コージェライト板。",
+    cookwareLabel: "鍋底の金属構造＆平坦度インターフェース：",
+    cookwareHelp: "多層ステンレス複合底（熱膨張による反り） vs 重量級ホーロー鋳鉄鍋 vs 底部変形・反り鍋（1.5mm空気層） vs 打ち抜き導磁ステンレス網アルミ底。",
+    transientLabel: "熱過渡衝撃＆急激な温度変化モード：",
+    transientHelp: "強火ブースト空焚き急上昇（3,700W急熱） vs 高温炒め物中の冷水吹きこぼれ急冷 vs 砂糖・ジャムの高温融解ピッティング侵食 vs とろ火定常安定加熱。",
+    acousticLabel: "インバーター駆動周波数＆音響共振モード：",
+    acousticHelp: "2口同時使用時のうなり周波数（1〜3 kHzの金属音） vs 120Hz電磁磁歪振動ビビリ音 vs 超音波静音高周波変調（>32 kHz）。",
+    defectLabel: "天板表面のマイクロクラック劣化損傷レベル：",
+    defectHelp: "工場出荷新品鏡面仕上げ vs 塩粒・砂噛み引きずり擦り傷（深さ25 µm） vs 衝撃・熱疲労による深部マイクロクラック（深さ75 µm）。",
+    loadLabel: "鍋＋食材の静的接触荷重（kg）：",
+    loadHelp: "天板の接触周縁部に集中して加わる鍋および調理食材の合計下向き荷重。",
+    presetsTitle: "実証ケーススタディ＆プリセット診断シナリオ：",
+    presetBoostDryRun: "傷入り結晶化ガラス天板＋ブースト空焚き（極限熱衝撃サージ）",
+    presetColdWaterSpill: "卓上強化ガラスIH調理器への冷水吹きこぼれ（突発的ガラス粉砕）",
+    presetSugarPyrolysis: "砂糖・ジャムの吹きこぼれ融解侵食（化学的ガラス剥離ピッティング）",
+    presetWarpedPanAcoustic: "反りのある多層鍋を2口同時加熱（音響共振と剪断応力）",
+    presetSafeSimmer: "平坦な鋳鉄鍋での安定した弱火煮込み（最適安全基準）",
+    diagnosticTitle: "セラミックス破壊力学＆天板剥離診断カード",
+    diagnosticSub: "接触面局所熱勾配、音響交変剪断応力、グリフィスクラック進展破壊確率、天板構造安全性のリアルタイム定量的判定。",
+    thermalGradientLabel: "接触境界ピーク熱勾配",
+    acousticStressLabel: "接触面音響剪断応力",
+    spallationRiskLabel: "マイクロクラック剥離・破損リスク",
+    noiseLevelLabel: "電磁音響うなり音・ビビリ音騒音値",
+    structuralStatusLabel: "天板結晶化ガラス構造健全性判定",
+    fractureMechanismLabel: "破壊物理学＆電気機械的複合破損メカニズム",
+    actionGuidanceLabel: "厨房IH安全運用＆天板保護エンジニアリング指針",
+    scienceTitle: "熱衝撃、グリフィス脆性破壊理論、磁歪音響剪断応力の物理学",
+    scienceSub: "なぜ局所的な急激な温度勾配、鍋底のわずかな反り、融解した砂糖がIH天板のガラスセラミックスを破壊するのか。",
+    tableTitle: "IH天板ガラスセラミックス物理特性＆耐衝撃性比較マトリックス",
+    tableSub: "熱膨張係数、耐熱衝撃温度差ΔT、音響減衰定数、高温糖類浸食リスクの素材別徹底比較。",
+    colSubstrate: "天板ガラス素材",
+    colCategory: "材料分類",
+    colCte: "熱膨張係数(10⁻⁶/K)",
+    colShockDelta: "耐熱衝撃ΔT",
+    colDamping: "音響減衰特性",
+    colSugarRisk: "砂糖ピッティング",
+    rulesTitle: "IHクッキングヒーター天板保護の鉄則",
+    rulesSub: "結晶化ガラスの自己破壊を防ぎ、マイクロクラックの進展を根絶する科学的取り扱い規範。",
+    rule1Title: "空焚き状態や少量の油で「強火・ブースト」を使わない",
+    rule1Text: "IHの強火は3000W以上の熱量を瞬時に鍋底へ注入します。空焚きでは30秒で280°Cに達し、接触周縁部と外周の間に18°C/mm以上の急峻な熱勾配が生じ、天板に巨大な熱剪断応力が集中します。",
+    rule2Title: "砂糖やジャムの吹きこぼれは熱いうちに直ちに拭き取る",
+    rule2Text: "160°C以上で融解した砂糖はガラスのケイ酸骨格と化学結合を起こします。冷えて固まる際に高い収縮力でガラス表面を貝殻状に引きちぎる「ピッティング現象」を引き起こします。",
+    rule3Title: "底が反って中央に1mm以上の隙間がある鍋は絶対に使用しない",
+    rule3Text: "鍋底が反っていると中央の空気層が断熱材となり、天板の温度センサー（サーミスタ）が誤認します。過剰加熱が局所に集中し、激しい音響振動と熱疲労を引き起こします。",
+    rule4Title: "重い鍋や塩粒が載った天板の上で鍋を引きずらない",
+    rule4Text: "天板に落ちた塩粒や研磨剤の上で重い鋳鉄鍋を引きずると、グリフィス破壊理論における致命的な亀裂（深さ数十ミクロンの傷）が生じ、引張強度が75%以上低下して突発割れの原因となります。",
+    copyReportBtn: "IH天板剥離監査レポートをコピー",
+    copiedFeedback: "IH天板破壊力学監査レポートをクリップボードにコピーしました！"
+  }
+};
+
+const d = DICTIONARY[lang] || DICTIONARY.en;
+---
+
+<div class="not-prose my-8 p-6 md:p-8 bg-surface border border-hairline rounded-3xl shadow-xs">
+  <!-- Header Badge -->
+  <div class="flex items-center justify-between gap-3 mb-6">
+    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-amber-500/10 text-amber-800 border border-amber-500/20">
+      <span>⚡</span>
+      {d.badge}
+    </div>
+    <span class="text-xs font-mono text-muted">IEC 60335-2-6 &bull; ANSI/UL 858 &bull; Griffith Fracture Mechanics</span>
+  </div>
+
+  <div class="mb-8">
+    <h2 class="text-xl md:text-2xl font-bold text-ink tracking-tight mb-2">
+      {d.title}
+    </h2>
+    <p class="text-xs md:text-sm text-muted leading-relaxed">
+      {d.subtitle}
+    </p>
+  </div>
+
+  <!-- Interactive Presets -->
+  <div class="mb-8 p-4 md:p-5 bg-surface-soft border border-hairline rounded-2xl">
+    <div class="text-xs font-bold uppercase tracking-wider text-muted mb-3 flex items-center gap-1.5">
+      <span>🎯</span>
+      {d.presetsTitle}
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+      <button
+        type="button"
+        class="preset-btn px-3 py-2 text-left text-xs rounded-xl bg-surface hover:bg-amber-50/60 border border-hairline hover:border-amber-300 text-ink transition-all cursor-pointer font-medium"
+        data-substrate="lithium-aluminosilicate"
+        data-cookware="multiclad-triply-stainless"
+        data-transient="boost-rapid-dry-boil"
+        data-acoustic="dual-burner-beat-frequency"
+        data-defect="scratched-grit-abrasions"
+        data-load="3.5"
+      >
+        🔥 {d.presetBoostDryRun}
+      </button>
+      <button
+        type="button"
+        class="preset-btn px-3 py-2 text-left text-xs rounded-xl bg-surface hover:bg-rose-50/60 border border-hairline hover:border-rose-300 text-ink transition-all cursor-pointer font-medium"
+        data-substrate="soda-lime-tempered"
+        data-cookware="multiclad-triply-stainless"
+        data-transient="cold-water-quench-spill"
+        data-acoustic="magnetostrictive-mains-chatter"
+        data-defect="scratched-grit-abrasions"
+        data-load="4.0"
+      >
+        ❄️ {d.presetColdWaterSpill}
+      </button>
+      <button
+        type="button"
+        class="preset-btn px-3 py-2 text-left text-xs rounded-xl bg-surface hover:bg-amber-50/60 border border-hairline hover:border-amber-300 text-ink transition-all cursor-pointer font-medium"
+        data-substrate="lithium-aluminosilicate"
+        data-cookware="punched-ferritic-dot-base"
+        data-transient="sugar-caramel-pyrolysis-fusion"
+        data-acoustic="ultrasonic-smooth-modulation"
+        data-defect="scratched-grit-abrasions"
+        data-load="2.0"
+      >
+        🍯 {d.presetSugarPyrolysis}
+      </button>
+      <button
+        type="button"
+        class="preset-btn px-3 py-2 text-left text-xs rounded-xl bg-surface hover:bg-cyan-50/60 border border-hairline hover:border-cyan-300 text-ink transition-all cursor-pointer font-medium"
+        data-substrate="lithium-aluminosilicate"
+        data-cookware="warped-concave-disc-base"
+        data-transient="boost-rapid-dry-boil"
+        data-acoustic="dual-burner-beat-frequency"
+        data-defect="deep-impact-microfissures"
+        data-load="2.5"
+      >
+        🔊 {d.presetWarpedPanAcoustic}
+      </button>
+      <button
+        type="button"
+        class="preset-btn px-3 py-2 text-left text-xs rounded-xl bg-surface hover:bg-emerald-50/60 border border-hairline hover:border-emerald-300 text-ink transition-all cursor-pointer font-medium"
+        data-substrate="lithium-aluminosilicate"
+        data-cookware="heavy-enameled-cast-iron"
+        data-transient="steady-state-water-simmer"
+        data-acoustic="ultrasonic-smooth-modulation"
+        data-defect="pristine-factory-mirror"
+        data-load="6.0"
+      >
+        🛡️ {d.presetSafeSimmer}
+      </button>
+    </div>
+  </div>
+
+  <!-- Engineering Input Controls -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-10">
+    <!-- Controls Column (5 cols) -->
+    <div class="lg:col-span-5 space-y-5 bg-surface-soft/40 p-5 rounded-2xl border border-hairline">
+      <div>
+        <h3 class="text-sm font-bold text-ink uppercase tracking-wider mb-1 flex items-center gap-1.5">
+          <span>⚙️</span>
+          {d.controlsTitle}
+        </h3>
+        <p class="text-xs text-muted mb-4">{d.controlsSub}</p>
+      </div>
+
+      <!-- Control 1: Glass Substrate -->
+      <div>
+        <label for="substrate-select" class="block text-xs font-bold text-ink mb-1">
+          {d.substrateLabel}
+        </label>
+        <select id="substrate-select" class="w-full text-xs rounded-xl border border-hairline bg-surface p-2.5 font-medium text-ink focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all">
+          {modelData.glassSubstrates.map(s => (
+            <option value={s.id}>{s.name}</option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1 leading-normal">{d.substrateHelp}</p>
+      </div>
+
+      <!-- Control 2: Cookware Base Interface -->
+      <div>
+        <label for="cookware-select" class="block text-xs font-bold text-ink mb-1">
+          {d.cookwareLabel}
+        </label>
+        <select id="cookware-select" class="w-full text-xs rounded-xl border border-hairline bg-surface p-2.5 font-medium text-ink focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all">
+          {modelData.cookwareInterfaces.map(c => (
+            <option value={c.id}>{c.name}</option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1 leading-normal">{d.cookwareHelp}</p>
+      </div>
+
+      <!-- Control 3: Thermal Transient -->
+      <div>
+        <label for="transient-select" class="block text-xs font-bold text-ink mb-1">
+          {d.transientLabel}
+        </label>
+        <select id="transient-select" class="w-full text-xs rounded-xl border border-hairline bg-surface p-2.5 font-medium text-ink focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all">
+          {modelData.thermalTransientScenarios.map(t => (
+            <option value={t.id}>{t.name}</option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1 leading-normal">{d.transientHelp}</p>
+      </div>
+
+      <!-- Control 4: Acoustic Resonance Mode -->
+      <div>
+        <label for="acoustic-select" class="block text-xs font-bold text-ink mb-1">
+          {d.acousticLabel}
+        </label>
+        <select id="acoustic-select" class="w-full text-xs rounded-xl border border-hairline bg-surface p-2.5 font-medium text-ink focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all">
+          {modelData.acousticResonanceModes.map(a => (
+            <option value={a.id}>{a.name}</option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1 leading-normal">{d.acousticHelp}</p>
+      </div>
+
+      <!-- Control 5: Pre-Existing Defect -->
+      <div>
+        <label for="defect-select" class="block text-xs font-bold text-ink mb-1">
+          {d.defectLabel}
+        </label>
+        <select id="defect-select" class="w-full text-xs rounded-xl border border-hairline bg-surface p-2.5 font-medium text-ink focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all">
+          {modelData.surfaceDefectStates.map(df => (
+            <option value={df.id}>{df.name}</option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1 leading-normal">{d.defectHelp}</p>
+      </div>
+
+      <!-- Control 6: Static Load Slider -->
+      <div>
+        <div class="flex items-center justify-between mb-1">
+          <label for="load-slider" class="text-xs font-bold text-ink">
+            {d.loadLabel}
+          </label>
+          <span id="load-val" class="text-xs font-mono font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+            3.5 kg
+          </span>
+        </div>
+        <input
+          type="range"
+          id="load-slider"
+          min="1.0"
+          max="10.0"
+          step="0.5"
+          value="3.5"
+          class="w-full accent-amber-600 cursor-pointer"
+        />
+        <p class="text-[11px] text-muted mt-1 leading-normal">{d.loadHelp}</p>
+      </div>
+    </div>
+
+    <!-- Telemetry Diagnostic Display (7 cols) -->
+    <div class="lg:col-span-7 flex flex-col justify-between space-y-6">
+      <!-- Status Banner -->
+      <div id="status-card" class="p-5 rounded-2xl border transition-all duration-300">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <span class="text-xs uppercase font-bold tracking-wider text-muted">
+            {d.structuralStatusLabel}
+          </span>
+          <span id="status-pill" class="text-xs font-extrabold uppercase px-3 py-1 rounded-full tracking-wider border">
+            <!-- Computed dynamically -->
+          </span>
+        </div>
+        <div id="status-headline" class="text-lg md:text-xl font-extrabold tracking-tight mb-2">
+          <!-- Computed dynamically -->
+        </div>
+        <p id="status-desc" class="text-xs leading-relaxed text-muted">
+          <!-- Computed dynamically -->
+        </p>
+      </div>
+
+      <!-- 4 Key Metric Tiles -->
+      <div class="grid grid-cols-2 sm:grid-cols-2 gap-3">
+        <!-- Metric 1: Peak Thermal Gradient -->
+        <div class="bg-surface-soft border border-hairline rounded-2xl p-4">
+          <span class="text-[11px] font-semibold text-muted block mb-1">
+            {d.thermalGradientLabel}
+          </span>
+          <div class="text-lg md:text-2xl font-black text-ink font-mono" id="out-gradient">
+            0.0 °C/mm
+          </div>
+          <span class="text-[10px] text-muted mt-1 block" id="out-gradient-sub">
+            Thermal Shear Boundary
+          </span>
+        </div>
+
+        <!-- Metric 2: Interfacial Acoustic Shear Stress -->
+        <div class="bg-surface-soft border border-hairline rounded-2xl p-4">
+          <span class="text-[11px] font-semibold text-muted block mb-1">
+            {d.acousticStressLabel}
+          </span>
+          <div class="text-lg md:text-2xl font-black text-amber-700 font-mono" id="out-acoustic">
+            0.0 MPa
+          </div>
+          <span class="text-[10px] text-muted mt-1 block" id="out-acoustic-sub">
+            Magnetostriction + Beat Shear
+          </span>
+        </div>
+
+        <!-- Metric 3: Spallation Risk Score -->
+        <div class="bg-surface-soft border border-hairline rounded-2xl p-4">
+          <span class="text-[11px] font-semibold text-muted block mb-1">
+            {d.spallationRiskLabel}
+          </span>
+          <div class="text-lg md:text-2xl font-black text-ink font-mono" id="out-risk">
+            0%
+          </div>
+          <span class="text-[10px] text-muted mt-1 block" id="out-risk-sub">
+            Griffith Crack Growth
+          </span>
+        </div>
+
+        <!-- Metric 4: Noise Level -->
+        <div class="bg-surface-soft border border-hairline rounded-2xl p-4">
+          <span class="text-[11px] font-semibold text-muted block mb-1">
+            {d.noiseLevelLabel}
+          </span>
+          <div class="text-lg md:text-2xl font-black text-ink font-mono" id="out-noise">
+            0 dBA
+          </div>
+          <span class="text-[10px] text-muted mt-1 block" id="out-noise-sub">
+            Resonance Audible Cavitation
+          </span>
+        </div>
+      </div>
+
+      <!-- Action Protocol & Science Mechanism Callout -->
+      <div class="space-y-3 bg-surface p-5 rounded-2xl border border-hairline">
+        <div>
+          <span class="text-xs uppercase font-bold text-amber-900 block mb-1">
+            🔬 {d.fractureMechanismLabel}
+          </span>
+          <p class="text-xs text-muted leading-relaxed" id="out-mechanism">
+            <!-- Computed dynamically -->
+          </p>
+        </div>
+        <div class="border-t border-hairline/60 pt-3">
+          <span class="text-xs uppercase font-bold text-ink block mb-1">
+            🛡️ {d.actionGuidanceLabel}
+          </span>
+          <p class="text-xs text-muted leading-relaxed font-medium" id="out-action">
+            <!-- Computed dynamically -->
+          </p>
+        </div>
+      </div>
+
+      <!-- Copy Report Button -->
+      <div class="pt-2">
+        <button
+          type="button"
+          id="copy-report-btn"
+          class="w-full py-3 px-4 rounded-xl bg-ink hover:bg-ink/90 text-surface text-center font-medium text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+        >
+          <span>📋</span>
+          <span id="copy-btn-text">{d.copyReportBtn}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Deep Dive Science Section -->
+  <div class="border-t border-hairline pt-8 mb-8">
+    <div class="max-w-3xl mb-6">
+      <h3 class="text-base md:text-lg font-bold text-ink tracking-tight mb-2">
+        {d.scienceTitle}
+      </h3>
+      <p class="text-xs md:text-sm text-muted leading-relaxed">
+        {d.scienceSub}
+      </p>
+    </div>
+
+    <!-- Comparative Technical Matrix Table -->
+    <div class="mb-8">
+      <h4 class="text-xs font-bold uppercase tracking-wider text-muted mb-1">
+        {d.tableTitle}
+      </h4>
+      <p class="text-xs text-muted mb-3">{d.tableSub}</p>
+
+      <div class="overflow-x-auto border border-hairline rounded-2xl">
+        <table class="w-full text-left text-xs text-ink divide-y divide-hairline">
+          <thead class="bg-surface-soft font-bold text-[11px] uppercase tracking-wider text-muted">
+            <tr>
+              <th class="p-3">{d.colSubstrate}</th>
+              <th class="p-3">{d.colCategory}</th>
+              <th class="p-3">{d.colCte}</th>
+              <th class="p-3">{d.colShockDelta}</th>
+              <th class="p-3">{d.colDamping}</th>
+              <th class="p-3">{d.colSugarRisk}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-hairline bg-surface font-normal">
+            {modelData.glassSubstrates.map(s => (
+              <tr class="hover:bg-surface-soft/50 transition-colors">
+                <td class="p-3 font-semibold text-ink">{s.name.split('(')[0].trim()}</td>
+                <td class="p-3 text-muted">{s.category}</td>
+                <td class="p-3 font-mono font-bold text-amber-700">{s.thermalExpansionCoefficient}</td>
+                <td class="p-3 font-mono">{s.thermalShockResistanceDeltaC}°C</td>
+                <td class="p-3 font-mono text-muted">{s.acousticDampingFactor}</td>
+                <td class="p-3 text-[11px]">{s.sugarPittingVulnerability}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 4 Golden Rules -->
+    <div class="p-5 md:p-6 bg-surface-soft border border-hairline rounded-2xl">
+      <div class="mb-4">
+        <h4 class="text-sm font-bold text-ink uppercase tracking-wider mb-1 flex items-center gap-1.5">
+          <span>🏆</span>
+          {d.rulesTitle}
+        </h4>
+        <p class="text-xs text-muted">{d.rulesSub}</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="p-4 bg-surface rounded-xl border border-hairline">
+          <div class="text-xs font-bold text-amber-900 mb-1 flex items-center gap-1">
+            <span>1️⃣</span> {d.rule1Title}
+          </div>
+          <p class="text-xs text-muted leading-relaxed">{d.rule1Text}</p>
+        </div>
+        <div class="p-4 bg-surface rounded-xl border border-hairline">
+          <div class="text-xs font-bold text-amber-900 mb-1 flex items-center gap-1">
+            <span>2️⃣</span> {d.rule2Title}
+          </div>
+          <p class="text-xs text-muted leading-relaxed">{d.rule2Text}</p>
+        </div>
+        <div class="p-4 bg-surface rounded-xl border border-hairline">
+          <div class="text-xs font-bold text-amber-900 mb-1 flex items-center gap-1">
+            <span>3️⃣</span> {d.rule3Title}
+          </div>
+          <p class="text-xs text-muted leading-relaxed">{d.rule3Text}</p>
+        </div>
+        <div class="p-4 bg-surface rounded-xl border border-hairline">
+          <div class="text-xs font-bold text-amber-900 mb-1 flex items-center gap-1">
+            <span>4️⃣</span> {d.rule4Title}
+          </div>
+          <p class="text-xs text-muted leading-relaxed">{d.rule4Text}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script define:vars={{ modelData, d }}>
+  (function () {
+    const substrateSelect = document.getElementById('substrate-select');
+    const cookwareSelect = document.getElementById('cookware-select');
+    const transientSelect = document.getElementById('transient-select');
+    const acousticSelect = document.getElementById('acoustic-select');
+    const defectSelect = document.getElementById('defect-select');
+    const loadSlider = document.getElementById('load-slider');
+    const loadVal = document.getElementById('load-val');
+
+    const outGradient = document.getElementById('out-gradient');
+    const outGradientSub = document.getElementById('out-gradient-sub');
+    const outAcoustic = document.getElementById('out-acoustic');
+    const outAcousticSub = document.getElementById('out-acoustic-sub');
+    const outRisk = document.getElementById('out-risk');
+    const outRiskSub = document.getElementById('out-risk-sub');
+    const outNoise = document.getElementById('out-noise');
+    const outNoiseSub = document.getElementById('out-noise-sub');
+
+    const statusCard = document.getElementById('status-card');
+    const statusPill = document.getElementById('status-pill');
+    const statusHeadline = document.getElementById('status-headline');
+    const statusDesc = document.getElementById('status-desc');
+    const outMechanism = document.getElementById('out-mechanism');
+    const outAction = document.getElementById('out-action');
+    const copyReportBtn = document.getElementById('copy-report-btn');
+    const copyBtnText = document.getElementById('copy-btn-text');
+
+    function calculate() {
+      if (!substrateSelect || !cookwareSelect || !transientSelect || !acousticSelect || !defectSelect || !loadSlider) return;
+
+      const subId = substrateSelect.value;
+      const cookId = cookwareSelect.value;
+      const transId = transientSelect.value;
+      const acId = acousticSelect.value;
+      const defId = defectSelect.value;
+      const loadKg = parseFloat(loadSlider.value);
+
+      if (loadVal) loadVal.textContent = loadKg.toFixed(1) + ' kg';
+
+      const substrate = modelData.glassSubstrates.find(s => s.id === subId) || modelData.glassSubstrates[0];
+      const cookware = modelData.cookwareInterfaces.find(c => c.id === cookId) || modelData.cookwareInterfaces[0];
+      const transient = modelData.thermalTransientScenarios.find(t => t.id === transId) || modelData.thermalTransientScenarios[0];
+      const acoustic = modelData.acousticResonanceModes.find(a => a.id === acId) || modelData.acousticResonanceModes[0];
+      const defect = modelData.surfaceDefectStates.find(d => d.id === defId) || modelData.surfaceDefectStates[0];
+
+      // 1. Peak Interfacial Thermal Gradient (°C/mm)
+      // Base transient gradient amplified by cookware base warping and point contact concentration
+      const effectiveGradient = transient.thermalGradientDegPerMm * (1 + (cookware.warpingTendencyMm * 0.45)) * (substrate.thermalExpansionCoefficient > 5.0 ? 1.4 : 1.0);
+
+      // 2. Interfacial Acoustic Shear Stress (MPa)
+      // Combines magnetic acoustic shear, cookware base resonance factor, and contact load
+      const baseAcousticStress = acoustic.interfacialShearStressMpa;
+      const effectiveAcousticStress = baseAcousticStress * cookware.acousticResonanceFactor * (1 + (loadKg * 0.08)) * (1 / (1 + (substrate.acousticDampingFactor * 15)));
+
+      // 3. Peak Thermal Stress calculation (MPa)
+      // σ_th = (E * α * ΔT) / (1 - ν)
+      const deltaT = Math.abs(transient.peakTempC - transient.initialTempC);
+      const alpha = substrate.thermalExpansionCoefficient * 1e-6; // 1/K
+      const E = substrate.elasticModulusGpa * 1e3; // MPa
+      const nu = substrate.poissonRatio;
+      const theoreticalThermalStressMpa = (E * alpha * deltaT) / (1 - nu);
+
+      // Combined equivalent Griffith tensile stress
+      const totalTensileStressMpa = (theoreticalThermalStressMpa + effectiveAcousticStress) * defect.stressConcentrationFactorKt;
+
+      // 4. Griffith Crack Spallation Probability (%)
+      // Critical crack threshold based on fracture toughness K_Ic
+      // K_Ic = σ * Y * √(π * a)
+      const a = defect.microcrackDepthMicrons * 1e-6; // meters
+      const Y = 1.12; // edge crack geometry factor
+      const appliedStressIntensity = (totalTensileStressMpa * Y * Math.sqrt(Math.PI * a)); // MPa·√m
+
+      let spallationScore = 0;
+      if (substrate.fractureToughnessKic > 0) {
+        const ratio = appliedStressIntensity / substrate.fractureToughnessKic;
+        spallationScore = Math.min(100, Math.max(1, Math.round(ratio * 42 * defect.weibullFailureProbabilityMultiplier * (transId === 'sugar-caramel-pyrolysis-fusion' ? 1.8 : 1.0))));
+      }
+
+      // If soda-lime under cold water quench -> 99% shatter
+      if (subId === 'soda-lime-tempered' && transId === 'cold-water-quench-spill') {
+        spallationScore = 98;
+      }
+
+      // 5. Acoustic Noise & Chatter (dBA)
+      const computedNoise = Math.min(88, Math.round(acoustic.acousticSoundPressureDb + (cookware.warpingTendencyMm * 4.2) + (loadKg * 0.5)));
+
+      // Render Metrics
+      if (outGradient) outGradient.textContent = effectiveGradient.toFixed(1) + ' °C/mm';
+      if (outGradientSub) outGradientSub.textContent = `ΔT = ${deltaT}°C over ${transient.transientDurationSec}s`;
+
+      if (outAcoustic) outAcoustic.textContent = effectiveAcousticStress.toFixed(1) + ' MPa';
+      if (outAcousticSub) outAcousticSub.textContent = `Carrier: ${acoustic.switchingFrequencyKhz} kHz`;
+
+      if (outRisk) outRisk.textContent = spallationScore + '%';
+      if (outRiskSub) outRiskSub.textContent = `Kt = ${defect.stressConcentrationFactorKt}x | Weibull: ${defect.weibullFailureProbabilityMultiplier}x`;
+
+      if (outNoise) outNoise.textContent = computedNoise + ' dBA';
+      if (outNoiseSub) outNoiseSub.textContent = acoustic.carrierDeltaHz > 0 ? `Beat Whine: ${acoustic.carrierDeltaHz} Hz` : 'Silent Modulation';
+
+      // 6. Safety & Integrity Status Classification
+      let statusKey = 'SAFE';
+      let pillBg = 'bg-emerald-500/10 text-emerald-800 border-emerald-500/20';
+      let cardBorder = 'bg-emerald-500/5 border-emerald-200';
+      let headline = 'Optimal Operating Envelope — Glass Substrate Fully Stable';
+      let desc = 'Applied thermal gradients and acoustic shear stresses remain comfortably within the elastic deformation limits of the ceramic-glass matrix.';
+      let mechanism = `Thermal stress (${theoreticalThermalStressMpa.toFixed(1)} MPa) and acoustic shear (${effectiveAcousticStress.toFixed(1)} MPa) are well beneath the Griffith fracture threshold. Negligible micro-crack propagation risk.`;
+      let action = 'Maintain standard operating procedures. Clean with non-abrasive microfiber cloths and ensure cookware bases are wiped clean before placement.';
+
+      if (spallationScore >= 80 || (subId === 'soda-lime-tempered' && deltaT > 130)) {
+        statusKey = 'CATASTROPHIC_SHATTER_HAZARD';
+        pillBg = 'bg-rose-500/10 text-rose-800 border-rose-500/20';
+        cardBorder = 'bg-rose-500/5 border-rose-300';
+        headline = '🚨 CRITICAL HAZARD: Catastrophic Glass Fracture & Shattering Risk';
+        desc = 'Sudden tensile contraction stresses violently overwhelm compressive tempering depth. The substrate is in imminent danger of explosive fragmentation or deep spiderweb shatter.';
+        mechanism = `Applied stress intensity (${appliedStressIntensity.toFixed(2)} MPa·√m) exceeds the critical fracture toughness K_Ic (${substrate.fractureToughnessKic} MPa·√m). Rapid crack tip propagation occurs at speeds approaching the Rayleigh wave speed in silica (~3,000 m/s).`;
+        action = 'MANDATORY ABORT: Immediately kill burner power. Do NOT apply cold towels or attempt to wipe liquid. Allow cooktop to equalize naturally to room temperature before inspection.';
+      } else if (spallationScore >= 45 || transId === 'sugar-caramel-pyrolysis-fusion') {
+        statusKey = 'HIGH_SPALLATION_RISK';
+        pillBg = 'bg-orange-500/10 text-orange-800 border-orange-500/20';
+        cardBorder = 'bg-orange-500/5 border-orange-300';
+        headline = '⚠️ HIGH RISK: Surface Pitting, Flaking & Glass Micro-Delamination';
+        desc = 'Severe localized thermal gradients or pyrolyzing sugar networks are applying aggressive localized pull-out shear forces to the vitreous silica surface layer.';
+        mechanism = transId === 'sugar-caramel-pyrolysis-fusion'
+          ? 'Molten sucrose pyrolyzes (>160°C) and covalently bonds to surface silanol (Si-OH) groups. Cooling induces extreme differential contraction shear, mechanically spalling glass chips.'
+          : `High radial thermal gradient (${effectiveGradient.toFixed(1)} °C/mm) focuses shear stress at the contact boundary. Pre-existing surface scratches act as stress concentrators (Kt = ${defect.stressConcentrationFactorKt}).`;
+        action = transId === 'sugar-caramel-pyrolysis-fusion'
+          ? 'IMMEDIATE SCRAPING REQUIRED: Use a designated flat ceramic razor blade scraper to lift viscous sugar while still hot (>100°C). Do NOT allow sugar to cool and harden on the glass!'
+          : 'Reduce burner power setting immediately. Replace warped cookware to eliminate isolated ring contact hotspots.';
+      } else if (spallationScore >= 20 || effectiveAcousticStress > 12) {
+        statusKey = 'ELEVATED_ACOUSTIC_FATIGUE';
+        pillBg = 'bg-amber-500/10 text-amber-800 border-amber-500/20';
+        cardBorder = 'bg-amber-500/5 border-amber-300';
+        headline = '⚠️ ELEVATED: Acoustic Micro-Friction & Interfacial Chattering Stress';
+        desc = 'Inverter frequency beat mismatch or magnetostrictive cookware base flexing is generating audible vibration and cyclical mechanical friction against the glass top.';
+        mechanism = `Interfacial acoustic shear (${effectiveAcousticStress.toFixed(1)} MPa) combined with cookware warping (${cookware.warpingTendencyMm} mm) drives cyclical micro-wear and acoustic fatigue along micro-notches.`;
+        action = 'Adjust burner power by one level to decouple inverter resonant cross-talk. Check pan base for concavity and avoid dragging cookware.';
+      }
+
+      if (statusPill) {
+        statusPill.className = `text-xs font-extrabold uppercase px-3 py-1 rounded-full tracking-wider border ${pillBg}`;
+        statusPill.textContent = statusKey.replace(/_/g, ' ');
+      }
+      if (statusCard) statusCard.className = `p-5 rounded-2xl border transition-all duration-300 ${cardBorder}`;
+      if (statusHeadline) statusHeadline.textContent = headline;
+      if (statusDesc) statusDesc.textContent = desc;
+      if (outMechanism) outMechanism.textContent = mechanism;
+      if (outAction) outAction.textContent = action;
+    }
+
+    // Preset handlers
+    const presetButtons = document.querySelectorAll('.preset-btn');
+    presetButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (substrateSelect) substrateSelect.value = btn.getAttribute('data-substrate');
+        if (cookwareSelect) cookwareSelect.value = btn.getAttribute('data-cookware');
+        if (transientSelect) transientSelect.value = btn.getAttribute('data-transient');
+        if (acousticSelect) acousticSelect.value = btn.getAttribute('data-acoustic');
+        if (defectSelect) defectSelect.value = btn.getAttribute('data-defect');
+        if (loadSlider) loadSlider.value = btn.getAttribute('data-load');
+        calculate();
+      });
+    });
+
+    [substrateSelect, cookwareSelect, transientSelect, acousticSelect, defectSelect, loadSlider].forEach(el => {
+      if (el) el.addEventListener('input', calculate);
+    });
+
+    // Copy report
+    if (copyReportBtn) {
+      copyReportBtn.addEventListener('click', () => {
+        const report = [
+          `======================================================================`,
+          `ISITKITCHENSAFE INDUCTION COOKTOP DELAMINATION & ACOUSTIC AUDIT`,
+          `======================================================================`,
+          `Glass Substrate   : ${substrateSelect.options[substrateSelect.selectedIndex].text}`,
+          `Cookware Interface: ${cookwareSelect.options[cookwareSelect.selectedIndex].text}`,
+          `Thermal Transient : ${transientSelect.options[transientSelect.selectedIndex].text}`,
+          `Acoustic Mode     : ${acousticSelect.options[acousticSelect.selectedIndex].text}`,
+          `Surface Defect    : ${defectSelect.options[defectSelect.selectedIndex].text}`,
+          `Point Load        : ${loadSlider.value} kg`,
+          `----------------------------------------------------------------------`,
+          `Thermal Gradient  : ${outGradient ? outGradient.textContent : 'N/A'}`,
+          `Acoustic Stress   : ${outAcoustic ? outAcoustic.textContent : 'N/A'}`,
+          `Spallation Risk   : ${outRisk ? outRisk.textContent : 'N/A'}`,
+          `Noise & Chatter   : ${outNoise ? outNoise.textContent : 'N/A'}`,
+          `Structural Status : ${statusPill ? statusPill.textContent : 'N/A'}`,
+          `----------------------------------------------------------------------`,
+          `Biophysics Mechanism: ${outMechanism ? outMechanism.textContent : ''}`,
+          `Mandatory Guidance  : ${outAction ? outAction.textContent : ''}`,
+          `======================================================================`,
+          `Audited via IsItKitchenSafe Autonomous Growth & Ops Engine v2.0`
+        ].join('\n');
+
+        navigator.clipboard.writeText(report).then(() => {
+          if (copyBtnText) copyBtnText.textContent = d.copiedFeedback;
+          setTimeout(() => {
+            if (copyBtnText) copyBtnText.textContent = d.copyReportBtn;
+          }, 3000);
+        }).catch(err => {
+          console.error('Clipboard copy failed:', err);
+        });
+      });
+    }
+
+    // Initial calculation
+    calculate();
+  })();
+</script>

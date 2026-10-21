@@ -86,7 +86,8 @@ const SPECIAL_PAGES = [
   'tools/air-fryer-pah-resuspension-modeler',
   'tools/commercial-ice-machine-biofilm-modeler',
   'tools/commercial-steam-table-spore-modeler',
-  'tools/plastic-blender-jar-hydrolysis-modeler'
+  'tools/plastic-blender-jar-hydrolysis-modeler',
+  'tools/induction-cooktop-delamination-modeler'
 ];
 
 const esSlugs = new Set([
