@@ -92,7 +92,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-conveyor-toaster-modeler',
   'tools/sous-vide-pouch-delamination-modeler',
   'tools/immersion-blender-grease-leaching-modeler',
-  'tools/cold-brew-nitro-biofilm-modeler'
+  'tools/cold-brew-nitro-biofilm-modeler',
+  'tools/commercial-charbroiler-pah-modeler'
 ];
 
 const esSlugs = new Set([
