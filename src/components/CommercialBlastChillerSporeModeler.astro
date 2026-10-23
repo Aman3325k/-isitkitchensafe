@@ -1,0 +1,1098 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import blastChillerData from '../data/blast-chiller-spore-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  chillerLabel: string;
+  chillerHelp: string;
+  matrixLabel: string;
+  matrixHelp: string;
+  panLabel: string;
+  panHelp: string;
+  frostLabel: string;
+  frostHelp: string;
+  velocitySliderLabel: string;
+  velocitySliderHelp: string;
+  tempSliderLabel: string;
+  tempSliderHelp: string;
+  airTempSliderLabel: string;
+  airTempSliderHelp: string;
+  depthSliderLabel: string;
+  depthSliderHelp: string;
+  presetsTitle: string;
+  presetGoldStandard: string;
+  presetSporeHazard: string;
+  presetDefrostAerosol: string;
+  presetStarchCereulide: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  pullDownTimeLabel: string;
+  dangerZoneTimeLabel: string;
+  clostridiumGrowthLabel: string;
+  cereusRiskLabel: string;
+  frostLoadLabel: string;
+  aerosolRiskLabel: string;
+  complianceLabel: string;
+  primaryRiskLabel: string;
+  mechanismsLabel: string;
+  mitigationLabel: string;
+  scienceTitle: string;
+  scienceSub: string;
+  tableTitle: string;
+  tableSub: string;
+  colChiller: string;
+  colPower: string;
+  colAirflow: string;
+  colCapacity: string;
+  colDefrost: string;
+  colAerosolRisk: string;
+  rulesTitle: string;
+  rulesSub: string;
+  rule1Title: string;
+  rule1Text: string;
+  rule2Title: string;
+  rule2Text: string;
+  rule3Title: string;
+  rule3Text: string;
+  rule4Title: string;
+  rule4Text: string;
+  copyReportBtn: string;
+  copiedFeedback: string;
+}
+
+const DICTIONARY: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Refrigeration Physics & Pathogen Dynamics",
+    title: "Commercial Blast Chiller Evaporator Coil Psychrotrophic Spore & Airflow Defrost Modeler",
+    subtitle: "Model 90-minute hot food pull-down boundary layer air velocity (70°C to 3°C), evaporator fan bio-aerosol cross-contamination, and Clostridium perfringens spore germination curves under FDA Food Code § 3-501.14 and UK ECFA criteria.",
+    controlsTitle: "Commercial Blast Chiller Thermodynamic & Aerodynamic Parameters",
+    controlsSub: "Configure blast chiller refrigeration architecture, culinary food matrix properties, Gastronorm pan geometry, evaporator coil frost status, and airflow velocities.",
+    chillerLabel: "Blast Chiller Architecture & Refrigeration Engine:",
+    chillerHelp: "Roll-in 20-pan trolley (5.5 kW, 6.8 m/s) vs standard reach-in 10-pan vs countertop 5-pan vs industrial spiral tunnel vs aged neglected unit.",
+    matrixLabel: "Culinary Food Matrix & Thermal Diffusivity:",
+    matrixHelp: "Dense viscous beef stew (high gelatin) vs cooked bulk starch (jasmine rice/potatoes) vs whole-muscle braised roast vs poultry stock broth vs multi-layer lasagna.",
+    panLabel: "Gastronorm Pan Depth & Surface Covering:",
+    panHelp: "Shallow 25 mm uncovered (rapid evaporation) vs standard 50 mm with perforated lid vs deep 65 mm tight foil vs overloaded 100 mm plastic wrapped vs 150 mm bulk pot.",
+    frostLabel: "Evaporator Coil Frost Thickness & Defrost Cycle State:",
+    frostHelp: "Pristine sanitized (0 mm frost) vs light rime frost (1.0 mm) vs moderate choked frost (2.5 mm, -38% CFM) vs heavy ice pack vs active hot-gas defrost with dirty drain pan.",
+    velocitySliderLabel: "Air Velocity Across Pan Surface (m/s / FPM):",
+    velocitySliderHelp: "High-velocity laminar airflow stripping the stagnant thermal boundary layer (convective heat coefficient h ranges from 25 to 75 W/m²K).",
+    tempSliderLabel: "Initial Food Core Temperature (°C / °F):",
+    tempSliderHelp: "Temperature of hot food when loaded immediately from oven, range, or kettle into the chiller cavity (target: 70°C / 158°F).",
+    airTempSliderLabel: "Chiller Air Cavity Operating Temperature (°C / °F):",
+    airTempSliderHelp: "Temperature of circulating blast air (-15°C for soft chill, -30°C to -38°C for hard blast chill pull-down).",
+    depthSliderLabel: "Effective Food Layer Depth (mm / inches):",
+    depthSliderHelp: "Physical thickness of the food layer inside the hotel pan. Thermal conductive path length scales time by square of depth (t ∝ L²).",
+    presetsTitle: "Real-World Commercial Blast Chiller Operating Scenarios:",
+    presetGoldStandard: "HACCP Gold Master: 50 mm Pan with Perforated Lid, 6.8 m/s Air Velocity & Pristine Hydrophilic Coils (72-Min Pull-Down)",
+    presetSporeHazard: "Severe Spore Proliferation: Overloaded 100 mm Beef Stew Pan in Choked Frost Unit (195-Min Pull-Down, 2.9 Log Growth)",
+    presetDefrostAerosol: "Listeria Bio-Aerosol Hazard: Uncovered Food Trays during Hot-Gas Defrost Restart with Slime-Contaminated Drain Pan",
+    presetStarchCereulide: "Cereus Emetic Toxin Danger: 65 mm Cooked Jasmine Rice Tightly Foil Wrapped (Trapping Steam & Retarding 45°C–30°C Dwell)",
+    diagnosticTitle: "Thermodynamic Pull-Down, Spore Kinetics & Bio-Aerosol Telemetry",
+    diagnosticSub: "Real-time core cooling curve, 90-minute compliance, Clostridium perfringens & Bacillus cereus proliferation, and evaporator bio-aerosol risk.",
+    pullDownTimeLabel: "Total Pull-Down Time (70°C → 3°C):",
+    dangerZoneTimeLabel: "Dwell Time in Critical Zone (57°C → 21°C):",
+    clostridiumGrowthLabel: "Clostridium perfringens Proliferation:",
+    cereusRiskLabel: "Bacillus cereus Emetic Toxin Risk:",
+    frostLoadLabel: "Moisture Condensate & Frost Accumulation:",
+    aerosolRiskLabel: "Evaporator Bio-Aerosol Dispersion Risk:",
+    complianceLabel: "HACCP & FDA Food Code § 3-501.14 Verdict:",
+    primaryRiskLabel: "Primary Food Safety Risk:",
+    mechanismsLabel: "Thermodynamic & Microbiological Mechanisms:",
+    mitigationLabel: "Actionable Sanitary & Engineering Mitigations:",
+    scienceTitle: "Refrigeration Heat Transfer, Fourier Conduction & Spore Outgrowth Kinetics",
+    scienceSub: "Engineering principles governing boundary layer air velocity, latent evaporative heat extraction, Biot number conductive impedance, and pathogen germination.",
+    tableTitle: "Commercial Blast Chiller Hardware Engineering Specifications",
+    tableSub: "Comparison of commercial refrigeration architectures, fan velocity ratings, defrost vaporization systems, and baseline bio-aerosol vulnerabilities.",
+    colChiller: "Chiller Architecture",
+    colPower: "Cooling Power",
+    colAirflow: "Fan Velocity / CFM",
+    colCapacity: "Loading Capacity",
+    colDefrost: "Defrost System",
+    colAerosolRisk: "Bio-Aerosol Risk",
+    rulesTitle: "Golden Rules for Commercial Cook-Chill Food Safety",
+    rulesSub: "Mandatory protocols under FDA Food Code 2022 § 3-501.14, UK ECFA 90-Minute Rule, and NSF/ANSI Standard 7.",
+    rule1Title: "Never Exceed 50 mm (2 Inches) Food Layer Thickness in Hotel Pans",
+    rule1Text: "Thermal conduction path time scales quadratically (t ∝ L²). Exceeding 50 mm depth traps core sensible heat, guaranteeing a breach of the FDA 2-hour 57°C to 21°C critical limit and permitting exponential Clostridium perfringens replication.",
+    rule2Title: "Use Slotted/Perforated Stainless Lids Rather Than Tight Foil",
+    rule2Text: "Tight foil or plastic film eliminates evaporative cooling (removing 35% of heat capacity) while trapping moisture. Perforated lids allow latent steam venting while physically deflecting falling condensation droplets and air turbulence.",
+    rule3Title: "Daily Sanitization of Evaporator Coils and Condensate Drain Pans",
+    rule3Text: "Evaporator drain pans remain damp and warm during hot-gas defrost (12°C–18°C), creating ideal breeding grounds for psychrotrophic Listeria monocytogenes biofilms that are aerosolized by high-velocity fans upon restart.",
+    rule4Title: "Insert Multipoint Needle Core Probes into the True Geometric Center",
+    rule4Text: "Surface layers can freeze to -2°C while the geometric core remains in the 40°C danger zone. Never rely on chamber air thermometers; use calibrated multi-point needle insertion probes verifying core temperature drops below 3°C.",
+    copyReportBtn: "Copy Complete Blast Chiller Audit Report",
+    copiedFeedback: "Audit Report Copied to Clipboard!"
+  },
+  es: {
+    badge: "Física de Refrigeración y Dinámica de Patógenos",
+    title: "Simulador de Abatidores de Temperatura, Bobinas Evaporadoras y Esporas Psicrótrofas",
+    subtitle: "Modele el enfriamiento rápido de alimentos calientes (70°C a 3°C en 90 min), la velocidad del aire en la capa límite, la dispersión de bioaerosoles del evaporador y la germinación de esporas de Clostridium perfringens según FDA § 3-501.14 y normas europeas.",
+    controlsTitle: "Parámetros Termodinámicos y Aerodinámicos del Abatidor Comercial",
+    controlsSub: "Configure el diseño del abatidor, las propiedades térmicas del alimento, la profundidad de la bandeja Gastronorm, la escarcha del evaporador y la velocidad del aire.",
+    chillerLabel: "Arquitectura del Abatidor y Potencia Frigorífica:",
+    chillerHelp: "Abatidor de carro 20 bandejas (5.5 kW, 6.8 m/s) vs vertical 10 bandejas vs sobremostrador 5 bandejas vs túnel espiral vs equipo antiguo descuidado.",
+    matrixLabel: "Matriz Alimentaria y Difusividad Térmica:",
+    matrixHelp: "Estofado denso de ternera (alta gelatina) vs arroz/puré de patatas cocido vs pieza entera de carne asada vs caldo de pollo clarificado vs lasaña multicapa.",
+    panLabel: "Profundidad de Bandeja Gastronorm y Cobertura:",
+    panHelp: "Bandeja plana 25 mm destapada (máxima evaporación) vs 50 mm estándar con tapa perforada vs 65 mm con papel de aluminio vs 100 mm con film vs olla profunda 150 mm.",
+    frostLabel: "Espesor de Escarcha en Evaporador y Ciclo de Desescarche:",
+    frostHelp: "Bobina limpia desinfectada (0 mm) vs escarcha leve (1.0 mm) vs escarcha moderada obstructiva (2.5 mm, -38% CFM) vs bloque de hielo sólido vs desescarche por gas caliente con bandeja sucia.",
+    velocitySliderLabel: "Velocidad del Aire sobre la Bandeja (m/s / FPM):",
+    velocitySliderHelp: "Flujo laminar de alta velocidad que rompe la capa límite térmica aislante (coeficiente convectivo h de 25 a 75 W/m²K).",
+    tempSliderLabel: "Temperatura Inicial en el Núcleo (°C / °F):",
+    tempSliderHelp: "Temperatura del alimento al salir del horno o marmita e introducirse en el abatidor (objetivo de diseño: 70°C / 158°F).",
+    airTempSliderLabel: "Temperatura del Aire en la Cámara (°C / °F):",
+    airTempSliderHelp: "Temperatura de circulación del aire (-15°C para abatimiento suave, -30°C a -38°C para congelación rápida de choque).",
+    depthSliderLabel: "Espesor de la Capa de Alimento (mm / pulgadas):",
+    depthSliderHelp: "Profundidad física en la bandeja. El tiempo de conducción térmica aumenta con el cuadrado del espesor (t ∝ L²).",
+    presetsTitle: "Escenarios Operativos Reales en Cocinas Centrales y Restauración:",
+    presetGoldStandard: "Estándar de Oro APPCC: Bandeja de 50 mm con Tapa Perforada, Aire a 6.8 m/s y Bobinas Impecables (72 min)",
+    presetSporeHazard: "Proliferación Crítica de Esporas: Bandeja de 100 mm con Estofado en Abatidor con Escarcha (195 min, 2.9 log)",
+    presetDefrostAerosol: "Peligro de Bioaerosoles de Listeria: Bandejas Destapadas durante Reinicio de Desescarche con Bandeja de Drenaje con Moho",
+    presetStarchCereulide: "Toxina Emética de Bacillus cereus: Arroz en Bandeja de 65 mm Envuelto en Aluminio Estanco (Retiene Calor y Vapor)",
+    diagnosticTitle: "Curva Termodinámica, Cinética de Esporas y Telemetría de Bioaerosoles",
+    diagnosticSub: "Tiempo real de abatimiento, cumplimiento del límite de 90 minutos, multiplicación de Clostridium y riesgo microbiológico.",
+    pullDownTimeLabel: "Tiempo Total de Abatimiento (70°C → 3°C):",
+    dangerZoneTimeLabel: "Permanencia en Zona Peligrosa (57°C → 21°C):",
+    clostridiumGrowthLabel: "Multiplicación de Clostridium perfringens:",
+    cereusRiskLabel: "Riesgo de Toxina Emética Bacillus cereus:",
+    frostLoadLabel: "Condensación y Acumulación de Escarcha:",
+    aerosolRiskLabel: "Riesgo de Dispersión de Bioaerosoles:",
+    complianceLabel: "Evaluación FDA § 3-501.14 y APPCC:",
+    primaryRiskLabel: "Riesgo Sanitario Primario:",
+    mechanismsLabel: "Mecanismos Termodinámicos y Microbiológicos:",
+    mitigationLabel: "Protocolos y Mitigaciones Obligatorias:",
+    scienceTitle: "Física de Transferencia de Calor, Ley de Fourier y Germinación de Esporas",
+    scienceSub: "Principios de capa límite de aire, extracción latente por evaporación, número de Biot y modelos de supervivencia de patógenos.",
+    tableTitle: "Especificaciones Técnicas de Equipos Abatidores Comerciales",
+    tableSub: "Comparativa de sistemas de ventilación, potencia frigorífica, evaporadores y riesgos de bioaerosoles.",
+    colChiller: "Modelo de Abatidor",
+    colPower: "Potencia Frigorífica",
+    colAirflow: "Velocidad Aire / CFM",
+    colCapacity: "Capacidad de Carga",
+    colDefrost: "Sistema Desescarche",
+    colAerosolRisk: "Riesgo Bioaerosoles",
+    rulesTitle: "Reglas de Oro para el Abatimiento Rápido Seguro",
+    rulesSub: "Límites obligatorios bajo FDA Food Code 2022 § 3-501.14 y norma europea de 90 minutos.",
+    rule1Title: "Nunca Supere los 50 mm (2 Pulgadas) de Espesor en Bandejas",
+    rule1Text: "La resistencia térmica por conducción se cuadruplica al duplicar el espesor. Superar 50 mm retiene calor en el centro e incumple el límite crítico de 2 horas entre 57°C y 21°C.",
+    rule2Title: "Use Tapas Perforadas de Acero en Lugar de Papel de Aluminio Apretado",
+    rule2Text: "El aluminio estanco anula el enfriamiento por evaporación (que aporta el 35% del frío inicial). Las tapas con orificios permiten salir el vapor y protegen contra gotas superiores.",
+    rule3Title: "Desinfección Diaria de Bobinas y Bandejas de Condensados",
+    rule3Text: "Las bandejas de drenaje permanecen templadas (15°C) durante el desescarche por gas caliente, permitiendo que Listeria monocytogenes forme biofilms que luego se dispersan por el aire.",
+    rule4Title: "Inserte Sondas Multipunto en el Verdadero Centro Geométrico",
+    rule4Text: "La superficie puede llegar a 0°C mientras el centro sigue a 45°C. Compruebe siempre el centro térmico con sondas de aguja calibradas antes de transferir a cámaras de conservación.",
+    copyReportBtn: "Copiar Informe Técnico de Auditoría APPCC",
+    copiedFeedback: "¡Informe Copiado al Portapapeles!"
+  },
+  pt: {
+    badge: "Física de Refrigeração e Dinâmica de Patógenos",
+    title: "Simulador de Ultracongeladores, Serpentinas Evaporadoras e Esporos Psicrotróficos",
+    subtitle: "Modele o resfriamento rápido de alimentos quentes (70°C a 3°C em 90 min), velocidade do ar na camada limite, dispersão de bioaerossóis do evaporador e germinação de esporos de Clostridium perfringens sob normas FDA e europeias.",
+    controlsTitle: "Parâmetros Termodinâmicos e Aerodinâmicos do Ultracongelador",
+    controlsSub: "Configure o modelo do equipamento, propriedades da matriz alimentar, profundidade das cubas GN, gelo no evaporador e velocidade do fluxo de ar.",
+    chillerLabel: "Arquitetura do Ultracongelador e Potência Frigorífica:",
+    chillerHelp: "Carro roll-in 20 cubas (5.5 kW, 6.8 m/s) vs vertical 10 cubas vs bancada 5 cubas vs túnel espiral vs equipamento antigo sem manutenção.",
+    matrixLabel: "Matriz Alimentar e Difusividade Térmica:",
+    matrixHelp: "Ensopado denso de carne bovina (rico em colágeno) vs arroz/purê de batata vs peça inteira de carne assada vs caldo de galinha coado vs lasanha em camadas.",
+    panLabel: "Profundidade da Cuba Gastronorm e Cobertura:",
+    panHelp: "Cuba rasa 25 mm sem tampa (resfriamento evaporativo) vs padrão 50 mm com tampa perfurada vs 65 mm com papel alumínio vs 100 mm com filme plástico vs panela funda 150 mm.",
+    frostLabel: "Camada de Gelo na Serpentina e Estado do Degelo:",
+    frostHelp: "Serpentina limpa e desinfetada (0 mm) vs geada fina (1.0 mm) vs gelo moderado obstrutivo (2.5 mm, -38% CFM) vs bloco de gelo maciço vs degelo a gás quente com dreno contaminado.",
+    velocitySliderLabel: "Velocidade do Ar sobre as Cubas (m/s / FPM):",
+    velocitySliderHelp: "Fluxo de ar laminar de alta velocidade que remove a camada limite térmica estagnada (coeficiente h de 25 a 75 W/m²K).",
+    tempSliderLabel: "Temperatura Inicial no Núcleo (°C / °F):",
+    tempSliderHelp: "Temperatura do alimento saindo do forno ou caldeira ao ser carregado no ultracongelador (alvo de referência: 70°C / 158°F).",
+    airTempSliderLabel: "Temperatura do Ar na Câmara (°C / °F):",
+    airTempSliderHelp: "Temperatura do ar insuflado (-15°C para resfriamento soft, -30°C a -38°C para congelamento rápido de choque).",
+    depthSliderLabel: "Espessura da Camada de Alimento (mm / polegadas):",
+    depthSliderHelp: "Profundidade física da comida na cuba. O tempo de condução aumenta com o quadrado da espessura (t ∝ L²).",
+    presetsTitle: "Cenários Operacionais em Cozinhas Industriais e Catering:",
+    presetGoldStandard: "Padrão Ouro APPCC: Cuba de 50 mm com Tampa Perfurada, Ar a 6.8 m/s e Serpentina Limpa (72 min)",
+    presetSporeHazard: "Proliferação Crítica de Esporos: Cuba de 100 mm com Ensopado em Unidade com Gelo Obstrutivo (195 min)",
+    presetDefrostAerosol: "Perigo de Bioaerossóis de Listeria: Cubas Abertas durante Reinício de Degelo com Calha de Dreno Suja",
+    presetStarchCereulide: "Toxina Emética de Bacillus cereus: Arroz em Cuba de 65 mm Fechada com Papel Alumínio Apertado",
+    diagnosticTitle: "Curva de Resfriamento, Cinética de Esporos e Telemetria de Aerossóis",
+    diagnosticSub: "Tempo de resfriamento, conformidade com a meta de 90 minutos, proliferação de Clostridium e risco microbiológico.",
+    pullDownTimeLabel: "Tempo Total de Resfriamento (70°C → 3°C):",
+    dangerZoneTimeLabel: "Tempo na Zona de Risco (57°C → 21°C):",
+    clostridiumGrowthLabel: "Multiplicação de Clostridium perfringens:",
+    cereusRiskLabel: "Risco de Toxina Emética Bacillus cereus:",
+    frostLoadLabel: "Condensado de Umidade e Acúmulo de Gelo:",
+    aerosolRiskLabel: "Risco de Dispersão de Bioaerossóis:",
+    complianceLabel: "Avaliação APPCC e FDA § 3-501.14:",
+    primaryRiskLabel: "Principal Perigo Sanitário:",
+    mechanismsLabel: "Mecanismos Físicos e Microbiológicos:",
+    mitigationLabel: "Ações Mitigatórias Recomendadas:",
+    scienceTitle: "Física de Transferência de Calor, Lei de Fourier e Germinação de Esporos",
+    scienceSub: "Princípios da camada limite de ar, resfriamento latente por evaporação, número de Biot e modelos de proliferação bacteriana.",
+    tableTitle: "Especificações Técnicas de Ultracongeladores Comerciais",
+    tableSub: "Comparativo de ventiladores, potência de refrigeração, tipos de degelo e vulnerabilidade a bioaerossóis.",
+    colChiller: "Modelo de Ultracongelador",
+    colPower: "Potência Frigorífica",
+    colAirflow: "Velocidade do Ar / CFM",
+    colCapacity: "Capacidade de Carga",
+    colDefrost: "Sistema de Degelo",
+    colAerosolRisk: "Risco de Bioaerossol",
+    rulesTitle: "Regras de Ouro para o Resfriamento Rápido Seguro",
+    rulesSub: "Diretrizes obrigatórias sob o FDA Food Code e regra britânica de 90 minutos.",
+    rule1Title: "Nunca Ultrapasse 50 mm (2 Polegadas) de Altura nas Cubas",
+    rule1Text: "O tempo de condução térmica eleva-se ao quadrado da espessura. Passar de 50 mm retém calor no centro e descumpre a janela de 2 horas entre 57°C e 21°C.",
+    rule2Title: "Utilize Tampas Perfuradas de Inox em Vez de Alumínio Selado",
+    rule2Text: "O filme de alumínio retém o vapor e bloqueia a evaporação (que responde por 35% do resfriamento inicial). Tampas perfuradas liberam vapor e barram gotejamentos.",
+    rule3Title: "Higienização Diária de Serpentinas e Calhas de Condensado",
+    rule3Text: "A calha do dreno aquece durante o degelo a gás quente (15°C), permitindo que Listeria forme biofilmes que são ejetados pelos ventiladores velozes ao religar.",
+    rule4Title: "Insira Sensores de Agulha no Verdadeiro Centro Geométrico",
+    rule4Text: "A superfície pode congelar enquanto o fundo continua a 40°C. Valide sempre o centro térmico com sondas multiponto calibradas antes de armazenar.",
+    copyReportBtn: "Copiar Relatório de Auditoria APPCC",
+    copiedFeedback: "Relatório Copiado para a Área de Transferência!"
+  },
+  'zh-cn': {
+    badge: "制冷热物理学与病原动力学",
+    title: "商用急冻柜（超低温急速冷却机）蒸发器盘管微孔气流除霜与嗜冷孢子动力学模拟器",
+    subtitle: "精确模拟熟热食物在90分钟内自70°C急降至3°C的边界层风速热传导动力学、蒸发器风机除霜生物气溶胶交叉污染风险，以及产气荚膜梭菌与蜡样芽孢杆菌萌发生长曲线（依据FDA 2022 § 3-501.14与英国90分钟急冷标准）。",
+    controlsTitle: "商用急冻柜热力学与气流动力学工程参数配置",
+    controlsSub: "配置急速冷却机机械架构、食品介质热扩散率、Gastronorm标准餐盘装载深度、蒸发器盘管结霜厚度及迎面循环风速。",
+    chillerLabel: "急速冷却机架构与制冷动力单元：",
+    chillerHelp: "20层台车步入式急冻柜 (5.5 kW, 6.8 m/s) vs 10盘商用立式急冻柜 vs 5盘台下紧凑型 vs 工业螺旋连续急冷隧道 vs 老化结垢失修设备。",
+    matrixLabel: "食品物理介质与热扩散率 (k/ρCp)：",
+    matrixHelp: "高粘度浓郁炖牛肉（高明胶蛋白）vs 大份熟淀粉（米饭/土豆泥）vs 完整大块厚切酱牛肉 vs 澄清禽类高汤 vs 多层肉酱千层意面。",
+    panLabel: "标准GN餐盘分装深度与表面覆盖状态：",
+    panHelp: "25毫米浅盘敞口（极速蒸发冷却）vs 50毫米标准盘配微孔不锈钢急冻盖 vs 65毫米深盘紧裹铝箔 vs 100毫米过厚盘保鲜膜紧封 vs 150毫米深大汤桶。",
+    frostLabel: "蒸发器翅片结霜厚度与除霜循环工况：",
+    frostHelp: "洁净卫生翅片 (0 mm) vs 轻微霜层 (1.0 mm) vs 中度霜堵阻塞 (2.5 mm, 风量骤降38%) vs 重度结冰硬壳块 vs 热气除霜开启且集水盘滋生黏液。",
+    velocitySliderLabel: "餐盘表面迎面循环风速 (m/s / FPM)：",
+    velocitySliderHelp: "高速层流冲刷食品表面停滞热边界层（对流换热系数h在25至75 W/m²K之间波动）。",
+    tempSliderLabel: "初始入柜食物核心温度 (°C / °F)：",
+    tempSliderHelp: "出炉或烹饪完成即刻入柜测得的中心温度（标准设计基准：70°C / 158°F）。",
+    airTempSliderLabel: "急冻室内循环冷风设定温度 (°C / °F)：",
+    airTempSliderHelp: "冷空气循环温度（软急冷通常为-15°C，硬急冷快速穿透通常为-30°C至-38°C）。",
+    depthSliderLabel: "餐盘内食物实际装载厚度 (mm / 英寸)：",
+    depthSliderHelp: "餐盘内食品层的垂直物理厚度。根据傅里叶导热定律，热传导耗时与厚度平方成正比 (t ∝ L²)。",
+    presetsTitle: "中央厨房与星级餐饮真实生产工况预设：",
+    presetGoldStandard: "HACCP黄金标准：50毫米餐盘配微孔急冻专用盖，6.8 m/s强劲风速与洁净无霜蒸发器（72分钟达成3°C）",
+    presetSporeHazard: "致命孢子繁衍温床：100毫米过厚大盘浓稠炖牛肉，装入结霜阻塞急冻机（耗时195分钟，梭菌激增2.9 log）",
+    presetDefrostAerosol: "李斯特菌气溶胶交叉污染：敞口食物暴露在热气除霜重启工况下，积水盘污垢被高速风机雾化吹散",
+    presetStarchCereulide: "蜡样芽孢杆菌催吐毒素隐患：65毫米熟米饭用厚铝箔密实紧封（锁死水汽阻断蒸发降温，在45°C–30°C停滞过久）",
+    diagnosticTitle: "热工降温曲线、病原动力学与生物气溶胶全景遥测",
+    diagnosticSub: "实时中心温度下降曲线、90分钟法定合规判定、产气荚膜梭菌增殖量及蒸发器气溶胶扩散评级。",
+    pullDownTimeLabel: "急冷全程耗时 (70°C → 3°C)：",
+    dangerZoneTimeLabel: "危险温区停滞时间 (57°C → 21°C)：",
+    clostridiumGrowthLabel: "产气荚膜梭菌增殖幅度：",
+    cereusRiskLabel: "蜡样芽孢杆菌催吐毒素风险：",
+    frostLoadLabel: "水分潜热蒸发与盘管结霜量：",
+    aerosolRiskLabel: "蒸发器生物气溶胶扩散风险：",
+    complianceLabel: "FDA § 3-501.14 与 HACCP 法定裁定：",
+    primaryRiskLabel: "首要食品安全隐患：",
+    mechanismsLabel: "热物理与微生物学微观机制：",
+    mitigationLabel: "工程与卫生防控整改规范：",
+    scienceTitle: "制冷传热学、傅里叶导热定律与细菌孢子复苏动力学",
+    scienceSub: "解析边界层风速、表面水分相变潜热吸收、毕奥数(Biot)内部导热阻抗与致病菌对数生长的科学规律。",
+    tableTitle: "商用急冻柜机械与制冷工程核心硬件参数",
+    tableSub: "对比不同急冷设备的制冷量、风机循环风速、除霜除湿系统及气溶胶卫生风险。",
+    colChiller: "急冻柜工程型号",
+    colPower: "制冷功率 (kW)",
+    colAirflow: "循环风速 / CFM",
+    colCapacity: "单批装载容量",
+    colDefrost: "除霜系统",
+    colAerosolRisk: "生物气溶胶风险",
+    rulesTitle: "中央厨房与烹饪急冷 (Cook-Chill) 黄金守则",
+    rulesSub: "FDA食品规范2022 § 3-501.14与英国90分钟强制标准的执行红线。",
+    rule1Title: "餐盘食品装填厚度绝对严禁超过50毫米（2英寸）",
+    rule1Text: "导热时间随厚度平方递增。超过50毫米会严重锁死深层核心热量，导致无法在2小时内从57°C降至21°C，引发产气荚膜梭菌指数级爆发。",
+    rule2Title: "严禁紧裹保鲜膜或铝箔，应使用专用微孔不锈钢急冷盖",
+    rule2Text: "密闭包裹完全剥夺了表面水分蒸发带走的35%初始潜热，使降温大幅放缓。专用微孔盖既允许水汽逸出，又能阻挡上方冷凝滴水与气溶胶坠落。",
+    rule3Title: "每日必须彻底清洗消毒蒸发器盘管及冷凝水排污盘",
+    rule3Text: "热气除霜期间集水盘温度回升至15°C，极易滋生耐冷李斯特菌生物膜。除霜结束后强力风机瞬间重启，会将积水盘细菌雾化喷溅到食物表面。",
+    rule4Title: "测温多点针式探针必须准确插入食品真正几何中心",
+    rule4Text: "高速冷风常导致表面结冰假象（-2°C），而厚盘核心仍然停留在40°C温床。切勿仅看库内空气温度计，必须以中心针式探针真实读数为准。",
+    copyReportBtn: "复制急冻柜热工与微生物安全审计报告",
+    copiedFeedback: "完整审计报告已复制至剪贴板！"
+  },
+  ja: {
+    badge: "冷凍物理学＆病原微生物動態工学",
+    title: "業務用ブラストチラー（急速冷却機）蒸発器コイル気流除霜＆好冷性芽胞動態モデラー",
+    subtitle: "加熱食品が90分以内に70°Cから3°Cまで急速冷却される際の境界層風速熱伝達、蒸発器ファン除霜時のバイオエアロゾル二次汚染リスク、およびウェルシュ菌・セレウス菌芽胞の発芽増殖をFDA Food Code § 3-501.14および英国90分急冷基準に基づき精密解析。",
+    controlsTitle: "業務用ブラストチラー熱力学＆空気力学エンジニアリング設定",
+    controlsSub: "急速冷却機の機械構造、食品マトリックスの熱拡散率、ホテルパンの盛り付け深さ、エバポレーターの着霜状態、および循環風速を設定。",
+    chillerLabel: "急速冷却機アーキテクチャ＆冷凍能力：",
+    chillerHelp: "20段カート式ロールインチラー (5.5 kW, 6.8 m/s) vs 10段標準リーチイン vs 5段卓上型 vs 工業用連続スパイラルチラー vs 老朽化・整備不良機。",
+    matrixLabel: "食品マトリックス＆熱拡散率 (k/ρCp)：",
+    matrixHelp: "高粘度ビーフシチュー（ゼラチンリッチ）vs 炊飯米/マッシュポテト（デンプン質）vs 塊肉ロースト vs 澄ましチキンスープ vs 積層ラザニア。",
+    panLabel: "ガストロノームパン深さ＆表面被覆状態：",
+    panHelp: "25 mm浅型パン・ラップなし（気化潜熱冷却）vs 50 mm標準パン・穴あきチラー蓋付き vs 65 mm深型アルミホイル密閉 vs 100 mm過積載ラップ掛け vs 150 mm深型寸胴。",
+    frostLabel: "蒸発器コイル着霜厚＆除霜サイクル状態：",
+    frostHelp: "洗浄済み清浄コイル (0 mm) vs 軽微着霜 (1.0 mm) vs 中度フロスト閉塞 (2.5 mm, 風量38%減) vs 強固氷結ブロック vs ホットガス除霜中（ドレンパン汚染）。",
+    velocitySliderLabel: "パン表面通過風速 (m/s / FPM)：",
+    velocitySliderHelp: "停滞する熱的境界層を吹き飛ばす高速気流（対流熱伝達率hは25〜75 W/m²K）。",
+    tempSliderLabel: "初期食品芯温 (°C / °F)：",
+    tempSliderHelp: "オーブンや回転釜から投入された直後の中心温度（標準設計基準：70°C / 158°F）。",
+    airTempSliderLabel: "チラー室内循環冷風温度 (°C / °F)：",
+    airTempSliderHelp: "循環冷気温度（ソフト冷却は-15°C、急速ハードチラープルダウンは-30°C〜-38°C）。",
+    depthSliderLabel: "パン内食品層の有効深さ (mm / インチ)：",
+    depthSliderHelp: "ホテルパン内の食品実厚。フーリエ熱伝導の法則により、冷却所要時間は厚さの2乗に比例 (t ∝ L²)。",
+    presetsTitle: "セントラルキッチン＆ホテル厨房のリアル運用プリセット：",
+    presetGoldStandard: "HACCPゴールドマスター：50 mmパン・穴あきチラー蓋使用、6.8 m/s高速気流＆清浄コイル（72分で3°C達成）",
+    presetSporeHazard: "芽胞大量増殖ハザード：100 mm過積載シチュー、霜付き閉塞チラー投入（195分所要、ウェルシュ菌2.9 log増殖）",
+    presetDefrostAerosol: "リステリア・バイオエアロゾル危険：除霜再起動時に露出した食品トレイへドレンパンスライムが飛散",
+    presetStarchCereulide: "セレウス菌嘔吐毒（セレウリド）生成リスク：65 mm炊飯米をアルミホイルで密閉（気化熱を阻害し45°C〜30°Cで長期停滞）",
+    diagnosticTitle: "熱工学的冷却曲線、芽胞キネティクス＆エアロゾル遠隔診断",
+    diagnosticSub: "リアルタイム芯温降下曲線、90分基準合規判定、ウェルシュ菌増殖量、および蒸発器エアロゾル評価。",
+    pullDownTimeLabel: "急冷完了所要時間 (70°C → 3°C)：",
+    dangerZoneTimeLabel: "危険温度帯滞留時間 (57°C → 21°C)：",
+    clostridiumGrowthLabel: "ウェルシュ菌 (C. perfringens) 増殖量：",
+    cereusRiskLabel: "セレウス菌嘔吐毒（セレウリド）リスク：",
+    frostLoadLabel: "水分気化潜熱損失＆コイル着霜量：",
+    aerosolRiskLabel: "蒸発器バイオエアロゾル飛散リスク：",
+    complianceLabel: "FDA § 3-501.14 ＆ HACCP 合規判定：",
+    primaryRiskLabel: "主要衛生ハザード：",
+    mechanismsLabel: "熱力学・微生物学的メカニズム：",
+    mitigationLabel: "改善工学プロトコル＆対策：",
+    scienceTitle: "冷凍伝熱工学、フーリエの熱伝導法則＆細菌芽胞の発芽速度論",
+    scienceSub: "空気境界層風速、蒸発潜熱による顕熱除去、ビオ数(Biot)による伝導熱抵抗、および細菌対数増殖の工学原理。",
+    tableTitle: "業務用ブラストチラー冷凍機械スペック比較",
+    tableSub: "各冷却構造における冷凍能力、風速、除霜システム、および二次汚染リスク比較。",
+    colChiller: "チラー構造モデル",
+    colPower: "冷却出力 (kW)",
+    colAirflow: "循環風速 / CFM",
+    colCapacity: "最大バッチ容量",
+    colDefrost: "除霜方式",
+    colAerosolRisk: "エアロゾルリスク",
+    rulesTitle: "クックチル (Cook-Chill) 急速冷却の黄金原則",
+    rulesSub: "FDA食品基準2022 § 3-501.14および英国90分基準に準拠した厳格な運用指針。",
+    rule1Title: "ホテルパンの盛り付け厚さは絶対に50 mm（2インチ）を超えてはならない",
+    rule1Text: "熱伝導時間は厚さの2乗に比例します。50 mmを超えると芯温降下が停滞し、57°Cから21°Cまでの2時間基準を破綻させ、ウェルシュ菌が急激に増殖します。",
+    rule2Title: "アルミホイル密閉を避け、穴あきステンレスチラー蓋を使用する",
+    rule2Text: "密閉ホイルは熱量の35%を奪う気化冷却を完全に阻害します。微細穴あき蓋は蒸気を逃がしながら、上部からの結露滴下や乱流エアロゾルを物理的に遮断します。",
+    rule3Title: "蒸発器コイルおよびドレンパンの毎日の酵素洗浄・殺菌を徹底する",
+    rule3Text: "ホットガス除霜中、ドレンパンは15°C前後まで温まり、リステリア菌バイオフィルムが繁殖します。運転再開時の強風でエアロゾル化して庫内に飛散します。",
+    rule4Title: "芯温センサー（マルチニードルプローブ）は真の幾何学的中心に刺す",
+    rule4Text: "表面が氷結（-2°C）していても中心部は40°Cの危険域にあることが頻繁に生じます。庫内温度計を過信せず、必ず校正済み針状芯温プローブで3°C到達を確認してください。",
+    copyReportBtn: "完全急冷監査レポートをクリップボードにコピー",
+    copiedFeedback: "監査レポートがクリップボードにコピーされました！"
+  }
+};
+
+const d = DICTIONARY[lang] || DICTIONARY.en;
+const architectures = blastChillerData.blastChillerArchitectures;
+const foodMatrices = blastChillerData.foodMatrixProfiles;
+const panOptions = blastChillerData.panDepthAndCoveringOptions;
+const frostStates = blastChillerData.evaporatorFrostAndDefrostStates;
+---
+
+<div class="blast-chiller-modeler bg-surface border border-hairline rounded-3xl p-6 md:p-10 shadow-sm max-w-6xl mx-auto my-8" id="blast-chiller-engine">
+  <!-- Header Badge -->
+  <div class="flex flex-wrap items-center justify-between gap-3 pb-6 border-b border-hairline">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-500/20">
+      <span>❄️</span>
+      {d.badge}
+    </div>
+    <div class="text-xs text-muted font-mono">
+      FDA Food Code § 3-501.14 &bull; UK ECFA 90-Min Rule &bull; NSF/ANSI 7
+    </div>
+  </div>
+
+  <!-- Title & Subtitle -->
+  <div class="mt-6 mb-8">
+    <h2 class="text-2xl md:text-3xl font-extrabold text-ink tracking-tight mb-2">
+      {d.title}
+    </h2>
+    <p class="text-sm md:text-base text-muted leading-relaxed max-w-4xl">
+      {d.subtitle}
+    </p>
+  </div>
+
+  <!-- Presets Bar -->
+  <div class="mb-8 p-5 bg-surface-soft border border-hairline rounded-2xl">
+    <div class="text-xs font-bold uppercase tracking-wider text-muted mb-3 flex items-center gap-2">
+      <span>🎯</span> {d.presetsTitle}
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+      <button 
+        type="button"
+        id="preset-gold"
+        class="text-left p-3 rounded-xl bg-surface border border-emerald-500/30 hover:border-emerald-500 hover:bg-emerald-500/5 transition text-ink font-medium flex items-start gap-2 shadow-2xs"
+      >
+        <span class="text-emerald-500 font-bold shrink-0">✓</span>
+        <span>{d.presetGoldStandard}</span>
+      </button>
+
+      <button 
+        type="button"
+        id="preset-spore"
+        class="text-left p-3 rounded-xl bg-surface border border-rose-500/30 hover:border-rose-500 hover:bg-rose-500/5 transition text-ink font-medium flex items-start gap-2 shadow-2xs"
+      >
+        <span class="text-rose-500 font-bold shrink-0">⚠️</span>
+        <span>{d.presetSporeHazard}</span>
+      </button>
+
+      <button 
+        type="button"
+        id="preset-aerosol"
+        class="text-left p-3 rounded-xl bg-surface border border-amber-500/30 hover:border-amber-500 hover:bg-amber-500/5 transition text-ink font-medium flex items-start gap-2 shadow-2xs"
+      >
+        <span class="text-amber-500 font-bold shrink-0">☣️</span>
+        <span>{d.presetDefrostAerosol}</span>
+      </button>
+
+      <button 
+        type="button"
+        id="preset-cereus"
+        class="text-left p-3 rounded-xl bg-surface border border-indigo-500/30 hover:border-indigo-500 hover:bg-indigo-500/5 transition text-ink font-medium flex items-start gap-2 shadow-2xs"
+      >
+        <span class="text-indigo-500 font-bold shrink-0">🍚</span>
+        <span>{d.presetStarchCereulide}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Interactive Controls Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+    <!-- Left Column: Selectors -->
+    <div class="space-y-6">
+      <div class="border-b border-hairline pb-2">
+        <h3 class="text-lg font-bold text-ink">{d.controlsTitle}</h3>
+        <p class="text-xs text-muted">{d.controlsSub}</p>
+      </div>
+
+      <!-- Chiller Architecture -->
+      <div>
+        <label for="chiller-select" class="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
+          {d.chillerLabel}
+        </label>
+        <select 
+          id="chiller-select"
+          class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs text-ink focus:outline-hidden focus:ring-2 focus:ring-sky-500 shadow-2xs cursor-pointer"
+        >
+          {architectures.map((item) => (
+            <option value={item.id} selected={item.id === 'reach_in_10_pan_commercial_chiller'}>
+              {item.name}
+            </option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1 leading-normal" id="chiller-help">{d.chillerHelp}</p>
+      </div>
+
+      <!-- Food Matrix -->
+      <div>
+        <label for="matrix-select" class="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
+          {d.matrixLabel}
+        </label>
+        <select 
+          id="matrix-select"
+          class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs text-ink focus:outline-hidden focus:ring-2 focus:ring-sky-500 shadow-2xs cursor-pointer"
+        >
+          {foodMatrices.map((m) => (
+            <option value={m.id} selected={m.id === 'dense_viscous_beef_stew'}>
+              {m.name}
+            </option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1 leading-normal" id="matrix-help">{d.matrixHelp}</p>
+      </div>
+
+      <!-- Pan Depth & Covering -->
+      <div>
+        <label for="pan-select" class="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
+          {d.panLabel}
+        </label>
+        <select 
+          id="pan-select"
+          class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs text-ink focus:outline-hidden focus:ring-2 focus:ring-sky-500 shadow-2xs cursor-pointer"
+        >
+          {panOptions.map((p) => (
+            <option value={p.id} selected={p.id === 'standard_50mm_perforated_lid'}>
+              {p.name}
+            </option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1 leading-normal" id="pan-help">{d.panHelp}</p>
+      </div>
+
+      <!-- Evaporator Frost State -->
+      <div>
+        <label for="frost-select" class="block text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
+          {d.frostLabel}
+        </label>
+        <select 
+          id="frost-select"
+          class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs text-ink focus:outline-hidden focus:ring-2 focus:ring-sky-500 shadow-2xs cursor-pointer"
+        >
+          {frostStates.map((f) => (
+            <option value={f.id} selected={f.id === 'light_frost_buildup'}>
+              {f.name}
+            </option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1 leading-normal" id="frost-help">{d.frostHelp}</p>
+      </div>
+    </div>
+
+    <!-- Right Column: Sliders -->
+    <div class="space-y-6 bg-surface-soft border border-hairline rounded-2xl p-6">
+      <div class="border-b border-hairline pb-2">
+        <h4 class="text-sm font-bold uppercase tracking-wider text-ink">Fine-Tuning Operational Variables</h4>
+        <p class="text-xs text-muted">Adjust physical velocities, thermal setpoints, and layer depths</p>
+      </div>
+
+      <!-- Air Velocity Slider -->
+      <div>
+        <div class="flex items-center justify-between text-xs font-bold mb-1">
+          <span class="text-ink">{d.velocitySliderLabel}</span>
+          <span class="font-mono text-sky-600 dark:text-sky-400 text-sm" id="velocity-val">4.5 m/s (885 FPM)</span>
+        </div>
+        <input 
+          type="range"
+          id="velocity-slider"
+          min="1.0"
+          max="8.0"
+          step="0.1"
+          value="4.5"
+          class="w-full accent-sky-500 cursor-pointer"
+        />
+        <p class="text-[11px] text-muted mt-1">{d.velocitySliderHelp}</p>
+      </div>
+
+      <!-- Initial Core Temp Slider -->
+      <div>
+        <div class="flex items-center justify-between text-xs font-bold mb-1">
+          <span class="text-ink">{d.tempSliderLabel}</span>
+          <span class="font-mono text-amber-600 dark:text-amber-400 text-sm" id="temp-val">75.0°C (167.0°F)</span>
+        </div>
+        <input 
+          type="range"
+          id="temp-slider"
+          min="60.0"
+          max="95.0"
+          step="1.0"
+          value="75.0"
+          class="w-full accent-amber-500 cursor-pointer"
+        />
+        <p class="text-[11px] text-muted mt-1">{d.tempSliderHelp}</p>
+      </div>
+
+      <!-- Air Setpoint Temp Slider -->
+      <div>
+        <div class="flex items-center justify-between text-xs font-bold mb-1">
+          <span class="text-ink">{d.airTempSliderLabel}</span>
+          <span class="font-mono text-indigo-600 dark:text-indigo-400 text-sm" id="air-temp-val">-28.0°C (-18.4°F)</span>
+        </div>
+        <input 
+          type="range"
+          id="air-temp-slider"
+          min="-38.0"
+          max="-10.0"
+          step="1.0"
+          value="-28.0"
+          class="w-full accent-indigo-500 cursor-pointer"
+        />
+        <p class="text-[11px] text-muted mt-1">{d.airTempSliderHelp}</p>
+      </div>
+
+      <!-- Pan Depth Slider -->
+      <div>
+        <div class="flex items-center justify-between text-xs font-bold mb-1">
+          <span class="text-ink">{d.depthSliderLabel}</span>
+          <span class="font-mono text-emerald-600 dark:text-emerald-400 text-sm" id="depth-val">50 mm (2.0 in)</span>
+        </div>
+        <input 
+          type="range"
+          id="depth-slider"
+          min="20"
+          max="150"
+          step="5"
+          value="50"
+          class="w-full accent-emerald-500 cursor-pointer"
+        />
+        <p class="text-[11px] text-muted mt-1">{d.depthSliderHelp}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Telemetry Output Dashboard -->
+  <div class="bg-surface-soft border border-hairline rounded-2xl p-6 md:p-8 mb-10">
+    <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-hairline mb-6">
+      <div>
+        <h3 class="text-lg md:text-xl font-extrabold text-ink">{d.diagnosticTitle}</h3>
+        <p class="text-xs text-muted">{d.diagnosticSub}</p>
+      </div>
+      <div id="status-pill" class="px-4 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+        COMPLIANT: 90-MIN PULL-DOWN OK
+      </div>
+    </div>
+
+    <!-- Metrics Cards 3x2 Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+      <!-- Metric 1: Pull Down Time -->
+      <div class="bg-surface border border-hairline rounded-xl p-4 shadow-2xs">
+        <div class="text-[11px] uppercase tracking-wider font-bold text-muted mb-1">{d.pullDownTimeLabel}</div>
+        <div class="text-2xl font-black font-mono text-ink" id="out-pulldown">74.5 min</div>
+        <div class="text-[11px] text-muted mt-1" id="out-pulldown-sub">Target: ≤ 90 min (UK/ECFA)</div>
+      </div>
+
+      <!-- Metric 2: Danger Zone Time -->
+      <div class="bg-surface border border-hairline rounded-xl p-4 shadow-2xs">
+        <div class="text-[11px] uppercase tracking-wider font-bold text-muted mb-1">{d.dangerZoneTimeLabel}</div>
+        <div class="text-2xl font-black font-mono text-ink" id="out-danger-zone">42.0 min</div>
+        <div class="text-[11px] text-muted mt-1" id="out-danger-sub">FDA CCP Limit: ≤ 120 min</div>
+      </div>
+
+      <!-- Metric 3: Clostridium perfringens Growth -->
+      <div class="bg-surface border border-hairline rounded-xl p-4 shadow-2xs">
+        <div class="text-[11px] uppercase tracking-wider font-bold text-muted mb-1">{d.clostridiumGrowthLabel}</div>
+        <div class="text-2xl font-black font-mono text-emerald-600 dark:text-emerald-400" id="out-clostridium">+0.22 log₁₀</div>
+        <div class="text-[11px] text-muted mt-1" id="out-clostridium-sub">Safe limit: &lt; 1.0 log₁₀</div>
+      </div>
+
+      <!-- Metric 4: Bacillus cereus Emetic Toxin Risk -->
+      <div class="bg-surface border border-hairline rounded-xl p-4 shadow-2xs">
+        <div class="text-[11px] uppercase tracking-wider font-bold text-muted mb-1">{d.cereusRiskLabel}</div>
+        <div class="text-xl font-black font-mono text-ink" id="out-cereus">LOW / NEGLIGIBLE</div>
+        <div class="text-[11px] text-muted mt-1" id="out-cereus-sub">Cereulide emetic toxin kinetics</div>
+      </div>
+
+      <!-- Metric 5: Moisture Loss & Frost Load -->
+      <div class="bg-surface border border-hairline rounded-xl p-4 shadow-2xs">
+        <div class="text-[11px] uppercase tracking-wider font-bold text-muted mb-1">{d.frostLoadLabel}</div>
+        <div class="text-2xl font-black font-mono text-ink" id="out-frost">145 g / batch</div>
+        <div class="text-[11px] text-muted mt-1" id="out-frost-sub">Latent vapor condensation on fins</div>
+      </div>
+
+      <!-- Metric 6: Bio-Aerosol Cross Contamination -->
+      <div class="bg-surface border border-hairline rounded-xl p-4 shadow-2xs">
+        <div class="text-[11px] uppercase tracking-wider font-bold text-muted mb-1">{d.aerosolRiskLabel}</div>
+        <div class="text-xl font-black font-mono text-emerald-600 dark:text-emerald-400" id="out-aerosol">LOW (18 / 100)</div>
+        <div class="text-[11px] text-muted mt-1" id="out-aerosol-sub">Listeria monocytogenes fan dispersal</div>
+      </div>
+    </div>
+
+    <!-- Detailed Assessment Panels -->
+    <div class="space-y-4 text-xs">
+      <div class="bg-surface border border-hairline rounded-xl p-4">
+        <span class="font-bold text-ink uppercase tracking-wider block mb-1">
+          {d.primaryRiskLabel}
+        </span>
+        <p class="text-muted leading-relaxed" id="out-primary-risk">
+          Standard operational mode with controlled convective pull-down. Minimal risk of Clostridium perfringens or Bacillus cereus germination.
+        </p>
+      </div>
+
+      <div class="bg-surface border border-hairline rounded-xl p-4">
+        <span class="font-bold text-ink uppercase tracking-wider block mb-1">
+          {d.mechanismsLabel}
+        </span>
+        <p class="text-muted leading-relaxed" id="out-mechanisms">
+          High-velocity laminar flow (4.5 m/s) strips the stagnant boundary layer, maintaining an elevated convective heat transfer coefficient. Shallow 50 mm geometry keeps the internal Biot number low, allowing rapid heat flux from core to surface.
+        </p>
+      </div>
+
+      <div class="bg-surface border border-hairline rounded-xl p-4">
+        <span class="font-bold text-ink uppercase tracking-wider block mb-1">
+          {d.mitigationLabel}
+        </span>
+        <p class="text-muted leading-relaxed" id="out-mitigations">
+          Maintain 50 mm perforated stainless covers during blast chill cycles. Schedule daily warm water drain flush and enzymatic coil sanitization to prevent psychrotrophic Listeria colonization.
+        </p>
+      </div>
+    </div>
+
+    <!-- Export Button -->
+    <div class="mt-6 flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-hairline">
+      <button 
+        type="button"
+        id="copy-report-btn"
+        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-medium text-xs transition shadow-xs cursor-pointer"
+      >
+        <span>📋</span> {d.copyReportBtn}
+      </button>
+      <span id="copied-toast" class="text-xs text-emerald-600 dark:text-emerald-400 font-bold hidden">
+        ✓ {d.copiedFeedback}
+      </span>
+    </div>
+  </div>
+
+  <!-- Hardware Specification Reference Table -->
+  <div class="mb-10">
+    <div class="mb-4">
+      <h3 class="text-lg font-bold text-ink">{d.tableTitle}</h3>
+      <p class="text-xs text-muted">{d.tableSub}</p>
+    </div>
+
+    <div class="overflow-x-auto border border-hairline rounded-2xl shadow-2xs">
+      <table class="w-full text-left text-xs">
+        <thead class="bg-surface-soft border-b border-hairline text-ink font-bold">
+          <tr>
+            <th class="p-3.5">{d.colChiller}</th>
+            <th class="p-3.5">{d.colPower}</th>
+            <th class="p-3.5">{d.colAirflow}</th>
+            <th class="p-3.5">{d.colCapacity}</th>
+            <th class="p-3.5">{d.colDefrost}</th>
+            <th class="p-3.5">{d.colAerosolRisk}</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline bg-surface text-muted">
+          {architectures.map((arch) => (
+            <tr class="hover:bg-surface-soft/60 transition">
+              <td class="p-3.5 font-medium text-ink">{arch.name}</td>
+              <td class="p-3.5 font-mono">{(arch.coolingPowerWatts / 1000).toFixed(1)} kW</td>
+              <td class="p-3.5 font-mono">{arch.fanVelocityMps} m/s ({arch.airFlowCfm} CFM)</td>
+              <td class="p-3.5 font-mono">{arch.capacityKg} kg</td>
+              <td class="p-3.5 text-[11px]">{arch.defrostType}</td>
+              <td class="p-3.5">
+                <span class={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
+                  arch.baselineAerosolRisk.includes('LOW') ? 'bg-emerald-500/10 text-emerald-600' :
+                  arch.baselineAerosolRisk.includes('MODERATE') ? 'bg-amber-500/10 text-amber-600' :
+                  'bg-rose-500/10 text-rose-600'
+                }`}>
+                  {arch.baselineAerosolRisk}
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Golden Rules Section -->
+  <div class="border-t border-hairline pt-8">
+    <div class="mb-6">
+      <h3 class="text-lg font-bold text-ink">{d.rulesTitle}</h3>
+      <p class="text-xs text-muted">{d.rulesSub}</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-4">
+        <div class="flex items-center gap-2 font-bold text-ink mb-1">
+          <span class="text-sky-500">1.</span> {d.rule1Title}
+        </div>
+        <p class="text-muted leading-relaxed">{d.rule1Text}</p>
+      </div>
+
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-4">
+        <div class="flex items-center gap-2 font-bold text-ink mb-1">
+          <span class="text-sky-500">2.</span> {d.rule2Title}
+        </div>
+        <p class="text-muted leading-relaxed">{d.rule2Text}</p>
+      </div>
+
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-4">
+        <div class="flex items-center gap-2 font-bold text-ink mb-1">
+          <span class="text-sky-500">3.</span> {d.rule3Title}
+        </div>
+        <p class="text-muted leading-relaxed">{d.rule3Text}</p>
+      </div>
+
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-4">
+        <div class="flex items-center gap-2 font-bold text-ink mb-1">
+          <span class="text-sky-500">4.</span> {d.rule4Title}
+        </div>
+        <p class="text-muted leading-relaxed">{d.rule4Text}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script is:inline define:vars={{ architectures, foodMatrices, panOptions, frostStates }}>
+  (function() {
+    const el = (id) => document.getElementById(id);
+
+    const chillerSelect = el('chiller-select');
+    const matrixSelect = el('matrix-select');
+    const panSelect = el('pan-select');
+    const frostSelect = el('frost-select');
+
+    const velocitySlider = el('velocity-slider');
+    const tempSlider = el('temp-slider');
+    const airTempSlider = el('air-temp-slider');
+    const depthSlider = el('depth-slider');
+
+    const velocityVal = el('velocity-val');
+    const tempVal = el('temp-val');
+    const airTempVal = el('air-temp-val');
+    const depthVal = el('depth-val');
+
+    const outPulldown = el('out-pulldown');
+    const outPulldownSub = el('out-pulldown-sub');
+    const outDangerZone = el('out-danger-zone');
+    const outDangerSub = el('out-danger-sub');
+    const outClostridium = el('out-clostridium');
+    const outClostridiumSub = el('out-clostridium-sub');
+    const outCereus = el('out-cereus');
+    const outCereusSub = el('out-cereus-sub');
+    const outFrost = el('out-frost');
+    const outFrostSub = el('out-frost-sub');
+    const outAerosol = el('out-aerosol');
+    const outAerosolSub = el('out-aerosol-sub');
+    const statusPill = el('status-pill');
+
+    const outPrimaryRisk = el('out-primary-risk');
+    const outMechanisms = el('out-mechanisms');
+    const outMitigations = el('out-mitigations');
+
+    const copyBtn = el('copy-report-btn');
+    const copiedToast = el('copied-toast');
+
+    function calculate() {
+      const arch = architectures.find(a => a.id === chillerSelect.value) || architectures[1];
+      const mat = foodMatrices.find(m => m.id === matrixSelect.value) || foodMatrices[0];
+      const pan = panOptions.find(p => p.id === panSelect.value) || panOptions[1];
+      const frost = frostStates.find(f => f.id === frostSelect.value) || frostStates[1];
+
+      const velocity = parseFloat(velocitySlider.value);
+      const initTemp = parseFloat(tempSlider.value);
+      const airTemp = parseFloat(airTempSlider.value);
+      const depth = parseFloat(depthSlider.value);
+
+      // Display current slider values
+      const fpm = Math.round(velocity * 196.85);
+      velocityVal.textContent = `${velocity.toFixed(1)} m/s (${fpm} FPM)`;
+      const initTempF = ((initTemp * 9/5) + 32).toFixed(1);
+      tempVal.textContent = `${initTemp.toFixed(1)}°C (${initTempF}°F)`;
+      const airTempF = ((airTemp * 9/5) + 32).toFixed(1);
+      airTempVal.textContent = `${airTemp.toFixed(1)}°C (${airTempF}°F)`;
+      const depthIn = (depth / 25.4).toFixed(1);
+      depthVal.textContent = `${Math.round(depth)} mm (${depthIn} in)`;
+
+      // Heat transfer & pull-down physics modeling
+      // Effective convective heat transfer coeff h (W/m²K)
+      // Forced convection correlation: h ≈ 10.45 - v + 10 * sqrt(v)
+      const h_coeff = 12.0 + (16.5 * Math.pow(velocity, 0.78));
+      
+      // Effective airflow reduction from frost
+      const airflowFactor = (100 - frost.airflowReductionPercent) / 100;
+      const effectiveH = h_coeff * airflowFactor * (pan.evaporativeCoolingFactor || 1.0);
+
+      // Thermal resistance model: Conductive R_cond = (L/2) / k, Convective R_conv = 1 / effectiveH
+      const L_half = (depth / 1000) / 2; // half thickness in meters
+      const R_cond = L_half / mat.thermalConductivityWmk;
+      const R_conv = 1 / Math.max(5, effectiveH);
+      const R_total = R_cond + R_conv;
+
+      // Biot number
+      const Bi = effectiveH * L_half / mat.thermalConductivityWmk;
+
+      // Total sensible + latent heat per unit area: q = rho * Cp * depth * (T_init - 3) + latent
+      const deltaT_total = initTemp - 3.0; // target 3°C
+      const heatCapacity = (mat.densityKgM3 * mat.specificHeatJkgK * (depth / 1000));
+      
+      // Base pull-down time in minutes
+      // Lumped/distributed Fourier model adjustment
+      let pullDownMinutes = (heatCapacity * R_total * Math.log((initTemp - airTemp) / (3.0 - airTemp)) / 60) * 1.35;
+      pullDownMinutes *= pan.coolingTimeMultiplier;
+
+      // Bound realistic minimum and maximums
+      pullDownMinutes = Math.max(22, pullDownMinutes);
+
+      // Time spent in 57°C to 21°C Danger Zone
+      const dangerZoneFraction = Math.log((57.2 - airTemp) / (21.1 - airTemp)) / Math.log((initTemp - airTemp) / (3.0 - airTemp));
+      const dangerMinutes = Math.max(12, pullDownMinutes * Math.max(0.28, Math.min(0.65, dangerZoneFraction)));
+
+      // Spore kinetics: Clostridium perfringens growth
+      // Generation time in stews is ~7.1 to 10 min at optimal 43°C.
+      // Proliferation is function of time spent between 54°C and 25°C
+      const clostridiumDwellMin = dangerMinutes * 0.75;
+      const clostridiumGenerations = (clostridiumDwellMin / 14.5) * mat.clostridiumRiskFactor;
+      const clostridiumLogGrowth = Math.max(0.05, (clostridiumGenerations * Math.log10(2)));
+
+      // Bacillus cereus emetic toxin index
+      let cereusVerdict = 'LOW / NEGLIGIBLE';
+      if (mat.id === 'cooked_bulk_starch_rice_potatoes' && dangerMinutes > 85) {
+        cereusVerdict = 'CRITICAL TOXIN HAZARD';
+      } else if (dangerMinutes > 65 || mat.bacillusRiskFactor > 1.8) {
+        cereusVerdict = 'ELEVATED / MONITOR';
+      }
+
+      // Moisture & frost accumulation (grams per batch)
+      const baseFrost = pan.frostLoadGramsPerHour * (pullDownMinutes / 60);
+      const frostGrams = Math.round(baseFrost * (mat.latentMoistureLossRatePercent / 3.5));
+
+      // Bio-aerosol risk score (0 to 100)
+      let aerosolScore = 15;
+      if (frost.id === 'active_hot_gas_defrost_biofilm') aerosolScore += 55;
+      if (frost.id === 'heavy_ice_solid_pack') aerosolScore += 30;
+      if (arch.baselineAerosolRisk.includes('CRITICAL')) aerosolScore += 25;
+      if (pan.id === 'shallow_25mm_uncovered') aerosolScore += 18;
+      if (pan.id === 'deep_65mm_tight_foil') aerosolScore -= 20;
+      aerosolScore = Math.max(5, Math.min(100, Math.round(aerosolScore)));
+
+      // UI updates
+      outPulldown.textContent = `${pullDownMinutes.toFixed(1)} min`;
+      outDangerZone.textContent = `${dangerMinutes.toFixed(1)} min`;
+      outClostridium.textContent = `+${clostridiumLogGrowth.toFixed(2)} log₁₀`;
+      outCereus.textContent = cereusVerdict;
+      outFrost.textContent = `${frostGrams} g / batch`;
+
+      let aerosolColor = 'text-emerald-600 dark:text-emerald-400';
+      let aerosolText = `LOW (${aerosolScore}/100)`;
+      if (aerosolScore >= 70) {
+        aerosolColor = 'text-rose-600 dark:text-rose-400';
+        aerosolText = `HIGH HAZARD (${aerosolScore}/100)`;
+      } else if (aerosolScore >= 40) {
+        aerosolColor = 'text-amber-600 dark:text-amber-400';
+        aerosolText = `MODERATE (${aerosolScore}/100)`;
+      }
+      outAerosol.className = `text-xl font-black font-mono ${aerosolColor}`;
+      outAerosol.textContent = aerosolText;
+
+      // Status Pill & Verdict
+      const passes90Min = pullDownMinutes <= 90.0;
+      const passesFda2Hr = dangerMinutes <= 120.0;
+      const clostridiumSafe = clostridiumLogGrowth < 1.0;
+
+      if (passes90Min && passesFda2Hr && clostridiumSafe && aerosolScore < 40) {
+        statusPill.className = 'px-4 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30';
+        statusPill.textContent = 'COMPLIANT: 90-MIN PULL-DOWN OK';
+        outPulldownSub.textContent = 'Meets UK ECFA & FDA Gold Standard';
+        outDangerSub.textContent = `Within 2-hr CCP limit (${(120 - dangerMinutes).toFixed(0)}m headroom)`;
+        outClostridium.className = 'text-2xl font-black font-mono text-emerald-600 dark:text-emerald-400';
+      } else if (passesFda2Hr && (!passes90Min || clostridiumLogGrowth >= 1.0 || aerosolScore >= 40)) {
+        statusPill.className = 'px-4 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/30';
+        statusPill.textContent = 'WARNING: 90-MIN TARGET BREACHED';
+        outPulldownSub.textContent = `Exceeds 90 min target by +${(pullDownMinutes - 90).toFixed(1)}m`;
+        outDangerSub.textContent = 'Meets US FDA 2-hr limit, but UK non-compliant';
+        outClostridium.className = 'text-2xl font-black font-mono text-amber-600 dark:text-amber-400';
+      } else {
+        statusPill.className = 'px-4 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/30';
+        statusPill.textContent = 'CRITICAL HACCP VIOLATION: SPORE OUTGROWTH';
+        outPulldownSub.textContent = `Severe pull-down failure (${pullDownMinutes.toFixed(0)} min)`;
+        outDangerSub.textContent = `Breaches 2-hr 57°C→21°C CCP by +${(dangerMinutes - 120).toFixed(0)}m!`;
+        outClostridium.className = 'text-2xl font-black font-mono text-rose-600 dark:text-rose-400';
+      }
+
+      // Dynamic text updates for explanations
+      if (pullDownMinutes > 90 || clostridiumLogGrowth >= 1.0) {
+        outPrimaryRisk.textContent = `Excessive conductive path length and thermal mass trap sensible heat in the core of ${mat.name}. Food dwells in the 54°C–15°C zone for ${dangerMinutes.toFixed(1)} minutes, triggering rapid Clostridium perfringens spore reactivation (+${clostridiumLogGrowth.toFixed(2)} log₁₀ outgrowth).`;
+        outMechanisms.textContent = `Food layer thickness (${depth} mm) produces a high Biot number (Bi = ${(Bi).toFixed(2)} > 0.1). Internal conductive thermal resistance (R_cond = ${R_cond.toFixed(3)} K/W) dominates over surface convection, rendering high air velocity ineffective at the pan geometric center.`;
+        outMitigations.textContent = `Immediately divide food into shallow 25–50 mm pans. Ensure evaporator fins are defrosted and sanitized. Do not seal tightly with foil until core temperature drops below 21°C to preserve latent evaporative cooling flux.`;
+      } else if (aerosolScore >= 60) {
+        outPrimaryRisk.textContent = `Elevated risk of Listeria monocytogenes and psychrotrophic mold bio-aerosol cross-contamination. Stagnant moisture and organic residues in the evaporator drain pan are sheared by ${velocity.toFixed(1)} m/s air currents into droplet nuclei.`;
+        outMechanisms.textContent = `High-velocity air circulation entrains fine aerosol droplets from wet defrost coils. Uncovered food trays act as passive deposition surfaces for viable microbial cells.`;
+        outMitigations.textContent = `Install perforated stainless steel blast chiller lids. Execute automated hot water flush of drain pan and apply dual-quaternary ammonium or peracetic acid foam sanitation to evaporator coil fins.`;
+      } else {
+        outPrimaryRisk.textContent = `Optimal thermodynamic pull-down rate. Food core successfully crosses the 57°C to 21°C microbiological danger zone in ${dangerMinutes.toFixed(1)} minutes, holding bacterial spore proliferation to negligible levels.`;
+        outMechanisms.textContent = `Airflow velocity (${velocity.toFixed(1)} m/s) strips the boundary layer while 50 mm depth maintains low conductive resistance. Latent evaporative heat removal efficiently supplements sensible convective cooling.`;
+        outMitigations.textContent = `Maintain current standard operating procedure (SOP). Log calibrated 3-point core needle temperature probes on automated HACCP compliance records.`;
+      }
+    }
+
+    // Preset handlers
+    el('preset-gold')?.addEventListener('click', () => {
+      chillerSelect.value = 'reach_in_10_pan_commercial_chiller';
+      matrixSelect.value = 'dense_viscous_beef_stew';
+      panSelect.value = 'standard_50mm_perforated_lid';
+      frostSelect.value = 'pristine_clean_fins';
+      velocitySlider.value = '6.5';
+      tempSlider.value = '75.0';
+      airTempSlider.value = '-32.0';
+      depthSlider.value = '50';
+      calculate();
+    });
+
+    el('preset-spore')?.addEventListener('click', () => {
+      chillerSelect.value = 'aged_compromised_chiller_neglect';
+      matrixSelect.value = 'dense_viscous_beef_stew';
+      panSelect.value = 'overloaded_100mm_plastic_wrap';
+      frostSelect.value = 'moderate_choked_frost';
+      velocitySlider.value = '2.0';
+      tempSlider.value = '85.0';
+      airTempSlider.value = '-16.0';
+      depthSlider.value = '100';
+      calculate();
+    });
+
+    el('preset-aerosol')?.addEventListener('click', () => {
+      chillerSelect.value = 'reach_in_10_pan_commercial_chiller';
+      matrixSelect.value = 'poultry_bone_stock_broth';
+      panSelect.value = 'shallow_25mm_uncovered';
+      frostSelect.value = 'active_hot_gas_defrost_biofilm';
+      velocitySlider.value = '5.8';
+      tempSlider.value = '70.0';
+      airTempSlider.value = '-22.0';
+      depthSlider.value = '35';
+      calculate();
+    });
+
+    el('preset-cereus')?.addEventListener('click', () => {
+      chillerSelect.value = 'compact_countertop_5_pan_chiller';
+      matrixSelect.value = 'cooked_bulk_starch_rice_potatoes';
+      panSelect.value = 'deep_65mm_tight_foil';
+      frostSelect.value = 'light_frost_buildup';
+      velocitySlider.value = '3.0';
+      tempSlider.value = '80.0';
+      airTempSlider.value = '-20.0';
+      depthSlider.value = '65';
+      calculate();
+    });
+
+    // Event listeners for inputs
+    [chillerSelect, matrixSelect, panSelect, frostSelect].forEach(sel => {
+      sel?.addEventListener('change', calculate);
+    });
+
+    [velocitySlider, tempSlider, airTempSlider, depthSlider].forEach(slider => {
+      slider?.addEventListener('input', calculate);
+    });
+
+    // Copy audit report
+    copyBtn?.addEventListener('click', () => {
+      const archName = chillerSelect.options[chillerSelect.selectedIndex].text;
+      const matName = matrixSelect.options[matrixSelect.selectedIndex].text;
+      const panName = panSelect.options[panSelect.selectedIndex].text;
+      const frostName = frostSelect.options[frostSelect.selectedIndex].text;
+
+      const report = `======================================================================
+ISITKITCHENSAFE BLAST CHILLER THERMODYNAMIC & SPORE AUDIT REPORT
+======================================================================
+Generated: ${new Date().toISOString()}
+Compliance Standard: FDA Food Code 2022 § 3-501.14 & UK ECFA 90-Min Rule
+
+ENGINEERING PARAMETERS:
+- Chiller Architecture: ${archName}
+- Food Matrix: ${matName}
+- Pan Depth & Covering: ${panName} (Layer depth: ${depthSlider.value} mm)
+- Evaporator Coil Status: ${frostName}
+- Air Velocity across Pan: ${velocitySlider.value} m/s
+- Initial Core Food Temp: ${tempSlider.value}°C
+- Air Chamber Setpoint: ${airTempSlider.value}°C
+
+DIAGNOSTIC TELEMETRY:
+- 70°C → 3°C Pull-Down Time: ${outPulldown.textContent}
+- 57°C → 21°C Critical Zone Time: ${outDangerZone.textContent}
+- Clostridium perfringens Proliferation: ${outClostridium.textContent}
+- Bacillus cereus Emetic Toxin Risk: ${outCereus.textContent}
+- Moisture Loss & Frost Load: ${outFrost.textContent}
+- Evaporator Bio-Aerosol Risk: ${outAerosol.textContent}
+- Status & Verdict: ${statusPill.textContent}
+
+RISK EVALUATION:
+${outPrimaryRisk.textContent.trim()}
+
+MECHANISMS:
+${outMechanisms.textContent.trim()}
+
+RECOMMENDED SANITARY MITIGATIONS:
+${outMitigations.textContent.trim()}
+======================================================================`;
+
+      navigator.clipboard.writeText(report).then(() => {
+        copiedToast.classList.remove('hidden');
+        setTimeout(() => copiedToast.classList.add('hidden'), 3500);
+      });
+    });
+
+    // Initial run
+    calculate();
+  })();
+</script>

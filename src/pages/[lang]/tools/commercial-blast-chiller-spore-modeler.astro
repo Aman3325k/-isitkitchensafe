@@ -1,0 +1,285 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import CommercialBlastChillerSporeModeler from '../../../components/CommercialBlastChillerSporeModeler.astro';
+import type { SupportedLanguage } from '../../../i18n/ui';
+import { useTranslations, useTranslatedPath } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+const t = useTranslations(lang);
+const tp = useTranslatedPath(lang);
+
+interface LocaleContent {
+  pageTitle: string;
+  pageDescription: string;
+  breadcrumbs: Array<{ label: string; href?: string }>;
+  faqs: Array<{ question: string; answer: string }>;
+  monoBadge: string;
+  monoTitle: string;
+  monoSub: string;
+  section1Title: string;
+  section1Body: string;
+  section2Title: string;
+  section2Body: string;
+  section3Title: string;
+  section3Body: string;
+}
+
+const CONTENT: Record<SupportedLanguage, LocaleContent> = {
+  en: {} as any,
+  es: {
+    pageTitle: "Simulador de Abatidores de Temperatura, Bobinas Evaporadoras y Esporas Psicrótrofas | IsItKitchenSafe",
+    pageDescription: "Modele el enfriamiento rápido de alimentos calientes (70°C a 3°C en 90 min), la velocidad del aire en la capa límite, la dispersión de bioaerosoles del evaporador y la germinación de esporas de Clostridium perfringens según FDA § 3-501.14 y normas europeas.",
+    breadcrumbs: [
+      { label: 'Inicio', href: '/es/' },
+      { label: 'Herramientas', href: '/es/tools/' },
+      { label: 'Simulador de Abatidores de Temperatura y Esporas' }
+    ],
+    faqs: [
+      {
+        question: "¿Cuáles son los criterios regulatorios de abatimiento rápido según FDA § 3-501.14 y la norma británica de 90 minutos?",
+        answer: "Bajo la norma FDA Food Code 2022 § 3-501.14, los alimentos potencialmente peligrosos cocinados deben enfriarse de 57.2°C (135°F) a 21.1°C (70°F) en un máximo de 2 horas (punto crítico de control primario), y de 21.1°C a 5°C (41°F) en las siguientes 4 horas (tiempo total máximo de 6 horas). En cambio, la normativa europea británica (ECFA) impone una meta más estricta de 90 minutos: el núcleo del alimento debe pasar de +70°C a +3°C en 90 minutos o menos mediante abatidores mecánicos de alta potencia."
+      },
+      {
+        question: "¿Por qué el rango de 57°C a 21°C (135°F a 70°F) es la ventana biológica más peligrosa?",
+        answer: "Esta franja térmica es la zona óptima para la germinación y multiplicación de esporas bacterianas resistentes al calor. Las esporas de Clostridium perfringens y Bacillus cereus sobreviven a la cocción y ebullición ordinaria. Al descender entre 54°C y 40°C, las esporas se reactivan vegetativamente. En caldos y estofados ricos en proteínas, Clostridium perfringens se duplica cada 7 a 10 minutos. Si el alimento permanece más de 2 horas en esta zona, supera los 100.000 UFC/g, causando intoxicación aguda."
+      },
+      {
+        question: "¿Cómo influye el espesor del alimento en bandejas en la transferencia de calor y el tiempo de enfriamiento?",
+        answer: "En alimentos sólidos o espesos (guisos, purés o lasañas), el calor se disipa casi exclusivamente por conducción interna (Ley de Fourier). El tiempo de enfriamiento conductivo aumenta de forma cuadrática con el espesor de la capa (t ∝ L²). Duplicar la altura de comida en una bandeja de 50 mm a 100 mm cuadruplica la resistencia térmica interna. Una bandeja de 100 mm puede tardar más de 3 o 4 horas en atravesar la zona de peligro, mientras que una de 50 mm lo hace de forma segura en 45 a 75 minutos."
+      },
+      {
+        question: "¿Por qué se deben usar tapas perforadas en lugar de papel de aluminio sellado en el abatidor?",
+        answer: "Sellar las bandejas calientes con papel de aluminio o film plástico bloquea el enfriamiento por evaporación, el cual elimina entre el 35% y el 50% del calor inicial mediante calor latente de vaporización. El papel retiene el vapor caliente en una bolsa de aire aislante que retrasa enormemente el enfriamiento central. Las tapas perforadas de acero inoxidable permiten salir el vapor y a la vez protegen la comida de turbulencias y gotas de condensación descendentes."
+      },
+      {
+        question: "¿Cómo degrada la escarcha en el evaporador la velocidad del aire y la capacidad de enfriamiento?",
+        answer: "El vapor que emana de los alimentos calientes se condensa y congela sobre las aletas del evaporador a -35°C. Cuando la capa de escarcha supera los 2.0 mm, obstruye los canales entre aletas, elevando la resistencia estática y reduciendo el flujo de aire (CFM) entre un 35% y un 65%. Además, la escarcha porosa tiene baja conductividad térmica (k ≈ 0.2 W/m·K) y actúa como un aislante que frena la absorción de calor hacia el refrigerante."
+      },
+      {
+        question: "¿Cómo genera el desescarche por gas caliente un riesgo de bioaerosoles de Listeria?",
+        answer: "Durante el desescarche por gas caliente, el gas caliente eleva la temperatura del evaporador y la bandeja de drenaje a 12°C–18°C para derretir el hielo. Si la bandeja contiene restos orgánicos, la humedad templada favorece la proliferación de biopelículas de Listeria monocytogenes y hongos psicrótrofos. Al reiniciarse los ventiladores de alta velocidad (6 m/s), la fuerza del aire atomiza las gotas de agua estancada, dispersando bioaerosoles sobre las bandejas de comida expuestas."
+      }
+    ],
+    monoBadge: "Física de Refrigeración y Dinámica de Patógenos",
+    monoTitle: "Simulador de Abatidores de Temperatura, Bobinas Evaporadoras y Esporas Psicrótrofas",
+    monoSub: "Modele el enfriamiento rápido de alimentos calientes (70°C a 3°C en 90 min), la velocidad del aire en la capa límite, la dispersión de bioaerosoles del evaporador y la germinación de esporas de Clostridium perfringens según FDA § 3-501.14 y normas europeas.",
+    section1Title: "Cinética de Abatimiento Térmico, Ruptura de la Capa Límite y Número de Biot",
+    section1Body: "En sistemas de cocina industrial (Cook-Chill), introducir bandejas calientes en cámaras frigoríficas convencionales provoca fallos graves de seguridad. Las cámaras de conservación tienen velocidades de aire mínimas (0.3 m/s) incapaces de romper la capa límite térmica aislante sobre la bandeja. Los abatidores industriales emplean ventiladores de alta presión que impulsan aire a 4.5–7.5 m/s, multiplicando el coeficiente de convección (h) hasta 45–75 W/m²K. Sin embargo, en alimentos de más de 50 mm de espesor, el número de Biot supera 0.1, y la resistencia conductiva interna limita la velocidad de enfriamiento sin importar el flujo del ventilador.",
+    section2Title: "Activación Térmica de Esporas y Cinética de Clostridium perfringens",
+    section2Body: "El mayor riesgo biológico al enfriar alimentos cocinados no son las bacterias vegetativas (eliminadas durante la cocción a 74°C), sino las endosporas termorresistentes de Clostridium perfringens y Bacillus cereus. La alta temperatura de cocción actúa como activador fisiológico de estas esporas. Al descender la temperatura entre 54°C y 40°C, las esporas germinan rápidamente. Con tiempos de duplicación inferiores a 10 minutos, una permanencia excesiva genera toxinas letales que causan diarreas y calambres intestinales agudos.",
+    section3Title: "Bloqueo por Escarcha en el Evaporador y Dispersión de Bioaerosoles de Listeria",
+    section3Body: "La evaporación de agua de los alimentos calientes forma capas de escarcha rime sobre el evaporador. Superados los 2 mm de espesor, el flujo de aire cae drásticamente, prolongando el tiempo en la zona de peligro. Durante los ciclos de desescarche, la bandeja de condensados se calienta a 15°C, convirtiéndose en reservorio de Listeria monocytogenes. El reinicio intempestivo de los ventiladores crea aerosoles bacterianos que caen sobre bandejas descubiertas."
+  },
+  pt: {
+    pageTitle: "Simulador de Ultracongeladores, Serpentinas Evaporadoras e Esporos Psicrotróficos | IsItKitchenSafe",
+    pageDescription: "Modele o resfriamento rápido de alimentos quentes (70°C a 3°C em 90 min), velocidade do ar na camada limite, dispersão de bioaerossóis do evaporador e germinação de esporos de Clostridium perfringens sob normas FDA e europeias.",
+    breadcrumbs: [
+      { label: 'Início', href: '/pt/' },
+      { label: 'Ferramentas', href: '/pt/tools/' },
+      { label: 'Simulador de Ultracongeladores e Esporos' }
+    ],
+    faqs: [
+      {
+        question: "Quais são os critérios regulatórios de resfriamento rápido sob a FDA § 3-501.14 e a regra britânica de 90 minutos?",
+        answer: "Sob o FDA Food Code 2022 § 3-501.14, alimentos potencialmente perigosos cozidos devem cair de 57.2°C (135°F) para 21.1°C (70°F) em até 2 horas (Ponto Crítico de Controle primário), e de 21.1°C para 5°C (41°F) nas 4 horas seguintes (tempo total máximo de 6 horas). Já a norma britânica e europeia (ECFA) impõe a meta mais rígida de 90 minutos: o núcleo geométrico deve baixar de +70°C para +3°C em 90 minutos ou menos em ultracongeladores mecânicos de alta potência."
+      },
+      {
+        question: "Por que a faixa de 57°C a 21°C (135°F a 70°F) é a janela biológica mais crítica?",
+        answer: "Essa faixa de temperatura é a zona ótima de germinação e multiplicação de endósporos resistentes ao calor. Esporos de Clostridium perfringens e Bacillus cereus resistem à fervura e cocção. Quando o alimento esfria entre 54°C e 40°C, os esporos ativam-se vegetativamente. Em ensopados e carnes, Clostridium perfringens duplica sua população a cada 7 a 10 minutos. Ultrapassar 2 horas nessa faixa permite atingir mais de 100.000 UFC/g, causando toxinfecção alimentar aguda."
+      },
+      {
+        question: "Como a espessura do alimento nas cubas afeta a condução térmica e os tempos de resfriamento?",
+        answer: "Em alimentos densos ou pastosos (purês, lasanhas, caldos espessos), a dissipação térmica ocorre quase exclusivamente por condução (Lei de Fourier). O tempo de resfriamento conductivo aumenta proporcionalmente ao quadrado da espessura (t ∝ L²). Dobrar a altura de comida de 50 mm para 100 mm quadruplica a resistência térmica. Cubas de 100 mm retêm calor no centro por mais de 3 horas, ao passo que cubas de 50 mm ultrapassam a zona perigosa com segurança em 45 a 75 minutos."
+      },
+      {
+        question: "Por que se deve utilizar tampas perfuradas em vez de papel alumínio selado no ultracongelador?",
+        answer: "Vedar as cubas com papel alumínio ou filme plástico elimina o resfriamento evaporativo, responsável por 35% a 50% da extração inicial de calor sensível por vaporização latente. O alumínio aprisiona o vapor numa bolsa de ar quente isolante, retardando o processo. Tampas perfuradas de aço inoxidável permitem a saída do vapor e simultaneamente protegem a comida contra turbulência e gotículas de condensado do teto."
+      },
+      {
+        question: "Como o congelamento e gelo na serpentina evaporadora prejudicam a velocidade do ar?",
+        answer: "O vapor liberado pelos alimentos congela sobre as aletas de alumínio do evaporador a -35°C. Camadas de gelo acima de 2 mm obstruem os canais entre as aletas, aumentando a resistência estática e reduzindo a vazão de ar (CFM) entre 35% e 65%. Além disso, o gelo poroso possui baixa condutividade térmica (k ≈ 0.2 W/m·K), atuando como isolante térmico que retarda a absorção de calor pelo fluido refrigerante."
+      },
+      {
+        question: "Como o degelo a gás quente cria risco de bioaerossóis de Listeria?",
+        answer: "No degelo a gás quente, fluido superaquecido eleva a serpentina e a calha de dreno para 12°C–18°C a fim de derreter o gelo. Se a calha contiver sujidades orgânicas, essa umidade morna estimula a proliferação de Listeria monocytogenes e fungos psicrotróficos. Ao religar os ventiladores de alta velocidade (6 m/s), o cisalhamento do ar atomiza a água estagnada em aerossóis que se espalham sobre as cubas abertas de comida."
+      }
+    ],
+    monoBadge: "Física de Refrigeração e Dinâmica de Patógenos",
+    monoTitle: "Simulador de Ultracongeladores, Serpentinas Evaporadoras e Esporos Psicrotróficos",
+    monoSub: "Modele o resfriamento rápido de alimentos quentes (70°C a 3°C em 90 min), velocidade do ar na camada limite, dispersão de bioaerossóis do evaporador e germinação de esporos de Clostridium perfringens sob normas FDA e europeias.",
+    section1Title: "Cinética de Resfriamento Rápido, Remoção da Camada Limite e Número de Biot",
+    section1Body: "Em sistemas industriais Cook-Chill, armazenar comida quente em câmaras frigoríficas comuns leva a falhas graves de segurança biológica. Câmaras normais utilizam baixas velocidades de ar (0.3 m/s), incapazes de remover a camada térmica isolante sobre as cubas. Os ultracongeladores contam com ventiladores potentes (4.5–7.5 m/s) que elevam o coeficiente convectivo (h) para 45–75 W/m²K. Contudo, em camadas de alimento com mais de 50 mm, o número de Biot excede 0.1, tornando a condução interna o fator limitante de velocidade.",
+    section2Title: "Ativação Térmica de Esporos e Cinética de Clostridium perfringens",
+    section2Body: "O risco primordial no resfriamento de alimentos não são as bactérias vegetativas (inativadas no cozimento a 74°C), mas os endósporos termorresistentes de Clostridium perfringens e Bacillus cereus. O calor do cozimento age como ativador fisiológico desses esporos. Ao esfriar na faixa de 54°C a 40°C, eles germinam em ritmo acelerado. Com duplicação celular abaixo de 10 minutos, o atraso no resfriamento sintetiza enterotoxinas que causam cólicas e diarreia severa.",
+    section3Title: "Gelo Obstrutivo na Serpentina e Dispersão de Bioaerossóis de Listeria",
+    section3Body: "A evaporação de água da comida quente deposita geada sobre as serpentinas. Ao ultrapassar 2 mm, a vazão de ar cai significativamente, prolongando o tempo na zona de risco. No degelo, a calha atinge 15°C, propiciando o crescimento de biofilmes de Listeria monocytogenes. O reinício brusco dos ventiladores dispersa bioaerossóis que contaminam cubas abertas."
+  },
+  'zh-cn': {
+    pageTitle: "商用急冻柜（急速冷却机）蒸发器盘管气流除霜与嗜冷孢子动力学模拟器 | IsItKitchenSafe",
+    pageDescription: "精确模拟熟热食物在90分钟内自70°C急降至3°C的边界层风速热传导动力学、蒸发器风机除霜生物气溶胶交叉污染风险，以及产气荚膜梭菌与蜡样芽孢杆菌萌发生长曲线（依据FDA 2022 § 3-501.14与英国90分钟急冷标准）。",
+    breadcrumbs: [
+      { label: '首页', href: '/zh-cn/' },
+      { label: '专业工具', href: '/zh-cn/tools/' },
+      { label: '商用急冻柜与致病孢子动力学模拟器' }
+    ],
+    faqs: [
+      {
+        question: "FDA食品规范§ 3-501.14与英国90分钟急冷法规的具体指标要求是什么？",
+        answer: "依据美国FDA Food Code 2022 § 3-501.14规定，高风险熟热食品必须在2小时内从57.2°C (135°F)降至21.1°C (70°F)（首要关键控制点CCP），并在随后的4小时内进一步降至5°C (41°F)或以下（总冷却时间不得超过6小时）。而英国及欧洲冷藏食品协会(ECFA)执行更为严苛的90分钟法规：核心温度必须在90分钟内自+70°C (+158°F)急降至+3°C (+37.4°F)，必须使用商用强风速急冻机(Blast Chiller)方可合规达成。"
+      },
+      {
+        question: "为什么57°C至21°C（135°F至70°F）是微生物繁殖最致命的危险温区？",
+        answer: "该温区是耐热细菌芽孢复苏萌发的最适温度区间。产气荚膜梭菌(Clostridium perfringens)与蜡样芽孢杆菌(Bacillus cereus)的休眠芽孢能够耐受常规沸水蒸煮。当烹饪结束、温度降至54°C至40°C时，高温加热反而刺激芽孢快速萌发为繁殖体。在浓汁和肉类等高蛋白基质中，产气荚膜梭菌每7至10分钟即可增殖一倍。若停滞超过2小时，菌数将轻易突破10万CFU/g，食用后在肠道内形成肠毒素引起剧烈腹痛腹泻。"
+      },
+      {
+        question: "餐盘内食物装填厚度如何制约傅里叶热传导与冷却总时长？",
+        answer: "在浓稠炖菜、土豆泥等固体黏性基质中，内部热量传递主要依靠热传导而非流体对流。依据傅里叶导热定律，热传导耗时与食物层物理厚度的平方成正比 (t ∝ L²)。将标准餐盘中的厚度从50毫米增加到100毫米，内部导热阻抗和传热耗时将增加为原先的4倍。100毫米厚盘核心可能在危险温区滞留3至4小时以上，而50毫米盘在45至75分钟即可安全通过。"
+      },
+      {
+        question: "为什么商用急冻柜必须使用微孔不锈钢专用盖，而严禁紧裹铝箔纸？",
+        answer: "用铝箔或保鲜膜紧密密封餐盘会完全剥夺水分潜热蒸发冷却作用（潜热带走初始35%至50%的显热）。紧封的铝箔将大量滚烫水汽锁在死角形成绝热保温气垫，极大地延缓核心降温。相反，专用的微孔不锈钢急冻盖允许水蒸气顺畅逸出，同时机械阻隔上方高空气流乱流与冷凝水滴坠落污染。"
+      },
+      {
+        question: "蒸发器盘管翅片结霜如何阻碍气流循环并降低制冷换热效率？",
+        answer: "热食物表面散发的大量水汽在循环流经-35°C蒸发器盘管时凝结为霜层。当霜层厚度超过2毫米时，狭窄的翅片缝隙被桥接堵塞，气流阻力剧增，循环风量(CFM)锐减35%至65%。此外，疏松的霜层导热系数极低(k ≈ 0.2 W/m·K)，如同一层保温棉被阻断热量传入制冷剂中，导致降温时间严重超标。"
+      },
+      {
+        question: "蒸发器热气除霜循环如何引发李斯特菌生物气溶胶交叉污染风险？",
+        answer: "在热气除霜过程中，高温制冷剂将蒸发器和接水盘加热至12°C–18°C以融化积冰。若接水盘平时缺乏清洗存有污垢，温暖湿润环境将促使耐冷李斯特菌(Listeria monocytogenes)形成生物膜。当除霜结束、6 m/s高转速风机瞬间重启时，强气流会将积水雾化为微米级气溶胶，随冷风吹向未盖盖的食物托盘。"
+      }
+    ],
+    monoBadge: "制冷热物理学与病原动力学",
+    monoTitle: "商用急冻柜（急速冷却机）蒸发器盘管气流除霜与嗜冷孢子动力学模拟器",
+    monoSub: "精确模拟熟热食物在90分钟内自70°C急降至3°C的边界层风速热传导动力学、蒸发器风机除霜生物气溶胶交叉污染风险，以及产气荚膜梭菌与蜡样芽孢杆菌萌发生长曲线（依据FDA 2022 § 3-501.14与英国90分钟急冷标准）。",
+    section1Title: "急冷热工动力学、气流边界层冲刷与毕奥数(Biot)传热极限",
+    section1Body: "在中央厨房与大型配餐中，直接将大批热食物放入普通冷库会导致严重食品安全隐患。普通冷库风速极低(0.3 m/s)，无法破坏食物表面的绝热边界层。商用急冻柜配置大风压强力风机，形成4.5–7.5 m/s强劲风速，将对流换热系数(h)提升至45–75 W/m²K。但当食物厚度超过50毫米时，毕奥数(Bi)远大于0.1，内部导热阻抗成为决定性瓶颈，强风无法穿透深层核心。",
+    section2Title: "耐热细菌芽孢热激活与产气荚膜梭菌对数增殖动力学",
+    section2Body: "熟食急冷的关键生物防线并非普通营养体细菌（在74°C烹调中已被杀灭），而是产气荚膜梭菌和蜡样芽孢杆菌耐热芽孢。蒸煮加热激活休眠芽孢。当温度降至54°C至40°C时，芽孢迅速复苏分裂，每10分钟即可翻倍增殖，过长的冷却时间会导致芽孢暴增并释放破坏人体肠上皮细胞的肠毒素。",
+    section3Title: "蒸发器霜堵风阻衰减与李斯特菌生物气溶胶雾化飞溅",
+    section3Body: "食物表面蒸发的潜热水汽在-35°C翅片上凝结为霜层。厚度超过2毫米即导致风量锐减35%–65%。除霜期间接水盘温升至15°C，滋生李斯特菌生物膜。风机高速重启时强气流剪切污水雾化，造成库内气溶胶交叉感染。"
+  },
+  ja: {
+    pageTitle: "業務用ブラストチラー（急速冷却機）蒸発器コイル気流除霜＆好冷性芽胞動態モデラー | IsItKitchenSafe",
+    pageDescription: "加熱食品が90分以内に70°Cから3°Cまで急速冷却される際の境界層風速熱伝達、蒸発器ファン除霜時のバイオエアロゾル二次汚染リスク、およびウェルシュ菌・セレウス菌芽胞の発芽増殖をFDA Food Code § 3-501.14および英国90分急冷基準に基づき精密解析。",
+    breadcrumbs: [
+      { label: 'ホーム', href: '/ja/' },
+      { label: '専門ツール', href: '/ja/tools/' },
+      { label: '急速冷却機＆病原芽胞動態モデラー' }
+    ],
+    faqs: [
+      {
+        question: "FDA食品基準§ 3-501.14および英国90分急冷基準の具体的な規定値とは？",
+        answer: "米国FDA Food Code 2022 § 3-501.14では、加熱調理後の危険食品は2時間以内に57.2°C (135°F)から21.1°C (70°F)まで降温させ（第1重要管理点CCP）、その後4時間以内に5°C (41°F)以下まで冷却しなければなりません（合計6時間以内）。一方、英国および欧州チルド食品協会(ECFA)基準では、芯温を70°Cから3°Cまで90分以内に急冷する厳格な基準が定められており、高性能ブラストチラーの導入が義務付けられています。"
+      },
+      {
+        question: "なぜ57°Cから21°C（135°Fから70°F）の温度帯が最も危険な生物学的ウィンドウなのか？",
+        answer: "この温度帯は、耐熱性細菌芽胞の発芽・急速増殖に最も適した環境です。ウェルシュ菌(Clostridium perfringens)やセレウス菌(Bacillus cereus)の芽胞は沸騰調理熱に耐えます。調理後に食品が54°Cから40°Cまで下がると、加熱刺激を受けた芽胞が一斉に発芽します。シチュー等の高タンパク環境下では7〜10分で倍加し、2時間以上停滞すると菌数が10万CFU/gを超え、激しい食中毒を引き起こします。"
+      },
+      {
+        question: "ホテルパン内の食品盛り付け厚さは熱伝導時間と冷却にどう影響するか？",
+        answer: "シチューやマッシュポテト等の粘性・固体食品では、内部熱移動はフーリエの熱伝導法則に支配されます。伝導熱移動の所要時間は厚さの2乗に比例します (t ∝ L²)。盛り付け厚さを50 mmから100 mmに倍増させると、中心部の熱抵抗と所要時間は4倍に跳ね上がります。100 mm深のパンでは危険温度帯に3時間以上停滞しますが、50 mmであれば45〜75分で安全に通過できます。"
+      },
+      {
+        question: "なぜブラストチラーでは密閉ホイルではなく穴あきチラー蓋を使用すべきなのか？",
+        answer: "アルミホイルやラップで密閉すると、初期熱量の35%〜50%を急速に奪う気化潜熱冷却が完全に遮断されます。密閉されたホイル内部には高温蒸気の断熱空気層が形成され、芯温降下が大幅に遅延します。穴あきステンレス蓋を使用すれば、蒸気を逃がしながら上部からの結露落下や送風乱流から食品を保護できます。"
+      },
+      {
+        question: "蒸発器コイルの着霜（フロスト閉塞）は風速と冷却性能をどう悪化させるか？",
+        answer: "食品から蒸発した水分は-35°Cのエバポレーターアルミフィン上で凍結します。霜の厚さが2 mmを超えるとフィン間隙が閉塞され、循環風量(CFM)が35%〜65%激減します。さらに多孔質の霜は熱伝導率が低く(k ≈ 0.2 W/m·K)、断熱毛布のように作用して冷媒への熱伝達を遮断し、深刻な冷却遅延を招きます。"
+      },
+      {
+        question: "ホットガス除霜サイクルはどのようにリステリア菌のエアロゾル汚染を引き起こすか？",
+        answer: "ホットガス除霜中、高温ガスがエバポレーターとドレンパンを12°C〜18°Cまで温めて着氷を融解させます。ドレンパンに有機汚れがあると、好冷性のリステリア菌(Listeria monocytogenes)がバイオフィルムを形成します。除霜完了後に6 m/sの強風ファンが再起動すると、汚水が微小エアロゾルとして庫内に飛散し、トレイ上の食品を二次汚染します。"
+      }
+    ],
+    monoBadge: "冷凍物理学＆病原微生物動態工学",
+    monoTitle: "業務用ブラストチラー（急速冷却機）蒸発器コイル気流除霜＆好冷性芽胞動態モデラー",
+    monoSub: "加熱食品が90分以内に70°Cから3°Cまで急速冷却される際の境界層風速熱伝達、蒸発器ファン除霜時のバイオエアロゾル二次汚染リスク、およびウェルシュ菌・セレウス菌芽胞の発芽増殖をFDA Food Code § 3-501.14および英国90分急冷基準に基づき精密解析。",
+    section1Title: "急速冷却熱力学、空気境界層剥離＆ビオ数(Biot)伝熱限界",
+    section1Body: "クックチル現場において、熱い食品を普通冷蔵庫に入れると重大な事故を招きます。普通冷蔵庫は風速が遅く(0.3 m/s)、パン表面の断熱境界層を破れません。ブラストチラーは4.5〜7.5 m/sの強風で対流熱伝達率(h)を45〜75 W/m²Kまで引き上げます。しかし食品の厚さが50 mmを超えるとビオ数が0.1を超過し、内部熱伝導抵抗が限界要因となり強風でも中心部が冷えません。",
+    section2Title: "耐熱細菌芽胞の熱活性化＆ウェルシュ菌対数増殖速度論",
+    section2Body: "調理済み食品冷却における最大の敵は、加熱調理に耐えるウェルシュ菌やセレウス菌の芽胞です。加熱熱刺激が休眠芽胞を発芽させます。54°Cから40°Cの至適帯では10分未満で菌数が倍増し、急冷が遅れると腸管内で毒素を放出して激しい下痢や腹痛を引き起こします。",
+    section3Title: "蒸発器フロスト閉塞による風速減衰＆リステリア二次汚染飛散",
+    section3Body: "食品の気化水分が-35°Cフィンに着霜し、2 mm超過で風量が35%〜65%激減します。除霜時にはドレンパンが15°Cに加温され、リステリア菌が繁殖します。ファン再起動時の高速気流が汚水をミスト化し、露出した食品トレイを汚染します。"
+  }
+};
+
+const c = CONTENT[lang];
+---
+
+<Layout title={c.pageTitle} description={c.pageDescription} faqs={c.faqs} availableLocales={availableLocales}>
+  <!-- Breadcrumbs -->
+  <div class="bg-surface-soft border-b border-hairline py-1">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <Breadcrumbs items={c.breadcrumbs} className="mb-0" />
+    </div>
+  </div>
+
+  <div class="max-w-[1280px] mx-auto px-6 py-10 md:py-16">
+    <!-- Header -->
+    <header class="max-w-4xl mb-10">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-sky-500/10 text-sky-800 dark:text-sky-300 mb-3 border border-sky-500/20">
+        <span>❄️</span>
+        {c.monoBadge}
+      </div>
+      <h1 class="text-3xl md:text-5xl font-extrabold text-ink tracking-tight mb-4 leading-tight">
+        {c.monoTitle}
+      </h1>
+      <p class="text-base md:text-lg text-muted leading-relaxed">
+        {c.monoSub}
+      </p>
+    </header>
+
+    <!-- Interactive Modeler Component -->
+    <CommercialBlastChillerSporeModeler lang={lang} />
+
+    <!-- Scientific Deep-Dive Analysis -->
+    <section class="prose max-w-none text-ink border-t border-hairline pt-12 mt-12 space-y-12">
+      <!-- Section 1 -->
+      <article>
+        <h2 class="text-2xl md:text-3xl font-bold tracking-tight mb-4">
+          {c.section1Title}
+        </h2>
+        <p class="text-sm md:text-base leading-relaxed text-muted mb-4">
+          {c.section1Body}
+        </p>
+      </article>
+
+      <!-- Section 2 -->
+      <article>
+        <h2 class="text-2xl md:text-3xl font-bold tracking-tight mb-4">
+          {c.section2Title}
+        </h2>
+        <p class="text-sm md:text-base leading-relaxed text-muted mb-4">
+          {c.section2Body}
+        </p>
+      </article>
+
+      <!-- Section 3 -->
+      <article>
+        <h2 class="text-2xl md:text-3xl font-bold tracking-tight mb-4">
+          {c.section3Title}
+        </h2>
+        <p class="text-sm md:text-base leading-relaxed text-muted mb-4">
+          {c.section3Body}
+        </p>
+      </article>
+    </section>
+  </div>
+</Layout>

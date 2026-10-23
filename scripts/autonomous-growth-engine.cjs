@@ -96,7 +96,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-conveyor-pizza-oven-modeler', name: 'Commercial Conveyor Pizza Oven Thermal Plume & Carbon Monoxide Dispersion Modeler', category: 'Thermal Physics & Industrial Ventilation', component: 'CommercialConveyorPizzaOvenModeler.astro', dataFile: 'conveyor-pizza-oven-data.json' },
   { slug: 'commercial-soft-serve-listeria-modeler', name: 'Commercial Soft-Serve Ice Cream Machine Heat-Treatment Cycle & Listeria Persistence Modeler', category: 'Dairy Microbiology & Thermal Kinetics', component: 'CommercialSoftServeListeriaModeler.astro', dataFile: 'soft-serve-listeria-data.json' },
   { slug: 'commercial-immersion-circulator-modeler', name: 'Commercial Immersion Circulator Water Bath Biofilm & Thermal Stratification Modeler', category: 'Microbiology & Thermal Engineering', component: 'CommercialImmersionCirculatorModeler.astro', dataFile: 'immersion-circulator-data.json' },
-  { slug: 'commercial-rotisserie-creosote-modeler', name: 'Commercial Rotisserie Gas Burner Radiant Heat Flare & Fat Creosote Deposition Modeler', category: 'Combustion Toxicology & Fire Prevention', component: 'CommercialRotisserieCreosoteModeler.astro', dataFile: 'rotisserie-creosote-data.json' }
+  { slug: 'commercial-rotisserie-creosote-modeler', name: 'Commercial Rotisserie Gas Burner Radiant Heat Flare & Fat Creosote Deposition Modeler', category: 'Combustion Toxicology & Fire Prevention', component: 'CommercialRotisserieCreosoteModeler.astro', dataFile: 'rotisserie-creosote-data.json' },
+  { slug: 'commercial-blast-chiller-spore-modeler', name: 'Commercial Blast Chiller Evaporator Coil Psychrotrophic Spore & Airflow Defrost Modeler', category: 'Refrigeration Physics & Pathogen Dynamics', component: 'CommercialBlastChillerSporeModeler.astro', dataFile: 'blast-chiller-spore-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -281,7 +282,11 @@ function auditDatasets() {
     'cold-brew-nitro-biofilm-data.json',
     'commercial-charbroiler-pah-data.json',
     'induction-wok-shatter-data.json',
-    'conveyor-pizza-oven-data.json'
+    'conveyor-pizza-oven-data.json',
+    'soft-serve-listeria-data.json',
+    'immersion-circulator-data.json',
+    'rotisserie-creosote-data.json',
+    'blast-chiller-spore-data.json'
   ];
 
   const datasetStats = {};
@@ -532,32 +537,32 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Blast Chiller Evaporator Coil Psychrotrophic Spore & Airflow Defrost Modeler',
-      category: 'Refrigeration Physics & Pathogen Dynamics',
-      intent: 'Models 90-minute hot food pull-down boundary layer air velocity (70°C to 3°C), evaporator fan bio-aerosol cross-contamination, and Clostridium perfringens spore germination curves under HACCP FDA criteria.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '13,500+ US impressions'
-    },
-    {
       title: 'Commercial Conveyor Dishwasher Acidic Descaler Chemical Vapor & Cavitation Modeler',
       category: 'Industrial Toxicology & Chemical Engineering',
       intent: 'Models phosphoric and sulfamic acid vapor aerosolization during automated high-temp descaling cycles, elastomeric pump seal embrittlement, and worker respiratory peak threshold limits under OSHA/NIOSH standards.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '12,200+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '14,200+ US impressions'
     },
     {
       title: 'Commercial Combi Oven Boiler Descaling Acid Aerosol & Steam Inversion Modeler',
       category: 'Industrial HVAC & Chemical Safety',
       intent: 'Models automated boiler steam generation descaling cycles with sulfamic acid aerosols, gasket embrittlement under 130°C superheated steam, and kitchen worker inhalation exposure thresholds under OSHA/NIOSH standards.',
-      priority: 'MEDIUM',
-      estimatedMonthlyVolume: '10,800+ US impressions'
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '11,800+ US impressions'
     },
     {
       title: 'Commercial Tilting Braising Pan Hydraulic Seal & Thermal Shock Warp Modeler',
       category: 'Mechanical Engineering & Thermal Physics',
       intent: 'Models heavy 40-gallon braising pan cold deglazing thermal shock warping (350°C to 20°C ΔT), hydraulic tilt cylinder seal fluid breakdown, and burn scald wave containment under NSF/ANSI standards.',
       priority: 'MEDIUM',
-      estimatedMonthlyVolume: '8,900+ US impressions'
+      estimatedMonthlyVolume: '9,500+ US impressions'
+    },
+    {
+      title: 'Commercial Soft-Serve Freezing Cylinder Scraper Blade Micro-Shaving & Refrigerant Floodback Modeler',
+      category: 'Tribology & Dairy Physics',
+      intent: 'Models Delrin/stainless scraper blade edge wear shearing into dairy ice matrices, barrel micro-shaving particulate contamination, and thermostatic expansion valve hunting during continuous draw under NSF 6 and 3-A Sanitary Standards.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '8,200+ US impressions'
     }
   ];
 
