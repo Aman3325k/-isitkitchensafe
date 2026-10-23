@@ -101,7 +101,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-rotisserie-creosote-modeler',
   'tools/commercial-blast-chiller-spore-modeler',
   'tools/commercial-dishwasher-acidic-descaler-modeler',
-  'tools/commercial-combi-oven-descaling-modeler'
+  'tools/commercial-combi-oven-descaling-modeler',
+  'tools/commercial-tilting-braising-pan-modeler'
 ];
 
 const esSlugs = new Set([
