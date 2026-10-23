@@ -104,7 +104,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-combi-oven-descaling-modeler',
   'tools/commercial-tilting-braising-pan-modeler',
   'tools/commercial-soft-serve-scraper-blade-modeler',
-  'tools/commercial-pressure-steamer-gasket-modeler'
+  'tools/commercial-pressure-steamer-gasket-modeler',
+  'tools/commercial-ventless-induction-fryer-modeler'
 ];
 
 const esSlugs = new Set([
