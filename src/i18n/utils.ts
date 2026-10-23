@@ -185,10 +185,10 @@ export function isItemTranslatedInLocale(appliance: string, slug: string, lang: 
   return false;
 }
 
-const esDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens', 'compare', 'blog', 'material', 'tools', 'about', 'contact', 'privacy', 'terms', 'sitemap-page']);
-const ptDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens', 'compare', 'blog', 'material', 'tools', 'about', 'contact', 'privacy', 'terms', 'sitemap-page']);
-const zhDirectories = new Set<string>(['washing-machine', 'how-long', 'material', 'what-happens', 'refreeze', 'compare', 'blog', 'tools', 'about', 'contact', 'privacy', 'terms', 'sitemap-page']);
-const jaDirectories = new Set<string>(['washing-machine', 'how-long', 'material', 'what-happens', 'refreeze', 'compare', 'blog', 'tools', 'about', 'contact', 'privacy', 'terms', 'sitemap-page']);
+const esDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens', 'compare', 'blog', 'material', 'tools', 'about', 'contact', 'privacy', 'terms', 'disclaimer', 'sitemap-page']);
+const ptDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens', 'compare', 'blog', 'material', 'tools', 'about', 'contact', 'privacy', 'terms', 'disclaimer', 'sitemap-page']);
+const zhDirectories = new Set<string>(['washing-machine', 'how-long', 'material', 'what-happens', 'refreeze', 'compare', 'blog', 'tools', 'about', 'contact', 'privacy', 'terms', 'disclaimer', 'sitemap-page']);
+const jaDirectories = new Set<string>(['washing-machine', 'how-long', 'material', 'what-happens', 'refreeze', 'compare', 'blog', 'tools', 'about', 'contact', 'privacy', 'terms', 'disclaimer', 'sitemap-page']);
 
 /**
  * Checks whether a safety directory section has translated content in the given locale.

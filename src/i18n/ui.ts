@@ -109,6 +109,7 @@ export const ui = {
     'footer.contact': 'Contact Support',
     'footer.privacy': 'Privacy Policy',
     'footer.terms': 'Terms & Conditions',
+    'footer.disclaimerLink': 'Safety Disclaimer',
     'footer.allRights': 'All rights reserved.',
     'footer.disclaimer': 'Disclaimer: The safety guidelines provided on this website are for informational purposes only. Always consult your appliance\'s manufacturer manual.',
 
@@ -216,6 +217,7 @@ export const ui = {
     'footer.contact': 'Contacto y Soporte',
     'footer.privacy': 'Política de Privacidad',
     'footer.terms': 'Términos y Condiciones',
+    'footer.disclaimerLink': 'Descargo de Responsabilidad',
     'footer.allRights': 'Todos los derechos reservados.',
     'footer.disclaimer': 'Descargo de responsabilidad: Las pautas de seguridad proporcionadas en este sitio web son solo para fines informativos. Consulta siempre el manual del fabricante de tu electrodoméstico.',
 
@@ -323,6 +325,7 @@ export const ui = {
     'footer.contact': 'Contato e Suporte',
     'footer.privacy': 'Política de Privacidade',
     'footer.terms': 'Termos e Condições',
+    'footer.disclaimerLink': 'Aviso de Responsabilidade',
     'footer.allRights': 'Todos os direitos reservados.',
     'footer.disclaimer': 'Aviso legal: As diretrizes de segurança fornecidas neste site são apenas para fins informativos. Sempre consulte o manual do fabricante do seu eletrodoméstico.',
 
@@ -430,6 +433,7 @@ export const ui = {
     'footer.contact': '联系我们',
     'footer.privacy': '隐私政策',
     'footer.terms': '使用条款',
+    'footer.disclaimerLink': '厨房安全免责声明',
     'footer.allRights': '保留所有权利。',
     'footer.disclaimer': '免责声明：本网站提供的安全指南仅供参考。使用时请务必遵循具体电器的原厂说明书。',
 
@@ -537,6 +541,7 @@ export const ui = {
     'footer.contact': 'お問い合わせ',
     'footer.privacy': 'プライバシーポリシー',
     'footer.terms': '利用規約',
+    'footer.disclaimerLink': 'キッチン安全免責事項',
     'footer.allRights': '無断転載を禁じます。',
     'footer.disclaimer': '免責事項：当サイトの情報は参考情報です。ご使用の際は必ず各家電製品の取扱説明書をご確認ください。',
 
