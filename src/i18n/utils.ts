@@ -102,8 +102,9 @@ const SPECIAL_PAGES = [
   'tools/commercial-blast-chiller-spore-modeler',
   'tools/commercial-dishwasher-acidic-descaler-modeler',
   'tools/commercial-combi-oven-descaling-modeler',
-  'tools/commercial-tilting-braising-pan-modeler,
-  'tools/commercial-soft-serve-scraper-blade-modeler''
+  'tools/commercial-tilting-braising-pan-modeler',
+  'tools/commercial-soft-serve-scraper-blade-modeler',
+  'tools/commercial-pressure-steamer-gasket-modeler'
 ];
 
 const esSlugs = new Set([
