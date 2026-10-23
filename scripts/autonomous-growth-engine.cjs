@@ -2,7 +2,7 @@
  * IsItKitchenSafe Autonomous Growth & Ops Engine (v2.0 - All-Day Smart Engine)
  * 
  * Continuous Operations & Growth Engine:
- * - 58 Interactive Diagnostic Tools Health & 5-Language Slug Parity (EN, ES, PT, JA, ZH-CN)
+ * - 71 Interactive Diagnostic Tools Health & 5-Language Slug Parity (EN, ES, PT, JA, ZH-CN)
  * - Cloudflare Pages _redirects budget monitor (2,000 line ceiling) & Edge Middleware sync
  * - Multi-Language Corpus & Database Integrity (66+ critical data assets)
  * - Structured Data (JSON-LD FAQPage, BreadcrumbList & Article/WebApplication) compliance audit
@@ -27,7 +27,7 @@ if (!fs.existsSync(LOGS_DIR)) {
   fs.mkdirSync(LOGS_DIR, { recursive: true });
 }
 
-// 67 Flagship Interactive Tools Registry
+// 71 Flagship Interactive Tools Registry
 const TOOLS_REGISTRY = [
   { slug: 'pan-scratch-inspector', name: 'AI Pan Scratch & Coating Damage Inspector', category: 'Materials', component: 'PanScratchInspector.astro' },
   { slug: 'cookware-brand-transparency-index', name: 'Cookware Brand Transparency & Greenwashing Index', category: 'Materials', component: 'CookwareBrandIndex.astro' },
@@ -98,7 +98,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-immersion-circulator-modeler', name: 'Commercial Immersion Circulator Water Bath Biofilm & Thermal Stratification Modeler', category: 'Microbiology & Thermal Engineering', component: 'CommercialImmersionCirculatorModeler.astro', dataFile: 'immersion-circulator-data.json' },
   { slug: 'commercial-rotisserie-creosote-modeler', name: 'Commercial Rotisserie Gas Burner Radiant Heat Flare & Fat Creosote Deposition Modeler', category: 'Combustion Toxicology & Fire Prevention', component: 'CommercialRotisserieCreosoteModeler.astro', dataFile: 'rotisserie-creosote-data.json' },
   { slug: 'commercial-blast-chiller-spore-modeler', name: 'Commercial Blast Chiller Evaporator Coil Psychrotrophic Spore & Airflow Defrost Modeler', category: 'Refrigeration Physics & Pathogen Dynamics', component: 'CommercialBlastChillerSporeModeler.astro', dataFile: 'blast-chiller-spore-data.json' },
-  { slug: 'commercial-dishwasher-acidic-descaler-modeler', name: 'Commercial Conveyor Dishwasher Acidic Descaler Chemical Vapor & Cavitation Modeler', category: 'Industrial Toxicology & Chemical Engineering', component: 'CommercialDishwasherAcidicDescalerModeler.astro', dataFile: 'commercial-dishwasher-descaler-data.json' }
+  { slug: 'commercial-dishwasher-acidic-descaler-modeler', name: 'Commercial Conveyor Dishwasher Acidic Descaler Chemical Vapor & Cavitation Modeler', category: 'Industrial Toxicology & Chemical Engineering', component: 'CommercialDishwasherAcidicDescalerModeler.astro', dataFile: 'commercial-dishwasher-descaler-data.json' },
+  { slug: 'commercial-combi-oven-descaling-modeler', name: 'Commercial Combi Oven Boiler Descaling Acid Aerosol & Steam Inversion Modeler', category: 'Industrial HVAC & Chemical Safety', component: 'CommercialCombiOvenDescalingModeler.astro', dataFile: 'combi-oven-descaling-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -538,32 +539,32 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Combi Oven Boiler Descaling Acid Aerosol & Steam Inversion Modeler',
-      category: 'Industrial HVAC & Chemical Safety',
-      intent: 'Models automated boiler steam generation descaling cycles with sulfamic acid aerosols, gasket embrittlement under 130°C superheated steam, and kitchen worker inhalation exposure thresholds under OSHA/NIOSH standards.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '14,500+ US impressions'
-    },
-    {
       title: 'Commercial Tilting Braising Pan Hydraulic Seal & Thermal Shock Warp Modeler',
       category: 'Mechanical Engineering & Thermal Physics',
       intent: 'Models heavy 40-gallon braising pan cold deglazing thermal shock warping (350°C to 20°C ΔT), hydraulic tilt cylinder seal fluid breakdown, and burn scald wave containment under NSF/ANSI standards.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '11,200+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '14,800+ US impressions'
     },
     {
       title: 'Commercial Soft-Serve Freezing Cylinder Scraper Blade Micro-Shaving & Refrigerant Floodback Modeler',
       category: 'Tribology & Dairy Physics',
       intent: 'Models Delrin/stainless scraper blade edge wear shearing into dairy ice matrices, barrel micro-shaving particulate contamination, and thermostatic expansion valve hunting during continuous draw under NSF 6 and 3-A Sanitary Standards.',
-      priority: 'MEDIUM',
-      estimatedMonthlyVolume: '8,900+ US impressions'
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '11,500+ US impressions'
     },
     {
       title: 'Commercial Pressure Steamer Door Gasket Hydrolytic Rupture & Scald Jet Modeler',
       category: 'Fluid Dynamics & Thermal Physics',
       intent: 'Models high-pressure commercial compartment steamer door silicone/EPDM gasket thermal embrittlement, safety interlock failure, and steam scalding jet velocity under ASME/NSF standards.',
       priority: 'MEDIUM',
-      estimatedMonthlyVolume: '7,400+ US impressions'
+      estimatedMonthlyVolume: '8,900+ US impressions'
+    },
+    {
+      title: 'Commercial Ventless High-Speed Induction Fryer Oil Aerosol & Fire Suppression Modeler',
+      category: 'Combustion Safety & Fluid Dynamics',
+      intent: 'Models high-temperature continuous deep fat frying aerosol generation (180°C–195°C), UL 710B electrostatic precipitator capture saturation, and NFPA 96 automatic wet chemical fire suppression release thresholds.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '7,200+ US impressions'
     }
   ];
 
