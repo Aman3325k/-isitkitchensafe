@@ -99,7 +99,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-soft-serve-listeria-modeler',
   'tools/commercial-immersion-circulator-modeler',
   'tools/commercial-rotisserie-creosote-modeler',
-  'tools/commercial-blast-chiller-spore-modeler'
+  'tools/commercial-blast-chiller-spore-modeler',
+  'tools/commercial-dishwasher-acidic-descaler-modeler'
 ];
 
 const esSlugs = new Set([
