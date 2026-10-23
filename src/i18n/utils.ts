@@ -96,7 +96,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-charbroiler-pah-modeler',
   'tools/commercial-induction-wok-shatter-modeler',
   'tools/commercial-conveyor-pizza-oven-modeler',
-  'tools/commercial-soft-serve-listeria-modeler'
+  'tools/commercial-soft-serve-listeria-modeler',
+  'tools/commercial-immersion-circulator-modeler'
 ];
 
 const esSlugs = new Set([

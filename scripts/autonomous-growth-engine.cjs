@@ -27,7 +27,7 @@ if (!fs.existsSync(LOGS_DIR)) {
   fs.mkdirSync(LOGS_DIR, { recursive: true });
 }
 
-// 60 Flagship Interactive Tools Registry
+// 67 Flagship Interactive Tools Registry
 const TOOLS_REGISTRY = [
   { slug: 'pan-scratch-inspector', name: 'AI Pan Scratch & Coating Damage Inspector', category: 'Materials', component: 'PanScratchInspector.astro' },
   { slug: 'cookware-brand-transparency-index', name: 'Cookware Brand Transparency & Greenwashing Index', category: 'Materials', component: 'CookwareBrandIndex.astro' },
@@ -94,7 +94,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-charbroiler-pah-modeler', name: 'Commercial Charbroiler Radiant Heat Flare-Up & Polycyclic Aromatic Hydrocarbon (PAH) Emission Modeler', category: 'Combustion Toxicology & Fluid Dynamics', component: 'CommercialCharbroilerPahModeler.astro', dataFile: 'commercial-charbroiler-pah-data.json' },
   { slug: 'commercial-induction-wok-shatter-modeler', name: 'Commercial Induction Wok Thermal Shock Ceramic Basin Shatter Modeler', category: 'Ceramic Physics & High-Frequency Electromagnetics', component: 'CommercialInductionWokShatterModeler.astro', dataFile: 'induction-wok-shatter-data.json' },
   { slug: 'commercial-conveyor-pizza-oven-modeler', name: 'Commercial Conveyor Pizza Oven Thermal Plume & Carbon Monoxide Dispersion Modeler', category: 'Thermal Physics & Industrial Ventilation', component: 'CommercialConveyorPizzaOvenModeler.astro', dataFile: 'conveyor-pizza-oven-data.json' },
-  { slug: 'commercial-soft-serve-listeria-modeler', name: 'Commercial Soft-Serve Ice Cream Machine Heat-Treatment Cycle & Listeria Persistence Modeler', category: 'Dairy Microbiology & Thermal Kinetics', component: 'CommercialSoftServeListeriaModeler.astro', dataFile: 'soft-serve-listeria-data.json' }
+  { slug: 'commercial-soft-serve-listeria-modeler', name: 'Commercial Soft-Serve Ice Cream Machine Heat-Treatment Cycle & Listeria Persistence Modeler', category: 'Dairy Microbiology & Thermal Kinetics', component: 'CommercialSoftServeListeriaModeler.astro', dataFile: 'soft-serve-listeria-data.json' },
+  { slug: 'commercial-immersion-circulator-modeler', name: 'Commercial Immersion Circulator Water Bath Biofilm & Thermal Stratification Modeler', category: 'Microbiology & Thermal Engineering', component: 'CommercialImmersionCirculatorModeler.astro', dataFile: 'immersion-circulator-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -530,32 +531,32 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Immersion Circulator Water Bath Biofilm & Thermal Stratification Modeler',
-      category: 'Microbiology & Thermal Engineering',
-      intent: 'Models prolonged 54°C cook cycle bacterial biofilm survival, heating coil calcification, and thermal inversion dead zones under high-volume sous vide commercial banquet production.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '14,000+ US impressions'
-    },
-    {
       title: 'Commercial Rotisserie Gas Burner Radiant Heat Flare & Fat Creosote Deposition Modeler',
       category: 'Combustion Toxicology & Fire Prevention',
       intent: 'Models radiant ceramic burner grease spatter ignition, exhaust duct creosote condensation rates, and continuous polycyclic hydrocarbon emissions during commercial batch chicken roasting.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '12,800+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '14,000+ US impressions'
     },
     {
       title: 'Commercial Blast Chiller Evaporator Coil Psychrotrophic Spore & Airflow Defrost Modeler',
       category: 'Refrigeration Physics & Pathogen Dynamics',
       intent: 'Models 90-minute hot food pull-down boundary layer air velocity (70°C to 3°C), evaporator fan bio-aerosol cross-contamination, and Clostridium perfringens spore germination curves under HACCP FDA criteria.',
-      priority: 'MEDIUM',
-      estimatedMonthlyVolume: '11,400+ US impressions'
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '12,800+ US impressions'
     },
     {
       title: 'Commercial Conveyor Dishwasher Acidic Descaler Chemical Vapor & Cavitation Modeler',
       category: 'Industrial Toxicology & Chemical Engineering',
       intent: 'Models phosphoric and sulfamic acid vapor aerosolization during automated high-temp descaling cycles, elastomeric pump seal embrittlement, and worker respiratory peak threshold limits under OSHA/NIOSH standards.',
       priority: 'MEDIUM',
-      estimatedMonthlyVolume: '10,200+ US impressions'
+      estimatedMonthlyVolume: '11,400+ US impressions'
+    },
+    {
+      title: 'Commercial Combi Oven Boiler Descaling Acid Aerosol & Steam Inversion Modeler',
+      category: 'Industrial HVAC & Chemical Safety',
+      intent: 'Models automated boiler steam generation descaling cycles with sulfamic acid aerosols, gasket embrittlement under 130°C superheated steam, and kitchen worker inhalation exposure thresholds under OSHA/NIOSH standards.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '9,800+ US impressions'
     }
   ];
 
@@ -848,7 +849,7 @@ Usage:
 Options:
   (no args)             Run full master cycle (audits + Astro build + link check)
   --quick               Fast validation cycle (< 2s) across all checks
-  --tools               Audit all 60 flagship tools across 5 locales (300 pages)
+  --tools               Audit all 67 flagship tools across 5 locales (335 pages)
   --parity              Verify tool registry vs. Astro component parity (0 orphans)
   --redirects           Audit Cloudflare Pages redirect limits & edge map
   --datasets            Audit all 66+ data files and multilingual integrity
