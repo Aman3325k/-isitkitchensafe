@@ -100,7 +100,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-blast-chiller-spore-modeler', name: 'Commercial Blast Chiller Evaporator Coil Psychrotrophic Spore & Airflow Defrost Modeler', category: 'Refrigeration Physics & Pathogen Dynamics', component: 'CommercialBlastChillerSporeModeler.astro', dataFile: 'blast-chiller-spore-data.json' },
   { slug: 'commercial-dishwasher-acidic-descaler-modeler', name: 'Commercial Conveyor Dishwasher Acidic Descaler Chemical Vapor & Cavitation Modeler', category: 'Industrial Toxicology & Chemical Engineering', component: 'CommercialDishwasherAcidicDescalerModeler.astro', dataFile: 'commercial-dishwasher-descaler-data.json' },
   { slug: 'commercial-combi-oven-descaling-modeler', name: 'Commercial Combi Oven Boiler Descaling Acid Aerosol & Steam Inversion Modeler', category: 'Industrial HVAC & Chemical Safety', component: 'CommercialCombiOvenDescalingModeler.astro', dataFile: 'combi-oven-descaling-data.json' },
-  { slug: 'commercial-tilting-braising-pan-modeler', name: 'Commercial Tilting Braising Pan Hydraulic Seal & Thermal Shock Warp Modeler', category: 'Mechanical Engineering & Thermal Physics', component: 'CommercialTiltingBraisingPanModeler.astro', dataFile: 'tilting-braising-pan-data.json' }
+  { slug: 'commercial-tilting-braising-pan-modeler', name: 'Commercial Tilting Braising Pan Hydraulic Seal & Thermal Shock Warp Modeler', category: 'Mechanical Engineering & Thermal Physics', component: 'CommercialTiltingBraisingPanModeler.astro', dataFile: 'tilting-braising-pan-data.json' },
+  { slug: 'commercial-soft-serve-scraper-blade-modeler', name: 'Commercial Soft-Serve Freezing Cylinder Scraper Blade Micro-Shaving & Refrigerant Floodback Modeler', category: 'Tribology & Dairy Physics', component: 'CommercialSoftServeScraperBladeModeler.astro', dataFile: 'soft-serve-scraper-blade-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -292,7 +293,8 @@ function auditDatasets() {
     'blast-chiller-spore-data.json',
     'commercial-dishwasher-descaler-data.json',
     'combi-oven-descaling-data.json',
-    'tilting-braising-pan-data.json'
+    'tilting-braising-pan-data.json',
+    'soft-serve-scraper-blade-data.json'
   ];
 
   const datasetStats = {};
@@ -326,72 +328,61 @@ function auditStructuredData() {
   let passingPages = 0;
   let auditedPages = 0;
 
-  // Audit compiled dist/tools if dist exists, else fallback to source pages
-  const hasDist = fs.existsSync(DIST_DIR);
+  for (const tool of TOOLS_REGISTRY) {
+    for (const loc of LOCALES) {
+      auditedPages++;
+      let htmlPath = loc === 'en'
+        ? path.join(DIST_DIR, `tools/${tool.slug}/index.html`)
+        : path.join(DIST_DIR, `${loc}/tools/${tool.slug}/index.html`);
 
-  if (hasDist) {
-    for (const tool of TOOLS_REGISTRY) {
-      for (const loc of LOCALES) {
-        let htmlPath;
-        if (loc === 'en') {
-          htmlPath = path.join(DIST_DIR, `tools/${tool.slug}/index.html`);
-        } else {
-          htmlPath = path.join(DIST_DIR, `${loc}/tools/${tool.slug}/index.html`);
-        }
+      if (fs.existsSync(htmlPath)) {
+        const html = fs.readFileSync(htmlPath, 'utf8');
+        const hasFaq = html.includes('"@type":"FAQPage"') || html.includes('"@type": "FAQPage"');
+        const hasBreadcrumbs = html.includes('"@type":"BreadcrumbList"') || html.includes('"@type": "BreadcrumbList"');
+        const hasCanonical = html.includes('<link rel="canonical"') || html.includes("<link rel='canonical'");
+        const hasHreflang = html.includes('hreflang="');
+        const hasViewport = html.includes('name="viewport"');
 
-        auditedPages++;
-        if (fs.existsSync(htmlPath)) {
-          const html = fs.readFileSync(htmlPath, 'utf8');
-          const hasFaq = html.includes('"@type":"FAQPage"') || html.includes('"@type": "FAQPage"');
-          const hasBreadcrumbs = html.includes('"@type":"BreadcrumbList"') || html.includes('"@type": "BreadcrumbList"');
-          const hasCanonical = html.includes('<link rel="canonical"') || html.includes("<link rel='canonical'");
-          const hasHreflang = html.includes('hreflang="');
-          const hasViewport = html.includes('name="viewport"');
+        const isPassing = hasFaq && hasBreadcrumbs && hasCanonical && hasHreflang && hasViewport;
+        if (isPassing) passingPages++;
 
-          const isPassing = hasFaq && hasBreadcrumbs && hasCanonical && hasHreflang && hasViewport;
-          if (isPassing) passingPages++;
-
-          results.push({
-            slug: tool.slug,
-            locale: loc,
-            hasFaq,
-            hasBreadcrumbs,
-            hasCanonical,
-            hasHreflang,
-            hasViewport,
-            status: isPassing ? 'PASS' : 'WARN'
-          });
-        } else {
-          results.push({
-            slug: tool.slug,
-            locale: loc,
-            status: 'MISSING_IN_DIST'
-          });
-        }
-      }
-    }
-  } else {
-    // Audit Astro source pages for schema props
-    for (const tool of TOOLS_REGISTRY) {
-      for (const loc of LOCALES) {
+        results.push({
+          slug: tool.slug,
+          locale: loc,
+          source: 'DIST_HTML',
+          hasFaq,
+          hasBreadcrumbs,
+          hasCanonical,
+          hasHreflang,
+          hasViewport,
+          status: isPassing ? 'PASS' : 'WARN'
+        });
+      } else {
+        // Fallback to source Astro page validation
         let astroPath = loc === 'en'
           ? path.join(PROJECT_ROOT, `src/pages/tools/${tool.slug}.astro`)
           : path.join(PROJECT_ROOT, `src/pages/[lang]/tools/${tool.slug}.astro`);
-        
-        auditedPages++;
+
         if (fs.existsSync(astroPath)) {
-          const content = fs.readFileSync(astroPath, 'utf8');
-          const hasFaqsProp = content.includes('faqs={faqs}') || content.includes('faqs=');
-          const hasBreadcrumbsComp = content.includes('Breadcrumbs');
+          const fileContent = fs.readFileSync(astroPath, 'utf8');
+          const hasFaqsProp = fileContent.includes('faqs={faqs}') || fileContent.includes('faqs=');
+          const hasBreadcrumbsComp = fileContent.includes('Breadcrumbs');
           const isPassing = hasFaqsProp && hasBreadcrumbsComp;
           if (isPassing) passingPages++;
 
           results.push({
             slug: tool.slug,
             locale: loc,
+            source: 'ASTRO_SOURCE',
             hasFaqsProp,
             hasBreadcrumbsComp,
             status: isPassing ? 'PASS' : 'WARN'
+          });
+        } else {
+          results.push({
+            slug: tool.slug,
+            locale: loc,
+            status: 'MISSING'
           });
         }
       }
@@ -543,24 +534,17 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Soft-Serve Freezing Cylinder Scraper Blade Micro-Shaving & Refrigerant Floodback Modeler',
-      category: 'Tribology & Dairy Physics',
-      intent: 'Models Delrin/stainless scraper blade edge wear shearing into dairy ice matrices, barrel micro-shaving particulate contamination, and thermostatic expansion valve hunting during continuous draw under NSF 6 and 3-A Sanitary Standards.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '14,800+ US impressions'
-    },
-    {
       title: 'Commercial Pressure Steamer Door Gasket Hydrolytic Rupture & Scald Jet Modeler',
       category: 'Fluid Dynamics & Thermal Physics',
       intent: 'Models high-pressure commercial compartment steamer door silicone/EPDM gasket thermal embrittlement, safety interlock failure, and steam scalding jet velocity under ASME/NSF standards.',
-      priority: 'HIGH',
+      priority: 'CRITICAL_HIGH',
       estimatedMonthlyVolume: '11,500+ US impressions'
     },
     {
       title: 'Commercial Ventless High-Speed Induction Fryer Oil Aerosol & Fire Suppression Modeler',
       category: 'Combustion Safety & Fluid Dynamics',
       intent: 'Models high-temperature continuous deep fat frying aerosol generation (180°C–195°C), UL 710B electrostatic precipitator capture saturation, and NFPA 96 automatic wet chemical fire suppression release thresholds.',
-      priority: 'MEDIUM',
+      priority: 'HIGH',
       estimatedMonthlyVolume: '8,900+ US impressions'
     },
     {
@@ -569,6 +553,13 @@ function auditGrowthOpportunities() {
       intent: 'Models 2/3 steam-jacketed commercial kettle steam pressure accumulation (up to 50 PSI), vacuum breaker air-binding collapse, and ASME Section VIII safety relief valve discharge sizing under high-viscosity food boiling.',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '7,500+ US impressions'
+    },
+    {
+      title: 'Commercial Walk-In Freezer Entrapment & Internal Emergency Release Freeze-Weld Modeler',
+      category: 'Cryogenic Safety & Mechanical Failure',
+      intent: 'Models -25°C commercial walk-in blast freezer latch moisture freeze-welding, internal glow-in-the-dark emergency plunger shear pin mechanical jamming, and entrapment hypothermia survival kinetics under OSHA 1910.36.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '6,800+ US impressions'
     }
   ];
 
