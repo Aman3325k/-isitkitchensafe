@@ -3,7 +3,7 @@
 A static reference site answering "Can you put X in Y?" questions for kitchen appliances.
 
 ## Overview
-IsItKitchenSafe provides 10,002 static diagnostic pages detailing whether everyday items are safe for the dishwasher, microwave, freezer, oven, dryer, air fryer, refrigerator, and more across 5 languages (English, Spanish, Portuguese, Japanese, Simplified Chinese), backed by 65 flagship interactive diagnostic tools.
+IsItKitchenSafe provides 10,002 static diagnostic pages detailing whether everyday items are safe for the dishwasher, microwave, freezer, oven, dryer, air fryer, refrigerator, and more across 5 languages (English, Spanish, Portuguese, Japanese, Simplified Chinese), backed by 66 flagship interactive diagnostic tools.
 
 ## Tech Stack
 - **Framework**: Astro.js
@@ -45,7 +45,7 @@ npm run ops:sitemaps
 # Run targeted audits
 npm run ops:seo        # Structured data (JSON-LD FAQPage, BreadcrumbList) & canonicals
 npm run ops:cwv        # Core Web Vitals bundle budgets & asset geometry
-node scripts/autonomous-growth-engine.cjs --tools      # 65 tools × 5 languages audit
+node scripts/autonomous-growth-engine.cjs --tools      # 66 tools × 5 languages audit
 node scripts/autonomous-growth-engine.cjs --redirects  # Cloudflare Pages 2k ceiling monitor
 node scripts/autonomous-growth-engine.cjs --datasets   # 77+ multilingual data assets
 
