@@ -27,7 +27,7 @@ if (!fs.existsSync(LOGS_DIR)) {
   fs.mkdirSync(LOGS_DIR, { recursive: true });
 }
 
-// 78 Flagship Interactive Tools Registry
+// 88 Flagship Interactive Tools Registry
 const TOOLS_REGISTRY = [
   { slug: 'pan-scratch-inspector', name: 'AI Pan Scratch & Coating Damage Inspector', category: 'Materials', component: 'PanScratchInspector.astro' },
   { slug: 'cookware-brand-transparency-index', name: 'Cookware Brand Transparency & Greenwashing Index', category: 'Materials', component: 'CookwareBrandIndex.astro' },
@@ -116,6 +116,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-ventless-hood-esp-modeler', name: 'Commercial Ventless Kitchen Hood Electrostatic Precipitator Ozone & Grease Vapor Oxidation Modeler', category: 'Combustion Toxicology & Industrial Ventilation', component: 'CommercialVentlessHoodEspModeler.astro', dataFile: 'ventless-hood-esp-data.json' },
   { slug: 'commercial-conveyor-smoker-pah-modeler', name: 'Commercial Continuous Conveyor Smoker Polycyclic Aromatic Hydrocarbon (PAH) Wood Pellet Combustion Modeler', category: 'Combustion Toxicology & Food Safety', component: 'CommercialConveyorSmokerPahModeler.astro', dataFile: 'conveyor-smoker-pah-data.json' },
   { slug: 'commercial-cryogenic-nitrogen-freezer-modeler', name: 'Commercial Cryogenic Liquid Nitrogen Quick-Freezer Belt Embrittlement & Oxygen Depletion Safety Modeler', category: 'Cryogenic Thermodynamics & Atmospheric Safety', component: 'CommercialCryogenicNitrogenFreezerModeler.astro', dataFile: 'cryogenic-nitrogen-freezer-data.json' }
+,
+  { slug: 'commercial-retort-autoclave-botulinum-modeler', name: 'Commercial High-Pressure Retort Autoclave Clostridium botulinum Fo Sterilization & Can Seam Stress Modeler', category: 'Thermal Processing & Pressure Vessel Safety', component: 'CommercialRetortAutoclaveModeler.astro', dataFile: 'retort-autoclave-botulinum-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -321,7 +323,9 @@ function auditDatasets() {
     'tunnel-washer-corrosion-data.json',
     'rotary-rack-oven-cracking-data.json',
     'ventless-hood-esp-data.json',
-    'conveyor-smoker-pah-data.json'
+    'conveyor-smoker-pah-data.json',
+    'cryogenic-nitrogen-freezer-data.json',
+    'retort-autoclave-botulinum-data.json'
 ];
 
   const datasetStats = {};
@@ -559,26 +563,19 @@ function auditGrowthOpportunities() {
   });
 
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
-    const candidateTools = [
-    {
-      title: 'Commercial High-Pressure Retort Autoclave Clostridium botulinum Fo Sterilization & Can Seam Stress Modeler',
-      category: 'Thermal Processing & Pressure Vessel Safety',
-      intent: 'Models 250°F (121°C) commercial batch retort autoclave thermal lethality Fo kinetics against Clostridium botulinum spores, saturated steam vs water immersion counter-pressure air overpressure control, and double-seam tinplate hermetic buckling margins under ASME BPVC Section VIII.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '4,600+ US impressions'
-    },
+        const candidateTools = [
     {
       title: 'Commercial Industrial Freeze Dryer Sublimation Condenser Ice Cake Collapse & Vacuum Seal Modeler',
       category: 'Cryogenic Thermodynamics & Vacuum Physics',
       intent: 'Models -50°C to +40°C industrial food freeze-drying shelf heating profiles, pirani gauge vacuum sublimation rates (<0.1 mbar), condenser coil ice cake sublimation collapse limits, and elastomer vacuum door seal permeation margins under FDA 21 CFR § 113.',
-      priority: 'HIGH',
+      priority: 'CRITICAL_HIGH',
       estimatedMonthlyVolume: '4,300+ US impressions'
     },
     {
       title: 'Commercial Steam Tunnel Continuous Shrink Sleeve Packaging Condensate Corrosion & Bottle Burst Modeler',
       category: 'Thermal Fluid Dynamics & Packaging Integrity',
       intent: 'Models high-speed commercial beverage & sauce line continuous steam shrink sleeve tunnels, saturated steam condensation heat transfer, PET vs glass bottle thermal shock hoop stress bursting, and 316L stainless tunnel plenum acid sanitizing corrosion.',
-      priority: 'MEDIUM',
+      priority: 'HIGH',
       estimatedMonthlyVolume: '4,000+ US impressions'
     },
     {
@@ -587,6 +584,13 @@ function auditGrowthOpportunities() {
       intent: 'Models commercial rotary screw drum blanchers, direct steam injection thermal stratification, Geobacillus stearothermophilus spore persistence and flat-sour spoilage kinetics, and sanitary rotary trunnion seal CIP cleanability under 21 CFR § 113.',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '3,800+ US impressions'
+    },
+    {
+      title: 'Commercial Ultrasonic Aqueous Degreasing Tank Cavitation Erosion & Transducer Delamination Modeler',
+      category: 'Acoustic Fluid Dynamics & Surface Physics',
+      intent: 'Models commercial dishwashing & cookware manufacturing 25-40 kHz multi-frequency ultrasonic cleaning baths, Rayleigh-Plesset acoustic cavitation bubble collapse shockwaves (>1,000 bar micro-jets), 316L stainless tank basin cavitation pit erosion rates, and piezoelectric PZT transducer epoxy bond shear fatigue under high alkaline sanitizing chemistries.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '3,600+ US impressions'
     }
   ];
 

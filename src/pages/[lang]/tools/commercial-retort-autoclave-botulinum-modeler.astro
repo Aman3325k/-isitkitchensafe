@@ -1,0 +1,369 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import CommercialRetortAutoclaveModeler from '../../../components/CommercialRetortAutoclaveModeler.astro';
+import type { SupportedLanguage } from '../../../i18n/ui';
+import { useTranslations, useTranslatedPath } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+const t = useTranslations(lang);
+const tp = useTranslatedPath(lang);
+
+interface LocaleToolContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  lead: string;
+  breadcrumbsLabel: string;
+  faqs: Array<{ question: string; answer: string }>;
+  scienceTitle1: string;
+  scienceText1: string;
+  box1Title: string;
+  box1Text: string;
+  box2Title: string;
+  box2Text: string;
+  scienceTitle2: string;
+  scienceText2: string;
+  box3Title: string;
+  box3Text: string;
+  box4Title: string;
+  box4Text: string;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocaleToolContent> = {
+  es: {
+    pageTitle: "Simulador de Autoclave de Retorta Comercial: Letalidad Fo contra C. botulinum y Pandeo de Latas | IsItKitchenSafe",
+    pageDescription: "Modela autoclaves de esterilización a 121.1°C (250°F), cinética de letalidad Fo contra esporas de Clostridium botulinum, sobrepresión de aire y límites de pandeo en doble cierre de latas según ASME y FDA.",
+    badge: "Procesamiento Térmico y Seguridad de Recipientes a Presión",
+    h1: "Simulador de Autoclave de Retorta Comercial: Letalidad Fo contra Clostridium botulinum y Estrés en Doble Cierre de Latas",
+    lead: "Simule autoclaves industriales a 121.1°C (250°F). Evalúe integrales de tiempo de muerte térmica Bigelow contra esporas de Clostridium botulinum, dinámica de purga de vapor puro 100%, equilibrio de sobrepresión de aire comprimido, límites de deformación en latas de hojalata y aluminio, y enclavamientos de compuerta ASME Sección VIII.",
+    breadcrumbsLabel: "Autoclave de Retorta y Letalidad Botulínica Fo",
+    faqs: [
+      {
+        question: "¿Por qué Clostridium botulinum es el patógeno de referencia en alimentos poco ácidos?",
+        answer: "Clostridium botulinum es un bacilo anaerobio formador de esporas sumamente termorresistentes (D121.1 = 0.21 min). En alimentos con pH > 4.6 y actividad de agua > 0.85, puede germinar en envases herméticos sin oxígeno y generar neurotoxina botulínica mortal. La FDA exige un proceso térmico mínimo de 12 reducciones decimales (Cocción 12D), equivalente a Fo ≥ 2.52 a 3.0 minutos."
+      },
+      {
+        question: "¿Cómo se calcula la letalidad térmica acumulada (Fo)?",
+        answer: "Fo representa los minutos equivalentes de esterilización a 121.11°C (250°F) con z = 10°C, integrando la tasa letal: Fo = ∫ 10^((T - 121.11)/10) dt. A 121.1°C cada minuto aporta 1.0 min de Fo. A 115°C por bolsas de aire residuales, la tasa se desploma a 0.245 min de Fo por minuto, causando subesterilización crítica."
+      },
+      {
+        question: "¿Por qué el aire atrapado en la retorta provoca fallos letales?",
+        answer: "Por la ley de Dalton, P_total = P_vapor + P_aire. Si hay aire residual no purgado, la temperatura del vapor solo corresponde a su presión parcial, cayendo de 121°C a 113°C aunque el manómetro marque 15 psig. Además, el aire actúa como aislante térmico, reduciendo la transferencia de calor en un 85%."
+      },
+      {
+        question: "¿Qué enclavamientos de seguridad exige el código ASME Sección VIII en compuertas?",
+        answer: "Una compuerta de retorta de 48 pulgadas a 45 psig soporta más de 81,000 libras (36.8 toneladas) de empuje hidrostático. La norma ASME UG-35.2 exige un pasador mecánico que impide abrir el anillo mientras la presión supere 0.2 psig, además de purga manual verificable y válvula de alivio UV."
+      }
+    ],
+    scienceTitle1: "Cinética de Letalidad Fo y Estándar de Esterilización 12D",
+    scienceText1: "El cálculo riguroso de Fo mediante el método general de Bigelow garantiza la destrucción comercial de esporas patógenas.",
+    box1Title: "Integral de Muerte Térmica Bigelow",
+    box1Text: "Fo = ∫ 10^((T(t) - 121.11°C) / 10) dt integra la letalidad minuto a minuto en el punto frío del envase.",
+    box2Title: "Margen de Seguridad Comercial 12D",
+    box2Text: "Fo = 12 · 0.21 min = 2.52 min garantiza una probabilidad de supervivencia de esporas inferior a 1 en un billón.",
+    scienceTitle2: "Termodinámica de Vapor Saturado y Resistencia del Cierre",
+    scienceText2: "La sobrepresión de aire comprimido evita el pandeo del cierre doble en envases con alta presión de vapor interna.",
+    box3Title: "Presión Parcial y Purga de Aire (21 CFR § 113)",
+    box3Text: "La purga completa con válvulas de 2 pulgadas abiertas elimina bolsas de aire frío que deprimen la temperatura real de esterilización.",
+    box4Title: "Límites de Deformación en Latas (ΔP_net)",
+    box4Text: "Diferenciales internos superiores a 34 psi en hojalata o 19.5 psi en aluminio abren el doble cierre y destruyen la hermeticidad.",
+  },
+  pt: {
+    pageTitle: "Simulador de Autoclave de Retorta Comercial: Letalidade Fo contra C. botulinum e Flambagem de Latas | IsItKitchenSafe",
+    pageDescription: "Simule autoclaves industriais de esterilização a 121.1°C (250°F), cinética de letalidade Fo contra esporos de Clostridium botulinum, contrapressão de ar comprimido e integridade da recravação conforme ASME e FDA.",
+    badge: "Processamento Térmico e Segurança de Vasos de Pressão",
+    h1: "Simulador de Autoclave de Retorta Comercial: Letalidade Fo contra Clostridium botulinum e Tensão na Recravação de Latas",
+    lead: "Simule autoclaves de retorta industriais operando a 121.1°C (250°F). Avalie integrais de letalidade térmica Bigelow contra esporos de Clostridium botulinum, purga de vapor 100% saturado, equilíbrio de contrapressão de ar, limites de flambagem de latas de folha-de-flandres e alumínio, e travas de segurança ASME Seção VIII.",
+    breadcrumbsLabel: "Autoclave de Retorta e Letalidade Botulínica Fo",
+    faqs: [
+      {
+        question: "Por que Clostridium botulinum é o patógeno de referência em alimentos de baixa acidez?",
+        answer: "Clostridium botulinum é uma bactéria anaeróbia formadora de esporos altamente termorresistentes (D121.1 = 0.21 min). Em produtos com pH > 4.6 e aw > 0.85, pode germinar em embalagens herméticas sem oxigênio e produzir a neurotoxina botulínica. A FDA e o MAPA exigem o processo 12D (Fo ≥ 2.52 a 3.0 min) para garantir esterilidade comercial."
+      },
+      {
+        question: "Como a letalidade térmica Fo é calculada na esterilização?",
+        answer: "Fo representa os minutos equivalentes de esterilização a 121.11°C (250°F) com z = 10°C: Fo = ∫ 10^((T - 121.11)/10) dt. A 121.1°C cada minuto gera 1.0 min de Fo. Se bolsões de ar frio derrubam a temperatura local para 115°C, a taxa de letalidade cai para 0.245 min/min, exigindo 4 vezes mais tempo para matar os mesmos esporos."
+      },
+      {
+        question: "Por que bolsões de ar não purgados causam risco fatal na retorta?",
+        answer: "Pela lei de Dalton, P_total = P_vapor + P_ar. Se restar ar na autoclave, a temperatura real do vapor saturado cai drasticamente abaixo da indicada pelo manômetro (ex: 114°C em vez de 121°C a 15 psig). Além disso, o ar isola as embalagens com condutividade de apenas 0.026 W/m·K."
+      },
+      {
+        question: "Quais travas de segurança a ASME Seção VIII exige em portas de autoclaves?",
+        answer: "Uma porta de retorta de 1.2 m a 45 psig suporta mais de 36.8 toneladas de empuxo hidrostático. A norma ASME UG-35.2 exige trava mecânica que impede a abertura da porta com pressão superior a 0.2 psig, além de válvula de alívio UV e purga de teste manual."
+      }
+    ],
+    scienceTitle1: "Cinética de Morte Térmica Fo e Processo 12D",
+    scienceText1: "A integração contínua de Fo no ponto mais frio do recipiente garante conformidade plena com o processo 12D da FDA.",
+    box1Title: "Método Geral de Bigelow",
+    box1Text: "Fo = ∫ 10^((T(t) - 121.11°C) / 10) dt integra a destruição térmica de esporos durante todo o ciclo.",
+    box2Title: "Margem de Segurança Comercial 12D",
+    box2Text: "Fo = 12 · 0.21 min = 2.52 min reduz 1 trilhão de esporos para menos de 1 esporo viável em todo o lote.",
+    scienceTitle2: "Termodinâmica de Contrapressão e Resistência da Recravação",
+    scienceText2: "A contrapressão de ar comprimido compensa a expansão de vapor interna e evita vazamentos na recravação.",
+    box3Title: "Purga de Ar Completa (21 CFR § 113)",
+    box3Text: "Abertura total dos drenos de 2 polegadas expulsa todo o ar isolante antes de iniciar a contagem do tempo de esterilização.",
+    box4Title: "Limites de Flambagem em Latas (ΔP_net)",
+    box4Text: "Diferenciais internos acima de 34 psi em folha-de-flandres ou 19.5 psi em alumínio rompem o fecho hermético da recravação.",
+  },
+  'zh-cn': {
+    pageTitle: "商用高压杀菌釜肉毒杆菌Fo灭菌动力学与罐身卷封应力模拟器 | IsItKitchenSafe",
+    pageDescription: "模拟121.1°C (250°F) 工业级高压杀菌釜对肉毒杆菌芽孢的Fo热力死灭动力学、饱和蒸汽与水浸式压缩空气反压平衡控制、以及ASME第VIII节与FDA 21 CFR § 113下的双重卷封胀罐破裂极限。",
+    badge: "热力杀菌与压力容器安全工程",
+    h1: "商用高压杀菌釜肉毒杆菌Fo灭菌动力学与罐身双重卷封应力模拟器",
+    lead: "模拟121.1°C (250°F) 工业级间歇式高压杀菌釜。评估Bigelow热死时间 (TDT) 积分算法对肉毒杆菌芽孢的灭活过程、纯饱和蒸汽100%全开排气除空动力学、全水浸式压缩空气反压平衡机制、三片马口铁与铝罐卷封起峰胀罐阈值，以及ASME第VIII节快开门机械安全联锁规范。",
+    breadcrumbsLabel: "高压杀菌釜Fo热力灭菌与卷封应力",
+    faqs: [
+      {
+        question: "为什么肉毒杆菌是低酸性罐头食品热力杀菌的法规基准菌？",
+        answer: "肉毒杆菌 (Clostridium botulinum) 为专性厌氧芽孢杆菌，其芽孢具有极高热耐受性 (D121.1°C = 0.21分钟，z = 10°C)。在pH > 4.6且aw > 0.85的无氧罐内，残存芽孢极易发芽并合成致死率极高的肉毒毒素。FDA 21 CFR § 113法规强制要求热力加工必须达到至少12个对数级衰减 (12D肉毒杀菌值)，理论最低Fo必须达到2.52至3.0分钟以上。"
+      },
+      {
+        question: "商业杀菌中累计热力杀菌值 (Fo) 是如何数学推导与计算的？",
+        answer: "Fo值代表以121.11°C (250°F) 为基准温度、z值为10°C时的等效杀菌时间，采用Bigelow常规法对升温、恒温及冷却全过程的致死率进行积分：Fo = ∫ 10^((T(t) - 121.11) / 10) dt。在121.11°C时，恒温1分钟即贡献1.0 Fo分。若因冷空气袋导致局部降温至115°C，每分钟致死率骤降至0.245 Fo分，杀灭相同数量芽孢所需时间延长4倍以上。"
+      },
+      {
+        question: "为什么杀菌釜内滞留冷空气袋会导致致命的杀菌不充分事故？",
+        answer: "依据道尔顿分压定律：P_总 = P_蒸汽 + P_空气。若釜内冷空气未排净，蒸汽温度仅对应于其蒸汽分压。当压力表显示15 psig时，若空气占比25%，实际蒸汽温度仅为113°C。此外，静止空气导热系数仅为0.026 W/m·K，如同一层高效绝热隔热膜，使传热系数从纯蒸汽的3,500 W/m²K暴跌85%至450 W/m²K以下，导致罐头冷点严重欠杀菌。"
+      },
+      {
+        question: "ASME第VIII节对快开式杀菌釜门有何强制安全联锁设计规范？",
+        answer: "直径1.2米、工作压力45 psig的杀菌釜门承受超过81,000磅 (36.8吨) 的巨大静水推力。ASME规范强制要求：1) 必须配置机械安全联锁销，必须手动打开1/4英寸测试旋塞确认釜内残余压力绝对低于0.2 psig后方可转动门锁扣圈；2) 配置气压感知联动机构，加压状态下机械闭锁；3) 必须装配全排量ASME UV认证安全泄放阀 (PRV)。"
+      }
+    ],
+    scienceTitle1: "Fo热死灭动力学与12D商业无菌标准",
+    scienceText1: "严格按照Bigelow常规法积分计算，确保低酸性罐头达到国际公认的12D肉毒杆菌安全杀菌标准。",
+    box1Title: "Bigelow通用热力致死积分公式",
+    box1Text: "Fo = ∫ 10^((T(t) - 121.11°C) / 10) dt 实时累加食品几何冷点的等效灭菌致死值。",
+    box2Title: "12D 肉毒杆菌安全杀菌裕度",
+    box2Text: "Fo = 12 · 0.21 min = 2.52 min 确保万亿 (10^12) 个芽孢批次残存概率小于1个容器。",
+    scienceTitle2: "道尔顿分压定律与双重卷封胀罐力学",
+    scienceText2: "气动压缩空气反压精确平衡罐内膨胀气压，彻底杜绝底盖起峰变形与密封胶泥挤出泄漏。",
+    box3Title: "彻底排气除空准则 (21 CFR § 113)",
+    box3Text: "通过至少2英寸全开排气阀持续排空冷空气，防止分压失真与绝热冷点导致欠杀菌事故。",
+    box4Title: "容器耐压与卷封起峰极限 (ΔP_net)",
+    box4Text: "马口铁罐承受内外净压差不得超过34 psi，薄铝罐不得超过19.5 psi，否则卷封叠合率受损漏气。",
+  },
+  ja: {
+    pageTitle: "業務用高圧レトルト殺菌釜ボツリヌス菌Fo熱死滅動力学・巻締座屈シミュレーター | IsItKitchenSafe",
+    pageDescription: "121.1°C (250°F) における高圧レトルト殺菌釜のボツリヌス菌Fo熱殺菌動力学、飽和蒸気対温水浸漬圧縮空気カウンター過圧制御、およびASME第VIII節・FDA基準下の巻締座屈破壊マージンをモデル化。",
+    badge: "熱殺菌工学・圧力容器安全工学",
+    h1: "業務用高圧レトルト殺菌釜ボツリヌス菌Fo熱死滅動力学・巻締座屈応力シミュレーター",
+    lead: "121.1°C (250°F) で運転される産業用バッチ式高圧レトルト殺菌釜をシミュレート。Clostridium botulinum芽胞に対するBigelow熱死時間 (TDT) 積分動力学、純粋飽和蒸気100%全開ベント排気特性、圧縮空気カウンター過圧平衡、ブリキ缶およびアルミ缶の二重巻締ピーク座屈限界、およびASME第VIII節安全扉インターロック機構を検証します。",
+    breadcrumbsLabel: "レトルト殺菌釜Fo熱殺菌と巻締応力",
+    faqs: [
+      {
+        question: "なぜボツリヌス菌は低酸性缶詰食品の法規制基準病原菌なのですか？",
+        answer: "ボツリヌス菌 (Clostridium botulinum) は偏性嫌気性の芽胞形成菌であり、極めて高い耐熱性 (D121.1 = 0.21分、z = 10°C) を示します。pH > 4.6、aw > 0.85の無酸素密閉缶内では、残存芽胞が発芽し致死毒素を産生します。FDA (21 CFR § 113) および厚労省基準は、最低12桁の対数減少を達成する「12Dボツリヌスクック」(Fo ≥ 2.52〜3.0分) の熱処理を義務付けています。"
+      },
+      {
+        question: "レトルト殺菌における積算熱殺菌値 (Fo) はどのように算出されますか？",
+        answer: "Fo値は121.11°C (250°F) を基準温度とした等価殺菌時間 (分) であり、Bigelow一般法に従い致死速度を積分して求められます：Fo = ∫ 10^((T - 121.11)/10) dt。121.11°Cでは1分間で1.0のFoを獲得します。もし残留空気により缶内冷点が115°Cに低下すると致死速度は0.245 Fo分/分に激減し、同じ殺菌効果を得るために4倍以上の時間が必要になります。"
+      },
+      {
+        question: "レトルト内の残留不凝縮空気だまりはなぜ致命的な殺菌不足を招くのですか？",
+        answer: "ドルトンの分圧の法則 (P_全 = P_蒸気 + P_空気) により、空気が滞留していると蒸気温度は全圧ではなく蒸気分圧に依存して低下します。圧力計が15 psigを示していても、空気が25%混入していれば実際の蒸気温度は113°Cしかありません。さらに静止空気の熱伝導率は0.026 W/m·Kと極めて低く断熱層として作用するため、缶体への熱伝達率が85%以上低下します。"
+      },
+      {
+        question: "ASME規格第VIII節はレトルト釜扉にどのような安全機構を義務付けていますか？",
+        answer: "直径1.2m、圧力45 psigの釜扉には81,000ポンド (36.8トン) の巨大な推力が作用します。ASME UG-35.2は、内圧が0.2 psig以下であることを検圧コックで手動確認しない限りロックリングの回転を阻止する機械式安全ピン、および加圧状態下でロックを物理的に保持する空圧インターロックの二重設置を義務付けています。"
+      }
+    ],
+    scienceTitle1: "Fo熱殺菌動力学と12D商業的無菌基準",
+    scienceText1: "Bigelow一般法による厳密な熱死滅積分により、低酸性食品の12Dボツリヌス殺菌安全性を証明します。",
+    box1Title: "Bigelow熱死時間積分方程式",
+    box1Text: "Fo = ∫ 10^((T(t) - 121.11°C) / 10) dt により缶内最冷点の等価殺菌時間を連続積分。",
+    box2Title: "12D ボツリヌス完全殺菌マージン",
+    box2Text: "Fo = 12 · 0.21 min = 2.52 min により、1兆個の芽胞に対し生残確率を1個未満に抑えます。",
+    scienceTitle2: "ドルトン分圧の法則と二重巻締座屈破壊力学",
+    scienceText2: "圧縮空気カウンター過圧制御が缶内の水蒸気膨張圧を打ち消し、巻締部の座屈変形と漏れを防ぎます。",
+    box3Title: "完全ベント排気基準 (21 CFR § 113)",
+    box3Text: "2インチ以上の全開ベントから蒸気を放出して断熱性空気を完全にパージし、冷点欠陥を防止します。",
+    box4Title: "容器内外差圧と巻締ピーク限界 (ΔP_net)",
+    box4Text: "正味内外差圧がブリキ缶で34 psi、アルミ缶で19.5 psiを超えると巻締が変形し完全密封が破綻します。",
+  }
+};
+
+const c = CONTENT[lang];
+
+const breadcrumbs = [
+  { label: t('nav.home'), href: tp('/') },
+  { label: t('nav.tools'), href: tp('/tools/') },
+  { label: c.breadcrumbsLabel }
+];
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "name": c.h1,
+      "url": `https://isitkitchensafe.com/${lang}/tools/commercial-retort-autoclave-botulinum-modeler/`,
+      "applicationCategory": "EngineeringApplication",
+      "operatingSystem": "All",
+      "browserRequirements": "Requires JavaScript. Requires HTML5 Canvas/CSS3.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": c.pageDescription
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": t('nav.home'),
+          "item": `https://isitkitchensafe.com${tp('/')}`
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": t('nav.tools'),
+          "item": `https://isitkitchensafe.com${tp('/tools/')}`
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": c.breadcrumbsLabel,
+          "item": `https://isitkitchensafe.com/${lang}/tools/commercial-retort-autoclave-botulinum-modeler/`
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": c.faqs.map(faq => ({
+        "@type": "Question",
+        "name": faq.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": faq.answer
+        }
+      }))
+    }
+  ]
+};
+---
+
+<Layout title={c.pageTitle} description={c.pageDescription} structuredData={structuredData}>
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <Breadcrumbs items={breadcrumbs} />
+
+    <header class="mb-8 mt-4">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-700 text-white">
+          {c.badge}
+        </span>
+        <span class="text-xs text-muted font-mono">FDA 21 CFR § 113 &bull; ASME BPVC Sec VIII &bull; 12D Fo</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-ink tracking-tight">
+        {c.h1}
+      </h1>
+      <p class="text-body text-base sm:text-lg leading-relaxed mt-3 max-w-4xl">
+        {c.lead}
+      </p>
+    </header>
+
+    <!-- Interactive Diagnostic Modeler -->
+    <CommercialRetortAutoclaveModeler lang={lang} />
+
+    <!-- Scientific & Regulatory Architecture Guide -->
+    <article class="prose prose-slate max-w-none mt-12 pt-8 border-t border-hairline text-body text-sm leading-relaxed space-y-6">
+      <h2 class="text-xl sm:text-2xl font-bold text-ink tracking-tight">
+        {c.scienceTitle1}
+      </h2>
+      <p>
+        {c.scienceText1}
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-6">
+        <div class="p-5 rounded-2xl bg-surface-soft border border-hairline">
+          <h3 class="text-sm font-bold text-ink mb-1.5 text-rose-700">
+            {c.box1Title}
+          </h3>
+          <p class="text-xs text-muted leading-relaxed">
+            {c.box1Text}
+          </p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-surface-soft border border-hairline">
+          <h3 class="text-sm font-bold text-ink mb-1.5 text-rose-700">
+            {c.box2Title}
+          </h3>
+          <p class="text-xs text-muted leading-relaxed">
+            {c.box2Text}
+          </p>
+        </div>
+      </div>
+
+      <h2 class="text-xl sm:text-2xl font-bold text-ink tracking-tight">
+        {c.scienceTitle2}
+      </h2>
+      <p>
+        {c.scienceText2}
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-6">
+        <div class="p-5 rounded-2xl bg-surface-soft border border-hairline">
+          <h3 class="text-sm font-bold text-ink mb-1.5 text-rose-700">
+            {c.box3Title}
+          </h3>
+          <p class="text-xs text-muted leading-relaxed">
+            {c.box3Text}
+          </p>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-surface-soft border border-hairline">
+          <h3 class="text-sm font-bold text-ink mb-1.5 text-rose-700">
+            {c.box4Title}
+          </h3>
+          <p class="text-xs text-muted leading-relaxed">
+            {c.box4Text}
+          </p>
+        </div>
+      </div>
+
+      <!-- FAQ Section -->
+      <div class="not-prose mt-12 pt-8 border-t border-hairline">
+        <h3 class="text-xl font-bold text-ink tracking-tight mb-6">
+          {lang === 'es' ? 'Preguntas Frecuentes sobre Esterilización Térmica y Autoclaves' :
+           lang === 'pt' ? 'Perguntas Frequentes sobre Esterilização Térmica e Autoclaves' :
+           lang === 'zh-cn' ? '关于商用杀菌釜热力灭菌与压力安全的常见问题' :
+           'レトルト殺菌熱工学および圧力容器安全性に関するよくある質問'}
+        </h3>
+        <div class="space-y-4">
+          {c.faqs.map(faq => (
+            <details class="group p-5 rounded-2xl bg-surface-soft border border-hairline transition-all">
+              <summary class="font-bold text-ink text-sm sm:text-base cursor-pointer list-none flex items-center justify-between gap-4">
+                <span>{faq.question}</span>
+                <span class="text-muted group-open:rotate-180 transition-transform text-xs">▼</span>
+              </summary>
+              <p class="text-muted text-xs sm:text-sm leading-relaxed mt-3 pt-3 border-t border-hairline">
+                {faq.answer}
+              </p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </article>
+  </div>
+</Layout>
