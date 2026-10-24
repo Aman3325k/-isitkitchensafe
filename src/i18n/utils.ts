@@ -112,7 +112,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-conveyor-dishwasher-water-hammer-modeler',
   'tools/commercial-tortilla-press-hydraulic-modeler',
   'tools/commercial-spiral-mixer-shear-overheat-modeler',
-  'tools/commercial-heated-holding-cabinet-modeler'
+  'tools/commercial-heated-holding-cabinet-modeler',
+  'tools/commercial-tunnel-washer-corrosion-modeler'
 ];
 
 const esSlugs = new Set([
