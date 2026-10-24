@@ -27,7 +27,7 @@ if (!fs.existsSync(LOGS_DIR)) {
   fs.mkdirSync(LOGS_DIR, { recursive: true });
 }
 
-// 74 Flagship Interactive Tools Registry
+// 76 Flagship Interactive Tools Registry
 const TOOLS_REGISTRY = [
   { slug: 'pan-scratch-inspector', name: 'AI Pan Scratch & Coating Damage Inspector', category: 'Materials', component: 'PanScratchInspector.astro' },
   { slug: 'cookware-brand-transparency-index', name: 'Cookware Brand Transparency & Greenwashing Index', category: 'Materials', component: 'CookwareBrandIndex.astro' },
@@ -103,7 +103,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-tilting-braising-pan-modeler', name: 'Commercial Tilting Braising Pan Hydraulic Seal & Thermal Shock Warp Modeler', category: 'Mechanical Engineering & Thermal Physics', component: 'CommercialTiltingBraisingPanModeler.astro', dataFile: 'tilting-braising-pan-data.json' },
   { slug: 'commercial-soft-serve-scraper-blade-modeler', name: 'Commercial Soft-Serve Freezing Cylinder Scraper Blade Micro-Shaving & Refrigerant Floodback Modeler', category: 'Tribology & Dairy Physics', component: 'CommercialSoftServeScraperBladeModeler.astro', dataFile: 'soft-serve-scraper-blade-data.json' },
   { slug: 'commercial-pressure-steamer-gasket-modeler', name: 'Commercial Pressure Steamer Door Gasket Hydrolytic Rupture & Scald Jet Modeler', category: 'Fluid Dynamics & Thermal Physics', component: 'CommercialPressureSteamerGasketModeler.astro', dataFile: 'pressure-steamer-gasket-data.json' },
-  { slug: 'commercial-ventless-induction-fryer-modeler', name: 'Commercial Ventless High-Speed Induction Fryer Oil Aerosol & Fire Suppression Modeler', category: 'Combustion Safety & Fluid Dynamics', component: 'CommercialVentlessFryerModeler.astro', dataFile: 'ventless-induction-fryer-data.json' }
+  { slug: 'commercial-ventless-induction-fryer-modeler', name: 'Commercial Ventless High-Speed Induction Fryer Oil Aerosol & Fire Suppression Modeler', category: 'Combustion Safety & Fluid Dynamics', component: 'CommercialVentlessFryerModeler.astro', dataFile: 'ventless-induction-fryer-data.json' },
+  { slug: 'commercial-steam-jacket-kettle-modeler', name: 'Commercial Gas Steam Jacket Kettle Overpressure & Relieving Capacity Modeler', category: 'Boiler Physics & ASME Pressure Safety', component: 'CommercialSteamJacketKettleModeler.astro', dataFile: 'steam-jacket-kettle-overpressure-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -538,32 +539,32 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Gas Steam Jacket Kettle Overpressure & Relieving Capacity Modeler',
-      category: 'Boiler Physics & ASME Pressure Safety',
-      intent: 'Models 2/3 steam-jacketed commercial kettle steam pressure accumulation (up to 50 PSI), vacuum breaker air-binding collapse, and ASME Section VIII safety relief valve discharge sizing under high-viscosity food boiling.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '11,200+ US impressions'
-    },
-    {
       title: 'Commercial Walk-In Freezer Entrapment & Internal Emergency Release Freeze-Weld Modeler',
       category: 'Cryogenic Safety & Mechanical Failure',
       intent: 'Models -25°C commercial walk-in blast freezer latch moisture freeze-welding, internal glow-in-the-dark emergency plunger shear pin mechanical jamming, and entrapment hypothermia survival kinetics under OSHA 1910.36.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '9,800+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '11,800+ US impressions'
     },
     {
       title: 'Commercial Conveyor Broiler Catalytic Converter Thermal Choke & Grease Aerosol Autoignition Modeler',
       category: 'Combustion Toxicology & Industrial Fire Prevention',
       intent: 'Models high-volume quick-service conveyor charbroiler platinum/palladium catalytic honeycomb smoke incinerator clogging (300°C–550°C), thermal grease aerosol backpressure choking, and NFPA 96 grease duct autoignition thresholds.',
       priority: 'HIGH',
-      estimatedMonthlyVolume: '8,400+ US impressions'
+      estimatedMonthlyVolume: '9,400+ US impressions'
     },
     {
       title: 'Commercial Conveyor Dishwasher Chemical Booster Water-Hammer & Cavitation Modeler',
       category: 'Sanitary Hydraulics & Fluid Mechanics',
       intent: 'Models 180°F (82.2°C) sanitizing rinse booster rapid solenoid valve closures, Joukowsky pressure transients (up to 320 PSI), ASME A112.26.1 water hammer arrester sizing, and cavitation erosion on copper plumbing lines.',
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '8,200+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous Tortilla Press Heated Platen Hydraulic Rupture & Thermal Oil Degradation Modeler',
+      category: 'Thermal Fluid Dynamics & High-Pressure Hydraulics',
+      intent: 'Models 230°C commercial automated tortilla press dual heated platen hydraulic cylinder seal thermal degradation, ISO VG 32 food-grade thermal oil cracking, and 2,500 PSI line burst atomization flash fire envelopes under NFPA 79.',
       priority: 'MEDIUM',
-      estimatedMonthlyVolume: '7,200+ US impressions'
+      estimatedMonthlyVolume: '6,800+ US impressions'
     }
   ];
 

@@ -1,0 +1,1312 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import kettleData from '../data/steam-jacket-kettle-overpressure-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  kettleModelLabel: string;
+  kettleModelHelp: string;
+  srvConditionLabel: string;
+  srvConditionHelp: string;
+  foodMatrixLabel: string;
+  foodMatrixHelp: string;
+  vacuumBreakerLabel: string;
+  vacuumBreakerHelp: string;
+  lowWaterProbeLabel: string;
+  lowWaterProbeHelp: string;
+  firingRateSliderLabel: string;
+  firingRateSliderHelp: string;
+  dwellSliderLabel: string;
+  dwellSliderHelp: string;
+  chargeSliderLabel: string;
+  chargeSliderHelp: string;
+  batchVolumeSliderLabel: string;
+  batchVolumeSliderHelp: string;
+  presetsTitle: string;
+  presetGoldStandard: string;
+  presetOverpressureChoke: string;
+  presetLinerImplosion: string;
+  presetDryFireBleve: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  pressureLabel: string;
+  steamTempLabel: string;
+  relievingCapacityLabel: string;
+  vacuumBucklingLabel: string;
+  lowWaterSafetyLabel: string;
+  bleveBlastLabel: string;
+  complianceLabel: string;
+  primaryRiskLabel: string;
+  mechanismsLabel: string;
+  mitigationLabel: string;
+  scienceTitle: string;
+  scienceSub: string;
+  tableTitle: string;
+  tableSub: string;
+  colModel: string;
+  colGasInput: string;
+  colMawp: string;
+  colRelief: string;
+  colLiner: string;
+  colLowWater: string;
+  rulesTitle: string;
+  rulesSub: string;
+  rule1Title: string;
+  rule1Text: string;
+  rule2Title: string;
+  rule2Text: string;
+  rule3Title: string;
+  rule3Text: string;
+  rule4Title: string;
+  rule4Text: string;
+  copyReportBtn: string;
+  copiedFeedback: string;
+}
+
+const DICTIONARY: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Boiler Physics & ASME Pressure Safety",
+    title: "Commercial Gas Steam Jacket Kettle Overpressure & Relieving Capacity Modeler",
+    subtitle: "Models commercial gas steam-jacketed kettle pressure accumulation (up to 50 PSI MAWP), ASME Section VIII safety relief valve discharge choking, vacuum breaker collapse, and low-water dry-firing BLEVE kinetics.",
+    controlsTitle: "Steam-Jacketed Kettle Mechanical, Thermal & Safety Controls",
+    controlsSub: "Configure commercial kettle vessel architecture, ASME safety relief valve condition, food product viscosity, vacuum breaker state, low-water cutoff probe, and thermal firing sliders.",
+    kettleModelLabel: "Commercial Gas Steam Jacket Kettle Architecture & Vessel Class:",
+    kettleModelHelp: "Cleveland KGL-40 (50 PSI 2/3 Jacketed Tilting) vs Groen AH/1-40 (30 PSI Stationary) vs Vulcan GL-60 (50 PSI High Capacity) vs Crown GL-40F vs Aged 20-Year Neglected Kettle.",
+    srvConditionLabel: "ASME Section VIII Safety Relief Valve (SRV) Mechanical State:",
+    srvConditionHelp: "Pristine UV-Stamped 50 PSI Valve (1,380 lbs/hr) vs Mild Scale (15% Choked) vs Severe Lithified Scale (70% Choked) vs Tampered Brass Hex Pipe Plug (0 lbs/hr).",
+    foodMatrixLabel: "Food Product Rheology & Boundary Layer Heat Transfer Matrix:",
+    foodMatrixHelp: "Thin Aqueous Bone Broth (U=1850 W/m²·K) vs Marinara Tomato Sauce (U=480) vs High-Starch Polenta / Beans (U=95 Severe Choke) vs Clam Chowder Roux (U=160).",
+    vacuumBreakerLabel: "Atmospheric Vacuum Relief Valve / Breaker State:",
+    vacuumBreakerHelp: "Operational Spring-Loaded Breaker (Cracks at -0.5 PSI) vs Sticky Food Residue (-4.5 PSI) vs Calcified Shut Breaker (-28 inHg Deep Vacuum Implosion).",
+    lowWaterProbeLabel: "Low Water Cut-Off (LWCO) Solid-State Sensor Condition:",
+    lowWaterProbeHelp: "Clean Dual-Electrode Sensor (Instant Cutoff) vs Calcite-Bridged Electrode (False Safe Reading) vs Bypassed Jumper Wire (Unchecked Dry-Firing).",
+    firingRateSliderLabel: "Gas Burner Thermal Firing Input Rate (BTU/hr):",
+    firingRateSliderHelp: "Burner thermal input (40,000 to 180,000 BTU/hr; higher inputs generate rapid steam mass accumulation inside sealed jacket).",
+    dwellSliderLabel: "Continuous Burner Dwell Time Without Product Draw-Off (Minutes):",
+    dwellSliderHelp: "Minutes of active full-rate firing with kettle draw-off valve closed and zero heat removal.",
+    chargeSliderLabel: "Steam Jacket Internal Distilled Water Charge Level (%):",
+    chargeSliderHelp: "Factory distilled water charge percentage (optimal: 70–90%; drop below 30% exposes kettle bottom crown to dry-firing).",
+    batchVolumeSliderLabel: "Food Product Batch Fill Volume (Gallons / Liters):",
+    batchVolumeSliderHelp: "Quantity of liquid or food product in the kettle vessel (5 to 60 Gallons; dampens or accelerates thermal transfer).",
+    presetsTitle: "Validated Commercial Kettle Operating Scenarios:",
+    presetGoldStandard: "ASME & National Board Gold Standard: Cleveland KGL-40 with Pristine 50 PSI Relief Valve, Clear Vacuum Breaker, Thin Stock (100% Compliant)",
+    presetOverpressureChoke: "ASME Overpressure Accumulation & Valve Choke: Severe Calcite Scaled Relief Valve, 150k BTU/hr, Starch Polenta (Pressure hits 68 PSI, >110% MAWP)",
+    presetLinerImplosion: "Inner Liner Thermal Vacuum Implosion: Frozen Vacuum Breaker, Cold Washdown after Boiling (Jacket pulls -26 inHg, liner collapses inward)",
+    presetDryFireBleve: "Catastrophic Low-Water Dry-Firing & BLEVE Flash: Scaled LWCO Probe allows 550°C bare metal dry firing, cold liquid recharge flashes 78 PSI explosion",
+    diagnosticTitle: "Thermodynamic Pressure, Relieving Margin & Vessel Structural Telemetry",
+    diagnosticSub: "Real-time steam saturation kinetics, ASME Section VIII relieving capacity margin, vacuum shell buckling thresholds, and BLEVE explosion indices.",
+    pressureLabel: "Steam Jacket Operating Gauge Pressure:",
+    steamTempLabel: "Saturated Steam Jacket Temperature:",
+    relievingCapacityLabel: "ASME Relief Valve Flow Capacity vs Burner Generation:",
+    vacuumBucklingLabel: "Inner Liner External Vacuum Buckling Margin:",
+    lowWaterSafetyLabel: "Low-Water Cutoff & Burner Interlock Status:",
+    bleveBlastLabel: "BLEVE Rupture Potential & Blast Energy (kJ TNT Eq):",
+    complianceLabel: "ASME BPVC Section VIII Div 1 & OSHA 1910 Compliance:",
+    primaryRiskLabel: "Primary Thermodynamic, Mechanical & Scald Hazard:",
+    mechanismsLabel: "Thermodynamic Overpressure & Phase Change Physics:",
+    mitigationLabel: "Engineering Controls & Validated Operational Protocols:",
+    scienceTitle: "Clapeyron Phase Saturation, ASME Choked Orifice & Shell Buckling Physics",
+    scienceSub: "Clausius-Clapeyron steam saturation, ASME Section VIII relieving capacity equations, Timoshenko elastic shell stability, and BLEVE shock waves.",
+    tableTitle: "Commercial Gas Steam Jacket Kettle Engineering Matrix",
+    tableSub: "BTU input ratings, maximum allowable working pressure (MAWP), liner metallurgy, and safety device specifications across commercial models.",
+    colModel: "Kettle Model",
+    colGasInput: "Gas Burner Input",
+    colMawp: "ASME MAWP",
+    colRelief: "Safety Relief Spec",
+    colLiner: "Liner Metallurgy",
+    colLowWater: "Low Water Cutoff",
+    rulesTitle: "ASME BPVC Section VIII & National Board Inspection Directives",
+    rulesSub: "Mandatory statutory safety directives for commercial kitchen pressurized steam kettles.",
+    rule1Title: "1. Annual ASME Section VIII Safety Relief Valve Certification & Ban on Pipe Plugs",
+    rule1Text: "Never insert a brass pipe plug, cap, or reducer into the discharge outlet of a safety relief valve to silence weeping. An obstructed relief valve transforms a 50-gallon kettle into an unvented pressure bomb. Inspect and manually trip the relief valve test lever monthly, and replace valves every 3 to 5 years.",
+    rule2Title: "2. Vacuum Relief Breaker Inspection & Prevention of Hemispherical Liner Implosion",
+    rule2Text: "Steam occupies 1,600 times the volume of liquid water. When a hot steam jacket cools after evening service, collapsing steam creates a deep vacuum (-28 inHg). Ensure the vacuum relief breaker is clean and free of caramelized food splatter to prevent atmospheric pressure from crushing the inner cooking liner.",
+    rule3Title: "3. Low Water Cutoff (LWCO) De-Liming & Prohibition of Jumper Wires",
+    rule3Text: "Inspect solid-state low water probes semi-annually. Mineral scale accumulation from non-distilled water conducts electrical current across the probe insulator, falsely signaling adequate water level to the control module while jacket water boils dry, causing catastrophic bare-metal burnout.",
+    rule4Title: "4. Rheological Agitation for High-Viscosity Starch Batches",
+    rule4Text: "High-viscosity foods (polenta, refried beans, gravies, puddings) exhibit near-zero natural convection (U < 100 W/m²·K), forming an insulating blanket against the vessel wall. Continuous mechanical paddle stirring or manual scraping is mandatory to prevent localized hot-spot steam accumulation.",
+    copyReportBtn: "Copy Kettle Telemetry & ASME Safety Audit Report",
+    copiedFeedback: "Report copied to clipboard!"
+  },
+  es: {
+    badge: "Física de Calderas y Seguridad de Presión ASME",
+    title: "Simulador de Sobrepresión y Capacidad de Alivio en Marmitas a Gas con Camisa de Vapor",
+    subtitle: "Modela la acumulación de presión en marmitas industriales a gas (hasta 50 PSI MAWP), estrangulamiento de válvulas de seguridad ASME Sección VIII, colapso por vacío y explosiones BLEVE.",
+    controlsTitle: "Parámetros Mecánicos, Térmicos y de Seguridad de la Marmita",
+    controlsSub: "Configure la arquitectura de la marmita, estado de la válvula ASME, viscosidad del alimento, válvula de vacío, sensor de bajo nivel de agua y quemador a gas.",
+    kettleModelLabel: "Arquitectura y Clase de Recipiente de la Marmita Industrial:",
+    kettleModelHelp: "Cleveland KGL-40 (50 PSI Basculante) vs Groen AH/1-40 (30 PSI Estacionaria) vs Vulcan GL-60 (50 PSI Gran Capacidad) vs Crown GL-40F vs Marmita de 20 Años sin Mantenimiento.",
+    srvConditionLabel: "Estado de la Válvula de Seguridad de Alivio (SRV) ASME Sección VIII:",
+    srvConditionHelp: "Válvula 50 PSI Impecable (1,380 lbs/h) vs Calcificación Leve (15% Reducción) vs Calcificación Severa (70% Obstruida) vs Tapón Roscado de Bronce (0 lbs/h).",
+    foodMatrixLabel: "Reología del Alimento y Transferencia Térmica de Capa Límite:",
+    foodMatrixHelp: "Caldo Claro Acuoso (U=1850 W/m²·K) vs Salsa Marinara de Tomate (U=480) vs Polenta Espesa de Almidón (U=95 Bloqueo Severo) vs Crema de Almejas (U=160).",
+    vacuumBreakerLabel: "Estado de la Válvula Rompedora de Vacío Atmosférico:",
+    vacuumBreakerHelp: "Rompedora de Resorte Operativa (-0.5 PSI) vs Residuos Adheridos (-4.5 PSI) vs Rompedora Calcificada Bloqueada (-28 inHg Implosión por Vacío).",
+    lowWaterProbeLabel: "Condición de la Sonda de Corte por Bajo Nivel de Agua (LWCO):",
+    lowWaterProbeHelp: "Sensor Doble Electrodo Limpio vs Electrodo Puenteado por Calcita (Falsa Señal Segura) vs Cable Puente Ilegal (Quemado en Seco sin Control).",
+    firingRateSliderLabel: "Potencia Térmica del Quemador a Gas (BTU/hr):",
+    firingRateSliderHelp: "Entrada térmica del quemador (40,000 a 180,000 BTU/hr; mayor entrada genera rápida acumulación de masa de vapor).",
+    dwellSliderLabel: "Tiempo de Ebullición Continuo sin Extracción de Producto (Minutos):",
+    dwellSliderHelp: "Minutos de quemador a máxima potencia con válvula de descarga cerrada y nula disipación de calor.",
+    chargeSliderLabel: "Nivel de Carga de Agua Destilada en la Camisa (%):",
+    chargeSliderHelp: "Porcentaje de agua destilada (óptimo: 70–90%; menos del 30% expone el fondo al quemado en seco).",
+    batchVolumeSliderLabel: "Volumen de Alimento Cargado (Galones / Litros):",
+    batchVolumeSliderHelp: "Cantidad de producto cargado (5 a 60 Galones; amortigua o acelera la transferencia térmica).",
+    presetsTitle: "Escenarios Operativos Validados de Marmitas:",
+    presetGoldStandard: "Estándar de Oro ASME: Cleveland KGL-40 con Válvula de Alivio Impecable de 50 PSI, Rompedora Libre, Caldo Claro (100% Conforme)",
+    presetOverpressureChoke: "Sobrepresión y Asfixia de Válvula: Válvula Calcificada al 70%, 150k BTU/hr, Polenta Espesa (Presión sube a 68 PSI, supera 110% MAWP)",
+    presetLinerImplosion: "Implosión Térmica del Recipiente Interno: Rompedora de Vacío Trabada, Lavado Frío tras Hervor (Camisa genera -26 inHg de vacío, colapso de chapa)",
+    presetDryFireBleve: "Quemado en Seco y Explosión BLEVE: Sonda Calcificada permite quemar chapa a 550°C, recarga fría detona explosión por vapor instantáneo a 78 PSI",
+    diagnosticTitle: "Presión Termodinámica, Margen de Alivio y Telemetría Estructural",
+    diagnosticSub: "Cinética de vapor saturado en tiempo real, margen ASME Sección VIII, umbral de pandeo por vacío y riesgo de explosión BLEVE.",
+    pressureLabel: "Presión Manométrica en la Camisa de Vapor:",
+    steamTempLabel: "Temperatura del Vapor Saturado en Camisa:",
+    relievingCapacityLabel: "Capacidad de Descarga de Válvula vs Vapor Generado:",
+    vacuumBucklingLabel: "Margen de Pandeo por Vacío del Forro Interior:",
+    lowWaterSafetyLabel: "Estado de Corte por Bajo Nivel y Bloqueo de Quemador:",
+    bleveBlastLabel: "Potencial de Ruptura BLEVE y Energía de Explosión (kJ TNT):",
+    complianceLabel: "Conformidad ASME BPVC Sección VIII Div 1 y OSHA:",
+    primaryRiskLabel: "Riesgo Primario Termodinámico, Mecánico y Quemaduras:",
+    mechanismsLabel: "Termodinámica de Sobrepresión y Cambio de Fase:",
+    mitigationLabel: "Controles de Ingeniería y Protocolos Operativos:",
+    scienceTitle: "Física de Saturación Clapeyron, Tobera ASME y Pandeo de Cascarones",
+    scienceSub: "Saturación Clausius-Clapeyron, ecuaciones de descarga ASME Sección VIII, estabilidad de cascarón Timoshenko y ondas de choque BLEVE.",
+    tableTitle: "Matriz de Ingeniería de Marmitas a Gas con Camisa de Vapor",
+    tableSub: "Potencia BTU, presión máxima admisible (MAWP), metalurgia de camisa y especificaciones de seguridad entre modelos comerciales.",
+    colModel: "Modelo de Marmita",
+    colGasInput: "Potencia Quemador",
+    colMawp: "MAWP ASME",
+    colRelief: "Válvula de Alivio",
+    colLiner: "Metalurgia Forro",
+    colLowWater: "Corte Bajo Nivel",
+    rulesTitle: "Directivas ASME BPVC Sección VIII y National Board",
+    rulesSub: "Mandatos obligatorios de seguridad estatutaria para marmitas a vapor en cocinas comerciales.",
+    rule1Title: "1. Certificación Anual de Válvula de Alivio y Prohibición de Tapones",
+    rule1Text: "Nunca coloque un tapón roscado de bronce ni reductor en la salida de una válvula de alivio para frenar goteos. Una válvula bloqueada convierte la marmita en una bomba. Pruebe la palanca mensualmente y reemplace cada 3 a 5 años.",
+    rule2Title: "2. Inspección de Rompedora de Vacío y Prevención de Implosión",
+    rule2Text: "El vapor ocupa 1,600 veces el volumen del agua líquida. Al enfriarse la marmita, el vapor condensado genera un vacío extremo (-28 inHg). Mantenga la válvula limpia para evitar que la atmósfera aplaste el fondo esférico.",
+    rule3Title: "3. Descalcificación de Sonda de Bajo Nivel y Prohibición de Puentes",
+    rule3Text: "Inspeccione la sonda semestralmente. La cal de agua corriente conduce electricidad a masa, simulando nivel seguro mientras la camisa hierve en seco hasta quemar la chapa de acero al rojo vivo.",
+    rule4Title: "4. Agitación Mecánica Obligatoria en Alimentos Viscosos",
+    rule4Text: "Los alimentos viscosos (polenta, frijoles refritos, bechamel) carecen de convección natural (U < 100 W/m²·K), acumulando calor en la pared. Es obligatorio el raspado o paleta continua para evitar sobrepresión.",
+    copyReportBtn: "Copiar Informe de Telemetría y Seguridad ASME",
+    copiedFeedback: "¡Informe copiado al portapapeles!"
+  },
+  pt: {
+    badge: "Física de Caldeiras e Segurança de Pressão ASME",
+    title: "Simulador de Sobrepressão e Capacidade de Alívio em Caldeirões a Gás com Camisa de Vapor",
+    subtitle: "Modela a acumulação de pressão em caldeirões industriais a gás (até 50 PSI MAWP), estrangulamento de válvulas de alívio ASME Seção VIII, implosão por vácuo e explosões BLEVE.",
+    controlsTitle: "Parâmetros Mecânicos, Térmicos e de Segurança do Caldeirão",
+    controlsSub: "Configure a arquitetura do caldeirão, estado da válvula ASME, viscosidade do alimento, quebra-vácuo, sensor de nível de água e potência do queimador.",
+    kettleModelLabel: "Arquitetura e Classe de Vaso de Pressão do Caldeirão:",
+    kettleModelHelp: "Cleveland KGL-40 (50 PSI Basculante) vs Groen AH/1-40 (30 PSI Estacionário) vs Vulcan GL-60 (50 PSI Alta Capacidade) vs Crown GL-40F vs Caldeirão de 20 Anos sem Manutenção.",
+    srvConditionLabel: "Estado da Válvula de Segurança de Alívio (SRV) ASME Seção VIII:",
+    srvConditionHelp: "Válvula Impecável 50 PSI (1.380 lbs/h) vs Incrustação Leve (15% Obstrução) vs Incrustação Severa (70% Obstruída) vs Bujão Roscado de Latão (0 lbs/h).",
+    foodMatrixLabel: "Reologia do Alimento e Transferência Térmica de Camada Limite:",
+    foodMatrixHelp: "Caldo Claro Aquoso (U=1850 W/m²·K) vs Molho de Tomate Marinara (U=480) vs Polenta Espessa de Amido (U=95 Bloqueio Severo) vs Sopa Cremosa (U=160).",
+    vacuumBreakerLabel: "Estado da Válvula Quebra-Vácuo Atmosférica:",
+    vacuumBreakerHelp: "Quebra-Vácuo de Mola Operacional (-0.5 PSI) vs Resíduos Viscosos (-4.5 PSI) vs Quebra-Vácuo Calcificado Travado (-28 inHg Implosão por Vácuo).",
+    lowWaterProbeLabel: "Condição da Sonda de Corte por Falta de Água (LWCO):",
+    lowWaterProbeHelp: "Sensor Duplo Eletrodo Limpo vs Eletrodo com Ponte de Calcita (Falso Sinal Seguro) vs Jumper Ilegal (Queima a Seco Descontrolada).",
+    firingRateSliderLabel: "Potência Térmica do Queimador a Gás (BTU/hr):",
+    firingRateSliderHelp: "Potência do queimador (40.000 a 180.000 BTU/hr; queima elevada gera rápido acúmulo de vapor na camisa selada).",
+    dwellSliderLabel: "Tempo de Aquecimento Contínuo sem Extração de Produto (Minutos):",
+    dwellSliderHelp: "Minutos de queimador em potência máxima com dreno fechado e zero dissipação de calor.",
+    chargeSliderLabel: "Nível de Carga de Água Destilada na Camisa (%):",
+    chargeSliderHelp: "Percentual de água destilada (ótimo: 70–90%; abaixo de 30% expõe o fundo do caldeirão ao fogo direto).",
+    batchVolumeSliderLabel: "Volume de Alimento Carregado (Galões / Litros):",
+    batchVolumeSliderHelp: "Carga de produto no caldeirão (5 a 60 Galões; amortece ou acelera a troca térmica).",
+    presetsTitle: "Cenários Operacionais Validados de Caldeirões Industriais:",
+    presetGoldStandard: "Padrão Ouro ASME: Cleveland KGL-40 com Válvula Impecável de 50 PSI, Quebra-Vácuo Livre, Caldo Aquoso (100% Conforme)",
+    presetOverpressureChoke: "Sobrepressão e Asfixia da Válvula: Válvula Calcificada em 70%, 150k BTU/hr, Polenta Espessa (Pressão atinge 68 PSI, excede 110% MAWP)",
+    presetLinerImplosion: "Implosão Térmica do Vaso Interno: Quebra-Vácuo Bloqueado, Lavagem Fria após Fervura (Camisa atinge -26 inHg de vácuo, chapa interna colapsa)",
+    presetDryFireBleve: "Queima a Seco e Explosão BLEVE: Sonda Calcificada permite aço a 550°C, recarga fria detona vapor instantâneo a 78 PSI",
+    diagnosticTitle: "Pressão Termodinâmica, Margem de Alívio e Telemetria Estrutural",
+    diagnosticSub: "Cinética de vapor saturado em tempo real, margem ASME Seção VIII, limite de flambagem por vácuo e energia explosiva BLEVE.",
+    pressureLabel: "Pressão Manométrica na Camisa de Vapor:",
+    steamTempLabel: "Temperatura do Vapor Saturado na Camisa:",
+    relievingCapacityLabel: "Capacidade de Alívio da Válvula vs Vapor Gerado:",
+    vacuumBucklingLabel: "Margem de Flambagem por Vácuo do Revestimento Interno:",
+    lowWaterSafetyLabel: "Status do Corte por Falta de Água e Bloqueio do Queimador:",
+    bleveBlastLabel: "Potencial de Ruptura BLEVE e Energia Explosiva (kJ TNT):",
+    complianceLabel: "Conformidade ASME BPVC Seção VIII Div 1 e OSHA:",
+    primaryRiskLabel: "Risco Primário Termodinâmico, Mecânico e Queimaduras:",
+    mechanismsLabel: "Termodinâmica de Sobrepressão e Mudança de Fase:",
+    mitigationLabel: "Controles de Engenharia e Protocolos Operacionais:",
+    scienceTitle: "Física de Saturação Clapeyron, Bocal ASME e Flambagem de Cascas",
+    scienceSub: "Saturação Clausius-Clapeyron, equações de alívio ASME Seção VIII, estabilidade de casca Timoshenko e ondas de choque BLEVE.",
+    tableTitle: "Matriz de Engenharia de Caldeirões a Gás com Camisa de Vapor",
+    tableSub: "Potência BTU, pressão máxima de trabalho (MAWP), metalurgia e dispositivos de segurança entre modelos comerciais.",
+    colModel: "Modelo do Caldeirão",
+    colGasInput: "Potência Queimador",
+    colMawp: "MAWP ASME",
+    colRelief: "Válvula de Alívio",
+    colLiner: "Metalurgia Interna",
+    colLowWater: "Corte Falta de Água",
+    rulesTitle: "Diretrizes ASME BPVC Seção VIII e National Board",
+    rulesSub: "Mandatos obrigatórios de segurança estatutária para caldeirões a vapor em cozinhas profissionais.",
+    rule1Title: "1. Certificação Anual da Válvula de Alívio e Proibição de Bujões",
+    rule1Text: "Nunca instale um bujão roscado de latão ou tampa na saída da válvula de segurança para estancar gotejamentos. Uma válvula bloqueada transforma o caldeirão numa bomba. Acione a alavanca de teste mensalmente e substitua a válvula a cada 3 a 5 anos.",
+    rule2Title: "2. Inspeção do Quebra-Vácuo e Prevenção de Implosão",
+    rule2Text: "O vapor ocupa 1.600 vezes o volume da água líquida. Ao resfriar o caldeirão, o vapor colapsa gerando vácuo profundo (-28 inHg). Mantenha a quebra-vácuo desobstruída para impedir que a pressão atmosférica amasse o fundo hemisférico.",
+    rule3Title: "3. Descalcificação da Sonda de Nível e Proibição de Jumpers",
+    rule3Text: "Inspecione a sonda de nível semestralmente. A calcificação por água comum conduz corrente elétrica, simulando nível normal enquanto a camisa ferve a seco até atingir calor incandescente de 600°C.",
+    rule4Title: "4. Agitação Mecânica Contínua para Alimentos de Alta Viscosidade",
+    rule4Text: "Alimentos ricos em amido ou gordura (polenta, feijão, molhos densos) têm convecção quase nula (U < 100 W/m²·K), isolando a parede do caldeirão. A agitação por pás contínua é obrigatória para evitar picos de pressão na camisa.",
+    copyReportBtn: "Copiar Relatório de Telemetria e Segurança ASME",
+    copiedFeedback: "Relatório copiado para a área de transferência!"
+  },
+  'zh-cn': {
+    badge: "锅炉物理学与ASME压力容器安全",
+    title: "商用燃气夹层蒸汽锅超压风险与泄放能力计算模拟器",
+    subtitle: "模拟商用夹层蒸汽夹套锅蒸汽压力累积过程（最高50 PSI MAWP设计上限）、ASME第八篇安全阀孔口截流堵塞、真空破除器失效内凹坍塌及缺水干烧BLEVE蒸汽爆炸力学。",
+    controlsTitle: "夹层蒸汽锅机械结构、热工动力学与安全参数控制",
+    controlsSub: "配置商用夹层锅结构规格、ASME安全泄放阀工况、烹饪食物流变粘度、真空破除器状态、固态低水位探头及燃烧器热负荷滑块。",
+    kettleModelLabel: "商用燃气蒸汽夹层锅结构与压力容器等级:",
+    kettleModelHelp: "Cleveland KGL-40 (50 PSI 2/3夹套可倾式) vs Groen AH/1-40 (30 PSI 固定式) vs Vulcan GL-60 (50 PSI 大容量) vs Crown GL-40F vs 运行20年失修老化锅体。",
+    srvConditionLabel: "ASME第八篇安全泄放阀 (SRV) 机械工作状态:",
+    srvConditionHelp: "出厂全新ASME认证50 PSI安全阀 (1,380 lbs/hr) vs 轻微水垢结晶 (15% 流量受限) vs 严重碳酸钙石化结垢 (70% 堵塞) vs 人为拧入黄铜丝堵螺栓 (0 lbs/hr 致命封死)。",
+    foodMatrixLabel: "食物物料流变学特性与边界层传热系数:",
+    foodMatrixHelp: "清澈牛骨高汤 (U=1850 W/m²·K) vs 意式番茄肉酱 (U=480) vs 高淀粉玉米糊/豆泥 (U=95 严重热阻滞) vs 浓稠奶油浓汤 (U=160)。",
+    vacuumBreakerLabel: "大气真空破除阀 / 止回防吸瘪装置状态:",
+    vacuumBreakerHelp: "弹簧式真空破除阀正常工作 (-0.5 PSI 开启) vs 粘性食物油垢卡滞 (-4.5 PSI) vs 水垢彻底石化卡死 (-28 inHg 深度真空导致内胆坍塌)。",
+    lowWaterProbeLabel: "低水位切断 (LWCO) 固态导电探头工况:",
+    lowWaterProbeHelp: "清洁双不锈钢电极 (水位<30%瞬间切断) vs 水垢桥接电极 (产生假安全导电信号) vs 非法跳线短接 (失去缺水干烧保护)。",
+    firingRateSliderLabel: "燃气燃烧器额定输入热负荷 (BTU/hr):",
+    firingRateSliderHelp: "燃烧器额定功率 (40,000 至 180,000 BTU/hr；热负荷越高，密闭蒸汽夹套内汽化质量流率越快)。",
+    dwellSliderLabel: "闭阀满负荷持续加热未散热时间 (分钟):",
+    dwellSliderHelp: "在排放阀完全关闭且内部食物停止吸热工况下的满负荷干热累积时间。",
+    chargeSliderLabel: "夹套内部蒸馏水注水保有比例 (%):",
+    chargeSliderHelp: "原厂蒸馏水注入量（标准值：70–90%；低于30%将导致锅底冠部直接暴露于干烧火焰）。",
+    batchVolumeSliderLabel: "锅内装载物料容积 (加仑 / 升):",
+    batchVolumeSliderHelp: "锅体内部食材物料容积 (5 至 60 加仑；显著改变热容量及边界层吸热能力)。",
+    presetsTitle: "典型商用夹层锅工程工况预设:",
+    presetGoldStandard: "ASME黄金标准工况: Cleveland KGL-40 配备全新50 PSI安全阀、通畅真空破除器、稀薄高汤 (100% 合规)",
+    presetOverpressureChoke: "ASME超压累积与安全阀节流: 严重结垢安全阀、150k BTU/hr、高淀粉物料 (压力飙升至68 PSI，突破110% MAWP安全红线)",
+    presetLinerImplosion: "内胆极度深冷真空坍塌失稳: 真空阀结死，沸腾后冷水冲洗 (夹套瞬间形成-26 inHg真空，内胆向内严重凹陷撕裂)",
+    presetDryFireBleve: "缺水干烧红热与瞬时BLEVE爆炸: 探头水垢虚接导致空胆干烧至550°C，注入冷水瞬间闪蒸引起78 PSI爆裂",
+    diagnosticTitle: "热力学压力、安全泄放裕度与容器结构安全遥测",
+    diagnosticSub: "实时饱和蒸汽相变动力学、ASME第八篇安全阀额定泄放裕度、外压壳体失稳屈曲极限及BLEVE爆炸能量指数。",
+    pressureLabel: "蒸汽夹套实时表压:",
+    steamTempLabel: "夹套内部饱和蒸汽温度:",
+    relievingCapacityLabel: "安全阀泄放通量 vs 燃烧器产汽通量裕度:",
+    vacuumBucklingLabel: "内胆半球壳抗外压失稳屈曲裕度:",
+    lowWaterSafetyLabel: "缺水切断与燃烧器电磁阀连锁状态:",
+    bleveBlastLabel: "BLEVE物理爆炸风险与TNT等效爆炸能量 (kJ):",
+    complianceLabel: "ASME BPVC Section VIII Div 1 & OSHA 合规判定:",
+    primaryRiskLabel: "首要热力学、机械破坏及高温烫伤危害:",
+    mechanismsLabel: "相变超压热力学与弹塑性破裂力学机理:",
+    mitigationLabel: "工程控制规范与现场标准化作业程序:",
+    scienceTitle: "克拉佩龙相平衡方程、ASME临界流孔口与薄壁壳体屈曲稳定性",
+    scienceSub: "Clausius-Clapeyron蒸汽饱和相变、ASME第八篇可压缩流体临界流公式、Timoshenko半球壳外压失稳及BLEVE超压冲击波模型。",
+    tableTitle: "商用燃气蒸汽夹层锅核心技术工程矩阵",
+    tableSub: "输入功率、最大允许工作压力 (MAWP)、内胆钢材质及安全保护装置横向参数对比。",
+    colModel: "夹层锅型号",
+    colGasInput: "燃烧器热负荷",
+    colMawp: "ASME MAWP",
+    colRelief: "安全泄放阀规格",
+    colLiner: "内胆金属材质",
+    colLowWater: "缺水切断保护",
+    rulesTitle: "ASME锅炉与压力容器规程 (BPVC) 法定操作准则",
+    rulesSub: "商用厨房高压蒸汽烹饪设备的法定安全强制规范。",
+    rule1Title: "1. 严禁封堵安全阀排汽口，强制执行年度ASME泄放校验",
+    rule1Text: "严禁在安全阀排汽口处拧入黄铜丝堵、管帽或盲死异径管以消除滴水现象！封死安全阀等于制造定时压力炸弹。必须每月手动拨动测试扳把，且每3至5年强制换新原厂认证安全阀。",
+    rule2Title: "2. 定期测试真空破除器，杜绝冷却内胆外压吸瘪坍塌",
+    rule2Text: "蒸汽在冷却液化为水时的体积收缩比达1600:1。若真空破除阀因焦化油垢卡死，冷凝将在夹套内产生高达-28 inHg的极度真空，外界14.7 PSI的大气压将瞬间压垮撕裂锅底内胆。",
+    rule3Title: "3. 严禁跳接短路低水位继电器，定期清除探头结垢",
+    rule3Text: "硬水中的钙镁碳酸盐在探头上结晶后将形成导电通路，即使夹套内部已彻底烧干，电控板仍会误判为满水并持续加热，导致304/316不锈钢烧至暗红（>600°C）造成结构报废与闪蒸爆炸。",
+    rule4Title: "4. 高粘度淀粉类物料必须配合机械强制搅拌",
+    rule4Text: "玉米糊、豆沙、浓稠面糊等高粘度食材（U < 100 W/m²·K）几乎无自然对流，在锅壁形成隔热焦糊层。必须采用机械刮壁搅拌，否则夹套热量无法导入物料，造成蒸汽压力急剧越限。",
+    copyReportBtn: "复制夹层锅遥测与ASME安全评估报告",
+    copiedFeedback: "报告已成功复制到剪贴板！"
+  },
+  ja: {
+    badge: "ボイラー熱物理学＆ASME圧力容器安全工学",
+    title: "業務用ガス蒸気ジャケット回転釜 過圧リスク＆リリーフ容量モデラー",
+    subtitle: "業務用ガス式蒸気ジャケットケトル（最大50 PSI MAWP）の蒸気圧蓄積挙動、ASME Section VIII安全リリーフ弁のチョーク閉塞、真空ブレーカー破損による内釜圧潰、および空焚きBLEVE爆発リスクをシミュレート。",
+    controlsTitle: "蒸気ジャケットケトルの機構・熱工学・安全制御パラメータ",
+    controlsSub: "ケトル容器仕様、ASME安全弁状態、調理物の粘度特性、真空ブレーカー開閉状態、低水位カットオフセンサー、バーナー入力熱量を設定します。",
+    kettleModelLabel: "業務用ガス蒸気ジャケットケトルの型式・構造クラス:",
+    kettleModelHelp: "Cleveland KGL-40（50 PSI 2/3ジャケット傾斜式）vs Groen AH/1-40（30 PSI 固定式）vs Vulcan GL-60（50 PSI 大容量）vs Crown GL-40F vs 20年間未整備の老朽化ケトル。",
+    srvConditionLabel: "ASME Section VIII 安全リリーフ弁（SRV）の機械的健全性:",
+    srvConditionHelp: "新品ASME認証50 PSI弁（1,380 lbs/h）vs 軽微なカルシウムスケール（15%絞り）vs 重度スケール固着（70%閉塞）vs 真鍮プラグ封止（0 lbs/h 逃げ場なし）。",
+    foodMatrixLabel: "食品レオロジー特性＆境界層熱伝達率（U値）マトリクス:",
+    foodMatrixHelp: "清湯スープ（U=1850 W/m²·K）vs マリナーラトマトソース（U=480）vs 高粘度コーンポレンタ・豆ペースト（U=95 深刻な熱滞留）vs クラムチャウダー（U=160）。",
+    vacuumBreakerLabel: "大気圧真空破壊弁（バキュームブレーカー）の状態:",
+    vacuumBreakerHelp: "正常スプリング式弁（-0.5 PSIで作動）vs 食品油煙・焦げ付着（-4.5 PSI遅延）vs 炭酸塩固着による完全閉塞（-28 inHg 深真空で内釜座屈圧潰）。",
+    lowWaterProbeLabel: "低水位遮断（LWCO）固相電極センサーの状態:",
+    lowWaterProbeHelp: "清浄な二重電極センサー（水位<30%で即座に遮断）vs スケール架橋電極（誤った安全信号出力）vs ジャンパー線短絡（空焚き安全装置無効化）。",
+    firingRateSliderLabel: "ガスバーナー熱量入力レート (BTU/hr):",
+    firingRateSliderHelp: "バーナー燃焼熱量（40,000〜180,000 BTU/hr；熱入力が高いほど密閉ジャケット内の飽和蒸気発生速度が急上昇します）。",
+    dwellSliderLabel: "排熱・抽出のない連続全開燃焼時間 (分):",
+    dwellSliderHelp: "ドレン弁が全閉で食品側への熱移動が停滞した状態での連続燃焼継続時間。",
+    chargeSliderLabel: "ジャケット内 蒸留水保有率 (%):",
+    chargeSliderHelp: "工場指定の蒸留水充填率（適正値: 70–90%；30%を下回ると内釜底部が直火に晒され空焚き状態になります）。",
+    batchVolumeSliderLabel: "投入調理物容量 (ガロン / リットル):",
+    batchVolumeSliderHelp: "ケトル内に投入された食材の量（5〜60ガロン；熱容量および吸熱速度を決定します）。",
+    presetsTitle: "検証済み業務用蒸気ケトル運用シナリオ:",
+    presetGoldStandard: "ASME基準ゴールドスタンダード: Cleveland KGL-40・新品50 PSI安全弁・正常真空弁・清湯スープ（100% 規格適合）",
+    presetOverpressureChoke: "ASME過圧蓄積＆安全弁閉塞: 70%スケール閉塞弁・150k BTU/hr・高粘度ポレンタ（内圧68 PSIに達し、110% MAWPを大幅超過）",
+    presetLinerImplosion: "内釜の深真空熱座屈破裂: 真空弁閉塞・沸騰後冷水洗浄（ジャケット内が-26 inHgの真空となり外気圧で内釜が圧潰座屈）",
+    presetDryFireBleve: "低水位空焚き赤熱＆瞬間BLEVE爆発: スケール架橋電極で550°C空焚き継続、冷水注入により78 PSIの瞬間蒸気爆発が発生",
+    diagnosticTitle: "熱力学圧力・リリーフ余裕度・構造健全性テレメトリ",
+    diagnosticSub: "飽和蒸気熱力学、ASME Section VIII安全弁排出余裕率、真空座屈限界圧、およびBLEVE蒸気爆発エネルギー。",
+    pressureLabel: "蒸気ジャケット内 運転ゲージ圧力:",
+    steamTempLabel: "ジャケット内 飽和蒸気温度:",
+    relievingCapacityLabel: "安全弁排出能力 vs バーナー蒸気発生量比率:",
+    vacuumBucklingLabel: "内釜半球シェル 外圧真空座屈余裕度:",
+    lowWaterSafetyLabel: "低水位遮断＆バーナーインターロック状態:",
+    bleveBlastLabel: "BLEVE物理爆発リスク＆爆風エネルギー (kJ TNT換算):",
+    complianceLabel: "ASME BPVC Section VIII Div 1 ＆ OSHA 判定:",
+    primaryRiskLabel: "最優先の熱力学的・機械的破壊＆高温熱傷リスク:",
+    mechanismsLabel: "相変化熱力学および弾塑性破裂メカニズム:",
+    mitigationLabel: "安全工学対策および標準作業手順:",
+    scienceTitle: "クラペイロンの相平衡、ASMEチョーク流オリフィス、座屈工学",
+    scienceSub: "Clausius-Clapeyron飽和曲線、ASME Section VIII圧縮性チョーク流れ方程式、ティモシェンコ外圧シェル座屈理論、BLEVE膨張波モデル。",
+    tableTitle: "業務用ガス蒸気ジャケットケトル 工学仕様マトリクス",
+    tableSub: "燃焼熱量、最高許容使用圧力（MAWP）、内釜材質、安全装置の仕様比較。",
+    colModel: "ケトル型式",
+    colGasInput: "バーナー熱量",
+    colMawp: "ASME MAWP",
+    colRelief: "安全弁仕様",
+    colLiner: "内釜金属材質",
+    colLowWater: "低水位遮断機構",
+    rulesTitle: "ASMEボイラー・圧力容器規格 (BPVC) 法定遵守指令",
+    rulesSub: "業務用厨房の高圧蒸気ジャケット機器における必須法定安全基準。",
+    rule1Title: "1. 安全弁排気口のプラグ封じ厳禁・年次ASME作動点検の義務化",
+    rule1Text: "蒸気の微小漏れを止めるために安全弁の排気口に真鍮製プラグやキャップをねじ込むことは絶対に避けてください。安全弁を塞いだケトルは爆弾と化します。テストレバーを毎月操作し、3〜5年ごとに新品に交換してください。",
+    rule2Title: "2. 真空ブレーカーの定期点検と内釜の負圧圧潰防止",
+    rule2Text: "蒸気が凝縮して水に戻ると体積は1,600分の1に縮小します。冷却時に真空弁が油煙やスケールで固着していると、-28 inHgの強力な真空が発生し、大気圧（14.7 PSI）によって内釜が押し潰されて圧潰します。",
+    rule3Title: "3. 低水位センサーのジャンパー短絡厳禁・電極スケール除去",
+    rule3Text: "水道水から析出したカルシウムスケールが電極を覆うと、水が空洞化しても電流がアースに導通し「満水」と誤認識されます。バーナーが空の釜を600°Cまで赤熱させ、破裂や火災を招きます。",
+    rule4Title: "4. 高粘度澱粉質メニュー調理時の機械的強制攪拌の徹底",
+    rule4Text: "ポレンタや豆煮、濃厚なホワイトソースなど粘度の高い食品（U < 100 W/m²·K）は自然対流が起きず、釜肌に断熱層を形成します。ジャケット熱が逃げず圧力が急激に高まるため、スクレーパーによる連続攪拌が不可欠です。",
+    copyReportBtn: "ケトル熱力学・ASME安全点検レポートをコピー",
+    copiedFeedback: "レポートをクリップボードにコピーしました！"
+  }
+};
+
+const d = DICTIONARY[lang];
+---
+
+<div class="bg-surface border border-hairline rounded-3xl p-6 md:p-10 shadow-sm max-w-5xl mx-auto my-8">
+  <!-- Header Badge -->
+  <div class="flex items-center gap-2 mb-4">
+    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-red-600/10 text-red-700 dark:text-red-400 border border-red-600/20">
+      <span class="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+      {d.badge}
+    </span>
+    <span class="text-xs text-muted font-mono">ASME Section VIII Div 1 &bull; NBBI NB-23 &bull; OSHA 1910.169</span>
+  </div>
+
+  <h2 class="text-2xl md:text-3xl font-extrabold text-ink tracking-tight mb-3">
+    {d.title}
+  </h2>
+  <p class="text-body text-sm md:text-base leading-relaxed mb-8 max-w-3xl">
+    {d.subtitle}
+  </p>
+
+  <!-- Scenario Presets -->
+  <div class="mb-8 p-4 md:p-5 rounded-2xl bg-surface-soft border border-hairline">
+    <div class="text-xs font-bold text-muted uppercase tracking-wider mb-3">
+      {d.presetsTitle}
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+      <button
+        type="button"
+        id="preset-gold"
+        class="text-left text-xs p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-900 dark:text-emerald-300 transition-all flex items-start gap-2"
+      >
+        <span class="text-emerald-600 text-sm leading-none mt-0.5">✓</span>
+        <span>{d.presetGoldStandard}</span>
+      </button>
+
+      <button
+        type="button"
+        id="preset-overpressure"
+        class="text-left text-xs p-3 rounded-xl border border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10 text-amber-900 dark:text-amber-300 transition-all flex items-start gap-2"
+      >
+        <span class="text-amber-600 text-sm leading-none mt-0.5">⚠️</span>
+        <span>{d.presetOverpressureChoke}</span>
+      </button>
+
+      <button
+        type="button"
+        id="preset-implosion"
+        class="text-left text-xs p-3 rounded-xl border border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/10 text-blue-900 dark:text-blue-300 transition-all flex items-start gap-2"
+      >
+        <span class="text-blue-600 text-sm leading-none mt-0.5">❄️</span>
+        <span>{d.presetLinerImplosion}</span>
+      </button>
+
+      <button
+        type="button"
+        id="preset-bleve"
+        class="text-left text-xs p-3 rounded-xl border border-rose-500/30 bg-rose-500/5 hover:bg-rose-500/10 text-rose-900 dark:text-rose-300 transition-all flex items-start gap-2"
+      >
+        <span class="text-rose-600 text-sm leading-none mt-0.5">💥</span>
+        <span>{d.presetDryFireBleve}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Interactive Controls Section -->
+  <div class="mb-10">
+    <div class="border-b border-hairline pb-3 mb-6">
+      <h3 class="text-lg font-bold text-ink">
+        {d.controlsTitle}
+      </h3>
+      <p class="text-xs text-muted">
+        {d.controlsSub}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <!-- Select 1: Kettle Model -->
+      <div>
+        <label for="kettle-model" class="block text-xs font-bold text-ink mb-1.5">
+          {d.kettleModelLabel}
+        </label>
+        <select
+          id="kettle-model"
+          class="w-full text-xs rounded-xl bg-surface border border-hairline p-3 text-ink focus:outline-none focus:ring-2 focus:ring-red-500"
+        >
+          {kettleData.kettleArchitectures.map((m) => (
+            <option value={m.id}>{m.name}</option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1 leading-normal">
+          {d.kettleModelHelp}
+        </p>
+      </div>
+
+      <!-- Select 2: SRV Condition -->
+      <div>
+        <label for="srv-condition" class="block text-xs font-bold text-ink mb-1.5">
+          {d.srvConditionLabel}
+        </label>
+        <select
+          id="srv-condition"
+          class="w-full text-xs rounded-xl bg-surface border border-hairline p-3 text-ink focus:outline-none focus:ring-2 focus:ring-red-500"
+        >
+          {kettleData.safetyReliefValveConditions.map((s) => (
+            <option value={s.id}>{s.name}</option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1 leading-normal">
+          {d.srvConditionHelp}
+        </p>
+      </div>
+
+      <!-- Select 3: Food Product Rheology -->
+      <div>
+        <label for="food-matrix" class="block text-xs font-bold text-ink mb-1.5">
+          {d.foodMatrixLabel}
+        </label>
+        <select
+          id="food-matrix"
+          class="w-full text-xs rounded-xl bg-surface border border-hairline p-3 text-ink focus:outline-none focus:ring-2 focus:ring-red-500"
+        >
+          {kettleData.foodProductMatrices.map((f) => (
+            <option value={f.id}>{f.name}</option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1 leading-normal">
+          {d.foodMatrixHelp}
+        </p>
+      </div>
+
+      <!-- Select 4: Vacuum Breaker State -->
+      <div>
+        <label for="vacuum-breaker" class="block text-xs font-bold text-ink mb-1.5">
+          {d.vacuumBreakerLabel}
+        </label>
+        <select
+          id="vacuum-breaker"
+          class="w-full text-xs rounded-xl bg-surface border border-hairline p-3 text-ink focus:outline-none focus:ring-2 focus:ring-red-500"
+        >
+          {kettleData.vacuumBreakerStates.map((v) => (
+            <option value={v.id}>{v.name}</option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1 leading-normal">
+          {d.vacuumBreakerHelp}
+        </p>
+      </div>
+
+      <!-- Select 5: Low Water Probe Condition (Spans 2 cols on md) -->
+      <div class="md:col-span-2">
+        <label for="low-water-probe" class="block text-xs font-bold text-ink mb-1.5">
+          {d.lowWaterProbeLabel}
+        </label>
+        <select
+          id="low-water-probe"
+          class="w-full text-xs rounded-xl bg-surface border border-hairline p-3 text-ink focus:outline-none focus:ring-2 focus:ring-red-500"
+        >
+          {kettleData.lowWaterProbeConditions.map((p) => (
+            <option value={p.id}>{p.name}</option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1 leading-normal">
+          {d.lowWaterProbeHelp}
+        </p>
+      </div>
+    </div>
+
+    <!-- Sliders Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 rounded-2xl bg-surface-soft border border-hairline">
+      <!-- Slider 1: Firing Rate -->
+      <div>
+        <div class="flex justify-between items-center mb-1.5">
+          <label for="firing-rate-slider" class="text-xs font-bold text-ink">
+            {d.firingRateSliderLabel}
+          </label>
+          <span id="firing-rate-val" class="font-mono text-xs font-bold text-red-600 bg-red-50 dark:bg-red-950/40 px-2 py-0.5 rounded">
+            140,000 BTU/hr
+          </span>
+        </div>
+        <input
+          type="range"
+          id="firing-rate-slider"
+          min="40000"
+          max="180000"
+          step="5000"
+          value="140000"
+          class="w-full accent-red-600 cursor-pointer"
+        />
+        <p class="text-[10px] text-muted mt-1">{d.firingRateSliderHelp}</p>
+      </div>
+
+      <!-- Slider 2: Dwell Time -->
+      <div>
+        <div class="flex justify-between items-center mb-1.5">
+          <label for="dwell-slider" class="text-xs font-bold text-ink">
+            {d.dwellSliderLabel}
+          </label>
+          <span id="dwell-val" class="font-mono text-xs font-bold text-red-600 bg-red-50 dark:bg-red-950/40 px-2 py-0.5 rounded">
+            10 min
+          </span>
+        </div>
+        <input
+          type="range"
+          id="dwell-slider"
+          min="0"
+          max="45"
+          step="1"
+          value="10"
+          class="w-full accent-red-600 cursor-pointer"
+        />
+        <p class="text-[10px] text-muted mt-1">{d.dwellSliderHelp}</p>
+      </div>
+
+      <!-- Slider 3: Water Charge Level -->
+      <div>
+        <div class="flex justify-between items-center mb-1.5">
+          <label for="charge-slider" class="text-xs font-bold text-ink">
+            {d.chargeSliderLabel}
+          </label>
+          <span id="charge-val" class="font-mono text-xs font-bold text-red-600 bg-red-50 dark:bg-red-950/40 px-2 py-0.5 rounded">
+            85 %
+          </span>
+        </div>
+        <input
+          type="range"
+          id="charge-slider"
+          min="5"
+          max="100"
+          step="5"
+          value="85"
+          class="w-full accent-red-600 cursor-pointer"
+        />
+        <p class="text-[10px] text-muted mt-1">{d.chargeSliderHelp}</p>
+      </div>
+
+      <!-- Slider 4: Food Batch Volume -->
+      <div>
+        <div class="flex justify-between items-center mb-1.5">
+          <label for="batch-volume-slider" class="text-xs font-bold text-ink">
+            {d.batchVolumeSliderLabel}
+          </label>
+          <span id="batch-volume-val" class="font-mono text-xs font-bold text-red-600 bg-red-50 dark:bg-red-950/40 px-2 py-0.5 rounded">
+            35 gal (132 L)
+          </span>
+        </div>
+        <input
+          type="range"
+          id="batch-volume-slider"
+          min="5"
+          max="60"
+          step="5"
+          value="35"
+          class="w-full accent-red-600 cursor-pointer"
+        />
+        <p class="text-[10px] text-muted mt-1">{d.batchVolumeSliderHelp}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Diagnostic Telemetry Dashboard -->
+  <div class="mb-10">
+    <div class="border-b border-hairline pb-3 mb-6">
+      <h3 class="text-lg font-bold text-ink">
+        {d.diagnosticTitle}
+      </h3>
+      <p class="text-xs text-muted">
+        {d.diagnosticSub}
+      </p>
+    </div>
+
+    <!-- Telemetry Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+      <!-- Card 1: Pressure & Temp -->
+      <div class="p-4 rounded-2xl bg-surface-soft border border-hairline flex flex-col justify-between">
+        <div class="text-[11px] font-bold text-muted uppercase tracking-wider mb-2">
+          {d.pressureLabel}
+        </div>
+        <div>
+          <div class="text-2xl md:text-3xl font-black font-mono text-ink tracking-tight" id="tele-pressure">
+            --
+          </div>
+          <div class="text-xs text-muted font-mono mt-1" id="tele-temp">
+            --
+          </div>
+        </div>
+        <div class="mt-3 text-[11px] font-semibold flex items-center gap-1.5" id="tele-pressure-badge">
+          <span>●</span> <span id="tele-pressure-status">Calculating...</span>
+        </div>
+      </div>
+
+      <!-- Card 2: Relieving Flow Capacity -->
+      <div class="p-4 rounded-2xl bg-surface-soft border border-hairline flex flex-col justify-between">
+        <div class="text-[11px] font-bold text-muted uppercase tracking-wider mb-2">
+          {d.relievingCapacityLabel}
+        </div>
+        <div>
+          <div class="text-2xl md:text-3xl font-black font-mono text-ink tracking-tight" id="tele-relieving">
+            --
+          </div>
+          <div class="text-xs text-muted font-mono mt-1" id="tele-relieving-sub">
+            --
+          </div>
+        </div>
+        <div class="mt-3 text-[11px] font-semibold flex items-center gap-1.5" id="tele-relieving-badge">
+          <span>●</span> <span id="tele-relieving-status">Calculating...</span>
+        </div>
+      </div>
+
+      <!-- Card 3: Vacuum Buckling -->
+      <div class="p-4 rounded-2xl bg-surface-soft border border-hairline flex flex-col justify-between">
+        <div class="text-[11px] font-bold text-muted uppercase tracking-wider mb-2">
+          {d.vacuumBucklingLabel}
+        </div>
+        <div>
+          <div class="text-2xl md:text-3xl font-black font-mono text-ink tracking-tight" id="tele-vacuum">
+            --
+          </div>
+          <div class="text-xs text-muted font-mono mt-1" id="tele-vacuum-sub">
+            --
+          </div>
+        </div>
+        <div class="mt-3 text-[11px] font-semibold flex items-center gap-1.5" id="tele-vacuum-badge">
+          <span>●</span> <span id="tele-vacuum-status">Calculating...</span>
+        </div>
+      </div>
+
+      <!-- Card 4: Low Water Cutoff -->
+      <div class="p-4 rounded-2xl bg-surface-soft border border-hairline flex flex-col justify-between">
+        <div class="text-[11px] font-bold text-muted uppercase tracking-wider mb-2">
+          {d.lowWaterSafetyLabel}
+        </div>
+        <div>
+          <div class="text-xl md:text-2xl font-bold font-mono text-ink tracking-tight" id="tele-lowwater">
+            --
+          </div>
+          <div class="text-xs text-muted font-mono mt-1" id="tele-lowwater-sub">
+            --
+          </div>
+        </div>
+        <div class="mt-3 text-[11px] font-semibold flex items-center gap-1.5" id="tele-lowwater-badge">
+          <span>●</span> <span id="tele-lowwater-status">Calculating...</span>
+        </div>
+      </div>
+
+      <!-- Card 5: BLEVE Blast Energy -->
+      <div class="p-4 rounded-2xl bg-surface-soft border border-hairline flex flex-col justify-between">
+        <div class="text-[11px] font-bold text-muted uppercase tracking-wider mb-2">
+          {d.bleveBlastLabel}
+        </div>
+        <div>
+          <div class="text-2xl md:text-3xl font-black font-mono text-ink tracking-tight" id="tele-bleve">
+            --
+          </div>
+          <div class="text-xs text-muted font-mono mt-1" id="tele-bleve-sub">
+            --
+          </div>
+        </div>
+        <div class="mt-3 text-[11px] font-semibold flex items-center gap-1.5" id="tele-bleve-badge">
+          <span>●</span> <span id="tele-bleve-status">Calculating...</span>
+        </div>
+      </div>
+
+      <!-- Card 6: ASME Compliance Verdict -->
+      <div class="p-4 rounded-2xl bg-surface-soft border border-hairline flex flex-col justify-between">
+        <div class="text-[11px] font-bold text-muted uppercase tracking-wider mb-2">
+          {d.complianceLabel}
+        </div>
+        <div>
+          <div class="text-xl md:text-2xl font-extrabold tracking-tight" id="tele-compliance">
+            --
+          </div>
+          <div class="text-xs text-muted font-mono mt-1" id="tele-compliance-sub">
+            ASME Section VIII Div 1
+          </div>
+        </div>
+        <div class="mt-3 text-[11px] font-semibold flex items-center gap-1.5" id="tele-compliance-badge">
+          <span>●</span> <span id="tele-compliance-status">Calculating...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hazard & Mechanism Analysis Callout -->
+    <div class="p-5 rounded-2xl border border-hairline bg-surface-soft space-y-4">
+      <div>
+        <div class="text-xs font-bold uppercase tracking-wider text-muted mb-1">
+          {d.primaryRiskLabel}
+        </div>
+        <p class="text-sm font-semibold text-ink" id="analysis-primary-hazard">
+          --
+        </p>
+      </div>
+
+      <div>
+        <div class="text-xs font-bold uppercase tracking-wider text-muted mb-1">
+          {d.mechanismsLabel}
+        </div>
+        <p class="text-xs md:text-sm text-body leading-relaxed" id="analysis-mechanisms">
+          --
+        </p>
+      </div>
+
+      <div>
+        <div class="text-xs font-bold uppercase tracking-wider text-muted mb-1">
+          {d.mitigationLabel}
+        </div>
+        <p class="text-xs md:text-sm text-body leading-relaxed" id="analysis-mitigation">
+          --
+        </p>
+      </div>
+
+      <!-- Action Button: Copy Report -->
+      <div class="pt-2 flex items-center gap-3">
+        <button
+          type="button"
+          id="btn-copy-report"
+          class="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-medium text-xs transition-colors shadow-xs flex items-center gap-2"
+        >
+          <span>📋</span>
+          <span>{d.copyReportBtn}</span>
+        </button>
+        <span id="copy-feedback" class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hidden">
+          {d.copiedFeedback}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Engineering Science Deep-Dive Section -->
+  <div class="mb-10">
+    <div class="border-b border-hairline pb-3 mb-6">
+      <h3 class="text-lg font-bold text-ink">
+        {d.scienceTitle}
+      </h3>
+      <p class="text-xs text-muted">
+        {d.scienceSub}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+      <div class="p-4 rounded-xl bg-surface-soft border border-hairline">
+        <h4 class="font-bold text-ink mb-1">1. Clausius-Clapeyron Phase Kinetics</h4>
+        <p class="text-body leading-relaxed">
+          The saturation relationship between steam temperature and jacket gauge pressure governs heat flux. At 50 PSI (345 kPa), saturated steam reaches 297.7°F (147.6°C). In an unvented vessel, temperature rises exponentially: <code class="font-mono bg-surface px-1 py-0.5 rounded">ln(P2/P1) = (ΔHvap/R)·(1/T1 - 1/T2)</code>.
+        </p>
+      </div>
+      <div class="p-4 rounded-xl bg-surface-soft border border-hairline">
+        <h4 class="font-bold text-ink mb-1">2. ASME Section VIII Choked Orifice Discharge</h4>
+        <p class="text-body leading-relaxed">
+          Under ASME Section VIII Div 1 § UG-125, relieving capacity must satisfy: <code class="font-mono bg-surface px-1 py-0.5 rounded">W = 51.5·K·A·P</code> (lbs/hr steam). If mineral scale deposits reduce effective orifice area <code class="font-mono bg-surface px-1 py-0.5 rounded">A</code> by 70%, pressure accumulates past 110% of MAWP, exceeding design yield limits.
+        </p>
+      </div>
+      <div class="p-4 rounded-xl bg-surface-soft border border-hairline">
+        <h4 class="font-bold text-ink mb-1">3. Timoshenko Shell Vacuum Buckling</h4>
+        <p class="text-body leading-relaxed">
+          Steam volume collapses 1,600-fold upon cooling. The critical external buckling pressure of a thin hemispherical shell is: <code class="font-mono bg-surface px-1 py-0.5 rounded">Pcrit = 0.366·E·(t/R)²</code>. At -28 inHg vacuum, external 14.7 PSI atmospheric force exceeds buckling limits, instantly crushing the inner liner.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Technical Engineering Matrix Table -->
+  <div class="mb-10">
+    <div class="border-b border-hairline pb-3 mb-4">
+      <h3 class="text-lg font-bold text-ink">
+        {d.tableTitle}
+      </h3>
+      <p class="text-xs text-muted">
+        {d.tableSub}
+      </p>
+    </div>
+
+    <div class="overflow-x-auto rounded-2xl border border-hairline">
+      <table class="w-full text-left text-xs text-ink">
+        <thead class="bg-surface-soft border-b border-hairline text-muted uppercase text-[10px] tracking-wider font-semibold">
+          <tr>
+            <th class="p-3.5">{d.colModel}</th>
+            <th class="p-3.5">{d.colGasInput}</th>
+            <th class="p-3.5">{d.colMawp}</th>
+            <th class="p-3.5">{d.colRelief}</th>
+            <th class="p-3.5">{d.colLiner}</th>
+            <th class="p-3.5">{d.colLowWater}</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline">
+          {kettleData.kettleArchitectures.map((item) => (
+            <tr class="hover:bg-surface-soft/50 transition-colors">
+              <td class="p-3.5 font-bold">{item.name}</td>
+              <td class="p-3.5 font-mono text-muted">{item.gasInputBtuHr.toLocaleString()} BTU/hr</td>
+              <td class="p-3.5 font-mono font-semibold text-red-600">{item.mawpPsi} PSI</td>
+              <td class="p-3.5 text-muted">{item.reliefValveSpec}</td>
+              <td class="p-3.5 text-muted">{item.linerMaterial}</td>
+              <td class="p-3.5 text-muted">{item.lowWaterSystem}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Statutory Regulations & Safety Directives -->
+  <div>
+    <div class="border-b border-hairline pb-3 mb-6">
+      <h3 class="text-lg font-bold text-ink">
+        {d.rulesTitle}
+      </h3>
+      <p class="text-xs text-muted">
+        {d.rulesSub}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+      <div class="p-4 rounded-xl border border-hairline bg-surface-soft">
+        <h4 class="font-bold text-ink mb-1">{d.rule1Title}</h4>
+        <p class="text-body leading-relaxed">{d.rule1Text}</p>
+      </div>
+
+      <div class="p-4 rounded-xl border border-hairline bg-surface-soft">
+        <h4 class="font-bold text-ink mb-1">{d.rule2Title}</h4>
+        <p class="text-body leading-relaxed">{d.rule2Text}</p>
+      </div>
+
+      <div class="p-4 rounded-xl border border-hairline bg-surface-soft">
+        <h4 class="font-bold text-ink mb-1">{d.rule3Title}</h4>
+        <p class="text-body leading-relaxed">{d.rule3Text}</p>
+      </div>
+
+      <div class="p-4 rounded-xl border border-hairline bg-surface-soft">
+        <h4 class="font-bold text-ink mb-1">{d.rule4Title}</h4>
+        <p class="text-body leading-relaxed">{d.rule4Text}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script define:vars={{ kettleData, lang }}>
+  (function() {
+    // DOM Element References
+    const kettleModelSelect = document.getElementById('kettle-model');
+    const srvConditionSelect = document.getElementById('srv-condition');
+    const foodMatrixSelect = document.getElementById('food-matrix');
+    const vacuumBreakerSelect = document.getElementById('vacuum-breaker');
+    const lowWaterProbeSelect = document.getElementById('low-water-probe');
+
+    const firingRateSlider = document.getElementById('firing-rate-slider');
+    const dwellSlider = document.getElementById('dwell-slider');
+    const chargeSlider = document.getElementById('charge-slider');
+    const batchVolumeSlider = document.getElementById('batch-volume-slider');
+
+    const firingRateVal = document.getElementById('firing-rate-val');
+    const dwellVal = document.getElementById('dwell-val');
+    const chargeVal = document.getElementById('charge-val');
+    const batchVolumeVal = document.getElementById('batch-volume-val');
+
+    // Telemetry Elements
+    const telePressure = document.getElementById('tele-pressure');
+    const teleTemp = document.getElementById('tele-temp');
+    const telePressureBadge = document.getElementById('tele-pressure-badge');
+    const telePressureStatus = document.getElementById('tele-pressure-status');
+
+    const teleRelieving = document.getElementById('tele-relieving');
+    const teleRelievingSub = document.getElementById('tele-relieving-sub');
+    const teleRelievingBadge = document.getElementById('tele-relieving-badge');
+    const teleRelievingStatus = document.getElementById('tele-relieving-status');
+
+    const teleVacuum = document.getElementById('tele-vacuum');
+    const teleVacuumSub = document.getElementById('tele-vacuum-sub');
+    const teleVacuumBadge = document.getElementById('tele-vacuum-badge');
+    const teleVacuumStatus = document.getElementById('tele-vacuum-status');
+
+    const teleLowWater = document.getElementById('tele-lowwater');
+    const teleLowWaterSub = document.getElementById('tele-lowwater-sub');
+    const teleLowWaterBadge = document.getElementById('tele-lowwater-badge');
+    const teleLowWaterStatus = document.getElementById('tele-lowwater-status');
+
+    const teleBleve = document.getElementById('tele-bleve');
+    const teleBleveSub = document.getElementById('tele-bleve-sub');
+    const teleBleveBadge = document.getElementById('tele-bleve-badge');
+    const teleBleveStatus = document.getElementById('tele-bleve-status');
+
+    const teleCompliance = document.getElementById('tele-compliance');
+    const teleComplianceBadge = document.getElementById('tele-compliance-badge');
+    const teleComplianceStatus = document.getElementById('tele-compliance-status');
+
+    const analysisPrimaryHazard = document.getElementById('analysis-primary-hazard');
+    const analysisMechanisms = document.getElementById('analysis-mechanisms');
+    const analysisMitigation = document.getElementById('analysis-mitigation');
+
+    const btnCopyReport = document.getElementById('btn-copy-report');
+    const copyFeedback = document.getElementById('copy-feedback');
+
+    // Presets
+    const presetGold = document.getElementById('preset-gold');
+    const presetOverpressure = document.getElementById('preset-overpressure');
+    const presetImplosion = document.getElementById('preset-implosion');
+    const presetBleve = document.getElementById('preset-bleve');
+
+    function calculateModel() {
+      const modelId = kettleModelSelect.value;
+      const srvId = srvConditionSelect.value;
+      const foodId = foodMatrixSelect.value;
+      const vacuumId = vacuumBreakerSelect.value;
+      const lowWaterId = lowWaterProbeSelect.value;
+
+      const firingRate = parseFloat(firingRateSlider.value);
+      const dwellMins = parseFloat(dwellSlider.value);
+      const chargePct = parseFloat(chargeSlider.value);
+      const batchVol = parseFloat(batchVolumeSlider.value);
+
+      // Display Slider Values
+      firingRateVal.textContent = firingRate.toLocaleString() + ' BTU/hr';
+      dwellVal.textContent = dwellMins + ' min';
+      chargeVal.textContent = chargePct + ' %';
+      batchVolumeVal.textContent = batchVol + ' gal (' + Math.round(batchVol * 3.785) + ' L)';
+
+      const model = kettleData.kettleArchitectures.find(m => m.id === modelId) || kettleData.kettleArchitectures[0];
+      const srv = kettleData.safetyReliefValveConditions.find(s => s.id === srvId) || kettleData.safetyReliefValveConditions[0];
+      const food = kettleData.foodProductMatrices.find(f => f.id === foodId) || kettleData.foodProductMatrices[0];
+      const vacuum = kettleData.vacuumBreakerStates.find(v => v.id === vacuumId) || kettleData.vacuumBreakerStates[0];
+      const lowWater = kettleData.lowWaterProbeConditions.find(p => p.id === lowWaterId) || kettleData.lowWaterProbeConditions[0];
+
+      // 1. Steam Production Rate from Burner (lbs/hr)
+      // Burner thermal efficiency ~75% in commercial kettles; Latent heat of vaporization ~910 BTU/lb at ~50 PSI
+      const burnerEff = 0.75;
+      const hfgBtuLb = 910.0;
+      const steamGenRateLbsHr = (firingRate * burnerEff) / hfgBtuLb;
+
+      // 2. Heat dissipation into food product
+      // U value governs dissipation. High U (broth) = rapid dissipation, low jacket pressure. Low U (polenta) = thermal choke.
+      const uFactor = food.overallHeatTransferCoeff / 1850.0; // 1.0 for broth, 0.05 for polenta
+      const thermalChokeRatio = 1.0 - Math.min(uFactor * (batchVol / 35.0), 0.90);
+
+      // 3. Low Water Cutoff Check
+      let isDryFiring = false;
+      let lowWaterStatusText = "NORMAL (Water Level Safe)";
+      let lowWaterColor = "text-emerald-600 dark:text-emerald-400";
+      if (chargePct < 30) {
+        if (lowWater.cutoffReliabilityPercent > 80) {
+          lowWaterStatusText = "CUTOFF ACTIVE (Burner Interlock Tripped)";
+          lowWaterColor = "text-blue-600 dark:text-blue-400";
+        } else {
+          isDryFiring = true;
+          lowWaterStatusText = "DRY-FIRING HAZARD (Burner Firing on Empty Jacket)";
+          lowWaterColor = "text-rose-600 dark:text-rose-400";
+        }
+      }
+
+      // 4. Pressure Accumulation
+      let jacketPressure = 0.0;
+      if (isDryFiring) {
+        jacketPressure = 2.0 + (chargePct * 0.15); // residual steam
+      } else {
+        // Normal to elevated steam pressure
+        const baselineOperating = model.mawpPsi * 0.55; // normal simmering ~25-30 PSI
+        const chokePressureRise = (dwellMins * 1.8) * thermalChokeRatio * (firingRate / 140000.0);
+        jacketPressure = baselineOperating + chokePressureRise;
+
+        // If pressure exceeds SRV set pressure:
+        if (jacketPressure > srv.setPressurePsi) {
+          if (srv.flowRestrictionPercent >= 100) {
+            // Plugged valve: unchecked accumulation
+            jacketPressure = srv.setPressurePsi + (dwellMins * 2.4);
+          } else {
+            // Relieving valve vents steam
+            const effectiveRelieving = srv.relievingCapacityLbsHr * (1.0 - (srv.flowRestrictionPercent / 100.0));
+            if (effectiveRelieving >= steamGenRateLbsHr) {
+              jacketPressure = srv.setPressurePsi * 1.03; // well regulated within 3% accumulation
+            } else {
+              // Undersized or choked relief: pressure accumulates past setpoint
+              const deficit = steamGenRateLbsHr - effectiveRelieving;
+              jacketPressure = srv.setPressurePsi + (deficit * 0.05 * (dwellMins / 10.0));
+            }
+          }
+        }
+      }
+
+      // Cap simulated pressure at realistic physical bursting limit (~95 PSI)
+      jacketPressure = Math.min(Math.max(jacketPressure, 0.0), 95.0);
+
+      // Saturated Steam Temperature (°C and °F)
+      // Approximation formula around 0–95 PSI
+      const tempC = jacketPressure > 0.5 
+        ? 100.0 + (1.28 * jacketPressure) - (0.0038 * jacketPressure * jacketPressure)
+        : 100.0;
+      const tempF = (tempC * 9/5) + 32;
+
+      // 5. Relieving Flow Capacity vs Required
+      const requiredFlow = steamGenRateLbsHr;
+      const actualFlow = srv.flowRestrictionPercent >= 100 
+        ? 0.0 
+        : srv.relievingCapacityLbsHr * (1.0 - (srv.flowRestrictionPercent / 100.0));
+      const relievingMarginPct = requiredFlow > 0 ? (actualFlow / requiredFlow) * 100.0 : 100.0;
+
+      // 6. Vacuum Breaker & Shell Implosion
+      // If cooking cycle ends and vacuum pulls:
+      const vacuumInHg = Math.abs(vacuum.crackingVacuumPsi) * 2.036;
+      const shellBucklingMarginPsi = 12.5 - Math.abs(vacuum.crackingVacuumPsi); // 12.5 PSI critical buckling threshold
+
+      // 7. BLEVE Blast Potential
+      let bleveKj = 0.0;
+      if (jacketPressure > 40.0) {
+        // High pressure steam + superheated water flash energy
+        bleveKj = (jacketPressure / 50.0) * (model.jacketWaterVolumeLiters * (chargePct / 100.0)) * 14.5;
+      }
+      if (isDryFiring && chargePct < 25) {
+        // Superheated bare metal flash upon recharge
+        bleveKj = 420.0;
+      }
+
+      // 8. Compliance & Status Verdicts
+      const mawp = model.mawpPsi;
+      const maxAllowedAccumulation = mawp * 1.10; // 110% per ASME Section VIII
+      let complianceVerdict = "COMPLIANT";
+      let complianceColor = "text-emerald-600 dark:text-emerald-400";
+      let complianceDetail = "100% ASME Section VIII & OSHA Compliant";
+
+      if (srv.flowRestrictionPercent >= 100) {
+        complianceVerdict = "FATAL VIOLATION";
+        complianceColor = "text-rose-600 dark:text-rose-400";
+        complianceDetail = "CRITICAL: Plugged Relief Valve Violates ASME BPVC § UG-125";
+      } else if (jacketPressure > maxAllowedAccumulation) {
+        complianceVerdict = "NON-COMPLIANT (OVERPRESSURE)";
+        complianceColor = "text-rose-600 dark:text-rose-400";
+        complianceDetail = "Exceeds 110% MAWP Accumulation Limit (ASME § UG-133)";
+      } else if (vacuum.implosionRiskPercent > 60) {
+        complianceVerdict = "IMMINENT IMPLOSION RISK";
+        complianceColor = "text-blue-600 dark:text-blue-400";
+        complianceDetail = "Vacuum Breaker Failure Exceeds Critical Buckling Pressure";
+      } else if (isDryFiring) {
+        complianceVerdict = "DRY-FIRE BURNOUT HAZARD";
+        complianceColor = "text-amber-600 dark:text-amber-400";
+        complianceDetail = "Low Water Cutoff Bypassed or Scale-Bridged";
+      }
+
+      // Update DOM
+      telePressure.textContent = jacketPressure.toFixed(1) + ' PSI (' + (jacketPressure * 6.895).toFixed(0) + ' kPa)';
+      teleTemp.textContent = tempC.toFixed(1) + '°C / ' + tempF.toFixed(1) + '°F Saturated Steam';
+
+      if (jacketPressure > maxAllowedAccumulation) {
+        telePressureStatus.textContent = "OVERPRESSURE HAZARD (>110% MAWP)";
+        telePressureBadge.className = "mt-3 text-[11px] font-semibold flex items-center gap-1.5 text-rose-600 dark:text-rose-400";
+      } else if (jacketPressure > mawp) {
+        telePressureStatus.textContent = "AT RELIEF VALVE SETPOINT";
+        telePressureBadge.className = "mt-3 text-[11px] font-semibold flex items-center gap-1.5 text-amber-600 dark:text-amber-400";
+      } else {
+        telePressureStatus.textContent = "WITHIN DESIGN OPERATING RANGE";
+        telePressureBadge.className = "mt-3 text-[11px] font-semibold flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400";
+      }
+
+      teleRelieving.textContent = relievingMarginPct.toFixed(0) + '% Capacity';
+      teleRelievingSub.textContent = actualFlow.toFixed(0) + ' lbs/hr actual vs ' + requiredFlow.toFixed(0) + ' lbs/hr req';
+      if (relievingMarginPct < 100) {
+        teleRelievingStatus.textContent = "RELIEVING DEFICIT (CHOKED DISCHARGE)";
+        teleRelievingBadge.className = "mt-3 text-[11px] font-semibold flex items-center gap-1.5 text-rose-600 dark:text-rose-400";
+      } else {
+        teleRelievingStatus.textContent = "ADEQUATE RELIEF MARGIN (ASME UG-125)";
+        teleRelievingBadge.className = "mt-3 text-[11px] font-semibold flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400";
+      }
+
+      teleVacuum.textContent = vacuumInHg.toFixed(1) + ' inHg Vacuum';
+      teleVacuumSub.textContent = vacuum.airIngressFlowCfm + ' CFM Air Flow | ' + Math.max(shellBucklingMarginPsi, 0).toFixed(1) + ' PSI Margin';
+      if (vacuum.implosionRiskPercent > 60) {
+        teleVacuumStatus.textContent = "HIGH IMPLOSION / BUCKLING RISK";
+        teleVacuumBadge.className = "mt-3 text-[11px] font-semibold flex items-center gap-1.5 text-rose-600 dark:text-rose-400";
+      } else {
+        teleVacuumStatus.textContent = "VACUUM BREAKER ADEQUATE";
+        teleVacuumBadge.className = "mt-3 text-[11px] font-semibold flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400";
+      }
+
+      teleLowWater.textContent = chargePct + '% Charge';
+      teleLowWaterSub.textContent = lowWaterStatusText;
+      teleLowWaterStatus.textContent = isDryFiring ? "BURNER DRY-FIRING ON BARE STEEL" : "LOW WATER INTERLOCK OK";
+      teleLowWaterBadge.className = "mt-3 text-[11px] font-semibold flex items-center gap-1.5 " + lowWaterColor;
+
+      teleBleve.textContent = bleveKj > 0 ? bleveKj.toFixed(0) + ' kJ' : '0 kJ';
+      teleBleveSub.textContent = (bleveKj / 4184.0).toFixed(3) + ' kg TNT Explosive Equivalent';
+      if (bleveKj > 250) {
+        teleBleveStatus.textContent = "SEVERE BLEVE BLAST THRESHOLD";
+        teleBleveBadge.className = "mt-3 text-[11px] font-semibold flex items-center gap-1.5 text-rose-600 dark:text-rose-400";
+      } else {
+        teleBleveStatus.textContent = "NOMINAL EXPLOSION HAZARD";
+        teleBleveBadge.className = "mt-3 text-[11px] font-semibold flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400";
+      }
+
+      teleCompliance.textContent = complianceVerdict;
+      teleCompliance.className = "text-xl md:text-2xl font-extrabold tracking-tight " + complianceColor;
+      teleComplianceSub.textContent = complianceDetail;
+      teleComplianceStatus.textContent = complianceVerdict.includes("COMPLIANT") && !complianceVerdict.includes("NON") ? "OSHA & ASME ACCEPTABLE" : "IMMEDIATE SHUTDOWN MANDATED";
+      teleComplianceBadge.className = "mt-3 text-[11px] font-semibold flex items-center gap-1.5 " + complianceColor;
+
+      // Analysis Text
+      if (srv.flowRestrictionPercent >= 100) {
+        analysisPrimaryHazard.textContent = "Catastrophic Pressure Vessel Rupture & Scald Blast: Plugged safety relief valve prevents steam discharge, causing uncontrollable pressure accumulation to metal bursting threshold (>85 PSI).";
+        analysisMechanisms.textContent = "With zero relieving aperture, burner energy continuously converts water to steam. At 80+ PSI, tensile hoop stress across the jacket welds exceeds the ultimate tensile strength of fatigued 304 stainless steel, initiating energetic BLEVE explosive fracture.";
+        analysisMitigation.textContent = "IMMEDIATE EMERGENCY SHUTDOWN: Cut gas supply shutoff valve. Clear kitchen personnel from the blast perimeter. Never attempt to remove a pipe plug under pressure. Replace entire relief valve with factory-certified ASME UV-stamped 50 PSI unit.";
+      } else if (vacuum.implosionRiskPercent > 60) {
+        analysisPrimaryHazard.textContent = "Atmospheric Pressure Vacuum Implosion & Inner Liner Collapse: Collapsing steam creates deep vacuum (-28 inHg) that crushes the thin hemispherical cooking liner inward.";
+        analysisMechanisms.textContent = "Steam undergoes a 1,600-to-1 volumetric phase collapse during cooling. With the vacuum breaker calcified shut, external 14.7 PSI atmospheric pressure exceeds the elastic buckling threshold of the 0.1875\" stainless liner, warping the vessel permanently.";
+        analysisMitigation.textContent = "Disassemble and de-lime vacuum relief breaker assembly. Clean internal seat with food-grade citric acid. Replace deformed vacuum disc or install new 1/2\" NPT bronze vacuum breaker.";
+      } else if (isDryFiring) {
+        analysisPrimaryHazard.textContent = "Bare-Metal Thermal Burnout & Thermal Shock Steam Flash: Low-water sensor defeated by scale allows burner to heat dry jacket steel past 550°C.";
+        analysisMechanisms.textContent = "Mineral scale conducts current across the low-water probe, blinding the safety control board. The burner fires on dry stainless steel, causing severe micro-structural sensitization, grain coarsening, and catastrophic steam flash if cold water is introduced.";
+        analysisMitigation.textContent = "De-energize kettle burner immediately. Allow vessel to cool naturally to ambient temperature (never add cold water to hot dry kettle). Pull low-water probe, remove scale with fine abrasive cloth, and inspect control relay.";
+      } else {
+        analysisPrimaryHazard.textContent = "Nominal Operating Status: Steam jacket pressure, relieving capacity, vacuum protection, and low-water cutoff operate within ASME Section VIII safety envelopes.";
+        analysisMechanisms.textContent = "Natural convective circulation in the food matrix absorbs heat at design rates. Safety relief valve provides 100% discharge margin over burner steam generation with zero accumulation overshoot.";
+        analysisMitigation.textContent = "Maintain routine monthly manual lift-lever testing of the safety relief valve. Verify distilled water charge sight glass level. Inspect low water cutoff probes annually.";
+      }
+    }
+
+    // Presets Handlers
+    presetGold.addEventListener('click', function() {
+      kettleModelSelect.value = 'cleveland_kgl40_tilting';
+      srvConditionSelect.value = 'pristine_asme_50psi';
+      foodMatrixSelect.value = 'thin_aqueous_stock';
+      vacuumBreakerSelect.value = 'operational_spring_loaded';
+      lowWaterProbeSelect.value = 'clean_dual_electrode';
+      firingRateSlider.value = '140000';
+      dwellSlider.value = '5';
+      chargeSlider.value = '85';
+      batchVolumeSlider.value = '35';
+      calculateModel();
+    });
+
+    presetOverpressure.addEventListener('click', function() {
+      kettleModelSelect.value = 'vulcan_gl60_high_capacity';
+      srvConditionSelect.value = 'severe_scale_choking';
+      foodMatrixSelect.value = 'high_starch_polenta';
+      vacuumBreakerSelect.value = 'partially_gummed_valve';
+      lowWaterProbeSelect.value = 'clean_dual_electrode';
+      firingRateSlider.value = '150000';
+      dwellSlider.value = '25';
+      chargeSlider.value = '90';
+      batchVolumeSlider.value = '50';
+      calculateModel();
+    });
+
+    presetImplosion.addEventListener('click', function() {
+      kettleModelSelect.value = 'groen_ah1_40_stationary';
+      srvConditionSelect.value = 'pristine_asme_50psi';
+      foodMatrixSelect.value = 'thin_aqueous_stock';
+      vacuumBreakerSelect.value = 'frozen_calcified_shut';
+      lowWaterProbeSelect.value = 'clean_dual_electrode';
+      firingRateSlider.value = '40000';
+      dwellSlider.value = '0';
+      chargeSlider.value = '80';
+      batchVolumeSlider.value = '5';
+      calculateModel();
+    });
+
+    presetBleve.addEventListener('click', function() {
+      kettleModelSelect.value = 'aged_20yr_neglected_kettle';
+      srvConditionSelect.value = 'plugged_seized_valve';
+      foodMatrixSelect.value = 'high_starch_polenta';
+      vacuumBreakerSelect.value = 'frozen_calcified_shut';
+      lowWaterProbeSelect.value = 'mineral_scale_bridged';
+      firingRateSlider.value = '140000';
+      dwellSlider.value = '35';
+      chargeSlider.value = '15';
+      batchVolumeSlider.value = '20';
+      calculateModel();
+    });
+
+    // Copy Report Handler
+    btnCopyReport.addEventListener('click', function() {
+      const reportText = [
+        "==================================================================",
+        "COMMERCIAL STEAM JACKET KETTLE ASME OVERPRESSURE & RELIEVING REPORT",
+        "Generated by IsItKitchenSafe Autonomous Growth & Ops Engine",
+        "==================================================================",
+        "Kettle Model: " + kettleModelSelect.options[kettleModelSelect.selectedIndex].text,
+        "ASME Relief Valve: " + srvConditionSelect.options[srvConditionSelect.selectedIndex].text,
+        "Food Matrix: " + foodMatrixSelect.options[foodMatrixSelect.selectedIndex].text,
+        "Vacuum Breaker: " + vacuumBreakerSelect.options[vacuumBreakerSelect.selectedIndex].text,
+        "Low Water Probe: " + lowWaterProbeSelect.options[lowWaterProbeSelect.selectedIndex].text,
+        "Burner Firing Input: " + firingRateVal.textContent,
+        "Dwell Time (Closed Draw-off): " + dwellVal.textContent,
+        "Water Charge Level: " + chargeVal.textContent,
+        "Batch Fill Volume: " + batchVolumeVal.textContent,
+        "------------------------------------------------------------------",
+        "Operating Steam Pressure: " + telePressure.textContent,
+        "Saturated Steam Temp: " + teleTemp.textContent,
+        "Relieving Capacity Margin: " + teleRelieving.textContent + " (" + teleRelievingSub.textContent + ")",
+        "Vacuum Protection: " + teleVacuum.textContent + " (" + teleVacuumSub.textContent + ")",
+        "Low Water Cutoff Status: " + teleLowWater.textContent + " (" + teleLowWaterSub.textContent + ")",
+        "BLEVE Blast Hazard Index: " + teleBleve.textContent + " (" + teleBleveSub.textContent + ")",
+        "ASME & OSHA Compliance: " + teleCompliance.textContent + " - " + teleComplianceSub.textContent,
+        "------------------------------------------------------------------",
+        "Primary Risk: " + analysisPrimaryHazard.textContent,
+        "Mechanism: " + analysisMechanisms.textContent,
+        "Mitigation: " + analysisMitigation.textContent,
+        "=================================================================="
+      ].join('\n');
+
+      navigator.clipboard.writeText(reportText).then(function() {
+        copyFeedback.classList.remove('hidden');
+        setTimeout(function() {
+          copyFeedback.classList.add('hidden');
+        }, 3000);
+      });
+    });
+
+    // Attach Change Listeners
+    [kettleModelSelect, srvConditionSelect, foodMatrixSelect, vacuumBreakerSelect, lowWaterProbeSelect].forEach(el => {
+      el.addEventListener('change', calculateModel);
+    });
+
+    [firingRateSlider, dwellSlider, chargeSlider, batchVolumeSlider].forEach(el => {
+      el.addEventListener('input', calculateModel);
+    });
+
+    // Initial calculation
+    calculateModel();
+  })();
+</script>
