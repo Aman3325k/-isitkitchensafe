@@ -108,7 +108,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-ventless-induction-fryer-modeler',
   'tools/commercial-steam-jacket-kettle-modeler',
   'tools/commercial-walk-in-freezer-entrapment-modeler',
-  'tools/commercial-conveyor-broiler-catalytic-modeler'
+  'tools/commercial-conveyor-broiler-catalytic-modeler',
+  'tools/commercial-conveyor-dishwasher-water-hammer-modeler'
 ];
 
 const esSlugs = new Set([
