@@ -27,6 +27,7 @@ export async function onRequest(context) {
     pathname.startsWith('/_astro/') ||
     pathname.startsWith('/sitemap') ||
     pathname === '/robots.txt' ||
+    pathname === '/ads.txt' ||
     pathname.startsWith('/favicon');
 
   if (!isBypassedPath) {
