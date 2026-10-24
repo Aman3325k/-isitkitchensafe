@@ -114,7 +114,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-spiral-mixer-shear-overheat-modeler',
   'tools/commercial-heated-holding-cabinet-modeler',
   'tools/commercial-tunnel-washer-corrosion-modeler',
-  'tools/commercial-rotary-rack-oven-cracking-modeler'
+  'tools/commercial-rotary-rack-oven-cracking-modeler',
+  'tools/commercial-ventless-hood-esp-modeler'
 ];
 
 const esSlugs = new Set([

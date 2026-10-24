@@ -112,7 +112,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-spiral-mixer-shear-overheat-modeler', name: 'Commercial Bakery Spiral Mixer Bowl Drive Gear Shear & Dough Friction Overheat Modeler', category: 'Mechanical Tribology & Rheological Thermal Physics', component: 'CommercialSpiralMixerShearOverheatModeler.astro', dataFile: 'spiral-mixer-shear-overheat-data.json' },
   { slug: 'commercial-heated-holding-cabinet-modeler', name: 'Commercial Heated Food Holding Cabinet Relative Humidity & Bacterial Enterotoxin Desiccation Modeler', category: 'Thermodynamic Microbiology & Food Quality Preservation', component: 'CommercialHoldingCabinetModeler.astro', dataFile: 'holding-cabinet-desiccation-data.json' },
   { slug: 'commercial-tunnel-washer-corrosion-modeler', name: 'Commercial Tunnel Washer Batch Continuous Flow Peracetic Acid Corrosion & Elastomer Degradation Modeler', category: 'Sanitary Chemical Engineering & Polymer Tribology', component: 'CommercialTunnelWasherModeler.astro', dataFile: 'tunnel-washer-corrosion-data.json' },
-  { slug: 'commercial-rotary-rack-oven-cracking-modeler', name: 'Commercial Rotary Rack Bakery Oven Airflow Inversion & Heat Exchanger Cracking Modeler', category: 'Thermal Aerodynamics & Combustion Safety', component: 'CommercialRotaryRackOvenModeler.astro', dataFile: 'rotary-rack-oven-cracking-data.json' }
+  { slug: 'commercial-rotary-rack-oven-cracking-modeler', name: 'Commercial Rotary Rack Bakery Oven Airflow Inversion & Heat Exchanger Cracking Modeler', category: 'Thermal Aerodynamics & Combustion Safety', component: 'CommercialRotaryRackOvenModeler.astro', dataFile: 'rotary-rack-oven-cracking-data.json' },
+  { slug: 'commercial-ventless-hood-esp-modeler', name: 'Commercial Ventless Kitchen Hood Electrostatic Precipitator Ozone & Grease Vapor Oxidation Modeler', category: 'Combustion Toxicology & Industrial Ventilation', component: 'CommercialVentlessHoodEspModeler.astro', dataFile: 'ventless-hood-esp-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -555,32 +556,32 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
     const candidateTools = [
     {
-      title: 'Commercial Ventless Kitchen Hood Electrostatic Precipitator Ozone & Grease Vapor Oxidation Modeler',
-      category: 'Combustion Toxicology & Industrial Ventilation',
-      intent: 'Models recirculating commercial ventless cooking hood 2-stage ESP ionizing cell corona wire fouling, aerosol particle collection efficiency, catalytic ozone gas decomposition (<0.05 PPM OSHA limit), and UL 710B / NFPA 96 interlocked fire suppression.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '4,900+ US impressions'
-    },
-    {
       title: 'Commercial Continuous Conveyor Smoker Polycyclic Aromatic Hydrocarbon (PAH) Wood Pellet Combustion Modeler',
       category: 'Combustion Toxicology & Food Safety',
       intent: 'Models industrial commercial conveyor barbecue pit wood pellet pyrolysis, forced-draft velocity, Benzo[a]pyrene and Chrysene PAH particle deposition onto meat bark, and NFPA 96 solid-fuel commercial kitchen flue creosote spark arrestor requirements.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '4,600+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '4,800+ US impressions'
     },
     {
       title: 'Commercial Cryogenic Liquid Nitrogen Quick-Freezer Belt Embrittlement & Oxygen Depletion Safety Modeler',
       category: 'Cryogenic Thermodynamics & Atmospheric Safety',
       intent: 'Models -320°F (-196°C) industrial liquid nitrogen immersion and tunnel quick-freezers, 304 vs 316 stainless steel wire mesh belt cryogenic ductile-to-brittle transition temperature (DBTT), conveyor drive thermal contraction jamming, boil-off expansion ratios (1:694), and CGA P-12 scullery oxygen depletion asphyxiation sensor interlocks.',
-      priority: 'MEDIUM',
-      estimatedMonthlyVolume: '4,400+ US impressions'
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '4,500+ US impressions'
     },
     {
       title: 'Commercial High-Pressure Retort Autoclave Clostridium botulinum Fo Sterilization & Can Seam Stress Modeler',
       category: 'Thermal Processing & Pressure Vessel Safety',
       intent: 'Models 250°F (121°C) commercial batch retort autoclave thermal lethality Fo kinetics against Clostridium botulinum spores, saturated steam vs water immersion counter-pressure air overpressure control, and double-seam tinplate hermetic buckling margins under ASME BPVC Section VIII.',
       priority: 'MEDIUM',
-      estimatedMonthlyVolume: '4,200+ US impressions'
+      estimatedMonthlyVolume: '4,300+ US impressions'
+    },
+    {
+      title: 'Commercial Industrial Freeze Dryer Sublimation Condenser Ice Cake Collapse & Vacuum Seal Modeler',
+      category: 'Cryogenic Thermodynamics & Vacuum Physics',
+      intent: 'Models -50°C to +40°C industrial food freeze-drying shelf heating profiles, pirani gauge vacuum sublimation rates (<0.1 mbar), condenser coil ice cake sublimation collapse limits, and elastomer vacuum door seal permeation margins under FDA 21 CFR § 113.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '4,100+ US impressions'
     }
   ];
 
