@@ -106,7 +106,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-soft-serve-scraper-blade-modeler',
   'tools/commercial-pressure-steamer-gasket-modeler',
   'tools/commercial-ventless-induction-fryer-modeler',
-  'tools/commercial-steam-jacket-kettle-modeler'
+  'tools/commercial-steam-jacket-kettle-modeler',
+  'tools/commercial-walk-in-freezer-entrapment-modeler'
 ];
 
 const esSlugs = new Set([
