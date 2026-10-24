@@ -2,7 +2,7 @@
  * IsItKitchenSafe Autonomous Growth & Ops Engine (v2.0 - All-Day Smart Engine)
  * 
  * Continuous Operations & Growth Engine:
- * - 80 Interactive Diagnostic Tools Health & 5-Language Slug Parity (EN, ES, PT, JA, ZH-CN)
+ * - 81 Interactive Diagnostic Tools Health & 5-Language Slug Parity (EN, ES, PT, JA, ZH-CN)
  * - Cloudflare Pages _redirects budget monitor (2,000 line ceiling) & Edge Middleware sync
  * - Multi-Language Corpus & Database Integrity (66+ critical data assets)
  * - Structured Data (JSON-LD FAQPage, BreadcrumbList & Article/WebApplication) compliance audit
@@ -108,7 +108,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-walk-in-freezer-entrapment-modeler', name: 'Commercial Walk-In Freezer Entrapment & Internal Emergency Release Freeze-Weld Modeler', category: 'Cryogenic Safety & Mechanical Failure', component: 'CommercialWalkInFreezerEntrapmentModeler.astro', dataFile: 'walk-in-freezer-entrapment-data.json' },
   { slug: 'commercial-conveyor-broiler-catalytic-modeler', name: 'Commercial Conveyor Broiler Catalytic Converter Thermal Choke & Grease Aerosol Autoignition Modeler', category: 'Combustion Toxicology & Industrial Fire Prevention', component: 'CommercialConveyorBroilerCatalyticModeler.astro', dataFile: 'conveyor-broiler-catalytic-data.json' },
   { slug: 'commercial-conveyor-dishwasher-water-hammer-modeler', name: 'Commercial Conveyor Dishwasher Chemical Booster Water-Hammer & Cavitation Modeler', category: 'Sanitary Hydraulics & Fluid Mechanics', component: 'CommercialConveyorDishwasherWaterHammerModeler.astro', dataFile: 'conveyor-dishwasher-water-hammer-data.json' },
-  { slug: 'commercial-tortilla-press-hydraulic-modeler', name: 'Commercial Continuous Tortilla Press Heated Platen Hydraulic Rupture & Thermal Oil Degradation Modeler', category: 'Thermal Fluid Dynamics & High-Pressure Hydraulics', component: 'CommercialTortillaPressHydraulicModeler.astro', dataFile: 'tortilla-press-hydraulic-data.json' }
+  { slug: 'commercial-tortilla-press-hydraulic-modeler', name: 'Commercial Continuous Tortilla Press Heated Platen Hydraulic Rupture & Thermal Oil Degradation Modeler', category: 'Thermal Fluid Dynamics & High-Pressure Hydraulics', component: 'CommercialTortillaPressHydraulicModeler.astro', dataFile: 'tortilla-press-hydraulic-data.json' },
+  { slug: 'commercial-spiral-mixer-shear-overheat-modeler', name: 'Commercial Bakery Spiral Mixer Bowl Drive Gear Shear & Dough Friction Overheat Modeler', category: 'Mechanical Tribology & Rheological Thermal Physics', component: 'CommercialSpiralMixerShearOverheatModeler.astro', dataFile: 'spiral-mixer-shear-overheat-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -548,24 +549,17 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Bakery Spiral Mixer Bowl Drive Gear Shear & Dough Friction Overheat Modeler',
-      category: 'Mechanical Tribology & Rheological Thermal Physics',
-      intent: 'Models 150 kg commercial bakery dual-speed spiral dough mixer planetary gear tooth shear stress, friction-induced dough overheating (>28°C premature fermentation), bowl interlock microswitch vibration drift, and motor thermal overload burnout under OSHA 1910.212 and ANSI/ASB Standard 101.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '6,800+ US impressions'
-    },
-    {
       title: 'Commercial Heated Food Holding Cabinet Relative Humidity & Bacterial Enterotoxin Desiccation Modeler',
       category: 'Thermodynamic Microbiology & Food Quality Preservation',
       intent: 'Models 140°F–165°F (60°C–74°C) commercial insulated holding cabinet moisture pan depletion, surface desiccation kinetics, Staphylococcus aureus enterotoxin heat stability, and NSF/ANSI Standard 4 holding compliance.',
-      priority: 'HIGH',
+      priority: 'CRITICAL_HIGH',
       estimatedMonthlyVolume: '5,400+ US impressions'
     },
     {
       title: 'Commercial Tunnel Washer Batch Continuous Flow Peracetic Acid Corrosion & Elastomer Degradation Modeler',
       category: 'Sanitary Chemical Engineering & Polymer Tribology',
       intent: 'Models commercial batch tunnel washer continuous counter-flow sanitizing zones, peracetic acid (PAA) equilibrium vapor corrosion on 304 vs 316L stainless steel drums, and fluoroelastomer FKM vs EPDM manifold seal degradation.',
-      priority: 'MEDIUM',
+      priority: 'HIGH',
       estimatedMonthlyVolume: '4,500+ US impressions'
     },
     {
@@ -574,6 +568,13 @@ function auditGrowthOpportunities() {
       intent: 'Models 500°F (260°C) commercial rotating rack bakery oven forced-convection airflow balance, heat exchanger 409/304 stainless steel weld thermal fatigue cracking, flue gas carbon monoxide leakage into baking chamber, and NFPA 86 Class A oven explosion relief panel compliance.',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '5,200+ US impressions'
+    },
+    {
+      title: 'Commercial Ventless Kitchen Hood Electrostatic Precipitator Ozone & Grease Vapor Oxidation Modeler',
+      category: 'Combustion Toxicology & Industrial Ventilation',
+      intent: 'Models recirculating commercial ventless cooking hood 2-stage ESP ionizing cell corona wire fouling, aerosol particle collection efficiency, catalytic ozone gas decomposition (<0.05 PPM OSHA limit), and UL 710B / NFPA 96 interlocked fire suppression.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '4,800+ US impressions'
     }
   ];
 

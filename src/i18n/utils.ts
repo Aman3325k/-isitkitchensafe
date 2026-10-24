@@ -110,7 +110,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-walk-in-freezer-entrapment-modeler',
   'tools/commercial-conveyor-broiler-catalytic-modeler',
   'tools/commercial-conveyor-dishwasher-water-hammer-modeler',
-  'tools/commercial-tortilla-press-hydraulic-modeler'
+  'tools/commercial-tortilla-press-hydraulic-modeler',
+  'tools/commercial-spiral-mixer-shear-overheat-modeler'
 ];
 
 const esSlugs = new Set([
