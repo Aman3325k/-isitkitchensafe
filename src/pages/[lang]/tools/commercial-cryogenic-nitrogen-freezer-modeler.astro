@@ -1,0 +1,349 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import CommercialCryogenicNitrogenFreezerModeler from '../../../components/CommercialCryogenicNitrogenFreezerModeler.astro';
+import type { SupportedLanguage } from '../../../i18n/ui';
+import { useTranslations, useTranslatedPath } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+const t = useTranslations(lang);
+const tp = useTranslatedPath(lang);
+
+interface LocaleToolContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  lead: string;
+  breadcrumbsLabel: string;
+  faqs: Array<{ question: string; answer: string }>;
+  scienceTitle1: string;
+  scienceText1: string;
+  box1Title: string;
+  box1Text: string;
+  box2Title: string;
+  box2Text: string;
+  scienceTitle2: string;
+  scienceText2: string;
+  box3Title: string;
+  box3Text: string;
+  box4Title: string;
+  box4Text: string;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocaleToolContent> = {
+  es: {
+    pageTitle: "Simulador de Fragilización Criogénica por Nitrógeno Líquido y Asfixia en Congeladores Continuos | IsItKitchenSafe",
+    pageDescription: "Modela congeladores industriales de nitrógeno líquido (-196°C / -320°F), temperatura de transición dúctil-frágil (DBTT) en mallas de acero 304 vs 316, atasco por contracción térmica, expansión 1:694 y enclavamientos según CGA P-12.",
+    badge: "Termodinámica Criogénica y Seguridad Atmosférica",
+    h1: "Simulador de Fragilización Criogénica por Nitrógeno Líquido y Asfixia por Desoxigenación en Congeladores Continuos",
+    lead: "Simule en congeladores rápidos industriales continuos la vaporización de nitrógeno líquido a -196°C (-320°F), la expansión volumétrica de 1:694, la cinética de desplazamiento del oxígeno ambiental, la tenacidad al impacto Charpy en mallas de acero inoxidable 304 vs 316L vs 430 y los enclavamientos de seguridad vital de CGA P-12.",
+    breadcrumbsLabel: "Congelador Criogénico LN2 y Seguridad O2",
+    faqs: [
+      {
+        question: "¿Qué peligro físico genera la vaporización del nitrógeno líquido en congeladores rápidos?",
+        answer: "El nitrógeno líquido hierve a -195.79°C (-320.4°F) y posee una relación de expansión volumétrica de 1:694 a temperatura ambiente. Un solo galón de líquido produce 694 galones (92.8 pies cúbicos) de gas puro. Sin extracción mecánica forzada de gran caudal, este volumen desplaza el oxígeno del recinto en pocos minutos, reduciendo la concentración por debajo del límite seguro de OSHA del 19.5%."
+      },
+      {
+        question: "¿Por qué el gas de nitrógeno frío se acumula en el suelo en vez de disiparse?",
+        answer: "A -196°C, el vapor de nitrógeno frío tiene una densidad de 4.61 kg/m³, casi 3.8 veces mayor que la del aire ambiente (1.20 kg/m³). Por gravedad, forma una capa densa y fría a ras de suelo en fosos de drenaje y zonas bajas. Los operarios que se agachan entran en una atmósfera sin oxígeno, perdiendo el conocimiento en menos de un minuto."
+      },
+      {
+        question: "¿Por qué están prohibidos los aceros ferríticos (AISI 430) en bandas transportadoras criogénicas?",
+        answer: "Los aceros ferríticos poseen una estructura cúbica centrada en el cuerpo (BCC) que presenta una transición dúctil-frágil (DBTT) entre -20°C y 0°C. Al enfriarse a -196°C en nitrógeno líquido, su tenacidad Charpy cae de 35 J a menos de 2 J, fracturándose de forma catastrófica como el vidrio bajo la tensión normal del motor."
+      },
+      {
+        question: "¿Qué sistemas de seguridad exige la norma CGA P-12 en salas con congeladores de nitrógeno?",
+        answer: "La norma CGA P-12 y OSHA 1910.146 obligan a contar con sensores de oxígeno en dos niveles (suelo y altura de respiración), alarmas acústico-ópticas a partir del 19.5% de O2, y una electroválvula de corte de emergencia normalmente cerrada que interrumpe de inmediato el suministro de LN2 al detectar desoxigenación."
+      }
+    ],
+    scienceTitle1: "Expansión de Fase 1:694 y Balance de Masa de Oxígeno",
+    scienceText1: "La vaporización masiva de nitrógeno líquido en recintos cerrados impone una extracción mecánica forzada ininterrumpida para evitar la asfixia.",
+    box1Title: "Caudal de Expansión Volumétrica",
+    box1Text: "Q_gas (CFM) = V_LN2 (gal/h) · 3.785 · 694 / (60 · 28.317) cuantifica el caudal masivo de gas inerte que desplaza el aire respirable.",
+    box2Title: "Densidad del Vapor Criogénico a -196°C",
+    box2Text: "Con una densidad de 4.61 kg/m³ (3.8 veces el aire ambiente), el nitrógeno frío se estratifica en el piso creando piscinas invisibles de asfixia mortal.",
+    scienceTitle2: "Metalurgia Criogénica y Contracción Lineal (ΔL)",
+    scienceText2: "Solo las aleaciones austeníticas con estructura FCC mantienen la ductilidad sin riesgo de rotura frágil bajo cero extremo.",
+    box3Title: "Ventaja de la Red FCC (304 / 316L)",
+    box3Text: "Sus 12 sistemas de deslizamiento activos retienen tenacidad Charpy superior a 55–125 J a -196°C, impidiendo la rotura frágil.",
+    box4Title: "Tolerancia de Contracción Lineal",
+    box4Text: "ΔL = L · α · ΔT acorta una banda de 40 pies en más de 36 mm, exigiendo compensadores con resortes para no fundir los reductores."
+  },
+  pt: {
+    pageTitle: "Simulador de Fragilização Criogênica por Nitrogênio Líquido e Asfixia em Congeladores Contínuos | IsItKitchenSafe",
+    pageDescription: "Simule congeladores industriais de esteira a nitrogênio líquido (-196°C / -320°F), transição dúctil-frágil (DBTT) em malhas de aço inox 304 vs 316, travamento por contração térmica, expansão 1:694 e normas CGA P-12.",
+    badge: "Termodinâmica Criogênica e Segurança Atmosférica",
+    h1: "Simulador de Fragilização Criogênica por Nitrogênio Líquido e Asfixia por Esgotamento de Oxigênio em Congeladores Contínuos",
+    lead: "Simule em túneis industriais contínuos de congelamento rápido a vaporização de nitrogênio líquido a -196°C (-320°F), a expansão volumétrica de 1:694, a cinética de deslocamento do oxigênio ambiente, a tenacidade Charpy em malhas de aço 304 vs 316L vs 430 e as travas de emergência da CGA P-12.",
+    breadcrumbsLabel: "Congelador Criogênico LN2 e Segurança O2",
+    faqs: [
+      {
+        question: "Qual o perigo físico da vaporização de nitrogênio líquido em congeladores rápidos?",
+        answer: "O nitrogênio líquido ferve a -195.79°C (-320.4°F) e expande 1:694 vezes ao se transformar em gás na temperatura ambiente. Um único galão de líquido gera 694 galões (92.8 pés cúbicos) de gás puro. Sem exaustão mecânica dedicada de alta capacidade, esse gás expulsa o oxigênio da sala, baixando a concentração abaixo do limite seguro de 19.5% da OSHA."
+      },
+      {
+        question: "Por que o gás de nitrogênio frio acumula no piso em vez de se dispersar?",
+        answer: "A -196°C, o vapor frio de nitrogênio tem densidade de 4.61 kg/m³, cerca de 3.8 vezes mais denso que o ar ambiente (1.20 kg/m³). Por estratificação gravitacional, o gás acumula junto ao piso e canaletas, criando zonas com zero oxigênio onde qualquer trabalhador agachado desmaia rapidamente."
+      },
+      {
+        question: "Por que aços ferríticos (AISI 430) são proibidos em esteiras criogênicas?",
+        answer: "Aços ferríticos possuem retículo cúbico de corpo centrado (BCC) com temperatura de transição dúctil-frágil (DBTT) entre -20°C e 0°C. Sob nitrogênio líquido a -196°C, a tenacidade Charpy desaba de 35 J para menos de 2 J, estilhaçando a esteira como vidro sob a tração do motor."
+      },
+      {
+        question: "Quais dispositivos de segurança são exigidos pela norma CGA P-12?",
+        answer: "A CGA P-12 exige sensores de oxigênio em dois níveis (piso e altura de respiração), alarmes sonoros e visuais abaixo de 19.5% de O2, e válvula solenoide de emergência normalmente fechada que corta imediatamente a injeção de LN2."
+      }
+    ],
+    scienceTitle1: "Expansão de Fase 1:694 e Equação de Deslocamento de O2",
+    scienceText1: "A vaporização contínua de LN2 requer exaustão mecânica dimensionada rigorosamente para neutralizar o risco de asfixia letal.",
+    box1Title: "Vazão de Expansão Gasosa",
+    box1Text: "Q_gas (CFM) = V_LN2 (gal/h) · 3.785 · 694 / (60 · 28.317) quantifica o imenso volume de nitrogênio introduzido no ambiente.",
+    box2Title: "Densidade de Gás Frio a -196°C",
+    box2Text: "Com 4.61 kg/m³ (3.8x o ar ambiente), o vapor de nitrogênio não sobe, assentando no piso em bolsões invisíveis de asfixia.",
+    scienceTitle2: "Metalurgia Criogênica e Contração Térmica (ΔL)",
+    scienceText2: "A estrutura cúbica de faces centradas (FCC) dos aços austeníticos impede a quebra frágil sob frio extremo.",
+    box3Title: "Ductilidade da Rede FCC (304 / 316L)",
+    box3Text: "Os 12 sistemas de deslizamento ativos mantêm tenacidade ao impacto Charpy acima de 55–125 J a -196°C.",
+    box4Title: "Encurtamento Térmico Linear",
+    box4Text: "ΔL = L · α · ΔT encurta a esteira de 40 pés em mais de 36 mm, exigindo esticadores automáticos com mola para não travar os eixos."
+  },
+  'zh-cn': {
+    pageTitle: "商用连续式液氮速冻机金属网带冷脆断裂与车间缺氧窒息模拟器 | IsItKitchenSafe",
+    pageDescription: "模拟-196°C (-320°F) 工业级液氮连续隧道速冻机、304与316奥氏体网带冷脆转变温度 (DBTT)、驱动轴冷缩卡死扭矩、1:694汽化膨胀率与CGA P-12氧气连锁切断阀生命安全系统。",
+    badge: "低温热力学与车间大气安全",
+    h1: "商用连续式液氮速冻机金属网带极低温冷脆断裂与车间缺氧窒息安全模拟器",
+    lead: "模拟工业连续式液氮单体速冻机 (IQF) 在-196°C (-320°F) 条件下的超快结壳速冻、1:694相变剧烈汽化膨胀、车间呼吸带氧气微分置换动力学、304 vs 316L vs 430不锈钢网带夏比V型冲击韧性断裂机理，以及CGA P-12车间氧气监测连锁电磁切断阀生命安全规程。",
+    breadcrumbsLabel: "液氮速冻机网带冷脆与氧气安全",
+    faqs: [
+      {
+        question: "工业液氮速冻机中液氮剧烈汽化具有怎样的物理危险特性？",
+        answer: "液氮常压沸点低达-195.79°C (-320.4°F)，在室温 (20°C) 下具有高达1:694的剧烈气液相变膨胀比。1加仑液氮瞬间汽化产生694加仑 (92.8立方英尺/2.63立方米) 纯氮气。若缺乏大风量专用强制机械排风系统，膨胀的氮气会在数分钟内迅速置换车间空气，使氧气浓度跌破OSHA规定的19.5%安全下限，产生无嗅无味但致命的窒息环境。"
+      },
+      {
+        question: "为什么低温氮气泄漏后会积聚在车间地面而不是向上扩散？",
+        answer: "虽然室温氮气微轻于空气，但在-196°C深冷状态下，冷氮气蒸气密度高达4.61 kg/m³，是室温空气密度 (1.20 kg/m³) 的约3.8倍。冷蒸气因重力迅速下沉，在排水沟、输送机低处及地面形成重质低温冷雾气层。操作人员一旦俯身或倒地，便会吸入纯氮气，在1至2次呼吸内丧失意识并在数分钟内导致不可逆脑死亡。"
+      },
+      {
+        question: "为什么严禁在深冷速冻机金属输送网带中使用铁素体不锈钢 (如AISI 430)？",
+        answer: "铁素体不锈钢具有体心立方 (BCC) 晶体结构，存在显著的韧脆转变温度 (DBTT，通常在-20°C至0°C)。低于该温度后，位错滑移被完全冻结，夏比冲击韧性从35 J断崖式跌落至2 J以下。在-196°C液氮环境下，铁素体金属网带呈完全玻璃态脆性，在输送带正常牵引张力下发生粉碎性断裂。而奥氏体钢 (304/316L) 属于面心立方 (FCC) 晶格，至绝对零度仍无DBTT，冲击韧性保持在55至125 J以上。"
+      },
+      {
+        question: "CGA P-12及OSHA 1910.146对液氮食品冷冻车间有何强制安全连锁要求？",
+        answer: "规范强制要求：1) 地面及呼吸带高低双位安装氧化锆或光学氧气传感器；2) 当氧气跌至19.5%时触发一级声光预警，同时瞬时连锁切断主供液管路上的常闭型紧急电磁切断阀；3) 液氮喷淋系统必须与机械强制排风风机互锁，排风机停机或压差开关故障时液氮无法注入。"
+      }
+    ],
+    scienceTitle1: "1:694 气液相变膨胀与车间氧气置换微分质量平衡",
+    scienceText1: "液氮深冷蒸气的大体积膨胀必须通过专用的强制负压排风予以完全中和，防止呼吸带缺氧窒息。",
+    box1Title: "汽化膨胀体积流量公式",
+    box1Text: "Q_gas (CFM) = V_LN2 (gal/h) · 3.785 · 694 / (60 · 28.317) 计算液氮剧烈气化所释放出的纯氮气体积。",
+    box2Title: "-196°C 极低温冷气重质沉积",
+    box2Text: "冷氮气密度达4.61 kg/m³ (室温空气的3.8倍)，贴地沉积形成零氧低温滞留层，构成严重安全盲区。",
+    scienceTitle2: "低温金属断裂力学与线性冷缩位移 (ΔL)",
+    scienceText2: "面心立方 (FCC) 晶体滑移系在极低温下依然稳定，是深冷连续输送设备唯一合规的冶金选材。",
+    box3Title: "奥氏体 FCC 晶格抗脆断优势",
+    box3Text: "12组滑移系在-196°C保持高度活跃，夏比冲击韧性高达55–125 J，彻底杜绝冷脆粉碎性断裂。",
+    box4Title: "全长热收缩补偿间隙设计",
+    box4Text: "ΔL = L · α · ΔT 使40英尺隧道网带收缩超过36毫米，必须装配弹簧蓄能张紧轮以防卡死烧毁电机。"
+  },
+  ja: {
+    pageTitle: "業務用連続式液体窒素急速凍結機ベルト極低温脆化・酸素欠乏シミュレーター | IsItKitchenSafe",
+    pageDescription: "産業用-196°C (-320°F) 液体窒素連続トンネルフリーザーにおける304/316ステンレス鋼メッシュベルトの延性-脆性遷移温度 (DBTT)、熱収縮駆動部噛み込み、1:694気化膨張比、およびCGA P-12安全連動遮断弁をモデル化。",
+    badge: "極低温熱力学・大気安全衛生工学",
+    h1: "業務用連続式液体窒素急速凍結機ベルト極低温脆化・酸素欠乏窒息災害安全性シミュレーター",
+    lead: "産業用連続式液体窒素単体急速凍結機 (IQF) における-196°C (-320°F) 超急速シェル凍結、1:694体積気化膨張、作業室呼吸域酸素置換速度論、304 vs 316L vs 430ステンレス鋼メッシュベルトのシャルピー衝撃値破壊機構、およびCGA P-12酸素欠乏連動電磁遮断弁を科学的にシミュレート。",
+    breadcrumbsLabel: "液体窒素フリーザー極低温脆化と酸素安全",
+    faqs: [
+      {
+        question: "業務用急速凍結機における液体窒素の気化にはどのような物理的危険性がありますか？",
+        answer: "液体窒素 (LN2) は常圧下で-195.79°C (-320.4°F) で沸騰し、常温 (20°C) において1:694という劇的な液体対気体体積膨張比を示します。わずか1ガロンの液体窒素が瞬時に694ガロン (92.8立方フィート/2.63 m³) の純窒素ガスへ膨張します。十分な強制排気がない場合、この膨張ガスが作業室内の空気を急速に置換し、OSHA許容下限である19.5% O2を割り込んで自覚症状のない酸素欠乏窒息を引き起こします。"
+      },
+      {
+        question: "なぜ気化した冷たい窒素ガスは拡散せず床面に滞留するのですか？",
+        answer: "-196°Cの冷たい窒素蒸気は密度が約4.61 kg/m³に達し、常温大気 (1.20 kg/m³) の約3.8倍という極めて重い流体になります。そのため天井へは上昇せず、重力により床面や排水ピットに沿って低層に高密度で滞留します。作業者が点検や転倒で低層大気を吸入すると、即座に無酸素状態に陥り数呼吸で意識を喪失します。"
+      },
+      {
+        question: "なぜ極低温フリーザーのメッシュベルトにフェライト系鋼 (AISI 430) を使用してはならないのですか？",
+        answer: "フェライト系ステンレス鋼は体心立方 (BCC) 格子構造をもち、-20°C〜0°C付近に明瞭な延性-脆性遷移温度 (DBTT) を示します。-196°Cの液体窒素に接触するとシャルピー衝撃値が35 Jから2 J未満へ暴落し、ガラスのように完全脆性破断します。対して304や316L等の面心立方 (FCC) オーステナイト鋼は絶対零度付近でもDBTTを示さず、55〜125 Jの極めて高い靭性を維持します。"
+      },
+      {
+        question: "CGA P-12 および OSHA 1910.146 はどのような安全連動設備を義務付けていますか？",
+        answer: "1) 床面 (0.3m) および呼吸域 (1.5m) の二点ジルコニア式O2監視センサーの設置、2) 酸素濃度が19.5%以下に低下した際の警報発報および主供給配管の常閉型電磁緊急遮断弁の即時連動、3) 強制負圧排気ファンが正常作動していない限りLN2注入弁が開かない電気的インターロックが義務付けられています。"
+      }
+    ],
+    scienceTitle1: "1:694 気液相変化膨張と呼吸域酸素置換微分質量収支",
+    scienceText1: "液体窒素の急激な気化膨張圧を安全に排出するためには、大風量の専用機械強制局所排気が不可欠です。",
+    box1Title: "気化体積流量計算式",
+    box1Text: "Q_gas (CFM) = V_LN2 (gal/h) · 3.785 · 694 / (60 · 28.317) により、室内に放出される膨大な不活性窒素ガス量を算出。",
+    box2Title: "-196°C 重質極低温ガスの床面滞留",
+    box2Text: "冷窒素密度4.61 kg/m³ (大気の3.8倍) により床面へ沈降し、目に見えない無酸素死角層を形成します。",
+    scienceTitle2: "極低温破壊力学とコンベア全長の線熱収縮変位 (ΔL)",
+    scienceText2: "面心立方 (FCC) オーステナイト結晶構造のみが、極低温衝撃荷重に耐えうるシャルピー靭性を保証します。",
+    box3Title: "オーステナイト FCC 格子の完全靭性",
+    box3Text: "12基の滑り系が-196°C下でも凍結せず、55〜125 Jのシャルピー衝撃値を維持し脆性粉砕を防止します。",
+    box4Title: "線熱収縮による駆動部噛み込みマージン",
+    box4Text: "ΔL = L · α · ΔT により40フィートベルトが36 mm以上収縮するため、スプリング式テンショナーが必要です。"
+  }
+};
+
+const c = CONTENT[lang];
+
+const breadcrumbs = [
+  { label: t('nav.home'), href: tp('/') },
+  { label: t('nav.tools'), href: tp('/tools/') },
+  { label: c.breadcrumbsLabel }
+];
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "name": c.h1,
+      "url": `https://isitkitchensafe.com/${lang}/tools/commercial-cryogenic-nitrogen-freezer-modeler/`,
+      "applicationCategory": "EngineeringApplication",
+      "operatingSystem": "All",
+      "browserRequirements": "Requires JavaScript. Requires HTML5 Canvas/CSS3.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": c.pageDescription
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": t('nav.home'),
+          "item": `https://isitkitchensafe.com${tp('/')}`
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": t('nav.tools'),
+          "item": `https://isitkitchensafe.com${tp('/tools/')}`
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": c.breadcrumbsLabel,
+          "item": `https://isitkitchensafe.com/${lang}/tools/commercial-cryogenic-nitrogen-freezer-modeler/`
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": c.faqs.map(faq => ({
+        "@type": "Question",
+        "name": faq.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": faq.answer
+        }
+      }))
+    }
+  ]
+};
+---
+
+<Layout title={c.pageTitle} description={c.pageDescription} structuredData={structuredData}>
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <Breadcrumbs items={breadcrumbs} />
+
+    <header class="mb-8 mt-4">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-cyan-700 text-white">
+          {c.badge}
+        </span>
+        <span class="text-xs text-muted font-mono">CGA P-12 &bull; OSHA 1910.146 &bull; ASME B31.3</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-ink tracking-tight">
+        {c.h1}
+      </h1>
+      <p class="text-body text-base sm:text-lg leading-relaxed mt-3 max-w-4xl">
+        {c.lead}
+      </p>
+    </header>
+
+    <!-- Interactive Diagnostic Modeler -->
+    <CommercialCryogenicNitrogenFreezerModeler lang={lang} />
+
+    <!-- Scientific & Regulatory Architecture Guide -->
+    <article class="prose prose-slate max-w-none mt-12 pt-8 border-t border-hairline text-body text-sm leading-relaxed space-y-6">
+      <h2 class="text-xl sm:text-2xl font-bold text-ink tracking-tight">
+        {c.scienceTitle1}
+      </h2>
+
+      <p>
+        {c.scienceText1}
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-6">
+        <div class="p-4 rounded-xl bg-surface-card border border-hairline">
+          <h4 class="text-xs font-bold text-ink mb-1">{c.box1Title}</h4>
+          <p class="text-xs text-muted leading-relaxed">{c.box1Text}</p>
+        </div>
+        <div class="p-4 rounded-xl bg-surface-card border border-hairline">
+          <h4 class="text-xs font-bold text-ink mb-1">{c.box2Title}</h4>
+          <p class="text-xs text-muted leading-relaxed">{c.box2Text}</p>
+        </div>
+      </div>
+
+      <h3 class="text-lg font-bold text-ink tracking-tight">
+        {c.scienceTitle2}
+      </h3>
+      <p>
+        {c.scienceText2}
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-6">
+        <div class="p-4 rounded-xl bg-surface-card border border-hairline">
+          <h4 class="text-xs font-bold text-ink mb-1">{c.box3Title}</h4>
+          <p class="text-xs text-muted leading-relaxed">{c.box3Text}</p>
+        </div>
+        <div class="p-4 rounded-xl bg-surface-card border border-hairline">
+          <h4 class="text-xs font-bold text-ink mb-1">{c.box4Title}</h4>
+          <p class="text-xs text-muted leading-relaxed">{c.box4Text}</p>
+        </div>
+      </div>
+
+      <!-- FAQ Section -->
+      <div class="not-prose mt-12 pt-8 border-t border-hairline">
+        <h3 class="text-xl font-bold text-ink tracking-tight mb-6">
+          Frequently Asked Questions: Cryogenic Freezer Safety &amp; Engineering
+        </h3>
+        <div class="space-y-4">
+          {c.faqs.map(faq => (
+            <details class="group p-5 rounded-2xl bg-surface-soft border border-hairline transition-all">
+              <summary class="font-bold text-ink text-sm sm:text-base cursor-pointer list-none flex items-center justify-between gap-4">
+                <span>{faq.question}</span>
+                <span class="text-muted group-open:rotate-180 transition-transform text-xs">▼</span>
+              </summary>
+              <p class="text-muted text-xs sm:text-sm leading-relaxed mt-3 pt-3 border-t border-hairline">
+                {faq.answer}
+              </p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </article>
+  </div>
+</Layout>

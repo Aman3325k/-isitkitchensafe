@@ -116,7 +116,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-tunnel-washer-corrosion-modeler',
   'tools/commercial-rotary-rack-oven-cracking-modeler',
   'tools/commercial-ventless-hood-esp-modeler',
-  'tools/commercial-conveyor-smoker-pah-modeler'
+  'tools/commercial-conveyor-smoker-pah-modeler',
+  'tools/commercial-cryogenic-nitrogen-freezer-modeler'
 ];
 
 const esSlugs = new Set([
