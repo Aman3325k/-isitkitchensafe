@@ -111,7 +111,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-tortilla-press-hydraulic-modeler', name: 'Commercial Continuous Tortilla Press Heated Platen Hydraulic Rupture & Thermal Oil Degradation Modeler', category: 'Thermal Fluid Dynamics & High-Pressure Hydraulics', component: 'CommercialTortillaPressHydraulicModeler.astro', dataFile: 'tortilla-press-hydraulic-data.json' },
   { slug: 'commercial-spiral-mixer-shear-overheat-modeler', name: 'Commercial Bakery Spiral Mixer Bowl Drive Gear Shear & Dough Friction Overheat Modeler', category: 'Mechanical Tribology & Rheological Thermal Physics', component: 'CommercialSpiralMixerShearOverheatModeler.astro', dataFile: 'spiral-mixer-shear-overheat-data.json' },
   { slug: 'commercial-heated-holding-cabinet-modeler', name: 'Commercial Heated Food Holding Cabinet Relative Humidity & Bacterial Enterotoxin Desiccation Modeler', category: 'Thermodynamic Microbiology & Food Quality Preservation', component: 'CommercialHoldingCabinetModeler.astro', dataFile: 'holding-cabinet-desiccation-data.json' },
-  { slug: 'commercial-tunnel-washer-corrosion-modeler', name: 'Commercial Tunnel Washer Batch Continuous Flow Peracetic Acid Corrosion & Elastomer Degradation Modeler', category: 'Sanitary Chemical Engineering & Polymer Tribology', component: 'CommercialTunnelWasherModeler.astro', dataFile: 'tunnel-washer-corrosion-data.json' }
+  { slug: 'commercial-tunnel-washer-corrosion-modeler', name: 'Commercial Tunnel Washer Batch Continuous Flow Peracetic Acid Corrosion & Elastomer Degradation Modeler', category: 'Sanitary Chemical Engineering & Polymer Tribology', component: 'CommercialTunnelWasherModeler.astro', dataFile: 'tunnel-washer-corrosion-data.json' },
+  { slug: 'commercial-rotary-rack-oven-cracking-modeler', name: 'Commercial Rotary Rack Bakery Oven Airflow Inversion & Heat Exchanger Cracking Modeler', category: 'Thermal Aerodynamics & Combustion Safety', component: 'CommercialRotaryRackOvenModeler.astro', dataFile: 'rotary-rack-oven-cracking-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -552,26 +553,19 @@ function auditGrowthOpportunities() {
   });
 
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
-  const candidateTools = [
-    {
-      title: 'Commercial Rotary Rack Bakery Oven Airflow Inversion & Heat Exchanger Cracking Modeler',
-      category: 'Thermal Aerodynamics & Combustion Safety',
-      intent: 'Models 500°F (260°C) commercial rotating rack bakery oven forced-convection airflow balance, heat exchanger 409/304 stainless steel weld thermal fatigue cracking, flue gas carbon monoxide leakage into baking chamber, and NFPA 86 Class A oven explosion relief panel compliance.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '5,400+ US impressions'
-    },
+    const candidateTools = [
     {
       title: 'Commercial Ventless Kitchen Hood Electrostatic Precipitator Ozone & Grease Vapor Oxidation Modeler',
       category: 'Combustion Toxicology & Industrial Ventilation',
       intent: 'Models recirculating commercial ventless cooking hood 2-stage ESP ionizing cell corona wire fouling, aerosol particle collection efficiency, catalytic ozone gas decomposition (<0.05 PPM OSHA limit), and UL 710B / NFPA 96 interlocked fire suppression.',
-      priority: 'HIGH',
+      priority: 'CRITICAL_HIGH',
       estimatedMonthlyVolume: '4,900+ US impressions'
     },
     {
       title: 'Commercial Continuous Conveyor Smoker Polycyclic Aromatic Hydrocarbon (PAH) Wood Pellet Combustion Modeler',
       category: 'Combustion Toxicology & Food Safety',
       intent: 'Models industrial commercial conveyor barbecue pit wood pellet pyrolysis, forced-draft velocity, Benzo[a]pyrene and Chrysene PAH particle deposition onto meat bark, and NFPA 96 solid-fuel commercial kitchen flue creosote spark arrestor requirements.',
-      priority: 'MEDIUM',
+      priority: 'HIGH',
       estimatedMonthlyVolume: '4,600+ US impressions'
     },
     {
@@ -580,6 +574,13 @@ function auditGrowthOpportunities() {
       intent: 'Models -320°F (-196°C) industrial liquid nitrogen immersion and tunnel quick-freezers, 304 vs 316 stainless steel wire mesh belt cryogenic ductile-to-brittle transition temperature (DBTT), conveyor drive thermal contraction jamming, boil-off expansion ratios (1:694), and CGA P-12 scullery oxygen depletion asphyxiation sensor interlocks.',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '4,400+ US impressions'
+    },
+    {
+      title: 'Commercial High-Pressure Retort Autoclave Clostridium botulinum Fo Sterilization & Can Seam Stress Modeler',
+      category: 'Thermal Processing & Pressure Vessel Safety',
+      intent: 'Models 250°F (121°C) commercial batch retort autoclave thermal lethality Fo kinetics against Clostridium botulinum spores, saturated steam vs water immersion counter-pressure air overpressure control, and double-seam tinplate hermetic buckling margins under ASME BPVC Section VIII.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '4,200+ US impressions'
     }
   ];
 
