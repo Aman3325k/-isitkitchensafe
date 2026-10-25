@@ -118,7 +118,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-ventless-hood-esp-modeler',
   'tools/commercial-conveyor-smoker-pah-modeler',
   'tools/commercial-cryogenic-nitrogen-freezer-modeler',
-  'tools/commercial-retort-autoclave-botulinum-modeler'
+  'tools/commercial-retort-autoclave-botulinum-modeler',
+  'tools/commercial-freeze-dryer-sublimation-modeler'
 ];
 
 const esSlugs = new Set([

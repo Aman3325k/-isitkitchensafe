@@ -117,7 +117,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-conveyor-smoker-pah-modeler', name: 'Commercial Continuous Conveyor Smoker Polycyclic Aromatic Hydrocarbon (PAH) Wood Pellet Combustion Modeler', category: 'Combustion Toxicology & Food Safety', component: 'CommercialConveyorSmokerPahModeler.astro', dataFile: 'conveyor-smoker-pah-data.json' },
   { slug: 'commercial-cryogenic-nitrogen-freezer-modeler', name: 'Commercial Cryogenic Liquid Nitrogen Quick-Freezer Belt Embrittlement & Oxygen Depletion Safety Modeler', category: 'Cryogenic Thermodynamics & Atmospheric Safety', component: 'CommercialCryogenicNitrogenFreezerModeler.astro', dataFile: 'cryogenic-nitrogen-freezer-data.json' }
 ,
-  { slug: 'commercial-retort-autoclave-botulinum-modeler', name: 'Commercial High-Pressure Retort Autoclave Clostridium botulinum Fo Sterilization & Can Seam Stress Modeler', category: 'Thermal Processing & Pressure Vessel Safety', component: 'CommercialRetortAutoclaveModeler.astro', dataFile: 'retort-autoclave-botulinum-data.json' }
+  { slug: 'commercial-retort-autoclave-botulinum-modeler', name: 'Commercial High-Pressure Retort Autoclave Clostridium botulinum Fo Sterilization & Can Seam Stress Modeler', category: 'Thermal Processing & Pressure Vessel Safety', component: 'CommercialRetortAutoclaveModeler.astro', dataFile: 'retort-autoclave-botulinum-data.json' },
+  { slug: 'commercial-freeze-dryer-sublimation-modeler', name: 'Commercial Industrial Freeze Dryer Sublimation Condenser Ice Cake Collapse & Vacuum Seal Modeler', category: 'Cryogenic Thermodynamics & Vacuum Physics', component: 'CommercialFreezeDryerSublimationModeler.astro', dataFile: 'freeze-dryer-sublimation-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -565,24 +566,17 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
         const candidateTools = [
     {
-      title: 'Commercial Industrial Freeze Dryer Sublimation Condenser Ice Cake Collapse & Vacuum Seal Modeler',
-      category: 'Cryogenic Thermodynamics & Vacuum Physics',
-      intent: 'Models -50°C to +40°C industrial food freeze-drying shelf heating profiles, pirani gauge vacuum sublimation rates (<0.1 mbar), condenser coil ice cake sublimation collapse limits, and elastomer vacuum door seal permeation margins under FDA 21 CFR § 113.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '4,300+ US impressions'
-    },
-    {
       title: 'Commercial Steam Tunnel Continuous Shrink Sleeve Packaging Condensate Corrosion & Bottle Burst Modeler',
       category: 'Thermal Fluid Dynamics & Packaging Integrity',
       intent: 'Models high-speed commercial beverage & sauce line continuous steam shrink sleeve tunnels, saturated steam condensation heat transfer, PET vs glass bottle thermal shock hoop stress bursting, and 316L stainless tunnel plenum acid sanitizing corrosion.',
-      priority: 'HIGH',
+      priority: 'CRITICAL_HIGH',
       estimatedMonthlyVolume: '4,000+ US impressions'
     },
     {
       title: 'Commercial Continuous Rotary Blancher Steam Inversion & Thermophilic Geobacillus Spore Modeler',
       category: 'Thermal Processing & Canning Microbiology',
       intent: 'Models commercial rotary screw drum blanchers, direct steam injection thermal stratification, Geobacillus stearothermophilus spore persistence and flat-sour spoilage kinetics, and sanitary rotary trunnion seal CIP cleanability under 21 CFR § 113.',
-      priority: 'MEDIUM',
+      priority: 'HIGH',
       estimatedMonthlyVolume: '3,800+ US impressions'
     },
     {
@@ -591,6 +585,13 @@ function auditGrowthOpportunities() {
       intent: 'Models commercial dishwashing & cookware manufacturing 25-40 kHz multi-frequency ultrasonic cleaning baths, Rayleigh-Plesset acoustic cavitation bubble collapse shockwaves (>1,000 bar micro-jets), 316L stainless tank basin cavitation pit erosion rates, and piezoelectric PZT transducer epoxy bond shear fatigue under high alkaline sanitizing chemistries.',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '3,600+ US impressions'
+    },
+    {
+      title: 'Commercial Fluidized Bed Agglomeration Spray Nozzle Droplet Drying & Dust Deflagration Modeler',
+      category: 'Thermal Fluid Dynamics & Combustible Dust Safety',
+      intent: 'Models commercial food powder agglomeration & instantizing fluidized bed dryers, two-fluid atomizing spray nozzle droplet evaporation kinetics, minimum ignition energy (MIE < 30 mJ), and NFPA 652 / NFPA 654 explosion venting panel burst pressures.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '3,400+ US impressions'
     }
   ];
 
