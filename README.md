@@ -3,7 +3,7 @@
 A static reference site answering "Can you put X in Y?" questions for kitchen appliances.
 
 ## Overview
-IsItKitchenSafe provides 10,122 static diagnostic pages detailing whether everyday items are safe for the dishwasher, microwave, freezer, oven, dryer, air fryer, refrigerator, and more across 5 languages (English, Spanish, Portuguese, Japanese, Simplified Chinese), backed by 90 flagship interactive diagnostic tools.
+IsItKitchenSafe provides 10,122 static diagnostic pages detailing whether everyday items are safe for the dishwasher, microwave, freezer, oven, dryer, air fryer, refrigerator, and more across 5 languages (English, Spanish, Portuguese, Japanese, Simplified Chinese), backed by 91 flagship interactive diagnostic tools.
 
 ## Tech Stack
 - **Framework**: Astro.js
@@ -45,7 +45,7 @@ npm run ops:sitemaps
 # Run targeted audits
 npm run ops:seo        # Structured data (JSON-LD FAQPage, BreadcrumbList) & canonicals
 npm run ops:cwv        # Core Web Vitals bundle budgets & asset geometry
-node scripts/autonomous-growth-engine.cjs --tools      # 90 tools × 5 languages audit
+node scripts/autonomous-growth-engine.cjs --tools      # 91 tools × 5 languages audit
 node scripts/autonomous-growth-engine.cjs --redirects  # Cloudflare Pages 2k ceiling monitor
 node scripts/autonomous-growth-engine.cjs --datasets   # 94+ multilingual data assets
 
@@ -57,8 +57,8 @@ npm run ops:engine
 ```
 
 ## Scale & Metrics
-- **10,122 Static Pages** across 11 verticals and 5 languages (EN, ES, PT, JA, ZH-CN)
-- **90 Flagship Interactive Tools** with 100% multilingual parity (450 tool pages)
+- **10,127 Static Pages** across 11 verticals and 5 languages (EN, ES, PT, JA, ZH-CN)
+- **91 Flagship Interactive Tools** with 100% multilingual parity (455 tool pages)
 - **Zero Dead Links** (942,000+ hrefs audited with 100% resolution)
 - **9,909+ Indexed URLs** in verified XML Sitemaps (`sitemap-index.xml`, `sitemap-0.xml`)
 - **Cloudflare Edge Middleware** fallback synchronization (`functions/_redirects-map.js`)

@@ -120,7 +120,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-cryogenic-nitrogen-freezer-modeler',
   'tools/commercial-retort-autoclave-botulinum-modeler',
   'tools/commercial-freeze-dryer-sublimation-modeler',
-  'tools/commercial-steam-tunnel-condensate-modeler'
+  'tools/commercial-steam-tunnel-condensate-modeler',
+  'tools/commercial-rotary-blancher-modeler'
 ];
 
 const esSlugs = new Set([
