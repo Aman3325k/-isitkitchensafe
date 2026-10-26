@@ -122,7 +122,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-freeze-dryer-sublimation-modeler',
   'tools/commercial-steam-tunnel-condensate-modeler',
   'tools/commercial-rotary-blancher-modeler',
-  'tools/commercial-ultrasonic-cavitation-modeler'
+  'tools/commercial-ultrasonic-cavitation-modeler',
+  'tools/commercial-fluidized-bed-agglomeration-modeler'
 ];
 
 const esSlugs = new Set([

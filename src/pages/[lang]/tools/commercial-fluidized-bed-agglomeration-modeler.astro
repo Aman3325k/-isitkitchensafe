@@ -1,0 +1,384 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import CommercialFluidizedBedAgglomerationModeler from '../../../components/CommercialFluidizedBedAgglomerationModeler.astro';
+import type { SupportedLanguage } from '../../../i18n/ui';
+import { useTranslations, useTranslatedPath } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+const t = useTranslations(lang);
+const tp = useTranslatedPath(lang);
+
+interface LocaleToolContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  lead: string;
+  breadcrumbsLabel: string;
+  faqs: Array<{ question: string; answer: string }>;
+  scienceTitle1: string;
+  scienceText1: string;
+  box1Title: string;
+  box1Text: string;
+  box2Title: string;
+  box2Text: string;
+  scienceTitle2: string;
+  scienceText2: string;
+  box3Title: string;
+  box3Text: string;
+  box4Title: string;
+  box4Text: string;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocaleToolContent> = {
+  es: {
+    pageTitle: "Simulador de Lecho Fluidizado: Secado por Pulverización y Deflagración de Polvo | IsItKitchenSafe",
+    pageDescription: "Modele secadores de lecho fluidizado de aglomeración e instantaneización de polvo alimentario comercial, cinética de evaporación de gotas con boquilla atomizadora de dos fluidos, energía mínima de ignición (MIE < 30 mJ) y presiones de alivio según NFPA 652 / NFPA 654.",
+    badge: "Termofluidodinámica y Seguridad contra Polvo Combustible",
+    h1: "Simulador de Lecho Fluidizado Comercial: Secado por Atomización y Deflagración de Polvo",
+    lead: "Simule procesos de aglomeración e instantaneización en lecho fluidizado de polvos alimentarios comerciales, cinética de evaporación de gotas en boquillas de dos fluidos, diámetro medio de gota Sauter (D32), energía mínima de ignición (MIE < 30 mJ), acumulación electrostática y venteo de deflagración según NFPA 68 en procesamiento lácteo y de bebidas.",
+    breadcrumbsLabel: "Lecho Fluidizado y Deflagración",
+    faqs: [
+      {
+        question: "¿Cuál es el mecanismo físico de la aglomeración de polvos en lechos fluidizados comerciales?",
+        answer: "La aglomeración en lecho fluidizado suspende polvos finos y poco humectables en una corriente ascendente de aire caliente entre la velocidad mínima de fluidización (U_mf) y la terminal (U_t). Boquillas de dos fluidos pulverizan microgotas de un aglutinante líquido formando puentes líquidos capilares entre las partículas en colisión. El aire caliente evapora el agua precipitando puentes sólidos cristalinos que fijan la estructura granular porosa, acelerando drásticamente su disolución instantánea en frío."
+      },
+      {
+        question: "¿Cómo controlan las boquillas atomizadoras de dos fluidos el diámetro de gota Sauter (D32)?",
+        answer: "El aire comprimido a alta velocidad cizalla el flujo líquido entrante. La relación aire-líquido (ALR), tensión superficial y viscosidad determinan el diámetro D32, que debe mantenerse estrictamente entre 25 µm y 45 µm. Gotas demasiado gruesas (>60 µm) causan sobrehumectación y colapso del lecho (desfluidización); gotas demasiado finas (<18 µm) se evaporan antes de contactar el polvo, generando pérdidas por elutriación."
+      },
+      {
+        question: "¿Por qué los polvos alimentarios representan un grave riesgo de deflagración (NFPA 652)?",
+        answer: "Polvos orgánicos como proteínas de suero, leche, harinas y cacao son polvos combustibles clase St-1 o St-2. Dentro del lecho se suspenden a concentraciones de 100 a 500 g/m³, muy por encima de la concentración mínima explosiva (MEC ≈ 35-60 g/m³). Con energías mínimas de ignición muy bajas (MIE de 12 a 18 mJ), cualquier fallo de puesta a tierra (R > 10 Ω) en mangas de filtro acumula voltajes superiores a 20 kV cuyas chispas estáticas (>25 mJ) provocan una deflagración violenta."
+      },
+      {
+        question: "¿Cómo protege el venteo de deflagración NFPA 68 contra la rotura del recipiente?",
+        answer: "En caso de deflagración interna, los gases en expansión generarían presiones de hasta 9 bar, superando la resistencia de recipientes estándar (0.2 a 1.2 bar). Un panel de venteo calibrado (Pstat ≈ 0.1 bar) se rompe de forma controlada, evacuando la onda de sobrepresión hacia el exterior o a través de malla disipadora de llama ATEX, garantizando que la presión reducida (Pred) no fracture el equipo."
+      },
+      {
+        question: "¿Cómo evita el inertizado con nitrógeno las explosiones de polvo según NFPA 69?",
+        answer: "La combustión requiere oxígeno por encima de la Concentración Límite de Oxígeno (LOC ≈ 9.5% a 11.0% O2). Operando en circuito cerrado purgado con nitrógeno continuo (O2 < 7.5%), la falta de comburente impide químicamente la deflagración, haciendo físicamente imposible cualquier explosión de polvo independientemente de fuentes de ignición estática."
+      },
+      {
+        question: "¿Qué es el punto pegajoso termoplástico y por qué limita la temperatura del aire?",
+        answer: "Los azúcares amorfos y grasas sufren una fuerte caída de la temperatura de transición vítrea (Tg) al absorber humedad durante la pulverización. Si el aire de entrada calienta la partícula por encima de su punto pegajoso (48°C en leche entera, 42°C en mezclas de cacao), el polvo entra en estado gomoso y se adhiere fuertemente a paredes y filtros, colapsando la fluidización."
+      }
+    ],
+    scienceTitle1: "Aerodinámica de Fluidización y Ecuación de Ergun",
+    scienceText1: "La caída de presión aerodinámica a través del lecho de polvo responde a la ecuación de Ergun. Al alcanzarse la velocidad mínima de fluidización (U_mf), el empuje aerodinámico compensa el peso del polvo, permitiendo una mezcla vigorosa y uniforme.",
+    box1Title: "Ecuación de Pérdida de Carga de Ergun",
+    box1Text: "ΔP / L = 150 · [ μ_g · (1 - ε)² / (ε³ · d_p²) ] · U_g + 1.75 · [ ρ_g · (1 - ε) / (ε³ · d_p) ] · U_g²",
+    box2Title: "Velocidad Mínima de Fluidización",
+    box2Text: "U_mf ≈ [ d_p² · (ρ_p - ρ_g) · g ] / (150 · μ_g) · [ ε_0³ / (1 - ε_0) ]",
+    scienceTitle2: "Severidad de Deflagración y Venteo según NFPA 68",
+    scienceText2: "La tasa de aumento de presión por explosión cúbica está gobernada por el índice de deflagración Kst. Los paneles de alivio calibrados descargan la sobrepresión manteniendo Pred por debajo de la resistencia mecánica del recipiente.",
+    box3Title: "Ley Cúbica de Deflagración",
+    box3Text: "(dP / dt)_max · V^(1/3) = K_st ≈ 110 – 175 bar·m/s (Polvo Clase St-1)",
+    box4Title: "Área de Venteo Requerida NFPA 68",
+    box4Text: "A_v = C · A_s · [ (P_max / P_red) - 1 ]^(0.5) · (K_st / 100) · [ 1 + 1.75 · (P_stat - 0.1) ]"
+  },
+  pt: {
+    pageTitle: "Simulador de Leito Fluidizado: Secagem por Pulverização e Deflagração de Poeira | IsItKitchenSafe",
+    pageDescription: "Modele secadores de leito fluidizado para aglomeração e instantaneização de pós alimentícios comerciais, cinética de evaporação de gotas com bicos de dois fluidos, energia mínima de ignição (MIE < 30 mJ) e alívio de explosão NFPA 652 / NFPA 654.",
+    badge: "Termofluidodinâmica e Segurança contra Poeira Combustível",
+    h1: "Simulador de Leito Fluidizado Comercial: Secagem por Atomização e Deflagração de Poeira",
+    lead: "Simule processos de aglomeração e instantaneização em leito fluidizado de pós alimentícios comerciais, cinética de evaporação de gotas em bicos pneumáticos de dois fluidos, diâmetro médio de Sauter (D32), energia mínima de ignição (MIE < 30 mJ), aterramento antiestático e alívio de deflagração NFPA 68 no processamento de laticínios e bebidas.",
+    breadcrumbsLabel: "Leito Fluidizado e Deflagração",
+    faqs: [
+      {
+        question: "Qual é o mecanismo físico da aglomeração de pós em leitos fluidizados comerciais?",
+        answer: "A aglomeração suspende partículas finas em uma corrente ascendente de ar condicionado entre a velocidade mínima de fluidização (U_mf) e a terminal (U_t). Bicos de dois fluidos atomizam microgotas de solução aglutinante criando pontes líquidas capilares entre as partículas. O ar aquecido evapora a umidade precipitando pontes sólidas cristalinas que consolidam o grânulo instantâneo com rápida dispersão em água fria."
+      },
+      {
+        question: "Como os bicos atomizadores de dois fluidos controlam o diâmetro de gota Sauter (D32)?",
+        answer: "O ar comprimido em alta velocidade cizilha o jato líquido central. A relação ar-líquido (ALR) e a viscosidade regulam o D32, que deve operar entre 25 µm e 45 µm. Gotas muito grossas (>60 µm) induzem sobreumedecimento e colapso do leito; gotas excessivamente finas (<18 µm) evaporam antes de tocar o pó, elevando perdas por elutriação."
+      },
+      {
+        question: "Por que pós alimentícios orgânicos representam risco severo de deflagração (NFPA 652)?",
+        answer: "Pós como proteínas de soro de leite, leite e cacau são poeiras combustíveis classe St-1 ou St-2. No leito fluidizado atingem densidades de 100 a 500 g/m³, bem acima da concentração mínima explosiva (MEC). Com MIE muito baixo (12 a 18 mJ), aterramento deficiente (R > 10 Ω) acumula potenciais eletrostáticos acima de 20 kV com energia de centelha (>25 mJ) suficiente para deflagração imediata."
+      },
+      {
+        question: "Como o alívio de deflagração NFPA 68 protege o vaso contra ruptura explosiva?",
+        answer: "Em uma deflagração interna, a expansão térmica atinge até 9 bar, superando a carcaça metálica (0,2 a 1,2 bar). Painéis de ruptura certificados (Pstat ≈ 0,1 bar) abrem-se permitindo escape seguro dos gases para a área externa, mantendo a pressão reduzida (Pred) abaixo da resistência estrutural do equipamento."
+      },
+      {
+        question: "Como a inertização com nitrogênio previne explosões sob a norma NFPA 69?",
+        answer: "A queima exige oxigênio acima da Concentração Limite de Oxigênio (LOC ≈ 9,5% a 11,0%). Operando em circuito fechado sob contínua purga de nitrogênio (O2 < 7,5%), a ausência de comburente impede a reação em cadeia, neutralizando o risco de deflagração mesmo na presença de faíscas estáticas."
+      },
+      {
+        question: "O que é o ponto pegajoso termoplástico e por que ele restringe a temperatura do ar?",
+        answer: "Açúcares amorfos e gorduras sofrem forte depressão da temperatura de transição vítrea com a umidade da pulverização. Se o ar de entrada aquecer o pó acima do ponto pegajoso (48°C em leite integral, 42°C em cacau), as partículas entram em estado borrachoso e aderem às paredes, provocando perda total de fluidização."
+      }
+    ],
+    scienceTitle1: "Aerodinâmica de Fluidização e Equação de Ergun",
+    scienceText1: "A perda de carga hidrodinâmica através do leito de pó obedece à equação de Ergun. Acima da velocidade mínima de fluidização (U_mf), a sustentação aerodinâmica equilibra o peso do pó, garantindo agitação homogênea sem zonas mortas.",
+    box1Title: "Equação de Perda de Carga de Ergun",
+    box1Text: "ΔP / L = 150 · [ μ_g · (1 - ε)² / (ε³ · d_p²) ] · U_g + 1.75 · [ ρ_g · (1 - ε) / (ε³ · d_p) ] · U_g²",
+    box2Title: "Velocidade Mínima de Fluidização",
+    box2Text: "U_mf ≈ [ d_p² · (ρ_p - ρ_g) · g ] / (150 · μ_g) · [ ε_0³ / (1 - ε_0) ]",
+    scienceTitle2: "Cinética de Deflagração e Dimensionamento de Venteio NFPA 68",
+    scienceText2: "A taxa de elevação de pressão explosiva é determinada pelo índice Kst. Painéis de ruptura certificados garantem que a pressão máxima interna de alívio (Pred) não exceda a resistência mecânica do vaso de processo.",
+    box3Title: "Lei Cúbica de Explosão",
+    box3Text: "(dP / dt)_max · V^(1/3) = K_st ≈ 110 – 175 bar·m/s (Poeira Classe St-1)",
+    box4Title: "Área de Venteo Obrigatória NFPA 68",
+    box4Text: "A_v = C · A_s · [ (P_max / P_red) - 1 ]^(0.5) · (K_st / 100) · [ 1 + 1.75 · (P_stat - 0.1) ]"
+  },
+  'zh-cn': {
+    pageTitle: "商用流化床团聚喷嘴液滴干燥与粉尘爆燃模拟分析仪 | IsItKitchenSafe",
+    pageDescription: "模拟商业食品粉体团聚速溶流化床干燥机、双流体雾化喷嘴液滴蒸发动力学、最小点火能 (MIE < 30 mJ) 以及符合 NFPA 652 / NFPA 654 标准的泄爆片破裂安全压力。",
+    badge: "热流体动力学与可燃粉尘防爆安全",
+    h1: "商用流化床团聚喷嘴液滴干燥与粉尘爆燃模拟分析仪",
+    lead: "精确模拟商用食品粉体流化床团聚与速溶造粒工艺、双流体气动雾化喷嘴液滴蒸发动力学、Sauter 平均液滴粒径 (D32)、最小点火能 (MIE < 30 mJ)、除尘滤袋静电火花积聚以及遵循 NFPA 68 / NFPA 69 / ATEX 规范的粉尘爆燃泄压安全裕度。",
+    breadcrumbsLabel: "流化床干燥与粉尘防爆",
+    faqs: [
+      {
+        question: "商用流化床干燥机中食品粉体团聚速溶的物理机理是什么？",
+        answer: "流化床团聚将微细难溶粉体（如水解乳清蛋白、可可粉、麦芽糊精）悬浮于流化气速 (U_mf 至 U_t) 的热风中。双流体喷嘴将雾化粘结液滴喷射入粉尘云中，液滴与运动颗粒碰撞形成毛细液桥。热空气在颗粒表面快速蒸发水分并析出坚硬的结晶固相桥，使原本粘性强、难下沉的粉体转变成孔隙率极高的速溶颗粒，冷水溶解时间缩短至15秒以内。"
+      },
+      {
+        question: "双流体气动雾化喷嘴如何精确调控 Sauter 平均液滴直径 (D32)？",
+        answer: "高压压缩空气高速剪切中心液体流。气液质量比 (ALR)、液体表面张力及粘度共同决定 D32 粒径，必须严格控制在 25–45 µm 之间。液滴过粗 (>60 µm) 会导致局部过湿引起床层坍塌板结；液滴过细 (<18 µm) 则在接触粉体前快速蒸发，造成微粉大量飞逸并堵塞后端滤筒。"
+      },
+      {
+        question: "为什么有机食品粉体属于高危可燃粉尘爆燃介质 (NFPA 652)？",
+        answer: "乳清蛋白、全脂奶粉、淀粉和可可粉均属 St-1 / St-2 级可燃粉尘。流化床内部粉尘浓度通常在 100–500 g/m³ 之间，深处爆炸极限浓度 (MEC ≈ 35–60 g/m³) 之内。干燥粉体最小点火能极低（可可仅 12 mJ，乳清蛋白仅 18 mJ）。气力输送产生的静电电荷若因接地不良 (R > 10 Ω) 积聚超 20 kV，其释放的高能火花 (>25 mJ) 将立即引燃粉尘云，引发峰值压力高达 9 bar 的猛烈爆燃。"
+      },
+      {
+        question: "NFPA 68 泄爆面积计算如何防止流化床壳体发生灾难性破裂？",
+        answer: "内部粉尘爆炸若无法泄放，膨胀压力将达 9 bar，瞬间撕裂常规不锈钢常压容器（耐压仅 0.2–1.2 bar）。标定泄爆膜片 (Pstat ≈ 0.1 bar) 会在初生压力下毫秒级破裂，将高压气体与火焰引导至室外或阻火滤网，确保容器内部减压后残余峰值压力 (Pred) 严格低于壳体屈服强度。"
+      },
+      {
+        question: "闭式循环氮气惰化系统如何依据 NFPA 69 杜绝粉尘爆炸？",
+        answer: "粉尘燃烧链式反应必须有高于极限氧浓度 (LOC ≈ 9.5%–11.0% O2) 的助燃气体。高价值或高脂配方采用全闭式氮气保护循环，将氧含量自动控制在 7.5% 以下。在缺氧环境下，化学氧化链无法形成，即便存在静电火花也绝不会发生粉尘爆燃。"
+      },
+      {
+        question: "什么是热塑性粘附点？为什么它限定了流化进风温度上限？",
+        answer: "含糖与高脂粉体吸湿后玻璃化转变温度 (Tg) 剧降。当流化进风加热使颗粒表面温度超过其热塑性粘附点（全脂奶粉约 48°C，可可混合粉约 42°C）时，表面转变为高粘度橡胶态，颗粒大量粘壁并结块堵死风板与滤袋，导致整床流化失效。"
+      }
+    ],
+    scienceTitle1: "流化床空气动力学与 Ergun 压降方程",
+    scienceText1: "穿过粉体床层的流体阻力与表观风速遵循 Ergun 方程。当升力与粉体浮重平衡时达到临界流化气速 (U_mf)，确保床层剧烈沸腾与均匀混合，消除局部死角。",
+    box1Title: "Ergun 床层压降微分方程",
+    box1Text: "ΔP / L = 150 · [ μ_g · (1 - ε)² / (ε³ · d_p²) ] · U_g + 1.75 · [ ρ_g · (1 - ε) / (ε³ · d_p) ] · U_g²",
+    box2Title: "临界流化气速公式 (U_mf)",
+    box2Text: "U_mf ≈ [ d_p² · (ρ_p - ρ_g) · g ] / (150 · μ_g) · [ ε_0³ / (1 - ε_0) ]",
+    scienceTitle2: "粉尘爆炸爆燃指数与 NFPA 68 泄压物理模型",
+    scienceText2: "爆炸压力上升速率与容器体积遵循立方根定律。校准型防爆片泄放面积 Av 确保内部残余峰值压力 Pred 不超过流化床壳体机械设计安全极限。",
+    box3Title: "粉尘爆燃三次方定律",
+    box3Text: "(dP / dt)_max · V^(1/3) = K_st ≈ 110 – 175 bar·m/s (St-1级可燃有机粉尘)",
+    box4Title: "NFPA 68 强制泄爆面积模型",
+    box4Text: "A_v = C · A_s · [ (P_max / P_red) - 1 ]^(0.5) · (K_st / 100) · [ 1 + 1.75 · (P_stat - 0.1) ]"
+  },
+  ja: {
+    pageTitle: "商用流動層凝集スプレーノズル液滴乾燥・粉塵爆燃モデラー | IsItKitchenSafe",
+    pageDescription: "商用食品粉末凝集・即溶化流動層乾燥機、二流体微粒化スプレーノズルの液滴蒸発動力学、最小着火エネルギー (MIE < 30 mJ)、NFPA 652 / NFPA 654 準拠の放散パネル破裂圧力を高精度にシミュレーション。",
+    badge: "熱流体力学と可燃性粉塵防爆安全性",
+    h1: "商用流動層凝集スプレーノズル液滴乾燥・粉塵爆燃モデラー",
+    lead: "食品粉末の商用流動層凝集造粒プロセス、二流体スプレーノズルの液滴蒸発動力学、ザウター平均液滴径 (D32)、最小着火エネルギー (MIE < 30 mJ)、フィルターバッグ静電気火花蓄積、および NFPA 68 / NFPA 69 / ATEX 規格に準拠した粉塵爆燃放散安全性を計算・診断します。",
+    breadcrumbsLabel: "流動層造粒と粉塵爆燃",
+    faqs: [
+      {
+        question: "商用流動層乾燥機における食品粉末凝集・即溶化の物理メカニズムとは？",
+        answer: "流動層凝集は難溶性の微細粉末を分散板からの熱風気流中に懸濁させ、二流体スプレーノズルから微粒化した液体バインダーを噴霧します。衝突した液滴が毛細管液架橋を形成し、熱風蒸発によって強固な結晶架橋へと固化することで、冷水でも数秒で溶解する多孔質インスタント顆粒を成形します。"
+      },
+      {
+        question: "二流体ノズルはどのようにザウター平均液滴径 (D32) を制御するか？",
+        answer: "高速圧縮空気による液体せん断機構を採用し、気液質量比 (ALR) と粘度によって D32 を 25〜45 µm の最適範囲に制御します。粗大液滴 (>60 µm) は局所過湿による層崩壊（流動停止）を引き起こし、過度に微小な霧 (<18 µm) は接触前に乾燥して微粉ロスとなります。"
+      },
+      {
+        question: "なぜ有機食品粉末は深刻な可燃性粉塵爆燃リスクとなるのか (NFPA 652)？",
+        answer: "ホエイプロテイン、全脂粉乳、ココア等は St-1 / St-2 クラスの可燃性粉塵です。装置内部は爆発下限界 (MEC) を超える 100〜500 g/m³ の高濃度粉塵雲となります。MIE が極めて低いため (12〜18 mJ)、接地不良 (R > 10 Ω) による静電気蓄積放電火花 (>25 mJ) が容易に着火源となり、猛烈な爆燃を引き起こします。"
+      },
+      {
+        question: "NFPA 68 放散パネルはどのように容器の破裂破壊を防ぐか？",
+        answer: "内部爆燃時の圧力上昇速度は極めて速く、最大 9 bar に達し耐圧 1.2 bar 程度の標準容器を破壊します。校正済み放散パネル (Pstat ≈ 0.1 bar) が瞬時に開放されて圧力を外部へ逃がし、チャンバー内の低減圧力 (Pred) を耐圧限界未満に抑え込みます。"
+      },
+      {
+        question: "閉ループ窒素置換は NFPA 69 に基づきどのように粉塵爆発を防ぐか？",
+        answer: "燃焼連鎖反応には限界酸素濃度 (LOC ≈ 9.5〜11.0%) 以上の酸素が必要です。高純度窒素によるクローズドループ運転で酸素濃度を 7.5% 未満に維持することで、静電気火花等の着火源が存在しても物理的に爆燃が起こり得ない不活性環境を構築します。"
+      },
+      {
+        question: "熱可塑性付着点とは何か？ なぜ給気温度の上限を決定づけるのか？",
+        answer: "糖分や脂肪を含む粉末は水分付着によりガラス転移温度 (Tg) が急低下します。給気温度が粉末の軟化付着温度（全粉乳 48°C、ココア 42°C）を超えると、粒子がゴム状に軟化して槽壁やフィルターに激しく融着し、流動が完全に停止します。"
+      }
+    ],
+    scienceTitle1: "流動化空気力学と Ergun 圧力損失方程式",
+    scienceText1: "粉末層を通過する流体抵抗と空塔速度は Ergun 方程式に従います。流体力学的抗力と粉末の浮動重量が釣り合う最小流動化速度 (U_mf) を超えることで、均一な混合と良好な液架橋が達成されます。",
+    box1Title: "Ergun 圧損方程式",
+    box1Text: "ΔP / L = 150 · [ μ_g · (1 - ε)² / (ε³ · d_p²) ] · U_g + 1.75 · [ ρ_g · (1 - ε) / (ε³ · d_p) ] · U_g²",
+    box2Title: "最小流動化速度 (U_mf)",
+    box2Text: "U_mf ≈ [ d_p² · (ρ_p - ρ_g) · g ] / (150 · μ_g) · [ ε_0³ / (1 - ε_0) ]",
+    scienceTitle2: "粉塵爆燃指数と NFPA 68 放散工学モデル",
+    scienceText2: "爆発時の圧力上昇率は粉塵指数 Kst に支配されます。校正された放散面積 Av を設けることで、減圧後最大圧力 Pred を流動層容器の設計耐圧強度以下に抑制します。",
+    box3Title: "立方根爆燃方程式",
+    box3Text: "(dP / dt)_max · V^(1/3) = K_st ≈ 110 – 175 bar·m/s (St-1級粉塵)",
+    box4Title: "NFPA 68 所要放散開口面積",
+    box4Text: "A_v = C · A_s · [ (P_max / P_red) - 1 ]^(0.5) · (K_st / 100) · [ 1 + 1.75 · (P_stat - 0.1) ]"
+  }
+};
+
+const c = CONTENT[lang as Exclude<SupportedLanguage, 'en'>] || CONTENT.es;
+
+const breadcrumbs = [
+  { label: t('nav.home' as any) || 'Home', href: tp('/') },
+  { label: t('nav.tools' as any) || 'Tools', href: tp('/tools/') },
+  { label: c.breadcrumbsLabel }
+];
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "name": c.h1,
+      "url": `https://isitkitchensafe.com/${lang}/tools/commercial-fluidized-bed-agglomeration-modeler/`,
+      "applicationCategory": "EngineeringApplication",
+      "operatingSystem": "All",
+      "browserRequirements": "Requires JavaScript. Requires HTML5 Canvas/CSS3.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": c.pageDescription
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": t('nav.home' as any) || 'Home',
+          "item": `https://isitkitchensafe.com${tp('/')}`
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": t('nav.tools' as any) || 'Tools',
+          "item": `https://isitkitchensafe.com${tp('/tools/')}`
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": c.breadcrumbsLabel,
+          "item": `https://isitkitchensafe.com/${lang}/tools/commercial-fluidized-bed-agglomeration-modeler/`
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": c.faqs.map(f => ({
+        "@type": "Question",
+        "name": f.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": f.answer
+        }
+      }))
+    }
+  ]
+};
+---
+
+<Layout
+  title={c.pageTitle}
+  description={c.pageDescription}
+  structuredData={structuredData}
+>
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+    <Breadcrumbs items={breadcrumbs} />
+
+    <header class="mb-8 mt-4">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+          {c.badge}
+        </span>
+        <span class="text-xs text-muted font-mono">NFPA 652 &bull; NFPA 68 &bull; NFPA 69 &bull; ATEX</span>
+      </div>
+      <h1 class="text-display-sm sm:text-display font-semibold text-ink tracking-tight mb-3">
+        {c.h1}
+      </h1>
+      <p class="text-body-lg text-muted max-w-4xl leading-relaxed">
+        {c.lead}
+      </p>
+    </header>
+
+    <!-- Flagship Interactive Modeler Component -->
+    <CommercialFluidizedBedAgglomerationModeler lang={lang} />
+
+    <!-- Engineering & Surface Science Technical Reference -->
+    <section class="my-16 space-y-12">
+      <div class="border-t border-hairline pt-10">
+        <h2 class="text-title-lg font-semibold text-ink tracking-tight mb-4">
+          {c.scienceTitle1}
+        </h2>
+        <div class="prose max-w-none text-body text-sm sm:text-base leading-relaxed space-y-4">
+          <p>{c.scienceText1}</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+            <div class="bg-surface-soft p-4 rounded-xl border border-hairline">
+              <span class="font-bold text-xs text-ink block mb-1">{c.box1Title}</span>
+              <div class="font-mono text-xs overflow-x-auto text-ink">{c.box1Text}</div>
+            </div>
+            <div class="bg-surface-soft p-4 rounded-xl border border-hairline">
+              <span class="font-bold text-xs text-ink block mb-1">{c.box2Title}</span>
+              <div class="font-mono text-xs overflow-x-auto text-ink">{c.box2Text}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="border-t border-hairline pt-10">
+        <h2 class="text-title-lg font-semibold text-ink tracking-tight mb-4">
+          {c.scienceTitle2}
+        </h2>
+        <div class="prose max-w-none text-body text-sm sm:text-base leading-relaxed space-y-4">
+          <p>{c.scienceText2}</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+            <div class="bg-surface-soft p-4 rounded-xl border border-hairline">
+              <span class="font-bold text-xs text-ink block mb-1">{c.box3Title}</span>
+              <div class="font-mono text-xs overflow-x-auto text-ink">{c.box3Text}</div>
+            </div>
+            <div class="bg-surface-soft p-4 rounded-xl border border-hairline">
+              <span class="font-bold text-xs text-ink block mb-1">{c.box4Title}</span>
+              <div class="font-mono text-xs overflow-x-auto text-ink">{c.box4Text}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="border-t border-hairline pt-10">
+        <h2 class="text-title-lg font-semibold text-ink tracking-tight mb-4">
+          Frequently Asked Questions
+        </h2>
+        <div class="space-y-6">
+          {c.faqs.map((faq) => (
+            <div class="bg-surface-soft/60 border border-hairline rounded-2xl p-6">
+              <h3 class="text-title-sm font-semibold text-ink mb-2">
+                {faq.question}
+              </h3>
+              <p class="text-body text-sm leading-relaxed text-muted">
+                {faq.answer}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
