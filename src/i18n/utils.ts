@@ -121,7 +121,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-retort-autoclave-botulinum-modeler',
   'tools/commercial-freeze-dryer-sublimation-modeler',
   'tools/commercial-steam-tunnel-condensate-modeler',
-  'tools/commercial-rotary-blancher-modeler'
+  'tools/commercial-rotary-blancher-modeler',
+  'tools/commercial-ultrasonic-cavitation-modeler'
 ];
 
 const esSlugs = new Set([
