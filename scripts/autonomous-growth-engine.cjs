@@ -123,7 +123,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-rotary-blancher-modeler', name: 'Commercial Continuous Rotary Blancher Steam Inversion & Thermophilic Geobacillus Spore Modeler', category: 'Thermal Processing & Canning Microbiology', component: 'CommercialRotaryBlancherModeler.astro', dataFile: 'rotary-blancher-spore-data.json' },
   { slug: 'commercial-ultrasonic-cavitation-modeler', name: 'Commercial Ultrasonic Aqueous Degreasing Tank Cavitation Erosion & Transducer Delamination Modeler', category: 'Acoustic Fluid Dynamics & Surface Physics', component: 'CommercialUltrasonicCavitationModeler.astro', dataFile: 'ultrasonic-degreasing-cavitation-data.json' },
   { slug: 'commercial-fluidized-bed-agglomeration-modeler', name: 'Commercial Fluidized Bed Agglomeration Spray Nozzle Droplet Drying & Dust Deflagration Modeler', category: 'Thermal Fluid Dynamics & Combustible Dust Safety', component: 'CommercialFluidizedBedAgglomerationModeler.astro', dataFile: 'fluidized-bed-agglomeration-data.json' },
-  { slug: 'commercial-spiral-freezer-ammonia-modeler', name: 'Commercial Spiral Freezer Evaporator Frost Inversion & Ammonia Leak Safety Modeler', category: 'Refrigeration Physics & Industrial Toxicology', component: 'CommercialSpiralFreezerAmmoniaModeler.astro', dataFile: 'spiral-freezer-ammonia-data.json' }
+  { slug: 'commercial-spiral-freezer-ammonia-modeler', name: 'Commercial Spiral Freezer Evaporator Frost Inversion & Ammonia Leak Safety Modeler', category: 'Refrigeration Physics & Industrial Toxicology', component: 'CommercialSpiralFreezerAmmoniaModeler.astro', dataFile: 'spiral-freezer-ammonia-data.json' },
+  { slug: 'commercial-drum-roaster-co-chaff-modeler', name: 'Commercial Continuous Drum Roaster Flue Gas Carbon Monoxide & Chaff Deflagration Modeler', category: 'Combustion Kinetics & Grain Processing Safety', component: 'CommercialContinuousDrumRoasterModeler.astro', dataFile: 'drum-roaster-co-chaff-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -337,7 +338,8 @@ function auditDatasets() {
     'rotary-blancher-spore-data.json',
     'ultrasonic-degreasing-cavitation-data.json',
     'fluidized-bed-agglomeration-data.json',
-    'spiral-freezer-ammonia-data.json'
+    'spiral-freezer-ammonia-data.json',
+    'drum-roaster-co-chaff-data.json'
 ];
 
   const datasetStats = {};
@@ -575,34 +577,34 @@ function auditGrowthOpportunities() {
   });
 
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
-  const candidateTools = [
-    {
-      title: 'Commercial Continuous Drum Roaster Flue Gas Carbon Monoxide & Chaff Deflagration Modeler',
-      category: 'Combustion Kinetics & Grain Processing Safety',
-      intent: 'Models commercial continuous rotary drum coffee/cocoa/grain roasters, burner flue gas carbon monoxide accumulation (CO > 50 ppm), chaff cyclone collector dust deflagration (Kst > 150 bar·m/s), and NFPA 61 / NFPA 86 fire extinguishing deluge response.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '3,700+ US impressions'
-    },
+    const candidateTools = [
     {
       title: 'Commercial High-Shear Colloid Mill Rotor-Stator Thermal Friction & Micro-Particle Emulsion Shear Modeler',
       category: 'Rheology & Sanitary Fluid Mechanics',
       intent: 'Models commercial food emulsification & wet-milling rotor-stator colloid mills, fluid shear rates (>100,000 s⁻¹), micro-gap frictional thermal dissipation (ΔT > 25°C), sanitary mechanical face seal thermal carbonization, and 3A Sanitary Standard 36-01 CIP cleanability.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '3,300+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '3,800+ US impressions'
     },
     {
       title: 'Commercial Continuous Hydrostatic Cooker-Cooler Hydrostatic Leg Pressure Differential & Steam Bleed Modeler',
       category: 'Hydrostatic Thermodynamics & Commercial Canning Safety',
       intent: 'Models commercial continuous hydrostatic retort cooker-coolers for canned food sterilization, hydrostatic water column differential pressure balance (ΔP = ρgh), conveyor carrier chain pitch elongation wear, steam chamber deaeration venting, and NFPA / OSHA pressure containment.',
-      priority: 'MEDIUM',
-      estimatedMonthlyVolume: '2,900+ US impressions'
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '3,300+ US impressions'
     },
     {
       title: 'Commercial Continuous Extrusion Cooker Screw Barrel Shear Friction & Gelatinization Degradation Modeler',
       category: 'Rheological Food Engineering & High-Pressure Tribology',
       intent: 'Models high-shear single and twin-screw commercial food extruders (snacks, pet food, plant protein), screw flight viscous dissipation shear heating (shear rates > 1,500 s⁻¹), starch gelatinization rheology, die throat pressure surging (> 120 bar), and barrel rupture safety.',
       priority: 'MEDIUM',
-      estimatedMonthlyVolume: '2,600+ US impressions'
+      estimatedMonthlyVolume: '2,900+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous Vacuum Microwave Belt Dryer Magnetron Plasma Arcing & Product Scorching Modeler',
+      category: 'Microwave Electromagnetics & Vacuum Processing Safety',
+      intent: 'Models continuous conveyor vacuum microwave dryers (0.02 to 0.1 bar, 2.45 GHz), Townsend gas discharge plasma arcing in low-pressure rarefied atmospheres, uneven microwave attenuation hotspot product scorching, and waveguide circulator water-load reflected power protection.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '2,500+ US impressions'
     }
   ];
 
