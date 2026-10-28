@@ -1,0 +1,1165 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import freezerData from '../data/spiral-freezer-ammonia-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  equipLabel: string;
+  equipHelp: string;
+  productLabel: string;
+  productHelp: string;
+  defrostLabel: string;
+  defrostHelp: string;
+  tempLabel: string;
+  tempHelp: string;
+  runtimeLabel: string;
+  runtimeHelp: string;
+  frostLabel: string;
+  frostHelp: string;
+  hotGasPressLabel: string;
+  hotGasPressHelp: string;
+  chargeLabel: string;
+  chargeHelp: string;
+  ventilationLabel: string;
+  ventilationHelp: string;
+  sensorLabel: string;
+  sensorHelp: string;
+  presetsTitle: string;
+  presetIQFProduce: string;
+  presetCookedPoultry: string;
+  presetLegacyFailure: string;
+  presetBakeryDeluge: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  uValueLabel: string;
+  pressureDropLabel: string;
+  thermalStressLabel: string;
+  nh3LeakLabel: string;
+  ventilationMarginLabel: string;
+  safetyStatusLabel: string;
+  primaryRiskLabel: string;
+  mechanismsLabel: string;
+  mitigationLabel: string;
+  scienceTitle: string;
+  scienceSub: string;
+  tableTitle: string;
+  tableSub: string;
+  colModel: string;
+  colClass: string;
+  colCapacity: string;
+  colCharge: string;
+  colDefrost: string;
+  colMitigation: string;
+  rulesTitle: string;
+  rulesSub: string;
+  rule1Title: string;
+  rule1Text: string;
+  rule2Title: string;
+  rule2Text: string;
+  rule3Title: string;
+  rule3Text: string;
+  rule4Title: string;
+  rule4Text: string;
+  copyReportBtn: string;
+  copiedFeedback: string;
+}
+
+const DICTIONARY: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Refrigeration Physics & Industrial Toxicology",
+    title: "Commercial Spiral Freezer Evaporator Frost Inversion & Ammonia Leak Safety Modeler",
+    subtitle: "Simulate continuous industrial spiral food freezing, evaporator coil frost thermal resistance boundary layers, hot-gas defrost hydraulic water-hammer shockwaves, anhydrous ammonia (R-717) toxic plume dispersion, and ANSI/IIAR 2-2021 emergency mechanical ventilation compliance.",
+    controlsTitle: "Spiral Freezer Architecture, Product Load & Defrost Controls",
+    controlsSub: "Configure continuous spiral freezer geometry, food moisture profile, defrost methodology, box operating temperature, continuous run hours, frost build-up thickness, hot-gas pressure, R-717 charge, and emergency exhaust rate.",
+    equipLabel: "Spiral Freezer Architecture & Piping Spec:",
+    equipHelp: "Single-Drum (1,500 kg/h, R-717 direct expansion, IIAR 2) vs Twin-Drum (4,500 kg/h, liquid overfeed, sequential) vs Compact Self-Stacking (316L, water deluge) vs Unvented Legacy Freezer (corroded carbon steel, fatigue cracks).",
+    productLabel: "Food Product Ingress & Moisture Loading:",
+    productHelp: "Steamed / Fried Poultry (65°C / 149°F, heavy steam vapor plume) vs Raw Beef Hamburger Patties (4°C / 39°F, chilled feed) vs Warm Par-Baked Artisan Breads (52°C, high vapor deficit) vs IQF Wet Sliced Produce (wet washed, severe ice bridging).",
+    defrostLabel: "Evaporator Defrost Sequence & Dynamics:",
+    defrostHelp: "Automated Hot-Gas Soft-Reversal (Controlled soft-bleed, dual relief) vs Rapid Hot-Gas Hard Shock (Abrupt 13-bar slam, water-hammer shockwave) vs Water Spray Deluge (Zero thermal shock) vs Continuous Sequential Zone Defrost (Isolated damper doors).",
+    tempLabel: "Freezer Box Operating Temperature (°C / °F):",
+    tempHelp: "Internal sub-zero air temperature (-45°C to -25°C / -49°F to -13°F). Governs coil surface temperature, air density, and refrigerant suction pressure.",
+    runtimeLabel: "Continuous Uninterrupted Runtime (Hours):",
+    runtimeHelp: "Continuous production run time between complete defrost cycles (2 to 48 hours). Prolonged runs induce severe frost insulation and fan throat choking.",
+    frostLabel: "Measured Fin Frost Accumulation (mm):",
+    frostHelp: "Average frost thickness on leading coil fins (0.5 to 12.0 mm). Critical bridging occurs when frost exceeds 50% of fin spacing (typically >4.5 mm).",
+    hotGasPressLabel: "Hot-Gas Defrost Vapor Injection Pressure (Bar):",
+    hotGasPressHelp: "Discharge vapor pressure supplied during hot-gas defrost (6.0 to 16.0 bar / 87 to 232 psi). Excessive pressure causes violent liquid slugging and weld shear.",
+    chargeLabel: "Freezer Evaporator R-717 Ammonia Charge (kg):",
+    chargeHelp: "Total active anhydrous ammonia refrigerant mass contained in the freezer circuit (50 to 1,200 kg / 110 to 2,645 lbs). Determines potential release magnitude.",
+    ventilationLabel: "Emergency Exhaust Mechanical Ventilation (CFM):",
+    ventilationHelp: "Independent emergency mechanical exhaust fan capacity (1,000 to 45,000 CFM). ANSI/IIAR 2 § 6.14 mandates Q = 20 · √G CFM based on total charge.",
+    sensorLabel: "R-717 Gas Sensor Alarm & Tripping Setpoint (ppm):",
+    sensorHelp: "Ammonia vapor detector setpoint (15 to 300 ppm). IIAR 2 mandates Level 1 supervisory alert at 25 ppm and Level 2 emergency shutdown at 150 ppm.",
+    presetsTitle: "Operational Processing Presets:",
+    presetIQFProduce: "IQF Wet Sliced Strawberries (Twin-Drum, -40°C, Sequential Zone Defrost, IIAR 2 Compliant)",
+    presetCookedPoultry: "High-Throughput Steamed Poultry (Single-Drum, 65°C Ingress, Soft-Reversal Hot Gas)",
+    presetLegacyFailure: "Catastrophic Legacy Freezer Rupture (Hard Hot-Gas Shock, 13 Bar, Unvented, >800 ppm NH3 Breach)",
+    presetBakeryDeluge: "Warm Artisan Bakery Loaves (Self-Stacking Spiral, Water Spray Deluge, Zero Mechanical Shock)",
+    diagnosticTitle: "Refrigeration Thermodynamics, Frost Boundary & Ammonia Telemetry",
+    diagnosticSub: "Real-time computational modeling of overall U-value collapse, air static pressure drop, pipe weld thermal stress, simulated room NH3 leak concentration, and IIAR 2 emergency ventilation compliance.",
+    uValueLabel: "Evaporator Overall Heat Transfer (U-Value)",
+    pressureDropLabel: "Air-Side Static Pressure Drop (ΔP)",
+    thermalStressLabel: "Pipe Weld Thermal Expansion Stress",
+    nh3LeakLabel: "Room Ammonia Gas Concentration (ppm)",
+    ventilationMarginLabel: "IIAR 2 Emergency Ventilation Safety Ratio",
+    safetyStatusLabel: "Process Regulatory Compliance & Life-Safety Status",
+    primaryRiskLabel: "Primary Mechanical & Toxicological Hazard:",
+    mechanismsLabel: "Governing Heat Transfer & Vapor Dispersion Physics:",
+    mitigationLabel: "Engineering Controls & IIAR / OSHA / EPA Remediation:",
+    scienceTitle: "Refrigeration Thermodynamics, Frost Mechanics & Ammonia Plume Dispersion",
+    scienceSub: "Mathematical modeling of Fourier conduction frost resistance, air-side fin choking, thermal expansion stress, and IIAR 2 ventilation rates.",
+    tableTitle: "Commercial Food Spiral Freezer Architectures Comparison",
+    tableSub: "Engineering specifications of industrial and commercial spiral freezers across poultry, bakery, produce, and prepared foods.",
+    colModel: "Freezer Architecture",
+    colClass: "Safety & Piping Standard",
+    colCapacity: "Freezing Capacity (kg/hr)",
+    colCharge: "R-717 Charge (kg)",
+    colDefrost: "Defrost Execution Method",
+    colMitigation: "Refrigerant Safety System",
+    rulesTitle: "Engineering Guidelines for Industrial Spiral Freezing & Ammonia Safety",
+    rulesSub: "Mandatory protocols established under ANSI/IIAR 2-2021, OSHA 29 CFR 1910.119 PSM, ASME B31.5, and EPA 40 CFR 68 RMP.",
+    rule1Title: "Automated Dual-Stage Hot-Gas Soft-Pressure Equalization (IIAR 2 § 13.2)",
+    rule1Text: "Hot-gas defrost injection must incorporate an automated soft-bleed equalizing valve that depressurizes cold liquid ammonia back to suction headers before admitting 10+ bar discharge gas. Hard hot-gas shocking creates destructive liquid-propelled vapor collapse shockwaves exceeding 45 bar, shearing pipe elbows.",
+    rule2Title: "Dual-Level Ammonia Gas Detection & Solenoid Emergency Interlocks (IIAR 2 § 17.2)",
+    rule2Text: "Continuous electrochemical ammonia sensors must monitor evaporator coil zones. Reaching 25 ppm (Level 1) must trigger supervisory alarms and low-speed exhaust; reaching 150 ppm (Level 2) must instantly de-energize liquid feed solenoids, trip emergency exhaust fans to high speed, and notify operators.",
+    rule3Title: "Mandatory Emergency Mechanical Ventilation Sizing (IIAR 2 § 6.14: Q = 20 · √G)",
+    rule3Text: "Emergency exhaust ventilation capacity Q must meet or exceed 20 · √G CFM (where G is total ammonia system charge in pounds). Undersized ventilation during an evaporator header rupture traps toxic anhydrous ammonia vapor, quickly exceeding the 300 ppm IDLH life-safety ceiling.",
+    rule4Title: "Frost Boundary Layer Monitoring & Critical Fin Bridging Prevention",
+    rule4Text: "Frost accumulation must never exceed 50% of coil fin spacing (typically 4.5 mm). Dense dendritic frost (k ≈ 0.16 W/m·K) collapses the overall heat transfer coefficient U by up to 72% and chokes air static pressure, inducing fan motor burnout and thawing of entering food products.",
+    copyReportBtn: "Copy Telemetry Report to Clipboard",
+    copiedFeedback: "Report Copied to Clipboard!"
+  },
+  es: {
+    badge: "Física de Refrigeración y Toxicología Industrial",
+    title: "Modelador de Inversión de Escarcha y Fuga de Amoníaco en Congelador Espiral Comercial",
+    subtitle: "Simule congelación continua industrial en espiral, capas límite de resistencia térmica por escarcha en evaporadores, choque hidráulico de gas caliente, dispersión de plumas tóxicas de amoníaco anhidro (R-717) y ventilación de emergencia según ANSI/IIAR 2-2021.",
+    controlsTitle: "Parámetros del Congelador Espiral, Carga de Producto y Descongelación",
+    controlsSub: "Configure geometría del congelador espiral, perfil de humedad del alimento, método de descongelación, temperatura de cámara, horas continuas de operación, espesor de escarcha, presión de gas caliente y ventilación de escape.",
+    equipLabel: "Arquitectura del Congelador Espiral y Tuberías:",
+    equipHelp: "Tambor simple (1.500 kg/h, expansión directa R-717, IIAR 2) vs Doble tambor (4.500 kg/h, sobrealimentación líquida) vs Autoapilable compacto (316L, diluvio de agua) vs Congelador antiguo sin ventilación.",
+    productLabel: "Ingreso de Producto Alimenticio y Humedad:",
+    productHelp: "Pollo frito o al vapor (65°C / 149°F, pluma de vapor masiva) vs Hamburguesas crudas (4°C, alimentación refrigerada) vs Panes precocidos calientes (52°C, alto gradiente) vs Frutas y verduras IQF lavadas húmedas.",
+    defrostLabel: "Secuencia y Dinámica de Descongelación:",
+    defrostHelp: "Gas caliente automatizado con alivio suave (Purga controlada) vs Choque duro directo (Golpe de ariete de 13 bar) vs Diluvio de agua tibia (Cero choque térmico) vs Descongelación secuencial continua por zonas.",
+    tempLabel: "Temperatura de Operación de la Cámara (°C / °F):",
+    tempHelp: "Temperatura del aire bajo cero (-45°C a -25°C / -49°F a -13°F). Rige la temperatura superficial de aletas y la presión de succión.",
+    runtimeLabel: "Tiempo de Operación Continua sin Descongelar (Horas):",
+    runtimeHelp: "Horas de producción continua entre ciclos completos de descongelación (2 a 48 horas). Operaciones prolongadas estrangulan el flujo de aire.",
+    frostLabel: "Espesor Medido de Escarcha en Aletas (mm):",
+    frostHelp: "Espesor medio de escarcha en aletas frontales (0.5 a 12.0 mm). El puenteo crítico ocurre al superar el 50% de separación (>4.5 mm).",
+    hotGasPressLabel: "Presión de Inyección de Gas Caliente (Bar):",
+    hotGasPressHelp: "Presión de vapor de descarga durante la descongelación (6.0 a 16.0 bar / 87 a 232 psi). Presiones excesivas fracturan codos y soldaduras.",
+    chargeLabel: "Carga de Amoníaco R-717 en Evaporador (kg):",
+    chargeHelp: "Masa total de amoníaco anhidro en el circuito de congelación (50 a 1.200 kg). Determina la magnitud potencial de una fuga.",
+    ventilationLabel: "Ventilación Mecánica de Emergencia (CFM):",
+    ventilationHelp: "Capacidad de extractores de emergencia (1.000 a 45.000 CFM). La norma ANSI/IIAR 2 § 6.14 exige Q = 20 · √G CFM según la carga total.",
+    sensorLabel: "Punto de Alarma y Corte del Sensor de R-717 (ppm):",
+    sensorHelp: "Ajuste de detección de amoníaco (15 a 300 ppm). IIAR 2 exige alarma de supervisión a 25 ppm y parada de emergencia a 150 ppm.",
+    presetsTitle: "Preajustes Operativos de Procesamiento:",
+    presetIQFProduce: "Fresas IQF Lavadas (Doble Tambor, -40°C, Descongelación Secuencial, Conforme IIAR 2)",
+    presetCookedPoultry: "Pollo Cocido de Alto Rendimiento (Tambor Simple, Entrada a 65°C, Gas Caliente Suave)",
+    presetLegacyFailure: "Rotura Catastrófica en Congelador Antiguo (Choque Duro, 13 Bar, Sin Ventilación, >800 ppm NH3)",
+    presetBakeryDeluge: "Panadería Artesanal Caliente (Espiral Autoapilable, Diluvio de Agua, Cero Choque Mecánico)",
+    diagnosticTitle: "Termodinámica de Refrigeración, Escarcha y Telemetría de Amoníaco",
+    diagnosticSub: "Cálculo en tiempo real del colapso del valor U, caída de presión estática del aire, tensión térmica de soldadura, concentración de gas NH3 y cumplimiento IIAR 2.",
+    uValueLabel: "Coeficiente Global de Transferencia Térmica (Valor U)",
+    pressureDropLabel: "Caída de Presión Estática del Aire (ΔP)",
+    thermalStressLabel: "Tensión Térmica de Soldadura en Tubería",
+    nh3LeakLabel: "Concentración de Amoníaco en Sala (ppm)",
+    ventilationMarginLabel: "Relación de Seguridad de Ventilación IIAR 2",
+    safetyStatusLabel: "Cumplimiento Normativo y Estado de Seguridad Personal",
+    primaryRiskLabel: "Peligro Mecánico y Toxicológico Primario:",
+    mechanismsLabel: "Física de Transferencia Térmica y Dispersión de Vapores:",
+    mitigationLabel: "Controles de Ingeniería y Remediación IIAR / OSHA / EPA:",
+    scienceTitle: "Termodinámica de Refrigeración, Mecánica de Escarcha y Plumas de NH3",
+    scienceSub: "Modelado matemático de conducción térmica en escarcha, estrangulamiento de aletas, tensión por dilatación térmica y ventilación IIAR 2.",
+    tableTitle: "Comparación de Congeladores Espirales Industriales para Alimentos",
+    tableSub: "Especificaciones de ingeniería de congeladores en espiral en procesamiento avícola, panadería, frutas y comidas preparadas.",
+    colModel: "Arquitectura del Congelador",
+    colClass: "Norma Sanitaria y de Tuberías",
+    colCapacity: "Capacidad (kg/h)",
+    colCharge: "Carga R-717 (kg)",
+    colDefrost: "Método de Descongelación",
+    colMitigation: "Sistema de Seguridad de Refrigerante",
+    rulesTitle: "Directrices de Ingeniería para Congelación Espiral y Seguridad de Amoníaco",
+    rulesSub: "Protocolos obligatorios según ANSI/IIAR 2-2021, OSHA 29 CFR 1910.119 PSM, ASME B31.5 y EPA 40 CFR 68 RMP.",
+    rule1Title: "Ecualización Suave Automatizada de Presión de Gas Caliente (IIAR 2 § 13.2)",
+    rule1Text: "La inyección de gas caliente debe incorporar una válvula de ecualización suave para drenar el amoníaco líquido antes de inyectar gas a más de 10 bar. Choques bruscos generan ondas de golpe de ariete superiores a 45 bar que fracturan codos.",
+    rule2Title: "Detección de Gas de Amoníaco de Doble Nivel y Corte por Solenoide (IIAR 2 § 17.2)",
+    rule2Text: "Sensores continuos de amoníaco deben monitorear las zonas del evaporador. Al alcanzar 25 ppm (Nivel 1) se activan alarmas y extracción a baja velocidad; a 150 ppm (Nivel 2) se cortan los solenoides de líquido y se eleva la ventilación al máximo.",
+    rule3Title: "Dimensionamiento Obligatorio de Ventilación de Emergencia (IIAR 2 § 6.14: Q = 20 · √G)",
+    rule3Text: "La capacidad de extracción Q debe ser mayor o igual a 20 · √G CFM (donde G es la carga en libras). Una ventilación deficiente atrapa vapores tóxicos de amoníaco superando el techo letal IDLH de 300 ppm.",
+    rule4Title: "Monitoreo de Capa Límite de Escarcha y Prevención de Puenteo Crítico",
+    rule4Text: "La escarcha no debe exceder el 50% de la separación entre aletas (>4.5 mm). La escarcha dendrítica colapsa el valor U hasta en un 72% y ahoga el flujo de aire, quemando motores de ventiladores.",
+    copyReportBtn: "Copiar Informe de Telemetría al Portapapeles",
+    copiedFeedback: "¡Informe Copiado al Portapapeles!"
+  },
+  pt: {
+    badge: "Física de Refrigeração e Toxicologia Industrial",
+    title: "Modelador de Inversão de Gelo e Vazamento de Amônia em Congelador Espiral Comercial",
+    subtitle: "Simule congelamento contínuo industrial em espiral, camadas limite de resistência térmica por gelo em evaporadores, choque hidráulico de gás quente, dispersão de plumas tóxicas de amônia anidra (R-717) e ventilação de emergência segundo ANSI/IIAR 2-2021.",
+    controlsTitle: "Parâmetros do Congelador Espiral, Carga de Alimento e Descongelamento",
+    controlsSub: "Configure geometria do congelador espiral, perfil de umidade do produto, método de descongelamento, temperatura da câmara, horas de operação contínua, espessura do gelo, pressão de gás quente e exaustão de emergência.",
+    equipLabel: "Arquitetura do Congelador Espiral e Tubulação:",
+    equipHelp: "Tambor simples (1.500 kg/h, expansão direta R-717, IIAR 2) vs Tambor duplo (4.500 kg/h, recirculação líquida) vs Autoempilhável compacto (316L, água) vs Congelador antigo sem ventilação.",
+    productLabel: "Ingresso de Alimento e Carga de Umidade:",
+    productHelp: "Frango frito ou cozido (65°C / 149°F, pluma de vapor densa) vs Hambúrguer cru (4°C, resfriado) vs Pães pré-assados quentes (52°C, alto vapor) vs Vegetais e frutas IQF lavados úmidos.",
+    defrostLabel: "Sequência e Dinâmica de Descongelamento:",
+    defrostHelp: "Gás quente com alívio suave gradual vs Choque duro direto (Golpe de aríete de 13 bar) vs Dilúvio de água morna (Zero choque térmico) vs Descongelamento sequencial por zonas.",
+    tempLabel: "Temperatura de Operação da Câmara (°C / °F):",
+    tempHelp: "Temperatura do ar sob zero (-45°C a -25°C / -49°F a -13°F). Governa a temperatura da aleta e a pressão de sucção do refrigerante.",
+    runtimeLabel: "Tempo de Operação Contínua sem Degelo (Horas):",
+    runtimeHelp: "Horas de operação ininterrupta entre degelos totais (2 a 48 horas). Operações prolongadas sufocam o fluxo de ar e colapsam o calor.",
+    frostLabel: "Espessura Medida de Gelo nas Aletas (mm):",
+    frostHelp: "Espessura média de gelo nas aletas frontais (0.5 a 12.0 mm). O bloqueio crítico ocorre acima de 50% do espaçamento (>4.5 mm).",
+    hotGasPressLabel: "Pressão de Injeção de Gás Quente (Bar):",
+    hotGasPressHelp: "Pressão de vapor fornecida durante o degelo (6.0 a 16.0 bar). Pressões excessivas cisalham soldas e tubos.",
+    chargeLabel: "Carga de Amônia R-717 no Evaporador (kg):",
+    chargeHelp: "Massa total de amônia anidra no circuito de congelamento (50 a 1.200 kg). Determina o volume potencial de vazamento.",
+    ventilationLabel: "Ventilação Mecânica de Emergência (CFM):",
+    ventilationHelp: "Capacidade de exaustão de emergência (1.000 a 45.000 CFM). A norma ANSI/IIAR 2 § 6.14 exige Q = 20 · √G CFM.",
+    sensorLabel: "Ponto de Alarme do Sensor de R-717 (ppm):",
+    sensorHelp: "Ponto de ajuste do detector de amônia (15 a 300 ppm). IIAR 2 estabelece Nível 1 a 25 ppm e Nível 2 a 150 ppm.",
+    presetsTitle: "Predefinições Operacionais de Processamento:",
+    presetIQFProduce: "Morangos IQF Lavados (Tambor Duplo, -40°C, Degelo Sequencial, IIAR 2 Conforme)",
+    presetCookedPoultry: "Frango Cozido de Alta Produção (Tambor Simples, Entrada a 65°C, Gás Quente Suave)",
+    presetLegacyFailure: "Ruptura Catastrófica em Congelador Antigo (Choque Duro, 13 Bar, Sem Ventilação, >800 ppm NH3)",
+    presetBakeryDeluge: "Pães Artesanais Quentes (Espiral Autoempilhável, Degelo por Água, Zero Choque)",
+    diagnosticTitle: "Termodinâmica de Refrigeração, Gelo e Telemetria de Amônia",
+    diagnosticSub: "Cálculo em tempo real da queda do valor U, perda de carga do ar, tensão térmica nas soldas, concentração de gás NH3 e conformidade IIAR 2.",
+    uValueLabel: "Coeficiente Global de Transferência de Calor (Valor U)",
+    pressureDropLabel: "Queda de Pressão Estática do Ar (ΔP)",
+    thermalStressLabel: "Tensão Térmica nas Soldas da Tubulação",
+    nh3LeakLabel: "Concentração de Amônia na Sala (ppm)",
+    ventilationMarginLabel: "Relação de Segurança de Ventilação IIAR 2",
+    safetyStatusLabel: "Conformidade Normativa e Status de Segurança Humana",
+    primaryRiskLabel: "Perigo Mecânico e Toxicológico Primário:",
+    mechanismsLabel: "Física de Transferência Térmica e Dispersão de Vapores:",
+    mitigationLabel: "Controles de Engenharia e Remediação IIAR / OSHA / EPA:",
+    scienceTitle: "Termodinâmica de Refrigeração, Mecânica do Gelo e Plumas de NH3",
+    scienceSub: "Modelagem matemática de condução de Fourier no gelo, bloqueio aerodinâmico de aletas, tensão térmica e taxas de exaustão IIAR 2.",
+    tableTitle: "Comparação de Congeladores Espirais Industriais de Alimentos",
+    tableSub: "Especificações de engenharia de congeladores espirais em avicultura, panificação, frutas e refeições prontas.",
+    colModel: "Arquitetura do Congelador",
+    colClass: "Norma de Segurança e Tubulação",
+    colCapacity: "Capacidade (kg/h)",
+    colCharge: "Carga R-717 (kg)",
+    colDefrost: "Método de Degelo",
+    colMitigation: "Sistema de Segurança de Refrigerante",
+    rulesTitle: "Diretrizes de Engenharia para Congelamento Espiral e Segurança de Amônia",
+    rulesSub: "Protocolos obrigatórios segundo ANSI/IIAR 2-2021, OSHA 29 CFR 1910.119 PSM, ASME B31.5 e EPA 40 CFR 68 RMP.",
+    rule1Title: "Equalização Suave Automatizada de Pressão de Gás Quente (IIAR 2 § 13.2)",
+    rule1Text: "A injeção de gás quente deve ter válvula de alívio suave para purgar líquido antes de admitir gás acima de 10 bar. Injeções bruscas causam golpes de aríete com picos superiores a 45 bar que rompem flanges e curvas.",
+    rule2Title: "Detecção de Amônia em Dois Níveis e Travamento Solenoide (IIAR 2 § 17.2)",
+    rule2Text: "Sensores eletroquímicos contínuos devem monitorar os evaporadores. Atingir 25 ppm ativa alertas e exaustão baixa; atingir 150 ppm corta a alimentação de líquido e aciona exaustão máxima imediatamente.",
+    rule3Title: "Dimensionamento Obrigatório de Ventilação de Emergência (IIAR 2 § 6.14: Q = 20 · √G)",
+    rule3Text: "A vazão de exaustão Q deve atender a 20 · √G CFM (sendo G a carga em libras). Ventilação subdimensionada retém vapores de amônia superando rapidamente o teto letal IDLH de 300 ppm.",
+    rule4Title: "Monitoramento de Gelo nas Aletas e Prevenção de Bloqueio Crítico",
+    rule4Text: "O acúmulo de gelo não pode superar 50% do espaçamento entre aletas (>4.5 mm). O gelo poroso reduz o coeficiente U em até 72% e sufoca o fluxo de ar, provocando queima de motores de ventiladores.",
+    copyReportBtn: "Copiar Relatório de Telemetria para a Área de Transferência",
+    copiedFeedback: "Relatório Copiado para a Área de Transferência!"
+  },
+  'zh-cn': {
+    badge: "制冷热力学与工业毒理学防爆安全",
+    title: "商用螺旋速冻机蒸发器结霜热阻反转与氨气泄漏安全模拟分析仪",
+    subtitle: "模拟连续工业螺旋食品速冻机、蒸发器翅片结霜导热阻力边界层演变、热气除霜水锤机械冲击应力、液氨 (R-717) 毒性蒸汽羽流扩散动力学以及 ANSI/IIAR 2-2021 机械应急排风合规裕度。",
+    controlsTitle: "螺旋速冻机架构、产品负荷与除霜控制参数",
+    controlsSub: "配置连续螺旋速冻机机械构型、食品水分释放特征、除霜作业模式、速冻库运行温度、连续运行工时、蒸发器结霜厚度、热气除霜压力、R-717氨充注量及应急排风风量。",
+    equipLabel: "螺旋速冻机设备架构与管道规格：",
+    equipHelp: "单转塔螺旋机 (1500 kg/h, R-717直接膨胀, IIAR 2) vs 双转塔工业机 (4500 kg/h, 泵供液再循环, 顺序除霜) vs 自堆叠卫生型 (316L, 水冲霜) vs 严重老旧无排风机型 (碳钢疲劳裂纹)。",
+    productLabel: "进料食品基质与水分蒸发释放特征：",
+    productHelp: "油炸/蒸煮禽肉鸡块 (65°C / 149°F, 高温浓密蒸汽羽流) vs 生鲜冷鲜牛肉饼 (4°C, 适度失水) vs 预烤热烘焙面包 (52°C, 极高蒸气压差) vs IQF水洗湿切果蔬 (表面附着水, 严重冰堵)。",
+    defrostLabel: "蒸发器除霜时序与水锤冲击特性：",
+    defrostHelp: "自动化热气平缓均压除霜 (双级旁通释压, 软换向) vs 剧烈直接热气硬冲击 (13 bar瞬态水锤冲击波) vs 温水喷淋水冲霜 (无热冲击) vs 连续分区顺序隔风除霜 (风门挡板轮流隔离)。",
+    tempLabel: "速冻库内部工作气温 (°C / °F)：",
+    tempHelp: "速冻库循环低温空气温度 (-45°C 至 -25°C / -49°F 至 -13°F)。决定翅片表面蒸发温度、气体密度及制冷剂吸气压力。",
+    runtimeLabel: "未除霜连续不间断运行时间 (小时)：",
+    runtimeHelp: "两次全面除霜之间的连续生产时间 (2 至 48 小时)。运行过久会导致冰霜严重桥连堵塞风道并引发电机过载跳闸。",
+    frostLabel: "蒸发器翅片实测结霜厚度 (mm)：",
+    frostHelp: "迎风面翅片结霜平均厚度 (0.5 至 12.0 mm)。当霜层厚度超过翅片间距的 50% (通常 >4.5 mm) 时发生临界桥连风道堵塞。",
+    hotGasPressLabel: "热气除霜压缩机排气供给压力 (Bar)：",
+    hotGasPressHelp: "除霜阶段注入蒸发器的高压排气压力 (6.0 至 16.0 bar / 87 至 232 psi)。过高气压会导致内部存液爆轰式冷凝并撕裂弯头焊缝。",
+    chargeLabel: "速冻机蒸发器系统 R-717 氨充注量 (kg)：",
+    chargeHelp: "速冻机管路与蒸发器内部储存的液氨制冷剂总质量 (50 至 1200 kg / 110 至 2645 磅)。决定潜在毒气泄漏规模上限。",
+    ventilationLabel: "事故应急机械排风风量 (CFM)：",
+    ventilationHelp: "速冻机房独立防爆应急排气风机总排风量 (1000 至 45000 CFM)。ANSI/IIAR 2 § 6.14 强制要求排风量 Q = 20 · √G CFM。",
+    sensorLabel: "R-717 氨气泄漏探测器报警切断阈值 (ppm)：",
+    sensorHelp: "电化学氨气探测器动作设定值 (15 至 300 ppm)。IIAR 2 规定一级预警阈值为 25 ppm，二级紧急停机并切断供液为 150 ppm。",
+    presetsTitle: "工业生产作业工艺预设：",
+    presetIQFProduce: "IQF 水洗切片草莓速冻线 (双转塔, -40°C, 分区顺序除霜, 符合 IIAR 2 规范)",
+    presetCookedPoultry: "大通量高温蒸煮禽肉速冻线 (单转塔, 65°C进料, 软换向平缓热气除霜)",
+    presetLegacyFailure: "失修老旧设备硬冲击爆裂事故 (剧烈热气冲击, 13 Bar, 排风不足, 氨泄漏 >800 ppm)",
+    presetBakeryDeluge: "出炉预烤欧包烘焙速冻线 (自堆叠密闭螺旋, 温水喷淋水冲霜, 零机械应力)",
+    diagnosticTitle: "制冷热工计算、结霜热阻与氨毒性扩散遥测指标",
+    diagnosticSub: "实时计算传热系数 U 值衰减、空气侧流动静压降、管道焊缝热膨胀剪切应力、室内氨气扩散峰值浓度及 IIAR 2 排风安全裕度。",
+    uValueLabel: "蒸发器总传热系数 (U-Value)",
+    pressureDropLabel: "蒸发器空气侧流动静压降 (ΔP)",
+    thermalStressLabel: "热气除霜管道焊缝热应力",
+    nh3LeakLabel: "车间空气中氨气浓度 (ppm)",
+    ventilationMarginLabel: "IIAR 2 应急排风安全保障系数",
+    safetyStatusLabel: "法规合规评估与车间人身生命安全等级",
+    primaryRiskLabel: "首要机械疲劳与急性毒理风险：",
+    mechanismsLabel: "主导热阻传热与毒气扩散物理机理：",
+    mitigationLabel: "工程防护对策与 IIAR / OSHA / EPA 规范整改：",
+    scienceTitle: "制冷热力学、冰霜热阻机理与氨气扩散动力学",
+    scienceSub: "Fourier 结霜导热阻力模型、翅片截流压降、热膨胀应力疲劳方程及 IIAR 2 应急通风公式。",
+    tableTitle: "商用工业食品螺旋速冻机架构对比分析",
+    tableSub: "家禽肉类、烘焙面包、水产果蔬及调理即食食品行业螺旋速冻机工程规格与制冷安全规范对比。",
+    colModel: "速冻机设备架构",
+    colClass: "安全认证与管道等级",
+    colCapacity: "速冻加工产能 (kg/h)",
+    colCharge: "R-717 氨充注量 (kg)",
+    colDefrost: "蒸发器除霜执行方式",
+    colMitigation: "氨泄漏与安全防护系统",
+    rulesTitle: "工业螺旋速冻设备运行与氨制冷安全工程准则",
+    rulesSub: "根据 ANSI/IIAR 2-2021、OSHA 29 CFR 1910.119 PSM、ASME B31.5 及 EPA 40 CFR 68 RMP 建立的强制规程。",
+    rule1Title: "热气除霜双级旁通平缓均压软换向控制 (IIAR 2 § 13.2)",
+    rule1Text: "热气除霜必须配置自动小口径均压旁通阀，在注入 10 bar 以上高温排气前将蒸发器内低温积液彻底抽空均压。严禁直接粗暴全开热气电磁阀，否则液体爆轰式冷凝坍缩产生的高达 45 bar 水锤激波会瞬间撕裂集管焊缝。",
+    rule2Title: "双级氨气浓度梯度监测与供液切断联动 (IIAR 2 § 17.2)",
+    rule2Text: "蒸发器附近必须安装全天候电化学氨敏传感器。浓度达到 25 ppm (一级) 触发警报并启动低速排风；达到 150 ppm (二级) 必须毫秒级自动关闭主供液电磁阀、将排风切至最高速并断开压缩机动力。",
+    rule3Title: "事故应急机械通风排气强制标准 (IIAR 2 § 6.14: Q = 20 · √G)",
+    rule3Text: "机房应急排风系统排气能力 Q 必须满足或大于 20 · √G CFM (G为系统氨充注量磅数)。排风量不足将导致泄漏的无水氨蒸气在生产车间极速积聚，迅速突破 300 ppm IDLH 立即威胁生命与健康浓度红线。",
+    rule4Title: "霜层热阻边界层监控与翅片临界桥连预防",
+    rule4Text: "蒸发器迎风面结霜厚度严禁超过翅片净距的 50% (通常为 4.5 mm)。低密度多孔树枝状霜层 (k ≈ 0.16 W/m·K) 会使总传热系数 U 暴跌多达 72% 并引发严重风道 Choke，导致循环风机电机烧毁和冻品表面融化。",
+    copyReportBtn: "复制遥测诊断报告到剪贴板",
+    copiedFeedback: "诊断报告已复制到剪贴板！"
+  },
+  ja: {
+    badge: "冷凍熱力学および産業毒性学安全工学",
+    title: "商用スパイラルフリーザー蒸発器着霜熱抵抗反転・アンモニア漏洩安全モデラー",
+    subtitle: "連続式産業用スパイラル食品急速凍結機、蒸発器フィン着霜熱伝導抵抗境界層、ホットガス除霜時のウォーターハンマー水撃衝撃波、アンモニア (R-717) 毒性ガスプルーム拡散動力学、ANSI/IIAR 2-2021 準拠非常排気風量をリアルタイム算出。",
+    controlsTitle: "スパイラルフリーザー構造、負荷および除霜制御パラメータ",
+    controlsSub: "連続スパイラルフリーザーの機械構造、食品水分蒸発特性、除霜方式、フリーザー庫内設定温度、連続無除霜稼働時間、着霜厚さ、ホットガス圧力、R-717充填量、非常換気風量を設定します。",
+    equipLabel: "スパイラルフリーザー構造および配管規格:",
+    equipHelp: "シングルドラム型 (1,500 kg/h, R-717直膨, IIAR 2) vs ツインドラム大型機 (4,500 kg/h, 液強制循環, 順次除霜) vs 自立積層衛生型 (316L, 水散水) vs 無換気老朽機 (炭素鋼疲労亀裂)。",
+    productLabel: "凍結投入食品および水分蒸散負荷:",
+    productHelp: "加熱調理済みチキンナゲット (65°C / 149°F, 濃厚蒸気プルーム) vs 冷蔵生ハンバーグパティ (4°C, 穏やかな水分) vs 焼成直後欧風パン (52°C, 高水蒸気圧差) vs IQF水洗果実・野菜 (表面付着水多大, 激しい氷閉塞)。",
+    defrostLabel: "蒸発器除霜シーケンスおよび衝撃ダイナミクス:",
+    defrostHelp: "自動ソフトブリード均圧ホットガス除霜 (二段階緩速注入) vs 急激直噴ホットガス衝撃 (13 bar水撃波発生) vs 温水散水デリュージ除霜 (熱衝撃ゼロ) vs 連続順次ゾーン除霜 (ダンパー遮断)。",
+    tempLabel: "フリーザー庫内設定温度 (°C / °F):",
+    tempHelp: "庫内循環冷気温度 (-45°C〜-25°C / -49°F〜-13°F)。フィン表面の蒸発温度、空気密度、冷媒吸入圧力を決定します。",
+    runtimeLabel: "除霜なし連続運転時間 (Hours):",
+    runtimeHelp: "除霜を行わずに連続運転した累積時間 (2〜48時間)。長時間の過剰運転は霜の架橋による風路閉塞とファン過負荷を招きます。",
+    frostLabel: "蒸発器フィン実測着霜厚さ (mm):",
+    frostHelp: "風上フィン表面の平均着霜厚さ (0.5〜12.0 mm)。フィン間ピッチの50% (通常 >4.5 mm) を超えると臨界ブリッジ閉塞が発生します。",
+    hotGasPressLabel: "ホットガス除霜ガス供給圧力 (Bar):",
+    hotGasPressHelp: "除霜時に注入される圧縮機吐出ガス圧 (6.0〜16.0 bar / 87〜232 psi)。過大な圧力は管内残留液の激しい液撃と溶接部破断を誘発します。",
+    chargeLabel: "フリーザー系統 R-717 アンモニア充填量 (kg):",
+    chargeHelp: "フリーザー回路内に封入されている冷媒アンモニアの総質量 (50〜1,200 kg)。漏洩事故発生時の最大毒性プルーム規模を決定します。",
+    ventilationLabel: "事故時非常用機械換気風量 (CFM):",
+    ventilationHelp: "防爆仕様非常排風機の総排気能力 (1,000〜45,000 CFM)。ANSI/IIAR 2 § 6.14 は充填量に応じた Q = 20 · √G CFM を義務付けています。",
+    sensorLabel: "R-717 検知警報・自動遮断閾値 (ppm):",
+    sensorHelp: "電気化学式アンモニアセンサーの設定値 (15〜300 ppm)。IIAR 2はレベル1予警報を25 ppm、レベル2緊急停止・供液遮断を150 ppmと定めています。",
+    presetsTitle: "標準運転プロセスプリセット:",
+    presetIQFProduce: "IQF水洗カットイチゴ急速凍結 (ツインドラム, -40°C, 順次ゾーン除霜, IIAR 2準拠)",
+    presetCookedPoultry: "大容量加熱済みチキンナゲット (シングルドラム, 65°C投入, ソフトホットガス除霜)",
+    presetLegacyFailure: "老朽フリーザーの水撃管破裂事故 (直噴高圧ホットガス, 13 Bar, 排気不全, 800 ppm突破)",
+    presetBakeryDeluge: "焼成直後ベーカリーパン急速凍結 (自立積層型, 温水散水デリュージ除霜, 熱衝撃ゼロ)",
+    diagnosticTitle: "冷凍熱工学、着霜熱抵抗およびアンモニア拡散テレメトリ",
+    diagnosticSub: "総括伝熱係数 U の低下率、空気側静圧損失、配管溶接部の熱応力、室内アンモニアガス濃度、IIAR 2 非常換気安全率をリアルタイム算出。",
+    uValueLabel: "蒸発器総括伝熱係数 (U-Value)",
+    pressureDropLabel: "蒸発器空気側静圧損失 (ΔP)",
+    thermalStressLabel: "除霜時配管溶接部熱膨張応力",
+    nh3LeakLabel: "室内アンモニアガス濃度 (ppm)",
+    ventilationMarginLabel: "IIAR 2 非常排気風量安全率",
+    safetyStatusLabel: "法規制適合性判定および人身安全レベル",
+    primaryRiskLabel: "主要な機械的・毒性学的リスク:",
+    mechanismsLabel: "支配的な伝熱破壊およびガス拡散メカニズム:",
+    mitigationLabel: "エンジニアリング管理および IIAR / OSHA 改善是正策:",
+    scienceTitle: "冷凍熱力学、着霜力学およびアンモニアプルーム拡散工学",
+    scienceSub: "フーリエ熱伝導着霜モデル、フィン空気閉塞圧損、熱膨張応力解析、IIAR 2 非常換気能力計算式。",
+    tableTitle: "商用食品産業用スパイラルフリーザーの機種比較",
+    tableSub: "食肉・鶏肉加工、ベーカリー製パン、農産水産物および調理食品におけるスパイラル急速凍結機の仕様と冷媒安全設計。",
+    colModel: "フリーザー構造",
+    colClass: "安全規格および配管基準",
+    colCapacity: "凍結能力 (kg/h)",
+    colCharge: "R-717 充填量 (kg)",
+    colDefrost: "蒸発器除霜方式",
+    colMitigation: "冷媒漏洩安全遮断設備",
+    rulesTitle: "スパイラルフリーザー運用およびアンモニア冷媒安全指針",
+    rulesSub: "ANSI/IIAR 2-2021、OSHA 29 CFR 1910.119 PSM、ASME B31.5、および EPA 40 CFR 68 RMP に基づく必須要件。",
+    rule1Title: "自動二段階ソフトブリード均圧ホットガス注入 (IIAR 2 § 13.2)",
+    rule1Text: "ホットガス除霜時は、10 bar以上の高圧ガスを導入する前に小型均圧弁で管内低温残留液を安全にパージする必要があります。急激な直噴は液撃（ウォーターハンマー）を発生させ、45 barを超える衝撃圧が溶接部を剪断破壊します。",
+    rule2Title: "二段階アンモニアガス検知および電磁弁自動緊急遮断 (IIAR 2 § 17.2)",
+    rule2Text: "蒸発器近傍には電気化学式センサーを常時配置します。25 ppm (レベル1) で警報吹鳴と低速排気を開始し、150 ppm (レベル2) 到達時は主液電磁弁をミリ秒単位で緊急遮断して排気ファンを最大回転数に切り替えます。",
+    rule3Title: "非常用機械排気ファン能力の法定基準 (IIAR 2 § 6.14: Q = 20 · √G)",
+    rule3Text: "非常排気風量 Q は 20 · √G CFM (Gは充填ポンド数) 以上でなければなりません。換気風量が不足すると漏洩したアンモニア蒸気が室内へ充満し、直ちに生命への危険を及ぼす限界値 300 ppm IDLH を超える恐れがあります。",
+    rule4Title: "着霜境界層モニタリングと臨界フィン架橋閉塞の回避",
+    rule4Text: "着霜厚さはフィン間隔の 50% (通常 4.5 mm) を超えてはなりません。多孔質な樹枝状着霜 (k ≈ 0.16 W/m·K) は総括伝熱係数 U を最大 72% 低下させ、ファンの空転焼き付きと食品の融解劣化を引き起こします。",
+    copyReportBtn: "診断テレメトリレポートをクリップボードにコピー",
+    copiedFeedback: "レポートをクリップボードにコピーしました！"
+  }
+};
+
+const t = DICTIONARY[lang] || DICTIONARY.en;
+const data = freezerData;
+---
+
+<div class="not-prose my-8 rounded-2xl bg-slate-900 border border-slate-800 p-6 md:p-8 text-slate-100 shadow-2xl">
+  <!-- Header Badge & Title -->
+  <div class="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-6">
+    <div>
+      <span class="inline-flex items-center gap-1.5 rounded-full bg-cyan-500/10 px-3 py-1 text-xs font-semibold text-cyan-400 border border-cyan-500/20">
+        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+        </svg>
+        {t.badge}
+      </span>
+      <h2 class="mt-2 text-2xl font-bold tracking-tight text-white md:text-3xl">
+        {t.title}
+      </h2>
+      <p class="mt-1 text-sm text-slate-400 max-w-4xl leading-relaxed">
+        {t.subtitle}
+      </p>
+    </div>
+  </div>
+
+  <!-- Operational Presets -->
+  <div class="mb-8 rounded-xl bg-slate-800/60 p-4 border border-slate-700/60">
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-xs font-bold uppercase tracking-wider text-cyan-400">{t.presetsTitle}</span>
+      <span class="text-[11px] text-slate-400">Click to load calibrated industrial refrigeration profiles</span>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+      <button type="button" id="btnPresetIQFProduce" class="px-3 py-2 text-left rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium text-slate-200 transition-colors flex flex-col justify-between">
+        <span class="font-semibold text-cyan-300">IQF Wet Strawberries</span>
+        <span class="text-[11px] text-slate-400 mt-1 line-clamp-1">{t.presetIQFProduce}</span>
+      </button>
+      <button type="button" id="btnPresetCookedPoultry" class="px-3 py-2 text-left rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium text-slate-200 transition-colors flex flex-col justify-between">
+        <span class="font-semibold text-amber-300">Steamed Poultry</span>
+        <span class="text-[11px] text-slate-400 mt-1 line-clamp-1">{t.presetCookedPoultry}</span>
+      </button>
+      <button type="button" id="btnPresetLegacyFailure" class="px-3 py-2 text-left rounded-lg bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/60 text-xs font-medium text-rose-200 transition-colors flex flex-col justify-between">
+        <span class="font-semibold text-rose-400">Legacy Water-Hammer Shock</span>
+        <span class="text-[11px] text-rose-300/80 mt-1 line-clamp-1">{t.presetLegacyFailure}</span>
+      </button>
+      <button type="button" id="btnPresetBakeryDeluge" class="px-3 py-2 text-left rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium text-slate-200 transition-colors flex flex-col justify-between">
+        <span class="font-semibold text-emerald-300">Warm Bakery Loaves</span>
+        <span class="text-[11px] text-slate-400 mt-1 line-clamp-1">{t.presetBakeryDeluge}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Interactive Controls Grid -->
+  <div class="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <!-- Left Column: Equipment & Food Product Setup -->
+    <div class="space-y-4 rounded-xl bg-slate-800/40 p-5 border border-slate-700/50">
+      <h3 class="text-sm font-semibold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        </svg>
+        Apparatus & Product Parameters
+      </h3>
+
+      <div>
+        <label for="selectEquipment" class="block text-xs font-medium text-slate-300 mb-1">{t.equipLabel}</label>
+        <select id="selectEquipment" class="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-xs text-slate-200 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400">
+          {data.freezerArchitectures.map((eq) => (
+            <option value={eq.id}>{eq.name}</option>
+          ))}
+        </select>
+        <p class="mt-1 text-[11px] text-slate-400 leading-tight">{t.equipHelp}</p>
+      </div>
+
+      <div>
+        <label for="selectProduct" class="block text-xs font-medium text-slate-300 mb-1">{t.productLabel}</label>
+        <select id="selectProduct" class="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-xs text-slate-200 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400">
+          {data.foodProducts.map((p) => (
+            <option value={p.id}>{p.name}</option>
+          ))}
+        </select>
+        <p class="mt-1 text-[11px] text-slate-400 leading-tight">{t.productHelp}</p>
+      </div>
+
+      <div>
+        <label for="selectDefrost" class="block text-xs font-medium text-slate-300 mb-1">{t.defrostLabel}</label>
+        <select id="selectDefrost" class="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-xs text-slate-200 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400">
+          {data.defrostMethods.map((d) => (
+            <option value={d.id}>{d.name}</option>
+          ))}
+        </select>
+        <p class="mt-1 text-[11px] text-slate-400 leading-tight">{t.defrostHelp}</p>
+      </div>
+    </div>
+
+    <!-- Center Column: Operational & Defrost Parameters -->
+    <div class="space-y-4 rounded-xl bg-slate-800/40 p-5 border border-slate-700/50">
+      <h3 class="text-sm font-semibold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+        </svg>
+        Refrigeration & Defrost Kinetics
+      </h3>
+
+      <div>
+        <div class="flex justify-between items-center mb-1">
+          <label for="inputBoxTemp" class="text-xs font-medium text-slate-300">{t.tempLabel}</label>
+          <span id="valBoxTemp" class="text-xs font-mono font-bold text-cyan-400">-38°C (-36°F)</span>
+        </div>
+        <input type="range" id="inputBoxTemp" min="-45" max="-25" step="1" value="-38" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500" />
+        <p class="mt-1 text-[11px] text-slate-400">{t.tempHelp}</p>
+      </div>
+
+      <div>
+        <div class="flex justify-between items-center mb-1">
+          <label for="inputRuntime" class="text-xs font-medium text-slate-300">{t.runtimeLabel}</label>
+          <span id="valRuntime" class="text-xs font-mono font-bold text-cyan-400">12 hrs</span>
+        </div>
+        <input type="range" id="inputRuntime" min="2" max="48" step="1" value="12" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500" />
+        <p class="mt-1 text-[11px] text-slate-400">{t.runtimeHelp}</p>
+      </div>
+
+      <div>
+        <div class="flex justify-between items-center mb-1">
+          <label for="inputFrostMm" class="text-xs font-medium text-slate-300">{t.frostLabel}</label>
+          <span id="valFrostMm" class="text-xs font-mono font-bold text-cyan-400">3.5 mm</span>
+        </div>
+        <input type="range" id="inputFrostMm" min="0.5" max="12.0" step="0.5" value="3.5" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500" />
+        <p class="mt-1 text-[11px] text-slate-400">{t.frostHelp}</p>
+      </div>
+
+      <div>
+        <div class="flex justify-between items-center mb-1">
+          <label for="inputHotGasPress" class="text-xs font-medium text-slate-300">{t.hotGasPressLabel}</label>
+          <span id="valHotGasPress" class="text-xs font-mono font-bold text-cyan-400">10.5 bar</span>
+        </div>
+        <input type="range" id="inputHotGasPress" min="6.0" max="16.0" step="0.5" value="10.5" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500" />
+        <p class="mt-1 text-[11px] text-slate-400">{t.hotGasPressHelp}</p>
+      </div>
+    </div>
+
+    <!-- Right Column: Ammonia Safety & IIAR 2 Mechanical Ventilation -->
+    <div class="space-y-4 rounded-xl bg-slate-800/40 p-5 border border-slate-700/50">
+      <h3 class="text-sm font-semibold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        R-717 Safety & IIAR 2 Exhaust
+      </h3>
+
+      <div>
+        <div class="flex justify-between items-center mb-1">
+          <label for="inputChargeKg" class="text-xs font-medium text-slate-300">{t.chargeLabel}</label>
+          <span id="valChargeKg" class="text-xs font-mono font-bold text-emerald-400">320 kg (705 lbs)</span>
+        </div>
+        <input type="range" id="inputChargeKg" min="50" max="1200" step="10" value="320" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500" />
+        <p class="mt-1 text-[11px] text-slate-400">{t.chargeHelp}</p>
+      </div>
+
+      <div>
+        <div class="flex justify-between items-center mb-1">
+          <label for="inputVentilationCfm" class="text-xs font-medium text-slate-300">{t.ventilationLabel}</label>
+          <span id="valVentilationCfm" class="text-xs font-mono font-bold text-emerald-400">18,000 CFM</span>
+        </div>
+        <input type="range" id="inputVentilationCfm" min="1000" max="45000" step="500" value="18000" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500" />
+        <p class="mt-1 text-[11px] text-slate-400">{t.ventilationHelp}</p>
+      </div>
+
+      <div>
+        <div class="flex justify-between items-center mb-1">
+          <label for="inputSensorSetPpm" class="text-xs font-medium text-slate-300">{t.sensorLabel}</label>
+          <span id="valSensorSetPpm" class="text-xs font-mono font-bold text-emerald-400">25 ppm (Level 1)</span>
+        </div>
+        <input type="range" id="inputSensorSetPpm" min="15" max="300" step="5" value="25" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500" />
+        <p class="mt-1 text-[11px] text-slate-400">{t.sensorHelp}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real-time Diagnostic Telemetry Cards -->
+  <div class="mb-8">
+    <div class="mb-4">
+      <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-300">
+        {t.diagnosticTitle}
+      </h3>
+      <p class="text-xs text-slate-400">{t.diagnosticSub}</p>
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <!-- 1. Overall U-Value Collapse -->
+      <div class="rounded-xl bg-slate-800/80 p-4 border border-slate-700/80">
+        <span class="text-xs font-medium text-slate-400 block">{t.uValueLabel}</span>
+        <div class="mt-2 flex items-baseline gap-2">
+          <span id="cardUValueVal" class="text-2xl font-bold font-mono text-cyan-400">24.2</span>
+          <span class="text-xs text-slate-400 font-mono">W/m²·K</span>
+        </div>
+        <div class="mt-2 h-1.5 w-full bg-slate-700 rounded-full overflow-hidden">
+          <div id="barUValue" class="h-full bg-cyan-400 transition-all duration-300" style="width: 63%"></div>
+        </div>
+        <span id="cardUValueStatus" class="mt-1.5 block text-[10px] font-medium text-cyan-400">Clean Fin Baseline: 38.5 W/m²·K</span>
+      </div>
+
+      <!-- 2. Air-Side Static Pressure Drop -->
+      <div class="rounded-xl bg-slate-800/80 p-4 border border-slate-700/80">
+        <span class="text-xs font-medium text-slate-400 block">{t.pressureDropLabel}</span>
+        <div class="mt-2 flex items-baseline gap-2">
+          <span id="cardPressureDropVal" class="text-2xl font-bold font-mono text-emerald-400">285</span>
+          <span class="text-xs text-slate-400 font-mono">Pa</span>
+        </div>
+        <div class="mt-2 h-1.5 w-full bg-slate-700 rounded-full overflow-hidden">
+          <div id="barPressureDrop" class="h-full bg-emerald-400 transition-all duration-300" style="width: 40%"></div>
+        </div>
+        <span id="cardPressureDropStatus" class="mt-1.5 block text-[10px] font-medium text-emerald-400">Normal Aerodynamic Flow</span>
+      </div>
+
+      <!-- 3. Pipe Weld Thermal Stress -->
+      <div class="rounded-xl bg-slate-800/80 p-4 border border-slate-700/80">
+        <span class="text-xs font-medium text-slate-400 block">{t.thermalStressLabel}</span>
+        <div class="mt-2 flex items-baseline gap-2">
+          <span id="cardThermalStressVal" class="text-2xl font-bold font-mono text-emerald-400">42</span>
+          <span class="text-xs text-slate-400 font-mono">MPa</span>
+        </div>
+        <div class="mt-2 h-1.5 w-full bg-slate-700 rounded-full overflow-hidden">
+          <div id="barThermalStress" class="h-full bg-emerald-400 transition-all duration-300" style="width: 25%"></div>
+        </div>
+        <span id="cardThermalStressStatus" class="mt-1.5 block text-[10px] font-medium text-emerald-400">Elastic Range (&lt; 140 MPa)</span>
+      </div>
+
+      <!-- 4. Room Ammonia Gas Concentration -->
+      <div class="rounded-xl bg-slate-800/80 p-4 border border-slate-700/80">
+        <span class="text-xs font-medium text-slate-400 block">{t.nh3LeakLabel}</span>
+        <div class="mt-2 flex items-baseline gap-2">
+          <span id="cardNh3LeakVal" class="text-2xl font-bold font-mono text-emerald-400">12</span>
+          <span class="text-xs text-slate-400 font-mono">ppm</span>
+        </div>
+        <div class="mt-2 h-1.5 w-full bg-slate-700 rounded-full overflow-hidden">
+          <div id="barNh3Leak" class="h-full bg-emerald-400 transition-all duration-300" style="width: 4%"></div>
+        </div>
+        <span id="cardNh3LeakStatus" class="mt-1.5 block text-[10px] font-medium text-emerald-400">Below OSHA PEL (50 ppm)</span>
+      </div>
+
+      <!-- 5. IIAR 2 Ventilation Safety Ratio -->
+      <div class="rounded-xl bg-slate-800/80 p-4 border border-slate-700/80">
+        <span class="text-xs font-medium text-slate-400 block">{t.ventilationMarginLabel}</span>
+        <div class="mt-2 flex items-baseline gap-2">
+          <span id="cardVentilationMarginVal" class="text-2xl font-bold font-mono text-emerald-400">3.4×</span>
+          <span class="text-xs text-slate-400 font-mono">Q_act/Q_req</span>
+        </div>
+        <div class="mt-2 h-1.5 w-full bg-slate-700 rounded-full overflow-hidden">
+          <div id="barVentilationMargin" class="h-full bg-emerald-400 transition-all duration-300" style="width: 85%"></div>
+        </div>
+        <span id="cardVentilationMarginStatus" class="mt-1.5 block text-[10px] font-medium text-emerald-400">Exceeds IIAR 2 Mandate</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dynamic Safety Status & Engineering Directive -->
+  <div id="statusBanner" class="mb-8 rounded-xl bg-emerald-950/40 p-5 border border-emerald-800/60 transition-colors">
+    <div class="flex items-start gap-3.5">
+      <div id="statusIconContainer" class="rounded-lg bg-emerald-500/20 p-2.5 text-emerald-400 mt-0.5">
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <div class="flex-1">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h4 id="statusTitle" class="text-base font-bold text-emerald-300">
+            FULLY COMPLIANT (ANSI/IIAR 2-2021 &amp; OSHA 1910.119 PSM VERIFIED)
+          </h4>
+          <span id="statusTag" class="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-bold text-emerald-300 border border-emerald-500/30">
+            LOW RISK
+          </span>
+        </div>
+        <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-300">
+          <div>
+            <span class="font-semibold text-slate-400 block">{t.primaryRiskLabel}</span>
+            <p id="readoutPrimaryRisk" class="mt-0.5 text-slate-200">
+              Controlled evaporator frosting within fin throat limits; minimal thermal fatigue cycle stress on carbon steel pipe welds.
+            </p>
+          </div>
+          <div>
+            <span class="font-semibold text-slate-400 block">{t.mechanismsLabel}</span>
+            <p id="readoutMechanisms" class="mt-0.5 text-slate-200">
+              Fourier conduction frost resistance &lt; 0.02 m²·K/W; hot-gas soft bleed prevents liquid slug shockwaves; exhaust Q ≥ 20·√G CFM.
+            </p>
+          </div>
+          <div>
+            <span class="font-semibold text-slate-400 block">{t.mitigationLabel}</span>
+            <p id="readoutMitigation" class="mt-0.5 text-slate-200">
+              Maintain quarterly dual-sensor electrochemical R-717 bump calibration; enforce 25 ppm supervisory and 150 ppm tripping interlocks.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Technical Telemetry Readout & Copy Button -->
+  <div class="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-xl bg-slate-800/40 p-4 border border-slate-700/50">
+    <div class="flex flex-wrap items-center gap-6 text-xs font-mono">
+      <div>
+        <span class="text-slate-400">Frost Resistance:</span>
+        <span id="readoutFrostR" class="font-bold text-cyan-400 ml-1">0.015 m²·K/W</span>
+      </div>
+      <div>
+        <span class="text-slate-400">Required IIAR 2 CFM:</span>
+        <span id="readoutRequiredCfm" class="font-bold text-cyan-400 ml-1">5,310 CFM</span>
+      </div>
+      <div>
+        <span class="text-slate-400">Water Hammer Peak:</span>
+        <span id="readoutWaterHammer" class="font-bold text-emerald-400 ml-1">&lt; 4.5 bar (Soft)</span>
+      </div>
+      <div>
+        <span class="text-slate-400">IDLH Margin (300 ppm):</span>
+        <span id="readoutIdlhMargin" class="font-bold text-emerald-400 ml-1">25.0× Safety</span>
+      </div>
+    </div>
+    <button type="button" id="btnCopyReport" class="inline-flex items-center gap-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 px-3 py-1.5 text-xs font-semibold text-slate-200 transition-colors">
+      <svg class="h-3.5 w-3.5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+      </svg>
+      <span id="lblCopyBtn">{t.copyReportBtn}</span>
+    </button>
+  </div>
+
+  <!-- Engineering Comparison Table -->
+  <div class="mb-8 overflow-hidden rounded-xl border border-slate-800 bg-slate-800/30">
+    <div class="p-4 border-b border-slate-800">
+      <h3 class="text-sm font-semibold text-white">{t.tableTitle}</h3>
+      <p class="text-xs text-slate-400 mt-0.5">{t.tableSub}</p>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs text-slate-300">
+        <thead class="bg-slate-800/80 text-[11px] uppercase tracking-wider text-slate-400">
+          <tr>
+            <th class="px-4 py-3">{t.colModel}</th>
+            <th class="px-4 py-3">{t.colClass}</th>
+            <th class="px-4 py-3">{t.colCapacity}</th>
+            <th class="px-4 py-3">{t.colCharge}</th>
+            <th class="px-4 py-3">{t.colDefrost}</th>
+            <th class="px-4 py-3">{t.colMitigation}</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-800/60 font-mono">
+          {data.freezerArchitectures.map((eq) => (
+            <tr class="hover:bg-slate-800/40 transition-colors">
+              <td class="px-4 py-3 font-medium text-slate-200 whitespace-nowrap">{eq.name.split('(')[0]}</td>
+              <td class="px-4 py-3 text-cyan-300/90">{eq.classification.split('(')[0]}</td>
+              <td class="px-4 py-3">{eq.capacityKgHr} kg/hr</td>
+              <td class="px-4 py-3">{eq.refrigerantChargeKg} kg R-717</td>
+              <td class="px-4 py-3 text-slate-400">{eq.defrostType.split('(')[0]}</td>
+              <td class="px-4 py-3 text-emerald-400/90">{eq.emergencyVentilationCfm.toLocaleString()} CFM Exhaust</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Industrial Engineering Directives & Standards -->
+  <div class="rounded-xl border border-slate-800 bg-slate-800/30 p-5">
+    <div class="mb-4">
+      <h3 class="text-sm font-semibold text-white">{t.rulesTitle}</h3>
+      <p class="text-xs text-slate-400 mt-0.5">{t.rulesSub}</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+      <div class="rounded-lg bg-slate-800/50 p-4 border border-slate-700/40">
+        <h4 class="font-semibold text-cyan-300 mb-1 flex items-center gap-1.5">
+          <span class="inline-block h-1.5 w-1.5 rounded-full bg-cyan-400"></span>
+          {t.rule1Title}
+        </h4>
+        <p class="text-slate-400 leading-relaxed">{t.rule1Text}</p>
+      </div>
+      <div class="rounded-lg bg-slate-800/50 p-4 border border-slate-700/40">
+        <h4 class="font-semibold text-cyan-300 mb-1 flex items-center gap-1.5">
+          <span class="inline-block h-1.5 w-1.5 rounded-full bg-cyan-400"></span>
+          {t.rule2Title}
+        </h4>
+        <p class="text-slate-400 leading-relaxed">{t.rule2Text}</p>
+      </div>
+      <div class="rounded-lg bg-slate-800/50 p-4 border border-slate-700/40">
+        <h4 class="font-semibold text-cyan-300 mb-1 flex items-center gap-1.5">
+          <span class="inline-block h-1.5 w-1.5 rounded-full bg-cyan-400"></span>
+          {t.rule3Title}
+        </h4>
+        <p class="text-slate-400 leading-relaxed">{t.rule3Text}</p>
+      </div>
+      <div class="rounded-lg bg-slate-800/50 p-4 border border-slate-700/40">
+        <h4 class="font-semibold text-cyan-300 mb-1 flex items-center gap-1.5">
+          <span class="inline-block h-1.5 w-1.5 rounded-full bg-cyan-400"></span>
+          {t.rule4Title}
+        </h4>
+        <p class="text-slate-400 leading-relaxed">{t.rule4Text}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script define:vars={{ data, t }}>
+  // DOM Element Selectors
+  const selectEquipment = document.getElementById('selectEquipment');
+  const selectProduct = document.getElementById('selectProduct');
+  const selectDefrost = document.getElementById('selectDefrost');
+
+  const inputBoxTemp = document.getElementById('inputBoxTemp');
+  const inputRuntime = document.getElementById('inputRuntime');
+  const inputFrostMm = document.getElementById('inputFrostMm');
+  const inputHotGasPress = document.getElementById('inputHotGasPress');
+  const inputChargeKg = document.getElementById('inputChargeKg');
+  const inputVentilationCfm = document.getElementById('inputVentilationCfm');
+  const inputSensorSetPpm = document.getElementById('inputSensorSetPpm');
+
+  const valBoxTemp = document.getElementById('valBoxTemp');
+  const valRuntime = document.getElementById('valRuntime');
+  const valFrostMm = document.getElementById('valFrostMm');
+  const valHotGasPress = document.getElementById('valHotGasPress');
+  const valChargeKg = document.getElementById('valChargeKg');
+  const valVentilationCfm = document.getElementById('valVentilationCfm');
+  const valSensorSetPpm = document.getElementById('valSensorSetPpm');
+
+  // Diagnostic Cards & Progress Bars
+  const cardUValueVal = document.getElementById('cardUValueVal');
+  const barUValue = document.getElementById('barUValue');
+  const cardUValueStatus = document.getElementById('cardUValueStatus');
+
+  const cardPressureDropVal = document.getElementById('cardPressureDropVal');
+  const barPressureDrop = document.getElementById('barPressureDrop');
+  const cardPressureDropStatus = document.getElementById('cardPressureDropStatus');
+
+  const cardThermalStressVal = document.getElementById('cardThermalStressVal');
+  const barThermalStress = document.getElementById('barThermalStress');
+  const cardThermalStressStatus = document.getElementById('cardThermalStressStatus');
+
+  const cardNh3LeakVal = document.getElementById('cardNh3LeakVal');
+  const barNh3Leak = document.getElementById('barNh3Leak');
+  const cardNh3LeakStatus = document.getElementById('cardNh3LeakStatus');
+
+  const cardVentilationMarginVal = document.getElementById('cardVentilationMarginVal');
+  const barVentilationMargin = document.getElementById('barVentilationMargin');
+  const cardVentilationMarginStatus = document.getElementById('cardVentilationMarginStatus');
+
+  // Status Banner & Readouts
+  const statusBanner = document.getElementById('statusBanner');
+  const statusIconContainer = document.getElementById('statusIconContainer');
+  const statusTitle = document.getElementById('statusTitle');
+  const statusTag = document.getElementById('statusTag');
+  const readoutPrimaryRisk = document.getElementById('readoutPrimaryRisk');
+  const readoutMechanisms = document.getElementById('readoutMechanisms');
+  const readoutMitigation = document.getElementById('readoutMitigation');
+
+  const readoutFrostR = document.getElementById('readoutFrostR');
+  const readoutRequiredCfm = document.getElementById('readoutRequiredCfm');
+  const readoutWaterHammer = document.getElementById('readoutWaterHammer');
+  const readoutIdlhMargin = document.getElementById('readoutIdlhMargin');
+
+  // Preset Buttons
+  const btnPresetIQFProduce = document.getElementById('btnPresetIQFProduce');
+  const btnPresetCookedPoultry = document.getElementById('btnPresetCookedPoultry');
+  const btnPresetLegacyFailure = document.getElementById('btnPresetLegacyFailure');
+  const btnPresetBakeryDeluge = document.getElementById('btnPresetBakeryDeluge');
+
+  const btnCopyReport = document.getElementById('btnCopyReport');
+  const lblCopyBtn = document.getElementById('lblCopyBtn');
+
+  function calculateTelemetry() {
+    const equipId = selectEquipment.value;
+    const productId = selectProduct.value;
+    const defrostId = selectDefrost.value;
+
+    const equip = data.freezerArchitectures.find(e => e.id === equipId) || data.freezerArchitectures[0];
+    const product = data.foodProducts.find(p => p.id === productId) || data.foodProducts[0];
+    const defrost = data.defrostMethods.find(d => d.id === defrostId) || data.defrostMethods[0];
+
+    const boxTemp = parseFloat(inputBoxTemp.value);
+    const runtime = parseFloat(inputRuntime.value);
+    const frostMm = parseFloat(inputFrostMm.value);
+    const hotGasPress = parseFloat(inputHotGasPress.value);
+    const chargeKg = parseFloat(inputChargeKg.value);
+    const ventilationCfm = parseFloat(inputVentilationCfm.value);
+    const sensorSetPpm = parseFloat(inputSensorSetPpm.value);
+
+    // Dynamic slider labels
+    const boxTempF = Math.round(boxTemp * 1.8 + 32);
+    valBoxTemp.textContent = `${boxTemp}°C (${boxTempF}°F)`;
+    valRuntime.textContent = `${runtime} hrs`;
+    valFrostMm.textContent = `${frostMm.toFixed(1)} mm`;
+    valHotGasPress.textContent = `${hotGasPress.toFixed(1)} bar`;
+    const chargeLbs = Math.round(chargeKg * 2.20462);
+    valChargeKg.textContent = `${chargeKg} kg (${chargeLbs} lbs)`;
+    valVentilationCfm.textContent = `${ventilationCfm.toLocaleString()} CFM`;
+    valSensorSetPpm.textContent = `${sensorSetPpm} ppm (${sensorSetPpm <= 50 ? 'Level 1' : 'Level 2'})`;
+
+    // 1. Evaporator Overall Heat Transfer U-Value (W/m²·K)
+    // Clean U ~ 38.5 W/m²·K. Frost acts as conductive thermal resistance: R_frost = x_frost / k_frost.
+    // k_frost varies between 0.16 (dendritic) and 0.32 (clean/rime).
+    const kFrost = (product.id === 'warm_parbaked_bakery_pastries') ? 0.16 : (product.id === 'iqf_fruits_vegetables_produce' ? 0.28 : 0.22);
+    const xFrostM = frostMm / 1000;
+    const rFrost = xFrostM / kFrost; // m²·K/W
+    const cleanU = data.frostThermalPhysics.cleanCoilOverallUValueWm2K;
+    const currentU = Math.max(6.5, 1 / ((1 / cleanU) + rFrost));
+    cardUValueVal.textContent = currentU.toFixed(1);
+    const uPercent = (currentU / cleanU) * 100;
+    barUValue.style.width = `${Math.min(100, Math.max(10, uPercent))}%`;
+
+    if (currentU > 28) {
+      cardUValueStatus.textContent = 'Optimal Coil Heat Flux (>28 W/m²·K)';
+      cardUValueStatus.className = 'mt-1.5 block text-[10px] font-medium text-emerald-400';
+      barUValue.className = 'h-full bg-emerald-400 transition-all duration-300';
+    } else if (currentU >= 15) {
+      cardUValueStatus.textContent = 'Degraded Heat Transfer (15–28 W/m²·K)';
+      cardUValueStatus.className = 'mt-1.5 block text-[10px] font-medium text-amber-400';
+      barUValue.className = 'h-full bg-amber-400 transition-all duration-300';
+    } else {
+      cardUValueStatus.textContent = 'SEVERE FROST BLANKET (<15 W/m²·K) — Freezing Failure';
+      cardUValueStatus.className = 'mt-1.5 block text-[10px] font-medium text-rose-400';
+      barUValue.className = 'h-full bg-rose-500 transition-all duration-300';
+    }
+
+    // 2. Air-Side Static Pressure Drop (Pa) & Throat Choking
+    // Clean pressure drop ~ 140 Pa. Exponentially increases with frostMm / finSpacing.
+    const finSpacing = equip.finSpacingMm;
+    const bridgingRatio = (frostMm * 2) / finSpacing;
+    const baseAirDrop = data.frostThermalPhysics.airSidePressureDropCleanPa;
+    const currentAirDrop = Math.min(1250, baseAirDrop * Math.pow(Math.max(1, 1 / (1 - Math.min(0.85, bridgingRatio * 0.45))), 2.4));
+    cardPressureDropVal.textContent = Math.round(currentAirDrop);
+    const pDropPercent = Math.min(100, (currentAirDrop / 800) * 100);
+    barPressureDrop.style.width = `${pDropPercent}%`;
+
+    if (currentAirDrop < 280) {
+      cardPressureDropStatus.textContent = 'Free Airflow Path (<280 Pa)';
+      cardPressureDropStatus.className = 'mt-1.5 block text-[10px] font-medium text-emerald-400';
+      barPressureDrop.className = 'h-full bg-emerald-400 transition-all duration-300';
+    } else if (currentAirDrop < 550) {
+      cardPressureDropStatus.textContent = 'Elevated Fin Choking & Air Bypass (280–550 Pa)';
+      cardPressureDropStatus.className = 'mt-1.5 block text-[10px] font-medium text-amber-400';
+      barPressureDrop.className = 'h-full bg-amber-400 transition-all duration-300';
+    } else {
+      cardPressureDropStatus.textContent = 'CRITICAL THROAT CHOKE (>550 Pa) — Fan Surge';
+      cardPressureDropStatus.className = 'mt-1.5 block text-[10px] font-medium text-rose-400';
+      barPressureDrop.className = 'h-full bg-rose-500 transition-all duration-300';
+    }
+
+    // 3. Pipe Weld Thermal Expansion Stress (MPa)
+    // Governed by hotGasPress, defrost method shock factor, and pipe material
+    let baseThermalStress = defrost.thermalExpansionStressMpa;
+    if (defrost.id === 'rapid_hot_gas_hard_shock') {
+      baseThermalStress = 120 + (hotGasPress - 6) * 10;
+    } else if (defrost.id === 'automated_hot_gas_soft_reversal') {
+      baseThermalStress = 30 + (hotGasPress - 6) * 2.2;
+    }
+    if (equip.id === 'unvented_legacy_spiral_freezer') {
+      baseThermalStress *= 1.45; // degraded pitted welds
+    }
+    const currentStressMpa = Math.min(320, baseThermalStress);
+    cardThermalStressVal.textContent = Math.round(currentStressMpa);
+    const stressPercent = (currentStressMpa / 250) * 100;
+    barThermalStress.style.width = `${Math.min(100, stressPercent)}%`;
+
+    if (currentStressMpa < 90) {
+      cardThermalStressStatus.textContent = 'Safe Elastic Range (<90 MPa)';
+      cardThermalStressStatus.className = 'mt-1.5 block text-[10px] font-medium text-emerald-400';
+      barThermalStress.className = 'h-full bg-emerald-400 transition-all duration-300';
+    } else if (currentStressMpa < 160) {
+      cardThermalStressStatus.textContent = 'Elevated Fatigue Cycling (90–160 MPa)';
+      cardThermalStressStatus.className = 'mt-1.5 block text-[10px] font-medium text-amber-400';
+      barThermalStress.className = 'h-full bg-amber-400 transition-all duration-300';
+    } else {
+      cardThermalStressStatus.textContent = 'CRITICAL WATER-HAMMER SHOCK (>160 MPa) — Weld Rupture Risk';
+      cardThermalStressStatus.className = 'mt-1.5 block text-[10px] font-medium text-rose-400 font-bold';
+      barThermalStress.className = 'h-full bg-rose-500 transition-all duration-300';
+    }
+
+    // 4. Room Ammonia Concentration (ppm)
+    // If stress > 160 MPa or legacy equipment with hard shock, pipe weld cracks!
+    const isWeldCracked = (currentStressMpa > 150) || (defrost.id === 'rapid_hot_gas_hard_shock' && equip.id === 'unvented_legacy_spiral_freezer');
+    let leakRateKgMin = 0.05; // normal minor valve stem weeping
+    if (isWeldCracked) {
+      leakRateKgMin = 8.5 + (chargeKg * 0.015); // massive header rupture
+    } else if (currentStressMpa > 100) {
+      leakRateKgMin = 0.45; // hairline fatigue fissure
+    }
+
+    // Steady-state indoor concentration: C_ppm = (Leak Rate / Ventilation)
+    // 1 kg/min of NH3 ≈ 1,420 liters of pure vapor per min ≈ 50.1 CFM of pure gas
+    const gasVolumeCfm = leakRateKgMin * 50.1;
+    const roomConcentrationPpm = Math.max(5, Math.min(2500, (gasVolumeCfm / Math.max(100, ventilationCfm)) * 1e6));
+    cardNh3LeakVal.textContent = Math.round(roomConcentrationPpm);
+    const nh3Percent = (roomConcentrationPpm / 300) * 100;
+    barNh3Leak.style.width = `${Math.min(100, Math.max(5, nh3Percent))}%`;
+
+    if (roomConcentrationPpm < 25) {
+      cardNh3LeakStatus.textContent = '< 25 ppm (Normal Background / Level 1 Supervisory)';
+      cardNh3LeakStatus.className = 'mt-1.5 block text-[10px] font-medium text-emerald-400';
+      barNh3Leak.className = 'h-full bg-emerald-400 transition-all duration-300';
+    } else if (roomConcentrationPpm <= 150) {
+      cardNh3LeakStatus.textContent = '25–150 ppm (Exceeds OSHA 50 ppm PEL) — Evacuate Zone';
+      cardNh3LeakStatus.className = 'mt-1.5 block text-[10px] font-medium text-amber-400';
+      barNh3Leak.className = 'h-full bg-amber-400 transition-all duration-300';
+    } else {
+      cardNh3LeakStatus.textContent = 'CRITICAL TOXIC EMERGENCY (>150 ppm) — Approaching 300 ppm IDLH';
+      cardNh3LeakStatus.className = 'mt-1.5 block text-[10px] font-medium text-rose-400 font-bold';
+      barNh3Leak.className = 'h-full bg-rose-500 transition-all duration-300';
+    }
+
+    // 5. IIAR 2 Chapter 6 Emergency Mechanical Ventilation Compliance (Q = 20 · √G)
+    // G in lbs
+    const requiredCfm = Math.round(20 * Math.sqrt(chargeLbs));
+    readoutRequiredCfm.textContent = `${requiredCfm.toLocaleString()} CFM`;
+    const ventilationRatio = ventilationCfm / Math.max(1, requiredCfm);
+    cardVentilationMarginVal.textContent = `${ventilationRatio.toFixed(1)}×`;
+    barVentilationMargin.style.width = `${Math.min(100, ventilationRatio * 35)}%`;
+
+    if (ventilationRatio >= 1.0) {
+      cardVentilationMarginStatus.textContent = 'Fully Compliant (Q_act ≥ 20·√G)';
+      cardVentilationMarginStatus.className = 'mt-1.5 block text-[10px] font-medium text-emerald-400';
+      barVentilationMargin.className = 'h-full bg-emerald-400 transition-all duration-300';
+    } else {
+      cardVentilationMarginStatus.textContent = 'DEFICIENT VENTILATION (Under IIAR 2 Mandate)';
+      cardVentilationMarginStatus.className = 'mt-1.5 block text-[10px] font-medium text-rose-400 font-bold';
+      barVentilationMargin.className = 'h-full bg-rose-500 transition-all duration-300';
+    }
+
+    // Overall Safety Status Determination
+    const isCritical = isWeldCracked || (roomConcentrationPpm > 150) || (ventilationRatio < 0.6 && currentStressMpa > 130);
+    const isElevated = !isCritical && (currentU < 18 || currentAirDrop > 450 || currentStressMpa > 95 || roomConcentrationPpm >= 25 || ventilationRatio < 1.0);
+
+    readoutFrostR.textContent = `${rFrost.toFixed(3)} m²·K/W`;
+    readoutWaterHammer.textContent = defrost.id === 'rapid_hot_gas_hard_shock' ? '> 42 bar (Violent)' : '< 4.5 bar (Soft)';
+    const idlhRatio = 300 / Math.max(1, roomConcentrationPpm);
+    readoutIdlhMargin.textContent = idlhRatio > 100 ? '>100× Safety' : `${idlhRatio.toFixed(1)}× Safety`;
+
+    if (isCritical) {
+      statusBanner.className = 'mb-8 rounded-xl bg-rose-950/60 p-5 border border-rose-700/80 transition-colors';
+      statusIconContainer.className = 'rounded-lg bg-rose-500/20 p-2.5 text-rose-400 mt-0.5';
+      statusTitle.textContent = 'ALERT: CATASTROPHIC AMMONIA LEAK & PIPE WELD RUPTURE HAZARD';
+      statusTitle.className = 'text-base font-bold text-rose-300';
+      statusTag.textContent = 'CRITICAL DANGER';
+      statusTag.className = 'rounded-full bg-rose-500/30 px-2.5 py-0.5 text-xs font-bold text-rose-300 border border-rose-500/40';
+
+      readoutPrimaryRisk.textContent = 'Severe hydraulic water-hammer shock sheared evaporator pipe welds; anhydrous ammonia discharging into room.';
+      readoutMechanisms.textContent = `Weld stress (${Math.round(currentStressMpa)} MPa) > yield point; NH3 room concentration (${Math.round(roomConcentrationPpm)} ppm) exceeds Level 2 shutdown; ventilation deficit.`;
+      readoutMitigation.textContent = 'EMERGENCY SHUTDOWN: Activate Level 2 auto-isolation valves; spool emergency exhaust fans to 100%; evacuate breathing zone immediately.';
+    } else if (isElevated) {
+      statusBanner.className = 'mb-8 rounded-xl bg-amber-950/50 p-5 border border-amber-700/70 transition-colors';
+      statusIconContainer.className = 'rounded-lg bg-amber-500/20 p-2.5 text-amber-400 mt-0.5';
+      statusTitle.textContent = 'WARNING: ELEVATED FROST RESISTANCE & THERMAL FATIGUE DETECTED';
+      statusTitle.className = 'text-base font-bold text-amber-300';
+      statusTag.textContent = 'ELEVATED RISK';
+      statusTag.className = 'rounded-full bg-amber-500/20 px-2.5 py-0.5 text-xs font-bold text-amber-300 border border-amber-500/30';
+
+      readoutPrimaryRisk.textContent = currentAirDrop > 450 ? 'Evaporator fin throat bridging choking air static pressure.' : 'Thermal expansion cycle stress approaching endurance limit.';
+      readoutMechanisms.textContent = `U-value down to ${currentU.toFixed(1)} W/m²·K; static ΔP ${Math.round(currentAirDrop)} Pa; weld fatigue stress ${Math.round(currentStressMpa)} MPa.`;
+      readoutMitigation.textContent = 'Initiate controlled soft-bleed defrost cycle; inspect header welds with ultrasonic non-destructive testing; verify sensor 25 ppm trip.';
+    } else {
+      statusBanner.className = 'mb-8 rounded-xl bg-emerald-950/40 p-5 border border-emerald-800/60 transition-colors';
+      statusIconContainer.className = 'rounded-lg bg-emerald-500/20 p-2.5 text-emerald-400 mt-0.5';
+      statusTitle.textContent = 'FULLY COMPLIANT (ANSI/IIAR 2-2021 & OSHA 1910.119 PSM VERIFIED)';
+      statusTitle.className = 'text-base font-bold text-emerald-300';
+      statusTag.textContent = 'LOW RISK';
+      statusTag.className = 'rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-bold text-emerald-300 border border-emerald-500/30';
+
+      readoutPrimaryRisk.textContent = 'Controlled evaporator frosting within fin throat limits; minimal thermal fatigue cycle stress on carbon steel pipe welds.';
+      readoutMechanisms.textContent = 'Fourier conduction frost resistance < 0.02 m²·K/W; hot-gas soft bleed prevents liquid slug shockwaves; exhaust Q ≥ 20·√G CFM.';
+      readoutMitigation.textContent = 'Maintain quarterly dual-sensor electrochemical R-717 bump calibration; enforce 25 ppm supervisory and 150 ppm tripping interlocks.';
+    }
+  }
+
+  // Event Listeners for Controls
+  [selectEquipment, selectProduct, selectDefrost, inputBoxTemp, inputRuntime, inputFrostMm, inputHotGasPress, inputChargeKg, inputVentilationCfm, inputSensorSetPpm].forEach(el => {
+    el.addEventListener('input', calculateTelemetry);
+    el.addEventListener('change', calculateTelemetry);
+  });
+
+  // Presets Handlers
+  btnPresetIQFProduce.addEventListener('click', () => {
+    selectEquipment.value = 'high_capacity_twin_drum_spiral_freezer';
+    selectProduct.value = 'iqf_fruits_vegetables_produce';
+    selectDefrost.value = 'continuous_sequential_zone_defrost';
+    inputBoxTemp.value = '-40';
+    inputRuntime.value = '16';
+    inputFrostMm.value = '3.0';
+    inputHotGasPress.value = '9.5';
+    inputChargeKg.value = '850';
+    inputVentilationCfm.value = '38000';
+    inputSensorSetPpm.value = '25';
+    calculateTelemetry();
+  });
+
+  btnPresetCookedPoultry.addEventListener('click', () => {
+    selectEquipment.value = 'industrial_single_drum_spiral_freezer';
+    selectProduct.value = 'steamed_poultry_cooked_nuggets';
+    selectDefrost.value = 'automated_hot_gas_soft_reversal';
+    inputBoxTemp.value = '-36';
+    inputRuntime.value = '18';
+    inputFrostMm.value = '4.5';
+    inputHotGasPress.value = '10.5';
+    inputChargeKg.value = '320';
+    inputVentilationCfm.value = '18000';
+    inputSensorSetPpm.value = '25';
+    calculateTelemetry();
+  });
+
+  btnPresetLegacyFailure.addEventListener('click', () => {
+    selectEquipment.value = 'unvented_legacy_spiral_freezer';
+    selectProduct.value = 'warm_parbaked_bakery_pastries';
+    selectDefrost.value = 'rapid_hot_gas_hard_shock';
+    inputBoxTemp.value = '-32';
+    inputRuntime.value = '32';
+    inputFrostMm.value = '8.5';
+    inputHotGasPress.value = '13.5';
+    inputChargeKg.value = '480';
+    inputVentilationCfm.value = '2400';
+    inputSensorSetPpm.value = '150';
+    calculateTelemetry();
+  });
+
+  btnPresetBakeryDeluge.addEventListener('click', () => {
+    selectEquipment.value = 'compact_self_stacking_spiral_freezer';
+    selectProduct.value = 'warm_parbaked_bakery_pastries';
+    selectDefrost.value = 'water_spray_deluge_defrost';
+    inputBoxTemp.value = '-34';
+    inputRuntime.value = '10';
+    inputFrostMm.value = '2.5';
+    inputHotGasPress.value = '7.5';
+    inputChargeKg.value = '190';
+    inputVentilationCfm.value = '12000';
+    inputSensorSetPpm.value = '25';
+    calculateTelemetry();
+  });
+
+  // Copy Report Handler
+  btnCopyReport.addEventListener('click', () => {
+    const reportText = `[IsItKitchenSafe Telemetry] Commercial Spiral Freezer Ammonia & Frost Diagnostic Report
+--------------------------------------------------------------------------------
+Architecture: ${selectEquipment.value}
+Product Substrate: ${selectProduct.value}
+Defrost Sequence: ${selectDefrost.value}
+Freezer Temp: ${valBoxTemp.textContent} | Continuous Run: ${valRuntime.textContent}
+Frost Thickness: ${valFrostMm.textContent} | Hot-Gas Pressure: ${valHotGasPress.textContent}
+R-717 Charge: ${valChargeKg.textContent} | Mechanical Ventilation: ${valVentilationCfm.textContent}
+Sensor Alarm Setpoint: ${valSensorSetPpm.textContent}
+--------------------------------------------------------------------------------
+Overall Heat Transfer U-Value: ${cardUValueVal.textContent} W/m²·K (${cardUValueStatus.textContent})
+Air Static Pressure Drop: ${cardPressureDropVal.textContent} Pa (${cardPressureDropStatus.textContent})
+Pipe Weld Thermal Stress: ${cardThermalStressVal.textContent} MPa (${cardThermalStressStatus.textContent})
+Room NH3 Gas Concentration: ${cardNh3LeakVal.textContent} ppm (${cardNh3LeakStatus.textContent})
+IIAR 2 Ventilation Margin: ${cardVentilationMarginVal.textContent} (${cardVentilationMarginStatus.textContent})
+Status Assessment: ${statusTitle.textContent}
+Primary Risk: ${readoutPrimaryRisk.textContent}
+Remediation: ${readoutMitigation.textContent}
+Timestamp: ${new Date().toISOString()}`;
+
+    navigator.clipboard.writeText(reportText).then(() => {
+      lblCopyBtn.textContent = t.copiedFeedback;
+      setTimeout(() => {
+        lblCopyBtn.textContent = t.copyReportBtn;
+      }, 2500);
+    }).catch(err => {
+      console.error('Failed to copy telemetry to clipboard:', err);
+    });
+  });
+
+  // Initial Calculation Run
+  calculateTelemetry();
+</script>

@@ -1,0 +1,376 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import CommercialSpiralFreezerAmmoniaModeler from '../../../components/CommercialSpiralFreezerAmmoniaModeler.astro';
+import type { SupportedLanguage } from '../../../i18n/ui';
+import { useTranslations, useTranslatedPath } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+const t = useTranslations(lang);
+const tp = useTranslatedPath(lang);
+
+interface LocaleToolContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  lead: string;
+  breadcrumbsLabel: string;
+  faqs: Array<{ question: string; answer: string }>;
+  scienceTitle1: string;
+  scienceText1: string;
+  box1Title: string;
+  box1Text: string;
+  box2Title: string;
+  box2Text: string;
+  scienceTitle2: string;
+  scienceText2: string;
+  box3Title: string;
+  box3Text: string;
+  box4Title: string;
+  box4Text: string;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocaleToolContent> = {
+  es: {
+    pageTitle: "Simulador de Congelador Espiral: Escarcha en Evaporador y Fuga de Amoníaco | IsItKitchenSafe",
+    pageDescription: "Simule congelación continua industrial en espiral, capas límite de resistencia térmica por escarcha en evaporadores, choque hidráulico de gas caliente, dispersión de plumas tóxicas de amoníaco anhidro (R-717) y ventilación de emergencia según ANSI/IIAR 2-2021.",
+    badge: "Física de Refrigeración y Toxicología Industrial",
+    h1: "Simulador de Congelador Espiral Comercial: Inversión de Escarcha y Fuga de Amoníaco",
+    lead: "Simule procesos de congelación continua industrial en espiral, resistencia térmica por capa de escarcha en aletas, choque hidráulico de gas caliente, dispersión de plumas tóxicas de amoníaco anhidro (R-717) y ventilación de emergencia según ANSI/IIAR 2-2021 en procesamiento de aves, panadería y alimentos preparados.",
+    breadcrumbsLabel: "Congelador Espiral y Amoníaco",
+    faqs: [
+      {
+        question: "¿Cuál es el mecanismo físico de la resistencia térmica de la escarcha y el colapso del valor U en congeladores espirales?",
+        answer: "El alimento caliente y húmedo que ingresa al congelador espiral evapora agua que se desublima en las aletas frías a -38°C, formando una capa porosa de escarcha. La escarcha tiene una conductividad térmica extremadamente baja (k ≈ 0.16 a 0.32 W/m·K) comparada con el aluminio o acero. A medida que supera los 3.5 mm de espesor, la resistencia conductiva domina el circuito térmico, desplomando el coeficiente global de transferencia térmica U de 38.5 W/m²·K a menos de 12.0 W/m²·K (caída superior al 70%)."
+      },
+      {
+        question: "¿Por qué el desescarche rápido por gas caliente sin descompresión previa causa choque hidráulico violento?",
+        answer: "Las tuberías del evaporador contienen amoníaco líquido a -38°C y 1.5 bar. Al abrir súbitamente una válvula con vapor caliente a 13 bar (+35°C), el vapor colapsa instantáneamente por condensación en el líquido frío, generando cavidades de vacío. El amoníaco circundante es arrastrado a gran velocidad (>25 m/s) contra codos y válvulas cerradas, desatando ondas de choque de golpe de ariete superiores a 45 bar que fracturan soldaduras."
+      },
+      {
+        question: "¿Cómo determina la norma ANSI/IIAR 2 § 6.14 la ventilación mecánica de emergencia obligatoria?",
+        answer: "La norma ANSI/IIAR 2-2021 exige que la capacidad de extracción mecánica de emergencia Q se dimensione mediante la fórmula Q = 20 · √G CFM, donde G es la masa total de amoníaco en libras del circuito protegido. Los extractores deben ser antideflagrantes (AMCA Tipo A/B) con descarga al exterior libre y accionamiento automático ante fugas."
+      },
+      {
+        question: "¿Cuáles son los umbrales toxicológicos críticos del amoníaco anhidro (R-717) según OSHA y NIOSH?",
+        answer: "El amoníaco reacciona exotérmicamente con la humedad corporal formando hidróxido de amonio cáustico. OSHA fija el límite permisible (PEL) en 50 ppm (TWA 8 horas). Entre 150 y 300 ppm provoca quemaduras químicas en tráquea y edema pulmonar severo. A 300 ppm (umbral IDLH de NIOSH), sobreviene laringoespasmo reflejo y asfixia en cuestión de minutos."
+      },
+      {
+        question: "¿Cómo ejecuta la detección de amoníaco en dos niveles el corte automático de seguridad?",
+        answer: "A 25 ppm (Nivel 1 de supervisión), el sistema activa sirenas y extractores a baja velocidad para evacuar fugas incipientes. Al alcanzar 150 ppm (Nivel 2 de parada de emergencia), el PLC cierra instantáneamente los solenoides de suministro de amoníaco líquido, pone los extractores al 100% de potencia y corta los motores de la espiral."
+      },
+      {
+        question: "¿Por qué el puenteo de escarcha en aletas estrangula la presión estática del aire del ventilador?",
+        answer: "Cuando la escarcha acumulada sobrepasa el 50% de la separación entre aletas (>4.5 mm), el área libre de paso se contrae drásticamente. La pérdida de carga estática se dispara de 140 Pa a más de 720 Pa, obligando a los ventiladores axiales a entrar en pérdida aerodinámica y sobrecalentamiento de motores."
+      }
+    ],
+    scienceTitle1: "Cinética de Conducción en Escarcha y Colapso del Valor U",
+    scienceText1: "La transferencia de calor depende del intercambio convectivo entre el aire a -38°C y el producto. La acumulación de escarcha añade una resistencia conductiva que estrangula el flujo térmico global.",
+    box1Title: "Resistencia Térmica Total del Evaporador",
+    box1Text: "R_total = (1 / h_int) + (x_tubo / k_metal) + (x_escarcha / k_escarcha) + (1 / h_ext)",
+    box2Title: "Colapso del Coeficiente Global U",
+    box2Text: "U = 1 / R_total ≈ 1 / [ (1 / U_limpio) + (x_escarcha / k_escarcha) ]",
+    scienceTitle2: "Choque Hidráulico (Golpe de Ariete) y Ventilación IIAR 2",
+    scienceText2: "El golpe de ariete por condensación súbita de gas caliente genera presiones transientales destructivas. La ventilación de emergencia evacúa fugas antes de alcanzar concentraciones letales.",
+    box3Title: "Presión de Choque de Joukowsky y Tensión Térmica",
+    box3Text: "ΔP_choque = ρ_liq · c_sonido · Δv_tapón  |  σ_térmica = E · α · ΔT",
+    box4Title: "Caudal de Ventilación de Emergencia IIAR 2",
+    box4Text: "Q = 20 · √G  [CFM]  (donde G = masa de amoníaco en libras)"
+  },
+  pt: {
+    pageTitle: "Simulador de Congelador Espiral: Gelo em Evaporador e Vazamento de Amônia | IsItKitchenSafe",
+    pageDescription: "Simule congelamento contínuo industrial em espiral, camadas limite de resistência térmica por gelo em evaporadores, choque hidráulico de gás quente, dispersão de plumas tóxicas de amônia anidra (R-717) e ventilação de emergência segundo ANSI/IIAR 2-2021.",
+    badge: "Física de Refrigeração e Toxicologia Industrial",
+    h1: "Simulador de Congelador Espiral Comercial: Inversão de Gelo e Vazamento de Amônia",
+    lead: "Simule processos de congelamento contínuo industrial em espiral, resistência térmica da camada de gelo em aletas, choque hidráulico de gás quente, dispersão de plumas tóxicas de amônia anidra (R-717) e ventilação de emergência segundo ANSI/IIAR 2-2021 no processamento de carnes, panificação e alimentos congelados.",
+    breadcrumbsLabel: "Congelador Espiral e Amônia",
+    faqs: [
+      {
+        question: "Qual é o mecanismo físico da resistência térmica do gelo e colapso do valor U em congeladores espirais?",
+        answer: "Alimentos quentes e úmidos desprendem vapor que se desublima sobre as aletas frias a -38°C, formando gelo poroso com condutividade extremamente baixa (k ≈ 0.16 a 0.32 W/m·K). Acima de 3.5 mm de espessura, a resistência condutiva domina o circuito térmico, reduzindo o valor U de 38.5 W/m²·K para menos de 12.0 W/m²·K (queda superior a 70%)."
+      },
+      {
+        question: "Por que o degelo rápido por gás quente sem despressurização prévia causa choque hidráulico violento?",
+        answer: "As serpentinas contêm amônia líquida a -38°C e 1.5 bar. O vapor quente a 13 bar (+35°C) injetado bruscamente colapsa por condensação, criando cavidades de vácuo. O líquido circundante é acelerado a mais de 25 m/s contra curvas e válvulas, gerando golpes de aríete superiores a 45 bar que rompem soldas."
+      },
+      {
+        question: "Como a norma ANSI/IIAR 2 § 6.14 estabelece a vazão obrigatória de ventilação mecânica de emergência?",
+        answer: "A norma ANSI/IIAR 2-2021 exige que a vazão de exaustão Q seja dimensionada pela equação Q = 20 · √G CFM, sendo G a carga total de amônia em libras. Exaustores blindados (AMCA Tipo A/B) devem operar automaticamente mediante sinais de alarme de gás."
+      },
+      {
+        question: "Quais são os limites toxicológicos agudos da amônia anidra (R-717) segundo OSHA e NIOSH?",
+        answer: "A amônia reage com a umidade dos tecidos formando hidróxido de amônio corrosivo. O limite ocupacional da OSHA é de 50 ppm (TWA 8 horas). Entre 150 e 300 ppm ocorrem queimaduras cáusticas nas vias aéreas e edema pulmonar. A 300 ppm (IDLH da NIOSH), ocorre espasmo glótico e asfixia fulminante."
+      },
+      {
+        question: "Como o monitoramento de amônia em dois níveis comanda o bloqueio automático do sistema?",
+        answer: "A 25 ppm (Nível 1 de supervisão), o sistema dispara alertas e liga exaustores em baixa rotação. A 150 ppm (Nível 2 de parada emergencial), o CLP fecha instantaneamente as válvulas solenoides de alimentação líquida e eleva os exaustores a 100% de rotação."
+      },
+      {
+        question: "Por que o congelamento das aletas sufoca a pressão estática de ar dos ventiladores?",
+        answer: "Quando o gelo acumulado ultrapassa 50% do espaçamento entre aletas (>4.5 mm), a área livre é estrangulada. A perda de carga do ar sobe de 140 Pa para mais de 720 Pa, empurrando os ventiladores axiais para o estol aerodinâmico e sobrecarga elétrica."
+      }
+    ],
+    scienceTitle1: "Cinética de Condução no Gelo e Queda do Coeficiente U",
+    scienceText1: "O congelamento contínuo exige troca convectiva intensa entre o ar a -38°C e o produto. O acúmulo de gelo nas aletas cria uma barreira condutiva que sufoca a transferência térmica.",
+    box1Title: "Resistência Térmica Total do Evaporador",
+    box1Text: "R_total = (1 / h_int) + (x_tubo / k_metal) + (x_gelo / k_gelo) + (1 / h_ext)",
+    box2Title: "Colapso do Coeficiente Global U",
+    box2Text: "U = 1 / R_total ≈ 1 / [ (1 / U_limpo) + (x_gelo / k_gelo) ]",
+    scienceTitle2: "Choque Hidráulico (Golpe de Aríete) e Ventilação IIAR 2",
+    scienceText2: "A injeção brusca de gás quente colapsa bolhas de vapor gerando picos de sobrepressão severos. A ventilação de emergência evacua a sala antes de atingir limites fatais.",
+    box3Title: "Pressão de Golpe de Aríete e Tensão Térmica",
+    box3Text: "ΔP_choque = ρ_liq · c_som · Δv_pistão  |  σ_térmica = E · α · ΔT",
+    box4Title: "Vazão de Ventilação de Emergência IIAR 2",
+    box4Text: "Q = 20 · √G  [CFM]  (onde G = massa de amônia em libras)"
+  },
+  'zh-cn': {
+    pageTitle: "商用螺旋速冻机模拟分析仪：蒸发器结霜热阻反转与氨气泄漏 | IsItKitchenSafe",
+    pageDescription: "模拟连续工业螺旋食品速冻机、蒸发器翅片结霜导热阻力边界层演变、热气除霜水锤机械冲击应力、液氨 (R-717) 毒性蒸汽羽流扩散动力学以及 ANSI/IIAR 2-2021 机械应急排风合规裕度。",
+    badge: "制冷热力学与工业毒理学防爆安全",
+    h1: "商用螺旋速冻机蒸发器结霜热阻反转与氨气泄漏安全模拟分析仪",
+    lead: "全面模拟工业连续螺旋食品速冻机蒸发器翅片结霜导热阻力演变、热气除霜水锤瞬态激波、无水氨 (R-717) 毒气扩散羽流及 ANSI/IIAR 2-2021 事故机械应急排风规范，为家禽肉类、烘焙与果蔬速冻提供权威安全工程指导。",
+    breadcrumbsLabel: "螺旋速冻机与氨制冷安全",
+    faqs: [
+      {
+        question: "连续螺旋速冻机中蒸发器翅片结霜热阻与总传热系数 U 暴跌的物理机理是什么？",
+        answer: "高温含湿食品进入速冻机后，水蒸气在 -38°C 的翅片表面直接凝华结霜。霜层的导热系数极低 (k ≈ 0.16 至 0.32 W/m·K)，远逊于铝合金或碳钢管材。根据傅里叶导热定律，当结霜厚度超过 3.5 mm 时，导热热阻占主导地位，使总传热系数 U 从 38.5 W/m²·K 骤跌至不足 12.0 W/m²·K (跌幅超 70%)，导致冷量受阻和冻品融化。"
+      },
+      {
+        question: "为什么未经均压缓冲的剧烈热气除霜会引发灾难性水锤冲击？",
+        answer: "蒸发器管内充斥着 -38°C 的低温液氨。若直接粗暴注入 13 bar (+35°C) 的高温排气，热气体与冷液体接触瞬间急剧冷凝坍塌形成局部真空。周围液氨以极高速度 (>25 m/s) 撞击弯头与管道阀门，产生峰值超过 45 bar 的水锤激波，直接撕裂焊缝导致氨气泄漏。"
+      },
+      {
+        question: "ANSI/IIAR 2 § 6.14 标准如何规定氨制冷机房强制应急排风量？",
+        answer: "ANSI/IIAR 2-2021 规定，氨制冷系统独立应急机械排风风量 Q 必须按 Q = 20 · √G CFM 计算，其中 G 为系统最大充氨量 (磅)。排风机必须采用防爆防静电构型，直通室外安全高空，并与双级氨气泄漏传感器实现毫秒级自动联动。"
+      },
+      {
+        question: "无水氨 (R-717) 在 OSHA 与 NIOSH 规范下的急性毒理与生命安全红线是多少？",
+        answer: "氨气极易溶于水生成强碱性氢氧化铵，造成化学灼伤。OSHA 规定 8 小时允许暴露浓度 (PEL) 为 50 ppm。当空气浓度升至 150 至 300 ppm 时，会引发急性化学性气管炎与严重肺水肿。达到 NIOSH 规定的 300 ppm IDLH 极限时，人体咽喉会发生反射性痉挛窒息，数分钟内危及生命。"
+      },
+      {
+        question: "双级氨气浓度监测 (25 ppm 一级 vs 150 ppm 二级) 如何执行自动停机切断？",
+        answer: "当蒸发器区域氨气达到 25 ppm 时，系统触发声光报警并启动排风机低速运行排气；当浓度飙升至 150 ppm 时，控制 PLC 毫秒级自动断开主供液电磁阀、关闭热气管路、将排气风机提至 100% 全速并切断螺旋传送电机电源。"
+      },
+      {
+        question: "为什么翅片结霜桥连会导致蒸发器风道流动静压降急剧飙升并引发风机失速？",
+        answer: "当翅片霜层厚度超过翅片间隙的 50% (>4.5 mm) 时，自由流通截面积剧烈收缩。空气侧流动阻力按二次方与指数规律从洁净时的 140 Pa 飙升至 720 Pa 以上，迫使轴流风机越过喘振边界进入失速区，造成风叶剧烈振动与电机过热烧毁。"
+      }
+    ],
+    scienceTitle1: "霜层傅里叶导热动力学与总传热 U 值暴跌",
+    scienceText1: "速冻机的降温能力取决于循环低温冷风与冻品的对流传热。蒸发器翅片表面结霜形成的低导热性多孔层构成了不可逾越的传热热阻。",
+    box1Title: "蒸发器总热阻方程",
+    box1Text: "R_total = (1 / h_int) + (x_管 / k_金属) + (x_霜 / k_霜) + (1 / h_ext)",
+    box2Title: "总传热系数 U 暴跌模型",
+    box2Text: "U = 1 / R_total ≈ 1 / [ (1 / U_洁净) + (x_霜 / k_霜) ]",
+    scienceTitle2: "除霜水锤冲击波动力学与 IIAR 2 应急排风准则",
+    scienceText2: "冷凝坍塌引发的水锤流体冲击波会瞬间超过管材屈服应力极限。合规的事故排风系统能在毒气聚积前迅速排空，守住生命安全底线。",
+    box3Title: "Joukowsky 水锤冲击压与热膨胀应力",
+    box3Text: "ΔP_shock = ρ_液 · c_声 · Δv_液塞  |  σ_热 = E · α · ΔT",
+    box4Title: "IIAR 2 事故机械排风法定风量公式",
+    box4Text: "Q = 20 · √G  [CFM]  (G 为充注液氨磅数)"
+  },
+  ja: {
+    pageTitle: "商用スパイラルフリーザーモデラー：着霜熱抵抗反転とアンモニア漏洩安全解析 | IsItKitchenSafe",
+    pageDescription: "連続式産業用スパイラル食品急速凍結機、蒸発器フィン着霜熱伝導抵抗境界層、ホットガス除霜時のウォーターハンマー水撃衝撃波、アンモニア (R-717) 毒性ガスプルーム拡散動力学、ANSI/IIAR 2-2021 準拠非常排気風量をリアルタイム算出。",
+    badge: "冷凍熱力学および産業毒性学安全工学",
+    h1: "商用スパイラルフリーザー蒸発器着霜熱抵抗反転・アンモニア漏洩安全モデラー",
+    lead: "産業用連続スパイラル急速凍結機における蒸発器フィンの着霜熱伝導抵抗境界層の増大、ホットガス除霜時の水撃ウォーターハンマー衝撃破壊、アンモニア (R-717) 毒性プルーム拡散および ANSI/IIAR 2-2021 非常換気基準をリアルタイム解析。",
+    breadcrumbsLabel: "スパイラルフリーザーとアンモニア安全",
+    faqs: [
+      {
+        question: "スパイラルフリーザーにおける蒸発器着霜熱抵抗の増大と総括伝熱係数 U の暴落メカニズムは？",
+        answer: "高温・多湿な食品から蒸発した水分は、-38°Cのフィン表面で昇華凝固し、多孔質な樹枝状の霜を形成します。霜の熱伝導率は極めて低く (k ≈ 0.16〜0.32 W/m·K)、厚さが3.5 mmを超えると熱抵抗が支配的となり、総括伝熱係数 U は 38.5 W/m²·K から 12.0 W/m²·K 未満へと 70% 以上暴落します。"
+      },
+      {
+        question: "事前均圧を行わない急激なホットガス除霜が壊滅的な水撃（ウォーターハンマー）を招く理由は？",
+        answer: "蒸発器内には -38°Cの低温液アンモニアが残留しています。そこに 13 bar (+35°C) の高温高圧ガスを直噴すると、蒸気凝縮崩壊により局所真空が発生し、液冷媒が25 m/sを超える超高速で配管ベンド部やヘッダーに激突します。45 barを超える衝撃水撃圧が発生し、溶接部が剪断破断します。"
+      },
+      {
+        question: "ANSI/IIAR 2 § 6.14 規格に基づく非常用機械換気風量の法定計算式は？",
+        answer: "ANSI/IIAR 2-2021 規格は、非常排気風量 Q を Q = 20 · √G CFM (Gは系内の冷媒アンモニア充填ポンド数) で算出することを義務付けています。防爆排風機は屋外安全領域へ直通排気し、ガス検知器と自動連動する必要があります。"
+      },
+      {
+        question: "OSHAおよびNIOSHにおけるアンモニア (R-717) の急性毒性・許容曝露限界値は？",
+        answer: "アンモニアは体液と反応して腐食性水酸化アンモニウムとなり、化学熱傷を引き起こします。OSHAの許容濃度 (PEL) は 50 ppm ですが、150〜300 ppm で重篤な気管支炎や肺水腫を誘発し、NIOSHの IDLH 値である 300 ppm を超えると喉頭痙攣により数分で致命的な窒息に至ります。"
+      },
+      {
+        question: "二段階アンモニアガス検知 (25 ppm レベル1 vs 150 ppm レベル2) の自動遮断シーケンスは？",
+        answer: "25 ppm (レベル1監視警報) 到達時は警報を発して排風機を低速運転します。150 ppm (レベル2緊急遮断警報) に達すると、PLCが主液電磁弁をミリ秒単位で緊急遮断し、排風機を100%全開駆動にしてドラムモーターを停止させます。"
+      },
+      {
+        question: "フィン間の着霜架橋閉塞が空気側静圧損失を急上昇させファンを失速させる原因は？",
+        answer: "着霜厚さがフィンピッチの 50% (>4.5 mm) を超えると、空気の流路面積が激減します。静圧損失は 140 Pa から 720 Pa 以上へと跳ね上がり、軸流ファンは限界圧力を超えて気流剥離失速に陥り、ファンモーターの焼損や冷却不良を引き起こします。"
+      }
+    ],
+    scienceTitle1: "着霜フーリエ熱伝導動力学と総括伝熱係数 U の暴落",
+    scienceText1: "急速凍結は -38°Cの高速冷気と食品との熱交換により成立します。着霜による熱抵抗層の成長は、蒸発器全体の冷却能力を致命的に損ないます。",
+    box1Title: "蒸発器総熱抵抗方程式",
+    box1Text: "R_total = (1 / h_int) + (x_管 / k_金属) + (x_霜 / k_霜) + (1 / h_ext)",
+    box2Title: "総括伝熱係数 U 低下モデル",
+    box2Text: "U = 1 / R_total ≈ 1 / [ (1 / U_清浄) + (x_霜 / k_霜) ]",
+    scienceTitle2: "除霜水撃衝撃波と IIAR 2 非常換気動力学",
+    scienceText2: "高温ガスの急激注入による凝縮崩壊水撃圧は配管の疲労強度を容易に突破します。法令基準を満たす非常換気が作業員の生命を守る防波堤となります。",
+    box3Title: "Joukowsky水撃衝撃圧と熱膨張応力",
+    box3Text: "ΔP_shock = ρ_液 · c_音 · Δv_液塞  |  σ_熱 = E · α · ΔT",
+    box4Title: "IIAR 2 法定非常排気風量計算式",
+    box4Text: "Q = 20 · √G  [CFM]  (G は充填アンモニアのポンド数)"
+  }
+};
+
+const content = CONTENT[lang as Exclude<SupportedLanguage, 'en'>];
+
+const breadcrumbs = [
+  { label: t('nav.home') || 'Home', href: tp('/') },
+  { label: t('nav.tools') || 'Tools', href: tp('/tools/') },
+  { label: content.breadcrumbsLabel }
+];
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "name": content.h1,
+      "url": `https://isitkitchensafe.com/${lang}/tools/commercial-spiral-freezer-ammonia-modeler/`,
+      "applicationCategory": "EngineeringApplication",
+      "operatingSystem": "All",
+      "browserRequirements": "Requires JavaScript. Requires HTML5 Canvas/CSS3.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": content.pageDescription
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": t('nav.home') || 'Home',
+          "item": `https://isitkitchensafe.com${tp('/')}`
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": t('nav.tools') || 'Tools',
+          "item": `https://isitkitchensafe.com${tp('/tools/')}`
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": content.breadcrumbsLabel,
+          "item": `https://isitkitchensafe.com/${lang}/tools/commercial-spiral-freezer-ammonia-modeler/`
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": content.faqs.map(f => ({
+        "@type": "Question",
+        "name": f.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": f.answer
+        }
+      }))
+    }
+  ]
+};
+---
+
+<Layout
+  title={content.pageTitle}
+  description={content.pageDescription}
+  structuredData={structuredData}
+>
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+    <Breadcrumbs items={breadcrumbs} />
+
+    <header class="mb-8 mt-4">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-100 text-cyan-800">
+          {content.badge}
+        </span>
+        <span class="text-xs text-muted font-mono">ANSI/IIAR 2-2021 &bull; OSHA 29 CFR 1910.119 &bull; ASME B31.5 &bull; EPA RMP</span>
+      </div>
+      <h1 class="text-display-sm sm:text-display font-semibold text-ink tracking-tight mb-3">
+        {content.h1}
+      </h1>
+      <p class="text-body-lg text-muted max-w-4xl leading-relaxed">
+        {content.lead}
+      </p>
+    </header>
+
+    <!-- Flagship Interactive Modeler Component -->
+    <CommercialSpiralFreezerAmmoniaModeler lang={lang} />
+
+    <!-- Engineering & Surface Science Technical Reference -->
+    <section class="my-16 space-y-12">
+      <div class="border-t border-hairline pt-10">
+        <h2 class="text-title-lg font-semibold text-ink tracking-tight mb-4">
+          {content.scienceTitle1}
+        </h2>
+        <div class="prose max-w-none text-body text-sm sm:text-base leading-relaxed space-y-4">
+          <p>{content.scienceText1}</p>
+          <div class="bg-surface-soft p-4 rounded-xl border border-hairline font-mono text-xs overflow-x-auto my-4 text-ink">
+            {content.box1Text}
+          </div>
+          <div class="bg-surface-soft p-4 rounded-xl border border-hairline font-mono text-xs overflow-x-auto my-4 text-ink">
+            {content.box2Text}
+          </div>
+        </div>
+      </div>
+
+      <div class="border-t border-hairline pt-10">
+        <h2 class="text-title-lg font-semibold text-ink tracking-tight mb-4">
+          {content.scienceTitle2}
+        </h2>
+        <div class="prose max-w-none text-body text-sm sm:text-base leading-relaxed space-y-4">
+          <p>{content.scienceText2}</p>
+          <div class="bg-surface-soft p-4 rounded-xl border border-hairline font-mono text-xs overflow-x-auto my-4 text-ink">
+            {content.box3Text}
+          </div>
+          <div class="bg-surface-soft p-4 rounded-xl border border-hairline font-mono text-xs overflow-x-auto my-4 text-ink">
+            {content.box4Text}
+          </div>
+        </div>
+      </div>
+
+      <div class="border-t border-hairline pt-10">
+        <h2 class="text-title-lg font-semibold text-ink tracking-tight mb-4">
+          Frequently Asked Questions
+        </h2>
+        <div class="space-y-6">
+          {content.faqs.map((faq) => (
+            <div class="bg-surface-soft/60 border border-hairline rounded-2xl p-6">
+              <h3 class="text-title-sm font-semibold text-ink mb-2">
+                {faq.question}
+              </h3>
+              <p class="text-body text-sm leading-relaxed text-muted">
+                {faq.answer}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
