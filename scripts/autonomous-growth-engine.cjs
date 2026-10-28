@@ -125,7 +125,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-fluidized-bed-agglomeration-modeler', name: 'Commercial Fluidized Bed Agglomeration Spray Nozzle Droplet Drying & Dust Deflagration Modeler', category: 'Thermal Fluid Dynamics & Combustible Dust Safety', component: 'CommercialFluidizedBedAgglomerationModeler.astro', dataFile: 'fluidized-bed-agglomeration-data.json' },
   { slug: 'commercial-spiral-freezer-ammonia-modeler', name: 'Commercial Spiral Freezer Evaporator Frost Inversion & Ammonia Leak Safety Modeler', category: 'Refrigeration Physics & Industrial Toxicology', component: 'CommercialSpiralFreezerAmmoniaModeler.astro', dataFile: 'spiral-freezer-ammonia-data.json' },
   { slug: 'commercial-drum-roaster-co-chaff-modeler', name: 'Commercial Continuous Drum Roaster Flue Gas Carbon Monoxide & Chaff Deflagration Modeler', category: 'Combustion Kinetics & Grain Processing Safety', component: 'CommercialContinuousDrumRoasterModeler.astro', dataFile: 'drum-roaster-co-chaff-data.json' },
-  { slug: 'commercial-high-shear-colloid-mill-modeler', name: 'Commercial High-Shear Colloid Mill Rotor-Stator Thermal Friction & Micro-Particle Emulsion Shear Modeler', category: 'Rheology & Sanitary Fluid Mechanics', component: 'CommercialHighShearColloidMillModeler.astro', dataFile: 'colloid-mill-shear-friction-data.json' }
+  { slug: 'commercial-high-shear-colloid-mill-modeler', name: 'Commercial High-Shear Colloid Mill Rotor-Stator Thermal Friction & Micro-Particle Emulsion Shear Modeler', category: 'Rheology & Sanitary Fluid Mechanics', component: 'CommercialHighShearColloidMillModeler.astro', dataFile: 'colloid-mill-shear-friction-data.json' },
+  { slug: 'commercial-hydrostatic-cooker-cooler-modeler', name: 'Commercial Continuous Hydrostatic Cooker-Cooler Hydrostatic Leg Pressure Differential & Steam Bleed Modeler', category: 'Hydrostatic Thermodynamics & Commercial Canning Safety', component: 'CommercialHydrostaticCookerCoolerModeler.astro', dataFile: 'hydrostatic-cooker-cooler-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -340,7 +341,9 @@ function auditDatasets() {
     'ultrasonic-degreasing-cavitation-data.json',
     'fluidized-bed-agglomeration-data.json',
     'spiral-freezer-ammonia-data.json',
-    'drum-roaster-co-chaff-data.json'
+    'drum-roaster-co-chaff-data.json',
+    'colloid-mill-shear-friction-data.json',
+    'hydrostatic-cooker-cooler-data.json'
 ];
 
   const datasetStats = {};
@@ -580,30 +583,30 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
     const candidateTools = [
     {
-      title: 'Commercial Continuous Hydrostatic Cooker-Cooler Hydrostatic Leg Pressure Differential & Steam Bleed Modeler',
-      category: 'Hydrostatic Thermodynamics & Commercial Canning Safety',
-      intent: 'Models commercial continuous hydrostatic retort cooker-coolers for canned food sterilization, hydrostatic water column differential pressure balance (ΔP = ρgh), conveyor carrier chain pitch elongation wear, steam chamber deaeration venting, and NFPA / OSHA pressure containment.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '3,800+ US impressions'
-    },
-    {
       title: 'Commercial Continuous Extrusion Cooker Screw Barrel Shear Friction & Gelatinization Degradation Modeler',
       category: 'Rheological Food Engineering & High-Pressure Tribology',
       intent: 'Models high-shear single and twin-screw commercial food extruders (snacks, pet food, plant protein), screw flight viscous dissipation shear heating (shear rates > 1,500 s⁻¹), starch gelatinization rheology, die throat pressure surging (> 120 bar), and barrel rupture safety.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '3,300+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '3,800+ US impressions'
     },
     {
       title: 'Commercial Continuous Vacuum Microwave Belt Dryer Magnetron Plasma Arcing & Product Scorching Modeler',
       category: 'Microwave Electromagnetics & Vacuum Processing Safety',
       intent: 'Models continuous conveyor vacuum microwave dryers (0.02 to 0.1 bar, 2.45 GHz), Townsend gas discharge plasma arcing in low-pressure rarefied atmospheres, uneven microwave attenuation hotspot product scorching, and waveguide circulator water-load reflected power protection.',
-      priority: 'MEDIUM',
-      estimatedMonthlyVolume: '2,900+ US impressions'
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '3,300+ US impressions'
     },
     {
       title: 'Commercial High-Pressure Homogenizer Micro-Orifice Cavitation Erosion & Valve Seat Spalling Modeler',
       category: 'Ultra-High-Pressure Fluid Dynamics & Sonic Cavitation',
       intent: 'Models commercial dairy & beverage ultra-high-pressure homogenizers (1,000 to 2,500 bar / 15,000 to 36,000 psi), supersonic jet impingement, micro-orifice cavitation bubble collapse, tungsten carbide valve seat impact spalling, and 3-A Sanitary standard particulate dispersion.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '2,900+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous Aseptic Scraped-Surface Heat Exchanger Blade Chattering & Protein Fouling Modeler',
+      category: 'Thermal Process Engineering & Aseptic Tribology',
+      intent: 'Models continuous commercial aseptic scraped-surface heat exchangers (SSHE) for viscous purees, infant formulas, and sauces, rotating scraper blade boundary hydrodynamic lift vs chattering cavitation, high-temperature heat transfer wall protein burn-on fouling (Biot number > 0.1), and CIP chemical stripping.',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '2,600+ US impressions'
     }

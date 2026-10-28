@@ -1,0 +1,1264 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import hydrostaticData from '../data/hydrostatic-cooker-cooler-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  retortLabel: string;
+  retortHelp: string;
+  canLabel: string;
+  canHelp: string;
+  alloyLabel: string;
+  alloyHelp: string;
+  tempLabel: string;
+  tempHelp: string;
+  legHeightLabel: string;
+  legHeightHelp: string;
+  waterTempLabel: string;
+  waterTempHelp: string;
+  bleederLabel: string;
+  bleederHelp: string;
+  dwellLabel: string;
+  dwellHelp: string;
+  chainHoursLabel: string;
+  chainHoursHelp: string;
+  presetsTitle: string;
+  presetSoup: string;
+  presetAluminum: string;
+  presetAirPocket: string;
+  presetBlowout: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  reqHeightLabel: string;
+  sealMarginLabel: string;
+  steamPressureLabel: string;
+  airFractionLabel: string;
+  lethalityFoLabel: string;
+  canStressLabel: string;
+  safetyStatusLabel: string;
+  primaryRiskLabel: string;
+  mechanismsLabel: string;
+  mitigationLabel: string;
+  scienceTitle: string;
+  scienceSub: string;
+  tableTitle: string;
+  tableSub: string;
+  colModel: string;
+  colClass: string;
+  colHeight: string;
+  colCapacity: string;
+  colPressure: string;
+  colBleeders: string;
+  rulesTitle: string;
+  rulesSub: string;
+  rule1Title: string;
+  rule1Text: string;
+  rule2Title: string;
+  rule2Text: string;
+  rule3Title: string;
+  rule3Text: string;
+  rule4Title: string;
+  rule4Text: string;
+  copyReportBtn: string;
+  copiedFeedback: string;
+}
+
+const DICTIONARY: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Hydrostatic Thermodynamics & Commercial Canning Safety",
+    title: "Commercial Continuous Hydrostatic Cooker-Cooler Hydrostatic Leg Pressure Differential & Steam Bleed Modeler",
+    subtitle: "Simulate continuous industrial hydrostatic retort cooker-coolers, barometric water leg hydrostatic column balance (ΔP = ρgh), steam chamber deaeration venting, non-condensable air pocket cold spots, container double-seam peaking hoop stress, and conveyor carrier chain pitch wear elongation per FDA 21 CFR § 113.40 and ASME BPVC Section VIII.",
+    controlsTitle: "Hydrostatic Retort Architecture, Packaging & Thermodynamic Controls",
+    controlsSub: "Configure hydrostatic tower geometry, container format, chain metallurgy, saturated steam temperature, water leg height, and steam bleed parameters.",
+    retortLabel: "Hydrostatic Cooker-Cooler Architecture:",
+    retortHelp: "Industrial Quad-Leg Hydrostatic Retort (22m, 1,500 cpm) vs Medium-Tower Dual-Leg (16.5m, 750 cpm) vs Flexible Pouch System (18m, Overpressure) vs Aging Legacy Retort (15m, Fouled Sight-Glass).",
+    canLabel: "Container Format & Product Rheology:",
+    canHelp: "Standard Tinplate Steel Can 300x407 (Soup, 34 psi Peaking) vs Lightweight Aluminum Can 202x504 (RTD Beverage, 19.5 psi) vs Institutional No. 10 Can (3 kg, 18 psi) vs Retortable Barrier Pouch (9.5 psi).",
+    alloyLabel: "Carrier Conveyor Chain Metallurgy:",
+    alloyHelp: "AISI 316L Austenitic Stainless Steel vs Case-Hardened Alloy Steel (Nickel Plated) vs Worn Uncoated Carbon Steel.",
+    tempLabel: "Retort Saturated Steam Temperature (°C / °F):",
+    tempHelp: "Saturated steam temperature inside the sterilizing dome (115°C to 130°C / 239°F to 266°F). Dictates saturated steam chamber pressure via Antoine phase equilibrium.",
+    legHeightLabel: "Hydrostatic Water Leg Column Height (m / ft):",
+    legHeightHelp: "Physical height of water column in the infeed and discharge legs (8.0m to 24.0m / 26ft to 79ft). Must exceed required barometric head to prevent steam blow-through.",
+    waterTempLabel: "Water Leg Mean Column Temperature (°C / °F):",
+    waterTempHelp: "Mean temperature of water inside the hydrostatic seal leg (50°C to 98°C). Elevated water temperatures reduce liquid density (ρ), increasing required column height.",
+    bleederLabel: "Continuous Steam Dome Deaeration Bleeders:",
+    bleederHelp: "Status of top dome continuous steam bleeders (0: Fully Closed [Critical], 1: 85% Clogged / Scaled, 2: 50% Restricted, 3: 100% Fully Open Continuous Bleed per 21 CFR 113).",
+    dwellLabel: "Sterilizing Dome Dwell Time (minutes):",
+    dwellHelp: "Residence time of containers moving through the pressurized saturated steam zone (10 to 65 min). Dictates cumulative thermal lethality (Fo).",
+    chainHoursLabel: "Conveyor Chain Operating Service Hours:",
+    chainHoursHelp: "Cumulative operating hours on roller chain links (200 to 12,000 hrs). Governs pin-bushing wear and cumulative pitch elongation (ΔL/L0).",
+    presetsTitle: "Operational Processing Presets:",
+    presetSoup: "Standard Commercial Soup Can (Quad-Leg 22m, 121.1°C, 12.2m Leg, Open Bleeders, Fo = 7.8m, Safe)",
+    presetAluminum: "Thin-Walled Aluminum Can (Medium 16.5m, 121.1°C, 11.2m Leg, Pressure Balanced, Safe)",
+    presetAirPocket: "Air Pocket Lethality Under-Processing Deficit (Legacy Retort, Clogged Bleeders, Fo = 2.4m, Danger)",
+    presetBlowout: "Water Level Depletion & Steam Blowout Geyser (Quad-Leg, Leg Height 9.0m < 11.2m Req, Catastrophic)",
+    diagnosticTitle: "Hydrostatic Column Thermodynamics, Thermal Lethality & Chain Telemetry",
+    diagnosticSub: "Real-time mathematical modeling of barometric hydrostatic column balance, steam seal margin, air pocket temperature deficit, thermal lethality (Fo), can peaking stress, and chain elongation.",
+    reqHeightLabel: "Required Hydrostatic Water Column Head (m / ft)",
+    sealMarginLabel: "Hydrostatic Seal Head Margin ΔH (m / ft)",
+    steamPressureLabel: "Chamber Saturated Steam Pressure (kPa / psig)",
+    airFractionLabel: "Steam Dome Non-Condensable Air Fraction (%)",
+    lethalityFoLabel: "Thermal Sterilization Lethality Fo (min)",
+    canStressLabel: "Container Net Differential Stress ΔP (psi)",
+    safetyStatusLabel: "Process Safety & FDA 21 CFR § 113.40 / ASME BPVC Compliance",
+    primaryRiskLabel: "Primary Thermodynamic, Mechanical & Inocuity Hazard:",
+    mechanismsLabel: "Governing Hydrostatic & Fluid Phase Mechanisms:",
+    mitigationLabel: "Engineering Controls & FDA 21 CFR 113 Validation Protocols:",
+    scienceTitle: "Hydrostatic Pressure Balance, Bigelow Lethality Kinetics & Peaking Physics",
+    scienceSub: "Mathematical modeling of barometric water columns, Antoine steam phase equilibrium, Dalton partial air pressure, and container double-seam peaking thresholds.",
+    tableTitle: "Commercial Continuous Hydrostatic Retort Engineering Specifications",
+    tableSub: "Comparison of quad-leg high-capacity towers, medium-capacity dual-leg retorts, pouch overpressure systems, and legacy units.",
+    colModel: "Retort Architecture",
+    colClass: "Canning Classification",
+    colHeight: "Tower Height",
+    colCapacity: "Throughput (CPM)",
+    colPressure: "Design Steam MAWP",
+    colBleeders: "Continuous Bleeders",
+    rulesTitle: "Engineering Guidelines for Continuous Hydrostatic Canning & Safety",
+    rulesSub: "Mandatory protocols per FDA 21 CFR § 113.40, ASME BPVC Section VIII, NFPA 86, and OSHA 1910.106 pressure vessels.",
+    rule1Title: "Hydrostatic Water Seal Head Elevation Margin (ASME BPVC § UG-125)",
+    rule1Text: "The actual water column elevation in the hydrostatic seal leg must maintain a minimum safety head margin of >= 1.2 meters (4.0 ft) above the theoretical steam counter-pressure head (ΔP / ρg). Water level depletion below the required barometric head results in immediate catastrophic steam blow-through and violent geysering of scalding water.",
+    rule2Title: "Continuous Steam Dome Deaeration & Bleeder Inspection (FDA 21 CFR § 113.40)",
+    rule2Text: "Top steam chamber domes must be equipped with 1/4-inch or larger continuous steam bleeders discharging to atmosphere at all times during sterilization. Trapped non-condensable air pockets reduce localized heat transfer coefficients by up to 85% and depress steam temperatures, causing severe under-processing (Fo < 3.0 min).",
+    rule3Title: "Container Internal Headspace Pressure & Peaking Limits (GMA / NFPA Standard)",
+    rule3Text: "The net differential pressure (ΔP_net = P_internal - P_retort) across container walls must remain below the plastic deformation limit of double seams (34 psi for tinplate steel, 19.5 psi for aluminum cans, 9.5 psi for pouches). Rapid hydrostatic pressure drops upon entering cooling legs cause permanent end-peaking and micro-leakage.",
+    rule4Title: "Carrier Conveyor Chain Pitch Elongation Tolerances (ISO 1977 & OSHA 1910.212)",
+    rule4Text: "Chain pitch wear elongation must not exceed 1.5% of nominal pitch length. Excessive elongation leads to sprocket tooth mis-engagement, drive shaft jamming inside the pressurized dome, and container crushing under continuous flights.",
+    copyReportBtn: "Copy Hydrostatic Telemetry to Clipboard",
+    copiedFeedback: "Report Copied to Clipboard!"
+  },
+  es: {
+    badge: "Termodinámica Hidrostática e Inocuidad en Conservas",
+    title: "Simulador de Retorta Hidrostática Comercial Continua: Presión de Columna de Agua y Purga de Vapor",
+    subtitle: "Simule autoclaves hidrostáticas industriales continuas, equilibrio de columna barométrica (ΔP = ρgh), venteo continuo de vapor, bolsas de aire no condensable, tensión de abombamiento en envases y elongación de la cadena de transporte según normas FDA 21 CFR § 113.40 y ASME BPVC Sección VIII.",
+    controlsTitle: "Arquitectura Hidrostática, Envase y Parámetros Operativos",
+    controlsSub: "Configure la geometría de la torre, formato de envase, metalurgia de cadena, temperatura del vapor saturado, altura de columna de agua y purgas.",
+    retortLabel: "Arquitectura del Esterilizador Hidrostático:",
+    retortHelp: "Retorta Cuádruple Industrial (22m, 1.500 cpm) vs Torre Mediana Doble (16,5m, 750 cpm) vs Sistema para Bolsas (18m, Sobrepresión) vs Retorta Antigua Desgastada (15m).",
+    canLabel: "Formato de Envase y Reología del Alimento:",
+    canHelp: "Lata de Hojalata Estándar 300x407 (Sopa, 34 psi límite) vs Lata de Aluminio 202x504 (Bebida, 19,5 psi) vs Lata Institucional N° 10 (3 kg, 18 psi) vs Bolsa Retortable Pouch (9,5 psi).",
+    alloyLabel: "Metalurgia de la Cadena Transportadora:",
+    alloyHelp: "Acero Inoxidable Austenítico AISI 316L vs Acero Aleado Cementado Niquelado vs Acero al Carbono Desgastado.",
+    tempLabel: "Temperatura del Vapor Saturado (°C / °F):",
+    tempHelp: "Temperatura del vapor en la cúpula de esterilización (115°C a 130°C). Determina la presión del vapor saturado mediante equilibrio de fases de Antoine.",
+    legHeightLabel: "Altura de la Columna Hidrostática de Agua (m / ft):",
+    legHeightHelp: "Altura física del agua en las columnas de entrada y descarga (8,0m a 24,0m). Debe superar la altura barométrica requerida para evitar escapes explosivos de vapor.",
+    waterTempLabel: "Temperatura Media del Agua en la Columna (°C / °F):",
+    waterTempHelp: "Temperatura del agua en el sello hidrostático (50°C a 98°C). Agua más caliente disminuye la densidad (ρ), aumentando la altura de columna necesaria.",
+    bleederLabel: "Purgadores Continuos de Vapor en la Cúpula:",
+    bleederHelp: "Estado de las purgas continuas (0: Cerradas [Peligro], 1: Obstruidas 85%, 2: Restringidas 50%, 3: Abiertas 100% continuo según 21 CFR 113).",
+    dwellLabel: "Tiempo de Retención en Cúpula de Vapor (minutos):",
+    dwellHelp: "Tiempo de permanencia en la zona presurizada (10 a 65 min). Dicta la letalidad térmica acumulada (Fo).",
+    chainHoursLabel: "Horas de Servicio de la Cadena:",
+    chainHoursHelp: "Horas acumuladas de operación (200 a 12.000 h). Determina el desgaste entre perno y buje y la elongación del paso (ΔL/L0).",
+    presetsTitle: "Configuraciones Operativas Predefinidas:",
+    presetSoup: "Lata de Hojalata Estándar (Torre 22m, 121,1°C, Columna 12,2m, Purgas OK, Fo = 7,8m, Seguro)",
+    presetAluminum: "Lata de Aluminio de Pared Delgada (Torre 16,5m, 121,1°C, 11,2m, Equilibrada, Seguro)",
+    presetAirPocket: "Déficit de Esterilización por Bolsa de Aire (Retorta Antigua, Purgas Tapadas, Fo = 2,4m, Peligro)",
+    presetBlowout: "Escape Explosivo de Vapor por Nivel Bajo (Torre 22m, Altura 9,0m < 11,2m Req, Crítico)",
+    diagnosticTitle: "Termodinámica Hidrostática, Letalidad Fo y Telemetría de Cadena",
+    diagnosticSub: "Modelado matemático en tiempo real de altura barométrica, margen de sello, déficit por aire atrapado, letalidad térmica (Fo), tensión de abombamiento y elongación de cadena.",
+    reqHeightLabel: "Altura Requerida de Columna de Agua (m / ft)",
+    sealMarginLabel: "Margen de Altura del Sello Hidrostático ΔH (m / ft)",
+    steamPressureLabel: "Presión del Vapor Saturado en Cúpula (kPa / psig)",
+    airFractionLabel: "Fracción de Aire No Condensable en Vapor (%)",
+    lethalityFoLabel: "Letalidad Térmica de Esterilización Fo (min)",
+    canStressLabel: "Tensión Neta Diferencial en el Envase ΔP (psi)",
+    safetyStatusLabel: "Estado de Seguridad y Cumplimiento FDA 21 CFR § 113.40 / ASME BPVC",
+    primaryRiskLabel: "Peligro Termodinámico, Mecánico y de Inocuidad Principal:",
+    mechanismsLabel: "Mecanismos Hidrostáticos y de Fase Dominantes:",
+    mitigationLabel: "Controles de Ingeniería y Protocolos FDA 21 CFR 113:",
+    scienceTitle: "Equilibrio Hidrostático, Cinética de Bigelow y Física del Abombamiento",
+    scienceSub: "Modelado de columnas de agua barométricas, equilibrio de vapor de Antoine, presión parcial de Dalton y límites plásticos del cierre doble.",
+    tableTitle: "Especificaciones Técnicas de Retortas Hidrostáticas Continuas",
+    tableSub: "Comparación entre torres cuádruples de alta capacidad, retortas medianas dobles, sistemas para bolsas y unidades obsoletas.",
+    colModel: "Arquitectura de Retorta",
+    colClass: "Clasificación de Enlatado",
+    colHeight: "Altura de Torre",
+    colCapacity: "Capacidad (CPM)",
+    colPressure: "Presión de Diseño MAWP",
+    colBleeders: "Purgadores de Vapor",
+    rulesTitle: "Pautas de Ingeniería para Autoclaves Hidrostáticas y Seguridad",
+    rulesSub: "Protocolos obligatorios según FDA 21 CFR § 113.40, ASME BPVC Sección VIII, NFPA 86 y OSHA 1910.106.",
+    rule1Title: "Margen de Seguridad de Altura de Columna de Agua (ASME BPVC § UG-125)",
+    rule1Text: "La altura real de la columna de agua debe mantener un margen mínimo de >= 1,2 metros sobre la altura teórica de contrapresión (ΔP / ρg). Un nivel insuficiente provoca el escape violento de vapor vivo y geiseres de agua hirviendo.",
+    rule2Title: "Desaireación Continua de la Cúpula de Vapor (FDA 21 CFR § 113.40)",
+    rule2Text: "Las cúpulas deben poseer purgas de vapor continuas de 1/4 pulgada o mayores venteando a la atmósfera durante todo el ciclo. El aire atrapado reduce la transferencia de calor hasta en un 85% y provoca subprocesamiento grave (Fo < 3,0 min).",
+    rule3Title: "Presión Diferencial y Límites de Deformación del Cierre (Norma GMA / NFPA)",
+    rule3Text: "La presión diferencial neta (ΔP_neta = P_envase - P_retorta) debe mantenerse inferior al límite de deformación plástica del cierre doble (34 psi en hojalata, 19,5 psi en aluminio, 9,5 psi en pouches) para evitar microfugas.",
+    rule4Title: "Tolerancia de Elongación de Paso en la Cadena (ISO 1977 y OSHA 1910.212)",
+    rule4Text: "La elongación por desgaste no debe superar el 1,5% del paso nominal. Desgastes mayores provocan atascos en los engranajes dentro de la cúpula presurizada y aplastamiento de envases.",
+    copyReportBtn: "Copiar Telemetría al Portapapeles",
+    copiedFeedback: "¡Reporte Copiado al Portapapeles!"
+  },
+  pt: {
+    badge: "Termodinâmica Hidrostática e Segurança em Enlatados",
+    title: "Simulador de Retorta Hidrostática Comercial Contínua: Pressão de Coluna de Água e Purga de Vapor",
+    subtitle: "Simule autoclaves hidrostáticas industriais contínuas, equilíbrio da coluna barométrica de água (ΔP = ρgh), purga contínua de vapor, bolsas de ar frio não condensável, tensão de estufamento em latas e desgaste por elongação de corrente sob FDA 21 CFR § 113.40 e ASME BPVC Seção VIII.",
+    controlsTitle: "Arquitetura da Retorta Hidrostática, Embalagem e Parâmetros Operacionais",
+    controlsSub: "Configure a torre hidrostática, formato da embalagem, metalurgia da corrente, temperatura do vapor saturado, altura da coluna de água e purga de ar.",
+    retortLabel: "Arquitetura do Esterilizador Hidrostático:",
+    retortHelp: "Retorta Quádrupla Industrial (22m, 1.500 cpm) vs Torre Média Dupla (16,5m, 750 cpm) vs Sistema para Pouches (18m, Sobrepressão) vs Retorta Antiga Desgastada (15m).",
+    canLabel: "Formato da Embalagem e Reologia do Produto:",
+    canHelp: "Lata de Folha-de-Flandres 300x407 (Sopa, limite 34 psi) vs Lata de Alumínio 202x504 (Bebida, 19,5 psi) vs Lata N° 10 Institucional (3 kg, 18 psi) vs Pouch Retortável (9,5 psi).",
+    alloyLabel: "Metalurgia da Corrente Transportadora:",
+    alloyHelp: "Aço Inoxidável Austenítico AISI 316L vs Aço Liga Cementado Niquelado vs Aço Carbono Desgastado.",
+    tempLabel: "Temperatura do Vapor Saturado (°C / °F):",
+    tempHelp: "Temperatura do vapor na cúpula esterilizadora (115°C a 130°C). Determina a pressão do vapor saturado via equilíbrio de Antoine.",
+    legHeightLabel: "Altura da Coluna Hidrostática de Água (m / ft):",
+    legHeightHelp: "Altura física da coluna de água nas pernas de entrada e saída (8,0m a 24,0m). Deve exceder a altura barométrica para evitar expulsão violenta de vapor.",
+    waterTempLabel: "Temperatura Média da Água na Coluna (°C / °F):",
+    waterTempHelp: "Temperatura média da água no selo hidrostático (50°C a 98°C). Temperaturas mais altas diminuem a densidade (ρ), aumentando a altura necessária.",
+    bleederLabel: "Purgadores Contínuos de Vapor na Cúpula:",
+    bleederHelp: "Estado dos purgadores de vapor da cúpula (0: Fechados [Crítico], 1: Entupidos 85%, 2: Restritos 50%, 3: Abertos 100% contínuos conforme 21 CFR 113).",
+    dwellLabel: "Tempo de Retenção na Cúpula de Vapor (minutos):",
+    dwellHelp: "Tempo de residência na zona pressurizada (10 a 65 min). Determina a letalidade térmica acumulada (Fo).",
+    chainHoursLabel: "Horas de Operação da Corrente:",
+    chainHoursHelp: "Horas acumuladas em operação (200 a 12.000 h). Governa o desgaste do elo e o aumento de passo (ΔL/L0).",
+    presetsTitle: "Configurações Operacionais Predefinidas:",
+    presetSoup: "Lata Padrão de Folha-de-Flandres (Torre 22m, 121,1°C, Coluna 12,2m, Purgas OK, Fo = 7,8m, Seguro)",
+    presetAluminum: "Lata de Alumínio Parede Fina (Torre 16,5m, 121,1°C, 11,2m, Equilibrada, Seguro)",
+    presetAirPocket: "Subprocessamento por Bolsa de Ar Frio (Retorta Antiga, Purgas Obstruídas, Fo = 2,4m, Perigo)",
+    presetBlowout: "Erupção de Vapor por Nível Baixo de Água (Torre 22m, Altura 9,0m < 11,2m Req, Crítico)",
+    diagnosticTitle: "Termodinâmica Hidrostática, Letalidade Fo e Telemetria de Corrente",
+    diagnosticSub: "Modelagem matemática em tempo real da coluna barométrica, margem de selo, ar não condensável, letalidade térmica (Fo), tensão de estufamento e passo da corrente.",
+    reqHeightLabel: "Altura Requerida da Coluna de Água (m / ft)",
+    sealMarginLabel: "Margem de Altura do Selo Hidrostático ΔH (m / ft)",
+    steamPressureLabel: "Pressão do Vapor Saturado na Cúpula (kPa / psig)",
+    airFractionLabel: "Fração de Ar Não Condensável no Vapor (%)",
+    lethalityFoLabel: "Letalidade Térmica de Esterilização Fo (min)",
+    canStressLabel: "Tensão Líquida Diferencial na Embalagem ΔP (psi)",
+    safetyStatusLabel: "Status de Segurança e Conformidade FDA 21 CFR § 113.40 / ASME BPVC",
+    primaryRiskLabel: "Perigo Termodinâmico, Mecânico e de Inocuidade Principal:",
+    mechanismsLabel: "Mecanismos Hidrostáticos e de Mudança de Fase:",
+    mitigationLabel: "Controles de Engenharia e Protocolos FDA 21 CFR 113:",
+    scienceTitle: "Equilíbrio Hidrostático, Cinética de Bigelow e Física de Estufamento",
+    scienceSub: "Modelagem de colunas barométricas de água, equilíbrio de Antoine, pressão parcial de Dalton e limites de deformação plástica da termosselagem.",
+    tableTitle: "Especificações Técnicas de Retortas Hidrostáticas Comerciais",
+    tableSub: "Comparativo entre torres quádruplas de alta capacidade, torres duplas médias, sistemas para pouches e unidades antigas.",
+    colModel: "Arquitetura da Retorta",
+    colClass: "Classificação Sanitária",
+    colHeight: "Altura da Torre",
+    colCapacity: "Capacidade (CPM)",
+    colPressure: "Pressão de Projeto MAWP",
+    colBleeders: "Purgadores de Vapor",
+    rulesTitle: "Diretrizes de Engenharia para Esterilização Hidrostática e Segurança",
+    rulesSub: "Protocolos obrigatórios segundo FDA 21 CFR § 113.40, ASME BPVC Seção VIII, NFPA 86 e OSHA 1910.106.",
+    rule1Title: "Margem de Elevação do Selo Hidrostático de Água (ASME BPVC § UG-125)",
+    rule1Text: "A altura da coluna de água deve manter uma margem mínima de >= 1,2 metros sobre a altura teórica de contrapressão (ΔP / ρg). Nível insuficiente gera expulsão explosiva imediata de vapor saturado e água fervente.",
+    rule2Title: "Desaeração Contínua da Cúpula de Vapor (FDA 21 CFR § 113.40)",
+    rule2Text: "As cúpulas devem possuir purgadores de 1/4 de polegada ou maiores soprando continuamente para a atmosfera durante o processo. Ar preso reduz a transferência de calor em até 85% e causa severo subprocessamento (Fo < 3,0 min).",
+    rule3Title: "Pressão Diferencial e Limites de Estufamento (Norma GMA / NFPA)",
+    rule3Text: "A pressão diferencial líquida (ΔP_líq = P_interna - P_retorta) deve permanecer abaixo do limite de deformação da termosselagem ou recravação (34 psi aço, 19,5 psi alumínio, 9,5 psi pouch) para impedir microvazamentos.",
+    rule4Title: "Tolerância de Aumento de Passo na Corrente (ISO 1977 e OSHA 1910.212)",
+    rule4Text: "O aumento do passo por desgaste não deve exceder 1,5% do comprimento nominal. Desgastes maiores levam a saltos de dente de engrenagem dentro da cúpula pressurizada e esmagamento de latas.",
+    copyReportBtn: "Copiar Telemetria para a Área de Transferência",
+    copiedFeedback: "Relatório Copiado com Sucesso!"
+  },
+  'zh-cn': {
+    badge: "流体静力热力学与罐头工业杀菌安全",
+    title: "商用连续式静压杀菌冷却机水柱压差平衡与排气泄压模拟器",
+    subtitle: "模拟食品工业巨型连续式静压杀菌釜（Hydrostatic Retort Cooker-Cooler）、静水压力平衡柱（ΔP = ρgh）、蒸汽穹顶连续排气、不凝结空气冷点热阻、罐体双重卷封膨胀凸起应力及链条节距伸长磨损，全面符合 FDA 21 CFR § 113.40 与 ASME BPVC 第八卷规范。",
+    controlsTitle: "静压杀菌机架构、包装形式与热力学操作控制",
+    controlsSub: "设定静压塔高度、罐体材料规格、输送链条材质、饱和蒸汽杀菌温度、静水柱高度及排气阀开度。",
+    retortLabel: "静压杀菌机架构与塔型选择:",
+    retortHelp: "工业级四腿式大型静压釜 (22m, 1,500 cpm) vs 中型双腿立塔 (16.5m, 750 cpm) vs 软罐头蒸煮袋过压系统 (18m) vs 老旧沉积静压机 (15m)。",
+    canLabel: "食品包装规格与物料流变特性:",
+    canHelp: "标准马口铁汤罐 300x407 (凸起极限 34 psi) vs 轻量级两片铝合金罐 202x504 (饮料, 19.5 psi) vs 大型 10 号餐饮马口铁罐 (3 kg, 18 psi) vs 高温蒸煮铝箔复合袋 (9.5 psi)。",
+    alloyLabel: "罐篮输送滚子链条合金材质:",
+    alloyHelp: "AISI 316L 奥氏体不锈钢镀铬 vs 表面渗碳硬化合金钢 (化学镀镍) vs 未涂层磨损碳钢。",
+    tempLabel: "杀菌穹顶饱和蒸汽温度 (°C / °F):",
+    tempHelp: "蒸汽穹顶杀菌段设计饱和温度（115°C 至 130°C / 239°F 至 266°F）。依据 Antoine 方程决定腔体饱和蒸汽压力。",
+    legHeightLabel: "静水压水柱有效提升高度 (m / ft):",
+    legHeightHelp: "进料预热腿及出料冷却腿中实际有效水柱高度（8.0m 至 24.0m）。必须高于蒸汽反压平衡静水压头，防止蒸汽冲破水封外泄。",
+    waterTempLabel: "水封腿内循环水平均温度 (°C / °F):",
+    waterTempHelp: "水柱循环水温（50°C 至 98°C）。高温水密度（ρ）下降，需更高水柱方能抵抗蒸汽压力。",
+    bleederLabel: "蒸汽穹顶连续排气阀（Bleeders）开度:",
+    bleederHelp: "排气阀门状态（0: 全闭 [致命危险], 1: 结垢堵塞 85%, 2: 受限 50%, 3: 100% 持续全开排放空气 符合 21 CFR 113）。",
+    dwellLabel: "蒸汽穹顶杀菌恒温时间 (分钟):",
+    dwellHelp: "罐头在蒸汽杀菌段运行保留时间（10 至 65 分钟）。直接决定累积杀菌致死值（Fo）。",
+    chainHoursLabel: "输送链条累计运行工作时间 (小时):",
+    chainHoursHelp: "链条累计使用小时数（200 至 12,000 小时）。决定销轴与套筒磨损间隙及节距伸长率（ΔL/L0）。",
+    presetsTitle: "工业杀菌典型工况预设:",
+    presetSoup: "标准商业低酸汤罐 (四腿立塔 22m, 121.1°C, 12.2m 水柱, 排气全开, Fo=7.8m, 安全合规)",
+    presetAluminum: "轻薄铝合金饮料罐 (中型立塔 16.5m, 121.1°C, 11.2m 均衡水柱, 压差平衡, 安全)",
+    presetAirPocket: "冷点空气团致死量严重不足 (老旧静压釜, 排气孔堵塞, Fo=2.4m, 致命违规)",
+    presetBlowout: "水封水位严重枯竭引发蒸汽喷溅爆炸 (22m 立塔, 水位 9.0m < 11.2m 需求, 沸水冲天灾难)",
+    diagnosticTitle: "水柱静压热力学平衡、杀菌 Fo 致死值与链条遥测",
+    diagnosticSub: "实时计算理论静水压平衡高度、水封液位安全余量、蒸汽穹顶空气分压、累积 Fo 致死值、罐底胀罐应力及链条节距伸长率。",
+    reqHeightLabel: "理论所需平衡静水柱压头 (m / ft)",
+    sealMarginLabel: "水封安全压头净余量 ΔH (m / ft)",
+    steamPressureLabel: "杀菌穹顶饱和蒸汽表压 (kPa / psig)",
+    airFractionLabel: "蒸汽穹顶不凝结空气体积分数 (%)",
+    lethalityFoLabel: "肉毒梭菌灭活致死值 Fo (min)",
+    canStressLabel: "罐体双重卷封承受净压差 ΔP (psi)",
+    safetyStatusLabel: "工业安全状态与 FDA 21 CFR § 113.40 / ASME BPVC 合规评估",
+    primaryRiskLabel: "核心热力学、机械及食品微生物危害:",
+    mechanismsLabel: "主导静压水力学与相平衡反应机理:",
+    mitigationLabel: "工程控制与 FDA 21 CFR 113 灭菌验证规范:",
+    scienceTitle: "静水压平衡原理、Bigelow 热死动力学及卷封抗压物理学",
+    scienceSub: "解析帕斯卡静水压定律、Antoine 饱和水蒸气相平衡、道尔顿分压定律与罐体卷封永久塑性变形极限。",
+    tableTitle: "商用连续式静压杀菌机架构工程参数对照表",
+    tableSub: "大型四腿静压塔、中型立式杀菌釜、蒸煮袋超压系统与老旧设备的工程设计对比。",
+    colModel: "静压杀菌塔型号",
+    colClass: "杀菌卫生等级",
+    colHeight: "立塔物理高度",
+    colCapacity: "处理能力 (CPM)",
+    colPressure: "设计蒸汽承压 MAWP",
+    colBleeders: "连续排气阀配置",
+    rulesTitle: "连续式静压杀菌罐装工业安全技术规程",
+    rulesSub: "强制遵循 FDA 21 CFR § 113.40、ASME 锅炉与压力容器规范 Section VIII、NFPA 86 及 OSHA 1910.106。",
+    rule1Title: "静水柱安全水头余量必须严格保持 (ASME BPVC § UG-125)",
+    rule1Text: "水封腿内实际有效水柱高度必须保持高出理论抗蒸汽反压水头 (ΔP / ρg) 至少 1.2 米以上。水柱液位因补水故障下降破封，将引发极度危险的饱和蒸汽猛烈外喷及高温沸水冲天喷溅事故。",
+    rule2Title: "蒸汽穹顶必须配备持续排放不凝空气阀门 (FDA 21 CFR § 113.40)",
+    rule2Text: "穹顶顶部必须配置孔径不小于 1/4 英寸（6.35 mm）的连续排气阀，在杀菌全程向大气敞开排放。滞留的不凝结空气膜可导致局部换热系数断崖式下跌 85% 并产生严重低温冷点，引发肉毒梭菌未灭活杀菌失效事故（Fo < 3.0 min）。",
+    rule3Title: "罐内外瞬时净压差必须受控以防胀罐破坏 (GMA / NFPA 规范)",
+    rule3Text: "容器内外净压差（ΔP_net = P_internal - P_retort）不得超过容器封口破坏极限（马口铁罐 34 psi、铝罐 19.5 psi、蒸煮袋 9.5 psi）。进入出料冷却水腿时压降过陡易造成罐盖永久突跳膨胀破损。",
+    rule4Title: "输送链条节距伸长磨损严限在 1.5% 以内 (ISO 1977 与 OSHA 1910.212)",
+    rule4Text: "滚子链条由于销轴套筒磨损造成的节距伸长率严禁超过 1.5%。过量伸长会导致链条与驱动链轮脱齿爬齿、罐篮卡死在加压穹顶内部，造成整线停机和数万罐产品批量报废。",
+    copyReportBtn: "复制静压杀菌遥测报告至剪贴板",
+    copiedFeedback: "遥测报告已复制！"
+  },
+  ja: {
+    badge: "静水圧熱力学・缶詰殺菌安全工学",
+    title: "業務用連続式静水圧レトルト殺菌冷却機 水柱差圧平衡・蒸気脱気モデラー",
+    subtitle: "大型連続式ハイドロスタティック・レトルト殺菌機（Hydrostatic Retort Cooker-Cooler）におけるバロメトリック水柱平衡（ΔP = ρgh）、蒸気ドーム連続脱気ベント、不凝縮空気コールドスポット熱抵抗、缶体二重巻締め膨張破損応力、および搬送チェーンピッチ伸び摩耗挙動を FDA 21 CFR § 113.40 および ASME BPVC Section VIII 基準に基づきシミュレート。",
+    controlsTitle: "静水圧レトルト機構、包装仕様および熱力学的操作パラメータ",
+    controlsSub: "静水圧タワー高さ、容器形態、チェーン冶金、飽和蒸気殺菌温度、水柱高さ、および連続脱気ブリーダー設定。",
+    retortLabel: "静水圧殺菌機アーキテクチャ形式:",
+    retortHelp: "大型4レッグ式産業用静水圧タワー (22m, 1,500 cpm) vs 中型2レッグ式 (16.5m, 750 cpm) vs レトルトパウチ加圧システム (18m) vs 老朽化設備 (15m)。",
+    canLabel: "缶体包装形態および内容物レオロジー:",
+    canHelp: "標準ブリキ製スープ缶 300x407 (座屈限界 34 psi) vs 軽量アルミ飲料缶 202x504 (19.5 psi) vs 大型10号給食用缶 (3 kg, 18 psi) vs 多層レトルトパウチ (9.5 psi)。",
+    alloyLabel: "搬送ローラーチェーン材質:",
+    alloyHelp: "オーステナイト系ステンレス鋼 AISI 316L vs 浸炭焼入れ合金鋼 (無電解ニッケルめっき) vs 未処理摩耗炭素鋼。",
+    tempLabel: "レトルト殺菌部飽和蒸気温度 (°C / °F):",
+    tempHelp: "蒸気ドーム内の飽和蒸気温度（115°C〜130°C / 239°F〜266°F）。アントワン状態式に基づき飽和蒸気圧力を決定。",
+    legHeightLabel: "静水圧水柱有効水頭高さ (m / ft):",
+    legHeightHelp: "入口予熱レッグおよび出口冷却レッグ内の有効水柱高さ（8.0m〜24.0m）。蒸気圧を封じ込めるため理論必要水頭を超える必要があります。",
+    waterTempLabel: "水封レッグ内循環水平均温度 (°C / °F):",
+    waterTempHelp: "水柱内の水温（50°C〜98°C）。水温上昇による水密度（ρ）低下は必要水柱高さを増大させます。",
+    bleederLabel: "蒸気ドーム上部連続脱気ブリーダー弁状態:",
+    bleederHelp: "空気排出ブリーダーの状態（0: 全閉 [重大危険], 1: スケール閉塞 85%, 2: 開度制限 50%, 3: 100% 連続全開排出 21 CFR 113準拠）。",
+    dwellLabel: "蒸気ドーム内殺菌保持時間 (分):",
+    dwellHelp: "加圧蒸気殺菌ゾーンの通過時間（10〜65分）。累積殺菌致死値（Fo）を決定。",
+    chainHoursLabel: "搬送チェーン累積稼働時間 (時間):",
+    chainHoursHelp: "チェーンリンクの累積使用時間（200〜12,000時間）。ピン・ブシュ摩耗によるピッチ伸び率（ΔL/L0）を規定。",
+    presetsTitle: "標準運転プリセット設定:",
+    presetSoup: "標準ブリキ製スープ缶 (4レッグ22m塔, 121.1°C, 12.2m水柱, ブリーダー全開, Fo=7.8分, 安全合規)",
+    presetAluminum: "薄肉アルミ飲料缶 (中型16.5m塔, 121.1°C, 11.2m水柱, 差圧平衡維持, 安全)",
+    presetAirPocket: "空気溜まりによる殺菌不足 (老朽機, ブリーダー閉塞, Fo=2.4分, 重大違反・危険)",
+    presetBlowout: "水頭低下による蒸気噴出破封 (22m塔, 水位9.0m < 必要11.2m, 沸騰水噴出事故)",
+    diagnosticTitle: "静水圧平衡熱力学・殺菌致死値 Fo・チェーン遠隔テレメトリ",
+    diagnosticSub: "理論静水頭、水封安全マージン、蒸気ドーム空気分圧、累積 Fo 致死値、缶蓋ピーキング差圧応力、およびチェーンピッチ伸びをリアルタイム算出。",
+    reqHeightLabel: "理論蒸気圧平衡水頭高さ (m / ft)",
+    sealMarginLabel: "水封安全水頭マージン ΔH (m / ft)",
+    steamPressureLabel: "殺菌ドーム飽和蒸気ゲージ圧 (kPa / psig)",
+    airFractionLabel: "蒸気ドーム内不凝縮空気体積分率 (%)",
+    lethalityFoLabel: "ボツリヌス殺菌致死値 Fo (分)",
+    canStressLabel: "缶体二重巻締め作用正味差圧 ΔP (psi)",
+    safetyStatusLabel: "プロセス安全性および FDA 21 CFR § 113.40 / ASME BPVC 適合評価",
+    primaryRiskLabel: "主たる熱力学的・機械的・衛生安全リスク：",
+    mechanismsLabel: "支配的静水圧水力学および相平衡機構：",
+    mitigationLabel: "工学的制御対策および FDA 21 CFR 113 殺菌検証手順：",
+    scienceTitle: "静水圧平衡原理・Bigelow 殺菌速度論・巻締め座屈物理学",
+    scienceSub: "パスカルの原理に基づく水柱平衡式、アントワン蒸気相平衡式、ドルトンの分圧法則、および二重巻締め塑性変形限界。",
+    tableTitle: "業務用連続静水圧レトルト殺菌機技術仕様比較",
+    tableSub: "大型4レッグ式高処理タワー、中型2レッグ式、レトルトパウチ加圧塔、および老朽設備の工学仕様比較。",
+    colModel: "静水圧レトルト形式",
+    colClass: "殺菌認証規格",
+    colHeight: "タワー物理全高",
+    colCapacity: "処理能力 (CPM)",
+    colPressure: "設計最高蒸気圧 MAWP",
+    colBleeders: "連続脱気弁構成",
+    rulesTitle: "連続式静水圧レトルト殺菌装置安全技術指針",
+    rulesSub: "FDA 21 CFR § 113.40、ASME ボイラー・圧力容器規格 Section VIII、NFPA 86、OSHA 1910.106 に基づく基準。",
+    rule1Title: "水封レッグ有効水頭マージンの常時確保 (ASME BPVC § UG-125)",
+    rule1Text: "水封レッグ内の実際の水柱高さは、理論蒸気圧平衡水頭 (ΔP / ρg) に対して最低 1.2 メートル（4.0 ft）以上の安全マージンを維持しなければなりません。水頭不足は瞬時に蒸気破封を引き起こし、熱湯の大規模な噴出事故を招きます。",
+    rule2Title: "蒸気ドームからの不凝縮空気の常時連続排出 (FDA 21 CFR § 113.40)",
+    rule2Text: "蒸気ドーム最上部には 1/4 インチ（6.35 mm）以上のブリーダー弁を設置し、殺菌運転中は常時大気中へ連続排出させなければなりません。残留空気膜は局所伝熱係数を最大 85% 低下させ、ボツリヌス芽胞の生残（Fo < 3.0 分）を招きます。",
+    rule3Title: "内外差圧の制御による缶蓋ピーキング防止 (GMA / NFPA ガイドライン)",
+    rule3Text: "缶体にかかる内外正味差圧（ΔP_net = P_internal - P_retort）は、二重巻締めの塑性変形限界（ブリキ缶 34 psi、アルミ缶 19.5 psi、パウチ 9.5 psi）以下に抑えなければなりません。冷却レッグ進入時の急激な減圧は巻締めの微細変形・漏れの原因となります。",
+    rule4Title: "搬送チェーンピッチ伸び率 1.5% の厳格管理 (ISO 1977 / OSHA 1910.212)",
+    rule4Text: "ローラーチェーンの摩耗によるピッチ伸び率は公称長の 1.5% を超えてはなりません。過度のピッチ伸びはスプロケットの歯飛びや加圧ドーム内でのキャリア詰まりを引き起こし、致命的なライン停止を招きます。",
+    copyReportBtn: "静水圧テレメトリをクリップボードにコピー",
+    copiedFeedback: "診断レポートをコピーしました！"
+  }
+};
+
+const d = DICTIONARY[lang] || DICTIONARY.en;
+const data = hydrostaticData;
+---
+
+<div class="bg-surface-soft border border-hairline rounded-3xl p-6 sm:p-8 md:p-10 shadow-sm max-w-5xl mx-auto my-8 font-sans">
+  <!-- Header Banner -->
+  <div class="mb-8 border-b border-hairline/80 pb-6">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase bg-blue-700/10 text-blue-900 mb-3 border border-blue-700/20">
+      <span class="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
+      {d.badge}
+    </div>
+    <h2 class="text-display-xs sm:text-display-sm font-bold text-ink tracking-tight mb-2">
+      {d.title}
+    </h2>
+    <p class="text-body text-sm sm:text-base text-muted max-w-4xl leading-relaxed">
+      {d.subtitle}
+    </p>
+  </div>
+
+  <!-- Operational Presets -->
+  <div class="mb-8 bg-surface rounded-2xl p-4 sm:p-5 border border-hairline">
+    <div class="text-xs font-bold uppercase tracking-wider text-muted mb-3 flex items-center gap-2">
+      <svg class="w-4 h-4 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+      </svg>
+      {d.presetsTitle}
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+      <button 
+        type="button" 
+        id="preset-soup"
+        class="text-left text-xs p-3 rounded-xl border border-hairline bg-surface-soft hover:bg-surface hover:border-blue-700/50 transition-all font-medium text-ink flex items-center justify-between group cursor-pointer"
+      >
+        <span>{d.presetSoup}</span>
+        <span class="text-blue-700 opacity-0 group-hover:opacity-100 transition-opacity ml-2">&rarr;</span>
+      </button>
+      <button 
+        type="button" 
+        id="preset-aluminum"
+        class="text-left text-xs p-3 rounded-xl border border-hairline bg-surface-soft hover:bg-surface hover:border-blue-700/50 transition-all font-medium text-ink flex items-center justify-between group cursor-pointer"
+      >
+        <span>{d.presetAluminum}</span>
+        <span class="text-blue-700 opacity-0 group-hover:opacity-100 transition-opacity ml-2">&rarr;</span>
+      </button>
+      <button 
+        type="button" 
+        id="preset-air-pocket"
+        class="text-left text-xs p-3 rounded-xl border border-hairline bg-surface-soft hover:bg-surface hover:border-amber-700/50 transition-all font-medium text-ink flex items-center justify-between group cursor-pointer"
+      >
+        <span>{d.presetAirPocket}</span>
+        <span class="text-amber-700 opacity-0 group-hover:opacity-100 transition-opacity ml-2">&rarr;</span>
+      </button>
+      <button 
+        type="button" 
+        id="preset-blowout"
+        class="text-left text-xs p-3 rounded-xl border border-hairline bg-surface-soft hover:bg-surface hover:border-red-700/50 transition-all font-medium text-ink flex items-center justify-between group cursor-pointer"
+      >
+        <span>{d.presetBlowout}</span>
+        <span class="text-red-700 opacity-0 group-hover:opacity-100 transition-opacity ml-2">&rarr;</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Interactive Controls Section -->
+  <div class="space-y-6 mb-8">
+    <div class="border-b border-hairline/60 pb-2">
+      <h3 class="text-title-sm sm:text-title font-semibold text-ink tracking-tight">
+        {d.controlsTitle}
+      </h3>
+      <p class="text-xs text-muted">
+        {d.controlsSub}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <!-- Retort Architecture Selection -->
+      <div>
+        <label for="retort-select" class="block text-xs font-semibold text-ink mb-1.5">
+          {d.retortLabel}
+        </label>
+        <select 
+          id="retort-select"
+          class="w-full text-xs font-medium rounded-xl border border-hairline bg-surface px-3 py-2.5 text-ink focus:outline-hidden focus:ring-2 focus:ring-blue-600 transition-all cursor-pointer"
+        >
+          {data.hydrostaticArchitectures.map(retort => (
+            <option value={retort.id}>{retort.name}</option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1 leading-snug">
+          {d.retortHelp}
+        </p>
+      </div>
+
+      <!-- Container Selection -->
+      <div>
+        <label for="can-select" class="block text-xs font-semibold text-ink mb-1.5">
+          {d.canLabel}
+        </label>
+        <select 
+          id="can-select"
+          class="w-full text-xs font-medium rounded-xl border border-hairline bg-surface px-3 py-2.5 text-ink focus:outline-hidden focus:ring-2 focus:ring-blue-600 transition-all cursor-pointer"
+        >
+          {data.containerFoodProfiles.map(can => (
+            <option value={can.id}>{can.name}</option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1 leading-snug">
+          {d.canHelp}
+        </p>
+      </div>
+
+      <!-- Chain Alloy Selection -->
+      <div>
+        <label for="alloy-select" class="block text-xs font-semibold text-ink mb-1.5">
+          {d.alloyLabel}
+        </label>
+        <select 
+          id="alloy-select"
+          class="w-full text-xs font-medium rounded-xl border border-hairline bg-surface px-3 py-2.5 text-ink focus:outline-hidden focus:ring-2 focus:ring-blue-600 transition-all cursor-pointer"
+        >
+          {data.chainAlloys.map(alloy => (
+            <option value={alloy.id}>{alloy.name}</option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1 leading-snug">
+          {d.alloyHelp}
+        </p>
+      </div>
+    </div>
+
+    <!-- Operating Sliders -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 pt-2">
+      <!-- Steam Retort Temperature -->
+      <div class="bg-surface rounded-2xl p-4 border border-hairline">
+        <div class="flex items-center justify-between text-xs mb-1.5">
+          <span class="font-semibold text-ink">{d.tempLabel}</span>
+          <span id="temp-val" class="font-bold text-blue-700 font-mono">121.1°C (250°F)</span>
+        </div>
+        <input 
+          type="range" 
+          id="temp-slider" 
+          min="115" 
+          max="130" 
+          step="0.5" 
+          value="121.1"
+          class="w-full h-1.5 bg-hairline rounded-lg appearance-none cursor-pointer accent-blue-600"
+        />
+        <p class="text-[11px] text-muted mt-1.5 leading-snug">{d.tempHelp}</p>
+      </div>
+
+      <!-- Hydrostatic Water Leg Height -->
+      <div class="bg-surface rounded-2xl p-4 border border-hairline">
+        <div class="flex items-center justify-between text-xs mb-1.5">
+          <span class="font-semibold text-ink">{d.legHeightLabel}</span>
+          <span id="leg-height-val" class="font-bold text-blue-700 font-mono">12.2 m (40.0 ft)</span>
+        </div>
+        <input 
+          type="range" 
+          id="leg-height-slider" 
+          min="8.0" 
+          max="24.0" 
+          step="0.2" 
+          value="12.2"
+          class="w-full h-1.5 bg-hairline rounded-lg appearance-none cursor-pointer accent-blue-600"
+        />
+        <p class="text-[11px] text-muted mt-1.5 leading-snug">{d.legHeightHelp}</p>
+      </div>
+
+      <!-- Water Leg Temperature -->
+      <div class="bg-surface rounded-2xl p-4 border border-hairline">
+        <div class="flex items-center justify-between text-xs mb-1.5">
+          <span class="font-semibold text-ink">{d.waterTempLabel}</span>
+          <span id="water-temp-val" class="font-bold text-blue-700 font-mono">85°C (185°F)</span>
+        </div>
+        <input 
+          type="range" 
+          id="water-temp-slider" 
+          min="50" 
+          max="98" 
+          step="1" 
+          value="85"
+          class="w-full h-1.5 bg-hairline rounded-lg appearance-none cursor-pointer accent-blue-600"
+        />
+        <p class="text-[11px] text-muted mt-1.5 leading-snug">{d.waterTempHelp}</p>
+      </div>
+
+      <!-- Bleeder Status -->
+      <div class="bg-surface rounded-2xl p-4 border border-hairline">
+        <div class="flex items-center justify-between text-xs mb-1.5">
+          <span class="font-semibold text-ink">{d.bleederLabel}</span>
+          <span id="bleeder-val" class="font-bold text-emerald-700 font-mono">100% Fully Open</span>
+        </div>
+        <input 
+          type="range" 
+          id="bleeder-slider" 
+          min="0" 
+          max="3" 
+          step="1" 
+          value="3"
+          class="w-full h-1.5 bg-hairline rounded-lg appearance-none cursor-pointer accent-blue-600"
+        />
+        <p class="text-[11px] text-muted mt-1.5 leading-snug">{d.bleederHelp}</p>
+      </div>
+
+      <!-- Dwell Time -->
+      <div class="bg-surface rounded-2xl p-4 border border-hairline">
+        <div class="flex items-center justify-between text-xs mb-1.5">
+          <span class="font-semibold text-ink">{d.dwellLabel}</span>
+          <span id="dwell-val" class="font-bold text-blue-700 font-mono">32 min</span>
+        </div>
+        <input 
+          type="range" 
+          id="dwell-slider" 
+          min="10" 
+          max="65" 
+          step="1" 
+          value="32"
+          class="w-full h-1.5 bg-hairline rounded-lg appearance-none cursor-pointer accent-blue-600"
+        />
+        <p class="text-[11px] text-muted mt-1.5 leading-snug">{d.dwellHelp}</p>
+      </div>
+
+      <!-- Chain Service Hours -->
+      <div class="bg-surface rounded-2xl p-4 border border-hairline">
+        <div class="flex items-center justify-between text-xs mb-1.5">
+          <span class="font-semibold text-ink">{d.chainHoursLabel}</span>
+          <span id="chain-hours-val" class="font-bold text-blue-700 font-mono">1,800 hrs</span>
+        </div>
+        <input 
+          type="range" 
+          id="chain-hours-slider" 
+          min="200" 
+          max="12000" 
+          step="100" 
+          value="1800"
+          class="w-full h-1.5 bg-hairline rounded-lg appearance-none cursor-pointer accent-blue-600"
+        />
+        <p class="text-[11px] text-muted mt-1.5 leading-snug">{d.chainHoursHelp}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real-time Telemetry Dashboard -->
+  <div class="bg-surface rounded-3xl p-6 sm:p-7 border border-hairline shadow-xs mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-hairline/80 pb-4 mb-6">
+      <div>
+        <h3 class="text-title font-bold text-ink tracking-tight">
+          {d.diagnosticTitle}
+        </h3>
+        <p class="text-xs text-muted">
+          {d.diagnosticSub}
+        </p>
+      </div>
+      <div id="safety-badge" class="self-start sm:self-auto inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300">
+        <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+        <span id="safety-badge-text">100% FDA 21 CFR 113 COMPLIANT</span>
+      </div>
+    </div>
+
+    <!-- 6 Telemetry Metric Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+      <!-- Card 1: Required Hydrostatic Water Head -->
+      <div class="p-4 rounded-xl bg-surface-soft border border-hairline flex flex-col justify-between">
+        <div>
+          <span class="text-xs font-medium text-muted block mb-1">{d.reqHeightLabel}</span>
+          <div id="out-req-height" class="text-2xl font-black text-ink font-mono">10.98 m (36.0 ft)</div>
+        </div>
+        <div class="mt-3 pt-2 border-t border-hairline/60">
+          <div class="w-full bg-surface rounded-full h-2 overflow-hidden mb-1.5">
+            <div id="req-bar" class="h-2 rounded-full bg-blue-600 transition-all duration-300" style="width: 50%;"></div>
+          </div>
+          <span id="req-status" class="text-[11px] text-muted">P_steam = 103.8 kPa gauge</span>
+        </div>
+      </div>
+
+      <!-- Card 2: Hydrostatic Seal Head Margin -->
+      <div class="p-4 rounded-xl bg-surface-soft border border-hairline flex flex-col justify-between">
+        <div>
+          <span class="text-xs font-medium text-muted block mb-1">{d.sealMarginLabel}</span>
+          <div id="out-seal-margin" class="text-2xl font-black text-emerald-700 font-mono">+1.22 m (+4.0 ft)</div>
+        </div>
+        <div class="mt-3 pt-2 border-t border-hairline/60">
+          <div class="w-full bg-surface rounded-full h-2 overflow-hidden mb-1.5">
+            <div id="seal-bar" class="h-2 rounded-full bg-emerald-600 transition-all duration-300" style="width: 75%;"></div>
+          </div>
+          <span id="seal-status" class="text-[11px] text-muted">Safe Barometric Equilibrium</span>
+        </div>
+      </div>
+
+      <!-- Card 3: Chamber Saturated Steam Pressure -->
+      <div class="p-4 rounded-xl bg-surface-soft border border-hairline flex flex-col justify-between">
+        <div>
+          <span class="text-xs font-medium text-muted block mb-1">{d.steamPressureLabel}</span>
+          <div id="out-steam-pressure" class="text-2xl font-black text-ink font-mono">103.8 kPa (15.05 psig)</div>
+        </div>
+        <div class="mt-3 pt-2 border-t border-hairline/60">
+          <div class="w-full bg-surface rounded-full h-2 overflow-hidden mb-1.5">
+            <div id="pressure-bar" class="h-2 rounded-full bg-blue-600 transition-all duration-300" style="width: 68%;"></div>
+          </div>
+          <span id="pressure-status" class="text-[11px] text-muted">Design MAWP 150.0 kPa</span>
+        </div>
+      </div>
+
+      <!-- Card 4: Non-Condensable Air Fraction -->
+      <div class="p-4 rounded-xl bg-surface-soft border border-hairline flex flex-col justify-between">
+        <div>
+          <span class="text-xs font-medium text-muted block mb-1">{d.airFractionLabel}</span>
+          <div id="out-air-fraction" class="text-2xl font-black text-emerald-700 font-mono">0.05% (&Delta;T: 0.0°C)</div>
+        </div>
+        <div class="mt-3 pt-2 border-t border-hairline/60">
+          <div class="w-full bg-surface rounded-full h-2 overflow-hidden mb-1.5">
+            <div id="air-bar" class="h-2 rounded-full bg-emerald-600 transition-all duration-300" style="width: 5%;"></div>
+          </div>
+          <span id="air-status" class="text-[11px] text-muted">100% Saturated Pure Steam</span>
+        </div>
+      </div>
+
+      <!-- Card 5: Thermal Sterilization Lethality Fo -->
+      <div class="p-4 rounded-xl bg-surface-soft border border-hairline flex flex-col justify-between">
+        <div>
+          <span class="text-xs font-medium text-muted block mb-1">{d.lethalityFoLabel}</span>
+          <div id="out-lethality-fo" class="text-2xl font-black text-emerald-700 font-mono">7.8 min</div>
+        </div>
+        <div class="mt-3 pt-2 border-t border-hairline/60">
+          <div class="w-full bg-surface rounded-full h-2 overflow-hidden mb-1.5">
+            <div id="fo-bar" class="h-2 rounded-full bg-emerald-600 transition-all duration-300" style="width: 78%;"></div>
+          </div>
+          <span id="fo-status" class="text-[11px] text-muted">Exceeds 12D Minimum (Fo &ge; 3.0m)</span>
+        </div>
+      </div>
+
+      <!-- Card 6: Container Net Differential Stress -->
+      <div class="p-4 rounded-xl bg-surface-soft border border-hairline flex flex-col justify-between">
+        <div>
+          <span class="text-xs font-medium text-muted block mb-1">{d.canStressLabel}</span>
+          <div id="out-can-stress" class="text-2xl font-black text-emerald-700 font-mono">14.2 psi (Margin: +19.8 psi)</div>
+        </div>
+        <div class="mt-3 pt-2 border-t border-hairline/60">
+          <div class="w-full bg-surface rounded-full h-2 overflow-hidden mb-1.5">
+            <div id="stress-bar" class="h-2 rounded-full bg-emerald-600 transition-all duration-300" style="width: 42%;"></div>
+          </div>
+          <span id="stress-status" class="text-[11px] text-muted">Safe Double Seam Elastic Zone</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Diagnostic Details Callouts -->
+    <div class="space-y-3 text-xs leading-relaxed border-t border-hairline pt-4">
+      <div class="p-3.5 rounded-xl bg-surface-soft border border-hairline flex items-start gap-2.5">
+        <span class="font-bold text-ink shrink-0">{d.primaryRiskLabel}</span>
+        <span id="hazard-detail" class="text-muted">Hydrostatic water column head provides positive counter-pressure seal. Saturated steam purity exceeds 99.9%, eliminating cold spot risks.</span>
+      </div>
+      <div class="p-3.5 rounded-xl bg-surface-soft border border-hairline flex items-start gap-2.5">
+        <span class="font-bold text-ink shrink-0">{d.mechanismsLabel}</span>
+        <span id="mechanisms-detail" class="text-muted">Hydrostatic equilibrium ΔP = ρ·g·H balances 103.8 kPa steam pressure against 12.2m water column at 85°C (density 968 kg/m³). Net safety head is +1.22m.</span>
+      </div>
+      <div class="p-3.5 rounded-xl bg-surface-soft border border-hairline flex items-start gap-2.5">
+        <span class="font-bold text-ink shrink-0">{d.mitigationLabel}</span>
+        <span id="mitigation-detail" class="text-muted">Maintain continuous 1/4" bleeders open to atmosphere. Verify water seal level sensors quarterly per 21 CFR § 113.40.</span>
+      </div>
+    </div>
+
+    <!-- Copy Telemetry Button -->
+    <div class="mt-6 flex justify-end">
+      <button 
+        type="button" 
+        id="copy-report-btn"
+        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-xs font-medium transition-colors shadow-xs cursor-pointer"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+        </svg>
+        <span id="copy-btn-text">{d.copyReportBtn}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Engineering Specifications Comparison Table -->
+  <div class="mb-10 bg-surface rounded-2xl p-6 border border-hairline">
+    <div class="mb-4">
+      <h3 class="text-title-sm sm:text-title font-semibold text-ink tracking-tight">
+        {d.tableTitle}
+      </h3>
+      <p class="text-xs text-muted">
+        {d.tableSub}
+      </p>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs text-ink border-collapse">
+        <thead>
+          <tr class="border-b border-hairline bg-surface-soft font-semibold text-muted">
+            <th class="p-3">{d.colModel}</th>
+            <th class="p-3">{d.colClass}</th>
+            <th class="p-3">{d.colHeight}</th>
+            <th class="p-3">{d.colCapacity}</th>
+            <th class="p-3">{d.colPressure}</th>
+            <th class="p-3">{d.colBleeders}</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline">
+          {data.hydrostaticArchitectures.map(arc => (
+            <tr class="hover:bg-surface-soft/50 transition-colors">
+              <td class="p-3 font-semibold text-ink">{arc.name}</td>
+              <td class="p-3 text-muted">{arc.classification}</td>
+              <td class="p-3 font-mono">{arc.towerHeightM} m</td>
+              <td class="p-3 font-mono">{arc.nominalCanRateCpm} cpm</td>
+              <td class="p-3 font-mono">{arc.maxOperatingSteamKpa} kPa</td>
+              <td class="p-3 font-mono">{arc.steamBleederCount} x {arc.bleederOrificeMm}mm</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Engineering Guidelines & Mandatory Rules -->
+  <div class="border-t border-hairline pt-8">
+    <div class="mb-6">
+      <h3 class="text-title font-semibold text-ink tracking-tight">
+        {d.rulesTitle}
+      </h3>
+      <p class="text-xs text-muted">
+        {d.rulesSub}
+      </p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="p-5 rounded-2xl bg-surface border border-hairline">
+        <h4 class="text-xs font-bold text-ink uppercase tracking-wider mb-2 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+          {d.rule1Title}
+        </h4>
+        <p class="text-xs text-muted leading-relaxed">
+          {d.rule1Text}
+        </p>
+      </div>
+
+      <div class="p-5 rounded-2xl bg-surface border border-hairline">
+        <h4 class="text-xs font-bold text-ink uppercase tracking-wider mb-2 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+          {d.rule2Title}
+        </h4>
+        <p class="text-xs text-muted leading-relaxed">
+          {d.rule2Text}
+        </p>
+      </div>
+
+      <div class="p-5 rounded-2xl bg-surface border border-hairline">
+        <h4 class="text-xs font-bold text-ink uppercase tracking-wider mb-2 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+          {d.rule3Title}
+        </h4>
+        <p class="text-xs text-muted leading-relaxed">
+          {d.rule3Text}
+        </p>
+      </div>
+
+      <div class="p-5 rounded-2xl bg-surface border border-hairline">
+        <h4 class="text-xs font-bold text-ink uppercase tracking-wider mb-2 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+          {d.rule4Title}
+        </h4>
+        <p class="text-xs text-muted leading-relaxed">
+          {d.rule4Text}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script define:vars={{ data, d }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Select elements
+    const retortSelect = document.getElementById('retort-select');
+    const canSelect = document.getElementById('can-select');
+    const alloySelect = document.getElementById('alloy-select');
+
+    const tempSlider = document.getElementById('temp-slider');
+    const legHeightSlider = document.getElementById('leg-height-slider');
+    const waterTempSlider = document.getElementById('water-temp-slider');
+    const bleederSlider = document.getElementById('bleeder-slider');
+    const dwellSlider = document.getElementById('dwell-slider');
+    const chainHoursSlider = document.getElementById('chain-hours-slider');
+
+    // Display labels
+    const tempVal = document.getElementById('temp-val');
+    const legHeightVal = document.getElementById('leg-height-val');
+    const waterTempVal = document.getElementById('water-temp-val');
+    const bleederVal = document.getElementById('bleeder-val');
+    const dwellVal = document.getElementById('dwell-val');
+    const chainHoursVal = document.getElementById('chain-hours-val');
+
+    // Outputs
+    const outReqHeight = document.getElementById('out-req-height');
+    const outSealMargin = document.getElementById('out-seal-margin');
+    const outSteamPressure = document.getElementById('out-steam-pressure');
+    const outAirFraction = document.getElementById('out-air-fraction');
+    const outLethalityFo = document.getElementById('out-lethality-fo');
+    const outCanStress = document.getElementById('out-can-stress');
+
+    // Visual Bars
+    const reqBar = document.getElementById('req-bar');
+    const sealBar = document.getElementById('seal-bar');
+    const pressureBar = document.getElementById('pressure-bar');
+    const airBar = document.getElementById('air-bar');
+    const foBar = document.getElementById('fo-bar');
+    const stressBar = document.getElementById('stress-bar');
+
+    // Status Footers
+    const reqStatus = document.getElementById('req-status');
+    const sealStatus = document.getElementById('seal-status');
+    const pressureStatus = document.getElementById('pressure-status');
+    const airStatus = document.getElementById('air-status');
+    const foStatus = document.getElementById('fo-status');
+    const stressStatus = document.getElementById('stress-status');
+
+    // Badges & Details
+    const safetyBadge = document.getElementById('safety-badge');
+    const safetyBadgeText = document.getElementById('safety-badge-text');
+    const hazardDetail = document.getElementById('hazard-detail');
+    const mechanismsDetail = document.getElementById('mechanisms-detail');
+    const mitigationDetail = document.getElementById('mitigation-detail');
+
+    // Clipboard Copy
+    const copyBtn = document.getElementById('copy-report-btn');
+    const copyBtnText = document.getElementById('copy-btn-text');
+
+    function recalculate() {
+      if (!retortSelect || !canSelect || !alloySelect) return;
+
+      const retort = data.hydrostaticArchitectures.find(r => r.id === retortSelect.value) || data.hydrostaticArchitectures[0];
+      const can = data.containerFoodProfiles.find(c => c.id === canSelect.value) || data.containerFoodProfiles[0];
+      const alloy = data.chainAlloys.find(a => a.id === alloySelect.value) || data.chainAlloys[0];
+
+      const tempC = parseFloat(tempSlider.value);
+      const legHeightM = parseFloat(legHeightSlider.value);
+      const waterTempC = parseFloat(waterTempSlider.value);
+      const bleederSetting = parseInt(bleederSlider.value, 10);
+      const dwellMin = parseFloat(dwellSlider.value);
+      const chainHours = parseFloat(chainHoursSlider.value);
+
+      // Text labels
+      if (tempVal) {
+        const tempF = Math.round(tempC * 9/5 + 32);
+        tempVal.textContent = `${tempC.toFixed(1)}°C (${tempF}°F)`;
+      }
+      if (legHeightVal) {
+        const legFt = (legHeightM * 3.28084).toFixed(1);
+        legHeightVal.textContent = `${legHeightM.toFixed(1)} m (${legFt} ft)`;
+      }
+      if (waterTempVal) {
+        const waterTempF = Math.round(waterTempC * 9/5 + 32);
+        waterTempVal.textContent = `${Math.round(waterTempC)}°C (${waterTempF}°F)`;
+      }
+      if (bleederVal) {
+        const labels = ['0% Closed [Critical]', '15% Scaled/Choked', '50% Restricted', '100% Fully Open'];
+        bleederVal.textContent = labels[bleederSetting] || '100% Open';
+        bleederVal.className = `font-bold font-mono ${bleederSetting <= 1 ? 'text-red-700' : (bleederSetting === 2 ? 'text-amber-700' : 'text-emerald-700')}`;
+      }
+      if (dwellVal) dwellVal.textContent = `${Math.round(dwellMin)} min`;
+      if (chainHoursVal) chainHoursVal.textContent = `${chainHours.toLocaleString()} hrs`;
+
+      // 1. Saturated Steam Pressure (Antoine Equation for Water 100°C to 140°C)
+      // log10(P_mmHg) = A - B / (C + T_C)
+      // For water: A = 8.14019, B = 1810.94, C = 244.485 (valid 99-374°C)
+      const pMmHg = Math.pow(10, 8.14019 - (1810.94 / (244.485 + tempC)));
+      const pAbsKpa = (pMmHg * 101.325) / 760.0;
+      const pGaugeKpa = Math.max(0, pAbsKpa - 101.325);
+      const pGaugePsig = pGaugeKpa * 0.145038;
+
+      // 2. Liquid Water Density in Hydrostatic Leg (Accounting for thermal expansion)
+      // rho(T) approx = 1000 - 0.0178 * |T - 4|^1.7
+      const waterDensityKgM3 = 1000 - 0.0178 * Math.pow(Math.abs(waterTempC - 4), 1.7);
+      const g = 9.80665;
+
+      // 3. Theoretical Required Hydrostatic Water Column Height:
+      // Delta_P = rho * g * H_req  =>  H_req = Delta_P / (rho * g)
+      // Delta_P in Pascals: pGaugeKpa * 1000
+      const hReqM = (pGaugeKpa * 1000.0) / (waterDensityKgM3 * g);
+      const hReqFt = (hReqM * 3.28084).toFixed(1);
+
+      // 4. Net Water Seal Elevation Margin:
+      const sealMarginM = legHeightM - hReqM;
+      const sealMarginFt = (sealMarginM * 3.28084).toFixed(1);
+
+      // 5. Steam Dome Air Fraction & Temperature Deficit:
+      // Bleeder setting 3: 0.05% air
+      // Bleeder setting 2: 0.8% air
+      // Bleeder setting 1: 3.2% air
+      // Bleeder setting 0: 8.5% air
+      const airFractions = [0.085, 0.032, 0.008, 0.0005];
+      let airFraction = airFractions[bleederSetting] || 0.0005;
+      if (retort.id === 'aging_legacy_hydrostatic_cooker_choked_bleeders') {
+        airFraction = Math.max(airFraction, 0.042);
+      }
+      // Temperature deficit due to Dalton's Partial Pressure of Air:
+      // P_steam = (1 - airFraction) * P_total
+      // Effective steam temp T_eff = T_sat(P_steam)
+      const pSteamPartKpa = (1 - airFraction) * pAbsKpa;
+      const pSteamPartMmHg = (pSteamPartKpa * 760.0) / 101.325;
+      const tEffC = (1810.94 / (8.14019 - Math.log10(pSteamPartMmHg))) - 244.485;
+      const deltaTempC = Math.max(0, tempC - tEffC);
+
+      // 6. Thermal Sterilization Lethality (Bigelow Fo calculation)
+      // Fo = Dwell_min * 10^((T_eff - 121.11) / z)
+      const lethalRate = Math.pow(10, (tEffC - 121.11) / can.zValueC);
+      const calculatedFo = Math.round((dwellMin * lethalRate) * 10) / 10;
+
+      // 7. Container Net Differential Pressure & Peaking Hoop Stress:
+      // Internal can pressure = vapor pressure at food core temp + heated expanded headspace air
+      // Headspace thermal expansion adds approx 8 to 16 psi
+      const foodInternalTempC = Math.min(tempC, tEffC - 1.5);
+      const canVaporKpa = Math.max(0, (Math.pow(10, 8.14019 - (1810.94 / (244.485 + foodInternalTempC))) * 101.325 / 760.0) - 101.325);
+      const headspaceAirPsi = 10.5 * (1 - can.internalHeadspaceFraction);
+      const canInternalPsi = (canVaporKpa * 0.145038) + headspaceAirPsi;
+      // Retort chamber pressure in psi:
+      const chamberPsi = pGaugePsig;
+      const netCanStressPsi = Math.max(0, Math.round((canInternalPsi - chamberPsi * 0.45) * 10) / 10);
+      const stressMarginPsi = Math.round((can.canPeakingThresholdPsi - netCanStressPsi) * 10) / 10;
+
+      // 8. Conveyor Chain Pitch Elongation:
+      // Wear rate per 1,000 hrs * pitch wear factor
+      const wearRatePer1000 = 0.18 * alloy.pitchWearFactor;
+      const thermalElongationPct = alloy.thermalExpansionCoeff * (tempC - 20) * 100;
+      const mechanicalWearPct = (chainHours / 1000.0) * wearRatePer1000;
+      const totalPitchElongationPct = Math.round((mechanicalWearPct + thermalElongationPct) * 100) / 100;
+
+      // UPDATE TELEMETRY OUTPUTS
+      // Card 1: Required Height
+      if (outReqHeight) outReqHeight.textContent = `${hReqM.toFixed(2)} m (${hReqFt} ft)`;
+      if (reqBar) {
+        const reqPct = Math.min(100, Math.round((hReqM / retort.towerHeightM) * 100));
+        reqBar.style.width = `${reqPct}%`;
+      }
+      if (reqStatus) {
+        reqStatus.textContent = `P_steam = ${pGaugeKpa.toFixed(1)} kPa (${pGaugePsig.toFixed(1)} psig)`;
+      }
+
+      // Card 2: Seal Head Margin
+      if (outSealMargin) {
+        const sign = sealMarginM >= 0 ? '+' : '';
+        outSealMargin.textContent = `${sign}${sealMarginM.toFixed(2)} m (${sign}${sealMarginFt} ft)`;
+        outSealMargin.className = `text-2xl font-black font-mono ${sealMarginM < 0 ? 'text-red-700 animate-pulse' : (sealMarginM < 0.8 ? 'text-amber-700' : 'text-emerald-700')}`;
+      }
+      if (sealBar) {
+        const sealPct = Math.max(0, Math.min(100, Math.round(((sealMarginM + 3) / 8) * 100)));
+        sealBar.style.width = `${sealPct}%`;
+        sealBar.className = `h-2 rounded-full transition-all duration-300 ${sealMarginM < 0 ? 'bg-red-600' : (sealMarginM < 0.8 ? 'bg-amber-500' : 'bg-emerald-600')}`;
+      }
+      if (sealStatus) {
+        if (sealMarginM < 0) {
+          sealStatus.textContent = '🚨 STEAM BLOWOUT GEYSER HAZARD!';
+          sealStatus.className = 'text-[11px] font-bold text-red-600';
+        } else if (sealMarginM < 0.8) {
+          sealStatus.textContent = 'Marginal Head (Min 1.2m Required)';
+          sealStatus.className = 'text-[11px] font-medium text-amber-600';
+        } else {
+          sealStatus.textContent = 'Safe Barometric Head Reserve';
+          sealStatus.className = 'text-[11px] text-muted';
+        }
+      }
+
+      // Card 3: Steam Pressure
+      if (outSteamPressure) {
+        outSteamPressure.textContent = `${pGaugeKpa.toFixed(1)} kPa (${pGaugePsig.toFixed(1)} psig)`;
+      }
+      if (pressureBar) {
+        const pressPct = Math.min(100, Math.round((pGaugeKpa / retort.maxOperatingSteamKpa) * 100));
+        pressureBar.style.width = `${pressPct}%`;
+        pressureBar.className = `h-2 rounded-full transition-all duration-300 ${pGaugeKpa > retort.maxOperatingSteamKpa ? 'bg-red-600' : 'bg-blue-600'}`;
+      }
+      if (pressureStatus) {
+        pressureStatus.textContent = `Design MAWP: ${retort.maxOperatingSteamKpa} kPa gauge`;
+      }
+
+      // Card 4: Non-Condensable Air Fraction
+      if (outAirFraction) {
+        outAirFraction.textContent = `${(airFraction * 100).toFixed(2)}% (ΔT: -${deltaTempC.toFixed(1)}°C)`;
+        outAirFraction.className = `text-2xl font-black font-mono ${airFraction > 0.02 ? 'text-red-700' : (airFraction > 0.005 ? 'text-amber-700' : 'text-emerald-700')}`;
+      }
+      if (airBar) {
+        const airPct = Math.min(100, Math.round((airFraction / 0.08) * 100));
+        airBar.style.width = `${airPct}%`;
+        airBar.className = `h-2 rounded-full transition-all duration-300 ${airFraction > 0.02 ? 'bg-red-600' : (airFraction > 0.005 ? 'bg-amber-500' : 'bg-emerald-600')}`;
+      }
+      if (airStatus) {
+        airStatus.textContent = airFraction > 0.02 ? 'Cold Spot Air Pockets Forming' : 'Pure Saturated Steam Atmosphere';
+      }
+
+      // Card 5: Thermal Lethality Fo
+      if (outLethalityFo) {
+        outLethalityFo.textContent = `${calculatedFo.toFixed(1)} min`;
+        outLethalityFo.className = `text-2xl font-black font-mono ${calculatedFo < 3.0 ? 'text-red-700 animate-pulse' : (calculatedFo < can.targetFoMinutes ? 'text-amber-700' : 'text-emerald-700')}`;
+      }
+      if (foBar) {
+        const foPct = Math.min(100, Math.round((calculatedFo / (can.targetFoMinutes * 1.5)) * 100));
+        foBar.style.width = `${foPct}%`;
+        foBar.className = `h-2 rounded-full transition-all duration-300 ${calculatedFo < 3.0 ? 'bg-red-600' : (calculatedFo < can.targetFoMinutes ? 'bg-amber-500' : 'bg-emerald-600')}`;
+      }
+      if (foStatus) {
+        if (calculatedFo < 3.0) {
+          foStatus.textContent = 'UNDER-PROCESSING VIOLATION (Fo < 3.0m)';
+          foStatus.className = 'text-[11px] font-bold text-red-600';
+        } else if (calculatedFo < can.targetFoMinutes) {
+          foStatus.textContent = `Commercial Target: Fo >= ${can.targetFoMinutes} min`;
+          foStatus.className = 'text-[11px] text-amber-600';
+        } else {
+          foStatus.textContent = `12D Botulinum Sterilization Exceeded`;
+          foStatus.className = 'text-[11px] text-muted';
+        }
+      }
+
+      // Card 6: Can Differential Stress
+      if (outCanStress) {
+        outCanStress.textContent = `${netCanStressPsi.toFixed(1)} psi (Margin: ${stressMarginPsi >= 0 ? '+' : ''}${stressMarginPsi.toFixed(1)} psi)`;
+        outCanStress.className = `text-2xl font-black font-mono ${stressMarginPsi < 0 ? 'text-red-700' : (stressMarginPsi < 5.0 ? 'text-amber-700' : 'text-emerald-700')}`;
+      }
+      if (stressBar) {
+        const stressPct = Math.min(100, Math.round((netCanStressPsi / can.canPeakingThresholdPsi) * 100));
+        stressBar.style.width = `${stressPct}%`;
+        stressBar.className = `h-2 rounded-full transition-all duration-300 ${stressMarginPsi < 0 ? 'bg-red-600' : (stressMarginPsi < 5.0 ? 'bg-amber-500' : 'bg-emerald-600')}`;
+      }
+      if (stressStatus) {
+        if (stressMarginPsi < 0) {
+          stressStatus.textContent = 'CAN PEAKING / BURST HAZARD!';
+          stressStatus.className = 'text-[11px] font-bold text-red-600';
+        } else {
+          stressStatus.textContent = `Peaking Limit: ${can.canPeakingThresholdPsi} psi`;
+          stressStatus.className = 'text-[11px] text-muted';
+        }
+      }
+
+      // SAFETY BADGE & TRIAGE CALLOUTS
+      if (sealMarginM < 0) {
+        safetyBadge.className = 'self-start sm:self-auto inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-red-100 text-red-800 border border-red-300 animate-pulse';
+        safetyBadgeText.textContent = 'CRITICAL: STEAM BLOWOUT / SCALD HAZARD';
+        if (hazardDetail) hazardDetail.textContent = 'Hydrostatic water column head is insufficient to balance chamber steam pressure. Steam is blowing past the bottom seal, causing violent geysering of scalding water onto plant floors.';
+        if (mechanismsDetail) mechanismsDetail.textContent = `Required head is ${hReqM.toFixed(2)}m, but actual leg is only ${legHeightM.toFixed(1)}m. Negative pressure differential (-${Math.abs(sealMarginM).toFixed(2)}m) creates steam discharge velocities exceeding 45 m/s.`;
+        if (mitigationDetail) mitigationDetail.textContent = 'Emergency trip: Modulate boiler steam supply valve closed immediately. Restore infeed water makeup pumps to elevate barometric seal height above 12.0 meters.';
+      } else if (calculatedFo < 3.0) {
+        safetyBadge.className = 'self-start sm:self-auto inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-red-100 text-red-800 border border-red-300';
+        safetyBadgeText.textContent = 'CRITICAL: BOTULINUM UNDER-PROCESSING (Fo < 3.0m)';
+        if (hazardDetail) hazardDetail.textContent = 'Sterilization lethality fails mandatory FDA 21 CFR § 113.40 12D commercial sterility standard. C. botulinum proteolytic endospores survive, risking deadly botulinum toxin neurotoxicity.';
+        if (mechanismsDetail) mechanismsDetail.textContent = `Trapped non-condensable air (${(airFraction * 100).toFixed(1)}%) depresses effective steam temperature by -${deltaTempC.toFixed(1)}°C, collapsing logarithmic lethality rate from 1.0 to ${lethalRate.toFixed(3)}.`;
+        if (mitigationDetail) mitigationDetail.textContent = 'Open continuous 1/4" steam bleeders fully. Re-evaluate dwell timer and quarantine all processed lot pallets for thermal death time (TDT) spoilage evaluation.';
+      } else if (stressMarginPsi < 0) {
+        safetyBadge.className = 'self-start sm:self-auto inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300';
+        safetyBadgeText.textContent = 'WARNING: CONTAINER PEAKING / SEAM LEAKAGE';
+        if (hazardDetail) hazardDetail.textContent = `Internal container hoop stress (${netCanStressPsi.toFixed(1)} psi) exceeds double-seam peaking threshold (${can.canPeakingThresholdPsi} psi), causing permanent end-plate deformation and micro-leakage.`;
+        if (mechanismsDetail) mechanismsDetail.textContent = 'Excessive internal vapor pressure from unvented headspace expansion overcomes external counter-pressure as cans exit the steam dome into the cooling leg.';
+        if (mitigationDetail) mitigationDetail.textContent = 'Increase compressed air overpressure in the transition cooling leg or decrease initial filling temperature headspace volume.';
+      } else if (totalPitchElongationPct > 1.5) {
+        safetyBadge.className = 'self-start sm:self-auto inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300';
+        safetyBadgeText.textContent = 'WARNING: CHAIN PITCH ELONGATION EXCEEDED (1.5%)';
+        if (hazardDetail) hazardDetail.textContent = `Conveyor chain cumulative pitch elongation (${totalPitchElongationPct.toFixed(2)}%) exceeds ISO 1977 maximum limit. Risk of drive sprocket tooth climb and catastrophic carrier jam.`;
+        if (mechanismsDetail) mechanismsDetail.textContent = `High service hours (${chainHours.toLocaleString()} hrs) under corrosive steam condensate has accelerated pin bushing abrasive-adhesive wear.`;
+        if (mitigationDetail) mitigationDetail.textContent = 'Schedule immediate carrier chain section replacement. Upgrade to AISI 316L or nickel-plated case-hardened alloy links with automatic oil-mist lubrication.';
+      } else {
+        safetyBadge.className = 'self-start sm:self-auto inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300';
+        safetyBadgeText.textContent = '100% FDA 21 CFR 113 COMPLIANT';
+        if (hazardDetail) hazardDetail.textContent = 'Hydrostatic column head provides positive counter-pressure seal. Saturated steam purity exceeds 99.9%, eliminating cold spot risks and securing commercial sterility.';
+        if (mechanismsDetail) mechanismsDetail.textContent = `Hydrostatic equilibrium ΔP = ρ·g·H balances ${pGaugeKpa.toFixed(1)} kPa steam pressure against ${legHeightM.toFixed(1)}m water column at ${waterTempC}°C (density ${Math.round(waterDensityKgM3)} kg/m³). Net safety head is +${sealMarginM.toFixed(2)}m.`;
+        if (mitigationDetail) mitigationDetail.textContent = 'Maintain continuous 1/4" bleeders open to atmosphere. Verify water seal level ultrasonic transmitters quarterly per 21 CFR § 113.40.';
+      }
+    }
+
+    // Attach Event Listeners
+    [retortSelect, canSelect, alloySelect].forEach(sel => {
+      sel?.addEventListener('change', recalculate);
+    });
+
+    [tempSlider, legHeightSlider, waterTempSlider, bleederSlider, dwellSlider, chainHoursSlider].forEach(sld => {
+      sld?.addEventListener('input', recalculate);
+    });
+
+    // Presets Click Handlers
+    document.getElementById('preset-soup')?.addEventListener('click', () => {
+      retortSelect.value = 'industrial_high_capacity_quad_leg_hydrostatic_retort';
+      canSelect.value = 'tinplate_soup_can_300x407';
+      alloySelect.value = 'aisi_316l_stainless_steel';
+      tempSlider.value = '121.1';
+      legHeightSlider.value = '12.2';
+      waterTempSlider.value = '85';
+      bleederSlider.value = '3';
+      dwellSlider.value = '32';
+      chainHoursSlider.value = '1800';
+      recalculate();
+    });
+
+    document.getElementById('preset-aluminum')?.addEventListener('click', () => {
+      retortSelect.value = 'medium_tower_dual_leg_hydrostatic_cooker_cooler';
+      canSelect.value = 'lightweight_aluminum_beverage_can_202x504';
+      alloySelect.value = 'aisi_316l_stainless_steel';
+      tempSlider.value = '121.1';
+      legHeightSlider.value = '11.8';
+      waterTempSlider.value = '80';
+      bleederSlider.value = '3';
+      dwellSlider.value = '22';
+      chainHoursSlider.value = '1200';
+      recalculate();
+    });
+
+    document.getElementById('preset-air-pocket')?.addEventListener('click', () => {
+      retortSelect.value = 'aging_legacy_hydrostatic_cooker_choked_bleeders';
+      canSelect.value = 'tinplate_soup_can_300x407';
+      alloySelect.value = 'standard_carbon_steel_worn';
+      tempSlider.value = '121.1';
+      legHeightSlider.value = '11.0';
+      waterTempSlider.value = '90';
+      bleederSlider.value = '1';
+      dwellSlider.value = '25';
+      chainHoursSlider.value = '6500';
+      recalculate();
+    });
+
+    document.getElementById('preset-blowout')?.addEventListener('click', () => {
+      retortSelect.value = 'industrial_high_capacity_quad_leg_hydrostatic_retort';
+      canSelect.value = 'tinplate_soup_can_300x407';
+      alloySelect.value = 'aisi_316l_stainless_steel';
+      tempSlider.value = '125.0';
+      legHeightSlider.value = '9.0';
+      waterTempSlider.value = '95';
+      bleederSlider.value = '3';
+      dwellSlider.value = '28';
+      chainHoursSlider.value = '3200';
+      recalculate();
+    });
+
+    // Copy to Clipboard
+    copyBtn?.addEventListener('click', () => {
+      const report = `=== ISITKITCHENSAFE HYDROSTATIC RETORT COOKER-COOLER TELEMETRY ===
+Timestamp: ${new Date().toISOString()}
+Retort: ${retortSelect.options[retortSelect.selectedIndex]?.text}
+Container: ${canSelect.options[canSelect.selectedIndex]?.text}
+Conveyor Chain Alloy: ${alloySelect.options[alloySelect.selectedIndex]?.text}
+Saturated Steam Temp: ${tempSlider.value}°C
+Hydrostatic Water Leg Height: ${legHeightSlider.value} m
+Water Column Temperature: ${waterTempSlider.value}°C
+Bleeder Status: ${bleederSlider.value} / 3
+Sterilizing Dwell Time: ${dwellSlider.value} min
+Chain Operating Hours: ${chainHoursSlider.value} hrs
+------------------------------------------------------------------
+Required Water Head: ${outReqHeight?.textContent}
+Seal Elevation Margin: ${outSealMargin?.textContent}
+Steam Chamber Pressure: ${outSteamPressure?.textContent}
+Non-Condensable Air: ${outAirFraction?.textContent}
+Sterilization Lethality (Fo): ${outLethalityFo?.textContent}
+Container Net Hoop Stress: ${outCanStress?.textContent}
+Compliance Status: ${safetyBadgeText?.textContent}
+Primary Hazard: ${hazardDetail?.textContent}
+Fluid Mechanisms: ${mechanismsDetail?.textContent}
+Engineering Controls: ${mitigationDetail?.textContent}
+Standards: FDA 21 CFR § 113.40 | ASME BPVC Section VIII | NFPA 86`;
+
+      navigator.clipboard.writeText(report).then(() => {
+        const originalText = copyBtnText?.textContent;
+        if (copyBtnText) copyBtnText.textContent = d.copiedFeedback;
+        setTimeout(() => {
+          if (copyBtnText) copyBtnText.textContent = originalText;
+        }, 2500);
+      });
+    });
+
+    // Initial run
+    recalculate();
+  });
+</script>

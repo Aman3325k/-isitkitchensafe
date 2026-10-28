@@ -126,7 +126,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-fluidized-bed-agglomeration-modeler',
   'tools/commercial-spiral-freezer-ammonia-modeler',
   'tools/commercial-drum-roaster-co-chaff-modeler',
-  'tools/commercial-high-shear-colloid-mill-modeler'
+  'tools/commercial-high-shear-colloid-mill-modeler',
+  'tools/commercial-hydrostatic-cooker-cooler-modeler'
 ];
 
 const esSlugs = new Set([
