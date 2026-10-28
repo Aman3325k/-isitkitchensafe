@@ -125,7 +125,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-ultrasonic-cavitation-modeler',
   'tools/commercial-fluidized-bed-agglomeration-modeler',
   'tools/commercial-spiral-freezer-ammonia-modeler',
-  'tools/commercial-drum-roaster-co-chaff-modeler'
+  'tools/commercial-drum-roaster-co-chaff-modeler',
+  'tools/commercial-high-shear-colloid-mill-modeler'
 ];
 
 const esSlugs = new Set([
@@ -423,4 +424,5 @@ export function getApplianceIn(appliance: string, lang: SupportedLanguage = 'en'
   }
   return `in the ${appliance}`;
 }
+
 
