@@ -127,7 +127,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-spiral-freezer-ammonia-modeler',
   'tools/commercial-drum-roaster-co-chaff-modeler',
   'tools/commercial-high-shear-colloid-mill-modeler',
-  'tools/commercial-hydrostatic-cooker-cooler-modeler'
+  'tools/commercial-hydrostatic-cooker-cooler-modeler',
+  'tools/commercial-extrusion-cooker-shear-modeler'
 ];
 
 const esSlugs = new Set([
