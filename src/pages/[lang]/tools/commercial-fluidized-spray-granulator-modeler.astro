@@ -1,0 +1,262 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import CommercialFluidizedSprayGranulatorModeler from '../../../components/CommercialFluidizedSprayGranulatorModeler.astro';
+import type { SupportedLanguage } from '../../../i18n/ui';
+import { useTranslations, useTranslatedPath } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+const t = useTranslations(lang);
+const tp = useTranslatedPath(lang);
+
+interface LocaleToolContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  lead: string;
+  breadcrumbsLabel: string;
+  faqs: Array<{ question: string; answer: string }>;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocaleToolContent> = {
+  es: {
+    pageTitle: "Simulador de Granulador por Pulverización en Lecho Fluidizado: Humectación y Deflagración | IsItKitchenSafe",
+    pageDescription: "Simule granuladores comerciales de lecho fluidizado de aspersión superior (top-spray), recubrimiento Wurster inferior y continuos multietapa para la instantaneización de fórmulas nutricionales y almidones. Modele regímenes de fluidización de Geldart, diámetro medio de Sauter (d32), número viscoso de Stokes (St_v < 0,15), caída de presión en mangas de filtración (ΔP), energía electrostática vs energía mínima de ignición (MIE) y venteo de deflagración NFPA 68.",
+    badge: "Mecánica de Fluidización y Seguridad contra Polvo Combustible",
+    h1: "Simulador de Granulador por Pulverización en Lecho Fluidizado: Humectación y Deflagración",
+    lead: "Simule granuladores comerciales de lecho fluidizado (top-spray, Wurster inferior y continuos), regímenes de Geldart, atomización de gotas d32, número dinámico viscoso de Stokes (St_v < 0,15), resistencia en filtros de mangas (ΔP), riesgo de chispas electrostáticas vs MIE y venteo según NFPA 68 y 652.",
+    breadcrumbsLabel: "Granulador de Lecho Fluidizado",
+    faqs: [
+      {
+        question: "¿Qué origina el colapso por humectación (apagado húmedo) y la desfluidización del lecho?",
+        answer: "La estabilidad en el lecho fluidizado depende de mantener la velocidad del gas (Ug) por encima de la velocidad mínima de fluidización (Umf) deducida de la ecuación de Ergun. Al atomizar aglutinante líquido sobre las partículas, si el caudal de líquido supera la capacidad psicrométrica de evaporación del aire caliente, se acumula humedad excesiva en el polvo. Las fuerzas de tensión superficial y viscosidad de los puentes líquidos superan el arrastre del gas. El umbral Umf se dispara y, si la relación Ug/Umf cae por debajo de 1,5, el lecho colapsa instantáneamente en un bloque pastoso sobre la placa distribuidora, provocando sobrecorrientes en el soplador y el aborto de emergencia del lote."
+      },
+      {
+        question: "¿Cómo controla el número viscoso de Stokes (St_v) la aglomeración frente al rebote de partículas?",
+        answer: "La aglomeración en lecho fluidizado se rige por el número dinámico de Stokes (St_v = 2·m_p·v_0 / (9·π·μ_b·R_b²)), que contrapone la energía cinética del choque a la disipación viscosa del puente líquido. Bajo el modelo de Ennis, las partículas forman un gránulo poroso estable solo si la energía cinética se disipa por completo antes del rebote (St_v < 0,15). Si la velocidad del gas es excesiva, las partículas rebotan y el polvo fino es arrastrado hacia los filtros. Por el contrario, gotas demasiado gruesas o viscosidades muy altas hunden St_v cerca de cero, produciendo masas pastosas incontroladas."
+      },
+      {
+        question: "¿Por qué los polvos alimentarios finos representan un grave peligro de deflagración según NFPA 652 y 68?",
+        answer: "Polvos alimentarios finos como almidones modificados, suero de leche, maltodextrina o cacao son polvos orgánicos combustibles de clase St 1 o St 2. Con una severidad explosiva notable (Kst = 100 a 220 bar·m/s, Pmax = 7,5 a 9,5 bar) y energías mínimas de ignición muy bajas (MIE < 10 a 25 mJ), generan fácilmente nubes explosivas en la cámara de expansión y la cúpula de filtración. La norma NFPA 68 exige paneles de venteo de baja inercia (Pstat = 0,10 bar) dimensionados para evacuar presiones al exterior a través de conductos rectos sin obstáculos estructurales."
+      },
+      {
+        question: "¿Cómo regulan las boquillas binarias de dos fluidos el diámetro medio de Sauter (d32)?",
+        answer: "Las boquillas neumáticas binarias emplean aire comprimido a alta velocidad (1,5 a 4,0 bar) para cizallar el chorro de aglutinante líquido. Según la ecuación de Lefebvre, el diámetro medio de Sauter (d32) es inversamente proporcional a la presión de aire de atomización y a la relación másica aire-líquido (ALR). Los cabezales de mezcla externa producen distribuciones estrechas de gota (18 a 40 μm) sin riesgo de colmatación interna. Mantener d32 < 0,6·d50 garantiza una deposición uniforme sobre las partículas en circulación y aglomerados homogéneos de disolución instantánea."
+      },
+      {
+        question: "¿Cuáles son los requisitos de pérdida de carga ΔP en mangas y puesta a tierra bajo NFPA 77?",
+        answer: "Las mangas filtrantes retienen los finos que ascienden por el lecho. La torta de polvo debe desprenderse con pulsos inversos de aire comprimido (4,5 a 6,0 bar cada 5 a 30 s) para mantener el diferencial de presión por debajo de 2,5 kPa. Un diferencial alto asfixia el flujo de aire y precipita el colapso del lecho. Al mismo tiempo, la fricción genera cargas triboeléctricas. Según NFPA 77, las mangas deben incorporar filamentos de acero inoxidable conductores y la resistencia de puesta a tierra a masa debe ser inferior a 10 Ohmios para evitar descargas que superen la MIE del polvo."
+      }
+    ]
+  },
+  pt: {
+    pageTitle: "Simulador de Granulador por Pulverização em Leito Fluidizado: Molhabilidade e Deflagração | IsItKitchenSafe",
+    pageDescription: "Simule granuladores industriais de leito fluidizado de pulverização superior (top-spray), revestimento Wurster inferior e contínuos multiestágios para pós nutricionais e amidos. Modele regimes de fluidização de Geldart, diâmetro médio de Sauter (d32), número viscoso de Stokes (St_v < 0,15), diferencial de pressão em filtros de mangas (ΔP), centelhas eletrostáticas vs energia mínima de ignição (MIE) e alívio de deflagração NFPA 68.",
+    badge: "Mecânica de Fluidização e Segurança contra Poeiras Combustíveis",
+    h1: "Simulador de Granulador por Pulverização em Leito Fluidizado: Molhabilidade e Deflagração",
+    lead: "Simule granuladores de leito fluidizado (top-spray, Wurster inferior e contínuos), regimes de Geldart, atomização d32, número viscoso de Stokes (St_v < 0,15), pressão diferencial em filtros de mangas (ΔP), risco de centelhas eletrostáticas vs MIE e alívio de explosão segundo as normas NFPA 68 e 652.",
+    breadcrumbsLabel: "Granulador de Leito Fluidizado",
+    faqs: [
+      {
+        question: "O que desencadeia o colapso por umidade excessiva e a desfluidização do leito?",
+        answer: "A estabilidade do leito depende da manutenção da velocidade do gás (Ug) acima da velocidade mínima de fluidização (Umf) pela equação de Ergun. Ao atomizar o aglutinante, se a vazão de líquido superar a capacidade psicrométrica de evaporação do ar quente, o teor de água acumula-se no pó. As forças de tensão superficial e viscosidade das pontes líquidas superam a sustentação aerodinâmica. O Umf sobe e, se a razão Ug/Umf cair abaixo de 1,5, a fluidização cessa abruptamente. O leito colapsa em uma massa pastosa sobre a placa distribuidora, causando sobrecarga no motor e perda do lote."
+      },
+      {
+        question: "Como o número viscoso de Stokes (St_v) determina a aglomeração versus o repique de partículas?",
+        answer: "A aglomeração é governada pelo número dinâmico viscoso de Stokes (St_v = 2·m_p·v_0 / (9·π·μ_b·R_b²)), confrontando a energia cinética de colisão com a dissipação viscosa da ponte líquida. Pelo critério de Ennis, as partículas coalescem em grânulos porosos estáveis apenas se a energia cinética for totalmente dissipada antes do rebote (St_v < 0,15). Velocidades excessivas de fluidização causam repique e arraste de finos para os filtros; por outro lado, gotas muito grandes reduzem St_v a zero localmente, gerando pastas irregulares."
+      },
+      {
+        question: "Por que pós alimentares finos configuram grave perigo de deflagração sob a NFPA 652 e 68?",
+        answer: "Pós orgânicos finos como amidos modificados, soro de leite, maltodextrina e cacau são pós combustíveis das classes St 1 ou St 2. Com severidade de deflagração elevada (Kst = 100 a 220 bar·m/s, Pmax = 7,5 a 9,5 bar) e baixíssima energia mínima de ignição (MIE < 10 a 25 mJ), formam nuvens explosivas na câmara de expansão. A NFPA 68 exige painéis de alívio de deflagração (Pstat = 0,10 bar) calibrados para descarregar picos de sobrepressão para o exterior por dutos curtos e retos."
+      },
+      {
+        question: "Como os bicos binários de dois fluidos calibram o diâmetro médio de Sauter (d32)?",
+        answer: "Bicos binários pneumáticos utilizam ar comprimido em alta velocidade (1,5 a 4,0 bar) para cisalhar o fluxo líquido de aglutinante. Pela equação de Lefebvre, o diâmetro Sauter d32 é inversamente proporcional à pressão do ar e à razão ar-líquido (ALR). Bicos de mistura externa produzem espectros de gotas estreitos (18 a 40 μm) sem risco de entupimento interno. Garantir d32 < 0,6·d50 assegura molhamento uniforme da superfície das partículas e grânulos com excelente solubilidade instantânea."
+      },
+      {
+        question: "Quais são os limites de perda de carga ΔP nas mangas e de aterramento sob a NFPA 77?",
+        answer: "As mangas retêm o pó arrastado pela corrente de ar. A torta de filtração deve ser desprendida por pulsos reversos periódicos de ar comprimido (4,5 a 6,0 bar) para manter o ΔP abaixo de 2,5 kPa. Pressões diferenciais elevadas sufocam o soplador e desfluidizam o leito. Ao mesmo tempo, o atrito gera eletricidade estática considerável. Pela NFPA 77, as mangas devem conter malha condutora de aço inoxidável e a resistência do chassi à terra deve ser menor que 10 Ohms para dissipar centelhas que possam superar a MIE."
+      }
+    ]
+  },
+  'zh-cn': {
+    pageTitle: "商用流化床喷雾制粒机颗粒润湿与滤袋脉冲爆燃模拟器 | IsItKitchenSafe",
+    pageDescription: "模拟用于营养奶粉、即溶饮品配料及变性淀粉造粒的商用顶喷式、底喷Wurster式及连续多级振动流化床制粒机。实时计算Geldart粉体流化速度比、双流体喷嘴Sauter平均液滴直径（d32）、粘性Stokes碰撞团聚准则（St_v < 0.15）、除尘滤袋脉冲反吹压降（ΔP）、静电火花能量与最小点火能（MIE）以及NFPA 68防爆泄压安全符合性。",
+    badge: "流态化力学与可燃粉尘防爆安全",
+    h1: "商用流化床喷雾制粒机颗粒润湿与滤袋脉冲爆燃模拟器",
+    lead: "模拟商用顶喷式、底喷Wurster式及连续多级流化床制粒机，解析Geldart流化速比、双流体雾化液滴d32、动态粘性Stokes碰撞数（St_v < 0.15）、除尘滤袋运行阻力（ΔP）、静电火花能量与最小点火能（MIE）对比及NFPA 68防爆泄压合规性。",
+    breadcrumbsLabel: "流化床喷雾制粒机",
+    faqs: [
+      {
+        question: "顶喷流化床制粒机中过湿塌床（死床）的物理诱发机制是什么？",
+        answer: "流化床的稳定性取决于表观气速（Ug）与Ergun方程导出的最小流化速度（Umf）之间的动态平衡。喷入粘合剂溶液后，颗粒碰撞形成液体桥。若供液喷雾速率超过热空气的绝热蒸发能力，过量自由水在粉体表面蓄积，液体桥的毛细张力与粘性黏聚力迅速超越气体上升拖拽力。Umf急剧飙升；一旦操作流化速比Ug/Umf跌破1.5，气泡流化瞬间崩溃，床层整体沉降坍缩为致密泥状块体，造成风机电机超载过流及整批物料报废。"
+      },
+      {
+        question: "动态粘性Stokes数（St_v）如何决定颗粒团聚成粒与碰撞反弹？",
+        answer: "流化床内的团聚微观动力学由动态粘性Stokes数（St_v = 2·m_p·v_0 / (9·π·μ_b·R_b²)）决定，该数表征颗粒撞击动能与表面粘合剂液体桥粘性耗散能之比。依据Ennis聚并准则，只有当颗粒初始动能在液体桥内完全耗散且未发生弹性反弹时（St_v < 0.15），颗粒才能有效结合为均质多孔颗粒。若风速过高导致颗粒撞击动能过大，粉末直接弹开并被排风吹入滤袋；反之若雾化过粗或粘度过高，St_v在局部归零，将形成无序硬块。"
+      },
+      {
+        question: "依据NFPA 652和NFPA 68，食品级微细有机粉末为何具备极高的粉尘爆炸危险性？",
+        answer: "食品级微细粉体（如变性玉米淀粉、水解乳清蛋白、麦芽糊精及可可粉）属于NFPA 652规范定义的St 1或St 2级高燃爆性粉尘。其爆炸烈度极高（Kst = 100至220 bar·m/s，Pmax = 7.5至9.5 bar），且最小点火能极低（MIE < 10至25 mJ）。在流化床膨胀仓及除尘段极易形成达到爆炸下限（MEC ≈ 30至60 g/m³）的高悬浮粉尘云。依据NFPA 68，设备必须配备低惯性爆燃泄压板（Pstat = 0.10 bar），通过平直短管将泄爆能量导向室外安全空间。"
+      },
+      {
+        question: "双流体气动雾化喷嘴如何精准控制Sauter平均液滴粒径（d32）？",
+        answer: "双流体气动喷嘴借助高速压缩空气（1.5至4.0 bar）对外流液体施加强大的气动剪切力。根据Lefebvre雾化动力学模型，Sauter平均直径（d32）与雾化气压及气液质量比（ALR）成反比。外混式喷嘴在出液口外侧完成气液混合剪切，可形成18至40 μm的极窄粒径分布且彻底杜绝内部积料结焦。使d32远小于原粉中位径（d32 < 0.6·d50），可保证微细液滴均匀附着在翻滚颗粒表面，成型为多孔速溶颗粒。"
+      },
+      {
+        question: "依据NFPA 77，除尘滤袋压降ΔP与设备静电接地的关键工程要求是什么？",
+        answer: "滤袋作为粉尘捕集屏障，必须通过高频压缩空气脉冲反吹（4.5至6.0 bar）定期剥离粉尘饼，将滤袋压降严格控制在2.5 kPa以内。过高的压降会扼杀进风并诱发塌床死床。同时，剧烈的颗粒湍流摩擦极易产生高压静电荷。依据NFPA 77规范，滤袋滤料必须混纺不锈钢导电连续纤维，且整机机壳对大地实测接地电阻必须低于10欧姆，杜绝大于物料MIE的静电火花放电。"
+      }
+    ]
+  },
+  ja: {
+    pageTitle: "業務用流動層スプレー造粒機粒子湿潤およびフィルター逆洗爆燃モデラー | IsItKitchenSafe",
+    pageDescription: "粉ミルク、即席飲料、および機能性加工デンプンの造粒に使用される業務用トップスプレー式、ボトムスプレーWurster式、および連続多段流動層造粒機をシミュレート。Geldart粉体流動化速度比、二流体ノズルSauter平均液滴径（d32）、粘性Stokes衝突凝集基準（St_v < 0.15）、バグフィルター逆洗パルス差圧（ΔP）、静電気火花エネルギーと最小着火エネルギー（MIE）、およびNFPA 68爆燃放散ベント適合性をリアルタイムに解析します。",
+    badge: "流動層工学および可燃性粉じん防爆安全",
+    h1: "業務用流動層スプレー造粒機粒子湿潤およびフィルター逆洗爆燃モデラー",
+    lead: "業務用トップスプレー式、ボトムスプレーWurster式および連続多段流動層造粒機を対象に、Geldart流動速比、二流体噴霧液滴d32、動的粘性Stokes衝突数（St_v < 0.15）、バグフィルター差圧（ΔP）、静電放電火花エネルギーvs MIE、およびNFPA 68/652爆発放散安全性を解析します。",
+    breadcrumbsLabel: "流動層スプレー造粒機",
+    faqs: [
+      {
+        question: "トップスプレー流動層造粒機における濡れ崩壊（Defluidization）死床の発生機構とは？",
+        answer: "流動層の安定性は、Ergun式から算出される空塔ガス速度（Ug）と最小流動化速度（Umf）の平衡関係に依存します。バインダー液の噴霧供給量が熱風の蒸発能力を上回ると、粉体表面に過剰な水分が蓄積します。液架橋の毛管張力と粘性凝集力が流動ガスの抗力を凌駕し、Umfが急上昇します。流動速比Ug/Umfが1.5を下回ると気泡流動化が停止し、層全体が目皿板上に固着してブロワーモーターの過負荷停止を招きます。"
+      },
+      {
+        question: "動的粘性Stokes数（St_v）はどのように粒子の衝突凝集と反発を決定づけるのか？",
+        answer: "流動層内の粒子凝集機構は、衝突運動エネルギーと液架橋の粘性散逸能の比を表す動的粘性Stokes数（St_v = 2·m_p·v_0 / (9·π·μ_b·R_b²)）に支配されます。Ennisモデルによれば、運動エネルギーが液膜内で反発前に完全に吸収散逸された場合（St_v < 0.15）にのみ粒子同士が結合し多孔質顆粒を形成します。風速過大により粒子速度が高いと反発して排風フィルターへ飛散し、液滴が粗大すぎるとSt_vがゼロに近づき不均一なペースト状塊となってしまいます。"
+      },
+      {
+        question: "微細な食品有機粉体がNFPA 652および68において極めて高い粉じん爆発危険物とされる理由は？",
+        answer: "加工デンプン、ホエイタンパク質、デキストリン、ココア粉末などの微細食品粉末は、NFPA 652でSt 1またはSt 2に分類される可燃性粉じんです。爆発激甚度が高く（Kst = 100〜220 bar·m/s、Pmax = 7.5〜9.5 bar）、最小着火エネルギーが極めて低い（MIE < 10〜25 mJ）ため、膨張部やフィルター室内に高密度の爆発性粉じん雲（爆発下限界MEC ≈ 30〜60 g/m³）を形成します。NFPA 68に基づき、低慣性爆発放散ベント（Pstat = 0.10 bar）の設置が義務付けられています。"
+      },
+      {
+        question: "外混式二流体スプレーノズルはどのようにSauter平均液滴径（d32）を制御するのか？",
+        answer: "二流体ノズルは高速圧縮空気（1.5〜4.0 bar）を用いて液噴流に強大な空気力学的せん断力を与えます。Lefebvreの微粒化モデルに従い、液滴径d32は噴霧空気圧および気液質量比（ALR）に反比例します。外混式ノズルキャップは噴孔の外側でせん断するため、内部詰まりを生じさせることなく18〜40 μmの狭小な液滴分布を形成し、原粉粒子表面へ均一に付着して即溶性に優れた顆粒を生み出します。"
+      },
+      {
+        question: "NFPA 77が規定するバグフィルター差圧ΔPおよび装置アース接地の工学的基準とは？",
+        answer: "バグフィルターは同伴飛散した微粉を捕捉します。定期的な逆洗パルス（4.5〜6.0 bar）により粉じんケーキを払い落とし、フィルター差圧を2.5 kPa以下に保つ必要があります。差圧過大は送風を絞り濡れ崩壊を誘発します。また、粉体の激しい乱流摩擦は膨大な静電荷を蓄積します。NFPA 77に基づき、ろ材にはステンレス導電繊維を混紡し、装置全体の対地接地抵抗を常時10 Ω以下に保ち、放電火花を遮断しなければなりません。"
+      }
+    ]
+  }
+};
+
+const content = CONTENT[lang as Exclude<SupportedLanguage, 'en'>];
+
+const breadcrumbs = [
+  { label: t('nav.home'), href: tp('/') },
+  { label: t('nav.tools'), href: tp('/tools/') },
+  { label: content.breadcrumbsLabel }
+];
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "@id": `https://isitkitchensafe.com/${lang}/tools/commercial-fluidized-spray-granulator-modeler/#webapp`,
+      "url": `https://isitkitchensafe.com/${lang}/tools/commercial-fluidized-spray-granulator-modeler/`,
+      "name": content.pageTitle,
+      "applicationCategory": "EngineeringApplication",
+      "operatingSystem": "All",
+      "browserRequirements": "Requires JavaScript. Requires HTML5 Canvas/CSS3.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": content.pageDescription
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": t('nav.home'),
+          "item": `https://isitkitchensafe.com${tp('/')}`
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": t('nav.tools'),
+          "item": `https://isitkitchensafe.com${tp('/tools/')}`
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": content.breadcrumbsLabel,
+          "item": `https://isitkitchensafe.com${tp('/tools/commercial-fluidized-spray-granulator-modeler/')}`
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": content.faqs.map(faq => ({
+        "@type": "Question",
+        "name": faq.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": faq.answer
+        }
+      }))
+    }
+  ]
+};
+---
+
+<Layout 
+  title={content.pageTitle}
+  description={content.pageDescription}
+  structuredData={structuredData}
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+    <Breadcrumbs items={breadcrumbs} />
+
+    <div class="mt-6">
+      <CommercialFluidizedSprayGranulatorModeler lang={lang} />
+    </div>
+
+    <!-- Structured FAQ Accordion Section -->
+    <section class="mt-12 p-6 md:p-8 rounded-2xl bg-surface border border-hairline shadow-sm space-y-6">
+      <div class="border-b border-hairline pb-4">
+        <h2 class="text-xl font-bold text-ink tracking-tight">
+          {content.h1} - FAQ
+        </h2>
+        <p class="text-xs text-body mt-1">
+          {content.lead}
+        </p>
+      </div>
+
+      <div class="space-y-4">
+        {content.faqs.map((faq, idx) => (
+          <details class="group p-4 rounded-xl bg-surface-soft border border-hairline transition-colors open:bg-surface">
+            <summary class="font-semibold text-xs md:text-sm text-ink cursor-pointer list-none flex justify-between items-center gap-2">
+              <span>{idx + 1}. {faq.question}</span>
+              <span class="text-body group-open:rotate-180 transition-transform text-xs">▼</span>
+            </summary>
+            <div class="text-xs text-body leading-relaxed mt-3 pt-3 border-t border-hairline/60">
+              {faq.answer}
+            </div>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+</Layout>

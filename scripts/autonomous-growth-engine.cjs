@@ -130,7 +130,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-extrusion-cooker-shear-modeler', name: 'Commercial Continuous Extrusion Cooker Screw Barrel Shear Friction & Gelatinization Degradation Modeler', category: 'Rheological Food Engineering & High-Pressure Tribology', component: 'CommercialExtrusionCookerShearModeler.astro', dataFile: 'extrusion-cooker-shear-data.json' },
   { slug: 'commercial-vacuum-microwave-dryer-modeler', name: 'Commercial Continuous Vacuum Microwave Belt Dryer Magnetron Plasma Arcing & Product Scorching Modeler', category: 'Microwave Electromagnetics & Vacuum Processing Safety', component: 'CommercialVacuumMicrowaveDryerModeler.astro', dataFile: 'vacuum-microwave-dryer-data.json' },
   { slug: 'commercial-high-pressure-homogenizer-modeler', name: 'Commercial High-Pressure Homogenizer Micro-Orifice Cavitation Erosion & Valve Seat Spalling Modeler', category: 'Ultra-High-Pressure Fluid Dynamics & Sonic Cavitation', component: 'CommercialHighPressureHomogenizerModeler.astro', dataFile: 'high-pressure-homogenizer-data.json' },
-  { slug: 'commercial-scraped-surface-heat-exchanger-modeler', name: 'Commercial Continuous Aseptic Scraped-Surface Heat Exchanger Blade Chattering & Protein Fouling Modeler', category: 'Thermal Process Engineering & Aseptic Tribology', component: 'CommercialScrapedSurfaceHeatExchangerModeler.astro', dataFile: 'scraped-surface-heat-exchanger-data.json' }
+  { slug: 'commercial-scraped-surface-heat-exchanger-modeler', name: 'Commercial Continuous Aseptic Scraped-Surface Heat Exchanger Blade Chattering & Protein Fouling Modeler', category: 'Thermal Process Engineering & Aseptic Tribology', component: 'CommercialScrapedSurfaceHeatExchangerModeler.astro', dataFile: 'scraped-surface-heat-exchanger-data.json' },
+  { slug: 'commercial-fluidized-spray-granulator-modeler', name: 'Commercial Fluidized Spray Granulator Particle Wetting & Filter Bag Pulse-Jet Deflagration Modeler', category: 'Fluidization Mechanics & Combustible Dust Safety', component: 'CommercialFluidizedSprayGranulatorModeler.astro', dataFile: 'fluidized-spray-granulator-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -351,7 +352,8 @@ function auditDatasets() {
     'extrusion-cooker-shear-data.json',
     'vacuum-microwave-dryer-data.json',
     'high-pressure-homogenizer-data.json',
-    'scraped-surface-heat-exchanger-data.json'
+    'scraped-surface-heat-exchanger-data.json',
+    'fluidized-spray-granulator-data.json'
 ];
 
   const datasetStats = {};
@@ -591,24 +593,17 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
     const candidateTools = [
     {
-      title: 'Commercial Fluidized Spray Granulator Particle Wetting & Filter Bag Pulse-Jet Deflagration Modeler',
-      category: 'Fluidization Mechanics & Combustible Dust Safety',
-      intent: 'Models top/bottom spray fluid bed granulators, binary nozzle droplet atomization, powder bed agglomeration Stokes criteria, solvent vapor evaporation kinetics, and pulse-jet exhaust filter deflagration venting under NFPA 68.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '2,800+ US impressions'
-    },
-    {
       title: 'Commercial Supercritical CO2 Fluid Extractor High-Pressure Autoclave Pressure Surging & Seal Explosive Decompression Modeler',
       category: 'High-Pressure Thermodynamics & Supercritical Fluid Safety',
       intent: 'Models commercial supercritical CO2 botanical extraction vessels (350 to 650 bar, 40°C to 80°C), rapid depressurization Joule-Thomson cooling, dry-ice freeze plugging in relief orifices, and elastomeric O-ring explosive decompression failure.',
-      priority: 'HIGH',
+      priority: 'CRITICAL_HIGH',
       estimatedMonthlyVolume: '2,500+ US impressions'
     },
     {
       title: 'Commercial Rotary Atomizer Spray Dryer Droplet Wall Deposition & Scorching Modeler',
       category: 'Aerosol Fluid Dynamics & Thermal Drying Safety',
       intent: 'Models commercial industrial spray dryers with high-speed spinning wheel rotary atomizers (12,000 to 24,000 RPM), centrifugal droplet ligament breakup, drying air swirl flow patterns, product wall impact deposition fouling, and combustible powder autoignition under NFPA 652.',
-      priority: 'MEDIUM',
+      priority: 'HIGH',
       estimatedMonthlyVolume: '2,300+ US impressions'
     },
     {
@@ -617,6 +612,13 @@ function auditGrowthOpportunities() {
       intent: 'Models 915 MHz single-mode commercial continuous microwave-assisted thermal sterilization (MATS) pressurized water immersion cavities, dielectric loss factor heating uniformity, barrier film retort pouch delamination, and microbial spore inactivation.',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '2,200+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous High-Intensity Pulsed Light (HIPL) Conveyor Quartz Tube Thermal Shock & Microsecond Xenon Flash Lethality Modeler',
+      category: 'Photonic Microbiology & Optical Safety',
+      intent: 'Models commercial continuous high-intensity pulsed light (HIPL) decontamination conveyors for eggshell and packaging sanitization, xenon flash lamp microsecond radiant fluence (1.2 to 3.8 J/cm²), DNA pyrimidine photolysis dimer formation, quartz protection sleeve thermal shock fracture, and cooling air ozone abatement.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '2,100+ US impressions'
     }
   ];
 

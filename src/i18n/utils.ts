@@ -131,7 +131,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-extrusion-cooker-shear-modeler',
   'tools/commercial-vacuum-microwave-dryer-modeler',
   'tools/commercial-high-pressure-homogenizer-modeler',
-  'tools/commercial-scraped-surface-heat-exchanger-modeler'
+  'tools/commercial-scraped-surface-heat-exchanger-modeler',
+  'tools/commercial-fluidized-spray-granulator-modeler'
 ];
 
 const esSlugs = new Set([
