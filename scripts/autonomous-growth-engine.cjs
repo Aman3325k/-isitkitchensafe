@@ -133,7 +133,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-scraped-surface-heat-exchanger-modeler', name: 'Commercial Continuous Aseptic Scraped-Surface Heat Exchanger Blade Chattering & Protein Fouling Modeler', category: 'Thermal Process Engineering & Aseptic Tribology', component: 'CommercialScrapedSurfaceHeatExchangerModeler.astro', dataFile: 'scraped-surface-heat-exchanger-data.json' },
   { slug: 'commercial-fluidized-spray-granulator-modeler', name: 'Commercial Fluidized Spray Granulator Particle Wetting & Filter Bag Pulse-Jet Deflagration Modeler', category: 'Fluidization Mechanics & Combustible Dust Safety', component: 'CommercialFluidizedSprayGranulatorModeler.astro', dataFile: 'fluidized-spray-granulator-data.json' },
   { slug: 'commercial-supercritical-co2-extractor-modeler', name: 'Commercial Supercritical CO2 Fluid Extractor High-Pressure Autoclave Pressure Surging & Seal Explosive Decompression Modeler', category: 'High-Pressure Thermodynamics & Supercritical Fluid Safety', component: 'CommercialSupercriticalCo2ExtractorModeler.astro', dataFile: 'supercritical-co2-extractor-data.json' },
-  { slug: 'commercial-rotary-atomizer-spray-dryer-modeler', name: 'Commercial Rotary Atomizer Spray Dryer Droplet Wall Deposition & Scorching Modeler', category: 'Aerosol Fluid Dynamics & Thermal Drying Safety', component: 'CommercialRotaryAtomizerSprayDryerModeler.astro', dataFile: 'rotary-atomizer-spray-dryer-data.json' }
+  { slug: 'commercial-rotary-atomizer-spray-dryer-modeler', name: 'Commercial Rotary Atomizer Spray Dryer Droplet Wall Deposition & Scorching Modeler', category: 'Aerosol Fluid Dynamics & Thermal Drying Safety', component: 'CommercialRotaryAtomizerSprayDryerModeler.astro', dataFile: 'rotary-atomizer-spray-dryer-data.json' },
+  { slug: 'commercial-mats-sterilization-modeler', name: 'Commercial Microwave-Assisted Thermal Sterilization (MATS) High-Power Cavity Thermal Inversion Modeler', category: 'Microwave Electromagnetics & Aseptic Thermal Processing', component: 'CommercialMatsSterilizationModeler.astro', dataFile: 'mats-sterilization-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -357,7 +358,8 @@ function auditDatasets() {
     'scraped-surface-heat-exchanger-data.json',
     'fluidized-spray-granulator-data.json',
     'supercritical-co2-extractor-data.json',
-    'rotary-atomizer-spray-dryer-data.json'
+    'rotary-atomizer-spray-dryer-data.json',
+    'mats-sterilization-data.json'
 ];
 
   const datasetStats = {};
@@ -595,26 +597,19 @@ function auditGrowthOpportunities() {
   });
 
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
-    const candidateTools = [
-    {
-      title: 'Commercial Microwave-Assisted Thermal Sterilization (MATS) High-Power Cavity Thermal Inversion Modeler',
-      category: 'Microwave Electromagnetics & Aseptic Thermal Processing',
-      intent: 'Models 915 MHz single-mode commercial continuous microwave-assisted thermal sterilization (MATS) pressurized water immersion cavities, dielectric loss factor heating uniformity, barrier film retort pouch delamination, and microbial spore inactivation under FDA 21 CFR § 113.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '2,500+ US impressions'
-    },
+  const candidateTools = [
     {
       title: 'Commercial Continuous High-Intensity Pulsed Light (HIPL) Conveyor Quartz Tube Thermal Shock & Microsecond Xenon Flash Lethality Modeler',
       category: 'Photonic Microbiology & Optical Safety',
       intent: 'Models commercial continuous high-intensity pulsed light (HIPL) decontamination conveyors for eggshell and packaging sanitization, xenon flash lamp microsecond radiant fluence (1.2 to 3.8 J/cm²), DNA pyrimidine photolysis dimer formation, quartz protection sleeve thermal shock fracture, and cooling air ozone abatement.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '2,300+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '2,400+ US impressions'
     },
     {
       title: 'Commercial Continuous Vacuum Freeze-Drying Tunnel Ice Sublimation & Shelf Glycol Thermal Uniformity Modeler',
       category: 'Cryogenic Vacuum Physics & Industrial Lyophilization',
       intent: 'Models continuous multi-stage industrial freeze-drying conveyor tunnels (0.05 to 0.20 mbar, -45°C to +40°C shelf heating), sublimative vapor choke in vacuum ducts, ice condensation coil defrost cycles, and radiant heat uniformity across bulk food trays.',
-      priority: 'MEDIUM',
+      priority: 'HIGH',
       estimatedMonthlyVolume: '2,200+ US impressions'
     },
     {
@@ -623,6 +618,13 @@ function auditGrowthOpportunities() {
       intent: 'Models commercial continuous liquid food preservation under high-voltage pulsed electric fields (20 to 45 kV/cm, 1 to 5 μs pulse widths), non-thermal bacterial cell membrane reversible vs irreversible electroporation, electrode electrochemical corrosion, titanium alloy surface pitting, and dielectric breakdown electrical arc quenching.',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '2,000+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous Radio Frequency (RF) Post-Bake Moisture Leveling & Thermal Runaway Modeler',
+      category: 'Radio Frequency Electromagnetics & Industrial Baking Safety',
+      intent: 'Models 27.12 MHz industrial radio frequency (RF) continuous post-bake moisture leveling for biscuits and crackers, ionic differential heating in high-moisture localized pockets, dielectric breakdown voltage arcing across electrode plates, and band thermal runaway prevention.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '2,100+ US impressions'
     }
   ];
 
