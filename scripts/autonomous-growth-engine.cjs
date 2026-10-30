@@ -128,7 +128,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-high-shear-colloid-mill-modeler', name: 'Commercial High-Shear Colloid Mill Rotor-Stator Thermal Friction & Micro-Particle Emulsion Shear Modeler', category: 'Rheology & Sanitary Fluid Mechanics', component: 'CommercialHighShearColloidMillModeler.astro', dataFile: 'colloid-mill-shear-friction-data.json' },
   { slug: 'commercial-hydrostatic-cooker-cooler-modeler', name: 'Commercial Continuous Hydrostatic Cooker-Cooler Hydrostatic Leg Pressure Differential & Steam Bleed Modeler', category: 'Hydrostatic Thermodynamics & Commercial Canning Safety', component: 'CommercialHydrostaticCookerCoolerModeler.astro', dataFile: 'hydrostatic-cooker-cooler-data.json' },
   { slug: 'commercial-extrusion-cooker-shear-modeler', name: 'Commercial Continuous Extrusion Cooker Screw Barrel Shear Friction & Gelatinization Degradation Modeler', category: 'Rheological Food Engineering & High-Pressure Tribology', component: 'CommercialExtrusionCookerShearModeler.astro', dataFile: 'extrusion-cooker-shear-data.json' },
-  { slug: 'commercial-vacuum-microwave-dryer-modeler', name: 'Commercial Continuous Vacuum Microwave Belt Dryer Magnetron Plasma Arcing & Product Scorching Modeler', category: 'Microwave Electromagnetics & Vacuum Processing Safety', component: 'CommercialVacuumMicrowaveDryerModeler.astro', dataFile: 'vacuum-microwave-dryer-data.json' }
+  { slug: 'commercial-vacuum-microwave-dryer-modeler', name: 'Commercial Continuous Vacuum Microwave Belt Dryer Magnetron Plasma Arcing & Product Scorching Modeler', category: 'Microwave Electromagnetics & Vacuum Processing Safety', component: 'CommercialVacuumMicrowaveDryerModeler.astro', dataFile: 'vacuum-microwave-dryer-data.json' },
+  { slug: 'commercial-high-pressure-homogenizer-modeler', name: 'Commercial High-Pressure Homogenizer Micro-Orifice Cavitation Erosion & Valve Seat Spalling Modeler', category: 'Ultra-High-Pressure Fluid Dynamics & Sonic Cavitation', component: 'CommercialHighPressureHomogenizerModeler.astro', dataFile: 'high-pressure-homogenizer-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -586,32 +587,32 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
     const candidateTools = [
     {
-      title: 'Commercial High-Pressure Homogenizer Micro-Orifice Cavitation Erosion & Valve Seat Spalling Modeler',
-      category: 'Ultra-High-Pressure Fluid Dynamics & Sonic Cavitation',
-      intent: 'Models commercial dairy & beverage ultra-high-pressure homogenizers (1,000 to 2,500 bar / 15,000 to 36,000 psi), supersonic jet impingement, micro-orifice cavitation bubble collapse, tungsten carbide valve seat impact spalling, and 3-A Sanitary standard particulate dispersion.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '3,300+ US impressions'
-    },
-    {
       title: 'Commercial Continuous Aseptic Scraped-Surface Heat Exchanger Blade Chattering & Protein Fouling Modeler',
       category: 'Thermal Process Engineering & Aseptic Tribology',
       intent: 'Models continuous commercial aseptic scraped-surface heat exchangers (SSHE) for viscous purees, infant formulas, and sauces, rotating scraper blade boundary hydrodynamic lift vs chattering cavitation, high-temperature heat transfer wall protein burn-on fouling (Biot number > 0.1), and CIP chemical stripping.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '2,900+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '3,100+ US impressions'
     },
     {
       title: 'Commercial Fluidized Spray Granulator Particle Wetting & Filter Bag Pulse-Jet Deflagration Modeler',
       category: 'Fluidization Mechanics & Combustible Dust Safety',
       intent: 'Models top/bottom spray fluid bed granulators, binary nozzle droplet atomization, powder bed agglomeration Stokes criteria, solvent vapor evaporation kinetics, and pulse-jet exhaust filter deflagration venting under NFPA 68.',
-      priority: 'MEDIUM',
-      estimatedMonthlyVolume: '2,600+ US impressions'
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '2,800+ US impressions'
     },
     {
       title: 'Commercial Supercritical CO2 Fluid Extractor High-Pressure Autoclave Pressure Surging & Seal Explosive Decompression Modeler',
       category: 'High-Pressure Thermodynamics & Supercritical Fluid Safety',
       intent: 'Models commercial supercritical CO2 botanical extraction vessels (350 to 650 bar, 40°C to 80°C), rapid depressurization Joule-Thomson cooling, dry-ice freeze plugging in relief orifices, and elastomeric O-ring explosive decompression failure.',
       priority: 'MEDIUM',
-      estimatedMonthlyVolume: '2,400+ US impressions'
+      estimatedMonthlyVolume: '2,500+ US impressions'
+    },
+    {
+      title: 'Commercial Rotary Atomizer Spray Dryer Droplet Wall Deposition & Scorching Modeler',
+      category: 'Aerosol Fluid Dynamics & Thermal Drying Safety',
+      intent: 'Models commercial industrial spray dryers with high-speed spinning wheel rotary atomizers (12,000 to 24,000 RPM), centrifugal droplet ligament breakup, drying air swirl flow patterns, product wall impact deposition fouling, and combustible powder autoignition under NFPA 652.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '2,300+ US impressions'
     }
   ];
 

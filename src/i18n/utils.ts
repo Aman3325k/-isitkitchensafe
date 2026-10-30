@@ -129,7 +129,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-high-shear-colloid-mill-modeler',
   'tools/commercial-hydrostatic-cooker-cooler-modeler',
   'tools/commercial-extrusion-cooker-shear-modeler',
-  'tools/commercial-vacuum-microwave-dryer-modeler'
+  'tools/commercial-vacuum-microwave-dryer-modeler',
+  'tools/commercial-high-pressure-homogenizer-modeler'
 ];
 
 const esSlugs = new Set([
