@@ -135,7 +135,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-fluidized-spray-granulator-modeler',
   'tools/commercial-supercritical-co2-extractor-modeler',
   'tools/commercial-rotary-atomizer-spray-dryer-modeler',
-  'tools/commercial-mats-sterilization-modeler'
+  'tools/commercial-mats-sterilization-modeler',
+  'tools/commercial-hipl-pulsed-light-modeler'
 ];
 
 const esSlugs = new Set([

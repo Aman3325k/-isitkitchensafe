@@ -134,7 +134,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-fluidized-spray-granulator-modeler', name: 'Commercial Fluidized Spray Granulator Particle Wetting & Filter Bag Pulse-Jet Deflagration Modeler', category: 'Fluidization Mechanics & Combustible Dust Safety', component: 'CommercialFluidizedSprayGranulatorModeler.astro', dataFile: 'fluidized-spray-granulator-data.json' },
   { slug: 'commercial-supercritical-co2-extractor-modeler', name: 'Commercial Supercritical CO2 Fluid Extractor High-Pressure Autoclave Pressure Surging & Seal Explosive Decompression Modeler', category: 'High-Pressure Thermodynamics & Supercritical Fluid Safety', component: 'CommercialSupercriticalCo2ExtractorModeler.astro', dataFile: 'supercritical-co2-extractor-data.json' },
   { slug: 'commercial-rotary-atomizer-spray-dryer-modeler', name: 'Commercial Rotary Atomizer Spray Dryer Droplet Wall Deposition & Scorching Modeler', category: 'Aerosol Fluid Dynamics & Thermal Drying Safety', component: 'CommercialRotaryAtomizerSprayDryerModeler.astro', dataFile: 'rotary-atomizer-spray-dryer-data.json' },
-  { slug: 'commercial-mats-sterilization-modeler', name: 'Commercial Microwave-Assisted Thermal Sterilization (MATS) High-Power Cavity Thermal Inversion Modeler', category: 'Microwave Electromagnetics & Aseptic Thermal Processing', component: 'CommercialMatsSterilizationModeler.astro', dataFile: 'mats-sterilization-data.json' }
+  { slug: 'commercial-mats-sterilization-modeler', name: 'Commercial Microwave-Assisted Thermal Sterilization (MATS) High-Power Cavity Thermal Inversion Modeler', category: 'Microwave Electromagnetics & Aseptic Thermal Processing', component: 'CommercialMatsSterilizationModeler.astro', dataFile: 'mats-sterilization-data.json' },
+  { slug: 'commercial-hipl-pulsed-light-modeler', name: 'Commercial Continuous High-Intensity Pulsed Light (HIPL) Conveyor Quartz Tube Thermal Shock & Microsecond Xenon Flash Lethality Modeler', category: 'Photonic Microbiology & Optical Safety', component: 'CommercialHiplPulsedLightModeler.astro', dataFile: 'hipl-pulsed-light-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -599,24 +600,17 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Continuous High-Intensity Pulsed Light (HIPL) Conveyor Quartz Tube Thermal Shock & Microsecond Xenon Flash Lethality Modeler',
-      category: 'Photonic Microbiology & Optical Safety',
-      intent: 'Models commercial continuous high-intensity pulsed light (HIPL) decontamination conveyors for eggshell and packaging sanitization, xenon flash lamp microsecond radiant fluence (1.2 to 3.8 J/cm²), DNA pyrimidine photolysis dimer formation, quartz protection sleeve thermal shock fracture, and cooling air ozone abatement.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '2,400+ US impressions'
-    },
-    {
       title: 'Commercial Continuous Vacuum Freeze-Drying Tunnel Ice Sublimation & Shelf Glycol Thermal Uniformity Modeler',
       category: 'Cryogenic Vacuum Physics & Industrial Lyophilization',
       intent: 'Models continuous multi-stage industrial freeze-drying conveyor tunnels (0.05 to 0.20 mbar, -45°C to +40°C shelf heating), sublimative vapor choke in vacuum ducts, ice condensation coil defrost cycles, and radiant heat uniformity across bulk food trays.',
-      priority: 'HIGH',
+      priority: 'CRITICAL_HIGH',
       estimatedMonthlyVolume: '2,200+ US impressions'
     },
     {
       title: 'Commercial Continuous High-Voltage Pulsed Electric Field (PEF) Microbial Electroporation & Electrode Cavitation Modeler',
       category: 'Electrophysical Microbiology & Sanitary Hydrodynamics',
       intent: 'Models commercial continuous liquid food preservation under high-voltage pulsed electric fields (20 to 45 kV/cm, 1 to 5 μs pulse widths), non-thermal bacterial cell membrane reversible vs irreversible electroporation, electrode electrochemical corrosion, titanium alloy surface pitting, and dielectric breakdown electrical arc quenching.',
-      priority: 'MEDIUM',
+      priority: 'HIGH',
       estimatedMonthlyVolume: '2,000+ US impressions'
     },
     {
@@ -625,6 +619,13 @@ function auditGrowthOpportunities() {
       intent: 'Models 27.12 MHz industrial radio frequency (RF) continuous post-bake moisture leveling for biscuits and crackers, ionic differential heating in high-moisture localized pockets, dielectric breakdown voltage arcing across electrode plates, and band thermal runaway prevention.',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '2,100+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous Ohmic Heating Liquid Sterilization Volumetric Electroporation & Electrode Fouling Modeler',
+      category: 'Electrochemical Thermal Processing & Liquid Food Safety',
+      intent: 'Models continuous commercial aseptic ohmic liquid pasteurization (50 to 60 Hz AC, 15 to 45 V/cm electric field gradients), electrolytic volumetric dissipation heating without hot boundary surfaces, ionic differential conductivities across food particulates, titanium/platinum-coated electrode electrochemical corrosion, and fouling deposit burn-on layer mitigation.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '1,950+ US impressions'
     }
   ];
 
