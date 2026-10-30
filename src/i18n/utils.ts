@@ -128,7 +128,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-drum-roaster-co-chaff-modeler',
   'tools/commercial-high-shear-colloid-mill-modeler',
   'tools/commercial-hydrostatic-cooker-cooler-modeler',
-  'tools/commercial-extrusion-cooker-shear-modeler'
+  'tools/commercial-extrusion-cooker-shear-modeler',
+  'tools/commercial-vacuum-microwave-dryer-modeler'
 ];
 
 const esSlugs = new Set([
