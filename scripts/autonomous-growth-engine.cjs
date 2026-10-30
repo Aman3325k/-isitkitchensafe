@@ -132,7 +132,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-high-pressure-homogenizer-modeler', name: 'Commercial High-Pressure Homogenizer Micro-Orifice Cavitation Erosion & Valve Seat Spalling Modeler', category: 'Ultra-High-Pressure Fluid Dynamics & Sonic Cavitation', component: 'CommercialHighPressureHomogenizerModeler.astro', dataFile: 'high-pressure-homogenizer-data.json' },
   { slug: 'commercial-scraped-surface-heat-exchanger-modeler', name: 'Commercial Continuous Aseptic Scraped-Surface Heat Exchanger Blade Chattering & Protein Fouling Modeler', category: 'Thermal Process Engineering & Aseptic Tribology', component: 'CommercialScrapedSurfaceHeatExchangerModeler.astro', dataFile: 'scraped-surface-heat-exchanger-data.json' },
   { slug: 'commercial-fluidized-spray-granulator-modeler', name: 'Commercial Fluidized Spray Granulator Particle Wetting & Filter Bag Pulse-Jet Deflagration Modeler', category: 'Fluidization Mechanics & Combustible Dust Safety', component: 'CommercialFluidizedSprayGranulatorModeler.astro', dataFile: 'fluidized-spray-granulator-data.json' },
-  { slug: 'commercial-supercritical-co2-extractor-modeler', name: 'Commercial Supercritical CO2 Fluid Extractor High-Pressure Autoclave Pressure Surging & Seal Explosive Decompression Modeler', category: 'High-Pressure Thermodynamics & Supercritical Fluid Safety', component: 'CommercialSupercriticalCo2ExtractorModeler.astro', dataFile: 'supercritical-co2-extractor-data.json' }
+  { slug: 'commercial-supercritical-co2-extractor-modeler', name: 'Commercial Supercritical CO2 Fluid Extractor High-Pressure Autoclave Pressure Surging & Seal Explosive Decompression Modeler', category: 'High-Pressure Thermodynamics & Supercritical Fluid Safety', component: 'CommercialSupercriticalCo2ExtractorModeler.astro', dataFile: 'supercritical-co2-extractor-data.json' },
+  { slug: 'commercial-rotary-atomizer-spray-dryer-modeler', name: 'Commercial Rotary Atomizer Spray Dryer Droplet Wall Deposition & Scorching Modeler', category: 'Aerosol Fluid Dynamics & Thermal Drying Safety', component: 'CommercialRotaryAtomizerSprayDryerModeler.astro', dataFile: 'rotary-atomizer-spray-dryer-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -355,7 +356,8 @@ function auditDatasets() {
     'high-pressure-homogenizer-data.json',
     'scraped-surface-heat-exchanger-data.json',
     'fluidized-spray-granulator-data.json',
-    'supercritical-co2-extractor-data.json'
+    'supercritical-co2-extractor-data.json',
+    'rotary-atomizer-spray-dryer-data.json'
 ];
 
   const datasetStats = {};
@@ -595,32 +597,32 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
     const candidateTools = [
     {
-      title: 'Commercial Rotary Atomizer Spray Dryer Droplet Wall Deposition & Scorching Modeler',
-      category: 'Aerosol Fluid Dynamics & Thermal Drying Safety',
-      intent: 'Models commercial industrial spray dryers with high-speed spinning wheel rotary atomizers (12,000 to 24,000 RPM), centrifugal droplet ligament breakup, drying air swirl flow patterns, product wall impact deposition fouling, and combustible powder autoignition under NFPA 652.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '2,500+ US impressions'
-    },
-    {
       title: 'Commercial Microwave-Assisted Thermal Sterilization (MATS) High-Power Cavity Thermal Inversion Modeler',
       category: 'Microwave Electromagnetics & Aseptic Thermal Processing',
-      intent: 'Models 915 MHz single-mode commercial continuous microwave-assisted thermal sterilization (MATS) pressurized water immersion cavities, dielectric loss factor heating uniformity, barrier film retort pouch delamination, and microbial spore inactivation.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '2,300+ US impressions'
+      intent: 'Models 915 MHz single-mode commercial continuous microwave-assisted thermal sterilization (MATS) pressurized water immersion cavities, dielectric loss factor heating uniformity, barrier film retort pouch delamination, and microbial spore inactivation under FDA 21 CFR § 113.',
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '2,500+ US impressions'
     },
     {
       title: 'Commercial Continuous High-Intensity Pulsed Light (HIPL) Conveyor Quartz Tube Thermal Shock & Microsecond Xenon Flash Lethality Modeler',
       category: 'Photonic Microbiology & Optical Safety',
       intent: 'Models commercial continuous high-intensity pulsed light (HIPL) decontamination conveyors for eggshell and packaging sanitization, xenon flash lamp microsecond radiant fluence (1.2 to 3.8 J/cm²), DNA pyrimidine photolysis dimer formation, quartz protection sleeve thermal shock fracture, and cooling air ozone abatement.',
-      priority: 'MEDIUM',
-      estimatedMonthlyVolume: '2,200+ US impressions'
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '2,300+ US impressions'
     },
     {
       title: 'Commercial Continuous Vacuum Freeze-Drying Tunnel Ice Sublimation & Shelf Glycol Thermal Uniformity Modeler',
       category: 'Cryogenic Vacuum Physics & Industrial Lyophilization',
       intent: 'Models continuous multi-stage industrial freeze-drying conveyor tunnels (0.05 to 0.20 mbar, -45°C to +40°C shelf heating), sublimative vapor choke in vacuum ducts, ice condensation coil defrost cycles, and radiant heat uniformity across bulk food trays.',
       priority: 'MEDIUM',
-      estimatedMonthlyVolume: '2,100+ US impressions'
+      estimatedMonthlyVolume: '2,200+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous High-Voltage Pulsed Electric Field (PEF) Microbial Electroporation & Electrode Cavitation Modeler',
+      category: 'Electrophysical Microbiology & Sanitary Hydrodynamics',
+      intent: 'Models commercial continuous liquid food preservation under high-voltage pulsed electric fields (20 to 45 kV/cm, 1 to 5 μs pulse widths), non-thermal bacterial cell membrane reversible vs irreversible electroporation, electrode electrochemical corrosion, titanium alloy surface pitting, and dielectric breakdown electrical arc quenching.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '2,000+ US impressions'
     }
   ];
 

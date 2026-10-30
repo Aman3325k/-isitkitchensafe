@@ -133,7 +133,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-high-pressure-homogenizer-modeler',
   'tools/commercial-scraped-surface-heat-exchanger-modeler',
   'tools/commercial-fluidized-spray-granulator-modeler',
-  'tools/commercial-supercritical-co2-extractor-modeler'
+  'tools/commercial-supercritical-co2-extractor-modeler',
+  'tools/commercial-rotary-atomizer-spray-dryer-modeler'
 ];
 
 const esSlugs = new Set([
