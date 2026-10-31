@@ -1,0 +1,953 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import rfData from '../data/rf-post-bake-leveling-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  systemLabel: string;
+  systemHelp: string;
+  matrixLabel: string;
+  matrixHelp: string;
+  powerLabel: string;
+  powerHelp: string;
+  gapLabel: string;
+  gapHelp: string;
+  beltSpeedLabel: string;
+  beltSpeedHelp: string;
+  moistureInLabel: string;
+  moistureInHelp: string;
+  airRhLabel: string;
+  airRhHelp: string;
+  saltLabel: string;
+  saltHelp: string;
+  presetsTitle: string;
+  presetCrackerAntiChecking: string;
+  presetBiscuitLowAcrylamide: string;
+  presetDigestiveCoreDrying: string;
+  presetArcFlashoverHazard: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  centerMoistureLabel: string;
+  moistureDiffLabel: string;
+  checkingRiskLabel: string;
+  selectiveHeatingRatioLabel: string;
+  fieldStrengthLabel: string;
+  arcSafetyFactorLabel: string;
+  acrylamideLevelLabel: string;
+  thermalRunawayLabel: string;
+  emfContainmentLabel: string;
+  safetyStatusLabel: string;
+  primaryRiskLabel: string;
+  mechanismsLabel: string;
+  mitigationLabel: string;
+  scienceTitle: string;
+  scienceSub: string;
+  tableTitle: string;
+}
+
+const DICT: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Radio Frequency Electromagnetics & Industrial Baking Safety",
+    title: "Commercial Continuous Radio Frequency (RF) Post-Bake Moisture Leveling Modeler",
+    subtitle: "Simulate 27.12 MHz industrial radio frequency dielectric moisture leveling for biscuits and crackers. Calculate selective water dissipation, post-packaging checking stress elimination, acrylamide reduction under EU 2017/2158, Townsend air breakdown voltage arcing margins, and OSHA 29 CFR § 1910.97 EMF compliance.",
+    controlsTitle: "RF Post-Bake Generator & Operating Parameters",
+    controlsSub: "Configure applicator geometry, generator power, electrode gap, belt velocity, and incoming biscuit moisture gradients.",
+    systemLabel: "RF Drying Applicator System:",
+    systemHelp: "Select commercial RF generator configuration, belt width, electrode length, and arc detection system.",
+    matrixLabel: "Baked Biscuit / Cracker Matrix:",
+    matrixHelp: "Select formulation dough type, initial core-to-edge moisture gradient, and mechanical tensile strength.",
+    powerLabel: "RF Generator Net Output Power (kW):",
+    powerHelp: "High-frequency electromagnetic power delivered to applicator electrodes at 27.12 MHz.",
+    gapLabel: "Upper Electrode Air Gap Height (mm):",
+    gapHelp: "Clearance distance between high-voltage electrode and grounded conveyor band. Smaller gaps increase field strength.",
+    beltSpeedLabel: "Conveyor Belt Velocity (m/min):",
+    beltSpeedHelp: "Product transit speed through RF chamber governing exposure residence time.",
+    moistureInLabel: "Oven Exit Core Moisture Content (%):",
+    moistureInHelp: "Initial moisture in biscuit center lamellae prior to entering the RF post-bake leveling tunnel.",
+    airRhLabel: "Applicator Chamber Air Relative Humidity (% RH):",
+    airRhHelp: "Ambient moisture in air gap. High humidity lowers dielectric breakdown threshold, increasing arc risk.",
+    saltLabel: "Formulation Dough Salt Content (% NaCl):",
+    saltHelp: "Ionic salt concentration. Higher salt elevates ionic conduction and thermal runaway susceptibility.",
+    presetsTitle: "Standard Industrial Operation Presets",
+    presetCrackerAntiChecking: "Industrial Cracker Anti-Checking (75 kW, 27.12 MHz, 32 m/min)",
+    presetBiscuitLowAcrylamide: "Hard Sweet Biscuit Low-Acrylamide Optimization (50 kW, 24 m/min)",
+    presetDigestiveCoreDrying: "Wholemeal Digestive Deep-Core Leveling (95 kW, 16 m/min)",
+    presetArcFlashoverHazard: "Critical Dielectric Arcing & Thermal Runaway Hazard",
+    diagnosticTitle: "Real-Time Dielectric & Process Diagnostics",
+    diagnosticSub: "Calculated electromagnetic field gradients, moisture differentials, checking risk, and electrical safety factors.",
+    centerMoistureLabel: "Final Center Moisture:",
+    moistureDiffLabel: "Core-to-Edge Moisture Δ:",
+    checkingRiskLabel: "Post-Packaging Checking Risk:",
+    selectiveHeatingRatioLabel: "Selective Heating Ratio (Core/Dry):",
+    fieldStrengthLabel: "Peak RF Electric Field:",
+    arcSafetyFactorLabel: "Townsend Arc Safety Factor:",
+    acrylamideLevelLabel: "Acrylamide Formation:",
+    thermalRunawayLabel: "Thermal Runaway Stability:",
+    emfContainmentLabel: "OSHA RF EMF Leakage:",
+    safetyStatusLabel: "Operational Safety Status:",
+    primaryRiskLabel: "Primary Process Limitation:",
+    mechanismsLabel: "Active Dielectric Mechanisms:",
+    mitigationLabel: "Recommended Engineering Action:",
+    scienceTitle: "Electromagnetic Physics & Quality Assurance Standards",
+    scienceSub: "Key governing physical equations and regulatory frameworks for industrial RF food processing.",
+    tableTitle: "Dielectric Loss & Regulatory Matrix"
+  },
+  es: {
+    badge: "Electromagnetismo de Radiofrecuencia y Seguridad en Panificación Industrial",
+    title: "Simulador de Nivelación de Humedad Post-Horneado por Radiofrecuencia (RF) Continua",
+    subtitle: "Simule la nivelación dieléctrica de humedad por radiofrecuencia (27,12 MHz) en galletas y crackers. Calcule la disipación selectiva en agua, eliminación del checking post-envasado, reducción de acrilamida bajo UE 2017/2158, margen contra arcos Townsend y cumplimiento OSHA 29 CFR § 1910.97.",
+    controlsTitle: "Parámetros del Generador y Operación RF",
+    controlsSub: "Configure la geometría del aplicador, potencia del generador, separación de electrodos, velocidad de banda y gradientes de humedad.",
+    systemLabel: "Sistema Aplicador de Secado por RF:",
+    systemHelp: "Seleccione la potencia del generador, ancho de banda, longitud de electrodo y sistema de detección de arco.",
+    matrixLabel: "Matriz de Galleta / Cracker Horneado:",
+    matrixHelp: "Seleccione el tipo de masa, gradiente inicial centro-borde y resistencia mecánica a la tracción.",
+    powerLabel: "Potencia Neta del Generador RF (kW):",
+    powerHelp: "Potencia electromagnética de alta frecuencia entregada a los electrodos a 27,12 MHz.",
+    gapLabel: "Espacio de Aire del Electrodo Superior (mm):",
+    gapHelp: "Distancia entre el electrodo de alta tensión y la banda transportadora. Menor espacio aumenta el campo.",
+    beltSpeedLabel: "Velocidad de la Banda Transportadora (m/min):",
+    beltSpeedHelp: "Velocidad de paso del producto que determina el tiempo de residencia bajo el campo RF.",
+    moistureInLabel: "Humedad en el Núcleo a Salida del Horno (%):",
+    moistureInHelp: "Humedad inicial en las capas internas de la galleta antes de ingresar al túnel de nivelación por RF.",
+    airRhLabel: "Humedad Relativa en Cámara del Aplicador (% HR):",
+    airRhHelp: "Humedad del aire en el entrehierro. Una alta humedad reduce la rigidez dieléctrica facilitando arcos.",
+    saltLabel: "Contenido de Sal en la Masa (% NaCl):",
+    saltHelp: "Concentración iónica. Niveles elevados aumentan la conducción iónica y el riesgo de embalamiento térmico.",
+    presetsTitle: "Preajustes Operativos Industriales",
+    presetCrackerAntiChecking: "Cracker Industrial Anti-Checking (75 kW, 27,12 MHz, 32 m/min)",
+    presetBiscuitLowAcrylamide: "Galleta Dulce Optimización Baja Acrilamida (50 kW, 24 m/min)",
+    presetDigestiveCoreDrying: "Galleta Digestive Secado Profundo del Núcleo (95 kW, 16 m/min)",
+    presetArcFlashoverHazard: "Riesgo Crítico de Arco Dieléctrico y Embalamiento Térmico",
+    diagnosticTitle: "Diagnóstico Dieléctrico y de Proceso en Tiempo Real",
+    diagnosticSub: "Gradientes de campo calculados, diferenciales de humedad, riesgo de rotura y factores de seguridad eléctrica.",
+    centerMoistureLabel: "Humedad Final en el Núcleo:",
+    moistureDiffLabel: "Diferencial de Humedad Núcleo-Borde:",
+    checkingRiskLabel: "Riesgo de Rotura Espontánea (Checking):",
+    selectiveHeatingRatioLabel: "Razón de Calentamiento Selectivo (Núcleo/Seco):",
+    fieldStrengthLabel: "Campo Eléctrico Pico de RF:",
+    arcSafetyFactorLabel: "Factor de Seguridad contra Arcos Townsend:",
+    acrylamideLevelLabel: "Formación de Acrilamida:",
+    thermalRunawayLabel: "Estabilidad ante Embalamiento Térmico:",
+    emfContainmentLabel: "Fuga Electromagnética OSHA RF:",
+    safetyStatusLabel: "Estado de Seguridad Operativa:",
+    primaryRiskLabel: "Limitación Principal del Proceso:",
+    mechanismsLabel: "Mecanismos Dieléctricos Activos:",
+    mitigationLabel: "Acción de Ingeniería Recomendada:",
+    scienceTitle: "Física Electromagnética y Normas de Calidad",
+    scienceSub: "Ecuaciones físicas y marcos normativos para el procesamiento industrial de alimentos por RF.",
+    tableTitle: "Matriz de Pérdida Dieléctrica y Normativa"
+  },
+  pt: {
+    badge: "Eletromagnetismo de Radiofrequência e Segurança em Panificação Industrial",
+    title: "Simulador de Nivelamento de Umidade Pós-Cozimento por Radiofrequência (RF) Contínua",
+    subtitle: "Simule o nivelamento dielétrico de umidade por radiofrequência (27,12 MHz) em biscoitos e crackers. Calcule a dissipação seletiva em água, eliminação de checking pós-embalagem, redução de acrilamida sob UE 2017/2158, margem contra arcos Townsend e conformidade OSHA 29 CFR § 1910.97.",
+    controlsTitle: "Parâmetros do Gerador e Operação de RF",
+    controlsSub: "Configure a geometria do aplicador, potência do gerador, vão dos eletrodos, velocidade da esteira e gradientes de umidade.",
+    systemLabel: "Sistema Aplicador de Secagem por RF:",
+    systemHelp: "Selecione a configuração do gerador, largura da esteira, comprimento de eletrodo e sistema de extinção de arco.",
+    matrixLabel: "Matriz de Biscoito / Cracker Assado:",
+    matrixHelp: "Selecione o tipo de massa, gradiente inicial centro-borda e resistência mecânica à tração.",
+    powerLabel: "Potência Líquida do Gerador RF (kW):",
+    powerHelp: "Potência eletromagnética de alta frequência entregue aos eletrodos a 27,12 MHz.",
+    gapLabel: "Vão de Ar do Eletrodo Superior (mm):",
+    gapHelp: "Distância entre o eletrodo de alta tensão e a esteira aterrada. Menor vão eleva a intensidade de campo.",
+    beltSpeedLabel: "Velocidade da Esteira Transportadora (m/min):",
+    beltSpeedHelp: "Velocidade de trânsito do produto que dita o tempo de exposição sob o campo RF.",
+    moistureInLabel: "Umidade no Centro na Saída do Forno (%):",
+    moistureInHelp: "Umidade inicial nas camadas internas do biscoito antes da entrada no túnel de nivelamento RF.",
+    airRhLabel: "Umidade Relativa do Ar no Aplicador (% UR):",
+    airRhHelp: "Umidade no ar do vão. Umidade excessiva reduz a rigidez dielétrica facilitando arcos de plasma.",
+    saltLabel: "Teor de Sal na Massa (% NaCl):",
+    saltHelp: "Concentração iônica. Níveis elevados elevam a condução iônica e suscetibilidade a fuga térmica.",
+    presetsTitle: "Predefinições de Operação Industrial",
+    presetCrackerAntiChecking: "Cracker Industrial Anti-Checking (75 kW, 27,12 MHz, 32 m/min)",
+    presetBiscuitLowAcrylamide: "Biscoito Doce Otimização Baixa Acrilamida (50 kW, 24 m/min)",
+    presetDigestiveCoreDrying: "Biscoito Digestive Secagem Profunda de Núcleo (95 kW, 16 m/min)",
+    presetArcFlashoverHazard: "Risco Crítico de Arco Dielétrico e Fuga Térmica",
+    diagnosticTitle: "Diagnósticos Dielétricos e de Processo em Tempo Real",
+    diagnosticSub: "Gradientes de campo elétrico, diferenciais de umidade, risco de checking e fatores de segurança calculados.",
+    centerMoistureLabel: "Umidade Final no Centro:",
+    moistureDiffLabel: "Diferencial de Umidade Centro-Borda:",
+    checkingRiskLabel: "Risco de Quebra Espontânea (Checking):",
+    selectiveHeatingRatioLabel: "Razão de Aquecimento Seletivo (Centro/Seco):",
+    fieldStrengthLabel: "Campo Elétrico Pico de RF:",
+    arcSafetyFactorLabel: "Fator de Segurança contra Arcos Townsend:",
+    acrylamideLevelLabel: "Formação de Acrilamida:",
+    thermalRunawayLabel: "Estabilidade contra Fuga Térmica:",
+    emfContainmentLabel: "Fuga Eletromagnética OSHA RF:",
+    safetyStatusLabel: "Status de Segurança Operacional:",
+    primaryRiskLabel: "Principal Limitação do Processo:",
+    mechanismsLabel: "Mecanismos Dielétricos Ativos:",
+    mitigationLabel: "Ação de Engenharia Recomendada:",
+    scienceTitle: "Física Eletromagnética e Normas de Qualidade",
+    scienceSub: "Equações físicas fundamentais e marcos regulatórios para processamento industrial de alimentos por RF.",
+    tableTitle: "Matriz de Perda Dielétrica e Normas"
+  },
+  ja: {
+    badge: "高周波（RF）電磁気学・産業用製菓安全工学",
+    title: "産業用連続高周波（RF）ポストベイク水分均一化・熱暴走解析シミュレータ",
+    subtitle: "ビスケットおよびクラッカー製造ラインにおける27.12 MHz工業用高周波（RF）誘電加熱水分均一化をシミュレーション。水分子への選択的誘電散逸、包装後割れ（チェッキング）内部応力解消、EU 2017/2158基準のアクリルアミド低減、タウンゼント誘電破壊アーク放電マージン、OSHA 29 CFR § 1910.97電磁界安全基準を算出します。",
+    controlsTitle: "高周波（RF）発振機およびプロセス制御パラメータ",
+    controlsSub: "アプリケータ電極間隔、発振機出力、コンベア速度、オーブン出側水分勾配を設定します。",
+    systemLabel: "RF乾燥アプリケータシステム:",
+    systemHelp: "産業用RF発振機出力、ベルト幅、電極長、アーク検知高速遮断システムを選択します。",
+    matrixLabel: "焼成ビスケット / クラッカー生地特性:",
+    matrixHelp: "生地配合、オーブン出側の中心・エッジ部水分勾配、機械的引張破壊強度を選択します。",
+    powerLabel: "RF発振機正味高周波出力 (kW):",
+    powerHelp: "27.12 MHzの周波数でアプリケータ電極間に印加される高周波電力。",
+    gapLabel: "上部電極エアギャップ間隔 (mm):",
+    gapHelp: "高電圧電極と接地コンベアベルト間のクリアランス。間隔が狭いほど電界強度が増加します。",
+    beltSpeedLabel: "コンベアベルト搬送速度 (m/min):",
+    beltSpeedHelp: "製品がRF電界領域を通過する速度（滞留時間を決定）。",
+    moistureInLabel: "オーブン出側中心部水分値 (%):",
+    moistureInHelp: "RF均一化トンネルに投入されるビスケット中心内部の初期水分率。",
+    airRhLabel: "アプリケータ内雰囲気相対湿度 (% RH):",
+    airRhHelp: "電極ギャップ内の空気湿度。高湿度環境は空気の絶縁破壊電圧を低下させアーク放電を誘発します。",
+    saltLabel: "配合生地中食塩濃度 (% NaCl):",
+    saltHelp: "イオン伝導率に影響。塩分過多は高温時の熱暴走（サーマルランナウェイ）を引き起こします。",
+    presetsTitle: "標準産業運用プリセット",
+    presetCrackerAntiChecking: "産業用クラッカー割れ防止（75 kW, 27.12 MHz, 32 m/min）",
+    presetBiscuitLowAcrylamide: "ハードビスケット アクリルアミド低減最適化（50 kW, 24 m/min）",
+    presetDigestiveCoreDrying: "全粒粉ダイジェスティブ 中心部深層乾燥（95 kW, 16 m/min）",
+    presetArcFlashoverHazard: "重大絶縁破壊アーク放電・熱暴走危険条件",
+    diagnosticTitle: "リアルタイム誘電加熱＆プロセス診断",
+    diagnosticSub: "算出された高周波電界勾配、水分差、チェッキング応力、電気的放電安全係数。",
+    centerMoistureLabel: "処理後中心部水分率:",
+    moistureDiffLabel: "中心・エッジ間残存水分差:",
+    checkingRiskLabel: "包装後自然割れ（チェッキング）リスク:",
+    selectiveHeatingRatioLabel: "選択的発熱比（水分部/乾燥部）:",
+    fieldStrengthLabel: "ピークRF電界強度:",
+    arcSafetyFactorLabel: "タウンゼントアーク放電安全係数:",
+    acrylamideLevelLabel: "アクリルアミド生成量:",
+    thermalRunawayLabel: "熱暴走（サーマルランナウェイ）耐性:",
+    emfContainmentLabel: "OSHA RF電磁界漏洩レベル:",
+    safetyStatusLabel: "プロセス稼働安全状態:",
+    primaryRiskLabel: "最大制限要因 / ボトルネック:",
+    mechanismsLabel: "支配的誘電加熱メカニズム:",
+    mitigationLabel: "推奨エンジニアリング対応策:",
+    scienceTitle: "電磁物理学・品質管理規制基準",
+    scienceSub: "産業用高周波食品加工における物理学的支配方程式と規制フレームワーク。",
+    tableTitle: "誘電損失特性および法規制基準マトリクス"
+  },
+  'zh-cn': {
+    badge: "射频电磁学与工业焙烤安全工程",
+    title: "商用连续射频（RF）二次焙烤水分均衡与热失控模拟器",
+    subtitle: "模拟饼干与苏打饼干工业生产线中的27.12 MHz工业射频介质水分均衡工艺。精确计算水分选择性介质损耗耗散、消除包装后自发碎裂（Checking）内应力、依据欧盟2017/2158法规降低丙烯酰胺生成、汤森电介质击穿电弧裕度以及OSHA 29 CFR § 1910.97电磁辐射安全合规性。",
+    controlsTitle: "射频（RF）发生器与工艺运行参数",
+    controlsSub: "配置电极板间隙、发生器功率、传送带速度、出炉饼干初始水分梯度及车间环境。",
+    systemLabel: "RF烘干应用器系统:",
+    systemHelp: "选择工业射频发生器配置、输送带宽度、电极有效长度以及电弧检测与毫秒级切断系统。",
+    matrixLabel: "出炉饼干 / 苏打薄脆基质:",
+    matrixHelp: "选择面团配方种类、出炉初始核心-边缘水分梯度以及机械抗拉断裂强度。",
+    powerLabel: "RF发生器净高频输出功率 (kW):",
+    powerHelp: "在27.12 MHz ISM频段下输送到高压电极板的高频电磁功率。",
+    gapLabel: "上部高压电极空气间隙 (mm):",
+    gapHelp: "高压电极与接地金属传送带之间的净空高度。间隙越小，电场强度越强。",
+    beltSpeedLabel: "输送带运行线速度 (m/min):",
+    beltSpeedHelp: "饼干通过高频射频电场区域的行进速度（决定介质加热时间）。",
+    moistureInLabel: "出炉核心部位初始水分 (%):",
+    moistureInHelp: "饼干刚出烤炉进入RF均衡隧道时中心夹层的初始水分含量。",
+    airRhLabel: "应用器内腔空气相对湿度 (% RH):",
+    airRhHelp: "电极空气间隙中的湿度。高湿度环境会显著降低空气介电击穿电压，剧增打火电弧风险。",
+    saltLabel: "面团配方食盐含量 (% NaCl):",
+    saltHelp: "离子盐浓度。盐分偏高会在高温下大幅提升离子电导率，引发局部热失控焦糊。",
+    presetsTitle: "工业生产标准预设场景",
+    presetCrackerAntiChecking: "工业苏打饼干防碎裂工艺（75 kW, 27.12 MHz, 32 m/min）",
+    presetBiscuitLowAcrylamide: "韧性甜饼干超低丙烯酰胺优化（50 kW, 24 m/min）",
+    presetDigestiveCoreDrying: "全麦消化饼干深层水分均匀化（95 kW, 16 m/min）",
+    presetArcFlashoverHazard: "临界介电击穿打火与热失控极高危工况",
+    diagnosticTitle: "实时介质损耗与工艺智能诊断",
+    diagnosticSub: "计算所得的高频电场梯度、残余水分差、碎裂应力指数及电气击穿安全系数。",
+    centerMoistureLabel: "处理后中心残余水分:",
+    moistureDiffLabel: "中心-边缘残余水分差:",
+    checkingRiskLabel: "包装后自发脆裂（Checking）风险:",
+    selectiveHeatingRatioLabel: "选择性发热比（水分区/干燥区）:",
+    fieldStrengthLabel: "峰值RF高频电场强度:",
+    arcSafetyFactorLabel: "汤森电介质电弧安全系数:",
+    acrylamideLevelLabel: "丙烯酰胺生成量预测:",
+    thermalRunawayLabel: "热失控（Thermal Runaway）稳定性:",
+    emfContainmentLabel: "OSHA RF电磁辐射泄漏水平:",
+    safetyStatusLabel: "设备与工艺综合安全状态:",
+    primaryRiskLabel: "主要工艺限制 / 瓶颈因素:",
+    mechanismsLabel: "主导介电加热物理机制:",
+    mitigationLabel: "推荐工艺与电气工程措施:",
+    scienceTitle: "电磁物理学与品质安全法规标准",
+    scienceSub: "工业高频射频食品加工的关键物理学控制方程与国际法规框架。",
+    tableTitle: "介电损耗特性及国际法规矩阵"
+  }
+};
+
+const d = DICT[lang];
+---
+
+<div class="rf-post-bake-leveling-modeler bg-surface border border-hairline rounded-3xl p-6 md:p-8 shadow-sm mb-12">
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-6 pb-6 border-b border-hairline">
+    <div>
+      <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-600 text-white mb-2">
+        {d.badge}
+      </span>
+      <h2 class="text-title-lg md:text-display-sm font-bold text-ink">
+        {d.title}
+      </h2>
+      <p class="text-body-sm text-muted max-w-3xl mt-1">
+        {d.subtitle}
+      </p>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="px-3 py-1.5 rounded-xl bg-surface-soft border border-hairline font-mono text-xs text-muted">
+        27.12 MHz ISM &bull; FCC Part 18 &bull; EU 2017/2158
+      </span>
+    </div>
+  </div>
+
+  <!-- Presets -->
+  <div class="mb-8">
+    <div class="text-xs font-semibold uppercase tracking-wider text-muted mb-3">
+      {d.presetsTitle}
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+      <button 
+        type="button"
+        id="preset-cracker"
+        class="text-left px-3.5 py-2.5 rounded-xl border border-hairline bg-surface-soft hover:bg-amber-50 hover:border-amber-400 text-xs font-medium text-ink transition-colors"
+      >
+        🍪 {d.presetCrackerAntiChecking}
+      </button>
+      <button 
+        type="button"
+        id="preset-biscuit"
+        class="text-left px-3.5 py-2.5 rounded-xl border border-hairline bg-surface-soft hover:bg-amber-50 hover:border-amber-400 text-xs font-medium text-ink transition-colors"
+      >
+        🥖 {d.presetBiscuitLowAcrylamide}
+      </button>
+      <button 
+        type="button"
+        id="preset-digestive"
+        class="text-left px-3.5 py-2.5 rounded-xl border border-hairline bg-surface-soft hover:bg-amber-50 hover:border-amber-400 text-xs font-medium text-ink transition-colors"
+      >
+        🌾 {d.presetDigestiveCoreDrying}
+      </button>
+      <button 
+        type="button"
+        id="preset-hazard"
+        class="text-left px-3.5 py-2.5 rounded-xl border border-hairline bg-red-50/50 hover:bg-red-100/60 border-red-200 text-xs font-medium text-red-900 transition-colors"
+      >
+        ⚡ {d.presetArcFlashoverHazard}
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Inputs & Live Simulation Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <!-- Controls (7 cols) -->
+    <div class="lg:col-span-7 space-y-6">
+      <div class="border-b border-hairline pb-3">
+        <h3 class="text-title-sm font-bold text-ink">
+          {d.controlsTitle}
+        </h3>
+        <p class="text-xs text-muted">
+          {d.controlsSub}
+        </p>
+      </div>
+
+      <!-- System Selector -->
+      <div>
+        <label for="rf-system-select" class="block text-xs font-bold text-ink uppercase tracking-wider mb-1">
+          {d.systemLabel}
+        </label>
+        <select 
+          id="rf-system-select" 
+          class="w-full text-xs rounded-xl border border-hairline bg-surface-soft px-3 py-2.5 text-ink focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
+        >
+          {rfData.rfSystems.map(sys => (
+            <option value={sys.id} selected={sys.id === 'commercial_high_throughput_75kw'}>
+              {sys.name}
+            </option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1" id="system-desc-help">
+          {d.systemHelp}
+        </p>
+      </div>
+
+      <!-- Baked Matrix Selector -->
+      <div>
+        <label for="rf-matrix-select" class="block text-xs font-bold text-ink uppercase tracking-wider mb-1">
+          {d.matrixLabel}
+        </label>
+        <select 
+          id="rf-matrix-select" 
+          class="w-full text-xs rounded-xl border border-hairline bg-surface-soft px-3 py-2.5 text-ink focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
+        >
+          {rfData.bakedProductMatrices.map(mat => (
+            <option value={mat.id} selected={mat.id === 'soda_cracker'}>
+              {mat.name}
+            </option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1">
+          {d.matrixHelp}
+        </p>
+      </div>
+
+      <!-- Slider 1: RF Output Power -->
+      <div>
+        <div class="flex items-center justify-between text-xs mb-1">
+          <span class="font-bold text-ink uppercase tracking-wider">{d.powerLabel}</span>
+          <span class="font-mono font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded" id="power-display">75 kW</span>
+        </div>
+        <input 
+          type="range" 
+          id="power-slider" 
+          min="10" 
+          max="140" 
+          step="5" 
+          value="75"
+          class="w-full accent-amber-600 cursor-pointer"
+        />
+        <p class="text-[11px] text-muted mt-1">{d.powerHelp}</p>
+      </div>
+
+      <!-- Slider 2: Electrode Air Gap -->
+      <div>
+        <div class="flex items-center justify-between text-xs mb-1">
+          <span class="font-bold text-ink uppercase tracking-wider">{d.gapLabel}</span>
+          <span class="font-mono font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded" id="gap-display">75 mm</span>
+        </div>
+        <input 
+          type="range" 
+          id="gap-slider" 
+          min="30" 
+          max="200" 
+          step="5" 
+          value="75"
+          class="w-full accent-amber-600 cursor-pointer"
+        />
+        <p class="text-[11px] text-muted mt-1">{d.gapHelp}</p>
+      </div>
+
+      <!-- Slider 3: Belt Velocity -->
+      <div>
+        <div class="flex items-center justify-between text-xs mb-1">
+          <span class="font-bold text-ink uppercase tracking-wider">{d.beltSpeedLabel}</span>
+          <span class="font-mono font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded" id="speed-display">32 m/min</span>
+        </div>
+        <input 
+          type="range" 
+          id="speed-slider" 
+          min="8" 
+          max="65" 
+          step="1" 
+          value="32"
+          class="w-full accent-amber-600 cursor-pointer"
+        />
+        <p class="text-[11px] text-muted mt-1">{d.beltSpeedHelp}</p>
+      </div>
+
+      <!-- Slider 4: Oven Exit Center Moisture -->
+      <div>
+        <div class="flex items-center justify-between text-xs mb-1">
+          <span class="font-bold text-ink uppercase tracking-wider">{d.moistureInLabel}</span>
+          <span class="font-mono font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded" id="moisture-display">5.8 %</span>
+        </div>
+        <input 
+          type="range" 
+          id="moisture-slider" 
+          min="3.5" 
+          max="10.0" 
+          step="0.1" 
+          value="5.8"
+          class="w-full accent-amber-600 cursor-pointer"
+        />
+        <p class="text-[11px] text-muted mt-1">{d.moistureInHelp}</p>
+      </div>
+
+      <!-- Dual Slider Row: Chamber Humidity & Salt % -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <div class="flex items-center justify-between text-xs mb-1">
+            <span class="font-bold text-ink uppercase tracking-wider">{d.airRhLabel}</span>
+            <span class="font-mono font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded" id="rh-display">45 %</span>
+          </div>
+          <input 
+            type="range" 
+            id="rh-slider" 
+            min="20" 
+            max="90" 
+            step="5" 
+            value="45"
+            class="w-full accent-amber-600 cursor-pointer"
+          />
+          <p class="text-[10px] text-muted mt-0.5">{d.airRhHelp}</p>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between text-xs mb-1">
+            <span class="font-bold text-ink uppercase tracking-wider">{d.saltLabel}</span>
+            <span class="font-mono font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded" id="salt-display">1.2 %</span>
+          </div>
+          <input 
+            type="range" 
+            id="salt-slider" 
+            min="0.2" 
+            max="2.5" 
+            step="0.1" 
+            value="1.2"
+            class="w-full accent-amber-600 cursor-pointer"
+          />
+          <p class="text-[10px] text-muted mt-0.5">{d.saltHelp}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Telemetry & Diagnostics (5 cols) -->
+    <div class="lg:col-span-5 bg-surface-soft border border-hairline rounded-2xl p-6 flex flex-col justify-between">
+      <div>
+        <div class="flex items-center justify-between border-b border-hairline pb-3 mb-5">
+          <div>
+            <h3 class="text-title-sm font-bold text-ink">
+              {d.diagnosticTitle}
+            </h3>
+            <p class="text-xs text-muted">
+              {d.diagnosticSub}
+            </p>
+          </div>
+          <span 
+            id="safety-badge"
+            class="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-600 text-white"
+          >
+            OPTIMAL
+          </span>
+        </div>
+
+        <!-- Key Metrics Cards -->
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div class="p-3 bg-surface border border-hairline rounded-xl">
+            <div class="text-[11px] text-muted font-medium mb-1">{d.centerMoistureLabel}</div>
+            <div class="font-mono text-title-sm font-bold text-emerald-600" id="res-center-moisture">2.18 %</div>
+            <div class="text-[10px] text-muted mt-0.5">Target: 2.0% - 2.5%</div>
+          </div>
+          <div class="p-3 bg-surface border border-hairline rounded-xl">
+            <div class="text-[11px] text-muted font-medium mb-1">{d.moistureDiffLabel}</div>
+            <div class="font-mono text-title-sm font-bold text-emerald-600" id="res-moisture-diff">&Delta; 0.38 %</div>
+            <div class="text-[10px] text-muted mt-0.5">&le; 0.8% prevents checking</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div class="p-3 bg-surface border border-hairline rounded-xl">
+            <div class="text-[11px] text-muted font-medium mb-1">{d.selectiveHeatingRatioLabel}</div>
+            <div class="font-mono text-title-sm font-bold text-amber-600" id="res-selective-ratio">18.4x</div>
+            <div class="text-[10px] text-muted mt-0.5">Selective water dissipation</div>
+          </div>
+          <div class="p-3 bg-surface border border-hairline rounded-xl">
+            <div class="text-[11px] text-muted font-medium mb-1">{d.fieldStrengthLabel}</div>
+            <div class="font-mono text-title-sm font-bold text-ink" id="res-field-strength">2.16 kV/cm</div>
+            <div class="text-[10px] text-muted mt-0.5">Electrode E-field gradient</div>
+          </div>
+        </div>
+
+        <!-- Safety Factors List -->
+        <div class="space-y-2.5 text-xs border-t border-hairline pt-4 mb-4">
+          <div class="flex items-center justify-between">
+            <span class="text-muted">{d.checkingRiskLabel}</span>
+            <span class="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded" id="res-checking-risk">
+              ZERO CHECKING (&le;0.4% &Delta;)
+            </span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-muted">{d.arcSafetyFactorLabel}</span>
+            <span class="font-mono font-bold text-ink" id="res-arc-safety">
+              SF = 2.45x (Safe)
+            </span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-muted">{d.acrylamideLevelLabel}</span>
+            <span class="font-bold text-emerald-700" id="res-acrylamide">
+              185 &mu;g/kg (-61% vs EU Benchmark)
+            </span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-muted">{d.thermalRunawayLabel}</span>
+            <span class="font-bold text-emerald-700" id="res-runaway-status">
+              STABLE (Ionic Dissipation Controlled)
+            </span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-muted">{d.emfContainmentLabel}</span>
+            <span class="font-mono text-muted" id="res-emf-leakage">
+              &lt; 0.15 mW/cm&sup2; (OSHA Limit 10.0)
+            </span>
+          </div>
+        </div>
+
+        <!-- Dynamic Process Advisory Box -->
+        <div class="p-3.5 rounded-xl bg-surface border border-hairline" id="advisory-box">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-muted mb-1" id="advisory-title">
+            Process Optimization Status
+          </div>
+          <p class="text-xs text-ink leading-relaxed" id="advisory-text">
+            Excellent selective water evaporation. The 27.12 MHz RF electric field selectively couples to high-dielectric water pockets in the biscuit core, reducing the moisture delta to 0.38%. Post-packaging tensile cracking (checking) is completely suppressed while keeping acrylamide well below European Union thresholds.
+          </p>
+        </div>
+      </div>
+
+      <div class="pt-4 border-t border-hairline mt-4">
+        <div class="flex items-center justify-between text-[11px] text-muted font-mono">
+          <span>Applicator: 27.12 MHz Class A</span>
+          <span>NFPA 86 Compliant</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Technical References & Physics Table -->
+  <div class="mt-12 pt-8 border-t border-hairline">
+    <div class="mb-6">
+      <h3 class="text-title-sm font-bold text-ink">
+        {d.scienceTitle}
+      </h3>
+      <p class="text-xs text-muted">
+        {d.scienceSub}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="p-4 rounded-xl bg-surface-soft border border-hairline">
+        <div class="font-bold text-xs text-ink uppercase tracking-wider mb-1">
+          Dielectric Dissipation Equation
+        </div>
+        <p class="font-mono text-xs text-amber-700 mb-2">
+          P_v = 2&pi; &bull; f &bull; &epsilon;_0 &bull; &epsilon;''_r &bull; E&sup2;
+        </p>
+        <p class="text-xs text-muted leading-relaxed">
+          Volumetric power dissipation (W/m&sup3;) where f = 27.12 MHz, &epsilon;_0 = 8.854&times;10&macr;&sup1;&sup2; F/m, &epsilon;''_r is the loss factor, and E is the applied field strength. Because &epsilon;''_water &approx; 75 vs &epsilon;''_dry &approx; 0.3, water dissipates ~200&times; more energy per unit mass.
+        </p>
+      </div>
+
+      <div class="p-4 rounded-xl bg-surface-soft border border-hairline">
+        <div class="font-bold text-xs text-ink uppercase tracking-wider mb-1">
+          Townsend Air Breakdown &amp; Arc Quench
+        </div>
+        <p class="font-mono text-xs text-amber-700 mb-2">
+          E_crit = 30 &bull; (&delta;) &bull; (1 - 0.003 &bull; RH) kV/cm
+        </p>
+        <p class="text-xs text-muted leading-relaxed">
+          Dielectric breakdown threshold of humid baking air. High relative humidity and flour dust reduce the breakdown threshold. Automated fast optical arc sensors trip RF excitation within &lt;2 ms to prevent belt scorching and fires under NFPA 86.
+        </p>
+      </div>
+
+      <div class="p-4 rounded-xl bg-surface-soft border border-hairline">
+        <div class="font-bold text-xs text-ink uppercase tracking-wider mb-1">
+          Acrylamide Decoupling (EU 2017/2158)
+        </div>
+        <p class="font-mono text-xs text-amber-700 mb-2">
+          &Delta;Acrylamide = -50% to -75% vs Convection
+        </p>
+        <p class="text-xs text-muted leading-relaxed">
+          Transferring the final 2% to 4% moisture removal from high-temperature convection ovens (190&deg;C) to the non-caramelizing RF tunnel prevents late-stage Maillard asparagine conjugation, safely meeting strict EU benchmark limits.
+        </p>
+      </div>
+    </div>
+
+    <!-- Regulatory Reference Matrix -->
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs border border-hairline rounded-xl overflow-hidden">
+        <thead class="bg-surface-soft text-ink font-bold uppercase tracking-wider border-b border-hairline">
+          <tr>
+            <th class="py-2.5 px-3">Regulatory Code</th>
+            <th class="py-2.5 px-3">Title &amp; Scope</th>
+            <th class="py-2.5 px-3">Benchmark Safety Standard</th>
+            <th class="py-2.5 px-3">RF Post-Bake Engineering Benefit</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline">
+          {rfData.regulatoryStandards.map(reg => (
+            <tr class="hover:bg-surface-soft/60">
+              <td class="py-2.5 px-3 font-mono font-bold text-amber-700">{reg.code}</td>
+              <td class="py-2.5 px-3 text-ink font-medium">{reg.title}</td>
+              <td class="py-2.5 px-3 text-muted">{reg.benchmarkLevel}</td>
+              <td class="py-2.5 px-3 text-muted">{reg.rfBenefit}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script is:inline define:vars={{ rfData, lang }}>
+  (function() {
+    const systems = rfData.rfSystems;
+    const matrices = rfData.bakedProductMatrices;
+
+    // Elements
+    const systemSelect = document.getElementById('rf-system-select');
+    const matrixSelect = document.getElementById('rf-matrix-select');
+    const powerSlider = document.getElementById('power-slider');
+    const gapSlider = document.getElementById('gap-slider');
+    const speedSlider = document.getElementById('speed-slider');
+    const moistureSlider = document.getElementById('moisture-slider');
+    const rhSlider = document.getElementById('rh-slider');
+    const saltSlider = document.getElementById('salt-slider');
+
+    // Displays
+    const powerDisp = document.getElementById('power-display');
+    const gapDisp = document.getElementById('gap-display');
+    const speedDisp = document.getElementById('speed-display');
+    const moistureDisp = document.getElementById('moisture-display');
+    const rhDisp = document.getElementById('rh-display');
+    const saltDisp = document.getElementById('salt-display');
+    const systemDescHelp = document.getElementById('system-desc-help');
+
+    // Results
+    const resCenterMoisture = document.getElementById('res-center-moisture');
+    const resMoistureDiff = document.getElementById('res-moisture-diff');
+    const resSelectiveRatio = document.getElementById('res-selective-ratio');
+    const resFieldStrength = document.getElementById('res-field-strength');
+    const resCheckingRisk = document.getElementById('res-checking-risk');
+    const resArcSafety = document.getElementById('res-arc-safety');
+    const resAcrylamide = document.getElementById('res-acrylamide');
+    const resRunawayStatus = document.getElementById('res-runaway-status');
+    const resEmfLeakage = document.getElementById('res-emf-leakage');
+    const safetyBadge = document.getElementById('safety-badge');
+    const advisoryTitle = document.getElementById('advisory-title');
+    const advisoryText = document.getElementById('advisory-text');
+    const advisoryBox = document.getElementById('advisory-box');
+
+    // Presets
+    const btnCracker = document.getElementById('preset-cracker');
+    const btnBiscuit = document.getElementById('preset-biscuit');
+    const btnDigestive = document.getElementById('preset-digestive');
+    const btnHazard = document.getElementById('preset-hazard');
+
+    function updateSimulation() {
+      const currentSystemId = systemSelect.value;
+      const currentMatrixId = matrixSelect.value;
+
+      const system = systems.find(s => s.id === currentSystemId) || systems[1];
+      const matrix = matrices.find(m => m.id === currentMatrixId) || matrices[0];
+
+      const powerKw = parseFloat(powerSlider.value);
+      const gapMm = parseFloat(gapSlider.value);
+      const beltSpeedMMin = parseFloat(speedSlider.value);
+      const moistureInCenter = parseFloat(moistureSlider.value);
+      const airRh = parseFloat(rhSlider.value);
+      const saltPct = parseFloat(saltSlider.value);
+
+      // Update text displays
+      powerDisp.textContent = `${powerKw} kW`;
+      gapDisp.textContent = `${gapMm} mm`;
+      speedDisp.textContent = `${beltSpeedMMin} m/min`;
+      moistureDisp.textContent = `${moistureInCenter.toFixed(1)} %`;
+      rhDisp.textContent = `${airRh} %`;
+      saltDisp.textContent = `${saltPct.toFixed(1)} %`;
+      if (systemDescHelp) {
+        systemDescHelp.textContent = system.description;
+      }
+
+      // Physics Calculations:
+      // 1. Residence time in RF zone (seconds)
+      const beltSpeedMS = beltSpeedMMin / 60.0;
+      const residenceTimeSec = system.electrodeLengthM / Math.max(0.05, beltSpeedMS);
+
+      // 2. Applied RF Voltage (V_peak) across electrode plates
+      // V_peak roughly proportional to sqrt(P * Z), capped by system max
+      const maxVoltKv = system.maxRfVoltagePeakKv || 18.0;
+      const appliedVoltageKv = Math.min(maxVoltKv, Math.sqrt((powerKw / 100.0) * (system.generatorPowerKw || 75.0)) * 2.2 + 4.0);
+      
+      // 3. Electric field strength E (kV/cm)
+      const gapCm = gapMm / 10.0;
+      const fieldStrengthKvCm = appliedVoltageKv / Math.max(1.0, gapCm);
+
+      // 4. Selective Heating: Dielectric loss factors
+      // Loss factor of wet center: water loss factor scaled by moisture & ionic conductivity
+      const ionicBoost = 1.0 + (saltPct - 1.0) * 0.45;
+      const epsCenter = (matrix.lossFactorWaterEpsilonDoublePrime * (moistureInCenter / 100.0) * 1.8 + matrix.lossFactorDryCrumbEpsilonDoublePrime) * Math.max(0.5, ionicBoost);
+      const epsEdge = matrix.lossFactorDryCrumbEpsilonDoublePrime * 1.15;
+      const selectiveRatio = Math.max(1.2, epsCenter / Math.max(0.1, epsEdge));
+
+      // 5. Moisture Evaporation in Core
+      // Latent heat of vaporization ~ 2260 kJ/kg water
+      // Evaporative moisture reduction in center
+      const energyDryingFactor = (powerKw * residenceTimeSec) / (system.beltWidthM * 1800);
+      const moistureDropCenter = Math.min(moistureInCenter - 1.2, energyDryingFactor * (epsCenter / 4.0) * 0.75);
+      const finalCenterMoisture = Math.max(1.4, moistureInCenter - Math.max(0.2, moistureDropCenter));
+      
+      // Edge moisture drops much less due to low dielectric absorption
+      const finalEdgeMoisture = Math.max(1.0, matrix.initialEdgeMoisturePct - (moistureDropCenter * 0.12));
+      const moistureDelta = Math.abs(finalCenterMoisture - finalEdgeMoisture);
+
+      // 6. Checking Stress Risk
+      // Internal tensile stress proportional to moisture gradient across lamellae
+      let checkingStatus = 'ZERO CHECKING';
+      let checkingClass = 'text-emerald-700 bg-emerald-50';
+      if (moistureDelta > 2.2) {
+        checkingStatus = 'SEVERE CHECKING RISK (>85% Spontaneous Breakage)';
+        checkingClass = 'text-red-700 bg-red-50';
+      } else if (moistureDelta > 1.2) {
+        checkingStatus = 'MODERATE CHECKING (20-40% Fragile Cracks)';
+        checkingClass = 'text-amber-700 bg-amber-50';
+      } else if (moistureDelta > 0.8) {
+        checkingStatus = 'MINOR CHECKING (<5% Flaws)';
+        checkingClass = 'text-yellow-700 bg-yellow-50';
+      } else {
+        checkingStatus = `ZERO CHECKING (Δ ${moistureDelta.toFixed(2)}%)`;
+        checkingClass = 'text-emerald-700 bg-emerald-50';
+      }
+
+      // 7. Townsend Dielectric Breakdown & Arc Safety Factor
+      // Dry air breakdown ~ 30 kV/cm, reduced by temperature (hot oven air ~ 60°C) and relative humidity
+      const airDensityFactor = 293.0 / (273.0 + 55.0); // 0.893
+      const humidityDerate = 1.0 - (airRh / 100.0) * 0.28;
+      const dustDerate = currentSystemId === 'uncalibrated_cavitating_rf' ? 0.65 : 0.95;
+      const breakdownThresholdKvCm = 30.0 * airDensityFactor * humidityDerate * dustDerate;
+      const arcSafetyFactor = breakdownThresholdKvCm / Math.max(0.1, fieldStrengthKvCm);
+
+      // 8. Acrylamide Formation Reduction
+      // Oven baking time reduced because drying is offloaded to RF
+      const thermalOvenOffloadPct = Math.min(0.40, (moistureInCenter - finalCenterMoisture) * 0.08);
+      const acrylamideFinal = Math.round(matrix.acrylamideBaselineUgcKg * (1.0 - thermalOvenOffloadPct * 1.5));
+      const euBenchmark = 350; // biscuits benchmark
+      const acrylamideDeltaPct = Math.round(((acrylamideFinal - euBenchmark) / euBenchmark) * 100);
+
+      // 9. Thermal Runaway Stability
+      // High salt + high field + low speed can trigger positive feedback
+      let runawayStatus = 'STABLE (Ionic Dissipation Controlled)';
+      let runawayColor = 'text-emerald-700';
+      const runawayRiskIndex = (saltPct / matrix.thermalRunawayConductivityThresholdSm) * (powerKw / gapMm) * 0.15;
+      if (currentSystemId === 'uncalibrated_cavitating_rf' || runawayRiskIndex > 1.8) {
+        runawayStatus = 'CRITICAL THERMAL RUNAWAY (Hotspots & Charring)';
+        runawayColor = 'text-red-700';
+      } else if (runawayRiskIndex > 1.1) {
+        runawayStatus = 'ELEVATED RUNAWAY RISK (High Salt Ionic Dissipation)';
+        runawayColor = 'text-amber-700';
+      }
+
+      // 10. OSHA EMF Leakage
+      const faradayShield = system.faradayShieldingDb || 75.0;
+      const leakagePowerDensity = Math.max(0.02, (powerKw / 100.0) * Math.pow(10, -(faradayShield - 40.0) / 10.0));
+
+      // Update Live UI
+      resCenterMoisture.textContent = `${finalCenterMoisture.toFixed(2)} %`;
+      resCenterMoisture.className = `font-mono text-title-sm font-bold ${finalCenterMoisture >= 1.8 && finalCenterMoisture <= 2.6 ? 'text-emerald-600' : 'text-amber-600'}`;
+
+      resMoistureDiff.textContent = `Δ ${moistureDelta.toFixed(2)} %`;
+      resMoistureDiff.className = `font-mono text-title-sm font-bold ${moistureDelta <= 0.8 ? 'text-emerald-600' : (moistureDelta <= 1.5 ? 'text-amber-600' : 'text-red-600')}`;
+
+      resSelectiveRatio.textContent = `${selectiveRatio.toFixed(1)}x`;
+      resFieldStrength.textContent = `${fieldStrengthKvCm.toFixed(2)} kV/cm`;
+
+      resCheckingRisk.textContent = checkingStatus;
+      resCheckingRisk.className = `font-bold px-2 py-0.5 rounded text-[11px] ${checkingClass}`;
+
+      resArcSafety.textContent = `SF = ${arcSafetyFactor.toFixed(2)}x ${arcSafetyFactor >= 1.6 ? '(Safe)' : (arcSafetyFactor >= 1.1 ? '(Marginal)' : '(ARC FLASHOVER HAZARD)')}`;
+      resArcSafety.className = `font-mono font-bold ${arcSafetyFactor >= 1.6 ? 'text-ink' : (arcSafetyFactor >= 1.1 ? 'text-amber-600' : 'text-red-600 animate-pulse')}`;
+
+      resAcrylamide.textContent = `${acrylamideFinal} µg/kg (${acrylamideDeltaPct <= 0 ? acrylamideDeltaPct + '% vs EU Benchmark' : '+' + acrylamideDeltaPct + '% above EU Benchmark'})`;
+      resAcrylamide.className = `font-bold ${acrylamideFinal <= euBenchmark ? 'text-emerald-700' : 'text-red-700'}`;
+
+      resRunawayStatus.textContent = runawayStatus;
+      resRunawayStatus.className = `font-bold ${runawayColor}`;
+
+      resEmfLeakage.textContent = `${leakagePowerDensity.toFixed(2)} mW/cm² (OSHA Limit 10.0)`;
+
+      // Overall System Health Badge & Advisory
+      if (arcSafetyFactor < 1.1 || currentSystemId === 'uncalibrated_cavitating_rf') {
+        safetyBadge.textContent = 'DANGER: ARCING HAZARD';
+        safetyBadge.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-red-600 text-white';
+        advisoryBox.className = 'p-3.5 rounded-xl bg-red-50 border border-red-200';
+        advisoryTitle.textContent = 'CRITICAL DIELECTRIC BREAKDOWN & FIRE HAZARD';
+        advisoryTitle.className = 'text-[11px] font-bold uppercase tracking-wider text-red-900 mb-1';
+        advisoryText.textContent = `Applied electric field (${fieldStrengthKvCm.toFixed(2)} kV/cm) exceeds or borders the dielectric breakdown strength of the humid air gap (${breakdownThresholdKvCm.toFixed(2)} kV/cm). Townsend electron avalanche creates catastrophic plasma arcs between the electrode and conveyor band. Increase electrode gap height to ≥70 mm or reduce generator power immediately.`;
+      } else if (moistureDelta > 1.8) {
+        safetyBadge.textContent = 'WARNING: CHECKING RISK';
+        safetyBadge.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-amber-600 text-white';
+        advisoryBox.className = 'p-3.5 rounded-xl bg-amber-50 border border-amber-200';
+        advisoryTitle.textContent = 'INSUFFICIENT RESIDENCE TIME / MOISTURE GRADIENT ELEVATED';
+        advisoryTitle.className = 'text-[11px] font-bold uppercase tracking-wider text-amber-900 mb-1';
+        advisoryText.textContent = `The core-to-edge moisture gradient (Δ ${moistureDelta.toFixed(2)}%) remains above the mechanical tensile threshold. Biscuits will experience spontaneous transverse stress cracking (checking) within 24 to 48 hours post-packaging. Increase RF generator power or decrease conveyor belt speed to prolong dielectric exposure.`;
+      } else {
+        safetyBadge.textContent = 'OPTIMAL & COMPLIANT';
+        safetyBadge.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-600 text-white';
+        advisoryBox.className = 'p-3.5 rounded-xl bg-surface border border-hairline';
+        advisoryTitle.textContent = 'PROCESS OPTIMIZATION STATUS: GOLD MASTER';
+        advisoryTitle.className = 'text-[11px] font-bold uppercase tracking-wider text-muted mb-1';
+        advisoryText.textContent = `Optimal 27.12 MHz dielectric dissipation. The selective heating ratio (${selectiveRatio.toFixed(1)}x) drives preferential evaporation of core moisture to ${finalCenterMoisture.toFixed(2)}%, achieving a tight moisture differential (Δ ${moistureDelta.toFixed(2)}%). Acrylamide is safely minimized to ${acrylamideFinal} µg/kg, arc safety factor is robust (SF ${arcSafetyFactor.toFixed(2)}x), and checking is 100% prevented.`;
+      }
+    }
+
+    // Attach listeners
+    systemSelect.addEventListener('change', updateSimulation);
+    matrixSelect.addEventListener('change', updateSimulation);
+    powerSlider.addEventListener('input', updateSimulation);
+    gapSlider.addEventListener('input', updateSimulation);
+    speedSlider.addEventListener('input', updateSimulation);
+    moistureSlider.addEventListener('input', updateSimulation);
+    rhSlider.addEventListener('input', updateSimulation);
+    saltSlider.addEventListener('input', updateSimulation);
+
+    // Preset Handlers
+    btnCracker.addEventListener('click', function() {
+      systemSelect.value = 'commercial_high_throughput_75kw';
+      matrixSelect.value = 'soda_cracker';
+      powerSlider.value = 75;
+      gapSlider.value = 75;
+      speedSlider.value = 32;
+      moistureSlider.value = 5.8;
+      rhSlider.value = 45;
+      saltSlider.value = 1.2;
+      updateSimulation();
+    });
+
+    btnBiscuit.addEventListener('click', function() {
+      systemSelect.value = 'commercial_high_throughput_75kw';
+      matrixSelect.value = 'hard_sweet_biscuit';
+      powerSlider.value = 50;
+      gapSlider.value = 85;
+      speedSlider.value = 24;
+      moistureSlider.value = 6.5;
+      rhSlider.value = 40;
+      saltSlider.value = 0.8;
+      updateSimulation();
+    });
+
+    btnDigestive.addEventListener('click', function() {
+      systemSelect.value = 'ultra_wide_industrial_120kw';
+      matrixSelect.value = 'digestive_cookie';
+      powerSlider.value = 95;
+      gapSlider.value = 90;
+      speedSlider.value = 16;
+      moistureSlider.value = 7.8;
+      rhSlider.value = 45;
+      saltSlider.value = 1.0;
+      updateSimulation();
+    });
+
+    btnHazard.addEventListener('click', function() {
+      systemSelect.value = 'uncalibrated_cavitating_rf';
+      matrixSelect.value = 'soda_cracker';
+      powerSlider.value = 60;
+      gapSlider.value = 35;
+      speedSlider.value = 40;
+      moistureSlider.value = 6.2;
+      rhSlider.value = 85;
+      saltSlider.value = 2.4;
+      updateSimulation();
+    });
+
+    // Run initial simulation on load
+    updateSimulation();
+  })();
+</script>
