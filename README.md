@@ -3,7 +3,7 @@
 A static reference site answering "Can you put X in Y?" questions for kitchen appliances.
 
 ## Overview
-IsItKitchenSafe provides 10,232 static diagnostic pages detailing whether everyday items are safe for the dishwasher, microwave, freezer, oven, dryer, air fryer, refrigerator, and more across 5 languages (English, Spanish, Portuguese, Japanese, Simplified Chinese), backed by 112 flagship interactive diagnostic tools.
+IsItKitchenSafe provides 10,237 static diagnostic pages detailing whether everyday items are safe for the dishwasher, microwave, freezer, oven, dryer, air fryer, refrigerator, and more across 5 languages (English, Spanish, Portuguese, Japanese, Simplified Chinese), backed by 113 flagship interactive diagnostic tools.
 
 ## Tech Stack
 - **Framework**: Astro.js
@@ -45,22 +45,22 @@ npm run ops:sitemaps
 # Run targeted audits
 npm run ops:seo        # Structured data (JSON-LD FAQPage, BreadcrumbList) & canonicals
 npm run ops:cwv        # Core Web Vitals bundle budgets & asset geometry
-node scripts/autonomous-growth-engine.cjs --tools      # 112 tools × 5 languages audit
+node scripts/autonomous-growth-engine.cjs --tools      # 113 tools × 5 languages audit
 node scripts/autonomous-growth-engine.cjs --redirects  # Cloudflare Pages 2k ceiling monitor
-node scripts/autonomous-growth-engine.cjs --datasets   # 113+ multilingual data assets
+node scripts/autonomous-growth-engine.cjs --datasets   # 124+ multilingual data assets
 
 # Run all-day autonomous background daemon (default 30m heartbeat)
 npm run ops:daemon
 
-# Run full master cycle (audits + 10,232-page static build + link verification)
+# Run full master cycle (audits + 10,237-page static build + link verification)
 npm run ops:engine
 ```
 
 ## Scale & Metrics
-- **10,232 Static Pages** across 11 verticals and 5 languages (EN, ES, PT, JA, ZH-CN)
-- **112 Flagship Interactive Tools** with 100% multilingual parity (560 tool pages)
+- **10,237 Static Pages** across 11 verticals and 5 languages (EN, ES, PT, JA, ZH-CN)
+- **113 Flagship Interactive Tools** with 100% multilingual parity (565 tool pages)
 - **Zero Dead Links** (955,000+ hrefs audited with 100% resolution)
-- **10,064+ Indexed URLs** in verified XML Sitemaps (`sitemap-index.xml`, `sitemap-0.xml`)
+- **10,069+ Indexed URLs** in verified XML Sitemaps (`sitemap-index.xml`, `sitemap-0.xml`)
 - **Cloudflare Edge Middleware** fallback synchronization (`functions/_redirects-map.js`)
 - **100% JSON-LD Schema Compliance** on all tool and reference pages
 

@@ -1,0 +1,968 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import cpData from '../data/cold-plasma-decontamination-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  systemLabel: string;
+  systemHelp: string;
+  matrixLabel: string;
+  matrixHelp: string;
+  gasLabel: string;
+  gasHelp: string;
+  filmLabel: string;
+  filmHelp: string;
+  voltageLabel: string;
+  voltageHelp: string;
+  timeLabel: string;
+  timeHelp: string;
+  humidityLabel: string;
+  humidityHelp: string;
+  holdTimeLabel: string;
+  holdTimeHelp: string;
+  presetsTitle: string;
+  presetGreens: string;
+  presetDeli: string;
+  presetBerry: string;
+  presetNut: string;
+  presetArc: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  logReductionLabel: string;
+  ozoneYieldLabel: string;
+  rnsYieldLabel: string;
+  tbarsLabel: string;
+  nitriteLabel: string;
+  pinholeRiskLabel: string;
+  ozoneDecayLabel: string;
+  sensoryScoreLabel: string;
+  safetyStatusLabel: string;
+  primaryLimitationLabel: string;
+  mitigationActionLabel: string;
+  scienceTitle: string;
+  scienceSub: string;
+  tableTitle: string;
+}
+
+const DICT: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Non-Thermal Physics & Cold Plasma Toxicology",
+    title: "Commercial Continuous Cold-Plasma (CP) In-Package Biofilm Decontamination & Reactive Nitrogen Species (RNS) Modeler",
+    subtitle: "Simulate commercial continuous in-package atmospheric cold plasma (ACP / DBD) non-thermal surface decontamination for fresh produce, poultry, and ready-to-eat foods. Model reactive oxygen and nitrogen species (RONS - O3, •OH, •NO, ONOO-) generation, bacterial lysis kinetics, lipid peroxidation (TBARS MDA), barrier film pinhole perforation stress, and FDA 21 CFR § 170.39 / USDA-FSIS compliance.",
+    controlsTitle: "Dielectric Barrier Discharge Plasma Operating Parameters",
+    controlsSub: "Configure DBD skid architecture, food substrate, packaging gas composition, barrier film dielectric properties, peak voltage, exposure time, gas humidity, and post-treatment hold time.",
+    systemLabel: "Plasma Generator & Skid Configuration:",
+    systemHelp: "Select industrial DBD electrode configuration, dielectric material (quartz, alumina, borosilicate), power density, and cooling architecture.",
+    matrixLabel: "Food Substrate Matrix:",
+    matrixHelp: "Select target food commodity, surface micro-topography, baseline fat content, target bacterial pathogen, and oxidation sensitivity.",
+    gasLabel: "In-Package Working Gas Composition:",
+    gasHelp: "Select modified atmosphere packaging (MAP) gas mixture (High-O2, compressed dry air, N2-dominant, or argon carrier gas).",
+    filmLabel: "Flexible Packaging Barrier Film:",
+    filmHelp: "Select package film polymer laminate, thickness, dielectric breakdown voltage, and oxygen/water vapor barrier integrity.",
+    voltageLabel: "Applied Peak High-Voltage (kV):",
+    voltageHelp: "Peak-to-peak high-voltage applied across dielectric gap. Governs electric field intensity and micro-discharge energy.",
+    timeLabel: "Active In-Plasma Exposure Duration (seconds):",
+    timeHelp: "Residence time packages spend inside active dielectric barrier discharge field under conveyor transit.",
+    humidityLabel: "Working Gas Relative Humidity (% RH):",
+    humidityHelp: "Moisture content in packaging headspace. Water molecules dissociate into bactericidal hydroxyl radicals (•OH) while modulating ozone accumulation.",
+    holdTimeLabel: "Post-Treatment Package Storage Hold Time (hours):",
+    holdTimeHelp: "Post-plasma dwell time in sealed package allowing lingering gaseous ozone and RONS to achieve dark microbial inactivation before retail venting.",
+    presetsTitle: "Standard Commercial Operation Presets",
+    presetGreens: "Leafy Greens Fast 5-Log Inactivation (High-O2 MAP, 70 kV, 45s)",
+    presetDeli: "RTE Deli Slices Listeria Biofilm Safe Window (Dry Air, 55 kV, 60s)",
+    presetBerry: "Delicate Berry Gentle Spore Mode (Argon Mix, 35 kV, 30s)",
+    presetNut: "Tree Nut Low-Oxidation Nitrogen Plasma (90% N2, 65 kV, 90s)",
+    presetArc: "Severe Over-Oxidation & Pinholing Stress Mode (98 kV, 240s, Thin Film)",
+    diagnosticTitle: "Real-Time Plasma Decontamination & Safety Diagnostics",
+    diagnosticSub: "Continuous biokinetic lethality, reactive species concentrations, lipid oxidation index, barrier film integrity, and regulatory compliance metrics.",
+    logReductionLabel: "Pathogen Lethality (Log CFU):",
+    ozoneYieldLabel: "Peak Headspace Ozone (ppm):",
+    rnsYieldLabel: "Reactive Nitrogen (NOx ppm):",
+    tbarsLabel: "Lipid Oxidation (TBARS mg MDA/kg):",
+    nitriteLabel: "Surface Nitrite (mg/kg):",
+    pinholeRiskLabel: "Dielectric Pinhole Risk:",
+    ozoneDecayLabel: "Ozone In-Package t½ (h):",
+    sensoryScoreLabel: "Sensory Quality Retention:",
+    safetyStatusLabel: "Process Operational Status:",
+    primaryLimitationLabel: "Primary Chemical / Physical Limitation:",
+    mitigationActionLabel: "Recommended Sanitary Engineering Action:",
+    scienceTitle: "Deep Science: Non-Thermal Atmospheric Plasma Physics & Microbial Lysis Kinetics",
+    scienceSub: "Comprehensive analysis of dielectric barrier discharge electron avalanches, reactive oxygen and nitrogen chemistry, cell membrane electroporation, and food quality trade-offs.",
+    tableTitle: "Comparative In-Package Cold Plasma Operational Matrix"
+  },
+  es: {
+    badge: "Física No Térmica y Toxicología de Plasma Frío",
+    title: "Simulador de Descontaminación por Plasma Frío en Envasado y Especies Reactivas de Nitrógeno (RNS)",
+    subtitle: "Simule la descontaminación superficial no térmica mediante plasma frío atmosférico (ACP / DBD) en envases sellados para vegetales, aves y carnes listas para consumir. Modele la generación de especies reactivas de oxígeno y nitrógeno (RONS - O3, •OH, •NO, ONOO-), cinética de lisis bacteriana, peroxidación lipídica (TBARS MDA), riesgo de microperforación del film y cumplimiento FDA 21 CFR § 170.39 y USDA-FSIS.",
+    controlsTitle: "Parámetros de Operación del Plasma de Descarga de Barrera Dieléctrica (DBD)",
+    controlsSub: "Configure el equipo DBD, matriz alimentaria, mezcla gaseosa de envasado, propiedades dieléctricas del film, voltaje pico, tiempo de exposición, humedad del gas y tiempo de reposo postratamiento.",
+    systemLabel: "Generador de Plasma y Configuración del Skid:",
+    systemHelp: "Seleccione el skid de electrodos DBD, dieléctrico (cuarzo, alúmina, borosilicato), densidad de potencia y sistema de refrigeración.",
+    matrixLabel: "Matriz del Sustrato Alimentario:",
+    matrixHelp: "Seleccione el alimento, microtopografía superficial, contenido graso, patógeno diana y sensibilidad a la oxidación.",
+    gasLabel: "Composición del Gas de Trabajo en el Envase:",
+    gasHelp: "Seleccione la mezcla MAP (alto O2, aire seco comprimido, dominante en N2 o gas portador de argón).",
+    filmLabel: "Film Barrera de Envasado Flexible:",
+    filmHelp: "Seleccione el laminado polimérico, espesor, rigidez dieléctrica y permeabilidad al oxígeno y vapor de agua.",
+    voltageLabel: "Alto Voltaje Pico Aplicado (kV):",
+    voltageHelp: "Voltaje pico a pico aplicado en el espacio dieléctrico. Rige la intensidad del campo eléctrico y energía de descarga.",
+    timeLabel: "Tiempo de Exposición al Plasma Activo (segundos):",
+    timeHelp: "Tiempo de permanencia del envase bajo el campo de descarga de barrera dieléctrica en la cinta transportadora.",
+    humidityLabel: "Humedad Relativa del Gas (% HR):",
+    humidityHelp: "Humedad del espacio de cabeza. El vapor de agua se disocia en radicales hidroxilo (•OH) modulando el ozono.",
+    holdTimeLabel: "Tiempo de Reposo Postratamiento en Envase Sellado (horas):",
+    holdTimeHelp: "Tiempo de permanencia en envase sellado para inactivación microbiana residual en oscuridad por ozono remanente.",
+    presetsTitle: "Preajustes Comerciales Estándar",
+    presetGreens: "Vegetales de Hoja Reducción Rápida 5-Log (MAP Alto O2, 70 kV, 45s)",
+    presetDeli: "Fiambres Listos para Consumir Ventana Segura Listeria (Aire Seco, 55 kV, 60s)",
+    presetBerry: "Frutos Rojos Delicados Modo Suave Esporas (Argón, 35 kV, 30s)",
+    presetNut: "Frutos Secos Baja Oxidación Plasma de Nitrógeno (90% N2, 65 kV, 90s)",
+    presetArc: "Modo Estrés Sobreoxidación y Microperforación (98 kV, 240s, Film Delgado)",
+    diagnosticTitle: "Diagnóstico en Tiempo Real de Descontaminación y Seguridad",
+    diagnosticSub: "Letalidad biocinética, concentraciones de especies reactivas, índice de oxidación lipídica, integridad del film y cumplimiento normativo.",
+    logReductionLabel: "Letalidad de Patógenos (Reducción Log UFC):",
+    ozoneYieldLabel: "Ozono Pico en Espacio de Cabeza (ppm):",
+    rnsYieldLabel: "Nitrógeno Reactivo (NOx ppm):",
+    tbarsLabel: "Oxidación Lipídica (TBARS mg MDA/kg):",
+    nitriteLabel: "Nitrito Superficial Residual (mg/kg):",
+    pinholeRiskLabel: "Riesgo de Perforación Dieléctrica:",
+    ozoneDecayLabel: "Vida Media del Ozono en Envase t½ (h):",
+    sensoryScoreLabel: "Retención de Calidad Sensorial:",
+    safetyStatusLabel: "Estado Operacional del Proceso:",
+    primaryLimitationLabel: "Limitación Física / Química Primaria:",
+    mitigationActionLabel: "Acción de Ingeniería Sanitaria Recomendada:",
+    scienceTitle: "Ciencia Detallada: Física del Plasma No Térmico y Lisis Microbiana",
+    scienceSub: "Análisis exhaustivo de avalanchas electrónicas en DBD, química de radicales RONS, electroporación de membrana y límites de calidad alimentaria.",
+    tableTitle: "Matriz Comparativa Operacional de Plasma Frío en Envasado"
+  },
+  pt: {
+    badge: "Física Não Térmica e Toxicologia de Plasma Frio",
+    title: "Simulador de Descontaminação por Plasma Frio em Embalagens e Espécies Reativas de Nitrogênio (RNS)",
+    subtitle: "Simule a descontaminação de superfície não térmica por plasma frio atmosférico (ACP / DBD) em embalagens seladas para vegetais, carnes de aves e embutidos prontos para consumo. Modele a geração de espécies reativas de oxigênio e nitrogênio (RONS - O3, •OH, •NO, ONOO-), cinética de lise bacteriana, peroxidação lipídica (TBARS MDA), risco de microperfuração do filme e conformidade com FDA 21 CFR § 170.39 e USDA-FSIS.",
+    controlsTitle: "Parâmetros de Operação do Plasma de Descarga de Barreira Dielétrica (DBD)",
+    controlsSub: "Configure o equipamento DBD, matriz alimentar, composição gasosa de embalagem, propriedades dielétricas do filme, tensão de pico, tempo de exposição, umidade do gás e repouso pós-tratamento.",
+    systemLabel: "Gerador de Plasma e Configuração do Skid:",
+    systemHelp: "Selecione o skid de eletrodos DBD, barreira dielétrica (quartzo, alumina, borossilicato), densidade de potência e refrigeração.",
+    matrixLabel: "Matriz do Substrato Alimentar:",
+    matrixHelp: "Selecione o alimento alvo, microtopografia de superfície, teor de lipídios, patógeno bacteriano e sensibilidade oxidativa.",
+    gasLabel: "Composição do Gás de Trabalho na Embalagem:",
+    gasHelp: "Selecione a mistura gasosa MAP (alto teor de O2, ar seco comprimido, rico em N2 ou gás argônio).",
+    filmLabel: "Filme Barreira de Embalagem Flexível:",
+    filmHelp: "Selecione o laminado polimérico, espessura, rigidez dielétrica e permeabilidade ao oxigênio e vapor de água.",
+    voltageLabel: "Alta Tensão de Pico Aplicada (kV):",
+    voltageHelp: "Tensão pico a pico aplicada no vão dielétrico. Governa a intensidade do campo elétrico e energia de microdescargas.",
+    timeLabel: "Tempo de Exposição ao Plasma Ativo (segundos):",
+    timeHelp: "Tempo de residência da embalagem sob o campo de descarga de barreira dielétrica na esteira transportadora.",
+    humidityLabel: "Umidade Relativa do Gás (% UR):",
+    humidityHelp: "Teor de umidade no espaço livre. O vapor de água se dissocia em radicais hidroxila (•OH) modulando o ozônio.",
+    holdTimeLabel: "Tempo de Repouso Pós-Tratamento na Embalagem Selada (horas):",
+    holdTimeHelp: "Tempo de retenção na embalagem selada permitindo inativação microbiana no escuro por ozônio remanescente.",
+    presetsTitle: "Predefinições Comerciais Padrão",
+    presetGreens: "Hortaliças Folhosas Redução Rápida 5-Log (MAP Alto O2, 70 kV, 45s)",
+    presetDeli: "Frios Prontos para Consumo Janela Segura Listeria (Ar Seco, 55 kV, 60s)",
+    presetBerry: "Frutas Vermelhas Modo Suave Esporos (Argônio, 35 kV, 30s)",
+    presetNut: "Castanhas e Nozes Baixa Oxidação Plasma Nitrogênio (90% N2, 65 kV, 90s)",
+    presetArc: "Modo Estresse Sobreoxidação e Microperfuração (98 kV, 240s, Filme Fino)",
+    diagnosticTitle: "Diagnóstico em Tempo Real de Descontaminação e Segurança",
+    diagnosticSub: "Letalidade biocinética, concentrações de espécies reativas, índice de oxidação lipídica, integridade do filme e conformidade regulatória.",
+    logReductionLabel: "Letalidade de Patógenos (Redução Log UFC):",
+    ozoneYieldLabel: "Ozônio Pico no Espaço Livre (ppm):",
+    rnsYieldLabel: "Nitrogênio Reativo (NOx ppm):",
+    tbarsLabel: "Oxidação Lipídica (TBARS mg MDA/kg):",
+    nitriteLabel: "Nitrito de Superfície Residual (mg/kg):",
+    pinholeRiskLabel: "Risco de Perfuração Dielétrica:",
+    ozoneDecayLabel: "Meia-Vida do Ozônio na Embalagem t½ (h):",
+    sensoryScoreLabel: "Retenção de Qualidade Sensorial:",
+    safetyStatusLabel: "Status Operacional do Processo:",
+    primaryLimitationLabel: "Limitação Física / Química Primária:",
+    mitigationActionLabel: "Ação de Engenharia Sanitária Recomendada:",
+    scienceTitle: "Ciência Avançada: Física do Plasma Não Térmico e Lise Microbiana",
+    scienceSub: "Análise profunda de avalanches eletrônicas em DBD, química de radicais RONS, eletroporação de membrana e equilíbrio da qualidade dos alimentos.",
+    tableTitle: "Matriz Comparativa Operacional de Plasma Frio em Embalagens"
+  },
+  'zh-cn': {
+    badge: "非热物理学与低温等离子体毒理学",
+    title: "商业连续包装内低温等离子体 (CP) 生物膜灭菌与活性氮物种 (RNS) 模拟器",
+    subtitle: "模拟生鲜果蔬、禽肉及即食食品的商业连续包装内大气压低温等离子体 (ACP / DBD) 非热表面灭菌过程。量化活性氧与活性氮物种 (RONS - O3, •OH, •NO, ONOO-) 生成动力学、细菌细胞裂解致死率、脂质过氧化物 (TBARS 丙二醛 MDA)、包装膜微孔击穿穿孔应力及 FDA 21 CFR § 170.39 / USDA-FSIS 卫生合规性。",
+    controlsTitle: "介质阻挡放电 (DBD) 等离子体核心运行参数",
+    controlsSub: "配置 DBD 放电设备、食品底物、包装保护气体成分、高阻隔薄膜介电特性、峰值高压、放电时间、气体湿度及处理后密封留存时间。",
+    systemLabel: "等离子体发生器及设备规格:",
+    systemHelp: "选择工业级介质阻挡放电电极结构、介质材料（石英、高纯氧化铝、硼硅酸盐玻璃）、功率密度及水冷温控系统。",
+    matrixLabel: "食品基质类别:",
+    matrixHelp: "选择目标食品物料、表面微观几何形貌、基础脂肪含量、目标食源性致病菌及脂质氧化敏感度。",
+    gasLabel: "包装内工作气体配比:",
+    gasHelp: "选择气调包装 (MAP) 气体组分（高氧混合气、压缩干燥空气、高纯富氮气或氩气惰性载气）。",
+    filmLabel: "柔性软包装阻隔薄膜材料:",
+    filmHelp: "选择复合包装膜聚合物材质、厚度、介电击穿场强以及氧气/水蒸气阻隔性能。",
+    voltageLabel: "施加电极峰值高压 (kV):",
+    voltageHelp: "施加在放电介质间隙两端的峰峰值高压。决定电场强度与微放电通道电子碰撞能量。",
+    timeLabel: "等离子体主动放电处理时间 (秒):",
+    timeHelp: "密封包装在输送带连续通过高压放电区域时的有效停留辐照时间。",
+    humidityLabel: "包装内气体相对湿度 (% RH):",
+    humidityHelp: "包装顶部空隙气体湿度。水分分子解离生成高活性羟基自由基 (•OH)，并调节臭氧积累。",
+    holdTimeLabel: "处理后包装密封留存时间 (小时):",
+    holdTimeHelp: "处理后密封贮存时间，利用残留气态臭氧及长寿命 RONS 在暗反应条件下持续灭菌。",
+    presetsTitle: "标准商业工况预设方案",
+    presetGreens: "叶类蔬菜快速 5-Log 灭菌 (高氧 MAP, 70 kV, 45秒)",
+    presetDeli: "即食禽肉熟食单增李斯特菌生物膜安全窗口 (干燥空气, 55 kV, 60秒)",
+    presetBerry: "脆弱浆果温和真菌孢子钝化模式 (氩气配比, 35 kV, 30秒)",
+    presetNut: "坚果低氧化氮气等离子体灭菌 (90% N2, 65 kV, 90秒)",
+    presetArc: "严重过氧化与介电击穿穿孔应力测试模式 (98 kV, 240秒, 薄膜)",
+    diagnosticTitle: "实时等离子体灭菌与安全毒理诊断指标",
+    diagnosticSub: "连续生物动力学致死率、活性自由基浓度、脂肪酸过氧化指数、包装薄膜物理完整度及法规合规状态。",
+    logReductionLabel: "致病菌对数杀灭率 (Log CFU):",
+    ozoneYieldLabel: "顶部空隙峰值臭氧浓度 (ppm):",
+    rnsYieldLabel: "活性氮物种浓度 (NOx ppm):",
+    tbarsLabel: "脂质氧化指标 (TBARS 丙二醛 mg/kg):",
+    nitriteLabel: "表面残存亚硝酸盐 (mg/kg):",
+    pinholeRiskLabel: "薄膜介电击穿穿孔风险:",
+    ozoneDecayLabel: "包装内臭氧半衰期 t½ (小时):",
+    sensoryScoreLabel: "感官与营养品质保留率:",
+    safetyStatusLabel: "工艺运行合规状态:",
+    primaryLimitationLabel: "主要理化限制机制:",
+    mitigationActionLabel: "建议卫生工程对策:",
+    scienceTitle: "深层科学原理解析: 非热等离子体物理放电与微生物细胞裂解机制",
+    scienceSub: "系统剖析介质阻挡放电电子雪崩效应、RONS 自由基连锁反应、膜电穿孔动力学及食品货架期质量控制平衡。",
+    tableTitle: "包装内低温等离子体商业工艺多维度对照表"
+  },
+  ja: {
+    badge: "非加熱物理学と低温プラズマ毒性学",
+    title: "商業用連続包装内低温プラズマ (CP) バイオフィルム殺菌＆活性窒素種 (RNS) シミュレーター",
+    subtitle: "生鮮野菜、鶏肉、調理済み食品の商業用連続密封包装内大気圧低温プラズマ (ACP / DBD) 非加熱殺菌プロセスをシミュレート。活性酸素・活性窒素種 (RONS - O3, •OH, •NO, ONOO-) 生成動態、細菌細胞溶解不活化速度、脂質過酸化度 (TBARS MDA)、包装フィルムの絶縁破壊ピンホール応力、および FDA 21 CFR § 170.39 / USDA-FSIS 適合性を高精度に評価します。",
+    controlsTitle: "誘電体バリア放電 (DBD) プラズマ運転制御パラメータ",
+    controlsSub: "DBD 電極構造、食品基質、ガス置換包装 (MAP) 組成、バリアフィルム誘電特性、ピーク印加電圧、照射時間、ガス湿度、処理後暗所保持時間を設定します。",
+    systemLabel: "プラズマ発生装置およびスキッド構成:",
+    systemHelp: "産業用 DBD 電極構成、誘電体材質（石英、高純度アルミナ、ホウケイ酸ガラス）、電力密度、水冷冷却系を選択します。",
+    matrixLabel: "食品基質カテゴリー:",
+    matrixHelp: "対象食品、表面微細構造、基礎脂肪含有率、標的食源性病原菌、および酸化感受性を選択します。",
+    gasLabel: "包装内封入ガス組成:",
+    gasHelp: "ガス置換包装 (MAP) 組成（高酸素ガス、乾燥圧縮空気、高窒素リッチ、アルゴンキャリアガス）を選択します。",
+    filmLabel: "軟包装バリアフィルム材料:",
+    filmHelp: "包装フィルムのポリマーラミネート構成、厚み、絶縁破壊耐電圧、酸素・水蒸気バリア性を選択します。",
+    voltageLabel: "印加ピーク高電圧 (kV):",
+    voltageHelp: "誘電体間隙に印加されるピーク間高電圧。電界強度と微小放電エネルギーを支配します。",
+    timeLabel: "アクティブプラズマ照射時間 (秒):",
+    timeHelp: "コンベア上で包装が放電電界領域内を通過・滞留する有効照射時間。",
+    humidityLabel: "封入ガス相対湿度 (% RH):",
+    humidityHelp: "ヘッドスペース水蒸気量。水分子が殺菌性の高いヒドロキシルラジカル (•OH) に解離し、オゾン濃度を調節します。",
+    holdTimeLabel: "処理後密封保管滞留時間 (時間):",
+    holdTimeHelp: "包装内残留オゾンおよび長寿命 RONS による暗所追加殺菌のための保管時間。",
+    presetsTitle: "標準的商業運転プリセット",
+    presetGreens: "葉物野菜急速 5-Log 殺菌 (高酸素 MAP, 70 kV, 45秒)",
+    presetDeli: "食肉加工品リステリア菌安全不活化 (乾燥空気, 55 kV, 60秒)",
+    presetBerry: "デリケート果実穏和殺菌モード (アルゴン配合, 35 kV, 30秒)",
+    presetNut: "ナッツ類低酸化窒素プラズマモード (90% N2, 65 kV, 90秒)",
+    presetArc: "過酸化・絶縁破壊ピンホールストレス試験モード (98 kV, 240秒, 薄膜)",
+    diagnosticTitle: "リアルタイム殺菌・毒性安全診断メトリクス",
+    diagnosticSub: "生物速度論的不活化対数値、活性種濃度、脂質過酸化指数、フィルム物理的健全性、法規制遵守状態。",
+    logReductionLabel: "病原菌殺菌対数値 (Log CFU 減少):",
+    ozoneYieldLabel: "ヘッドスペースピークオゾン濃度 (ppm):",
+    rnsYieldLabel: "活性窒素種濃度 (NOx ppm):",
+    tbarsLabel: "脂質過酸化度 (TBARS MDA mg/kg):",
+    nitriteLabel: "表面残留亜硝酸塩 (mg/kg):",
+    pinholeRiskLabel: "フィルム誘電破壊ピンホールリスク:",
+    ozoneDecayLabel: "包装内オゾン半減期 t½ (時間):",
+    sensoryScoreLabel: "官能・栄養品質保持スコア:",
+    safetyStatusLabel: "プロセス運転適合性ステータス:",
+    primaryLimitationLabel: "主要な物理・化学的ボトルネック:",
+    mitigationActionLabel: "推奨される衛生工学的対策:",
+    scienceTitle: "詳細科学解説: 非加熱低温プラズマ物理と細菌細胞溶解メカニズム",
+    scienceSub: "誘電体バリア放電の電子雪崩現象、RONS 活性種化学反応、細胞膜電界穿孔（エレクトロポレーション）、品質制御工学を徹底解説。",
+    tableTitle: "包装内低温プラズマ運転特性比較マトリクス"
+  }
+};
+
+const d = DICT[lang] || DICT.en;
+---
+
+<div class="commercial-cold-plasma-modeler max-w-6xl mx-auto space-y-8" data-lang={lang}>
+  <!-- Header Title & Badges -->
+  <div class="bg-surface-soft border border-hairline rounded-2xl p-6 sm:p-8 shadow-xs">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+      <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-violet-600 text-white">
+        {d.badge}
+      </span>
+      <span class="text-xs text-muted font-mono">
+        FDA 21 CFR &sect; 170.39 &bull; USDA-FSIS 9 CFR &sect; 430 &bull; OSHA 29 CFR 1910.1000 &bull; EFSA
+      </span>
+    </div>
+    <h1 class="text-title-lg sm:text-headline font-semibold text-ink tracking-tight mb-3">
+      {d.title}
+    </h1>
+    <p class="text-body text-sm sm:text-base leading-relaxed text-muted max-w-4xl">
+      {d.subtitle}
+    </p>
+
+    <!-- Presets Bar -->
+    <div class="mt-6 pt-6 border-t border-hairline/60">
+      <div class="text-xs font-semibold uppercase tracking-wider text-muted mb-3">
+        {d.presetsTitle}
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" class="cp-preset-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-surface border border-hairline hover:border-violet-500 hover:text-violet-600 transition-colors cursor-pointer" data-preset="greens">
+          🥬 {d.presetGreens}
+        </button>
+        <button type="button" class="cp-preset-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-surface border border-hairline hover:border-violet-500 hover:text-violet-600 transition-colors cursor-pointer" data-preset="deli">
+          🥩 {d.presetDeli}
+        </button>
+        <button type="button" class="cp-preset-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-surface border border-hairline hover:border-violet-500 hover:text-violet-600 transition-colors cursor-pointer" data-preset="berry">
+          🍓 {d.presetBerry}
+        </button>
+        <button type="button" class="cp-preset-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-surface border border-hairline hover:border-violet-500 hover:text-violet-600 transition-colors cursor-pointer" data-preset="nut">
+          🥜 {d.presetNut}
+        </button>
+        <button type="button" class="cp-preset-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-surface border border-hairline hover:border-rose-500 hover:text-rose-600 transition-colors cursor-pointer" data-preset="arc">
+          ⚠️ {d.presetArc}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Controls & Configuration Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <!-- Controls Column (7 cols) -->
+    <div class="lg:col-span-7 bg-surface-soft border border-hairline rounded-2xl p-6 sm:p-7 shadow-xs space-y-6">
+      <div>
+        <h2 class="text-title font-semibold text-ink tracking-tight mb-1">
+          {d.controlsTitle}
+        </h2>
+        <p class="text-xs text-muted leading-relaxed">
+          {d.controlsSub}
+        </p>
+      </div>
+
+      <!-- System Selector -->
+      <div class="space-y-1.5">
+        <label for="cp-system-select" class="block text-xs font-semibold text-ink">
+          {d.systemLabel}
+        </label>
+        <select id="cp-system-select" class="w-full px-3 py-2 rounded-xl bg-surface border border-hairline text-sm text-ink focus:outline-hidden focus:border-violet-500">
+          {cpData.plasmaSystems.map((sys) => (
+            <option value={sys.id} selected={sys.id === 'commercial_conveyor_dbd_skid_90kv'}>
+              {sys.name}
+            </option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted">{d.systemHelp}</p>
+      </div>
+
+      <!-- Food Matrix Selector -->
+      <div class="space-y-1.5">
+        <label for="cp-matrix-select" class="block text-xs font-semibold text-ink">
+          {d.matrixLabel}
+        </label>
+        <select id="cp-matrix-select" class="w-full px-3 py-2 rounded-xl bg-surface border border-hairline text-sm text-ink focus:outline-hidden focus:border-violet-500">
+          {cpData.foodMatrices.map((mat) => (
+            <option value={mat.id} selected={mat.id === 'fresh_cut_leafy_greens'}>
+              {mat.name}
+            </option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted">{d.matrixHelp}</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Gas Mixture Selector -->
+        <div class="space-y-1.5">
+          <label for="cp-gas-select" class="block text-xs font-semibold text-ink">
+            {d.gasLabel}
+          </label>
+          <select id="cp-gas-select" class="w-full px-3 py-2 rounded-xl bg-surface border border-hairline text-sm text-ink focus:outline-hidden focus:border-violet-500">
+            {cpData.gasFormulations.map((gas) => (
+              <option value={gas.id} selected={gas.id === 'map_high_oxygen_mix'}>
+                {gas.name}
+              </option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted">{d.gasHelp}</p>
+        </div>
+
+        <!-- Packaging Barrier Film -->
+        <div class="space-y-1.5">
+          <label for="cp-film-select" class="block text-xs font-semibold text-ink">
+            {d.filmLabel}
+          </label>
+          <select id="cp-film-select" class="w-full px-3 py-2 rounded-xl bg-surface border border-hairline text-sm text-ink focus:outline-hidden focus:border-violet-500">
+            {cpData.packagingFilms.map((film) => (
+              <option value={film.id} selected={film.id === 'pet_ldpe_barrier_laminate_75um'}>
+                {film.name}
+              </option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted">{d.filmHelp}</p>
+        </div>
+      </div>
+
+      <!-- Sliders Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2 border-t border-hairline/60">
+        <!-- Peak Voltage -->
+        <div class="space-y-1.5">
+          <div class="flex justify-between items-center">
+            <label for="cp-voltage-slider" class="text-xs font-semibold text-ink">
+              {d.voltageLabel}
+            </label>
+            <span id="cp-voltage-val" class="text-xs font-mono font-bold text-violet-600 bg-violet-500/10 px-2 py-0.5 rounded">
+              70 kV
+            </span>
+          </div>
+          <input type="range" id="cp-voltage-slider" min="15" max="95" step="1" value="70" class="w-full accent-violet-600 cursor-pointer" />
+          <p class="text-[11px] text-muted">{d.voltageHelp}</p>
+        </div>
+
+        <!-- Exposure Duration -->
+        <div class="space-y-1.5">
+          <div class="flex justify-between items-center">
+            <label for="cp-time-slider" class="text-xs font-semibold text-ink">
+              {d.timeLabel}
+            </label>
+            <span id="cp-time-val" class="text-xs font-mono font-bold text-violet-600 bg-violet-500/10 px-2 py-0.5 rounded">
+              45 s
+            </span>
+          </div>
+          <input type="range" id="cp-time-slider" min="10" max="300" step="5" value="45" class="w-full accent-violet-600 cursor-pointer" />
+          <p class="text-[11px] text-muted">{d.timeHelp}</p>
+        </div>
+
+        <!-- Relative Humidity -->
+        <div class="space-y-1.5">
+          <div class="flex justify-between items-center">
+            <label for="cp-humidity-slider" class="text-xs font-semibold text-ink">
+              {d.humidityLabel}
+            </label>
+            <span id="cp-humidity-val" class="text-xs font-mono font-bold text-violet-600 bg-violet-500/10 px-2 py-0.5 rounded">
+              55% RH
+            </span>
+          </div>
+          <input type="range" id="cp-humidity-slider" min="10" max="85" step="5" value="55" class="w-full accent-violet-600 cursor-pointer" />
+          <p class="text-[11px] text-muted">{d.humidityHelp}</p>
+        </div>
+
+        <!-- Hold Time -->
+        <div class="space-y-1.5">
+          <div class="flex justify-between items-center">
+            <label for="cp-hold-slider" class="text-xs font-semibold text-ink">
+              {d.holdTimeLabel}
+            </label>
+            <span id="cp-hold-val" class="text-xs font-mono font-bold text-violet-600 bg-violet-500/10 px-2 py-0.5 rounded">
+              12 h
+            </span>
+          </div>
+          <input type="range" id="cp-hold-slider" min="0" max="48" step="1" value="12" class="w-full accent-violet-600 cursor-pointer" />
+          <p class="text-[11px] text-muted">{d.holdTimeHelp}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Diagnostic Results Column (5 cols) -->
+    <div class="lg:col-span-5 bg-surface-soft border border-hairline rounded-2xl p-6 sm:p-7 shadow-xs flex flex-col justify-between space-y-6">
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-title font-semibold text-ink tracking-tight">
+            {d.diagnosticTitle}
+          </h2>
+          <span id="cp-safety-badge" class="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-600 text-white">
+            OPTIMAL_SAFE
+          </span>
+        </div>
+        <p class="text-xs text-muted leading-relaxed mb-5">
+          {d.diagnosticSub}
+        </p>
+
+        <!-- Metrics Grid -->
+        <div class="grid grid-cols-2 gap-3 mb-5">
+          <!-- Log Reduction -->
+          <div class="p-3.5 rounded-xl bg-surface border border-hairline/80">
+            <div class="text-[11px] text-muted font-medium mb-1">{d.logReductionLabel}</div>
+            <div id="cp-log-reduction" class="text-lg font-bold font-mono text-emerald-600">4.8 Log</div>
+            <div id="cp-log-sub" class="text-[10px] text-muted mt-0.5">Target &ge; 4.5 Log</div>
+          </div>
+
+          <!-- Headspace Ozone -->
+          <div class="p-3.5 rounded-xl bg-surface border border-hairline/80">
+            <div class="text-[11px] text-muted font-medium mb-1">{d.ozoneYieldLabel}</div>
+            <div id="cp-ozone-yield" class="text-lg font-bold font-mono text-violet-600">1,420 ppm</div>
+            <div id="cp-ozone-sub" class="text-[10px] text-muted mt-0.5">ROS Lysis Driver</div>
+          </div>
+
+          <!-- RNS Yield -->
+          <div class="p-3.5 rounded-xl bg-surface border border-hairline/80">
+            <div class="text-[11px] text-muted font-medium mb-1">{d.rnsYieldLabel}</div>
+            <div id="cp-rns-yield" class="text-lg font-bold font-mono text-indigo-600">310 ppm</div>
+            <div id="cp-rns-sub" class="text-[10px] text-muted mt-0.5">NOx &amp; ONOO-</div>
+          </div>
+
+          <!-- TBARS Lipid Oxidation -->
+          <div class="p-3.5 rounded-xl bg-surface border border-hairline/80">
+            <div class="text-[11px] text-muted font-medium mb-1">{d.tbarsLabel}</div>
+            <div id="cp-tbars" class="text-lg font-bold font-mono text-emerald-600">0.24 mg/kg</div>
+            <div id="cp-tbars-sub" class="text-[10px] text-muted mt-0.5">Rancidity &lt; 1.0</div>
+          </div>
+
+          <!-- Nitrite Accumulation -->
+          <div class="p-3.5 rounded-xl bg-surface border border-hairline/80">
+            <div class="text-[11px] text-muted font-medium mb-1">{d.nitriteLabel}</div>
+            <div id="cp-nitrite" class="text-lg font-bold font-mono text-ink">18.5 mg/kg</div>
+            <div id="cp-nitrite-sub" class="text-[10px] text-muted mt-0.5">EFSA Safe</div>
+          </div>
+
+          <!-- Pinhole Risk -->
+          <div class="p-3.5 rounded-xl bg-surface border border-hairline/80">
+            <div class="text-[11px] text-muted font-medium mb-1">{d.pinholeRiskLabel}</div>
+            <div id="cp-pinhole" class="text-lg font-bold font-mono text-emerald-600">0.0% (Zero)</div>
+            <div id="cp-pinhole-sub" class="text-[10px] text-muted mt-0.5">Dielectric Safe</div>
+          </div>
+        </div>
+
+        <!-- Secondary Metrics -->
+        <div class="space-y-2 text-xs border-y border-hairline/60 py-3 mb-4">
+          <div class="flex justify-between">
+            <span class="text-muted">{d.ozoneDecayLabel}</span>
+            <span id="cp-decay-half" class="font-mono font-medium text-ink">1.8 h (Headspace Residual)</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-muted">{d.sensoryScoreLabel}</span>
+            <span id="cp-sensory-score" class="font-mono font-medium text-emerald-600">94.5% Retention</span>
+          </div>
+        </div>
+
+        <!-- Failure Diagnosis Card -->
+        <div id="cp-diagnostic-callout" class="p-3.5 rounded-xl bg-surface border border-emerald-500/40 text-xs space-y-1.5">
+          <div>
+            <span class="font-semibold text-ink">{d.primaryLimitationLabel}</span>
+            <span id="cp-primary-limitation" class="text-muted ml-1 font-mono">None (Uniform Glow Discharge &amp; High Lethality)</span>
+          </div>
+          <div>
+            <span class="font-semibold text-ink">{d.mitigationActionLabel}</span>
+            <span id="cp-mitigation-action" class="text-muted ml-1">Process within validated HACCP &amp; USDA-FSIS lethal boundaries. Maintain package barrier inspection.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Deep Science Explanatory Section -->
+  <div class="bg-surface-soft border border-hairline rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+    <div>
+      <h2 class="text-title-lg font-semibold text-ink tracking-tight mb-2">
+        {d.scienceTitle}
+      </h2>
+      <p class="text-body text-sm leading-relaxed text-muted max-w-4xl">
+        {d.scienceSub}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-body leading-relaxed">
+      <div class="space-y-3">
+        <h3 class="font-semibold text-ink flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-violet-600"></span>
+          1. Dielectric Barrier Discharge (DBD) Plasma Physics &amp; Electric Field Ionization
+        </h3>
+        <p>
+          Atmospheric cold plasma operates by applying high AC or nanosecond-pulsed voltages (15 to 90 kV) across an electrode gap containing an insulating dielectric barrier (such as quartz, alumina ceramic, or the flexible package wall itself). The dielectric barrier suppresses continuous thermal arc formation by accumulating surface charge that opposes the applied electric field, choking the discharge into thousands of transient, self-terminating micro-discharges per microsecond.
+        </p>
+        <p>
+          Because energetic electrons (Te ~ 1 to 10 eV &approx; 11,000 to 110,000 K) collide with heavy gas molecules (N2, O2, H2O) without raising the bulk gas translational temperature (T_gas &lt; 35&deg;C), biological tissues inside the sealed package remain undamaged by heat while chemical reactivity is maximized.
+        </p>
+      </div>
+
+      <div class="space-y-3">
+        <h3 class="font-semibold text-ink flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
+          2. Reactive Oxygen &amp; Nitrogen Species (RONS) Cell Lysis Pathways
+        </h3>
+        <p>
+          Microbial death occurs through a synergistic cascade of oxidative and chemical mechanisms:
+        </p>
+        <ul class="list-disc pl-5 space-y-1.5 text-xs text-muted">
+          <li><strong>Ozone (O3) &amp; Singlet Oxygen (1O2):</strong> Direct oxidation of peptidoglycan, lipopolysaccharide (LPS), and unsaturated fatty acid double bonds in microbial cell membranes, leading to localized pore formation, leakage of potassium and nucleic acids, and immediate osmotic lysis.</li>
+          <li><strong>Hydroxyl Radicals (&bull;OH):</strong> Generated by water vapor dissociation (e- + H2O &rarr; &bull;OH + H&bull; + e-), exhibiting an extreme oxidation potential (E&deg; = 2.80 V), inducing immediate single- and double-strand DNA cleavage.</li>
+          <li><strong>Peroxynitrite (ONOO-) &amp; Nitric Oxide (&bull;NO):</strong> Synthesized via the coupling of nitric oxide and superoxide (&bull;NO + O2&bull;- &rarr; ONOO-), driving intracellular protein tyrosine nitration, cytochrome c oxidation, and catastrophic metabolic collapse.</li>
+        </ul>
+      </div>
+
+      <div class="space-y-3">
+        <h3 class="font-semibold text-ink flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-amber-600"></span>
+          3. The Lipid Oxidation &amp; TBARS Rancidity Trade-Off
+        </h3>
+        <p>
+          In foods containing polyunsaturated fatty acids (PUFAs—such as poultry fat, cured meats, and walnuts), reactive oxygen species extract bis-allylic hydrogen atoms, initiating free-radical chain lipid autoxidation (RH + &bull;OH &rarr; R&bull; + H2O &rarr; ROO&bull; &rarr; ROOH). Secondary breakdown produces volatile malondialdehyde (MDA) and 4-hydroxynonenal (4-HNE), measured by the Thiobarbituric Acid Reactive Substances (TBARS) index.
+        </p>
+        <p>
+          Exceeding 1.0 mg MDA/kg in poultry or 1.5 mg MDA/kg in cured meats introduces severe rancid, cardboard off-flavors. Formulating the working gas with high nitrogen (&gt; 85% N2) or using precise sub-60-second exposure windows preserves the delicate lipids while ensuring &ge; 4.5-log lethality.
+        </p>
+      </div>
+
+      <div class="space-y-3">
+        <h3 class="font-semibold text-ink flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-rose-600"></span>
+          4. Barrier Film Dielectric Breakdown &amp; Pinhole Containment Physics
+        </h3>
+        <p>
+          For in-package cold plasma, the polymer film must serve as an impermeable barrier both before and after plasma discharge. If the electric field across the package film exceeds its intrinsic dielectric breakdown strength (E_breakdown, typically 180 kV/mm for PET and 65 kV/mm for thin LDPE), localized dielectric puncture occurs.
+        </p>
+        <p>
+          These microscopic pinholes (10 to 50 &mu;m) breach the hermetic seal, permitting ozone and reactive gas leakage into the manufacturing facility (violating OSHA's 0.1 ppm ceiling) while allowing re-contamination of the food product by environmental spoilage molds. Multi-layer laminates (e.g., PET/LDPE &ge; 75 &mu;m or OPP/EVOH &ge; 100 &mu;m) are mandatory for commercial lines.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comparison Regulatory Table -->
+  <div class="bg-surface-soft border border-hairline rounded-2xl p-6 sm:p-8 shadow-xs">
+    <h2 class="text-title font-semibold text-ink tracking-tight mb-4">
+      {d.tableTitle}
+    </h2>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs border-collapse">
+        <thead>
+          <tr class="border-b border-hairline text-muted font-semibold uppercase tracking-wider">
+            <th class="py-3 px-3">Process Parameter / Commodity</th>
+            <th class="py-3 px-3">Fresh Leafy Greens</th>
+            <th class="py-3 px-3">Raw Chicken Cut</th>
+            <th class="py-3 px-3">RTE Sliced Deli Meat</th>
+            <th class="py-3 px-3">Shelled Tree Nuts</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline/60 font-mono text-ink">
+          <tr>
+            <td class="py-2.5 px-3 font-sans font-medium text-ink">Target Pathogen</td>
+            <td class="py-2.5 px-3">E. coli O157:H7</td>
+            <td class="py-2.5 px-3">Salmonella / Campylobacter</td>
+            <td class="py-2.5 px-3">Listeria monocytogenes</td>
+            <td class="py-2.5 px-3">Salmonella Enteritidis</td>
+          </tr>
+          <tr>
+            <td class="py-2.5 px-3 font-sans font-medium text-ink">Optimal Working Gas</td>
+            <td class="py-2.5 px-3 text-emerald-600">65% O2 / 30% CO2 / 5% N2</td>
+            <td class="py-2.5 px-3">Dry Air (78% N2 / 21% O2)</td>
+            <td class="py-2.5 px-3">Dry Air or 80% N2 / 20% O2</td>
+            <td class="py-2.5 px-3 text-violet-600">90% N2 / 10% O2 (Low-ROS)</td>
+          </tr>
+          <tr>
+            <td class="py-2.5 px-3 font-sans font-medium text-ink">Operating Peak Voltage (kV)</td>
+            <td class="py-2.5 px-3">65 &ndash; 75 kV</td>
+            <td class="py-2.5 px-3">70 &ndash; 85 kV</td>
+            <td class="py-2.5 px-3">50 &ndash; 65 kV</td>
+            <td class="py-2.5 px-3">60 &ndash; 70 kV</td>
+          </tr>
+          <tr>
+            <td class="py-2.5 px-3 font-sans font-medium text-ink">Lethal Log Reduction</td>
+            <td class="py-2.5 px-3 font-bold text-emerald-600">&ge; 4.5 Log</td>
+            <td class="py-2.5 px-3 font-bold text-emerald-600">&ge; 5.0 Log</td>
+            <td class="py-2.5 px-3 font-bold text-emerald-600">&ge; 5.0 Log (FSIS)</td>
+            <td class="py-2.5 px-3 font-bold text-emerald-600">&ge; 4.0 Log</td>
+          </tr>
+          <tr>
+            <td class="py-2.5 px-3 font-sans font-medium text-ink">TBARS Lipid Limit (mg MDA/kg)</td>
+            <td class="py-2.5 px-3">&lt; 0.25 (Negligible Fat)</td>
+            <td class="py-2.5 px-3">&lt; 1.0 (Fresh Baseline)</td>
+            <td class="py-2.5 px-3">&lt; 1.5 (Cooked Fat Limit)</td>
+            <td class="py-2.5 px-3">&lt; 2.0 (High PUFA Risk)</td>
+          </tr>
+          <tr>
+            <td class="py-2.5 px-3 font-sans font-medium text-ink">Recommended Barrier Film</td>
+            <td class="py-2.5 px-3">PET/LDPE 75 &mu;m</td>
+            <td class="py-2.5 px-3">PET/LDPE 85 &mu;m</td>
+            <td class="py-2.5 px-3">OPP/EVOH/PE 110 &mu;m</td>
+            <td class="py-2.5 px-3">High-Barrier Foil Laminate</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  import cpData from '../data/cold-plasma-decontamination-data.json';
+
+  function initColdPlasmaModeler() {
+    const root = document.querySelector('.commercial-cold-plasma-modeler');
+    if (!root) return;
+
+    // Elements
+    const systemSelect = root.querySelector('#cp-system-select') as HTMLSelectElement;
+    const matrixSelect = root.querySelector('#cp-matrix-select') as HTMLSelectElement;
+    const gasSelect = root.querySelector('#cp-gas-select') as HTMLSelectElement;
+    const filmSelect = root.querySelector('#cp-film-select') as HTMLSelectElement;
+
+    const voltageSlider = root.querySelector('#cp-voltage-slider') as HTMLInputElement;
+    const timeSlider = root.querySelector('#cp-time-slider') as HTMLInputElement;
+    const humiditySlider = root.querySelector('#cp-humidity-slider') as HTMLInputElement;
+    const holdSlider = root.querySelector('#cp-hold-slider') as HTMLInputElement;
+
+    const voltageVal = root.querySelector('#cp-voltage-val') as HTMLElement;
+    const timeVal = root.querySelector('#cp-time-val') as HTMLElement;
+    const humidityVal = root.querySelector('#cp-humidity-val') as HTMLElement;
+    const holdVal = root.querySelector('#cp-hold-val') as HTMLElement;
+
+    // Output elements
+    const safetyBadge = root.querySelector('#cp-safety-badge') as HTMLElement;
+    const logReductionEl = root.querySelector('#cp-log-reduction') as HTMLElement;
+    const logSubEl = root.querySelector('#cp-log-sub') as HTMLElement;
+    const ozoneYieldEl = root.querySelector('#cp-ozone-yield') as HTMLElement;
+    const rnsYieldEl = root.querySelector('#cp-rns-yield') as HTMLElement;
+    const tbarsEl = root.querySelector('#cp-tbars') as HTMLElement;
+    const nitriteEl = root.querySelector('#cp-nitrite') as HTMLElement;
+    const pinholeEl = root.querySelector('#cp-pinhole') as HTMLElement;
+    const decayHalfEl = root.querySelector('#cp-decay-half') as HTMLElement;
+    const sensoryScoreEl = root.querySelector('#cp-sensory-score') as HTMLElement;
+    const primaryLimitationEl = root.querySelector('#cp-primary-limitation') as HTMLElement;
+    const mitigationActionEl = root.querySelector('#cp-mitigation-action') as HTMLElement;
+    const diagnosticCallout = root.querySelector('#cp-diagnostic-callout') as HTMLElement;
+
+    const presetBtns = root.querySelectorAll('.cp-preset-btn');
+
+    // Preset configurations
+    const PRESETS: Record<string, { system: string; matrix: string; gas: string; film: string; v: number; t: number; rh: number; hold: number }> = {
+      greens: {
+        system: 'commercial_conveyor_dbd_skid_90kv',
+        matrix: 'fresh_cut_leafy_greens',
+        gas: 'map_high_oxygen_mix',
+        film: 'pet_ldpe_barrier_laminate_75um',
+        v: 70,
+        t: 45,
+        rh: 60,
+        hold: 12
+      },
+      deli: {
+        system: 'commercial_conveyor_dbd_skid_90kv',
+        matrix: 'rte_sliced_turkey_deli',
+        gas: 'ambient_dry_air',
+        film: 'opp_evoh_retort_pouch_110um',
+        v: 55,
+        t: 60,
+        rh: 50,
+        hold: 24
+      },
+      berry: {
+        system: 'industrial_smd_high_speed_2500pkg',
+        matrix: 'fresh_soft_berries',
+        gas: 'argon_carrier_gas',
+        film: 'pla_bioplastic_barrier_film_45um',
+        v: 35,
+        t: 30,
+        rh: 40,
+        hold: 6
+      },
+      nut: {
+        system: 'commercial_conveyor_dbd_skid_90kv',
+        matrix: 'shelled_raw_walnuts_almonds',
+        gas: 'nitrogen_enriched_mix',
+        film: 'pet_ldpe_barrier_laminate_75um',
+        v: 65,
+        t: 90,
+        rh: 20,
+        hold: 16
+      },
+      arc: {
+        system: 'compromised_overvoltage_dbd_unit',
+        matrix: 'fresh_raw_chicken_fillets',
+        gas: 'map_high_oxygen_mix',
+        film: 'compromised_thin_ldpe_30um',
+        v: 98,
+        t: 240,
+        rh: 75,
+        hold: 2
+      }
+    };
+
+    function recalculate() {
+      const sysId = systemSelect.value;
+      const matId = matrixSelect.value;
+      const gasId = gasSelect.value;
+      const filmId = filmSelect.value;
+
+      const vKv = parseFloat(voltageSlider.value);
+      const tSec = parseFloat(timeSlider.value);
+      const rhPct = parseFloat(humiditySlider.value);
+      const holdHr = parseFloat(holdSlider.value);
+
+      voltageVal.textContent = `${vKv} kV`;
+      timeVal.textContent = `${tSec} s`;
+      humidityVal.textContent = `${rhPct}% RH`;
+      holdVal.textContent = `${holdHr} h`;
+
+      const sys = cpData.plasmaSystems.find(s => s.id === sysId) || cpData.plasmaSystems[1];
+      const mat = cpData.foodMatrices.find(m => m.id === matId) || cpData.foodMatrices[0];
+      const gas = cpData.gasFormulations.find(g => g.id === gasId) || cpData.gasFormulations[0];
+      const film = cpData.packagingFilms.find(f => f.id === filmId) || cpData.packagingFilms[0];
+
+      // 1. Ozone generation calculation (ppm)
+      const baseOzone = 650.0;
+      const voltageFactorO3 = Math.pow(vKv / 50.0, 1.65);
+      const timeFactorO3 = Math.sqrt(tSec / 45.0);
+      const rhQuenchFactor = Math.max(0.45, 1.0 - (rhPct - 20) * 0.007);
+      const sysPowerFactor = sys.powerDensityWPerCm2 / 1.0;
+      let ozonePpm = Math.round(baseOzone * voltageFactorO3 * timeFactorO3 * gas.ozoneGenerationYieldFactor * rhQuenchFactor * sysPowerFactor);
+      if (sys.id === 'compromised_overvoltage_dbd_unit') {
+        ozonePpm = Math.round(ozonePpm * 1.55);
+      }
+
+      // 2. Reactive Nitrogen Species (NOx ppm)
+      const baseRns = 180.0;
+      const voltageFactorRns = Math.pow(vKv / 50.0, 1.4);
+      const timeFactorRns = Math.pow(tSec / 45.0, 0.85);
+      const rhRnsFactor = 1.0 + (rhPct - 30) * 0.006;
+      let rnsPpm = Math.round(baseRns * voltageFactorRns * timeFactorRns * gas.rnsGenerationYieldFactor * rhRnsFactor * sysPowerFactor);
+
+      // 3. Pathogen Lethality (Log reduction)
+      const baseRate = (ozonePpm * 0.0018) + (rnsPpm * 0.0024);
+      let activeLogReduction = baseRate * Math.pow(tSec / 30.0, 0.65);
+      const darkLethality = 0.42 * Math.log10(1 + (holdHr * ozonePpm) / 400.0);
+      let totalLogReduction = activeLogReduction + darkLethality;
+
+      if (mat.baselineFatContentPercent > 10.0) totalLogReduction *= 0.75;
+      else if (mat.baselineFatContentPercent > 3.0) totalLogReduction *= 0.88;
+      totalLogReduction = Math.min(6.2, Math.max(0.4, totalLogReduction));
+
+      // 4. Lipid Oxidation & TBARS Index (mg MDA/kg)
+      const baselineFat = mat.baselineFatContentPercent;
+      let tbars = (baselineFat * 0.08) + (ozonePpm * 0.00035 * (tSec / 60.0) * (baselineFat / 5.0));
+      if (gas.id === 'nitrogen_enriched_mix') tbars *= 0.35;
+      if (gas.id === 'argon_carrier_gas') tbars *= 0.20;
+      if (sys.id === 'compromised_overvoltage_dbd_unit') tbars *= 2.4;
+
+      // 5. Residual surface nitrite (mg/kg)
+      let nitriteMg = (rnsPpm * 0.045 * (rhPct / 50.0) * Math.sqrt(tSec / 45.0));
+      if (mat.id === 'fresh_cut_leafy_greens') nitriteMg *= 0.8;
+
+      // 6. Dielectric Film Stress & Pinhole Risk (%)
+      const filmThicknessMm = film.filmThicknessMicrons / 1000.0;
+      const breakdownKv = filmThicknessMm * film.dielectricBreakdownStrengthKvPerMm;
+      const stressRatio = vKv / breakdownKv;
+      let pinholeRiskPct = 0.0;
+      if (stressRatio >= 1.0) {
+        pinholeRiskPct = Math.min(100.0, ((stressRatio - 1.0) * 140.0) + (tSec > 90 ? 40 : 15));
+      } else if (stressRatio > 0.85) {
+        pinholeRiskPct = (stressRatio - 0.85) * 60.0;
+      }
+      if (film.id === 'compromised_thin_ldpe_30um' && vKv > 50) {
+        pinholeRiskPct = Math.max(65.0, pinholeRiskPct + 35.0);
+      }
+
+      // 7. Ozone decay half-life inside package (hours)
+      let halfLifeH = 2.4;
+      if (mat.id === 'fresh_raw_chicken_fillets' || mat.id === 'rte_sliced_turkey_deli') {
+        halfLifeH = 1.2;
+      } else if (mat.id === 'fresh_cut_leafy_greens') {
+        halfLifeH = 1.8;
+      }
+      if (film.oxygenTransmissionRateCcM2Day > 500) {
+        halfLifeH *= 0.45;
+      }
+
+      // 8. Sensory score retention (%)
+      let sensoryScore = 98.0;
+      if (tbars > 1.2) sensoryScore -= (tbars - 1.2) * 22.0;
+      if (ozonePpm > 1800) sensoryScore -= (ozonePpm - 1800) * 0.012;
+      if (nitriteMg > mat.nitrateNitriteAccumulationLimitMgPerKg) sensoryScore -= 20.0;
+      sensoryScore = Math.max(35.0, Math.min(99.5, sensoryScore));
+
+      // 9. Operational Status Determination
+      let status = 'OPTIMAL_SAFE';
+      let primaryLimitation = 'None (Uniform Glow Discharge & High Lethality)';
+      let mitigation = 'Process within validated HACCP & USDA-FSIS lethal boundaries. Maintain package barrier inspection.';
+
+      if (pinholeRiskPct > 20.0) {
+        status = 'PINHOLE_CONTAINMENT_BREACH';
+        primaryLimitation = `Electric field exceeds film dielectric strength (${(stressRatio * 100).toFixed(0)}% breakdown threshold). Severe arc punching.`;
+        mitigation = `Increase packaging barrier thickness to ≥ 75 µm (PET/LDPE) or reduce applied peak voltage below ${Math.round(breakdownKv * 0.8)} kV.`;
+      } else if (tbars > 1.5) {
+        status = 'SEVERE_RANCIDITY_OVEROXIDATION';
+        primaryLimitation = `Excessive lipid oxidation (TBARS ${tbars.toFixed(2)} mg MDA/kg exceeds threshold). Free-radical off-flavor.`;
+        mitigation = 'Switch to Nitrogen-Enriched MAP (90% N2) to suppress reactive oxygen species while maintaining RNS microbial lethality.';
+      } else if (totalLogReduction < mat.targetLogReduction - 0.5) {
+        status = 'INSUFFICIENT_LETHALITY';
+        primaryLimitation = `Pathogen reduction (${totalLogReduction.toFixed(1)} Log) fails target (${mat.targetLogReduction} Log). Microbial survival risk.`;
+        mitigation = 'Increase active plasma residence time to >= 60 seconds or elevate voltage to increase reactive species concentration.';
+      } else if (sensoryScore < mat.sensoryToleranceScoreThreshold) {
+        status = 'MARGINAL_CAUTION';
+        primaryLimitation = 'Sensory degradation: slight surface pigment bleaching or elevated ozone exposure.';
+        mitigation = 'Shorten active exposure time and utilize post-treatment sealed dwell storage for dark bacterial inactivation.';
+      }
+
+      // Update UI Display
+      logReductionEl.textContent = `${totalLogReduction.toFixed(1)} Log`;
+      logSubEl.textContent = `Target ≥ ${mat.targetLogReduction} Log (${mat.targetPathogen.split(' ')[0]})`;
+
+      ozoneYieldEl.textContent = `${ozonePpm.toLocaleString()} ppm`;
+      rnsYieldEl.textContent = `${rnsPpm.toLocaleString()} ppm`;
+      tbarsEl.textContent = `${tbars.toFixed(2)} mg/kg`;
+      nitriteEl.textContent = `${nitriteMg.toFixed(1)} mg/kg`;
+
+      pinholeEl.textContent = pinholeRiskPct > 0 ? `${pinholeRiskPct.toFixed(1)}% (Hazard)` : '0.0% (Zero)';
+      decayHalfEl.textContent = `${halfLifeH.toFixed(1)} h (Headspace Residual)`;
+      sensoryScoreEl.textContent = `${sensoryScore.toFixed(1)}% Retention`;
+
+      primaryLimitationEl.textContent = primaryLimitation;
+      mitigationActionEl.textContent = mitigation;
+
+      // Color coding badges & indicators
+      safetyBadge.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider text-white';
+      diagnosticCallout.className = 'p-3.5 rounded-xl bg-surface border text-xs space-y-1.5';
+
+      if (status === 'OPTIMAL_SAFE') {
+        safetyBadge.classList.add('bg-emerald-600');
+        diagnosticCallout.classList.add('border-emerald-500/40');
+        safetyBadge.textContent = 'OPTIMAL_SAFE';
+        logReductionEl.className = 'text-lg font-bold font-mono text-emerald-600';
+        pinholeEl.className = 'text-lg font-bold font-mono text-emerald-600';
+        tbarsEl.className = 'text-lg font-bold font-mono text-emerald-600';
+      } else if (status === 'MARGINAL_CAUTION') {
+        safetyBadge.classList.add('bg-amber-600');
+        diagnosticCallout.classList.add('border-amber-500/40');
+        safetyBadge.textContent = 'MARGINAL_CAUTION';
+        logReductionEl.className = 'text-lg font-bold font-mono text-amber-600';
+        pinholeEl.className = 'text-lg font-bold font-mono text-amber-600';
+        tbarsEl.className = 'text-lg font-bold font-mono text-amber-600';
+      } else {
+        safetyBadge.classList.add('bg-rose-600');
+        diagnosticCallout.classList.add('border-rose-500/40');
+        safetyBadge.textContent = status;
+        logReductionEl.className = 'text-lg font-bold font-mono text-rose-600';
+        pinholeEl.className = pinholeRiskPct > 20 ? 'text-lg font-bold font-mono text-rose-600' : 'text-lg font-bold font-mono text-emerald-600';
+        tbarsEl.className = tbars > 1.5 ? 'text-lg font-bold font-mono text-rose-600' : 'text-lg font-bold font-mono text-emerald-600';
+      }
+    }
+
+    // Bind event listeners
+    [systemSelect, matrixSelect, gasSelect, filmSelect].forEach(el => el?.addEventListener('change', recalculate));
+    [voltageSlider, timeSlider, humiditySlider, holdSlider].forEach(el => el?.addEventListener('input', recalculate));
+
+    presetBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const pKey = btn.getAttribute('data-preset');
+        if (!pKey || !PRESETS[pKey]) return;
+        const p = PRESETS[pKey];
+        systemSelect.value = p.system;
+        matrixSelect.value = p.matrix;
+        gasSelect.value = p.gas;
+        filmSelect.value = p.film;
+        voltageSlider.value = p.v.toString();
+        timeSlider.value = p.t.toString();
+        humiditySlider.value = p.rh.toString();
+        holdSlider.value = p.hold.toString();
+        recalculate();
+      });
+    });
+
+    recalculate();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initColdPlasmaModeler);
+  } else {
+    initColdPlasmaModeler();
+  }
+</script>

@@ -141,7 +141,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-rf-post-bake-leveling-modeler', name: 'Commercial Continuous Radio Frequency (RF) Post-Bake Moisture Leveling & Thermal Runaway Modeler', category: 'Radio Frequency Electromagnetics & Industrial Baking Safety', component: 'CommercialRfPostBakeLevelingModeler.astro', dataFile: 'rf-post-bake-leveling-data.json' },
   { slug: 'commercial-ohmic-heating-sterilization-modeler', name: 'Commercial Continuous Ohmic Heating Liquid Sterilization Volumetric Electroporation & Electrode Fouling Modeler', category: 'Electrochemical Thermal Processing & Liquid Food Safety', component: 'CommercialOhmicHeatingModeler.astro', dataFile: 'ohmic-heating-sterilization-data.json' },
   { slug: 'commercial-hpcd-sterilization-modeler', name: 'Commercial Continuous High-Pressure Carbon Dioxide (HPCD) Dense-Phase Micro-Bubble Solubilization & Enzyme Inactivation Modeler', category: 'Dense-Phase Thermodynamics & Non-Thermal Sterilization', component: 'CommercialHpcdSterilizationModeler.astro', dataFile: 'hpcd-sterilization-data.json' },
-  { slug: 'commercial-fo-membrane-concentration-modeler', name: 'Commercial Continuous Industrial Forward Osmosis (FO) Membrane Concentration Polarization & Flux Attenuation Modeler', category: 'Membrane Thermodynamics & Liquid Concentration Safety', component: 'CommercialFoMembraneModeler.astro', dataFile: 'fo-membrane-concentration-data.json' }
+  { slug: 'commercial-fo-membrane-concentration-modeler', name: 'Commercial Continuous Industrial Forward Osmosis (FO) Membrane Concentration Polarization & Flux Attenuation Modeler', category: 'Membrane Thermodynamics & Liquid Concentration Safety', component: 'CommercialFoMembraneModeler.astro', dataFile: 'fo-membrane-concentration-data.json' },
+  { slug: 'commercial-cold-plasma-decontamination-modeler', name: 'Commercial Continuous Cold-Plasma (CP) In-Package Biofilm Decontamination & Reactive Nitrogen Species (RNS) Modeler', category: 'Non-Thermal Physics & Cold Plasma Toxicology', component: 'CommercialColdPlasmaModeler.astro', dataFile: 'cold-plasma-decontamination-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -613,32 +614,32 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Continuous Cold-Plasma (CP) In-Package Biofilm Decontamination & Reactive Nitrogen Species (RNS) Modeler',
-      category: 'Non-Thermal Physics & Cold Plasma Toxicology',
-      intent: 'Models atmospheric dielectric barrier discharge (DBD) cold plasma in-package post-seal sanitation, reactive oxygen/nitrogen species (RONS - ozone, NO, ONOO-) bacterial lysis kinetics, food lipid oxidation peroxide value limits, and ozone degradation kinetics.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '1,950+ US impressions'
-    },
-    {
       title: 'Commercial Continuous Membrane Distillation (MD) Vapor Permeation & Thermal Polarization Modeler',
       category: 'Membrane Thermal Physics & High-Concentration Food Processing',
       intent: 'Models continuous direct contact membrane distillation (DCMD) and vacuum membrane distillation (VMD) for thermosensitive fruit juice and aroma concentration, hydrophobic PTFE/PVDF microporous pore wetting capillary breakthrough pressures (LEPw), temperature and concentration boundary layer polarization coefficients, and trans-membrane vapor flux attenuation.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '1,800+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '1,980+ US impressions'
     },
     {
       title: 'Commercial Continuous High-Power Ultrasound (HPU) Acoustic Cavitation Sonication & Enzyme Inactivation Modeler',
       category: 'Acoustic Fluid Dynamics & Non-Thermal Processing',
       intent: 'Models commercial continuous flow-through acoustic horns (20 to 40 kHz, 100 to 1,500 W/cm² acoustic intensity), transient acoustic micro-cavitation bubble collapse temperatures (>5,000 K localized hot spots) and micro-jets (>100 m/s), sonochemical hydroxyl radical (•OH) generation, and microbial cell sonoporation under Sanitary 3-A standards.',
-      priority: 'MEDIUM',
-      estimatedMonthlyVolume: '1,720+ US impressions'
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '1,850+ US impressions'
     },
     {
       title: 'Commercial Continuous Pulsed UV-C Light High-Intensity Fluid Disinfection & Pyrimidine Dimer Modeler',
       category: 'Photobiological Safety & Fluid Dynamics',
       intent: 'Models commercial continuous thin-film annular quartz sleeve high-power pulsed xenon flash disinfection, UV fluence dose distribution (mJ/cm²), cyclobutane pyrimidine dimer (CPD) DNA photolysis, liquid absorption extinction coefficients (Beer-Lambert α_254), and photoreactivation dark repair suppression under FDA 21 CFR § 179.39.',
       priority: 'MEDIUM',
-      estimatedMonthlyVolume: '1,650+ US impressions'
+      estimatedMonthlyVolume: '1,740+ US impressions'
+    },
+    {
+      title: 'Commercial High-Pressure Supercritical CO2 Fluid Inactivation & Dense-Phase Solubilization Modeler',
+      category: 'Dense-Phase Thermodynamics & Non-Thermal Sterilization',
+      intent: 'Models continuous micro-bubble supercritical and dense-phase CO2 fluid extraction and microbial spore lethality, cellular acidification, membrane lipid solubilization, and barophilic spore germination kinetics under ASME BPVC Section VIII.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '1,660+ US impressions'
     }
   ];
 
