@@ -141,7 +141,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-pef-electroporation-modeler',
   'tools/commercial-rf-post-bake-leveling-modeler',
   'tools/commercial-ohmic-heating-sterilization-modeler',
-  'tools/commercial-hpcd-sterilization-modeler'
+  'tools/commercial-hpcd-sterilization-modeler',
+  'tools/commercial-fo-membrane-concentration-modeler'
 ];
 
 const esSlugs = new Set([
