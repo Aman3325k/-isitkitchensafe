@@ -138,7 +138,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-hipl-pulsed-light-modeler', name: 'Commercial Continuous High-Intensity Pulsed Light (HIPL) Conveyor Quartz Tube Thermal Shock & Microsecond Xenon Flash Lethality Modeler', category: 'Photonic Microbiology & Optical Safety', component: 'CommercialHiplPulsedLightModeler.astro', dataFile: 'hipl-pulsed-light-data.json' },
   { slug: 'commercial-vacuum-freeze-drying-tunnel-modeler', name: 'Commercial Continuous Vacuum Freeze-Drying Tunnel Ice Sublimation & Shelf Glycol Thermal Uniformity Modeler', category: 'Cryogenic Vacuum Physics & Industrial Lyophilization', component: 'CommercialVacuumFreezeDryingTunnelModeler.astro', dataFile: 'vacuum-freeze-drying-tunnel-data.json' },
   { slug: 'commercial-pef-electroporation-modeler', name: 'Commercial Continuous High-Voltage Pulsed Electric Field (PEF) Microbial Electroporation & Electrode Cavitation Modeler', category: 'Electrophysical Microbiology & Sanitary Hydrodynamics', component: 'CommercialPefElectroporationModeler.astro', dataFile: 'pef-electroporation-data.json' },
-  { slug: 'commercial-rf-post-bake-leveling-modeler', name: 'Commercial Continuous Radio Frequency (RF) Post-Bake Moisture Leveling & Thermal Runaway Modeler', category: 'Radio Frequency Electromagnetics & Industrial Baking Safety', component: 'CommercialRfPostBakeLevelingModeler.astro', dataFile: 'rf-post-bake-leveling-data.json' }
+  { slug: 'commercial-rf-post-bake-leveling-modeler', name: 'Commercial Continuous Radio Frequency (RF) Post-Bake Moisture Leveling & Thermal Runaway Modeler', category: 'Radio Frequency Electromagnetics & Industrial Baking Safety', component: 'CommercialRfPostBakeLevelingModeler.astro', dataFile: 'rf-post-bake-leveling-data.json' },
+  { slug: 'commercial-ohmic-heating-sterilization-modeler', name: 'Commercial Continuous Ohmic Heating Liquid Sterilization Volumetric Electroporation & Electrode Fouling Modeler', category: 'Electrochemical Thermal Processing & Liquid Food Safety', component: 'CommercialOhmicHeatingModeler.astro', dataFile: 'ohmic-heating-sterilization-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -367,7 +368,8 @@ function auditDatasets() {
     'hipl-pulsed-light-data.json',
     'vacuum-freeze-drying-tunnel-data.json',
     'pef-electroporation-data.json',
-    'rf-post-bake-leveling-data.json'
+    'rf-post-bake-leveling-data.json',
+    'ohmic-heating-sterilization-data.json'
 ];
 
   const datasetStats = {};
@@ -607,32 +609,32 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Continuous Ohmic Heating Liquid Sterilization Volumetric Electroporation & Electrode Fouling Modeler',
-      category: 'Electrochemical Thermal Processing & Liquid Food Safety',
-      intent: 'Models continuous commercial aseptic ohmic liquid pasteurization (50 to 60 Hz AC, 15 to 45 V/cm electric field gradients), electrolytic volumetric dissipation heating without hot boundary surfaces, ionic differential conductivities across food particulates, titanium/platinum-coated electrode electrochemical corrosion, and fouling deposit burn-on layer mitigation.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '2,350+ US impressions'
-    },
-    {
       title: 'Commercial Continuous High-Pressure Carbon Dioxide (HPCD) Dense-Phase Micro-Bubble Solubilization & Enzyme Inactivation Modeler',
       category: 'Dense-Phase Thermodynamics & Non-Thermal Sterilization',
       intent: 'Models continuous dense-phase CO2 liquid food preservation (75 to 150 bar, 35°C to 50°C), cellular membrane acidification via carbonic acid permeation, irreversible baro-enzymatic polyphenol oxidase (PPO) denaturation, micro-bubble Venturi nozzle hydrodynamic shearing, and continuous depressurization gas-liquid cyclone separation.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '2,100+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '2,350+ US impressions'
     },
     {
       title: 'Commercial Continuous Industrial Forward Osmosis (FO) Membrane Concentration Polarization & Flux Attenuation Modeler',
       category: 'Membrane Thermodynamics & Liquid Concentration Safety',
       intent: 'Models commercial continuous hollow-fiber forward osmosis (FO) non-thermal juice concentration against concentrated draw solutes (NaCl/sucrose, osmotic pressure differential Δπ > 60 bar), internal concentration polarization (ICP) within porous asymmetric support layers, structural parameter (S-value) optimization, reverse draw solute reverse flux leakage (J_s), and CIP chemical membrane fouling restoration.',
-      priority: 'MEDIUM',
-      estimatedMonthlyVolume: '1,950+ US impressions'
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '2,100+ US impressions'
     },
     {
       title: 'Commercial Continuous Cold-Plasma (CP) In-Package Biofilm Decontamination & Reactive Nitrogen Species (RNS) Modeler',
       category: 'Non-Thermal Physics & Cold Plasma Toxicology',
       intent: 'Models atmospheric dielectric barrier discharge (DBD) cold plasma in-package post-seal sanitation, reactive oxygen/nitrogen species (RONS - ozone, NO, ONOO-) bacterial lysis kinetics, food lipid oxidation peroxide value limits, and ozone degradation kinetics.',
       priority: 'MEDIUM',
-      estimatedMonthlyVolume: '1,850+ US impressions'
+      estimatedMonthlyVolume: '1,950+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous Membrane Distillation (MD) Vapor Permeation & Thermal Polarization Modeler',
+      category: 'Membrane Thermal Physics & High-Concentration Food Processing',
+      intent: 'Models continuous direct contact membrane distillation (DCMD) and vacuum membrane distillation (VMD) for thermosensitive fruit juice and aroma concentration, hydrophobic PTFE/PVDF microporous pore wetting capillary breakthrough pressures (LEPw), temperature and concentration boundary layer polarization coefficients, and trans-membrane vapor flux attenuation.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '1,800+ US impressions'
     }
   ];
 

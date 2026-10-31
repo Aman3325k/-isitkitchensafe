@@ -1,0 +1,272 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import CommercialOhmicHeatingModeler from '../../../components/CommercialOhmicHeatingModeler.astro';
+import type { SupportedLanguage } from '../../../i18n/ui';
+import { useTranslations, useTranslatedPath } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+const t = useTranslations(lang);
+const tp = useTranslatedPath(lang);
+
+interface LocaleToolContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  lead: string;
+  breadcrumbsLabel: string;
+  faqs: Array<{ question: string; answer: string }>;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocaleToolContent> = {
+  es: {
+    pageTitle: "Simulador de Esterilización por Calentamiento Óhmico Continuo | IsItKitchenSafe",
+    pageDescription: "Simule la pasteurización y esterilización continua por calentamiento óhmico aséptico para alimentos líquidos con partículas. Modele el calentamiento Joule volumétrico, relación de conductividades líquido-partícula, electroporación no térmica, corrosión faradaica a 50 Hz y cumplimiento 3-A 64-00.",
+    badge: "Procesamiento Térmico Electroquímico y Seguridad de Alimentos Líquidos",
+    h1: "Simulador de Esterilización por Calentamiento Óhmico Continuo",
+    lead: "Modele la pasteurización y esterilización aséptica continua por calentamiento óhmico para sopas, lácteos, salsas y preparados de fruta. Calcule la disipación volumétrica por efecto Joule, la relación de conductividades líquido-partícula, la sinergia de electroporación no térmica, los márgenes de corrosión faradaica a 50 Hz y el cumplimiento de la norma sanitaria 3-A 64-00.",
+    breadcrumbsLabel: "Simulador de Calentamiento Óhmico",
+    faqs: [
+      {
+        question: "¿Cómo logra el calentamiento óhmico continuo esterilizar líquidos y partículas sin ensuciar las paredes térmicas?",
+        answer: "El calentamiento óhmico (calentamiento directo por resistencia eléctrica o efecto Joule) hace pasar una corriente eléctrica alterna directamente a través del alimento líquido conductor. A diferencia de los intercambiadores de calor convencionales donde el calor se transfiere por conducción a través de paredes metálicas sobrecalentadas (provocando desnaturalización proteica e incrustaciones), en el calentamiento óhmico la energía térmica se genera de forma volumétrica e instantánea en todo el producto (P_v = σ·E²). Como las paredes y electrodos se mantienen prácticamente a la misma temperatura que el fluido en circulación, se eliminan los gradientes térmicos superficiales agresivos, suprimiendo el ensuciamiento por quemado y preservando el sabor y los nutrientes."
+      },
+      {
+        question: "¿Qué es la relación de conductividades (Γ = σ_p / σ_f) y por qué las partículas poco conductoras representan el punto frío crítico?",
+        answer: "En alimentos multifásicos (sopas con trozos de verdura, carne o fruta), la corriente eléctrica se distribuye en función de la conductividad del fluido portador (σ_f) y de las partículas (σ_p). Cuando las partículas sólidas tienen menor conductividad que el líquido (Γ < 1, habitual en trozos de fruta en jarabes o verduras sin salar en caldos), la corriente fluye preferentemente por el líquido conductor. En consecuencia, el fluido se calienta con gran rapidez mientras el centro de las partículas depende de la conducción térmica más lenta desde el exterior. Bajo la normativa FDA 21 CFR § 113 para procesamiento aséptico de partículas, el centro de la partícula más grande y rápida con menor conductividad constituye el punto frío crítico que determina el tiempo mínimo de retención para garantizar la esterilidad comercial."
+      },
+      {
+        question: "¿De qué forma la electroporación volumétrica no térmica acelera la inactivación bacteriana en el calentamiento óhmico?",
+        answer: "Al aplicar campos eléctricos alternos moderados (15 a 45 V/cm), las células microbianas experimentan un potencial transmembrana inducido (ΔΨ_m = 1,5·r_célula·E·cos θ). Cuando este potencial supera el valor crítico (entre 0,2 y 1,0 V), se forman microporos en la bicapa fosfolipídica celular (electroporación). A las temperaturas de pasteurización y esterilización (65°C a 135°C), este efecto no térmico desestabiliza la homeostasis celular de bacterias como Clostridium botulinum, Bacillus cereus o Listeria, reduciendo el tiempo de reducción decimal (valor D) entre un 15% y un 40% en comparación con el tratamiento térmico convencional aislado."
+      },
+      {
+        question: "¿Qué provoca la corrosión electroquímica faradaica y la liberación de metales pesados a 50/60 Hz?",
+        answer: "A las frecuencias estándar de red eléctrica (50 Hz o 60 Hz), el semiciclo de corriente es lo suficientemente prolongado (8 a 10 ms) para que ocurra una transferencia de carga faradaica a través de la doble capa electroquímica en la superficie de los electrodos. Si la densidad de corriente supera el umbral crítico del metal (J_crit ≈ 2.800 a 4.000 A/m² en acero inoxidable AISI 316L), se produce electrólisis del agua y disolución anódica, liberando iones tóxicos de cromo (Cr6+) y níquel (Ni2+) en el alimento. Los sistemas industriales modernos evitan este problema empleando electrodos inertes de titanio platinado (Pt/Ti) o de óxidos mixtos (MMO RuO2-TiO2), o alimentando el sistema con inversores de alta frecuencia (≥10 kHz a 25 kHz) donde la capacitancia se carga sin transferencia de carga faradaica."
+      },
+      {
+        question: "¿Qué normativas regulan los calentadores óhmicos asépticos bajo la FDA 21 CFR § 113 y la norma 3-A 64-00?",
+        answer: "El procesamiento continuo de alimentos de baja acidez (pH > 4,6) por calentamiento óhmico se rige por la norma FDA 21 CFR § 113. Los expedientes de proceso requieren modelado matemático y validación empírica de la distribución del tiempo de residencia (RTD) de la partícula más veloz, monitorización continua de la conductividad eléctrica en tiempo real y medición redundante de temperatura a la salida del tubo de retención para certificar un valor F0 ≥ 6,0 a 8,0 min (reducción de 12 ciclos logarítmicos de C. botulinum). Asimismo, el diseño higiénico, sellado de electrodos y rugosidad superficial (Ra ≤ 0,8 µm) deben cumplir estrictamente con la norma sanitaria 3-A 64-00 y las directrices EHEDG Document 17."
+      }
+    ]
+  },
+  pt: {
+    pageTitle: "Simulador de Esterilização por Aquecimento Ôhmico Contínuo | IsItKitchenSafe",
+    pageDescription: "Simule a pasteurização e esterilização contínua por aquecimento ôhmico asséptico para alimentos líquidos com partículas. Modele o aquecimento Joule volumétrico, razão de condutividades elétricas líquido-partícula, eletroporação não térmica, corrosão faradaica a 50 Hz e conformidade sanitária 3-A 64-00.",
+    badge: "Processamento Térmico Eletroquímico e Segurança de Alimentos Líquidos",
+    h1: "Simulador de Esterilização por Aquecimento Ôhmico Contínuo",
+    lead: "Modele a pasteurização e esterilização asséptica contínua por aquecimento ôhmico para sopas, laticínios, molhos e preparados de frutas. Calcule a dissipação volumétrica de Joule, a razão de condutividades líquido-partícula, a sinergia de eletroporação não térmica, os limites de corrosão faradaica a 50 Hz e a conformidade sanitária 3-A 64-00.",
+    breadcrumbsLabel: "Simulador de Aquecimento Ôhmico",
+    faqs: [
+      {
+        question: "Como o aquecimento ôhmico contínuo esteriliza líquidos e partículas sem incrustação nas paredes metálicas?",
+        answer: "O aquecimento ôhmico (aquecimento direto por resistência elétrica ou efeito Joule) faz passar uma corrente elétrica alternada diretamente através do alimento líquido condutor. Em contraste com os trocadores de calor convencionais que dependem da condução de calor através de paredes metálicas superaquecidas (provocando desnaturação proteica e incrustações severas), no aquecimento ôhmico a energia térmica é dissipada volumetricamente em todo o produto de forma instantânea (P_v = σ·E²). Como os eletrodos e paredes permanecem quase à mesma temperatura do fluido em fluxo, a camada limite térmica agressiva é eliminada, suprimindo o fouling por queimado e preservando nutrientes e características sensoriais."
+      },
+      {
+        question: "O que é a razão de condutividades (Γ = σ_p / σ_f) e por que sólidos de baixa condutividade são o ponto frio crítico?",
+        answer: "Em alimentos multifásicos (sopas com pedaços de vegetais, carne ou frutas), a corrente elétrica se divide de acordo com a condutividade da fase líquida (σ_f) e das partículas (σ_p). Quando os sólidos possuem condutividade inferior à do líquido (Γ < 1, comum em frutas em xarope ou legumes sem sal em caldo temperado), a corrente desvia dos sólidos e percorre preferencialmente o fluido condutor. Com isso, o líquido aquece com rapidez volumétrica enquanto o miolo das partículas depende da condução térmica mais lenta a partir da superfície. Sob a norma FDA 21 CFR § 113 para processamento asséptico com partículas, o núcleo da partícula sólida maior e mais veloz com baixa condutividade constitui o ponto frio crítico que rege o tempo no tubo de retenção."
+      },
+      {
+        question: "De que maneira a eletroporação volumétrica acelera a inativação bacteriana no aquecimento ôhmico?",
+        answer: "Ao submeter suspensões condutoras a gradientes de campo elétrico alternado moderados (15 a 45 V/cm), as células microbianas sofrem indução de potencial transmembrana (ΔΨ_m = 1,5·r_célula·E·cos θ). Quando esse potencial ultrapassa o patamar crítico (0,2 a 1,0 V), formam-se nanoporos na membrana celular (eletroporação). Em temperaturas de pasteurização e esterilização (65°C a 135°C), essa permeabilização mecânica atua em sinergia com a desnaturação térmica, reduzindo o valor D de termorresistência em 15% a 40% em relação ao aquecimento puramente condutivo."
+      },
+      {
+        question: "O que provoca a corrosão eletroquímica faradaica e liberação de íons metálicos em 50/60 Hz?",
+        answer: "Nas frequências da rede elétrica convencional (50 Hz ou 60 Hz), o semiperíodo alternado (8 a 10 ms) é suficientemente longo para propiciar transferência de carga faradaica na dupla camada eletroquímica da interface eletrodo-alimento. Se a densidade de corrente ultrapassar o limite crítico do metal (J_crit ≈ 2.800 a 4.000 A/m² em aço inoxidável AISI 316L), ocorre eletrólise com dissolução anódica, liberando íons de cromo (Cr6+) e níquel (Ni2+) na comida. Túneis industriais modernos evitam essa contaminação utilizando eletrodos nobres de Titânio Platinado (Pt/Ti) ou Óxidos Metálicos Mistos (MMO RuO2-TiO2), ou operando com inversores de alta frequência (≥10 kHz a 25 kHz) imunes a reações faradaicas."
+      },
+      {
+        question: "Quais normas sanitárias regulam aquecedores ôhmicos contínuos sob a FDA 21 CFR § 113 e 3-A 64-00?",
+        answer: "O processamento contínuo asséptico de alimentos de baixa acidez (pH > 4,6) exige cumprimento estrito da FDA 21 CFR § 113. Os processos exigem modelagem matemática e validação empírica da distribuição de tempos de residência (RTD) da partícula crítica, monitoramento em tempo real da condutividade elétrica e sensores de temperatura redundantes na saída do tubo de espera para assegurar letalidade F0 ≥ 6,0 a 8,0 min (redução 12D de C. botulinum). O equipamento deve também ter rugosidade sanitária Ra ≤ 0,8 µm e facilidade de limpeza CIP conforme as normas 3-A Sanitary Standard 64-00 e EHEDG Document 17."
+      }
+    ]
+  },
+  'zh-cn': {
+    pageTitle: "商用连续欧姆加热液体灭菌与电极结垢模拟器 | IsItKitchenSafe",
+    pageDescription: "模拟商用连续无菌欧姆加热液体与颗粒食品杀菌工艺。精确计算体积焦耳热功率耗散、固液电导率比差、非热电穿孔细胞膜通透协同杀菌、50 Hz工频法拉第电化学金属溶出腐蚀以及3-A Sanitary Standard 64-00标准合规性。",
+    badge: "电化学热力工程与液体食品无菌安全",
+    h1: "商用连续欧姆加热液体灭菌与电极结垢模拟器",
+    lead: "模拟连续无菌欧姆加热（Joule Heating）液体与悬浮颗粒食品杀菌工艺。计算体积焦耳发热功率耗散、固液电导率比差对杀菌冷点的影响、非热电穿孔灭菌协同增效、50 Hz工频交流电法拉第电极金属溶出腐蚀裕度以及3-A 64-00卫生认证合规性。",
+    breadcrumbsLabel: "欧姆加热杀菌模拟器",
+    faqs: [
+      {
+        question: "连续欧姆加热如何实现液体与固体颗粒的快速均匀灭菌且彻底避免换热面焦糊结垢？",
+        answer: "欧姆加热（Joule Heating或直接电阻加热）利用交变电流直接通过具有导电性的液体食品。传统列管式或板式换热器依赖过热金属壁面与流体间的传导换热（壁温必须显著高于物料平均温度，导致严重的蛋白质热变性焦糊与矿物质结垢），而欧姆加热在物料整个体积内部瞬时释放焦耳热（P_v = σ·E²）。电极表面温度与流动物料本体温度基本一致，彻底消除了壁面过热热边界层，大幅降低表面结垢（Fouling Burn-on），完好锁住热敏性维生素与新鲜风味，并大幅减少原位清洗（CIP）周期。"
+      },
+      {
+        question: "什么是固液电导率比（Γ = σ_p / σ_f），为何低电导率颗粒中心是决定无菌安全的微生物冷点？",
+        answer: "在含有固体颗粒的多相悬浮食品中（如蔬菜浓汤、肉丁或果粒），电流在载液（电导率 σ_f）与固体颗粒（电导率 σ_p）之间分流分配。当颗粒电导率低于载液时（Γ < 1，常见于糖水中的低酸果粒或清淡高汤中的未腌渍蔬菜块），电流优先流经高导电性的液体，液体迅速体积发热，而低电导颗粒中心只能依靠流体向内的导热传质缓慢升温。依据美国FDA 21 CFR § 113关于无菌颗粒食品加工法规，物料中流速最快、粒径最大且电导率最低的颗粒中心构成了系统的关键微生物冷点（Cold Spot），必须以此计算保温管所需的最短致死保留时间。"
+      },
+      {
+        question: "非热效应体积电穿孔如何协同加速欧姆加热中的微生物灭活？",
+        answer: "在导电食品悬浮液两端施加中等交变电场梯度（15至45 V/cm）时，微生物细胞跨膜电位受到外场极化诱导（ΔΨ_m = 1.5·r_cell·E·cos θ）。当跨膜电位跨越临界膜电位阈值（约0.2至1.0 V）时，磷脂双分子层产生纳米级水化微孔（电穿孔现象）。在巴氏杀菌与商业无菌高温段（65°C至135°C），细胞膜穿孔的非热物理破坏与热力蛋白质变性产生强烈的杀菌协同效应，导致细菌芽孢与营养体的热致死D值显著降低15%至40%，实现更温和温度下的高效灭菌。"
+      },
+      {
+        question: "工频50/60 Hz交流电为何会引发法拉第电化学腐蚀与重金属溶出危害？",
+        answer: "在50 Hz或60 Hz的工业电网频率下，半周期交变持续时间较长（8.3至10毫秒），足以在电极-食品界面双电层发生明显的法拉第电荷转移反应。当电流密度超出电极临界法拉第阈值（AISI 316L不锈钢约为2,800至4,000 A/m²）时，水分子电解产生氢氧气体微泡，阳极金属发生氧化溶解，导致六价铬（Cr6+）、镍（Ni2+）等重金属离子直接迁移渗入食品。现代工业欧姆加热设备通过采用贵金属镀铂钛电极（Pt/Ti）或金红石型混合金属氧化物电极（MMO RuO2-TiO2），或采用高频固态逆变器（≥10 kHz至25 kHz）供电，仅产生电容位移电流，彻底根绝重金属离子溶出。"
+      },
+      {
+        question: "美国FDA 21 CFR § 113与3-A 64-00卫生标准对连续欧姆无菌设备有何具体规范要求？",
+        answer: "依据美国FDA 21 CFR § 113低酸罐头及无菌食品法规，采用连续欧姆杀菌必须向FDA工艺管理当局提交详尽的工艺验证报告，包括最快颗粒停留时间分布（RTD）验证、在线电导率连续监控联锁装置，以及保温管出口双通道冗余温度监控，以保证肉毒梭菌（C. botulinum）12D杀菌值达到F0 ≥ 6.0至8.0 min。同时，设备材质卫生等级、电极密封自洁性及流道电抛光粗糙度（Ra ≤ 0.8 µm，行业通常达0.4 µm）必须严格符合3-A Sanitary Standard 64-00标准与欧洲EHEDG Document 17无菌准则。"
+      }
+    ]
+  },
+  ja: {
+    pageTitle: "産業用連続通電加熱（オーム加熱）滅菌・電極ファウリング解析シミュレータ | IsItKitchenSafe",
+    pageDescription: "液体および固形物混入食品の連続無菌通電加熱（オーム加熱・Joule加熱）殺菌プロセスをシミュレーション。体積発熱、固液導電率比、非熱的エレクトロポレーション殺菌相乗効果、50 Hz商用周波ファラデー電極溶出腐食、3-A 64-00衛生基準適合性を算出します。",
+    badge: "電気化学的熱加工・液体食品無菌工学",
+    h1: "産業用連続通電加熱（オーム加熱）滅菌・電極ファウリング解析シミュレータ",
+    lead: "スープ、乳清飲料、ソース、果実加工品向けの産業用連続無菌通電加熱（オーム加熱）殺菌プロセスをモデル化。体積ジュール熱エネルギー散逸、固液電気伝導率比（Γ）、非熱的エレクトロポレーション相乗効果、50 Hzファラデー電極金属溶出腐食マージン、および3-A 64-00サニタリー衛生基準適合性を評価します。",
+    breadcrumbsLabel: "オーム加熱殺菌シミュレータ",
+    faqs: [
+      {
+        question: "連続通電加熱（オーム加熱）はどのように熱交換面の焦げ付き結垢を防ぎつつ液体と固形物を均一滅菌しますか？",
+        answer: "通電加熱（オーム加熱／ジュール加熱）は、導電性を有する液体食品そのものに交流電流を直接流すことで加熱します。従来の多管式熱交換器では過熱された金属壁面からの熱伝導に依存するため（壁面温度が流体温度を大きく上回り、タンパク質変性による激しい焦げ付きやファウリングが発生します）、オーム加熱では食品の体積全体で同時に均一な熱エネルギーが発生します（P_v = σ·E²）。電極や管壁の温度が流れる食品とほぼ同等に保たれるため、過酷な表面熱境界層がなくなり、焦げ付きファウリングを徹底的に抑え、熱に弱いビタミンや風味を保持しながらCIP洗浄頻度を劇的に削減します。"
+      },
+      {
+        question: "固液導電率比（Γ = σ_p / σ_f）とは何ですか？なぜ導電率の低い固形粒子が重要コールドスポットになるのですか？",
+        answer: "野菜スープや果実ブレンドなどの多相系食品では、電流は担体液体（導電率 σ_f）と懸濁固形物（導電率 σ_p）の間で分配されます。固形物の導電率が液体より低い場合（Γ < 1、シロップ中の低酸性果実片や塩味スープ中の無塩野菜ブロックなど）、電流は高導電性の液体を迂回して流れ、液体側が急速に体積加熱される一方、固形物中心部は周囲液体からの緩慢な熱伝導に頼るため昇温が遅れます。FDA 21 CFR § 113の無菌固形物加工規制において、最も流速が速く導電率が低い最大固形物の幾何学的中心が、商業的無菌性を保証する決定的なコールドスポット（最冷点）となります。"
+      },
+      {
+        question: "非熱的体積エレクトロポレーションはオーム加熱においてどのように微生物殺菌を加速しますか？",
+        answer: "導電性食品流路に15〜45 V/cmの適度な交流電界傾度を印加すると、微生物細胞膜に膜電位差が誘導されます（ΔΨ_m = 1.5·r·E·cos θ）。この誘導電位が臨界閾値（0.2〜1.0 V）を超えると、リン脂質二重層に微小な親水性ポア（孔）が形成されるエレクトロポレーションが生じます。65°C〜135°Cの殺菌温度帯において、この細胞膜透過性の物理的損傷が熱変性と相乗的に作用し、ボツリヌス菌芽胞やリステリア菌の熱死滅D値を純粋な熱伝導加熱と比較して15%〜40%短縮・低減します。"
+      },
+      {
+        question: "50/60 Hz商用周波交流において生じるファラデー電気化学腐食と重金属溶出リスクとは何ですか？",
+        answer: "50 Hzや60 Hzの商用電源周波数では、半波長周期（8.3〜10ミリ秒）が長いため、電極と食品の接触界面の電気二重層でファラデー電荷移動反応が容易に進行します。電極電流密度が限界値（SUS316Lステンレス鋼で約2,800〜4,000 A/m²）を超えると、水の電気分解とともに陽極金属が溶出し、六価クロム（Cr6+）やニッケル（Ni2+）などの有害金属イオンが食品中に移行します。最新の産業用オーム加熱装置では、極めて安定した白金クラッドチタン（Pt/Ti）や酸化ルテニウム混晶（MMO RuO2-TiO2）電極を採用するか、ファラデー反応を生じない高周波インバータ（≥10 kHz〜25 kHz）で駆動することで金属溶出をゼロに抑えています。"
+      },
+      {
+        question: "FDA 21 CFR § 113および3-A 64-00サニタリー衛生基準における連続オーム加熱装置の要求事項は何ですか？",
+        answer: "低酸性食品（pH > 4.6）の連続オーム加熱滅菌には、FDA 21 CFR § 113に基づく無菌プロセスの届出が必要です。流路内における最速固形粒子の滞留時間分布（RTD）の実験的検証、インライン電気伝導率常時監視、および保持管出口の冗長温度センサによるF0 ≥ 6.0〜8.0 min（ボツリヌス菌12D殺菌）の保証が義務付けられます。さらに、機器構造のサニタリー性、電極シールの洗浄性、管内面の電解研磨粗さ（Ra ≤ 0.8 µm、通常0.4 µm以下）は3-A Sanitary Standard 64-00および欧州EHEDG Doc 17の厳格な認証基準に準拠する必要があります。"
+      }
+    ]
+  }
+};
+
+const c = CONTENT[lang];
+
+const breadcrumbs = [
+  { label: t('nav.home'), href: tp('/') },
+  { label: t('nav.tools') || 'Tools', href: tp('/tools/') },
+  { label: c.breadcrumbsLabel }
+];
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "@id": `https://isitkitchensafe.com/${lang}/tools/commercial-ohmic-heating-sterilization-modeler/#webapp`,
+      "url": `https://isitkitchensafe.com/${lang}/tools/commercial-ohmic-heating-sterilization-modeler/`,
+      "name": c.h1,
+      "applicationCategory": "EngineeringApplication",
+      "operatingSystem": "All",
+      "browserRequirements": "Requires JavaScript. Requires HTML5 Canvas/CSS3.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": c.pageDescription
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": t('nav.home'),
+          "item": `https://isitkitchensafe.com${tp('/')}`
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": t('nav.tools') || 'Tools',
+          "item": `https://isitkitchensafe.com${tp('/tools/')}`
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": c.breadcrumbsLabel,
+          "item": `https://isitkitchensafe.com/${lang}/tools/commercial-ohmic-heating-sterilization-modeler/`
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": c.faqs.map(faq => ({
+        "@type": "Question",
+        "name": faq.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": faq.answer
+        }
+      }))
+    }
+  ]
+};
+---
+
+<Layout
+  title={c.pageTitle}
+  description={c.pageDescription}
+  structuredData={structuredData}
+>
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <Breadcrumbs items={breadcrumbs} />
+
+    <header class="mb-8">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-600 text-white">
+          {c.badge}
+        </span>
+        <span class="text-xs text-muted font-mono">FDA 21 CFR § 113 &bull; 3-A 64-00 &bull; EHEDG Doc 17</span>
+      </div>
+      <h1 class="text-display-sm md:text-display-md font-bold text-ink tracking-tight mb-4">
+        {c.h1}
+      </h1>
+      <p class="text-body-lg text-muted max-w-4xl leading-relaxed">
+        {c.lead}
+      </p>
+    </header>
+
+    <!-- Interactive Simulator Component -->
+    <CommercialOhmicHeatingModeler lang={lang} />
+
+    <!-- FAQ Section with Schema-Compliant Formatting -->
+    <section class="my-16 border-t border-hairline pt-12">
+      <h2 class="text-title-lg font-bold text-ink mb-6">
+        {lang === 'es' && "Preguntas Frecuentes: Esterilización Óhmica Continua y Seguridad Aséptica"}
+        {lang === 'pt' && "Perguntas Frequentes: Esterilização Ôhmica Contínua e Segurança Asséptica"}
+        {lang === 'zh-cn' && "常见问题解答：商用连续欧姆加热无菌灭菌工艺工程"}
+        {lang === 'ja' && "よくある質問：産業用連続通電加熱（オーム加熱）滅菌と無菌保証"}
+      </h2>
+      <div class="space-y-6">
+        {c.faqs.map(faq => (
+          <div class="p-6 rounded-2xl bg-surface-soft border border-hairline">
+            <h3 class="text-title-sm font-semibold text-ink mb-2">
+              {faq.question}
+            </h3>
+            <p class="text-body text-sm text-muted leading-relaxed">
+              {faq.answer}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+  </div>
+</Layout>

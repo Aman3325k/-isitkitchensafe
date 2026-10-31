@@ -1,0 +1,997 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import ohmicData from '../data/ohmic-heating-sterilization-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  systemLabel: string;
+  systemHelp: string;
+  matrixLabel: string;
+  matrixHelp: string;
+  fieldStrengthLabel: string;
+  fieldStrengthHelp: string;
+  freqLabel: string;
+  freqHelp: string;
+  flowRateLabel: string;
+  flowRateHelp: string;
+  tempInLabel: string;
+  tempInHelp: string;
+  partSizeLabel: string;
+  partSizeHelp: string;
+  pressureLabel: string;
+  pressureHelp: string;
+  presetsTitle: string;
+  presetParticulateSoup: string;
+  presetDairyPasteurization: string;
+  presetFruitColdSpot: string;
+  presetFaradaicArcingHazard: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  bulkOutletTempLabel: string;
+  partCoreTempLabel: string;
+  f0SterilityLabel: string;
+  electroporationSynergyLabel: string;
+  currentDensityLabel: string;
+  faradaicMarginLabel: string;
+  foulingResistanceLabel: string;
+  sanitaryStandardLabel: string;
+  safetyStatusLabel: string;
+  primaryRiskLabel: string;
+  mechanismsLabel: string;
+  mitigationLabel: string;
+  scienceTitle: string;
+  scienceSub: string;
+  tableTitle: string;
+}
+
+const DICT: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Electrochemical Thermal Processing & Liquid Food Safety",
+    title: "Commercial Continuous Ohmic Heating Liquid Sterilization Volumetric Electroporation & Electrode Fouling Modeler",
+    subtitle: "Simulate continuous commercial aseptic ohmic pasteurization and sterilization for liquid and particulate food systems. Model electrolytic volumetric Joule heating, particle-to-liquid electrical conductivity ratios, non-thermal electroporation microbial lethality synergy, 50 Hz Faradaic electrochemical electrode dissolution, and 3-A Sanitary Standard 64-00 compliance.",
+    controlsTitle: "Ohmic Generator & Process Operational Parameters",
+    controlsSub: "Configure applicator geometry, electric field gradients, AC power frequency, flow rate, particulate suspension geometry, and electrode metallurgy.",
+    systemLabel: "Ohmic Heating Column System:",
+    systemHelp: "Select commercial collinear ohmic heating column, power rating, tube internal diameter, and electrode metallurgy.",
+    matrixLabel: "Liquid & Particulate Suspension Food Matrix:",
+    matrixHelp: "Select food suspension formulation, particulate volume fraction, and baseline electrical conductivity.",
+    fieldStrengthLabel: "Applied Electric Field Gradient (V/cm):",
+    fieldStrengthHelp: "Alternating potential gradient E across collinear electrode spacing. Drives volumetric power dissipation (P = σ·E²).",
+    freqLabel: "AC Power Supply Frequency:",
+    freqHelp: "Electrical waveform frequency. High frequencies (≥10 kHz) suppress Faradaic charge transfer and electrode dissolution.",
+    flowRateLabel: "Continuous Process Flow Rate (L/h):",
+    flowRateHelp: "Volumetric throughput governing fluid velocity, Reynolds number, and holding column residence time.",
+    tempInLabel: "Inlet Product Temperature (°C):",
+    tempInHelp: "Temperature of liquid suspension entering the first ohmic heating stage.",
+    partSizeLabel: "Particulate Diameter (mm):",
+    partSizeHelp: "Mean diameter of suspended solid food chunks (carrots, meat, fruit) dictating thermal diffusion core lag.",
+    pressureLabel: "System Hydraulic Backpressure (bar):",
+    pressureHelp: "Operating pressure required to prevent flashing, boiling, and steam cavitation at temperatures >100°C.",
+    presetsTitle: "Standard Commercial Operation Presets",
+    presetParticulateSoup: "Aseptic Vegetable Particulate Soup (60 kW, 35 V/cm, 50 Hz, Pt/Ti, 1,200 L/h)",
+    presetDairyPasteurization: "Dairy Whey Protein High-Frequency Pasteurization (45 kW, 22 V/cm, 20 kHz, 1,400 L/h)",
+    presetFruitColdSpot: "Acidified Fruit Puree Cold-Spot Particle Assurance (30 kW, 28 V/cm, 50 Hz, F0 ≥ 3.5)",
+    presetFaradaicArcingHazard: "Critical 50 Hz Faradaic Dissolution & Cold-Spot Bypass Hazard",
+    diagnosticTitle: "Real-Time Electrochemical & Thermal Sterilization Diagnostics",
+    diagnosticSub: "Calculated volumetric heating rates, cold-spot particle temperatures, microbial F0 lethality, and electrode corrosion margins.",
+    bulkOutletTempLabel: "Bulk Carrier Outlet Temp:",
+    partCoreTempLabel: "Particulate Core Temp (Cold/Hot Spot):",
+    f0SterilityLabel: "Thermal Sterility (F0 Lethality):",
+    electroporationSynergyLabel: "Electroporation Inactivation Synergy:",
+    currentDensityLabel: "Electrode Current Density (J):",
+    faradaicMarginLabel: "Faradaic Corrosion Safety Margin:",
+    foulingResistanceLabel: "Electrode Burn-On Fouling Index:",
+    sanitaryStandardLabel: "FDA & 3-A Sanitary Status:",
+    safetyStatusLabel: "Process Operational Status:",
+    primaryRiskLabel: "Primary Kinetic Limitation:",
+    mechanismsLabel: "Active Electro-Thermal Mechanisms:",
+    mitigationLabel: "Recommended Engineering Action:",
+    scienceTitle: "Electro-Thermal Physics & Aseptic Regulatory Frameworks",
+    scienceSub: "Governing thermodynamic and electrochemical equations for continuous ohmic food pasteurization and sterilization.",
+    tableTitle: "Electrical Conductivity & Electrochemical Threshold Matrix"
+  },
+  es: {
+    badge: "Procesamiento Térmico Electroquímico y Seguridad de Alimentos Líquidos",
+    title: "Simulador de Esterilización por Calentamiento Óhmico Continuo, Electroporación y Ensuciamiento de Electrodos",
+    subtitle: "Simule la pasteurización y esterilización continua por calentamiento óhmico aséptico para alimentos líquidos con partículas en suspensión. Modele el calentamiento Joule volumétrico, la relación de conductividades eléctrica líquido-partícula, la sinergia de electroporación no térmica, la corrosión faradaica a 50 Hz y el cumplimiento de la norma sanitaria 3-A 64-00.",
+    controlsTitle: "Parámetros del Generador y Operación Óhmica",
+    controlsSub: "Configure la geometría de la columna, el gradiente de campo eléctrico, la frecuencia de corriente alterna, el caudal, las partículas y la metalurgia.",
+    systemLabel: "Sistema de Columna de Calentamiento Óhmico:",
+    systemHelp: "Seleccione el calentador óhmico colineal, potencia, diámetro interno del tubo y metalurgia de electrodos.",
+    matrixLabel: "Matriz Alimentaria Líquida con Partículas:",
+    matrixHelp: "Seleccione la suspensión, fracción volumétrica de partículas y conductividad eléctrica de referencia.",
+    fieldStrengthLabel: "Gradiente de Campo Eléctrico Aplicado (V/cm):",
+    fieldStrengthHelp: "Gradiente de potencial alterno E entre electrodos colineales. Determina la disipación volumétrica (P = σ·E²).",
+    freqLabel: "Frecuencia de la Alimentación Eléctrica CA:",
+    freqHelp: "Frecuencia de la onda eléctrica. Altas frecuencias (≥10 kHz) suprimen la transferencia faradaica y la corrosión.",
+    flowRateLabel: "Caudal Continuo de Proceso (L/h):",
+    flowRateHelp: "Caudal volumétrico que determina la velocidad del fluido, número de Reynolds y tiempo de residencia.",
+    tempInLabel: "Temperatura de Entrada del Producto (°C):",
+    tempInHelp: "Temperatura del fluido alimentario al ingresar a la primera etapa de calentamiento óhmico.",
+    partSizeLabel: "Diámetro de las Partículas (mm):",
+    partSizeHelp: "Diámetro medio de trozos sólidos (zanahorias, carne, fruta) que determina el retardo térmico por difusión.",
+    pressureLabel: "Contrapresión Hidráulica del Sistema (bar):",
+    pressureHelp: "Presión requerida para evitar la ebullición instantánea y cavitación de vapor a temperaturas >100°C.",
+    presetsTitle: "Configuraciones Comerciales Estándar",
+    presetParticulateSoup: "Sopa Minestrone con Partículas Aséptica (60 kW, 35 V/cm, 50 Hz, Pt/Ti, 1.200 L/h)",
+    presetDairyPasteurization: "Pasteurización de Suero Lácteo en Alta Frecuencia (45 kW, 22 V/cm, 20 kHz, 1.400 L/h)",
+    presetFruitColdSpot: "Puré de Fruta Acidificado con Seguridad de Punto Frío (30 kW, 28 V/cm, 50 Hz, F0 ≥ 3,5)",
+    presetFaradaicArcingHazard: "Peligro Crítico de Corrosión Faradaica a 50 Hz y Omisión de Esterilidad",
+    diagnosticTitle: "Diagnósticos Electroquímicos y Térmicos en Tiempo Real",
+    diagnosticSub: "Tasas de calentamiento volumétrico calculadas, temperaturas de núcleo de partículas, letalidad F0 y corrosión.",
+    bulkOutletTempLabel: "Temperatura de Salida del Líquido:",
+    partCoreTempLabel: "Temp. Núcleo Partícula (Punto Frío/Caliente):",
+    f0SterilityLabel: "Esterilidad Térmica (Letalidad F0):",
+    electroporationSynergyLabel: "Sinergia de Electroporación no Térmica:",
+    currentDensityLabel: "Densidad de Corriente en Electrodo (J):",
+    faradaicMarginLabel: "Margen de Seguridad contra Corrosión Faradaica:",
+    foulingResistanceLabel: "Índice de Ensuciamiento por Quemado:",
+    sanitaryStandardLabel: "Estado Sanitario FDA y 3-A:",
+    safetyStatusLabel: "Estado Operacional del Proceso:",
+    primaryRiskLabel: "Limitación Cinética Primaria:",
+    mechanismsLabel: "Mecanismos Electrotérmicos Activos:",
+    mitigationLabel: "Acción de Ingeniería Recomendada:",
+    scienceTitle: "Física Electrotérmica y Marco Normativo Aséptico",
+    scienceSub: "Ecuaciones termodinámicas y electroquímicas fundamentales para la esterilización óhmica continua.",
+    tableTitle: "Matriz de Conductividades Eléctricas y Umbrales Electroquímicos"
+  },
+  pt: {
+    badge: "Processamento Térmico Eletroquímico e Segurança de Alimentos Líquidos",
+    title: "Simulador de Esterilização por Aquecimento Ôhmico Contínuo, Eletroporação e Incrustação de Eletrodos",
+    subtitle: "Simule a pasteurização e esterilização contínua por aquecimento ôhmico asséptico para alimentos líquidos com partículas em suspensão. Modele o aquecimento Joule volumétrico, a razão de condutividades elétricas líquido-partícula, a sinergia de eletroporação não térmica, a corrosão faradaica a 50 Hz e a conformidade sanitária 3-A 64-00.",
+    controlsTitle: "Parâmetros do Gerador e Operação Ôhmica",
+    controlsSub: "Configure a geometria da coluna, o gradiente de campo elétrico, a frequência CA, a vazão, as partículas e a metalurgia.",
+    systemLabel: "Sistema de Coluna de Aquecimento Ôhmico:",
+    systemHelp: "Selecione o aquecedor ôhmico colinear, potência, diâmetro interno do tubo e metalurgia dos eletrodos.",
+    matrixLabel: "Matriz Alimentar Líquida com Partículas:",
+    matrixHelp: "Selecione a suspensão, fração volumétrica de sólidos e condutividade elétrica basal.",
+    fieldStrengthLabel: "Gradiente de Campo Elétrico Aplicado (V/cm):",
+    fieldStrengthHelp: "Gradiente de potencial alternado E entre eletrodos colineares. Governa a dissipação volumétrica (P = σ·E²).",
+    freqLabel: "Frequência da Alimentação Elétrica CA:",
+    freqHelp: "Frequência da onda elétrica. Altas frequências (≥10 kHz) suprimem a transferência faradaica e corrosão.",
+    flowRateLabel: "Vazão Contínua de Processo (L/h):",
+    flowRateHelp: "Vazão volumétrica que determina a velocidade do fluido, número de Reynolds e tempo de residência.",
+    tempInLabel: "Temperatura de Entrada do Produto (°C):",
+    tempInHelp: "Temperatura do fluido alimentar na admissão da coluna de aquecimento ôhmico.",
+    partSizeLabel: "Diâmetro das Partículas (mm):",
+    partSizeHelp: "Diâmetro médio de pedaços sólidos (legumes, carne, fruta) que dita o retardo térmico por difusão.",
+    pressureLabel: "Contrapressão Hidráulica do Sistema (bar):",
+    pressureHelp: "Pressão de operação requerida para impedir ebulição instantânea e cavitação de vapor acima de 100°C.",
+    presetsTitle: "Predefinições Comerciais Padrão",
+    presetParticulateSoup: "Sopa Minestrone com Partículas Asséptica (60 kW, 35 V/cm, 50 Hz, Pt/Ti, 1.200 L/h)",
+    presetDairyPasteurization: "Pasteurização de Soro Lácteo em Alta Frequência (45 kW, 22 V/cm, 20 kHz, 1.400 L/h)",
+    presetFruitColdSpot: "Purê de Fruta Acidificado com Garantia de Ponto Frio (30 kW, 28 V/cm, 50 Hz, F0 ≥ 3,5)",
+    presetFaradaicArcingHazard: "Perigo Crítico de Corrosão Faradaica a 50 Hz e Subprocessamento Térmico",
+    diagnosticTitle: "Diagnósticos Eletroquímicos e Térmicos em Tempo Real",
+    diagnosticSub: "Taxas de aquecimento volumétrico calculadas, temperaturas do núcleo de partículas, letalidade F0 e corrosão.",
+    bulkOutletTempLabel: "Temperatura de Saída do Fluido:",
+    partCoreTempLabel: "Temp. Núcleo Partícula (Ponto Frio/Quente):",
+    f0SterilityLabel: "Esterilidade Térmica (Letalidade F0):",
+    electroporationSynergyLabel: "Sinergia de Eletroporação não Térmica:",
+    currentDensityLabel: "Densidade de Corrente no Eletrodo (J):",
+    faradaicMarginLabel: "Margem de Segurança contra Corrosão Faradaica:",
+    foulingResistanceLabel: "Índice de Incrustação por Queimado:",
+    sanitaryStandardLabel: "Status Sanitário FDA e 3-A:",
+    safetyStatusLabel: "Status Operacional do Processo:",
+    primaryRiskLabel: "Limitação Cinética Primária:",
+    mechanismsLabel: "Mecanismos Eletrotérmicos Ativos:",
+    mitigationLabel: "Ação de Engenharia Recomendada:",
+    scienceTitle: "Física Eletrotérmica e Diretrizes Regulatórias Assépticas",
+    scienceSub: "Equações termodinâmicas e eletroquímicas fundamentais para a esterilização ôhmica contínua.",
+    tableTitle: "Matriz de Condutividades Elétricas e Limiares Eletroquímicos"
+  },
+  'zh-cn': {
+    badge: "电化学热力工程与液体食品无菌安全",
+    title: "商用连续欧姆加热液体灭菌、体积电穿孔与电极结垢模拟器",
+    subtitle: "模拟商用连续无菌欧姆加热（Joule Heating）液体与悬浮颗粒食品杀菌工艺。精确计算体积焦耳热功率耗散、固液电导率比差效应、非热电穿孔细胞膜通透协同杀菌、50 Hz工频法拉第电化学金属溶出腐蚀以及3-A Sanitary Standard 64-00卫生标准合规性。",
+    controlsTitle: "欧姆发生器与工艺运行参数控制",
+    controlsSub: "配置共线管式反应器几何结构、电场梯度、交流电源频率、物料流量、颗粒悬浮体系以及电极材质。",
+    systemLabel: "欧姆加热管柱系统:",
+    systemHelp: "选择商用共线欧姆加热器、额定功率、管道内径及电极表面冶金体系。",
+    matrixLabel: "液体与颗粒悬浮食品物料基质:",
+    matrixHelp: "选择食品悬浮基质配方、颗粒体积百分比以及基础电导率参数。",
+    fieldStrengthLabel: "施加电场梯度 (V/cm):",
+    fieldStrengthHelp: "共线电极间交变电位梯度 E。直接决定体积焦耳热发热功率 (P = σ·E²)。",
+    freqLabel: "交流电源工作频率:",
+    freqHelp: "电源交变波形频率。高频交流电（≥10 kHz）可完全抑制双电层法拉第电荷转移与电极溶解。",
+    flowRateLabel: "连续物料流速 (L/h):",
+    flowRateHelp: "连续体积流量，决定管道内流体剪切雷诺数（Re）及保温管驻留杀菌时间。",
+    tempInLabel: "物料初始入料温度 (°C):",
+    tempInHelp: "进入第一级欧姆加热柱时的液体食品初温。",
+    partSizeLabel: "悬浮固体颗粒直径 (mm):",
+    partSizeHelp: "固体颗粒（胡萝卜块、肉丁、果粒）平均粒径，决定中心导热滞后延迟。",
+    pressureLabel: "系统工作背压 (bar):",
+    pressureHelp: "防止物料在超百摄氏度杀菌时发生闪蒸暴沸及水蒸气空化的液压背压。",
+    presetsTitle: "标准工业操作预设方案",
+    presetParticulateSoup: "无菌蔬菜颗粒意式杂菜汤 (60 kW, 35 V/cm, 50 Hz, Pt/Ti, 1,200 L/h)",
+    presetDairyPasteurization: "乳清蛋白高频巴氏杀菌低结垢模式 (45 kW, 22 V/cm, 20 kHz, 1,400 L/h)",
+    presetFruitColdSpot: "酸化果泥冷点颗粒商业无菌保障 (30 kW, 28 V/cm, 50 Hz, F0 ≥ 3.5)",
+    presetFaradaicArcingHazard: "严重50 Hz法拉第电极溶出与颗粒欠杀菌失效工况",
+    diagnosticTitle: "实时电化学与热力无菌工程诊断",
+    diagnosticSub: "计算体积发热速率、颗粒冷点中心温度、F0无菌值、非热电穿孔增效与电极腐蚀裕度。",
+    bulkOutletTempLabel: "载液出料平均温度:",
+    partCoreTempLabel: "固体颗粒中心温度 (冷点/热点):",
+    f0SterilityLabel: "热力商业无菌值 (F0):",
+    electroporationSynergyLabel: "非热电穿孔灭菌协同增效:",
+    currentDensityLabel: "电极工作电流密度 (J):",
+    faradaicMarginLabel: "法拉第防腐蚀安全裕度:",
+    foulingResistanceLabel: "电极表面焦糊结垢指数:",
+    sanitaryStandardLabel: "FDA与3-A卫生认证状态:",
+    safetyStatusLabel: "工艺综合运行状态:",
+    primaryRiskLabel: "主要动力学限制因素:",
+    mechanismsLabel: "主导电热力学反应机理:",
+    mitigationLabel: "建议工程改进措施:",
+    scienceTitle: "电热物理学与无菌杀菌法规标准",
+    scienceSub: "连续欧姆热力杀菌的核心控制热物理方程与FDA无菌法规依据。",
+    tableTitle: "物料电导率与电极电化学阈值参数对照表"
+  },
+  ja: {
+    badge: "電気化学的熱加工・液体食品無菌工学",
+    title: "産業用連続通電加熱（オーム加熱）液体滅菌・体積エレクトロポレーション・電極ファウリング解析シミュレータ",
+    subtitle: "液体および固形物混入食品の連続無菌通電加熱（オーム加熱・Joule加熱）殺菌プロセスをシミュレーション。体積ジュール熱発熱、固液導電率比、非熱的エレクトロポレーション殺菌相乗効果、50 Hz商用周波ファラデー電気化学電極溶出腐食、3-A 64-00衛生基準適合性を算出します。",
+    controlsTitle: "オーム加熱発生器・運転パラメータ設定",
+    controlsSub: "共線型管路カラム、電界傾度、交流周波数、流量、固形物粒径、および電極表面金属を設定します。",
+    systemLabel: "オーム加熱カラムシステム:",
+    systemHelp: "産業用共線オーム加熱ユニット、定格出力、管路内径、および電極材料を選択します。",
+    matrixLabel: "液体・固形物混合食品マトリクス:",
+    matrixHelp: "食品懸濁液の配合、固形物充填率、および基準電気伝導率を選択します。",
+    fieldStrengthLabel: "印加電界傾度 (V/cm):",
+    fieldStrengthHelp: "共線電極間の交流電位傾度 E。体積発熱エネルギー散逸（P = σ·E²）を決定します。",
+    freqLabel: "交流電源周波数:",
+    freqHelp: "交流波形周波数。高周波（≥10 kHz）は電気二重層のファラデー電荷移動と電極溶出を抑制します。",
+    flowRateLabel: "連続プロセス流量 (L/h):",
+    flowRateHelp: "管内流速、レイノルズ数、および保持管滞留殺菌時間を規定する体積流量。",
+    tempInLabel: "製品初温・入口温度 (°C):",
+    tempInHelp: "第一段オーム加熱カラムに供給される食品懸濁液の投入温度。",
+    partSizeLabel: "懸濁固形物粒径 (mm):",
+    partSizeHelp: "固形物粒子（人参、肉、果実ブロック）の平均直径。熱拡散中心到達遅延を左右します。",
+    pressureLabel: "システム流体背圧 (bar):",
+    pressureHelp: "100°C以上の加熱殺菌時に突沸・蒸気キャビテーションを防止する管内背圧。",
+    presetsTitle: "標準産業用運転プリセット",
+    presetParticulateSoup: "固形野菜スープ無菌殺菌 (60 kW, 35 V/cm, 50 Hz, Pt/Ti, 1,200 L/h)",
+    presetDairyPasteurization: "乳清タンパク質高周波低温殺菌・低ファウリング (45 kW, 22 V/cm, 20 kHz, 1,400 L/h)",
+    presetFruitColdSpot: "酸性化フルーツピューレ冷点粒子無菌保証 (30 kW, 28 V/cm, 50 Hz, F0 ≥ 3.5)",
+    presetFaradaicArcingHazard: "危険な50 Hz電極金属溶出・粒子未殺菌バイパス障害",
+    diagnosticTitle: "リアルタイム電気化学・熱無菌工学診断",
+    diagnosticSub: "体積発熱速度、固形物中心冷点温度、F0無菌値、非熱的穿孔相乗効果、電極耐食性を算出。",
+    bulkOutletTempLabel: "キャリア液体出口平均温度:",
+    partCoreTempLabel: "固形物中心温度 (冷点/熱点):",
+    f0SterilityLabel: "熱殺菌価 (F0値):",
+    electroporationSynergyLabel: "非熱的エレクトロポレーション相乗効果:",
+    currentDensityLabel: "電極電流密度 (J):",
+    faradaicMarginLabel: "ファラデー電極腐食安全マージン:",
+    foulingResistanceLabel: "電極表面焦げ付きファウリング指数:",
+    sanitaryStandardLabel: "FDA・3-Aサニタリー適合基準:",
+    safetyStatusLabel: "プロセス総合運転状態:",
+    primaryRiskLabel: "律速制限要因:",
+    mechanismsLabel: "主導的電熱物理学的機構:",
+    mitigationLabel: "推奨エンジニアリング対策:",
+    scienceTitle: "電熱物理学・無菌殺菌規制フレームワーク",
+    scienceSub: "連続オーム加熱滅菌の支配熱力学・電気化学方程式とFDA/3-A無菌管理基準。",
+    tableTitle: "電気伝導率・電極電気化学閾値マトリクス"
+  }
+};
+
+const d = DICT[lang] || DICT.en;
+---
+
+<div class="my-8 rounded-3xl bg-surface border border-hairline p-6 md:p-8 shadow-sm">
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-hairline pb-6 mb-8">
+    <div>
+      <div class="flex items-center gap-2 mb-2">
+        <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-600 text-white">
+          {d.badge}
+        </span>
+        <span class="text-xs text-muted font-mono">FDA 21 CFR § 113 &bull; 3-A 64-00 &bull; EHEDG Doc 17</span>
+      </div>
+      <h2 class="text-title-lg md:text-display-sm font-bold text-ink">
+        {d.title}
+      </h2>
+      <p class="text-body-sm text-muted max-w-3xl mt-1">
+        {d.subtitle}
+      </p>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="px-3 py-1.5 rounded-xl bg-surface-soft border border-hairline font-mono text-xs text-muted">
+        50/60 Hz &bull; 25 kHz Inverter &bull; Pt/Ti &bull; MMO
+      </span>
+    </div>
+  </div>
+
+  <!-- Presets -->
+  <div class="mb-8">
+    <div class="text-xs font-semibold uppercase tracking-wider text-muted mb-3">
+      {d.presetsTitle}
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+      <button 
+        type="button"
+        id="preset-soup"
+        class="text-left px-3.5 py-2.5 rounded-xl border border-hairline bg-surface-soft hover:bg-rose-50 hover:border-rose-400 text-xs font-medium text-ink transition-colors"
+      >
+        🍲 {d.presetParticulateSoup}
+      </button>
+      <button 
+        type="button"
+        id="preset-dairy"
+        class="text-left px-3.5 py-2.5 rounded-xl border border-hairline bg-surface-soft hover:bg-rose-50 hover:border-rose-400 text-xs font-medium text-ink transition-colors"
+      >
+        🥛 {d.presetDairyPasteurization}
+      </button>
+      <button 
+        type="button"
+        id="preset-fruit"
+        class="text-left px-3.5 py-2.5 rounded-xl border border-hairline bg-surface-soft hover:bg-rose-50 hover:border-rose-400 text-xs font-medium text-ink transition-colors"
+      >
+        🍑 {d.presetFruitColdSpot}
+      </button>
+      <button 
+        type="button"
+        id="preset-hazard"
+        class="text-left px-3.5 py-2.5 rounded-xl border border-hairline bg-red-50/50 hover:bg-red-100/60 border-red-200 text-xs font-medium text-red-900 transition-colors"
+      >
+        ⚡ {d.presetFaradaicArcingHazard}
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Inputs & Live Simulation Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <!-- Controls (7 cols) -->
+    <div class="lg:col-span-7 space-y-6">
+      <div class="border-b border-hairline pb-3">
+        <h3 class="text-title-sm font-bold text-ink">
+          {d.controlsTitle}
+        </h3>
+        <p class="text-xs text-muted">
+          {d.controlsSub}
+        </p>
+      </div>
+
+      <!-- System Selector -->
+      <div>
+        <label for="ohmic-system-select" class="block text-xs font-bold text-ink uppercase tracking-wider mb-1">
+          {d.systemLabel}
+        </label>
+        <select 
+          id="ohmic-system-select" 
+          class="w-full text-xs rounded-xl border border-hairline bg-surface-soft px-3 py-2.5 text-ink focus:outline-none focus:ring-2 focus:ring-rose-500 font-medium"
+        >
+          {ohmicData.ohmicSystems.map(sys => (
+            <option value={sys.id} selected={sys.id === 'commercial_particulate_ohmic_60kw'}>
+              {sys.name}
+            </option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1" id="system-desc-help">
+          {d.systemHelp}
+        </p>
+      </div>
+
+      <!-- Food Matrix Selector -->
+      <div>
+        <label for="ohmic-matrix-select" class="block text-xs font-bold text-ink uppercase tracking-wider mb-1">
+          {d.matrixLabel}
+        </label>
+        <select 
+          id="ohmic-matrix-select" 
+          class="w-full text-xs rounded-xl border border-hairline bg-surface-soft px-3 py-2.5 text-ink focus:outline-none focus:ring-2 focus:ring-rose-500 font-medium"
+        >
+          {ohmicData.foodSuspensionMatrices.map(mat => (
+            <option value={mat.id} selected={mat.id === 'vegetable_particulate_soup'}>
+              {mat.name}
+            </option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1">
+          {d.matrixHelp}
+        </p>
+      </div>
+
+      <!-- Slider 1: Electric Field Strength -->
+      <div>
+        <div class="flex items-center justify-between text-xs mb-1">
+          <span class="font-bold text-ink uppercase tracking-wider">{d.fieldStrengthLabel}</span>
+          <span class="font-mono font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded" id="field-display">35.0 V/cm</span>
+        </div>
+        <input 
+          type="range" 
+          id="field-slider" 
+          min="10" 
+          max="55" 
+          step="1" 
+          value="35"
+          class="w-full accent-rose-600 cursor-pointer"
+        />
+        <p class="text-[11px] text-muted mt-1">{d.fieldStrengthHelp}</p>
+      </div>
+
+      <!-- Frequency Selector -->
+      <div>
+        <label for="ohmic-freq-select" class="block text-xs font-bold text-ink uppercase tracking-wider mb-1">
+          {d.freqLabel}
+        </label>
+        <select 
+          id="ohmic-freq-select" 
+          class="w-full text-xs rounded-xl border border-hairline bg-surface-soft px-3 py-2.5 text-ink focus:outline-none focus:ring-2 focus:ring-rose-500 font-medium"
+        >
+          <option value="50">50 Hz Industrial Mains (Standard European/Asian Grid)</option>
+          <option value="60">60 Hz Industrial Mains (Standard North American Grid)</option>
+          <option value="1000">1,000 Hz Mid-Frequency (Partial Faradaic Mitigation)</option>
+          <option value="10000">10,000 Hz High-Frequency Inverter (Suppressed Faradaic Transfer)</option>
+          <option value="25000" selected>25,000 Hz Ultra-High-Frequency (Complete Electrochemical Immunity)</option>
+        </select>
+        <p class="text-[11px] text-muted mt-1">{d.freqHelp}</p>
+      </div>
+
+      <!-- Slider 2: Flow Rate -->
+      <div>
+        <div class="flex items-center justify-between text-xs mb-1">
+          <span class="font-bold text-ink uppercase tracking-wider">{d.flowRateLabel}</span>
+          <span class="font-mono font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded" id="flow-display">1,200 L/h</span>
+        </div>
+        <input 
+          type="range" 
+          id="flow-slider" 
+          min="200" 
+          max="3600" 
+          step="50" 
+          value="1200"
+          class="w-full accent-rose-600 cursor-pointer"
+        />
+        <p class="text-[11px] text-muted mt-1">{d.flowRateHelp}</p>
+      </div>
+
+      <!-- Slider 3: Inlet Temperature -->
+      <div>
+        <div class="flex items-center justify-between text-xs mb-1">
+          <span class="font-bold text-ink uppercase tracking-wider">{d.tempInLabel}</span>
+          <span class="font-mono font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded" id="tempin-display">35.0 °C</span>
+        </div>
+        <input 
+          type="range" 
+          id="tempin-slider" 
+          min="10" 
+          max="80" 
+          step="1" 
+          value="35"
+          class="w-full accent-rose-600 cursor-pointer"
+        />
+        <p class="text-[11px] text-muted mt-1">{d.tempInHelp}</p>
+      </div>
+
+      <!-- Slider 4: Particulate Diameter -->
+      <div>
+        <div class="flex items-center justify-between text-xs mb-1">
+          <span class="font-bold text-ink uppercase tracking-wider">{d.partSizeLabel}</span>
+          <span class="font-mono font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded" id="partsize-display">10.0 mm</span>
+        </div>
+        <input 
+          type="range" 
+          id="partsize-slider" 
+          min="0" 
+          max="20" 
+          step="1" 
+          value="10"
+          class="w-full accent-rose-600 cursor-pointer"
+        />
+        <p class="text-[11px] text-muted mt-1">{d.partSizeHelp}</p>
+      </div>
+
+      <!-- Slider 5: Hydraulic Backpressure -->
+      <div>
+        <div class="flex items-center justify-between text-xs mb-1">
+          <span class="font-bold text-ink uppercase tracking-wider">{d.pressureLabel}</span>
+          <span class="font-mono font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded" id="pressure-display">6.5 bar</span>
+        </div>
+        <input 
+          type="range" 
+          id="pressure-slider" 
+          min="2.0" 
+          max="12.0" 
+          step="0.5" 
+          value="6.5"
+          class="w-full accent-rose-600 cursor-pointer"
+        />
+        <p class="text-[11px] text-muted mt-1">{d.pressureHelp}</p>
+      </div>
+    </div>
+
+    <!-- Live Diagnostics & Physics Output (5 cols) -->
+    <div class="lg:col-span-5 flex flex-col justify-between space-y-6 bg-surface-soft border border-hairline rounded-2xl p-6">
+      <div>
+        <div class="flex items-center justify-between border-b border-hairline pb-3 mb-4">
+          <div>
+            <h3 class="text-title-sm font-bold text-ink">
+              {d.diagnosticTitle}
+            </h3>
+            <p class="text-[11px] text-muted">
+              {d.diagnosticSub}
+            </p>
+          </div>
+          <span id="safety-status-badge" class="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-600 text-white">
+            OPTIMAL &amp; COMPLIANT
+          </span>
+        </div>
+
+        <div class="space-y-3.5 text-xs">
+          <!-- Bulk Outlet Temperature -->
+          <div class="flex items-center justify-between py-1.5 border-b border-hairline/60">
+            <span class="text-muted">{d.bulkOutletTempLabel}</span>
+            <span id="res-bulk-temp" class="font-mono text-title-sm font-bold text-emerald-600">138.5 °C</span>
+          </div>
+
+          <!-- Particulate Core Temperature -->
+          <div class="flex items-center justify-between py-1.5 border-b border-hairline/60">
+            <span class="text-muted">{d.partCoreTempLabel}</span>
+            <span id="res-part-temp" class="font-mono text-title-sm font-bold text-emerald-600">134.2 °C</span>
+          </div>
+
+          <!-- Thermal F0 Sterility -->
+          <div class="flex items-center justify-between py-1.5 border-b border-hairline/60">
+            <span class="text-muted">{d.f0SterilityLabel}</span>
+            <span id="res-f0" class="font-mono font-bold text-ink">F0 = 8.4 min (Target ≥ 6.0)</span>
+          </div>
+
+          <!-- Electroporation Synergy -->
+          <div class="flex items-center justify-between py-1.5 border-b border-hairline/60">
+            <span class="text-muted">{d.electroporationSynergyLabel}</span>
+            <span id="res-electroporation" class="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-[11px]">
+              +32% Synergistic D-value Derating
+            </span>
+          </div>
+
+          <!-- Current Density -->
+          <div class="flex items-center justify-between py-1.5 border-b border-hairline/60">
+            <span class="text-muted">{d.currentDensityLabel}</span>
+            <span id="res-current-density" class="font-mono font-bold text-ink">4,850 A/m²</span>
+          </div>
+
+          <!-- Faradaic Corrosion Margin -->
+          <div class="flex items-center justify-between py-1.5 border-b border-hairline/60">
+            <span class="text-muted">{d.faradaicMarginLabel}</span>
+            <span id="res-faradaic-margin" class="font-mono font-bold text-emerald-600">SF = 2.47x (Zero Leaching)</span>
+          </div>
+
+          <!-- Electrode Fouling Index -->
+          <div class="flex items-center justify-between py-1.5 border-b border-hairline/60">
+            <span class="text-muted">{d.foulingResistanceLabel}</span>
+            <span id="res-fouling" class="font-bold text-emerald-700">Low (Rf &lt; 0.0002 m²·K/W)</span>
+          </div>
+
+          <!-- Sanitary Standard Status -->
+          <div class="flex items-center justify-between py-1.5">
+            <span class="text-muted">{d.sanitaryStandardLabel}</span>
+            <span id="res-sanitary" class="font-mono font-bold text-ink">3-A 64-00 / FDA § 113 Pass</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Advisory Box -->
+      <div id="advisory-box" class="p-3.5 rounded-xl bg-surface border border-hairline">
+        <div id="advisory-title" class="text-[11px] font-bold uppercase tracking-wider text-muted mb-1">
+          {d.safetyStatusLabel}
+        </div>
+        <p id="advisory-text" class="text-[11px] text-ink leading-relaxed">
+          Ohmic heating is executing with optimal electrolytic energy coupling. Both carrier fluid and particulate core temperatures achieve complete commercial sterility without thermal surface burn-on fouling.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scientific Background & Governing Physics -->
+  <div class="mt-12 pt-8 border-t border-hairline">
+    <div class="mb-6">
+      <h3 class="text-title-sm md:text-title-md font-bold text-ink">
+        {d.scienceTitle}
+      </h3>
+      <p class="text-xs text-muted mt-1">
+        {d.scienceSub}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-muted mb-8">
+      <div class="p-4 rounded-xl bg-surface-soft border border-hairline">
+        <div class="font-bold text-ink mb-1.5">1. Volumetric Joule Heating Power Dissipation</div>
+        <p class="leading-relaxed">
+          Unlike surface heat exchangers governed by Fourier heat conduction (q = -k·∇T), ohmic heating generates thermal energy directly throughout the food volume via electrical dissipation:
+        </p>
+        <div class="font-mono bg-surface p-2 rounded my-2 text-ink text-[11px]">
+          P_v = σ(T) &middot; |E|² = (V / L)² &middot; σ_0 [1 + m(T - T_0)]
+        </div>
+        <p class="leading-relaxed">
+          Because electrical conductivity increases with temperature (m &approx; 0.015 to 0.025 per &deg;C), warmer regions draw more current, necessitating uniform collinear fluid velocity to prevent thermal runaway.
+        </p>
+      </div>
+
+      <div class="p-4 rounded-xl bg-surface-soft border border-hairline">
+        <div class="font-bold text-ink mb-1.5">2. Particulate Conductivity Ratio & Cold-Spot Dynamics</div>
+        <p class="leading-relaxed">
+          In multiphase particulate suspensions, heating rates diverge based on the ratio &Gamma; = &sigma;_p / &sigma;_f:
+        </p>
+        <div class="font-mono bg-surface p-2 rounded my-2 text-ink text-[11px]">
+          &Gamma; &lt; 1 (Fluid faster &rarr; Particle cold-spot)<br/>
+          &Gamma; &gt; 1 (Particle faster &rarr; Particle hot-spot)
+        </div>
+        <p class="leading-relaxed">
+          For fruit pieces in sugar syrup (&Gamma; &approx; 0.33), current preferentially bypasses the particles, establishing the particle center as the critical microbiological cold spot requiring extended holding tube verification under FDA 21 CFR § 113.
+        </p>
+      </div>
+
+      <div class="p-4 rounded-xl bg-surface-soft border border-hairline">
+        <div class="font-bold text-ink mb-1.5">3. 50 Hz Faradaic Reactions vs High-Frequency Inverters</div>
+        <p class="leading-relaxed">
+          At standard mains frequency (50/60 Hz), alternating electric current can drive Faradaic oxidation-reduction reactions across the electrode electrical double layer:
+        </p>
+        <div class="font-mono bg-surface p-2 rounded my-2 text-ink text-[11px]">
+          J_crit &approx; 2,800 to 4,500 A/m² (AISI 316L)<br/>
+          J_crit &ge; 10,000 A/m² (Pt/Ti &amp; RuO2 MMO)
+        </div>
+        <p class="leading-relaxed">
+          Operating high-frequency solid-state inverters (&ge; 10 kHz) discharges the double-layer capacitance purely through non-Faradaic displacement currents, eliminating electrolytic electrolysis and toxic chromium/nickel leaching.
+        </p>
+      </div>
+    </div>
+
+    <!-- Comparative Specifications Table -->
+    <div class="overflow-x-auto">
+      <div class="text-xs font-bold text-ink uppercase tracking-wider mb-2">
+        {d.tableTitle}
+      </div>
+      <table class="w-full text-left text-xs border border-hairline rounded-xl overflow-hidden">
+        <thead class="bg-surface-soft border-b border-hairline text-ink font-semibold">
+          <tr>
+            <th class="p-3">Suspension / Metallurgy</th>
+            <th class="p-3">Conductivity (20°C)</th>
+            <th class="p-3">Critical Faradaic J_crit</th>
+            <th class="p-3">Microbial Target &amp; F0</th>
+            <th class="p-3">Regulatory Compliance</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline">
+          <tr class="hover:bg-surface-soft/50">
+            <td class="p-3 font-medium text-ink">Vegetable Minestrone Soup</td>
+            <td class="p-3 font-mono">1.25 S/m (Carrier) / 0.95 S/m (Solids)</td>
+            <td class="p-3 font-mono">&gt; 8,000 A/m² (MMO Ti)</td>
+            <td class="p-3">C. botulinum (Target F0 &ge; 6.0)</td>
+            <td class="p-3 text-emerald-700 font-semibold">FDA 21 CFR § 113 / 3-A 64-00</td>
+          </tr>
+          <tr class="hover:bg-surface-soft/50">
+            <td class="p-3 font-medium text-ink">Dairy Whey Protein Emulsion</td>
+            <td class="p-3 font-mono">0.58 S/m (Homogeneous)</td>
+            <td class="p-3 font-mono">&gt; 10,000 A/m² (Pt/Ti)</td>
+            <td class="p-3">B. cereus / L. monocytogenes (F0 &ge; 5.0)</td>
+            <td class="p-3 text-emerald-700 font-semibold">EHEDG Doc 17 / USDA-AMS</td>
+          </tr>
+          <tr class="hover:bg-surface-soft/50">
+            <td class="p-3 font-medium text-ink">Acidified Mango/Peach Puree</td>
+            <td class="p-3 font-mono">0.42 S/m (Carrier) / 0.14 S/m (Pieces)</td>
+            <td class="p-3 font-mono">&gt; 9,000 A/m² (MMO Ti)</td>
+            <td class="p-3">A. acidoterrestris (F0 &ge; 3.5)</td>
+            <td class="p-3 text-emerald-700 font-semibold">FDA 21 CFR § 114 (Acidified Foods)</td>
+          </tr>
+          <tr class="hover:bg-surface-soft/50">
+            <td class="p-3 font-medium text-ink">Savory Braised Beef Stew</td>
+            <td class="p-3 font-mono">1.45 S/m (Carrier) / 2.25 S/m (Meat)</td>
+            <td class="p-3 font-mono">&gt; 12,000 A/m² (Pt/Ti)</td>
+            <td class="p-3">C. sporogenes PA 3679 (F0 &ge; 8.0)</td>
+            <td class="p-3 text-emerald-700 font-semibold">ASME BPE / USDA-FSIS Low-Acid</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script is:inline define:vars={{ ohmicData }}>
+  (function() {
+    // DOM Elements
+    const systemSelect = document.getElementById('ohmic-system-select');
+    const matrixSelect = document.getElementById('ohmic-matrix-select');
+    const freqSelect = document.getElementById('ohmic-freq-select');
+    
+    const fieldSlider = document.getElementById('field-slider');
+    const flowSlider = document.getElementById('flow-slider');
+    const tempinSlider = document.getElementById('tempin-slider');
+    const partsizeSlider = document.getElementById('partsize-slider');
+    const pressureSlider = document.getElementById('pressure-slider');
+
+    const fieldDisp = document.getElementById('field-display');
+    const flowDisp = document.getElementById('flow-display');
+    const tempinDisp = document.getElementById('tempin-display');
+    const partsizeDisp = document.getElementById('partsize-display');
+    const pressureDisp = document.getElementById('pressure-display');
+    const systemDescHelp = document.getElementById('system-desc-help');
+
+    // Diagnostic Results Elements
+    const resBulkTemp = document.getElementById('res-bulk-temp');
+    const resPartTemp = document.getElementById('res-part-temp');
+    const resF0 = document.getElementById('res-f0');
+    const resElectroporation = document.getElementById('res-electroporation');
+    const resCurrentDensity = document.getElementById('res-current-density');
+    const resFaradaicMargin = document.getElementById('res-faradaic-margin');
+    const resFouling = document.getElementById('res-fouling');
+    const resSanitary = document.getElementById('res-sanitary');
+    const safetyBadge = document.getElementById('safety-status-badge');
+    const advisoryBox = document.getElementById('advisory-box');
+    const advisoryTitle = document.getElementById('advisory-title');
+    const advisoryText = document.getElementById('advisory-text');
+
+    // Preset Buttons
+    const btnSoup = document.getElementById('preset-soup');
+    const btnDairy = document.getElementById('preset-dairy');
+    const btnFruit = document.getElementById('preset-fruit');
+    const btnHazard = document.getElementById('preset-hazard');
+
+    function updateSimulation() {
+      const currentSystemId = systemSelect.value;
+      const currentMatrixId = matrixSelect.value;
+      const freqHz = parseFloat(freqSelect.value);
+
+      const fieldVcm = parseFloat(fieldSlider.value);
+      const flowLh = parseFloat(flowSlider.value);
+      const tempInC = parseFloat(tempinSlider.value);
+      const partSizeMm = parseFloat(partsizeSlider.value);
+      const pressureBar = parseFloat(pressureSlider.value);
+
+      const system = ohmicData.ohmicSystems.find(s => s.id === currentSystemId) || ohmicData.ohmicSystems[0];
+      const matrix = ohmicData.foodSuspensionMatrices.find(m => m.id === currentMatrixId) || ohmicData.foodSuspensionMatrices[0];
+
+      // Update text displays
+      fieldDisp.textContent = `${fieldVcm.toFixed(1)} V/cm`;
+      flowDisp.textContent = `${flowLh.toLocaleString()} L/h`;
+      tempinDisp.textContent = `${tempInC.toFixed(1)} °C`;
+      partsizeDisp.textContent = `${partSizeMm.toFixed(1)} mm`;
+      pressureDisp.textContent = `${pressureBar.toFixed(1)} bar`;
+
+      if (systemDescHelp) {
+        systemDescHelp.textContent = system.description;
+      }
+
+      // Physics Calculations:
+      // 1. Column geometry & velocity
+      const tubeDiameterM = (system.tubeInternalDiameterMm || 50.0) / 1000.0;
+      const tubeAreaM2 = Math.PI * Math.pow(tubeDiameterM / 2.0, 2);
+      const flowM3S = (flowLh / 1000.0) / 3600.0;
+      const fluidVelocityMS = flowM3S / Math.max(0.0001, tubeAreaM2);
+      const electrodeSpacingM = (system.electrodeSpacingCm || 50.0) / 100.0;
+      const columnVolumeM3 = tubeAreaM2 * electrodeSpacingM;
+      const residenceTimeSec = columnVolumeM3 / Math.max(0.00001, flowM3S);
+
+      // 2. Temperature dependent electrical conductivities
+      const tempAvgEstimated = tempInC + 45.0; // midpoint approximation
+      const tempDeltaFrom20 = Math.max(0, tempAvgEstimated - 20.0);
+      const mCoeff = matrix.temperatureCoeffPctPerC || 0.021;
+      const sigmaFluid = matrix.carrierConductivitySm * (1.0 + mCoeff * tempDeltaFrom20);
+      const sigmaPart = matrix.particulateConductivitySm * (1.0 + mCoeff * tempDeltaFrom20);
+
+      // Maxwell-Eucken effective suspension conductivity
+      const phi = (matrix.particulateFractionPct / 100.0) * (partSizeMm > 0 ? 1.0 : 0.0);
+      let sigmaEff = sigmaFluid;
+      if (phi > 0.01) {
+        const num = 2.0 * sigmaFluid + sigmaPart - 2.0 * phi * (sigmaFluid - sigmaPart);
+        const den = 2.0 * sigmaFluid + sigmaPart + phi * (sigmaFluid - sigmaPart);
+        sigmaEff = sigmaFluid * (num / Math.max(0.001, den));
+      }
+
+      // 3. Volumetric power dissipation (kW/L and total kW absorbed)
+      const fieldVm = fieldVcm * 100.0; // convert V/cm to V/m
+      const powerDensityWm3 = sigmaEff * Math.pow(fieldVm, 2);
+      const totalPowerAbsorbedW = powerDensityWm3 * columnVolumeM3;
+      const maxSystemPowerW = (system.generatorPowerKw || 60.0) * 1000.0;
+      const actualPowerW = Math.min(maxSystemPowerW, totalPowerAbsorbedW);
+
+      // 4. Bulk temperature rise
+      const massFlowKgS = flowM3S * (matrix.densityKgM3 || 1050.0);
+      const cpJoule = (matrix.specificHeatKjKgC || 3.92) * 1000.0;
+      const deltaTBulk = actualPowerW / Math.max(0.01, massFlowKgS * cpJoule);
+      const bulkOutletTemp = tempInC + deltaTBulk;
+
+      // 5. Particulate core temperature & conduction lag
+      // Particle vs fluid heating rate ratio: Gamma = sigmaPart / sigmaFluid
+      const gamma = sigmaPart / Math.max(0.01, sigmaFluid);
+      let partCoreTemp = bulkOutletTemp;
+      let coldSpotLagC = 0.0;
+
+      if (partSizeMm > 0 && phi > 0.01) {
+        if (gamma < 0.95) {
+          // Liquid heats faster than solid particle -> particle core is the COLD SPOT
+          // Thermal conduction lag proportional to square of radius divided by thermal diffusivity
+          const radiusM = (partSizeMm / 2.0) / 1000.0;
+          const thermalDiffusivityM2S = 1.45e-7; // food biomaterial avg
+          const fourierTimeLag = Math.pow(radiusM, 2) / (6.0 * thermalDiffusivityM2S);
+          const relativeLagFactor = Math.min(0.40, fourierTimeLag / Math.max(1.0, residenceTimeSec * 4.0));
+          coldSpotLagC = deltaTBulk * (1.0 - gamma) * relativeLagFactor * 2.8;
+          partCoreTemp = Math.max(tempInC + 5.0, bulkOutletTemp - coldSpotLagC);
+        } else if (gamma > 1.05) {
+          // Solid particle has higher conductivity than liquid -> particle is the HOT SPOT!
+          const hotSpotBoostC = deltaTBulk * (gamma - 1.0) * 0.35;
+          partCoreTemp = bulkOutletTemp + hotSpotBoostC;
+        }
+      }
+
+      // 6. Microbial Sterilization Lethality (F0 in minutes)
+      // Reference temperature 121.1°C, z = 10.0°C
+      const zVal = matrix.zValueC || 10.0;
+      const limitingTemp = Math.min(bulkOutletTemp, partCoreTemp); // cold spot dictates safety
+      const lethalityRate = Math.pow(10.0, (limitingTemp - 121.1) / zVal);
+      // Assuming a standard holding tube residence time of 30 to 45 seconds at peak temp
+      const holdingTimeSec = Math.max(15.0, (1800.0 / Math.max(200.0, flowLh)) * 35.0);
+      const rawF0 = (lethalityRate * holdingTimeSec) / 60.0;
+
+      // 7. Non-Thermal Electroporation Synergy
+      // Transmembrane potential: deltaPsi = 1.5 * r * E
+      // When E >= 20 V/cm, membrane permeabilization accelerates microbial inactivation
+      let electroporationPct = 0;
+      let electroporationClass = 'text-muted';
+      if (fieldVcm >= 40.0) {
+        electroporationPct = 42;
+        electroporationClass = 'text-emerald-700 bg-emerald-50';
+      } else if (fieldVcm >= 28.0) {
+        electroporationPct = 28;
+        electroporationClass = 'text-emerald-700 bg-emerald-50';
+      } else if (fieldVcm >= 18.0) {
+        electroporationPct = 14;
+        electroporationClass = 'text-emerald-700 bg-emerald-50';
+      } else {
+        electroporationPct = 0;
+        electroporationClass = 'text-muted bg-surface-soft';
+      }
+
+      const effectiveF0 = rawF0 * (1.0 + (electroporationPct / 100.0) * 0.45);
+
+      // 8. Electrode Current Density & Faradaic Electrochemical Leaching Risk
+      const currentDensityAm2 = sigmaFluid * fieldVm;
+      
+      // Faradaic threshold is frequency and metallurgy dependent
+      // High frequency (>=10 kHz) raises the effective threshold by 300%
+      let baseFaradaicThreshold = 8000;
+      if (currentSystemId === 'compromised_fouling_corroding_ohmic') {
+        baseFaradaicThreshold = 2800;
+      }
+      const freqMultiplier = freqHz >= 10000 ? 3.5 : (freqHz >= 1000 ? 1.6 : 1.0);
+      const effectiveFaradaicThreshold = baseFaradaicThreshold * freqMultiplier;
+      const faradaicMargin = effectiveFaradaicThreshold / Math.max(10.0, currentDensityAm2);
+
+      // 9. Electrode Fouling Resistance (Burn-On Risk)
+      // Evaluates fluid wall shear rate and product matrix fouling tendency
+      const shearRateWall = (8.0 * fluidVelocityMS) / Math.max(0.01, tubeDiameterM);
+      let foulingStatus = 'Low (Rf < 0.0002 m²·K/W)';
+      let foulingColor = 'text-emerald-700';
+
+      if (currentSystemId === 'compromised_fouling_corroding_ohmic' || (bulkOutletTemp > 135.0 && shearRateWall < 120.0)) {
+        foulingStatus = 'CRITICAL BURN-ON FOULING (Rf > 0.0018 m²·K/W)';
+        foulingColor = 'text-red-700';
+      } else if (matrix.id === 'dairy_protein_shake' && bulkOutletTemp > 120.0 && shearRateWall < 180.0) {
+        foulingStatus = 'ELEVATED FOULING (Beta-Lactoglobulin Deposition)';
+        foulingColor = 'text-amber-700';
+      }
+
+      // 10. Update Live Diagnostic UI
+      resBulkTemp.textContent = `${bulkOutletTemp.toFixed(1)} °C`;
+      resBulkTemp.className = `font-mono text-title-sm font-bold ${bulkOutletTemp >= 125.0 && bulkOutletTemp <= 145.0 ? 'text-emerald-600' : (bulkOutletTemp < 120.0 ? 'text-amber-600' : 'text-red-600')}`;
+
+      const isColdSpot = partCoreTemp < bulkOutletTemp;
+      resPartTemp.textContent = `${partCoreTemp.toFixed(1)} °C ${partSizeMm > 0 ? (isColdSpot ? `(Cold-Spot Δ -${coldSpotLagC.toFixed(1)}°C)` : '(Hot-Spot)') : '(Homogeneous)'}`;
+      resPartTemp.className = `font-mono text-title-sm font-bold ${partCoreTemp >= 121.1 ? 'text-emerald-600' : (partCoreTemp >= 105.0 ? 'text-amber-600' : 'text-red-600')}`;
+
+      const targetF0 = matrix.targetF0 || 6.0;
+      resF0.textContent = `F0 = ${effectiveF0.toFixed(2)} min (Target ≥ ${targetF0.toFixed(1)})`;
+      resF0.className = `font-mono font-bold ${effectiveF0 >= targetF0 ? 'text-emerald-700' : 'text-red-700'}`;
+
+      resElectroporation.textContent = electroporationPct > 0 ? `+${electroporationPct}% Synergistic D-value Derating` : 'Sub-Threshold (<18 V/cm)';
+      resElectroporation.className = `font-bold px-2 py-0.5 rounded text-[11px] ${electroporationClass}`;
+
+      resCurrentDensity.textContent = `${Math.round(currentDensityAm2).toLocaleString()} A/m²`;
+
+      resFaradaicMargin.textContent = `SF = ${faradaicMargin.toFixed(2)}x ${faradaicMargin >= 1.5 ? '(Zero Leaching)' : (faradaicMargin >= 1.0 ? '(Marginal)' : '(FARADAIC DISSOLUTION HAZARD)')}`;
+      resFaradaicMargin.className = `font-mono font-bold ${faradaicMargin >= 1.5 ? 'text-emerald-600' : (faradaicMargin >= 1.0 ? 'text-amber-600' : 'text-red-600 animate-pulse')}`;
+
+      resFouling.textContent = foulingStatus;
+      resFouling.className = `font-bold ${foulingColor}`;
+
+      // Overall System Health Badge & Advisory
+      if (faradaicMargin < 1.0 || currentSystemId === 'compromised_fouling_corroding_ohmic') {
+        safetyBadge.textContent = 'DANGER: CORROSION / SCALE';
+        safetyBadge.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-red-600 text-white';
+        advisoryBox.className = 'p-3.5 rounded-xl bg-red-50 border border-red-200';
+        advisoryTitle.textContent = 'CRITICAL FARADAIC ELECTROCHEMICAL DISSOLUTION & CONTAMINATION';
+        advisoryTitle.className = 'text-[11px] font-bold uppercase tracking-wider text-red-900 mb-1';
+        advisoryText.textContent = `Electrode current density (${Math.round(currentDensityAm2).toLocaleString()} A/m²) exceeds the Faradaic electrochemical threshold at ${freqHz} Hz. Charge transfer drives toxic metal ion dissolution (chromium/nickel release), electrode surface pitting, and electrolytic gas generation. Switch to high-frequency AC (≥10 kHz) or upgrade to Platinum-Clad Titanium electrodes immediately.`;
+        resSanitary.textContent = 'NON-COMPLIANT (Faradaic Metal Leaching)';
+        resSanitary.className = 'font-mono font-bold text-red-600';
+      } else if (effectiveF0 < targetF0) {
+        safetyBadge.textContent = 'WARNING: UNDER-STERILIZED';
+        safetyBadge.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-amber-600 text-white';
+        advisoryBox.className = 'p-3.5 rounded-xl bg-amber-50 border border-amber-200';
+        advisoryTitle.textContent = 'INSUFFICIENT THERMAL LETHALITY / COLD-SPOT PARTICLE LAG';
+        advisoryTitle.className = 'text-[11px] font-bold uppercase tracking-wider text-amber-900 mb-1';
+        advisoryText.textContent = `The particulate core temperature (${partCoreTemp.toFixed(1)}°C) yields an F0 lethality of ${effectiveF0.toFixed(2)} min, failing the commercial sterility threshold (F0 ≥ ${targetF0.toFixed(1)} min for ${matrix.referenceOrganism}). Increase electric field gradient or decrease flow rate to prolong holding time.`;
+        resSanitary.textContent = 'FDA 21 CFR § 113 Deficient';
+        resSanitary.className = 'font-mono font-bold text-amber-600';
+      } else {
+        safetyBadge.textContent = 'OPTIMAL & COMPLIANT';
+        safetyBadge.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-600 text-white';
+        advisoryBox.className = 'p-3.5 rounded-xl bg-surface border border-hairline';
+        advisoryTitle.textContent = 'PROCESS OPTIMIZATION STATUS: GOLD MASTER';
+        advisoryTitle.className = 'text-[11px] font-bold uppercase tracking-wider text-muted mb-1';
+        advisoryText.textContent = `Optimal electrolytic Joule heating. Both fluid (${bulkOutletTemp.toFixed(1)}°C) and particle core (${partCoreTemp.toFixed(1)}°C) achieve complete commercial sterility (F0 = ${effectiveF0.toFixed(2)} min) with non-thermal electroporation synergy (+${electroporationPct}%). Faradaic margin is robust (SF ${faradaicMargin.toFixed(2)}x) with zero heavy metal migration, complying with 3-A 64-00 and FDA 21 CFR § 113.`;
+        resSanitary.textContent = '3-A 64-00 / FDA § 113 Pass';
+        resSanitary.className = 'font-mono font-bold text-emerald-600';
+      }
+    }
+
+    // Attach listeners
+    systemSelect.addEventListener('change', updateSimulation);
+    matrixSelect.addEventListener('change', updateSimulation);
+    freqSelect.addEventListener('change', updateSimulation);
+    fieldSlider.addEventListener('input', updateSimulation);
+    flowSlider.addEventListener('input', updateSimulation);
+    tempinSlider.addEventListener('input', updateSimulation);
+    partsizeSlider.addEventListener('input', updateSimulation);
+    pressureSlider.addEventListener('input', updateSimulation);
+
+    // Preset Handlers
+    btnSoup.addEventListener('click', function() {
+      systemSelect.value = 'commercial_particulate_ohmic_60kw';
+      matrixSelect.value = 'vegetable_particulate_soup';
+      freqSelect.value = '50';
+      fieldSlider.value = 35;
+      flowSlider.value = 1200;
+      tempinSlider.value = 35;
+      partsizeSlider.value = 10;
+      pressureSlider.value = 6.5;
+      updateSimulation();
+    });
+
+    btnDairy.addEventListener('click', function() {
+      systemSelect.value = 'commercial_particulate_ohmic_60kw';
+      matrixSelect.value = 'dairy_protein_shake';
+      freqSelect.value = '25000';
+      fieldSlider.value = 22;
+      flowSlider.value = 1400;
+      tempinSlider.value = 40;
+      partsizeSlider.value = 0;
+      pressureSlider.value = 7.0;
+      updateSimulation();
+    });
+
+    btnFruit.addEventListener('click', function() {
+      systemSelect.value = 'pilot_aseptic_ohmic_15kw';
+      matrixSelect.value = 'fruit_puree_mango_peach';
+      freqSelect.value = '50';
+      fieldSlider.value = 28;
+      flowSlider.value = 350;
+      tempinSlider.value = 30;
+      partsizeSlider.value = 12;
+      pressureSlider.value = 5.5;
+      updateSimulation();
+    });
+
+    btnHazard.addEventListener('click', function() {
+      systemSelect.value = 'compromised_fouling_corroding_ohmic';
+      matrixSelect.value = 'vegetable_particulate_soup';
+      freqSelect.value = '50';
+      fieldSlider.value = 48;
+      flowSlider.value = 1800;
+      tempinSlider.value = 25;
+      partsizeSlider.value = 16;
+      pressureSlider.value = 3.5;
+      updateSimulation();
+    });
+
+    // Run initial simulation on load
+    updateSimulation();
+  })();
+</script>
