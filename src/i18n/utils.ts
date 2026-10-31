@@ -148,7 +148,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-continuous-hpu-sonication-modeler',
   'tools/commercial-continuous-puvc-disinfection-modeler',
   'tools/commercial-high-pressure-supercritical-co2-inactivation-modeler',
-  'tools/commercial-continuous-dual-frequency-ultrasonic-modeler'
+  'tools/commercial-continuous-dual-frequency-ultrasonic-modeler',
+  'tools/commercial-continuous-micro-fluidization-modeler'
 ];
 
 const esSlugs = new Set([
@@ -446,5 +447,6 @@ export function getApplianceIn(appliance: string, lang: SupportedLanguage = 'en'
   }
   return `in the ${appliance}`;
 }
+
 
 

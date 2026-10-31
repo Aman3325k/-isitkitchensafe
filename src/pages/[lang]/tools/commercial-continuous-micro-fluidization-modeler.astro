@@ -1,0 +1,262 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import CommercialMicroFluidizationModeler from '../../../components/CommercialMicroFluidizationModeler.astro';
+import type { SupportedLanguage } from '../../../i18n/ui';
+import { useTranslations, useTranslatedPath } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+const t = useTranslations(lang);
+const tp = useTranslatedPath(lang);
+
+interface LocaleToolContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  lead: string;
+  breadcrumbsLabel: string;
+  faqs: Array<{ question: string; answer: string }>;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocaleToolContent> = {
+  es: {
+    pageTitle: "Simulador de Microfluidización Continua, Liposomas y Nanoencapsulación | IsItKitchenSafe",
+    pageDescription: "Simule la microfluidización continua de ultra-alta presión (hasta 200 MPa / 30.000 psi) en cámaras de diamante con microcanales fijos (chorros de impacto opuestos tipo Y y canales en zigzag tipo Z). Modele tasas de disipación de energía espacial (>10^7 W/kg), rotura de gotas sub-100 nm, encapsulación en bicapas de fosfolípidos, enfriamiento de disipación viscosa adiabática y desgaste de émbolos cerámicos según 3-A 04-05 y EHEDG Doc 8 y 17.",
+    badge: "Microfluídica y Física de Nanoemulsiones",
+    h1: "Simulador de Microfluidización Continua, Liposomas y Nanoencapsulación",
+    lead: "Modele el procesamiento de ultra-alta presión con microfluidización continua. Calcule la cinemática de chorros colidentes a más de 400 m/s, rotura de gotas por turbulencia de Kolmogorov, autoensamblaje liposomal, disipación viscosa adiabática y vida útil de sellos cerámicos según las normas 3-A y EHEDG.",
+    breadcrumbsLabel: "Simulador de Microfluidización Continua",
+    faqs: [
+      {
+        question: "¿Qué es la microfluidización continua y en qué se diferencia de los homogeneizadores de válvula convencionales?",
+        answer: "La microfluidización continua es una tecnología mecánica avanzada de procesamiento no térmico que impulsa preemulsiones líquidas a través de microcanales de diamante con geometría fija a ultra-alta presión (hasta 200 MPa / 30.000 psi). A diferencia de los homogeneizadores convencionales—que emplean una válvula de estrangulamiento accionada por resorte o pistón hidráulico donde el fluido se expande radialmente con holguras variables—los microfluidizadores fuerzan el fluido a través de microcanales de diamante policristalino mecanizados por láser (anchuras de 50 a 100 µm). En cámaras tipo Y, la corriente se divide en dos chorros opuestos que colisionan frontalmente a velocidades superiores a 400 m/s, sometiendo cada elemento de volumen a tasas de cizallamiento uniformes (γ̇ > 10^7 s⁻¹) y generando gotas monodispersas sub-100 nm."
+      },
+      {
+        question: "¿Cuál es la diferencia entre las cámaras de interacción de diamante tipo Y y tipo Z?",
+        answer: "Las cámaras de interacción tipo Y (como F12Y o F20Y) dividen el flujo presurizado en dos microcanales opuestos que dirigen los chorros directamente uno contra el otro en una zona de colisión central. Este impacto frontal genera elongación extensional planar extrema y cavitación, siendo ideales para emulsificación líquido-líquido, nanoemulsiones transparentes sub-80 nm y autoensamblaje de liposomas. Por su parte, las cámaras tipo Z (como H10Z o H30Z) guían el fluido a través de un canal en zigzag con quiebres a 90 grados donde el chorro choca a velocidad sónica contra placas de desgaste de diamante. Estas cámaras generan impacto mecánico masivo y cizallamiento de capa límite, siendo óptimas para disgregación de cristales insolubles (fitosteroles) y lisis celular bacteriana."
+      },
+      {
+        question: "¿Por qué el calentamiento por disipación viscosa adiabática es crítico y cómo se controla en línea?",
+        answer: "En la microfluidización a ultra-alta presión, prácticamente el 100% de la energía mecánica introducida por la bomba electrohidráulica intensificadora se transforma en energía térmica por cizallamiento viscoso dentro de los microcanales. Para fluidos acuosos, el aumento adiabático teórico es de 1,6°C a 2,2°C por cada 100 bar (10 MPa). A presiones típicas de 1.500 bar (150 MPa), el fluido experimenta un pico súbito de temperatura de +25°C a +35°C en menos de 2 milisegundos. Para evitar la termodegradación de bioactivos sensibles (Omega-3 DHA/EPA, curcumina o vitaminas), los equipos comerciales integran inmediatamente a la salida un intercambiador de calor de carcasa y tubos sanitario alimentado con propilenglicol a -5°C conforme a ASME BPE, enfriando el producto por debajo de 15°C en menos de 180 ms."
+      },
+      {
+        question: "¿Cómo logra la microfluidización tamaños de gota sub-100 nm y un índice de polidispersidad muy bajo (PDI < 0,12)?",
+        answer: "La rotura de gotas está gobernada por la microescala turbulenta de Kolmogorov (η = (ν³ / ε)^(1/4)). Debido a que los microcanales generan tasas de disipación de energía extremadamente altas (ε > 10^7 - 10^8 W/kg), la escala de los microvórtices desciende hasta unos 30 nm. Cuando las gotas son mayores que esta escala, el cizallamiento inercial turbulento las fragmenta velozmente. Al tener una geometría de microcanales fija donde todas las gotas recorren idéntica trayectoria sin trayectorias de fuga o derivación, la emulsión resultante presenta una distribución muy estrecha y monodispersa con PDI < 0,12, evitando la coalescencia y maduración de Ostwald."
+      },
+      {
+        question: "¿Qué normas sanitarias y especificaciones rigen los émbolos cerámicos en microfluidizadores comerciales?",
+        answer: "Los microfluidizadores para alimentos, bebidas y nutracéuticos deben cumplir la norma sanitaria 3-A 04-05 (Homogeneizadores y Bombas Reciprocantes) y los criterios de limpiabilidad EHEDG Doc 8 y 17. Los cilindros intensificadores utilizan émbolos de cerámica de circonio tetragonal estabilizado con itrio (Y-TZP) o alúmina alfa al 99,8% con acabado de espejo (Ra < 0,03 µm). Sellos de labio de PTFE virgen energizados por resortes de acero inoxidable previenen fugas de aceite hidráulico y evitan el desprendimiento de partículas metálicas hacia el producto alimentario."
+      }
+    ]
+  },
+  pt: {
+    pageTitle: "Simulador de Microfluidização Contínua, Lipossomas e Nanoencapsulamento | IsItKitchenSafe",
+    pageDescription: "Simule a microfluidização contínua de ultra-alta pressão (até 200 MPa / 30.000 psi) em câmaras de diamante com microcanais de geometria fixa (jatos colidentes tipo Y e canais em zigue-zague tipo Z). Modele taxas de dissipação de energia (>10^7 W/kg), quebra de gotas sub-100 nm, formação de lipossomas, resfriamento de calor viscoso adiabático e desgaste de êmbolos cerâmicos sob 3-A 04-05 e EHEDG Doc 8 e 17.",
+    badge: "Microfluídica e Física de Nanoemulsões",
+    h1: "Simulador de Microfluidização Contínua, Lipossomas e Nanoencapsulamento",
+    lead: "Modele o processamento de ultra-alta pressão por microfluidização contínua. Calcule a cinemática de jatos frontais a mais de 400 m/s, fragmentação turbulenta de Kolmogorov, automontagem de vesículas lipossomais, aquecimento viscoso adiabático e vida útil de êmbolos cerâmicos segundo 3-A e EHEDG.",
+    breadcrumbsLabel: "Simulador de Microfluidização Contínua",
+    faqs: [
+      {
+        question: "O que é a microfluidização contínua e como ela difere dos homogeneizadores de válvula convencionais?",
+        answer: "A microfluidização contínua é uma tecnologia mecânica não térmica de alta precisão que bombeia pré-emulsões líquidas através de microcanais de diamante de geometria fixa a pressões de até 200 MPa (30.000 psi). Ao contrário dos homogeneizadores clássicos de válvula—onde o fluido se expande radialmente por uma fresta com folgas dinâmicas e variáveis—os microfluidizadores direcionam o fluxo através de canais usinados a laser em diamante policristalino (50 a 100 µm). Em câmaras tipo Y, a corrente é dividida em dois jatos frontais que colidem a mais de 400 m/s, impondo taxas de cisalhamento idênticas (γ̇ > 10^7 s⁻¹) a todo o fluido e gerando nanoemulsões monodispersas sub-100 nm."
+      },
+      {
+        question: "Qual a diferença entre câmaras de interação de diamante tipo Y e tipo Z?",
+        answer: "Câmaras tipo Y (ex.: F12Y) bifurcam o fluxo em dois microcanais que convergem frontalmente em uma zona de colisão de altíssima energia. Esse impacto gera forte elongação extensional planar e cavitação, sendo a geometria de eleição para emulsões líquido-líquido, nanoemulsões translúcidas sub-80 nm e montagem de lipossomas. Já as câmaras tipo Z (ex.: H30Z) conduzem o fluxo através de um caminho em zigue-zague de 90 graus, onde o jato em velocidade sônica colide repetidamente contra placas de diamante. Esse mecanismo produz alto impacto mecânico e cisalhamento de parede, sendo ideal para quebra de agregados cristalinos insolúveis e lise de paredes celulares bacterianas."
+      },
+      {
+        question: "Por que a dissipação viscosa adiabática é crítica e como ela é neutralizada em linha?",
+        answer: "Sob pressões ultraelevadas, quase 100% da energia mecânica hidráulica é convertida em calor devido ao atrito viscoso nos microcanais. Para fluidos aquosos, a elevação adiabática teórica é de cerca de 1,6°C a 2,2°C a cada 100 bar (10 MPa). A 1.500 bar (150 MPa), ocorre um pico instantâneo de +25°C a +35°C em menos de 2 milissegundos. Para evitar a degradação térmica de bioativos termossensíveis (como Ômega-3 DHA/EPA e vitaminas), os skids industriais posicionam um trocador de calor sanitário tipo casco-e-tubos com propilenoglicol a -5°C imediatamente na saída da câmara, reduzindo a temperatura do produto abaixo de 15°C em menos de 180 ms."
+      },
+      {
+        question: "Como a microfluidização atinge gotas sub-100 nm e baixo índice de polidispersão (PDI < 0,12)?",
+        answer: "A quebra das gotas é orientada pela microescala de turbulência de Kolmogorov (η = (ν³ / ε)^(1/4)). Devido às altíssimas taxas de dissipação energética (ε > 10^7 - 10^8 W/kg), a escala dos microvórtices turbulentos cai para cerca de 30 nm. Gotas maiores que essa dimensão são prontamente estilhaçadas pelo cisalhamento inercial. Como a câmara possui microcanais fixos por onde passa 100% do volume sob condições idênticas, a nanoemulsão exibe distribuição granulométrica extremamente estreita e uniforme (PDI < 0,12), assegurando estabilidade contra coalescência e floculação."
+      },
+      {
+        question: "Quais normas sanitárias e requisitos de êmbolo cerâmico regulam os microfluidizadores industriais?",
+        answer: "Microfluidizadores contínuos para alimentos e nutracêuticos devem obedecer à norma 3-A Sanitary Standard 04-05 (Homogeneizadores) e às diretrizes EHEDG Doc 8 e 17. Os pistões da bomba intensificadora de alta pressão utilizam cerâmica de zircônia tetragonal estabilizada com ítria (Y-TZP) com rugosidade espelhada (Ra < 0,03 µm). Vedações de PTFE puro energizadas por mola evitam contaminação cruzada com fluidos hidráulicos e eliminam o desprendimento de fragmentos metálicos na corrente alimentícia."
+      }
+    ]
+  },
+  'zh-cn': {
+    pageTitle: "商业连续超高压微射流均质脂质体包封与纳米乳化模拟器 | IsItKitchenSafe",
+    pageDescription: "模拟商业管线连续超高压微射流（最高 200 MPa / 30,000 psi）在固定几何金刚石微通道相互作用腔（Y型对撞微射流与Z型高速撞击通道）中的极高剪切与空化过程。精确建模空间能量耗散率（>10^7 W/kg）、亚百纳米液滴均质破碎、磷脂双分子层脂质体包封率、绝热粘滞耗散温升瞬间急冷动力学以及在 3-A 04-05 和 EHEDG 第 8 & 17 号准则下的氧化锆柱塞密封磨损界限。",
+    badge: "微流控物理学与纳米乳化工程",
+    h1: "商业连续超高压微射流均质脂质体包封与纳米乳化模拟器",
+    lead: "精确模拟商业连续超高压微射流均质动力学。计算超 400 m/s 正面对撞射流微流动、Kolmogorov 湍流微涡破碎机理、磷脂囊泡高剪切组装、绝热粘性温升控制以及符合 3-A 与 EHEDG 卫生标准的超高压陶瓷柱塞密封寿命。",
+    breadcrumbsLabel: "微射流均质纳米包埋模拟器",
+    faqs: [
+      {
+        question: "什么是连续超高压微射流均质技术？它与传统高压均质阀有何本质区别？",
+        answer: "连续超高压微射流均质技术是一种先进的非热机械物理加工工程，利用电液增压泵在最高 200 MPa（30,000 psi）的超高压下，将流体强制推入固定几何构型的金刚石微通道中。传统高压均质阀依靠弹簧或液压阀芯形成可变狭缝，物料呈径向发散流出且边缘存在压力剪切死区；而微射流技术采用激光精密微加工的多晶金刚石微通道（孔径 50 至 100 µm）。在经典的 Y 型腔中，流体被分为两股以超过 400 m/s 的超音速进行正面对撞，每个流体微元均经历完全均一的极高剪切力（γ̇ > 10^7 s⁻¹）与空间能量耗散（>10^7 W/kg），从而产出粒径均匀、无批次差异的 sub-100 nm 窄分布单分散纳米乳与脂质体。"
+      },
+      {
+        question: "金刚石相互作用腔的 Y 型对撞微孔与 Z 型高速撞击微孔在液滴破碎机制上有何差异？",
+        answer: "Y 型相互作用腔（如 F12Y 或 F20Y）将超高压料流分流为两股正向相对的微射流，并在微米级腔心区发生超高速正面撞击。该对撞产生极强的平面拉伸应变场与空化爆聚力，非常适合液-液均质纳米乳化、sub-80 nm 高透亮功能饮料乳液以及磷脂双分子层脂质体的剪切重组包裹。相比之下，Z 型相互作用腔（如 H10Z 或 H30Z）使高速射流通过急剧的 90 度折返流道，并以近声速直接撞击耐磨金刚石撞击板壁面。Z 型腔产生最大的机械碰撞冲击力与贴壁剪切，特别适合不溶性活性结晶粉碎（如植物甾醇、纳米纤维素）及微生物细胞壁的物理机械破碎。"
+      },
+      {
+        question: "超高压均质过程中绝热粘性耗散温升是如何产生的？为何必须配套在线极速急冷？",
+        answer: "在超高压微射流处理中，电液增压泵输入的机械功几乎 100% 通过金刚石微孔内的剧烈分子内摩擦与湍流粘滞剪切转化为热能。对于水相流体，理论绝热温升约为每 100 bar（10 MPa）上升 1.6°C 至 2.2°C。在 1,500 bar（150 MPa）的常见工作压力下，流体会在 2 毫秒内瞬间急剧升温 +25°C 至 +35°C。若不采取冷却措施，骤升的高温会破坏热敏活性因子（如深海鱼油 Omega-3 EPA/DHA、姜黄素、维生素及天然酶类），并破坏脂质体双分子层结构。工业卫生级机组必须在金刚石腔出口端紧凑直连符合 ASME BPE 卫生标准的列管式在线换热器，通入 -5°C 食品级丙二醇载冷剂，在 180 毫秒内将物料迅速淬冷回 15°C 以下。"
+      },
+      {
+        question: "微射流均质机如何确保亚百纳米（sub-100 nm）粒径与超低多分散指数（PDI < 0.12）？",
+        answer: "微射流中的液滴剪切破裂遵循 Kolmogorov 湍流微尺度理论（η = (ν³ / ε)^(1/4)）。由于金刚石微孔能释放高达 10^7 至 10^8 W/kg 的微观体积空间能量耗散率，湍流微涡尺度骤降至约 30 nm。当液滴初始尺寸大于微涡尺度时，湍流惯性剪切力会将其粉碎至 sub-100 nm 级别。加之对撞区强大的平面拉伸流动能够迅速延展并切断粗液滴，且金刚石流道几何尺寸完全固定、零旁路流道，所有物料承受均一应力历史，最终产物的多分散指数（PDI）通常低于 0.12，具备极高的热力学稳定性，能有效抵御分层破乳与奥斯特瓦尔德熟化（Ostwald Ripening）。"
+      },
+      {
+        question: "商业连续微射流机组的陶瓷柱塞与卫生级设计有哪些严苛工程规范？",
+        answer: "应用于食品、饮料及膳食补充剂纳米包埋的商业连续微射流机组必须严格遵照 3-A 卫生标准 04-05（均质机与往复泵）及欧洲卫生工程设计组织 EHEDG 第 8 & 17 号可清洗性准则。其高压增压柱塞选用镜面抛光（Ra < 0.03 µm）的钇稳定四方多晶氧化锆（Y-TZP）或 99.8% 烧结α-氧化铝陶瓷，具有极高的耐磨损性与抗裂韧性。柱塞密封圈采用不锈钢弹簧补偿的医用级特氟龙（PTFE）或超高分子量聚乙烯（UHMWPE），彻底杜绝液压油渗漏与金属碎屑微剥落污染流体通道。"
+      }
+    ]
+  },
+  ja: {
+    pageTitle: "商業連続式超高圧マイクロフルイダイザー・リポソーム＆エマルションナノカプセル化シミュレーター | IsItKitchenSafe",
+    pageDescription: "固定幾何学ダイヤモンド相互作用チャンバー（Y型対向衝突ジェットおよびZ型ジグザグ衝突流路）を用いた連続超高圧マイクロフルイダイゼーション（最大 200 MPa / 30,000 psi）をシミュレート。空間エネルギー散逸率（>10^7 W/kg）、サブ 100 nm 微粒子微細化、リン脂質二重層リポソーム包括率、断熱粘性散逸発熱の急速冷却挙動、および 3-A 04-05 や EHEDG Doc 8 & 17 に準拠したセラミックプランジャー摩耗マージンを精密にモデル化します。",
+    badge: "マイクロフルイディクス＆ナノエマルション物理学",
+    h1: "商業連続式超高圧マイクロフルイダイザー・リポソーム＆エマルションナノカプセル化シミュレーター",
+    lead: "商業連続超高圧マイクロフルイダイザーのナノ乳化・包括速度論を精密シミュレート。400 m/s を超える対向衝突ジェット、コルモゴロフ乱流渦破壊、リン脂質ナノ包括効率、粘性発熱のインライン急速冷却制御、および 3-A / EHEDG 衛生設計基準に適合した超高圧セラミックプランジャー寿命を総合モデル化。",
+    breadcrumbsLabel: "マイクロフルイダイザーナノ包括シミュレーター",
+    faqs: [
+      {
+        question: "連続超高圧マイクロフルイダイザーとは何ですか？従来の高圧ホモジナイザーとどう異なりますか？",
+        answer: "連続超高圧マイクロフルイダイザーは、電気油圧式増圧ポンプを用いて最大 200 MPa（30,000 psi）の超高圧下で流体を固定幾何学ダイヤモンド流路へ噴出させる高度な機械的微細化加工技術です。従来の高圧ホモジナイザーがバルブシート間の可変スリットから流体を放射状に膨張させるのに対し、マイクロフルイダイザーはレーザー精密加工されたダイヤモンド微細流路（幅 50〜100 µm）を使用します。代表的な Y 型チャンバーでは、流体が二分岐して 400 m/s 以上の超音速で正面衝突します。全流体要素が均一な極大せん断（γ̇ > 10^7 s⁻¹）と空間エネルギー散逸（>10^7 W/kg）を同時に受けるため、バッチ間ばらつきの極めて少ないサブ 100 nm の単分散ナノエマルションが生成されます。"
+      },
+      {
+        question: "ダイヤモンド相互作用チャンバーの Y 型衝突流路と Z 型ジグザグ流路の違いは何ですか？",
+        answer: "Y 型チャンバー（F12Y 等）は、超高圧流体を二分岐させた後、微小衝突ゾーンで真正面から衝突させます。この正面衝突により極めて強い平面伸長応力とキャビテーションが発生し、液-液ナノ乳化、サブ 80 nm の透明飲料用エマルション、リン脂質二重層リポソームの自己組織化包括に最適です。一方、Z 型チャンバー（H30Z 等）は流体を直角ジグザグ流路に導き、音速ジェットをダイヤモンド耐摩耗壁面に激突させます。Z 型は衝撃力と壁面せん断を最大化するため、不溶性機能性結晶（植物ステロール等）の粉砕分散や細菌細胞壁の破砕に優れています。"
+      },
+      {
+        question: "超高圧加工における断熱粘性散逸発熱とは何ですか？なぜインライン急速冷却が不可欠ですか？",
+        answer: "超高圧マイクロフルイダイザーでは、増圧ポンプから投入された機械的仕事が微細流路内の激しい流体摩擦によってほぼ 100% 熱エネルギーへ変換されます。水溶液の場合、理論上の断熱昇温は 100 bar（10 MPa）あたり約 +1.6°C 〜 +2.2°C です。一般的な運転圧力である 1,500 bar（150 MPa）では、流体温度はわずか 2 ミリ秒以内に +25°C 〜 +35°C 急上昇します。この熱は熱感受性機能性成分（DHA/EPA、クルクミン、ビタミン）を熱劣化させ、リポソーム構造を崩壊させます。そのため、チャンバー直後に ASME BPE 規格のサニタリー多管式熱交換器を配置し、-5°C の冷却プロピレングリコールで 180 ミリ秒以内に 15°C 以下へ急冷します。"
+      },
+      {
+        question: "マイクロフルイダイザーはどのようにしてサブ 100 nm かつ狭い粒度分布（PDI < 0.12）を実現するのですか？",
+        answer: "微小液滴の破壊はコルモゴロフの乱流マイクロスケール（η = (ν³ / ε)^(1/4)）に従います。ダイヤモンド流路は 10^7 〜 10^8 W/kg という極限の空間エネルギー散逸率（ε）を達成するため、乱流マイクロ渦のスケールは約 30 nm まで縮小します。初期液滴がこの渦より大きい場合、乱流慣性力により強力に引き裂かれます。また、固定流路であるためすべての流体要素が全く同一の流動履歴をたどり、バイパス流が発生しないため、多分散指数（PDI）が 0.12 未満の極めてシャープな粒度分布が得られ、オストワルド熟成や凝集分離を長期にわたり防ぎます。"
+      },
+      {
+        question: "商業用連続機におけるセラミックプランジャーおよびサニタリー設計基準とは何ですか？",
+        answer: "食品・飲料・サプリメント向けの商業用連続マイクロフルイダイザーは、3-A 衛生規格 04-05（ホモジナイザー規格）および EHEDG ドキュメント 8 & 17 の洗浄性基準を満たす必要があります。高圧増圧プランジャーには、鏡面研磨（Ra < 0.03 µm）されたイットリア安定化ジルコニア（Y-TZP）または高純度焼結アルミナセラミックが採用され、過酷な摺動摩耗に耐えます。また、スプリング補強された純粋 PTFE リップシールにより、油圧作動油の混入や微小金属摩耗粉の製品混入を完全に防止します。"
+      }
+    ]
+  }
+};
+
+const c = CONTENT[lang];
+
+const pageTitle = c.pageTitle;
+const pageDescription = c.pageDescription;
+
+const breadcrumbs = [
+  { label: t('nav.home'), href: tp('/') },
+  { label: t('nav.tools'), href: tp('/tools/') },
+  { label: c.breadcrumbsLabel }
+];
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "@id": `https://isitkitchensafe.com/${lang}/tools/commercial-continuous-micro-fluidization-modeler/#webapp`,
+      "url": `https://isitkitchensafe.com/${lang}/tools/commercial-continuous-micro-fluidization-modeler/`,
+      "name": c.pageTitle,
+      "applicationCategory": "EngineeringApplication",
+      "operatingSystem": "All",
+      "browserRequirements": "Requires JavaScript. Requires HTML5 Canvas/CSS3.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": c.pageDescription
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": t('nav.home'),
+          "item": `https://isitkitchensafe.com${tp('/')}`
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": t('nav.tools'),
+          "item": `https://isitkitchensafe.com${tp('/tools/')}`
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": c.breadcrumbsLabel,
+          "item": `https://isitkitchensafe.com/${lang}/tools/commercial-continuous-micro-fluidization-modeler/`
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": c.faqs.map(faq => ({
+        "@type": "Question",
+        "name": faq.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": faq.answer
+        }
+      }))
+    }
+  ]
+};
+---
+
+<Layout title={pageTitle} description={pageDescription}>
+  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <Breadcrumbs items={breadcrumbs} />
+
+    <div class="mt-6">
+      <CommercialMicroFluidizationModeler lang={lang} />
+    </div>
+
+    <!-- Supplementary Scientific FAQs Section -->
+    <section class="mt-16 border-t border-hairline pt-12">
+      <div class="max-w-3xl mb-8">
+        <h2 class="text-2xl font-bold text-ink tracking-tight">
+          {c.h1} - FAQ
+        </h2>
+        <p class="text-body text-sm mt-2">
+          {c.lead}
+        </p>
+      </div>
+
+      <div class="space-y-6">
+        {c.faqs.map(faq => (
+          <div class="bg-surface-soft border border-hairline rounded-2xl p-6">
+            <h3 class="text-base font-bold text-ink mb-2">
+              {faq.question}
+            </h3>
+            <p class="text-body text-sm leading-relaxed">
+              {faq.answer}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+  </main>
+</Layout>
