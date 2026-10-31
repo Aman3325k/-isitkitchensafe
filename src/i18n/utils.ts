@@ -144,7 +144,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-hpcd-sterilization-modeler',
   'tools/commercial-fo-membrane-concentration-modeler',
   'tools/commercial-cold-plasma-decontamination-modeler',
-  'tools/commercial-membrane-distillation-modeler'
+  'tools/commercial-membrane-distillation-modeler',
+  'tools/commercial-continuous-hpu-sonication-modeler'
 ];
 
 const esSlugs = new Set([
