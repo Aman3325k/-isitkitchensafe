@@ -1,0 +1,986 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import mdData from '../data/membrane-distillation-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  systemLabel: string;
+  systemHelp: string;
+  matrixLabel: string;
+  matrixHelp: string;
+  materialLabel: string;
+  materialHelp: string;
+  feedTempLabel: string;
+  feedTempHelp: string;
+  coolTempLabel: string;
+  coolTempHelp: string;
+  velocityLabel: string;
+  velocityHelp: string;
+  targetBrixLabel: string;
+  targetBrixHelp: string;
+  presetsTitle: string;
+  presetCitrus: string;
+  presetBerry: string;
+  presetApple: string;
+  presetWhey: string;
+  presetWetting: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  vaporFluxLabel: string;
+  hourlyThroughputLabel: string;
+  finalBrixLabel: string;
+  viscosityLabel: string;
+  tpcLabel: string;
+  cpcLabel: string;
+  wettingMarginLabel: string;
+  nutrientRetentionLabel: string;
+  safetyStatusLabel: string;
+  primaryLimitationLabel: string;
+  mitigationActionLabel: string;
+  scienceTitle: string;
+  scienceSub: string;
+  tableTitle: string;
+}
+
+const DICT: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Membrane Thermal Physics & High-Concentration Food Processing",
+    title: "Commercial Continuous Membrane Distillation (MD) Vapor Permeation & Thermal Polarization Modeler",
+    subtitle: "Simulate commercial continuous membrane distillation (DCMD, VMD, AGMD) non-thermal concentration of liquid foods. Model trans-membrane water vapor flux, Cantor-Laplace capillary pore wetting breakthrough (LEPw), temperature and concentration boundary layer polarization (TPC/CPC), aroma volatile retention, and FDA 21 CFR § 177 / 3-A Sanitary 45-03 compliance.",
+    controlsTitle: "Membrane Distillation Operating Parameters & Skid Configuration",
+    controlsSub: "Configure MD module architecture, liquid food matrix, hydrophobic membrane polymer, feed and coolant temperatures, cross-flow velocity, and target concentration °Brix.",
+    systemLabel: "MD Skid Architecture & Configuration:",
+    systemHelp: "Select commercial DCMD, industrial VMD, flat-sheet AGMD cascade, or compromised pore-wetted module.",
+    matrixLabel: "Liquid Food Substrate Matrix:",
+    matrixHelp: "Select thermosensitive juice, polyphenol berry extract, clarified cider, dairy whey, or botanical herbal extract.",
+    materialLabel: "Hydrophobic Microporous Membrane Material:",
+    materialHelp: "Select hydrophobic polymer (ePTFE, PVDF, PP, or silylated ceramic) determining water contact angle and LEP threshold.",
+    feedTempLabel: "Feed Stream Inlet Temperature Tf (°C):",
+    feedTempHelp: "Temperature of hot liquid food entering membrane channel. Higher temperatures exponentialize vapor pressure driving force.",
+    coolTempLabel: "Permeate / Coolant Temperature Tp (°C):",
+    coolTempHelp: "Temperature of cold distillate stream or condenser plate. Governs trans-membrane vapor pressure differential ΔP.",
+    velocityLabel: "Feed Cross-Flow Velocity (m/s):",
+    velocityHelp: "Linear fluid velocity across membrane surface. Higher shear mitigates boundary layer concentration and thermal polarization.",
+    targetBrixLabel: "Target Concentration Output (°Brix):",
+    targetBrixHelp: "Desired final soluble solids concentration. Increasing Brix increases viscosity and lowers water activity coefficient γw.",
+    presetsTitle: "Standard Commercial Operation Presets",
+    presetCitrus: "Cold-Pressed Citrus 65°Brix Low-Temp Concentration (DCMD 55°C, ePTFE)",
+    presetBerry: "Berry Anthocyanin & Antioxidant Preservation (VMD 48°C, PVDF)",
+    presetApple: "Clarified Apple Cider Essence & Aroma Recovery (AGMD 50°C, Ceramic)",
+    presetWhey: "Dairy Sweet Whey Protein Cold Dewatering (DCMD 42°C, ePTFE)",
+    presetWetting: "Critical Pore Wetting & Surfactant Breakthrough Hazard (Degraded PP, Low Tension)",
+    diagnosticTitle: "Real-Time Membrane Distillation & Hydrophobic Safety Diagnostics",
+    diagnosticSub: "Continuous hydrodynamic vapor flux, boundary layer polarization coefficients, pore wetting safety margins, and aroma retention metrics.",
+    vaporFluxLabel: "Trans-Membrane Vapor Flux (kg/m²·h):",
+    hourlyThroughputLabel: "Hourly Water Removal Rate (L/h):",
+    finalBrixLabel: "Concentrate Concentration (°Brix):",
+    viscosityLabel: "Dynamic Concentrate Viscosity (cP):",
+    tpcLabel: "Temperature Polarization (TPC):",
+    cpcLabel: "Concentration Polarization (CPC):",
+    wettingMarginLabel: "Pore Wetting Safety Margin (LEPw):",
+    nutrientRetentionLabel: "Aroma & Vitamin C Retention (%):",
+    safetyStatusLabel: "Sanitary Operational Status:",
+    primaryLimitationLabel: "Primary Thermodynamic / Physical Bottleneck:",
+    mitigationActionLabel: "Recommended Sanitary Engineering Action:",
+    scienceTitle: "Deep Science: Membrane Distillation Thermodynamics & Pore Wetting Physics",
+    scienceSub: "Comprehensive analysis of Knudsen-Poiseuille vapor transport, Cantor-Laplace capillary breakthrough, boundary layer polarization, and volatile aroma preservation.",
+    tableTitle: "Commercial Membrane Distillation Modules & Polymer Specifications"
+  },
+  es: {
+    badge: "Física Térmica de Membranas y Concentración de Alimentos",
+    title: "Simulador de Destilación por Membrana (MD), Permeación de Vapor y Polarización Térmica",
+    subtitle: "Simule la concentración no térmica de alimentos líquidos mediante destilación por membrana (DCMD, VMD, AGMD). Modele el flujo de vapor transmembrana, la presión de rotura capilar de poros (LEPw), los coeficientes de polarización térmica y de concentración (TPC/CPC), la retención de aromas volátiles y el cumplimiento bajo FDA 21 CFR § 177 y 3-A Sanitario 45-03.",
+    controlsTitle: "Parámetros Operativos del Skid de Destilación por Membrana",
+    controlsSub: "Configure el diseño del módulo MD, la matriz del alimento líquido, el polímero hidrófobo, temperaturas de alimentación y condensación, velocidad tangencial y °Brix objetivo.",
+    systemLabel: "Arquitectura y Configuración del Skid MD:",
+    systemHelp: "Seleccione DCMD piloto, VMD industrial al vacío, cascada plana AGMD o módulo degradado con poros inundados.",
+    matrixLabel: "Matriz del Alimento Líquido:",
+    matrixHelp: "Seleccione zumo de cítricos termosensible, extracto de frutos rojos, sidra clarificada, suero lácteo o infusión botánica.",
+    materialLabel: "Material Polimérico Hidrófobo de la Membrana:",
+    materialHelp: "Seleccione ePTFE, PVDF, PP o cerámica sililada para determinar el ángulo de contacto y la presión LEP.",
+    feedTempLabel: "Temperatura de Alimentación Entrada Tf (°C):",
+    feedTempHelp: "Temperatura del alimento caliente. A mayor temperatura, mayor presión de vapor de agua impulsora.",
+    coolTempLabel: "Temperatura del Permeado / Condensador Tp (°C):",
+    coolTempHelp: "Temperatura del condensador o corriente de agua destilada fría que fija el gradiente térmico transmembrana.",
+    velocityLabel: "Velocidad de Flujo Tangencial (m/s):",
+    velocityHelp: "Velocidad del fluido sobre la membrana. Un mayor cizallamiento reduce la polarización de temperatura y concentración.",
+    targetBrixLabel: "Concentración Objetivo Salida (°Brix):",
+    targetBrixHelp: "Grados Brix deseados. Aumentar el extracto seco eleva la viscosidad y disminuye la actividad del agua.",
+    presetsTitle: "Perfiles Preconfigurados de Operación Comercial",
+    presetCitrus: "Cítricos Prensados en Frío a 65°Brix a Baja Temperatura (DCMD 55°C, ePTFE)",
+    presetBerry: "Preservación de Antocianinas y Antioxidantes en Bayas (VMD 48°C, PVDF)",
+    presetApple: "Recuperación de Esencias y Aromas en Sidra de Manzana (AGMD 50°C, Cerámica)",
+    presetWhey: "Concentración en Frío de Proteínas de Suero Lácteo (DCMD 42°C, ePTFE)",
+    presetWetting: "Riesgo Crítico de Inundación de Poros por Tensioactivos (PP Degradado)",
+    diagnosticTitle: "Diagnóstico Hidrodinámico y de Seguridad de Membrana en Tiempo Real",
+    diagnosticSub: "Monitoreo continuo de flujo de vapor, polarización de capa límite, márgenes de mojado de poros y retención de aromas.",
+    vaporFluxLabel: "Flujo de Vapor Transmembrana (kg/m²·h):",
+    hourlyThroughputLabel: "Tasa de Evaporación Horaria (L/h):",
+    finalBrixLabel: "Concentración del Concentrado (°Brix):",
+    viscosityLabel: "Viscosidad Dinámica del Concentrado (cP):",
+    tpcLabel: "Polarización Térmica (TPC):",
+    cpcLabel: "Polarización de Concentración (CPC):",
+    wettingMarginLabel: "Margen de Seguridad de Mojado (LEPw):",
+    nutrientRetentionLabel: "Retención de Aromas y Vitamina C (%):",
+    safetyStatusLabel: "Estado Operativo y Sanitario:",
+    primaryLimitationLabel: "Cuello de Botella Termodinámico Primario:",
+    mitigationActionLabel: "Acción de Ingeniería Sanitaria Recomendada:",
+    scienceTitle: "Fundamentos Científicos: Termodinámica de Destilación por Membrana y Mojado de Poros",
+    scienceSub: "Análisis integral del transporte de vapor Knudsen-Poiseuille, ecuación capilar de Cantor-Laplace, polarización límite y preservación aromática.",
+    tableTitle: "Especificaciones de Módulos de Destilación por Membrana y Polímeros"
+  },
+  pt: {
+    badge: "Física Térmica de Membranas e Concentração de Alimentos",
+    title: "Simulador de Destilação por Membrana (MD), Permeação de Vapor e Polarização Térmica",
+    subtitle: "Simule a concentração não térmica de alimentos líquidos por destilação por membrana (DCMD, VMD, AGMD). Modele o fluxo de vapor transmembrana, a pressão de ruptura capilar dos poros (LEPw), coeficientes de polarização térmica e concentração (TPC/CPC), retenção de compostos aromáticos e conformidade FDA 21 CFR § 177 / 3-A 45-03.",
+    controlsTitle: "Parâmetros Operacionais do Skid de Destilação por Membrana",
+    controlsSub: "Configure o módulo MD, matriz do alimento líquido, polímero hidrofóbico, temperaturas de alimentação e condensação, velocidade tangencial e °Brix alvo.",
+    systemLabel: "Arquitetura e Configuração do Skid MD:",
+    systemHelp: "Selecione DCMD piloto, VMD industrial a vácuo, cascata plana AGMD ou módulo degradado com poros inundados.",
+    matrixLabel: "Matriz do Alimento Líquido:",
+    matrixHelp: "Selecione suco cítrico sensível ao calor, extrato de mirtilo, cidra de maçã clarificada, soro lácteo ou infusão botânica.",
+    materialLabel: "Material Polimérico Hidrofóbico da Membrana:",
+    materialHelp: "Selecione ePTFE, PVDF, PP ou cerâmica silitada para definir o ângulo de contato e o limiar LEP.",
+    feedTempLabel: "Temperatura de Alimentação na Entrada Tf (°C):",
+    feedTempHelp: "Temperatura do alimento líquido aquecido. Quanto maior a temperatura, maior o diferencial de pressão de vapor.",
+    coolTempLabel: "Temperatura do Permeado / Condensador Tp (°C):",
+    coolTempHelp: "Temperatura da corrente de água fria destilada ou placa condensadora que governa o gradiente térmico.",
+    velocityLabel: "Velocidade de Fluxo Tangencial (m/s):",
+    velocityHelp: "Velocidade linear do fluido sobre a membrana para reduzir a polarização de concentração e temperatura.",
+    targetBrixLabel: "Concentração Alvo de Saída (°Brix):",
+    targetBrixHelp: "Sólidos solúveis finais. Maior concentração eleva a viscosidade e reduz a atividade de água.",
+    presetsTitle: "Perfis Predefinidos de Operação Comercial",
+    presetCitrus: "Cítricos Prensados a Frio a 65°Brix a Baixa Temperatura (DCMD 55°C, ePTFE)",
+    presetBerry: "Preservação de Antocianinas e Antioxidantes em Frutas Vermelhas (VMD 48°C, PVDF)",
+    presetApple: "Recuperação de Essências e Aromas em Cidra de Maçã (AGMD 50°C, Cerâmica)",
+    presetWhey: "Concentração a Frio de Proteínas de Soro de Queijo (DCMD 42°C, ePTFE)",
+    presetWetting: "Risco Crítico de Inundação de Poros por Tensoativos (PP Degradado)",
+    diagnosticTitle: "Diagnóstico Hidrodinâmico e de Segurança de Membrana em Tempo Real",
+    diagnosticSub: "Monitoramento contínuo de fluxo de vapor, polarização de camada limite, margens de molhabilidade e retenção de aroma.",
+    vaporFluxLabel: "Fluxo de Vapor Transmembrana (kg/m²·h):",
+    hourlyThroughputLabel: "Taxa de Evaporação Horária (L/h):",
+    finalBrixLabel: "Concentração do Concentrado (°Brix):",
+    viscosityLabel: "Viscosidade Dinâmica do Concentrado (cP):",
+    tpcLabel: "Polarização Térmica (TPC):",
+    cpcLabel: "Polarização de Concentração (CPC):",
+    wettingMarginLabel: "Margem de Segurança de Molhamento (LEPw):",
+    nutrientRetentionLabel: "Retenção de Aromas e Vitamina C (%):",
+    safetyStatusLabel: "Status Operacional e Sanitário:",
+    primaryLimitationLabel: "Principal Gargalo Termodinâmico:",
+    mitigationActionLabel: "Ação de Engenharia Sanitária Recomendada:",
+    scienceTitle: "Ciência Avançada: Termodinâmica de Destilação por Membrana e Molhamento de Poros",
+    scienceSub: "Análise aprofundada do transporte Knudsen-Poiseuille, equação capilar de Cantor-Laplace, polarização de contorno e retenção volátil.",
+    tableTitle: "Especificações de Módulos Industriais e Polímeros de Membrana"
+  },
+  'zh-cn': {
+    badge: "膜热物理学与高浓度食品工程",
+    title: "商业连续膜蒸馏 (MD) 水蒸气渗透与热极化模拟器",
+    subtitle: "模拟直接接触式 (DCMD)、真空式 (VMD) 及气隙式 (AGMD) 膜蒸馏对热敏性食品液体的非热浓缩过程。精确测算跨膜水蒸气通量、Cantor-Laplace 毛细孔润湿穿透压力 (LEPw)、温度与浓度边界层极化系数 (TPC/CPC)、挥发性香气成分保留率及 FDA 21 CFR § 177 / 3-A 卫生标准 45-03 合规性。",
+    controlsTitle: "膜蒸馏撬装运行参数配置",
+    controlsSub: "配置膜蒸馏系统构型、食品料液物性、疏水微孔膜聚合物、料液与冷却侧温度、错流速度及浓缩 °Brix 目标。",
+    systemLabel: "膜蒸馏撬装构型与工艺体系:",
+    systemHelp: "选择中试级 DCMD 中空纤维、工业级 VMD 卷式真空膜、多级平板式 AGMD 气隙膜或疏水性失效受损组件。",
+    matrixLabel: "食品料液基质:",
+    matrixHelp: "选择热敏性柑橘原汁、高多酚蓝莓提取液、澄清苹果汁、乳酪乳清蛋白液或草本芳香植物提取液。",
+    materialLabel: "疏水性微孔膜材料:",
+    materialHelp: "选择膨体聚四氟乙烯 (ePTFE)、聚偏氟乙烯 (PVDF)、聚丙烯 (PP) 或硅烷化陶瓷膜，决定接触角与 LEP 阈值。",
+    feedTempLabel: "料液进料温度 Tf (°C):",
+    feedTempHelp: "进入膜流道的热料液温度。提升温度可按指数规律剧烈放大跨膜水蒸气饱和分压差驱动力。",
+    coolTempLabel: "渗透侧 / 冷凝温度 Tp (°C):",
+    coolTempHelp: "冷馏出水或冷凝板温度。决定膜两侧的跨膜有效蒸气压差 ΔP。",
+    velocityLabel: "料液错流流速 (m/s):",
+    velocityHelp: "料液在膜表面的流动线速度。增大剪切力可有效抑制温度极化与浓度极化边界层。",
+    targetBrixLabel: "目标浓缩浓度 (°Brix):",
+    targetBrixHelp: "期望达到的可溶性固形物含量。糖度升高会导致料液粘度激增并抑制水分活度系数 γw。",
+    presetsTitle: "标准工业工况预设配置",
+    presetCitrus: "冷榨柑橘汁 65°Brix 低温超浓缩工况 (DCMD 55°C, ePTFE)",
+    presetBerry: "高活性花青素与多酚抗氧化低温保全工况 (VMD 48°C, PVDF)",
+    presetApple: "澄清苹果汁特征芳香酯类成分回收工况 (AGMD 50°C, 陶瓷膜)",
+    presetWhey: "乳酪甜乳清可溶性天然蛋白非热脱水工况 (DCMD 42°C, ePTFE)",
+    presetWetting: "表面活性剂诱发毛细微孔润湿穿透危险工况 (降解 PP 膜)",
+    diagnosticTitle: "实时膜蒸馏水动力学与疏水防渗诊断面板",
+    diagnosticSub: "连续量化跨膜水蒸气通量、边界层极化系数、孔润湿安全冗余度、香气与热敏营养成分留存率。",
+    vaporFluxLabel: "跨膜水蒸气通量 (kg/m²·h):",
+    hourlyThroughputLabel: "小时水分蒸发脱除量 (L/h):",
+    finalBrixLabel: "浓缩液最终浓度 (°Brix):",
+    viscosityLabel: "浓缩液动力粘度 (cP):",
+    tpcLabel: "温度极化系数 (TPC):",
+    cpcLabel: "浓度极化系数 (CPC):",
+    wettingMarginLabel: "微孔润湿安全裕度 (LEPw):",
+    nutrientRetentionLabel: "香气与维生素 C 保全率 (%):",
+    safetyStatusLabel: "卫生运行与防渗状态:",
+    primaryLimitationLabel: "首要热力学与物理瓶颈:",
+    mitigationActionLabel: "推荐卫生工程与 CIP 应对措施:",
+    scienceTitle: "深度科学解析: 膜蒸馏传质热力学与毛细孔润湿物理机理",
+    scienceSub: "系统拆解 Knudsen-Poiseuille 水蒸气扩散传输方程、Cantor-Laplace 孔润湿临界条件、边界层极化阻力及天然芳香成分分子保全。",
+    tableTitle: "商业膜蒸馏组件技术参数与疏水材料特性对照表"
+  },
+  ja: {
+    badge: "膜熱物理学と高濃度食品工学",
+    title: "商業用連続膜蒸留 (MD) 水蒸気透過＆熱分極シミュレーター",
+    subtitle: "直接接触式 (DCMD)、真空式 (VMD)、エアギャップ式 (AGMD) 膜蒸留による熱感受性液状食品の非加熱濃縮プロセスをシミュレート。膜透過水蒸気流束、Cantor-Laplace 毛細管孔濡れ突破圧 (LEPw)、温度・濃度境界分極係数 (TPC/CPC)、揮発性アロマ保持率、および FDA 21 CFR § 177 / 3-A 衛生規格 45-03 適合性を解析。",
+    controlsTitle: "膜蒸留スキッド運転パラメータ設定",
+    controlsSub: "MD モジュール構造、液状食品マトリックス、疎水性微多孔膜ポリマー、供給液・冷却側温度、流速、および目標濃縮 °Brix を設定します。",
+    systemLabel: "MD スキッド構造＆プロセス構成:",
+    systemHelp: "パイロット DCMD 中空糸、産業用 VMD スパイラル真空膜、平板型 AGMD カスケード、または孔濡れ破損モジュールを選択。",
+    matrixLabel: "液状食品基質マトリックス:",
+    matrixHelp: "熱感受性柑橘果汁、高ポリフェノールブルーベリー抽出液、清澄リンゴ果汁、チーズホエイ、またはハーブ抽出液を選択。",
+    materialLabel: "疎水性微多孔膜ポリマー材質:",
+    materialHelp: "接触角および LEP 閾値を決定する ePTFE、PVDF、PP、またはシリル化セラミック膜を選択。",
+    feedTempLabel: "供給液入口温度 Tf (°C):",
+    feedTempHelp: "膜流路に入る加温食品液の温度。温度上昇に伴い水蒸気飽和分圧差駆動力が指数関数的に増大します。",
+    coolTempLabel: "透過水 / 冷却温度 Tp (°C):",
+    coolTempHelp: "冷蒸留水または冷却プレートの温度。膜間の有効蒸気圧勾配を支配します。",
+    velocityLabel: "供給液クロスフロー流速 (m/s):",
+    velocityHelp: "膜表面の流体線速度。せん断力を高めることで濃度分極および温度分極境界層を抑制します。",
+    targetBrixLabel: "目標濃縮濃度 (°Brix):",
+    targetBrixHelp: "最終可溶性固形分。糖度の上昇は粘度を増大させ、水分活性係数 γw を低下させます。",
+    presetsTitle: "標準商業運転プリセット構成",
+    presetCitrus: "コールドプレス柑橘果汁 65°Brix 低温超濃縮 (DCMD 55°C, ePTFE)",
+    presetBerry: "ベリー系アントシアニン＆抗酸化成分極限保持 (VMD 48°C, PVDF)",
+    presetApple: "清澄リンゴ果汁エッセンス＆アロマ回収 (AGMD 50°C, セラミック)",
+    presetWhey: "チーズホエイ天然タンパク質低温脱水 (DCMD 42°C, ePTFE)",
+    presetWetting: "界面活性剤による微細孔毛細管濡れ突破の臨界危険モード (劣化 PP 膜)",
+    diagnosticTitle: "リアルタイム膜蒸留流体力学＆疎水性防護診断パネル",
+    diagnosticSub: "膜透過水蒸気流束、境界層分極係数、孔濡れ安全マージン、およびアロマ保持率を常時定量評価します。",
+    vaporFluxLabel: "膜透過水蒸気流束 (kg/m²·h):",
+    hourlyThroughputLabel: "時間当たり水蒸発脱水量 (L/h):",
+    finalBrixLabel: "濃縮液最終濃度 (°Brix):",
+    viscosityLabel: "濃縮液動的粘度 (cP):",
+    tpcLabel: "温度分極係数 (TPC):",
+    cpcLabel: "濃度分極係数 (CPC):",
+    wettingMarginLabel: "孔濡れ安全マージン (LEPw):",
+    nutrientRetentionLabel: "アロマ＆ビタミン C 保持率 (%):",
+    safetyStatusLabel: "衛生運転＆濡れ防止状態:",
+    primaryLimitationLabel: "主要な熱力学的・物理的ボトルネック:",
+    mitigationActionLabel: "推奨衛生工学＆ CIP 改善アクション:",
+    scienceTitle: "深層科学解説: 膜蒸留伝熱伝質熱力学と微細孔濡れ物理機構",
+    scienceSub: "Knudsen-Poiseuille 水蒸気拡散透過方程式、Cantor-Laplace 孔濡れ臨界条件、境界層分極抵抗、およびアロマ揮発成分の分子保持性を網羅。",
+    tableTitle: "商業用膜蒸留モジュール仕様と疎水性ポリマー特性一覧"
+  }
+};
+
+const d = DICT[lang] || DICT.en;
+---
+
+<div class="bg-surface border border-hairline rounded-3xl p-6 sm:p-10 shadow-sm transition-all" id="md-modeler-app">
+  <!-- Header Badge & Title -->
+  <div class="mb-8">
+    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-sky-600 text-white mb-3 shadow-xs">
+      <span>{d.badge}</span>
+      <span class="inline-block w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+    </div>
+    <h1 class="text-display-sm sm:text-display font-semibold text-ink tracking-tight mb-3">
+      {d.title}
+    </h1>
+    <p class="text-body text-sm sm:text-base leading-relaxed max-w-4xl">
+      {d.subtitle}
+    </p>
+  </div>
+
+  <!-- Presets Bar -->
+  <div class="mb-8 bg-surface-soft border border-hairline rounded-2xl p-4 sm:p-5">
+    <div class="text-xs font-bold uppercase tracking-wider text-muted mb-3 flex items-center gap-1.5">
+      <svg class="w-4 h-4 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+      </svg>
+      {d.presetsTitle}
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <button type="button" class="md-preset-btn px-3 py-2 text-xs font-medium rounded-xl bg-surface border border-hairline hover:border-sky-500 hover:text-sky-700 dark:hover:text-sky-300 transition-all text-left" data-preset="citrus">
+        🍊 {d.presetCitrus}
+      </button>
+      <button type="button" class="md-preset-btn px-3 py-2 text-xs font-medium rounded-xl bg-surface border border-hairline hover:border-sky-500 hover:text-sky-700 dark:hover:text-sky-300 transition-all text-left" data-preset="berry">
+        🫐 {d.presetBerry}
+      </button>
+      <button type="button" class="md-preset-btn px-3 py-2 text-xs font-medium rounded-xl bg-surface border border-hairline hover:border-sky-500 hover:text-sky-700 dark:hover:text-sky-300 transition-all text-left" data-preset="apple">
+        🍏 {d.presetApple}
+      </button>
+      <button type="button" class="md-preset-btn px-3 py-2 text-xs font-medium rounded-xl bg-surface border border-hairline hover:border-sky-500 hover:text-sky-700 dark:hover:text-sky-300 transition-all text-left" data-preset="whey">
+        🥛 {d.presetWhey}
+      </button>
+      <button type="button" class="md-preset-btn px-3 py-2 text-xs font-medium rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 hover:border-rose-400 transition-all text-left" data-preset="wetting">
+        ⚠️ {d.presetWetting}
+      </button>
+    </div>
+  </div>
+
+  <!-- Interactive Controls & Live Readouts Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+    <!-- Controls Column (7 Cols) -->
+    <div class="lg:col-span-7 space-y-6 bg-surface-soft/60 border border-hairline rounded-2xl p-5 sm:p-7">
+      <div class="border-b border-hairline pb-4">
+        <h2 class="text-title-sm font-semibold text-ink tracking-tight">
+          {d.controlsTitle}
+        </h2>
+        <p class="text-xs text-muted mt-1">
+          {d.controlsSub}
+        </p>
+      </div>
+
+      <!-- 1. MD System Architecture -->
+      <div>
+        <label for="md-system-select" class="block text-xs font-semibold uppercase tracking-wider text-ink mb-1.5">
+          {d.systemLabel}
+        </label>
+        <select id="md-system-select" class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ink focus:outline-hidden focus:ring-2 focus:ring-sky-500 transition-all">
+          {mdData.membraneSystems.map(sys => (
+            <option value={sys.id}>
+              {sys.name}
+            </option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1" id="md-system-desc">
+          {mdData.membraneSystems[0].description}
+        </p>
+      </div>
+
+      <!-- 2. Liquid Food Matrix -->
+      <div>
+        <label for="md-matrix-select" class="block text-xs font-semibold uppercase tracking-wider text-ink mb-1.5">
+          {d.matrixLabel}
+        </label>
+        <select id="md-matrix-select" class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ink focus:outline-hidden focus:ring-2 focus:ring-sky-500 transition-all">
+          {mdData.liquidFoodMatrices.map(mat => (
+            <option value={mat.id}>
+              {mat.name}
+            </option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1" id="md-matrix-desc">
+          {mdData.liquidFoodMatrices[0].description}
+        </p>
+      </div>
+
+      <!-- 3. Hydrophobic Membrane Polymer -->
+      <div>
+        <label for="md-material-select" class="block text-xs font-semibold uppercase tracking-wider text-ink mb-1.5">
+          {d.materialLabel}
+        </label>
+        <select id="md-material-select" class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-ink focus:outline-hidden focus:ring-2 focus:ring-sky-500 transition-all">
+          {mdData.membraneMaterials.map(mat => (
+            <option value={mat.id}>
+              {mat.name} (Contact Angle: {mat.waterContactAngleDeg}°, Clean Water LEP: {mat.cleanWaterLepBar} bar)
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <!-- Sliders Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
+        <!-- Feed Temperature Tf -->
+        <div class="bg-surface border border-hairline rounded-xl p-4">
+          <div class="flex justify-between items-center mb-1.5">
+            <label for="md-feed-temp-slider" class="text-xs font-semibold text-ink">
+              {d.feedTempLabel}
+            </label>
+            <span class="text-xs font-mono font-bold text-sky-600 dark:text-sky-400" id="md-feed-temp-val">55 °C</span>
+          </div>
+          <input type="range" id="md-feed-temp-slider" min="40" max="75" step="1" value="55" class="w-full accent-sky-600 cursor-pointer" />
+          <p class="text-[10px] text-muted mt-1">
+            {d.feedTempHelp}
+          </p>
+        </div>
+
+        <!-- Coolant Temperature Tp -->
+        <div class="bg-surface border border-hairline rounded-xl p-4">
+          <div class="flex justify-between items-center mb-1.5">
+            <label for="md-cool-temp-slider" class="text-xs font-semibold text-ink">
+              {d.coolTempLabel}
+            </label>
+            <span class="text-xs font-mono font-bold text-sky-600 dark:text-sky-400" id="md-cool-temp-val">20 °C</span>
+          </div>
+          <input type="range" id="md-cool-temp-slider" min="10" max="30" step="1" value="20" class="w-full accent-sky-600 cursor-pointer" />
+          <p class="text-[10px] text-muted mt-1">
+            {d.coolTempHelp}
+          </p>
+        </div>
+
+        <!-- Cross-Flow Velocity -->
+        <div class="bg-surface border border-hairline rounded-xl p-4">
+          <div class="flex justify-between items-center mb-1.5">
+            <label for="md-velocity-slider" class="text-xs font-semibold text-ink">
+              {d.velocityLabel}
+            </label>
+            <span class="text-xs font-mono font-bold text-sky-600 dark:text-sky-400" id="md-velocity-val">0.65 m/s</span>
+          </div>
+          <input type="range" id="md-velocity-slider" min="0.10" max="1.50" step="0.05" value="0.65" class="w-full accent-sky-600 cursor-pointer" />
+          <p class="text-[10px] text-muted mt-1">
+            {d.velocityHelp}
+          </p>
+        </div>
+
+        <!-- Target Concentration Brix -->
+        <div class="bg-surface border border-hairline rounded-xl p-4">
+          <div class="flex justify-between items-center mb-1.5">
+            <label for="md-brix-slider" class="text-xs font-semibold text-ink">
+              {d.targetBrixLabel}
+            </label>
+            <span class="text-xs font-mono font-bold text-sky-600 dark:text-sky-400" id="md-brix-val">55.0 °Brix</span>
+          </div>
+          <input type="range" id="md-brix-slider" min="15" max="70" step="1" value="55" class="w-full accent-sky-600 cursor-pointer" />
+          <p class="text-[10px] text-muted mt-1">
+            {d.targetBrixHelp}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Telemetry Readouts (5 Cols) -->
+    <div class="lg:col-span-5 space-y-4 flex flex-col justify-between">
+      <div class="bg-surface-soft/80 border border-hairline rounded-2xl p-5 sm:p-6 shadow-xs">
+        <div class="flex items-center justify-between pb-3 border-b border-hairline mb-4">
+          <div>
+            <h2 class="text-title-sm font-semibold text-ink tracking-tight">
+              {d.diagnosticTitle}
+            </h2>
+            <p class="text-[11px] text-muted">
+              {d.diagnosticSub}
+            </p>
+          </div>
+          <span class="inline-flex px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300" id="md-status-badge">
+            OPTIMAL SANITARY
+          </span>
+        </div>
+
+        <!-- KPI Telemetry Cards -->
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <!-- Vapor Flux -->
+          <div class="bg-surface border border-hairline rounded-xl p-3">
+            <span class="block text-[10px] text-muted uppercase font-medium">{d.vaporFluxLabel}</span>
+            <span class="text-lg font-mono font-bold text-sky-600 dark:text-sky-400" id="md-out-flux">14.8 kg/m²·h</span>
+            <span class="block text-[10px] text-muted">Antoine driving force</span>
+          </div>
+
+          <!-- Hourly Throughput -->
+          <div class="bg-surface border border-hairline rounded-xl p-3">
+            <span class="block text-[10px] text-muted uppercase font-medium">{d.hourlyThroughputLabel}</span>
+            <span class="text-lg font-mono font-bold text-ink" id="md-out-throughput">37.0 L/h</span>
+            <span class="block text-[10px] text-muted">Module net dewatering</span>
+          </div>
+
+          <!-- TPC -->
+          <div class="bg-surface border border-hairline rounded-xl p-3">
+            <span class="block text-[10px] text-muted uppercase font-medium">{d.tpcLabel}</span>
+            <span class="text-lg font-mono font-bold text-emerald-600 dark:text-emerald-400" id="md-out-tpc">0.74</span>
+            <span class="block text-[10px] text-muted">Eff. ΔTm: <b id="md-out-eff-dt">25.9°C</b></span>
+          </div>
+
+          <!-- CPC -->
+          <div class="bg-surface border border-hairline rounded-xl p-3">
+            <span class="block text-[10px] text-muted uppercase font-medium">{d.cpcLabel}</span>
+            <span class="text-lg font-mono font-bold text-ink" id="md-out-cpc">1.18</span>
+            <span class="block text-[10px] text-muted">Viscosity: <b id="md-out-viscosity">12.4 cP</b></span>
+          </div>
+
+          <!-- Wetting Safety Margin -->
+          <div class="bg-surface border border-hairline rounded-xl p-3 col-span-2">
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-[10px] text-muted uppercase font-medium">{d.wettingMarginLabel}</span>
+              <span class="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400" id="md-out-wetting-text">78% SAFE (ΔP 0.42 / LEP 1.94 bar)</span>
+            </div>
+            <div class="w-full bg-hairline rounded-full h-2 overflow-hidden">
+              <div class="bg-emerald-500 h-2 rounded-full transition-all duration-300" id="md-wetting-bar" style="width: 22%"></div>
+            </div>
+            <span class="block text-[10px] text-muted mt-1">Cantor-Laplace pore penetration threshold</span>
+          </div>
+
+          <!-- Nutrient Retention -->
+          <div class="bg-surface border border-hairline rounded-xl p-3 col-span-2">
+            <span class="block text-[10px] text-muted uppercase font-medium">{d.nutrientRetentionLabel}</span>
+            <div class="flex items-baseline justify-between mt-0.5">
+              <span class="text-xl font-mono font-bold text-emerald-600 dark:text-emerald-400" id="md-out-retention">94.8%</span>
+              <span class="text-xs text-muted font-mono" id="md-out-volatile-note">Esters: 93% | Vit C: 96%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Technical Diagnostics Details -->
+        <div class="space-y-2.5 text-xs border-t border-hairline pt-3">
+          <div>
+            <span class="text-muted block text-[11px] font-medium">{d.primaryLimitationLabel}</span>
+            <p class="font-medium text-ink mt-0.5" id="md-out-limitation">
+              Mild temperature polarization at boundary layer; cross-flow velocity maintains Reynolds shear.
+            </p>
+          </div>
+          <div>
+            <span class="text-muted block text-[11px] font-medium">{d.mitigationActionLabel}</span>
+            <p class="font-medium text-sky-700 dark:text-sky-300 mt-0.5" id="md-out-action">
+              Maintain feed velocity above 0.5 m/s. Schedule 3-A standard enzymatic wash after 8 hours continuous concentration.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scientific Deep-Dive Section -->
+  <div class="border-t border-hairline pt-10 mb-12">
+    <div class="mb-6">
+      <h2 class="text-title font-semibold text-ink tracking-tight mb-2">
+        {d.scienceTitle}
+      </h2>
+      <p class="text-xs sm:text-sm text-body leading-relaxed max-w-4xl">
+        {d.scienceSub}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-body leading-relaxed">
+      <!-- 1. Antoine Vapor Driving Force -->
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-5">
+        <div class="w-8 h-8 rounded-lg bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 flex items-center justify-center font-bold text-sm mb-3">
+          1
+        </div>
+        <h3 class="font-semibold text-ink text-sm mb-2">Antoine Vapor Pressure &amp; Mass Transfer</h3>
+        <p class="mb-2">
+          Membrane distillation (MD) is a non-isothermal separation process driven by the vapor pressure difference across a hydrophobic microporous barrier. The saturation vapor pressure of water at the membrane-liquid interfaces is calculated using the Antoine equation:
+        </p>
+        <div class="font-mono bg-surface p-2.5 rounded-lg border border-hairline text-[11px] text-ink mb-2">
+          P_sat(T) = exp(23.1964 - 3816.44 / (T - 46.13))<br />
+          J_w = C_MD · [ a_w · P_sat(T_f,m) - P_sat(T_p,m) ]
+        </div>
+        <p>
+          Where <em>a_w</em> is the water activity coefficient, heavily depressed at higher Brix levels by Raoult-Kelvin thermodynamic effects, reducing the effective driving force as juice thickens.
+        </p>
+      </div>
+
+      <!-- 2. Cantor-Laplace Capillary Pore Wetting -->
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-5">
+        <div class="w-8 h-8 rounded-lg bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 flex items-center justify-center font-bold text-sm mb-3">
+          2
+        </div>
+        <h3 class="font-semibold text-ink text-sm mb-2">Cantor-Laplace Pore Wetting Dynamics (LEPw)</h3>
+        <p class="mb-2">
+          The critical barrier preventing bulk juice from flooding through the pores into the distillate stream is governed by the Liquid Entry Pressure of water (<em>LEP_w</em>):
+        </p>
+        <div class="font-mono bg-surface p-2.5 rounded-lg border border-hairline text-[11px] text-ink mb-2">
+          LEP_w = (-2 · B · γ_L · cos θ) / r_max<br />
+          Breakthrough Risk: ΔP_hydraulic &gt; LEP_w
+        </div>
+        <p>
+          Where <em>γ_L</em> is liquid surface tension, <em>θ</em> is water contact angle (&gt;110°), <em>r_max</em> is maximum pore radius (0.1–0.45 µm), and <em>B</em> is the pore geometry factor. Natural organic surfactants (saponins, essential oils, lipids) depress surface tension, drastically lowering <em>LEP_w</em> and requiring superhydrophobic materials.
+        </p>
+      </div>
+
+      <!-- 3. Boundary Layer Polarizations & Sanitary Standards -->
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-5">
+        <div class="w-8 h-8 rounded-lg bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 flex items-center justify-center font-bold text-sm mb-3">
+          3
+        </div>
+        <h3 class="font-semibold text-ink text-sm mb-2">Boundary Polarization &amp; 3-A Sanitary Design</h3>
+        <p class="mb-2">
+          Sensible heat loss reduces temperature directly at the membrane interface (<em>T_f,m &lt; T_f,b</em>), giving a Temperature Polarization Coefficient (<em>TPC = (T_f,m - T_p,m)/(T_f,b - T_p,b)</em>) between 0.45 and 0.85. Concurrently, solute accumulation drives concentration polarization (<em>CPC &gt; 1.0</em>).
+        </p>
+        <p>
+          Under <strong>3-A Sanitary Standard 45-03</strong> and <strong>FDA 21 CFR § 177.1550</strong>, commercial skids must use food-grade ePTFE/PVDF membranes capable of withstanding enzyme and caustic Clean-In-Place (CIP) regimes without hydrophobicity breakdown or fluoropolymer migration.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reference Data Table -->
+  <div class="border-t border-hairline pt-8">
+    <h2 class="text-title-sm font-semibold text-ink tracking-tight mb-4">
+      {d.tableTitle}
+    </h2>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs border-collapse">
+        <thead>
+          <tr class="border-b border-hairline bg-surface-soft text-muted font-mono uppercase text-[10px]">
+            <th class="py-2.5 px-3">Module ID</th>
+            <th class="py-2.5 px-3">Technology</th>
+            <th class="py-2.5 px-3">Membrane Polymer</th>
+            <th class="py-2.5 px-3">Nominal Pore Size</th>
+            <th class="py-2.5 px-3">Clean LEP</th>
+            <th class="py-2.5 px-3">Contact Angle</th>
+            <th class="py-2.5 px-3">Area (m²)</th>
+            <th class="py-2.5 px-3">Regulatory Compliance</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline">
+          {mdData.membraneSystems.map(sys => (
+            <tr class="hover:bg-surface-soft/60 transition-colors">
+              <td class="py-2.5 px-3 font-mono font-medium text-ink">{sys.id}</td>
+              <td class="py-2.5 px-3 text-body">{sys.technologyType.split('with')[0]}</td>
+              <td class="py-2.5 px-3 font-medium text-ink">{sys.membraneMaterial.split('(')[0]}</td>
+              <td class="py-2.5 px-3 font-mono text-body">{sys.nominalPoreSizeMicrons} µm</td>
+              <td class="py-2.5 px-3 font-mono text-sky-600 dark:text-sky-400">{sys.liquidEntryPressureWaterBar} bar</td>
+              <td class="py-2.5 px-3 font-mono text-body">{sys.waterContactAngleDeg}°</td>
+              <td class="py-2.5 px-3 font-mono text-body">{sys.totalMembraneAreaM2} m²</td>
+              <td class="py-2.5 px-3 text-[11px] text-muted">{sys.sanitaryCertifications}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  // @ts-nocheck
+  document.addEventListener('DOMContentLoaded', () => {
+    const systems = {
+      pilot_dcmd_hollow_fiber_ptfe: {
+        id: 'pilot_dcmd_hollow_fiber_ptfe',
+        area: 2.5,
+        baseCmd: 0.038,
+        lep: 3.2,
+        contactAngle: 138,
+        type: 'DCMD',
+        compromised: false,
+        desc: "High-precision hollow-fiber direct contact membrane distillation system engineered for low-temperature dewatering of heat-sensitive citrus juices and botanical polyphenols without vacuum pump mechanical cavitation."
+      },
+      commercial_vmd_spiral_pvdf_skid: {
+        id: 'commercial_vmd_spiral_pvdf_skid',
+        area: 45.0,
+        baseCmd: 0.052,
+        lep: 2.5,
+        contactAngle: 124,
+        type: 'VMD',
+        compromised: false,
+        desc: "Heavy-duty commercial spiral-wound continuous vacuum membrane distillation system delivering high trans-membrane water vapor flux at modest feed temperatures (45-60°C), minimizing thermal degradation and preserving volatile aroma esters."
+      },
+      industrial_agmd_flat_sheet_cascade: {
+        id: 'industrial_agmd_flat_sheet_cascade',
+        area: 80.0,
+        baseCmd: 0.029,
+        lep: 4.8,
+        contactAngle: 145,
+        type: 'AGMD',
+        compromised: false,
+        desc: "Robust flat-sheet air gap membrane distillation cascade engineered with stationary internal cooling plates, reducing conductive sensible heat loss across the membrane while concentrating viscous fruit purees up to 68 °Brix."
+      },
+      compromised_wetted_membrane_unit: {
+        id: 'compromised_wetted_membrane_unit',
+        area: 15.0,
+        baseCmd: 0.012,
+        lep: 0.65,
+        contactAngle: 68,
+        type: 'DCMD_FAILED',
+        compromised: true,
+        desc: "Severely compromised membrane module suffering from capillary pore wetting due to low liquid surface tension or excessive trans-membrane hydraulic pressure exceeding the Cantor-Laplace LEP limit, causing catastrophic permeate contamination."
+      }
+    };
+
+    const matrices = {
+      cold_pressed_orange_juice: {
+        id: 'cold_pressed_orange_juice',
+        initialBrix: 11.2,
+        surfaceTension: 54.0,
+        initialViscosity: 2.4,
+        foulingResistance: 0.72,
+        heatSensitivity: 'high',
+        criticalPectinBrix: 62.0,
+        desc: "Premium raw citrus juice containing delicate ascorbic acid and cold-pressed citrus terpenes that degrade rapidly under standard multi-effect vacuum evaporation, requiring non-thermal membrane dewatering."
+      },
+      wild_blueberry_anthocyanin_extract: {
+        id: 'wild_blueberry_anthocyanin_extract',
+        initialBrix: 8.5,
+        surfaceTension: 61.0,
+        initialViscosity: 1.6,
+        foulingResistance: 0.88,
+        heatSensitivity: 'critical',
+        criticalPectinBrix: 58.0,
+        desc: "High-antioxidant polyphenol extract vulnerable to oxidative cleavage and polymerization if heated; direct contact membrane distillation maintains natural deep pigmentation without thermal scorching."
+      },
+      clarified_apple_cider_concentrate: {
+        id: 'clarified_apple_cider_concentrate',
+        initialBrix: 12.0,
+        surfaceTension: 58.0,
+        initialViscosity: 1.9,
+        foulingResistance: 0.92,
+        heatSensitivity: 'moderate',
+        criticalPectinBrix: 68.0,
+        desc: "Enzymatically de-pectinized clarified apple juice exhibiting low suspended solids, enabling high concentration factors up to 70 °Brix while recapturing essential top-note aroma fractions."
+      },
+      cheese_whey_protein_concentrate: {
+        id: 'cheese_whey_protein_concentrate',
+        initialBrix: 6.2,
+        surfaceTension: 48.0,
+        initialViscosity: 1.4,
+        foulingResistance: 0.54,
+        heatSensitivity: 'very_high',
+        criticalPectinBrix: 42.0,
+        desc: "Dairy byproduct containing soluble whey proteins and mineral salts; requires operating strictly below 55°C to avoid thermal protein denaturation and calcium-phosphate scaling on hydrophobic membrane pores."
+      },
+      fermented_botanical_infusion: {
+        id: 'fermented_botanical_infusion',
+        initialBrix: 4.5,
+        surfaceTension: 34.0,
+        initialViscosity: 1.2,
+        foulingResistance: 0.42,
+        heatSensitivity: 'extreme_volatiles',
+        criticalPectinBrix: 36.0,
+        desc: "Complex herbal infusion rich in natural surface-active saponins and essential oils that depress liquid surface tension, demanding superhydrophobic membranes (contact angle > 140°) to prevent wetting breakthrough."
+      }
+    };
+
+    const materials = {
+      ptfe_expanded: { angle: 138, lepClean: 3.2, mult: 1.15 },
+      pvdf_electrospun: { angle: 124, lepClean: 2.5, mult: 1.05 },
+      pp_microporous: { angle: 115, lepClean: 1.8, mult: 0.90 },
+      ceramic_silylated: { angle: 145, lepClean: 4.8, mult: 1.25 }
+    };
+
+    // DOM Elements
+    const systemSelect = document.getElementById('md-system-select');
+    const matrixSelect = document.getElementById('md-matrix-select');
+    const materialSelect = document.getElementById('md-material-select');
+    const feedTempSlider = document.getElementById('md-feed-temp-slider');
+    const coolTempSlider = document.getElementById('md-cool-temp-slider');
+    const velocitySlider = document.getElementById('md-velocity-slider');
+    const brixSlider = document.getElementById('md-brix-slider');
+
+    const feedTempDisplay = document.getElementById('md-feed-temp-val');
+    const coolTempDisplay = document.getElementById('md-cool-temp-val');
+    const velocityDisplay = document.getElementById('md-velocity-val');
+    const brixDisplay = document.getElementById('md-brix-val');
+    const systemDesc = document.getElementById('md-system-desc');
+    const matrixDesc = document.getElementById('md-matrix-desc');
+
+    // Outputs
+    const outFlux = document.getElementById('md-out-flux');
+    const outThroughput = document.getElementById('md-out-throughput');
+    const outTpc = document.getElementById('md-out-tpc');
+    const outEffDt = document.getElementById('md-out-eff-dt');
+    const outCpc = document.getElementById('md-out-cpc');
+    const outViscosity = document.getElementById('md-out-viscosity');
+    const outWettingText = document.getElementById('md-out-wetting-text');
+    const outWettingBar = document.getElementById('md-wetting-bar');
+    const outRetention = document.getElementById('md-out-retention');
+    const outVolatileNote = document.getElementById('md-out-volatile-note');
+    const statusBadge = document.getElementById('md-status-badge');
+    const outLimitation = document.getElementById('md-out-limitation');
+    const outAction = document.getElementById('md-out-action');
+
+    function calculateSaturationPressure(tempC) {
+      // Antoine equation for water saturation pressure in kPa
+      // ln(P_sat) = 23.1964 - 3816.44 / (T_K - 46.13)
+      const T_K = tempC + 273.15;
+      return Math.exp(23.1964 - (3816.44 / (T_K - 46.13)));
+    }
+
+    function recalculate() {
+      const sysKey = systemSelect?.value || 'pilot_dcmd_hollow_fiber_ptfe';
+      const matKey = matrixSelect?.value || 'cold_pressed_orange_juice';
+      const polyKey = materialSelect?.value || 'ptfe_expanded';
+
+      const sys = systems[sysKey] || systems.pilot_dcmd_hollow_fiber_ptfe;
+      const mat = matrices[matKey] || matrices.cold_pressed_orange_juice;
+      const poly = materials[polyKey] || materials.ptfe_expanded;
+
+      const Tf = parseFloat(feedTempSlider?.value || '55');
+      const Tp = parseFloat(coolTempSlider?.value || '20');
+      const velocity = parseFloat(velocitySlider?.value || '0.65');
+      const targetBrix = parseFloat(brixSlider?.value || '55');
+
+      // Update Slider value displays
+      if (feedTempDisplay) feedTempDisplay.textContent = `${Tf.toFixed(0)} °C`;
+      if (coolTempDisplay) coolTempDisplay.textContent = `${Tp.toFixed(0)} °C`;
+      if (velocityDisplay) velocityDisplay.textContent = `${velocity.toFixed(2)} m/s`;
+      if (brixDisplay) brixDisplay.textContent = `${targetBrix.toFixed(1)} °Brix`;
+
+      if (systemDesc) systemDesc.textContent = sys.desc;
+      if (matrixDesc) matrixDesc.textContent = mat.desc;
+
+      // 1. Water activity coefficient aw as a function of Brix (Norrish equation approximation)
+      // aw drops as soluble sugars increase
+      const sucroseMassFraction = targetBrix / 100.0;
+      const aw = Math.max(0.68, 1.0 - (0.28 * sucroseMassFraction) - (0.35 * Math.pow(sucroseMassFraction, 2)));
+
+      // 2. Temperature Polarization Coefficient (TPC)
+      // Higher crossflow velocity improves Reynolds number and heat transfer, raising TPC toward 0.85
+      let tpc = 0.52 + (0.24 * Math.min(1.0, velocity / 1.0));
+      if (sys.type === 'VMD') tpc += 0.06; // VMD has lower conductive loss
+      if (sys.type === 'AGMD') tpc -= 0.05; // Air gap adds conduction resistance
+      if (sys.compromised) tpc = 0.35;
+      tpc = Math.min(0.88, Math.max(0.30, tpc));
+
+      const deltaTBulk = Math.max(5, Tf - Tp);
+      const deltaTMembrane = deltaTBulk * tpc;
+
+      const Tf_membrane = Tp + deltaTMembrane;
+      const Tp_membrane = Tp;
+
+      // 3. Vapor Pressure Calculations
+      const Psat_feed = calculateSaturationPressure(Tf_membrane) * aw;
+      const Psat_cool = calculateSaturationPressure(Tp_membrane);
+      const deltaP_kPa = Math.max(0.5, Psat_feed - Psat_cool);
+
+      // 4. Trans-Membrane Vapor Flux (kg/m²·h)
+      let cMd = sys.baseCmd * poly.mult;
+      if (sys.type === 'VMD') cMd *= 1.35; // Vacuum eliminates air diffusion resistance
+      if (sys.compromised) cMd *= 0.40;
+
+      // Concentration factor & dynamic viscosity penalty
+      const concentrationFactor = targetBrix / mat.initialBrix;
+      const dynamicViscosity = mat.initialViscosity * Math.exp(0.045 * targetBrix);
+
+      // Viscosity resistance boundary layer attenuation
+      const viscosityPenalty = 1.0 / (1.0 + (0.015 * Math.max(0, dynamicViscosity - 5)));
+      let flux = cMd * deltaP_kPa * 10.0 * viscosityPenalty * mat.foulingResistance;
+      if (flux < 1.0) flux = 1.0;
+
+      // Total hourly throughput (L/h = kg/h)
+      const hourlyThroughput = flux * sys.area;
+
+      // 5. Concentration Polarization Coefficient (CPC = Cm / Cb)
+      // High flux and low velocity drive solute accumulation at membrane interface
+      const massTransferK = 0.00015 * Math.pow(velocity, 0.75);
+      const fluxMPerSec = (flux / 1000.0) / 3600.0;
+      let cpc = Math.exp(Math.min(0.8, fluxMPerSec / (massTransferK + 1e-6)));
+      if (cpc < 1.02) cpc = 1.02;
+      if (cpc > 2.2) cpc = 2.2;
+
+      // 6. Liquid Entry Pressure of Water (LEP) & Wetting Safety Margin
+      // Clean LEP modified by actual liquid surface tension (72 mN/m pure water reference)
+      const effectiveSurfaceTensionRatio = mat.surfaceTension / 72.8;
+      let effectiveLep = poly.lepClean * effectiveSurfaceTensionRatio;
+      if (sys.compromised) effectiveLep = 0.45;
+
+      // Hydraulic pressure in module channel
+      const hydraulicP_bar = 0.25 + (0.35 * Math.pow(velocity, 1.6)) + (0.01 * (dynamicViscosity / 10.0));
+      const wettingRatio = hydraulicP_bar / (effectiveLep + 1e-5);
+      const wettingMarginPercent = Math.max(0, Math.min(100, (1.0 - wettingRatio) * 100));
+
+      // 7. Aroma Volatiles & Vitamin C Retention
+      // Lower temperatures and shorter residence preserve thermolabile compounds
+      let thermalStressScore = Math.max(0, (Tf - 40) * 0.85);
+      if (sys.type === 'VMD') thermalStressScore += 5; // Light volatile stripping in vacuum
+      let retention = 99.2 - thermalStressScore - (targetBrix > mat.criticalPectinBrix ? 4.5 : 0);
+      if (sys.compromised) retention -= 25.0;
+      retention = Math.max(50.0, Math.min(98.8, retention));
+
+      // Update Telemetry Elements
+      if (outFlux) outFlux.textContent = `${flux.toFixed(1)} kg/m²·h`;
+      if (outThroughput) outThroughput.textContent = `${hourlyThroughput.toFixed(1)} L/h`;
+      if (outTpc) outTpc.textContent = tpc.toFixed(2);
+      if (outEffDt) outEffDt.textContent = `${deltaTMembrane.toFixed(1)}°C`;
+      if (outCpc) outCpc.textContent = cpc.toFixed(2);
+      if (outViscosity) outViscosity.textContent = `${dynamicViscosity.toFixed(1)} cP`;
+      if (outRetention) outRetention.textContent = `${retention.toFixed(1)}%`;
+
+      if (outVolatileNote) {
+        const esterEst = Math.max(60, retention - 3.2).toFixed(0);
+        const vitEst = Math.min(99, retention + 2.1).toFixed(0);
+        outVolatileNote.textContent = `Esters: ${esterEst}% | Vit C: ${vitEst}%`;
+      }
+
+      // Update Wetting Bar & Text
+      if (outWettingBar && outWettingText) {
+        const barWidth = Math.min(100, Math.max(5, wettingRatio * 100));
+        outWettingBar.style.width = `${barWidth}%`;
+
+        if (wettingRatio >= 0.90 || sys.compromised) {
+          outWettingBar.className = 'bg-rose-600 h-2 rounded-full transition-all duration-300';
+          outWettingText.textContent = `CRITICAL BREAKTHROUGH RISK (ΔP ${hydraulicP_bar.toFixed(2)} / LEP ${effectiveLep.toFixed(2)} bar)`;
+          outWettingText.className = 'text-xs font-mono font-bold text-rose-600 dark:text-rose-400';
+        } else if (wettingRatio >= 0.65) {
+          outWettingBar.className = 'bg-amber-500 h-2 rounded-full transition-all duration-300';
+          outWettingText.textContent = `MODERATE RISK (${wettingMarginPercent.toFixed(0)}% Margin - Watch Surfactants)`;
+          outWettingText.className = 'text-xs font-mono font-bold text-amber-600 dark:text-amber-400';
+        } else {
+          outWettingBar.className = 'bg-emerald-500 h-2 rounded-full transition-all duration-300';
+          outWettingText.textContent = `${wettingMarginPercent.toFixed(0)}% SAFE (ΔP ${hydraulicP_bar.toFixed(2)} / LEP ${effectiveLep.toFixed(2)} bar)`;
+          outWettingText.className = 'text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400';
+        }
+      }
+
+      // Operational Status Badge & Limitations
+      if (statusBadge && outLimitation && outAction) {
+        if (sys.compromised || wettingRatio >= 0.95) {
+          statusBadge.textContent = 'CRITICAL PORE WETTING';
+          statusBadge.className = 'inline-flex px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300';
+          outLimitation.textContent = 'Membrane pore wetting failure: hydraulic trans-membrane pressure exceeds Cantor-Laplace LEP limit, flooding raw concentrate into pure distillate.';
+          outAction.textContent = 'Emergency halt: isolate module. Replace compromised membrane elements and verify liquid surface tension above 45 mN/m before restart.';
+        } else if (targetBrix >= mat.criticalPectinBrix) {
+          statusBadge.textContent = 'GEL LAYER FOULING';
+          statusBadge.className = 'inline-flex px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300';
+          outLimitation.textContent = `Concentrate viscosity exceeds ${dynamicViscosity.toFixed(0)} cP at ${targetBrix}°Brix, inducing severe concentration polarization and boundary gelation.`;
+          outAction.textContent = 'Increase cross-flow velocity to > 1.0 m/s or perform periodic forward flush. Target intermediate concentration (< 60 °Brix) before secondary polishing.';
+        } else if (Tf > 65) {
+          statusBadge.textContent = 'THERMAL STRESS WARNING';
+          statusBadge.className = 'inline-flex px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300';
+          outLimitation.textContent = 'Feed inlet temperature Tf > 65°C causes accelerated degradation of heat-labile polyphenols, anthocyanins, and native protein denaturation.';
+          outAction.textContent = 'Reduce Tf to 50–55°C. Utilize Vacuum Membrane Distillation (VMD) to sustain high trans-membrane vapor flux at reduced thermal impact.';
+        } else {
+          statusBadge.textContent = 'OPTIMAL SANITARY (3-A 45-03)';
+          statusBadge.className = 'inline-flex px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300';
+          outLimitation.textContent = 'Mild boundary layer thermal polarization (TPC ~0.70-0.80); flow hydrodynamic shear effectively suppresses particulate concentration polarization.';
+          outAction.textContent = 'Normal continuous operation. Execute standard 3-A enzymatic and mild caustic clean-in-place (CIP) cycle every 8 hours.';
+        }
+      }
+    }
+
+    // Attach Event Listeners
+    [systemSelect, matrixSelect, materialSelect, feedTempSlider, coolTempSlider, velocitySlider, brixSlider].forEach(el => {
+      el?.addEventListener('input', recalculate);
+      el?.addEventListener('change', recalculate);
+    });
+
+    // Preset Buttons
+    document.querySelectorAll('.md-preset-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const target = e.currentTarget;
+        const preset = target?.getAttribute('data-preset');
+
+        if (preset === 'citrus') {
+          if (systemSelect) systemSelect.value = 'commercial_vmd_spiral_pvdf_skid';
+          if (matrixSelect) matrixSelect.value = 'cold_pressed_orange_juice';
+          if (materialSelect) materialSelect.value = 'ptfe_expanded';
+          if (feedTempSlider) feedTempSlider.value = '55';
+          if (coolTempSlider) coolTempSlider.value = '18';
+          if (velocitySlider) velocitySlider.value = '0.85';
+          if (brixSlider) brixSlider.value = '62';
+        } else if (preset === 'berry') {
+          if (systemSelect) systemSelect.value = 'commercial_vmd_spiral_pvdf_skid';
+          if (matrixSelect) matrixSelect.value = 'wild_blueberry_anthocyanin_extract';
+          if (materialSelect) materialSelect.value = 'pvdf_electrospun';
+          if (feedTempSlider) feedTempSlider.value = '48';
+          if (coolTempSlider) coolTempSlider.value = '15';
+          if (velocitySlider) velocitySlider.value = '0.70';
+          if (brixSlider) brixSlider.value = '45';
+        } else if (preset === 'apple') {
+          if (systemSelect) systemSelect.value = 'industrial_agmd_flat_sheet_cascade';
+          if (matrixSelect) matrixSelect.value = 'clarified_apple_cider_concentrate';
+          if (materialSelect) materialSelect.value = 'ceramic_silylated';
+          if (feedTempSlider) feedTempSlider.value = '52';
+          if (coolTempSlider) coolTempSlider.value = '20';
+          if (velocitySlider) velocitySlider.value = '0.90';
+          if (brixSlider) brixSlider.value = '65';
+        } else if (preset === 'whey') {
+          if (systemSelect) systemSelect.value = 'pilot_dcmd_hollow_fiber_ptfe';
+          if (matrixSelect) matrixSelect.value = 'cheese_whey_protein_concentrate';
+          if (materialSelect) materialSelect.value = 'ptfe_expanded';
+          if (feedTempSlider) feedTempSlider.value = '42';
+          if (coolTempSlider) coolTempSlider.value = '15';
+          if (velocitySlider) velocitySlider.value = '0.60';
+          if (brixSlider) brixSlider.value = '35';
+        } else if (preset === 'wetting') {
+          if (systemSelect) systemSelect.value = 'compromised_wetted_membrane_unit';
+          if (matrixSelect) matrixSelect.value = 'fermented_botanical_infusion';
+          if (materialSelect) materialSelect.value = 'pp_microporous';
+          if (feedTempSlider) feedTempSlider.value = '68';
+          if (coolTempSlider) coolTempSlider.value = '25';
+          if (velocitySlider) velocitySlider.value = '1.40';
+          if (brixSlider) brixSlider.value = '38';
+        }
+
+        recalculate();
+      });
+    });
+
+    // Initial Execution
+    recalculate();
+  });
+</script>

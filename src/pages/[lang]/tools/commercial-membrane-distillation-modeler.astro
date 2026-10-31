@@ -1,0 +1,264 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import CommercialMembraneDistillationModeler from '../../../components/CommercialMembraneDistillationModeler.astro';
+import type { SupportedLanguage } from '../../../i18n/ui';
+import { useTranslations, useTranslatedPath } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+const t = useTranslations(lang);
+const tp = useTranslatedPath(lang);
+
+interface LocaleToolContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  lead: string;
+  breadcrumbsLabel: string;
+  faqs: Array<{ question: string; answer: string }>;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocaleToolContent> = {
+  es: {
+    pageTitle: "Simulador de Destilación por Membrana (MD) y Polarización Térmica | IsItKitchenSafe",
+    pageDescription: "Simule la concentración no térmica de alimentos líquidos mediante destilación por membrana (DCMD, VMD, AGMD). Modele el flujo de vapor transmembrana, la presión de rotura capilar de poros (LEPw), los coeficientes de polarización térmica y de concentración (TPC/CPC), la retención de aromas volátiles y el cumplimiento bajo FDA 21 CFR § 177 y 3-A Sanitario 45-03.",
+    badge: "Física Térmica de Membranas y Concentración de Alimentos",
+    h1: "Simulador de Destilación por Membrana (MD), Permeación de Vapor y Polarización Térmica",
+    lead: "Modele la concentración no térmica de zumos de frutas termosensibles, extractos de polifenoles y suero lácteo mediante destilación por membrana (DCMD, VMD, AGMD). Calcule el flujo de vapor de agua transmembrana, la presión de intrusión capilar de Cantor-Laplace (LEPw), los coeficientes de polarización límite (TPC/CPC), la retención de ésteres aromáticos y el cumplimiento bajo FDA 21 CFR § 177 y 3-A Sanitario 45-03.",
+    breadcrumbsLabel: "Simulador de Destilación por Membrana (MD)",
+    faqs: [
+      {
+        question: "¿Qué es la Destilación por Membrana (MD) y cómo concentra líquidos termosensibles sin degradación térmica?",
+        answer: "La Destilación por Membrana (MD) es una tecnología de separación no isotérmica impulsada térmicamente donde una corriente de alimento líquido caliente (típicamente 40°C a 65°C) circula sobre un lado de una membrana hidrófoba microporosa, mientras que en el otro lado se mantiene una corriente fría o vacío. Al ser fuertemente hidrófoba (materiales como ePTFE o PVDF), el agua líquida no puede penetrar en los microporos (0,1 a 0,45 µm). En su lugar, el agua se evapora exclusivamente en el menisco líquido-vapor de la entrada del poro y el vapor se difunde a través del poro seco impulsado por la diferencia de presión de vapor (ΔP) descrita por la ecuación de Antoine. Al evitar la ebullición y operar muy por debajo de los evaporadores industriales tradicionales (70°C a 100°C), los polifenoles, antocianinas, vitamina C y ésteres aromáticos volátiles se conservan entre un 92% y un 98% intactos."
+      },
+      {
+        question: "¿Cómo gobierna la ecuación de Cantor-Laplace el mojado de poros (LEPw) y la rotura de la barrera hidrófoba?",
+        answer: "El mojado de poros es el principal fallo crítico en destilación por membrana, ocurrido cuando la presión hidráulica transmembrana (ΔP_hidráulica) supera la Presión de Entrada de Líquido (LEP_w). Según la ecuación de Cantor-Laplace, LEP_w = (-2 · B · γ_L · cos θ) / r_max, donde γ_L es la tensión superficial del líquido, θ es el ángulo de contacto (&gt; 110° a 145°), r_max es el radio de poro máximo y B es el factor geométrico. Si compuestos tensoactivos (como saponinas naturales, aceites esenciales o terpenos de cítricos) reducen la tensión superficial por debajo de ~40 mN/m, o si las bombas generan sobrepresiones que superan el umbral LEP, el alimento líquido penetra los poros capilares, inundando el permeado destilado y provocando la pérdida total de selectividad y contaminación del producto."
+      },
+      {
+        question: "¿Cuáles son las diferencias estructurales entre los sistemas DCMD, VMD y AGMD?",
+        answer: "En la Destilación por Membrana de Contacto Directo (DCMD), tanto el alimento caliente como el destilado frío tocan directamente las caras opuestas de la membrana; es un diseño sencillo pero con mayor pérdida de calor sensible por conducción. En la Destilación por Membrana al Vacío (VMD), se aplica un vacío moderado (5 a 20 kPa abs) en el lado del permeado, eliminando la resistencia del aire en los poros y minimizando la conducción térmica, lo que incrementa el flujo de vapor entre un 30% y un 50% para zumos viscosos (requiriendo condensadores externos refrigerados). En la Destilación por Membrana con Espacio de Aire (AGMD), se interpone una cámara de aire estático entre la membrana y una placa metálica refrigerada, lo que reduce sustancialmente las pérdidas térmicas y permite recuperar calor latente internamente en cascadas industriales multietapa."
+      },
+      {
+        question: "¿Cómo atenúan el flujo de vapor la Polarización Térmica (TPC) y la Polarización de Concentración (CPC) a altos °Brix?",
+        answer: "Durante la evaporación activa, el calor latente consumido enfría el líquido en contacto íntimo con la membrana, creando una capa límite donde T_membrana &lt; T_seno_fluido. Esto se evalúa mediante el Coeficiente de Polarización Térmica (TPC = (T_f,m - T_p,m)/(T_f,b - T_p,b)), que oscila entre 0,45 y 0,85, reduciendo la fuerza impulsora neta. Simultáneamente, a medida que el agua se evapora, azúcares y pectinas se acumulan en la superficie de la membrana (Polarización de Concentración, CPC &gt; 1,0). Al acercarse a 60°-70° Brix, la viscosidad se dispara de forma exponencial, reduciendo la actividad de agua (a_w) y formando una capa gelatinosa que obstruye los poros a menos que se mantengan altas velocidades tangenciales (v_f &gt; 0,6 m/s) y turbulencia hidrodinámica."
+      },
+      {
+        question: "¿Qué normativas regulan las membranas de contacto alimentario bajo FDA y estándares sanitarios 3-A?",
+        answer: "Los módulos comerciales de destilación por membrana para alimentos y derivados lácteos deben cumplir con FDA 21 CFR § 177.1550 (resinas de perfluorocarbono en contacto con alimentos) y FDA 21 CFR § 177.2510 (polímeros de PVDF), certificando la ausencia de migración de oligómeros tóxicos o plastificantes hacia el alimento. Asimismo, bajo el Estándar Sanitario 3-A 45-03 (Módulos de Membrana de Flujo Tangencial), todos los skids, carcasas y juntas elastoméricas deben presentar geometrías higiénicas sin zonas muertas, compatibles con procedimientos de limpieza CIP basados en detergentes enzimáticos y lavados alcalinos suaves (pH 2 a 11) sin degradar la hidrofobicidad del polímero."
+      }
+    ]
+  },
+  pt: {
+    pageTitle: "Simulador de Destilação por Membrana (MD) e Polarização Térmica | IsItKitchenSafe",
+    pageDescription: "Simule a concentração não térmica de alimentos líquidos por destilação por membrana (DCMD, VMD, AGMD). Modele o fluxo de vapor transmembrana, a pressão de ruptura capilar dos poros (LEPw), coeficientes de polarização térmica e concentração (TPC/CPC), retenção de compostos aromáticos e conformidade FDA 21 CFR § 177 / 3-A 45-03.",
+    badge: "Física Térmica de Membranas e Concentração de Alimentos",
+    h1: "Simulador de Destilação por Membrana (MD), Permeação de Vapor e Polarização Térmica",
+    lead: "Modele a concentração não térmica de sucos cítricos sensíveis ao calor, extratos de polifenóis e soro lácteo por destilação por membrana (DCMD, VMD, AGMD). Calcule o fluxo de vapor d'água transmembrana, a pressão de intrusão capilar de Cantor-Laplace (LEPw), os coeficientes de polarização de contorno (TPC/CPC), a retenção de ésteres voláteis e a conformidade sob FDA 21 CFR § 177 e Norma Sanitária 3-A 45-03.",
+    breadcrumbsLabel: "Simulador de Destilação por Membrana (MD)",
+    faqs: [
+      {
+        question: "O que é a Destilação por Membrana (MD) e como ela concentra líquidos termosensíveis sem degradação térmica?",
+        answer: "A Destilação por Membrana (MD) é um processo de separação não isotérmico acionado termicamente, no qual um fluxo de alimento líquido aquecido (tipicamente 40°C a 65°C) circula sobre uma das faces de uma membrana hidrofóbica microporosa, enquanto a face oposta mantém um fluxo refrigerado ou vácuo. Devido à forte hidrofobicidade da membrana (materiais como ePTFE ou PVDF), a água líquida não penetra nos microporos (0,1 a 0,45 µm). Em vez disso, a água evapora unicamente no menisco líquido-vapor na entrada dos poros e o vapor difunde-se pelos poros secos impulsionado pela diferença de pressão de vapor (ΔP) da equação de Antoine. Por dispensar a fervura e operar abaixo dos evaporadores convencionais (70°C a 100°C), polifenóis, antocianinas, vitamina C e ésteres de aroma voláteis são preservados entre 92% e 98% intactos."
+      },
+      {
+        question: "Como a equação de Cantor-Laplace governa o molhamento dos poros (LEPw) e a ruptura capilar?",
+        answer: "O molhamento de poros é a principal falha crítica na destilação por membrana, ocorrendo quando a pressão hidráulica transmembrana (ΔP_hidráulica) excede a Pressão de Entrada de Líquido (LEP_w). De acordo com a equação de Cantor-Laplace, LEP_w = (-2 · B · γ_L · cos θ) / r_max, onde γ_L é a tensão superficial do líquido, θ é o ângulo de contato (&gt; 110° a 145°), r_max é o raio máximo do poro e B é o fator de geometria. Caso compostos tensoativos (como saponinas naturais, óleos essenciais ou terpenos) reduzam a tensão superficial abaixo de ~40 mN/m, ou as bombas criem picos de pressão acima do limite LEP, o líquido rompe a barreira capilar, inundando a corrente de destilado e destruindo a seletividade da operação."
+      },
+      {
+        question: "Quais são as diferenças de engenharia entre as configurações DCMD, VMD e AGMD?",
+        answer: "Na Destilação por Membrana de Contato Direto (DCMD), tanto a alimentação aquecida quanto o destilado frio tocam diretamente as superfícies da membrana; é um sistema simples, mas com perdas sensíveis de calor por condução através da matriz polimérica. Na Destilação por Membrana a Vácuo (VMD), um vácuo moderado (5 a 20 kPa abs) é aplicado no lado do permeado, eliminando a resistência do ar nos poros e reduzindo a perda condutiva, o que proporciona fluxo de vapor 30% a 50% superior em sucos densos (requerendo condensador externo com salmoura fria). Na Destilação por Membrana com Espaço de Ar (AGMD), cria-se um espaço de ar estático entre a membrana e uma placa condensadora fria interna, reduzindo perdas condutivas e viabilizando recuperação de calor latente em cascatas industriais multietapas."
+      },
+      {
+        question: "Como a Polarização Térmica (TPC) e a Polarização de Concentração (CPC) afetam o fluxo em altos °Brix?",
+        answer: "Durante a transferência de vapor, o calor latente de evaporação resfria a camada fluida imediatamente adjacente à membrana, gerando uma camada limite térmica onde T_membrana &lt; T_seio_líquido. Esse fenômeno é quantificado pelo Coeficiente de Polarização Térmica (TPC = (T_f,m - T_p,m)/(T_f,b - T_p,b)), que varia entre 0,45 e 0,85, diminuindo a força motriz efetiva. Concomitantemente, com a remoção de água, açúcares e pectinas concentram-se junto à membrana (Polarização de Concentração, CPC &gt; 1,0). Próximo de 60°-70° Brix, a viscosidade dinâmica cresce exponencialmente, reduzindo a atividade de água (a_w) e gerando uma camada de gel incrustante caso não se garanta alta velocidade tangencial (v_f &gt; 0,6 m/s) e turbulência hidrodinâmica de Reynolds."
+      },
+      {
+        question: "Quais normas sanitárias regulam membranas em contato com alimentos sob a FDA e a norma 3-A?",
+        answer: "Sistemas comerciais de destilação por membrana aplicados a produtos alimentícios ou lácteos devem atender à FDA 21 CFR § 177.1550 (resinas de perfluorocarbonetos para contato com alimentos) e FDA 21 CFR § 177.2510 (conformidade de polímeros PVDF), garantindo migração zero de oligômeros tóxicos para alimentos ácidos. Além disso, segundo a Norma Sanitária 3-A 45-03 (Módulos de Membrana de Fluxo Cruzado), todos os módulos, carcaças e vedações elastoméricas devem exibir geometria sanitária isenta de frestas, tolerando ciclos de limpeza CIP com detergentes enzimáticos e soluções alcalinas suaves (pH 2 a 11) sem degradação da hidrofobicidade da membrana."
+      }
+    ]
+  },
+  'zh-cn': {
+    pageTitle: "商业连续膜蒸馏 (MD) 水蒸气渗透与热极化模拟器 | IsItKitchenSafe",
+    pageDescription: "模拟直接接触式 (DCMD)、真空式 (VMD) 及气隙式 (AGMD) 膜蒸馏对热敏性食品液体的非热浓缩过程。精确测算跨膜水蒸气通量、Cantor-Laplace 毛细孔润湿穿透压力 (LEPw)、温度与浓度边界层极化系数 (TPC/CPC)、挥发性香气成分保留率及 FDA 21 CFR § 177 / 3-A 卫生标准 45-03 合规性。",
+    badge: "膜热物理学与高浓度食品工程",
+    h1: "商业连续膜蒸馏 (MD) 水蒸气渗透与热极化模拟器",
+    lead: "针对热敏性柑橘果汁、高活性花青素多酚浆果原浆及乳清蛋白液，模拟直接接触式 (DCMD)、真空式 (VMD) 及气隙式 (AGMD) 膜蒸馏非热浓缩全过程。精确计算跨膜水蒸气通量、Cantor-Laplace 毛细微孔润湿穿透压力 (LEPw)、温度与浓度边界层极化阻力系数 (TPC/CPC)、天然特征芳香酯类分子保留率及 FDA 21 CFR § 177 / 3-A 卫生标准 45-03 工业合规性。",
+    breadcrumbsLabel: "膜蒸馏 (MD) 水蒸气渗透模拟器",
+    faqs: [
+      {
+        question: "什么是膜蒸馏 (MD) 技术？它如何在无需高温沸腾的情况下对热敏性食品液体进行超浓缩？",
+        answer: "膜蒸馏 (MD) 是一种由热力学驱动的非等温微孔膜分离技术。在此过程中，加温的热食品料液（通常仅为 40°C 至 65°C）流经疏水微孔膜的一侧，而在膜的另一侧保持冷馏出水流或真空低压环境。由于膜材质（如膨体聚四氟乙烯 ePTFE 或聚偏氟乙烯 PVDF）具有极高疏水性，液态水无法渗入微孔（0.1 至 0.45 µm）内部，水分子仅在微孔入口处的气-液弯月面蒸发，水蒸气在 Antoine 方程决定的饱和分压差 (ΔP) 驱动下穿透干燥孔道扩散到冷侧被冷凝捕集。由于全程避免了液体沸腾，且运行温度远低于传统真空多效蒸发器（70°C 至 100°C），果汁中的天然维生素 C、花青素多酚抗氧化物及挥发性特征芳香酯类（如丁酸乙酯）保留率高达 92% 至 98%。"
+      },
+      {
+        question: "Cantor-Laplace 毛细微孔润湿穿透方程如何决定膜破裂泄漏 (LEPw) 与防渗安全性？",
+        answer: "微孔润湿（Pore Wetting）是膜蒸馏工业中最严重的灾难性失效形式，当料液侧跨膜水力静压 (ΔP_hydraulic) 超过临界微孔进水压力 (LEP_w) 时即发生润湿穿透。该物理过程由 Cantor-Laplace 方程决定：LEP_w = (-2 · B · γ_L · cos θ) / r_max，式中 γ_L 为料液表面张力，θ 为水接触角（通常需 &gt; 110° 至 145°），r_max 为最大微孔半径，B 为微孔几何构型因子。如果料液中含有表面活性天然皂苷、精油萜烯或游离脂质，使表面张力骤降至 40 mN/m 以下，或错流循环泵产生局部水力压力波峰超过 LEP 极限，料液将突破毛细阻力彻底浸润微孔，导致浑浊浓缩果汁涌入纯净馏出液，造成分离选择性瞬间归零并引发严重微生物交叉污染。"
+      },
+      {
+        question: "商业连续运行中，直接接触式 (DCMD)、真空式 (VMD) 与气隙式 (AGMD) 膜蒸馏有何本质区别？",
+        answer: "直接接触式膜蒸馏 (DCMD) 中，温热料液与冰冷纯净馏出水分别直接润湿疏水膜的两侧表面；其系统结构极其紧凑简单，但存在横跨薄膜的高额导热显热损失。真空膜蒸馏 (VMD) 在渗透侧施加 5 至 20 kPa 绝压真空，消除了孔道内部滞留空气的分子扩散阻力，传热传质效率显著倍增，高粘度果汁的蒸气通量可提升 30% 至 50%，但需要配套外部深冷捕集器。气隙式膜蒸馏 (AGMD) 在疏水膜与冷凝金属板之间设置一层静止干燥气隙；这一隔层极大遏制了跨膜热传导损耗，便于在多级平板级联系统中实现蒸发潜热的高效内部热回收，综合能效表现最为卓越。"
+      },
+      {
+        question: "温度极化系数 (TPC) 与浓度极化系数 (CPC) 如何在高糖度 (°Brix) 下削弱水蒸气通量？",
+        answer: "在剧烈的水蒸气相变转移过程中，蒸发潜热迅速吸走料液界面处的热量，造成膜表面温度显著低于料液主流本体温度 (T_m &lt; T_b)。该温降阻力由温度极化系数 (TPC = (T_f,m - T_p,m)/(T_f,b - T_p,b)) 进行度量（工业工况通常为 0.45 至 0.85），直接削弱了有效的饱和蒸气压驱动力。与此同时，水分蒸发导致膜表面溶质分子与果胶快速堆积（浓度极化，CPC &gt; 1.0）。当果汁浓缩接近 60° 至 70° Brix 时，流体粘度呈指数级暴增，界面局部水分活度 (a_w) 显著下降，若未维持足够的错流剪切流速 (v_f &gt; 0.6 m/s) 和 Reynolds 湍流，膜表面极易形成致密的胶状污染凝胶层。"
+      },
+      {
+        question: "美国 FDA 与 3-A 卫生标准对食品接触级疏水微孔膜有哪些关键法规要求？",
+        answer: "加工可食用食品或乳制品的工业膜蒸馏系统必须严格满足 FDA 21 CFR § 177.1550（食品接触用全氟碳树脂规范）以及 FDA 21 CFR § 177.2510（PVDF 聚偏氟乙烯材料标准），确保在热酸性果汁侵蚀下不会产生微塑料氟聚合物低聚物或有害添加剂向食品迁移。此外，依据 3-A 卫生标准 45-03（错流膜分离组件规范），撬装管道、端盖与密封弹性体必须采用全卫生级无死角自排净设计，耐受酶制剂与弱碱性原位清洗 (CIP，pH 2 至 11) 工艺冲刷，且长期运行不得发生疏水涂层脱落或接触角衰退。"
+      }
+    ]
+  },
+  ja: {
+    pageTitle: "商業用連続膜蒸留 (MD) 水蒸気透過＆熱分極シミュレーター | IsItKitchenSafe",
+    pageDescription: "直接接触式 (DCMD)、真空式 (VMD)、エアギャップ式 (AGMD) 膜蒸留による熱感受性液状食品の非加熱濃縮プロセスをシミュレート。膜透過水蒸気流束、Cantor-Laplace 毛細管孔濡れ突破圧 (LEPw)、温度・濃度境界分極係数 (TPC/CPC)、揮発性アロマ保持率、および FDA 21 CFR § 177 / 3-A 衛生規格 45-03 適合性を解析。",
+    badge: "膜熱物理学と高濃度食品工学",
+    h1: "商業用連続膜蒸留 (MD) 水蒸気透過＆熱分極シミュレーター",
+    lead: "熱感受性柑橘果汁、高活性アントシアニン抽出液、およびチーズホエイタンパク質液を対象に、直接接触式 (DCMD)、真空式 (VMD)、エアギャップ式 (AGMD) 膜蒸留による低温非加熱濃縮プロセスをシミュレート。膜透過水蒸気流束、Cantor-Laplace 毛細管孔濡れ限界圧 (LEPw)、温度・濃度境界層分極抵抗 (TPC/CPC)、揮発性エステルアロマ保持率、および FDA 21 CFR § 177 / 3-A 衛生規格 45-03 適合性を詳細に診断します。",
+    breadcrumbsLabel: "膜蒸留 (MD) 水蒸気透過シミュレーター",
+    faqs: [
+      {
+        question: "膜蒸留 (MD) 技術とは何ですか？加熱沸騰させずに熱感受性液体を濃縮できる理由は何ですか？",
+        answer: "膜蒸留 (MD) は、温度差による蒸気圧勾配を駆動力とする非等温微多孔膜分離プロセスです。加温された液状食品流（通常 40°C〜65°C）が疎水性微多孔膜の一方を流れ、膜の反対側には冷蒸留水流または真空低圧が維持されます。膜素材（ePTFE や PVDF など）が極めて強い疎水性（撥水性）を有するため、液体の水は微細孔（0.1〜0.45 µm）内に侵入できません。水分子は細孔入口の気液界面（メニスカス）でのみ蒸発し、Antoine 式で決定される飽和蒸気圧差 (ΔP) に従って乾燥細孔内を水蒸気として拡散透過します。沸騰を完全に排除し、従来の真空蒸発缶（70°C〜100°C）よりも遥かに低い温度で脱水するため、ビタミン C、アントシアニン、ポリフェノール、および微量アロマエステル（酪酸エチルなど）が 92%〜98% の高水準でそのまま残存します。"
+      },
+      {
+        question: "Cantor-Laplace 毛細管細孔濡れ方程式はどのようにして破れ浸入（LEPw）と防漏安全性を支配しますか？",
+        answer: "細孔濡れ（Pore Wetting）は膜蒸留において最も警戒すべき致命的故障モードであり、膜間の水力静圧差 (ΔP_hydraulic) が微細孔の臨界液体侵入圧 (LEP_w) を上回った瞬間に発生します。この物理挙動は Cantor-Laplace 式で記述されます：LEP_w = (-2 · B · γ_L · cos θ) / r_max。ここで γ_L は液体の表面張力、θ は水接触角（通常 &gt; 110°〜145°）、r_max は最大細孔半径、B は幾何学的細孔形状因子です。食品中に天然サポニン、精油テルペン、脂質などの界面活性成分が含まれ表面張力が 40 mN/m 以下に低下した場合や、ポンプ圧の脈動で LEP 限界を超えた場合、液体が毛細管抵抗を突破して細孔を濡らし、濃縮果汁が透過水側に漏洩して分離選択性が崩壊します。"
+      },
+      {
+        question: "商業設備における直接接触式 (DCMD)、真空式 (VMD)、エアギャップ式 (AGMD) の構造的違いは何ですか？",
+        answer: "直接接触式 (DCMD) では、加温原料液と冷却蒸留水が膜の両面に直接接触します。配管構造はシンプルですが、膜基材を介した伝導顕熱損失が比較的大きくなります。真空膜蒸留 (VMD) では透過側に 5〜20 kPa abs の中真空を印加し、細孔内の空気拡散抵抗を排除して伝熱損失を抑制するため、高粘度果汁で透過流束が 30%〜50% 向上します（外部ブラインチラーが必要です）。エアギャップ式 (AGMD) では膜と冷却凝縮金属板の間に静止気隙層を設けることで熱伝導損失を大幅に抑え、多段カスケード設備において内部潜熱回収を可能にする極めてエネルギー効率の高い設計です。"
+      },
+      {
+        question: "温度分極係数 (TPC) と濃度分極係数 (CPC) は高 Brix 条件でどのように透過流束を低下させますか？",
+        answer: "活発な水蒸気相変化に伴う蒸発潜熱の移動により、膜直近の液相境界層温度は主流液よりも著しく低下します (T_m &lt; T_b)。この抵抗は温度分極係数 (TPC = (T_f,m - T_p,m)/(T_f,b - T_p,b)) で評価され（通常 0.45〜0.85）、有効飽和蒸気圧差を減少させます。同時に水分の蒸発によって糖分やペクチンが膜壁面に濃縮蓄積します（濃度分極、CPC &gt; 1.0）。果汁が 60°〜70° Brix に達すると動粘度が指数関数的に増大して水分活性 (a_w) が低下し、十分なクロスフロー流速 (v_f &gt; 0.6 m/s) によるせん断レイノルズ乱流を維持しない場合、膜表面にゲル状のファウリング被膜が形成されます。"
+      },
+      {
+        question: "FDA および 3-A 衛生規格における食品接触用疎水性微多孔膜の規制要件は何ですか？",
+        answer: "可食食品や乳製品を濃縮する産業用膜蒸留モジュールは、FDA 21 CFR § 177.1550（食品接触用過フッ素化炭素樹脂基準）および FDA 21 CFR § 177.2510（PVDF ポリマー基準）に厳格に準拠し、酸性食品への低分子オリゴマー溶出がゼロであることを保証しなければなりません。さらに 3-A 衛生規格 45-03（クロスフロー膜分離モジュール基準）に基づき、全モジュールハウジングおよび弾性ガスケットは液溜まりのないサニタリー構造とし、酵素洗剤や弱アルカリ洗浄（CIP、pH 2〜11）に耐え、膜の疎水性撥水角を長期維持できる設計が要求されます。"
+      }
+    ]
+  }
+};
+
+const c = CONTENT[lang as Exclude<SupportedLanguage, 'en'>] || CONTENT.es;
+
+const pageTitle = c.pageTitle;
+const pageDescription = c.pageDescription;
+
+const breadcrumbs = [
+  { label: t('nav.home') || 'Home', href: tp('/') },
+  { label: t('nav.tools') || 'Tools', href: tp('/tools/') },
+  { label: c.breadcrumbsLabel }
+];
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "@id": `https://isitkitchensafe.com/${lang}/tools/commercial-membrane-distillation-modeler/#webapp`,
+      "url": `https://isitkitchensafe.com/${lang}/tools/commercial-membrane-distillation-modeler/`,
+      "name": c.h1,
+      "applicationCategory": "EngineeringApplication",
+      "operatingSystem": "All",
+      "browserRequirements": "Requires JavaScript. Requires HTML5 Canvas/CSS3.",
+      "inLanguage": lang,
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": pageDescription
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": t('nav.home') || 'Home',
+          "item": `https://isitkitchensafe.com${tp('/')}`
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": t('nav.tools') || 'Tools',
+          "item": `https://isitkitchensafe.com${tp('/tools/')}`
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": c.breadcrumbsLabel,
+          "item": `https://isitkitchensafe.com${tp('/tools/commercial-membrane-distillation-modeler/')}`
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": c.faqs.map(faq => ({
+        "@type": "Question",
+        "name": faq.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": faq.answer
+        }
+      }))
+    }
+  ]
+};
+---
+
+<Layout
+  title={pageTitle}
+  description={pageDescription}
+  lang={lang}
+  availableLocales={availableLocales}
+  structuredData={structuredData}
+>
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <Breadcrumbs items={breadcrumbs} />
+    <div class="mt-6">
+      <CommercialMembraneDistillationModeler lang={lang} />
+    </div>
+
+    <!-- Structured FAQ Accordion Section -->
+    <div class="mt-12 bg-surface-soft border border-hairline rounded-2xl p-6 sm:p-8 shadow-xs">
+      <h2 class="text-title font-semibold text-ink tracking-tight mb-6">
+        {lang === 'es' ? 'Preguntas Frecuentes: Termodinámica de Destilación por Membrana y Diseño Sanitario' :
+         lang === 'pt' ? 'Perguntas Frequentes: Termodinâmica de Destilação por Membrana e Engenharia Sanitária' :
+         lang === 'zh-cn' ? '常见问题解答: 膜蒸馏相变热力学、微孔防渗与卫生工程设计' :
+         'よくある質問: 膜蒸留熱力学・微細孔防漏機構とサニタリー工学設計'}
+      </h2>
+      <div class="space-y-4">
+        {c.faqs.map((faq, index) => (
+          <details class="group border border-hairline rounded-xl p-4 bg-surface transition-colors open:bg-surface-soft">
+            <summary class="font-medium text-ink cursor-pointer list-none flex justify-between items-center text-sm">
+              <span>{index + 1}. {faq.question}</span>
+              <span class="text-muted group-open:rotate-180 transition-transform ml-2">▼</span>
+            </summary>
+            <p class="mt-3 text-xs leading-relaxed text-body border-t border-hairline/60 pt-3">
+              {faq.answer}
+            </p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </div>
+</Layout>
