@@ -146,7 +146,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-membrane-distillation-modeler', name: 'Commercial Continuous Membrane Distillation (MD) Vapor Permeation & Thermal Polarization Modeler', category: 'Membrane Thermal Physics & High-Concentration Food Processing', component: 'CommercialMembraneDistillationModeler.astro', dataFile: 'membrane-distillation-data.json' },
   { slug: 'commercial-continuous-hpu-sonication-modeler', name: 'Commercial Continuous High-Power Ultrasound (HPU) Acoustic Cavitation Sonication & Enzyme Inactivation Modeler', category: 'Acoustic Fluid Dynamics & Non-Thermal Processing', component: 'CommercialHpuSonicationModeler.astro', dataFile: 'hpu-sonication-data.json' },
   { slug: 'commercial-continuous-puvc-disinfection-modeler', name: 'Commercial Continuous Pulsed UV-C Light High-Intensity Fluid Disinfection & Pyrimidine Dimer Modeler', category: 'Photobiological Safety & Fluid Dynamics', component: 'CommercialPuvcDisinfectionModeler.astro', dataFile: 'puvc-disinfection-data.json' },
-  { slug: 'commercial-high-pressure-supercritical-co2-inactivation-modeler', name: 'Commercial High-Pressure Supercritical CO2 Fluid Inactivation & Spore Solubilization Modeler', category: 'Dense-Phase Thermodynamics & Non-Thermal Sterilization', component: 'CommercialSupercriticalCo2InactivationModeler.astro', dataFile: 'supercritical-co2-inactivation-data.json' }
+  { slug: 'commercial-high-pressure-supercritical-co2-inactivation-modeler', name: 'Commercial High-Pressure Supercritical CO2 Fluid Inactivation & Spore Solubilization Modeler', category: 'Dense-Phase Thermodynamics & Non-Thermal Sterilization', component: 'CommercialSupercriticalCo2InactivationModeler.astro', dataFile: 'supercritical-co2-inactivation-data.json' },
+  { slug: 'commercial-continuous-dual-frequency-ultrasonic-modeler', name: 'Commercial Continuous Dual-Frequency Ultrasonic Desorption & Biofilm Disruption Modeler', category: 'Ultrasonic Cavitation & Surface Hygiene', component: 'CommercialDualFrequencyUltrasonicModeler.astro', dataFile: 'dual-frequency-ultrasonic-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -383,7 +384,8 @@ function auditDatasets() {
     'membrane-distillation-data.json',
     'hpu-sonication-data.json',
     'puvc-disinfection-data.json',
-    'supercritical-co2-inactivation-data.json'
+    'supercritical-co2-inactivation-data.json',
+    'dual-frequency-ultrasonic-data.json'
 ];
 
   const datasetStats = {};
@@ -623,24 +625,17 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Continuous Dual-Frequency Ultrasonic Desorption & Biofilm Disruption Modeler',
-      category: 'Ultrasonic Cavitation & Surface Hygiene',
-      intent: 'Models dual-frequency (28 kHz / 40 kHz) megasonic acoustic field interaction with resilient microbial biofilm matrices on stainless steel sanitary food-contact piping.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '1,890+ US impressions'
-    },
-    {
       title: 'Commercial Continuous Micro-Fluidization High-Shear Liposome & Emulsion Nano-Encapsulation Modeler',
       category: 'Micro-Fluidics & Nano-Emulsion Physics',
       intent: 'Models continuous ultra-high-pressure micro-fluidization (up to 200 MPa / 30,000 psi) interaction chambers (Y-type and Z-type micro-channels), spatial dissipation energy rates (>10^7 W/kg), sub-100 nm nano-emulsion droplet breakup, and sanitary ceramic plunger wear under EHEDG standards.',
-      priority: 'HIGH',
+      priority: 'CRITICAL_HIGH',
       estimatedMonthlyVolume: '1,780+ US impressions'
     },
     {
       title: 'Commercial Continuous Low-Energy Electron Beam (E-Beam) Surface Packaging Decontamination Modeler',
       category: 'Radiation Physics & Aseptic Packaging Hygiene',
       intent: 'Models continuous low-energy electron beam (80-150 keV) non-thermal sterilization of carton preforms and polymer bottle caps, absorbed surface dose distribution (kGy), penetration depth curves in HDPE/PET, and bacterial endospore lethality without ozone accumulation under FDA 21 CFR § 179.26.',
-      priority: 'MEDIUM',
+      priority: 'HIGH',
       estimatedMonthlyVolume: '1,660+ US impressions'
     },
     {
@@ -649,6 +644,13 @@ function auditGrowthOpportunities() {
       intent: 'Models continuous rotor-stator and orifice-plate cold hydrodynamic cavitation (generation of high-frequency micro-cavitation bubble clouds, localized collapse pressures > 1,000 bar), sonochemical microbial membrane perforation, and whey protein nano-texturizing under 3-A Sanitary standards.',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '1,590+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous Atmospheric Cold Gaseous Ozone (O3) Conveyor In-Line Spore Sterilization & Off-Gas Destruction Modeler',
+      category: 'Ozone Oxidation & Gaseous Sanitation',
+      intent: 'Models continuous conveyor surface sanitization with high-concentration gaseous ozone (50-250 ppm), relative humidity activation kinetics (>80% RH), Clostridium and Aspergillus spore coat oxidation, and catalytic thermal ozone destruction under OSHA 29 CFR § 1910.1000.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '1,520+ US impressions'
     }
   ];
 
