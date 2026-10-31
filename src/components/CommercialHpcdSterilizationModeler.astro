@@ -1,0 +1,1282 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import hpcdData from '../data/hpcd-sterilization-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  systemLabel: string;
+  systemHelp: string;
+  matrixLabel: string;
+  matrixHelp: string;
+  pressureLabel: string;
+  pressureHelp: string;
+  tempLabel: string;
+  tempHelp: string;
+  orificeLabel: string;
+  orificeHelp: string;
+  co2RatioLabel: string;
+  co2RatioHelp: string;
+  flowRateLabel: string;
+  flowRateHelp: string;
+  targetLabel: string;
+  targetHelp: string;
+  presetsTitle: string;
+  presetCitrus5Log: string;
+  presetCiderPpo: string;
+  presetEggSalmonella: string;
+  presetChannelingHazard: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  co2PhaseStateLabel: string;
+  dissolvedCo2Label: string;
+  phDropLabel: string;
+  bubbleDiameterLabel: string;
+  residenceTimeLabel: string;
+  logReductionLabel: string;
+  enzymeInactivationLabel: string;
+  cycloneSeparationLabel: string;
+  asmeSafetyMarginLabel: string;
+  fdaHaccpStatusLabel: string;
+  safetyStatusLabel: string;
+  primaryRiskLabel: string;
+  mechanismsLabel: string;
+  mitigationLabel: string;
+  scienceTitle: string;
+  scienceSub: string;
+  tableTitle: string;
+}
+
+const DICT: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Dense-Phase Thermodynamics & Non-Thermal Sterilization",
+    title: "Commercial Continuous High-Pressure Carbon Dioxide (HPCD) Dense-Phase Micro-Bubble Solubilization & Enzyme Inactivation Modeler",
+    subtitle: "Simulate continuous commercial dense-phase CO2 liquid food pasteurization and sterilization. Model high-pressure CO2 phase equilibrium, Venturi micro-bubble dissolution mass transfer, cellular membrane lipophilic permeation, cytoplasmic acidification collapse, baro-enzymatic polyphenol oxidase (PPO) denaturation, cyclone depressurization separation, and FDA 21 CFR § 120 Juice HACCP 5-log compliance.",
+    controlsTitle: "HPCD Reactor Geometry & Process Operational Parameters",
+    controlsSub: "Configure reactor pressure, process temperature, Venturi micro-bubble orifice diameter, CO2-to-liquid mass ratio, throughput flow rate, and target pathogen/enzyme matrix.",
+    systemLabel: "Continuous HPCD System Architecture:",
+    systemHelp: "Select commercial high-pressure dense-phase carbon dioxide unit, design pressure rating, reactor holding volume, and wetted metallurgy.",
+    matrixLabel: "Liquid Food Matrix & Target Substrate:",
+    matrixHelp: "Select beverage substrate, sugar/acid balance, baseline enzyme activity, and target microbial pathogen.",
+    pressureLabel: "Operating Hydraulic Pressure (bar):",
+    pressureHelp: "Continuous system pressure. Governs CO2 phase density and solubility (CO2 critical point: 73.8 bar, 31.1°C).",
+    tempLabel: "Process Isothermal Temperature (°C):",
+    tempHelp: "Operating fluid temperature in reactor holding coil. Low temperatures (30-45°C) preserve natural thermolabile flavor and vitamins.",
+    orificeLabel: "Venturi Micro-Bubble Orifice Diameter (µm):",
+    orificeHelp: "Nozzle throat diameter governing micro-bubble shearing, Sauter mean diameter (d32), and interfacial gas-liquid area (a).",
+    co2RatioLabel: "CO2-to-Liquid Mass Ratio (% w/w):",
+    co2RatioHelp: "Mass fraction of supercritical/dense CO2 injected into the continuous liquid stream.",
+    flowRateLabel: "Continuous Process Flow Rate (L/h):",
+    flowRateHelp: "Fluid throughput determining reactor holding tube residence time and fluid shear Reynolds number.",
+    targetLabel: "Target Pathogen or Spoilage Enzyme:",
+    targetHelp: "Select pertinent regulatory microorganism or quality-degrading enzyme for inactivation kinetic modeling.",
+    presetsTitle: "Standard Commercial Operation Presets",
+    presetCitrus5Log: "Cold-Pressed Citrus 5-Log Aseptic Pasteurization (120 bar, 38°C, 25 µm Venturi, 10% CO2, 600 L/h)",
+    presetCiderPpo: "Raw Apple Cider PPO Browning Inactivation (140 bar, 40°C, 20 µm, 12% CO2, 500 L/h)",
+    presetEggSalmonella: "Liquid Whole Egg Non-Thermal Salmonella Elimination (160 bar, 36°C, 35 µm, 8% CO2, 450 L/h)",
+    presetChannelingHazard: "Sub-Critical Macro-Bubble Channeling & 5-Log Failure Hazard (45 bar, 24°C, 85 µm, 4% CO2, Bypass)",
+    diagnosticTitle: "Real-Time Dense-Phase Thermodynamic & Sterility Diagnostics",
+    diagnosticSub: "Calculated CO2 thermodynamic phase state, dissolved carbonic acid concentration, cytoplasmic acidification, microbial log reduction, and ASME safety margins.",
+    co2PhaseStateLabel: "CO2 Thermodynamic State:",
+    dissolvedCo2Label: "Dissolved CO2 Concentration:",
+    phDropLabel: "In-Situ Cytoplasmic pH Depression (ΔpH):",
+    bubbleDiameterLabel: "Micro-Bubble Sauter Diameter (d32):",
+    residenceTimeLabel: "Reactor Pressurized Residence Time:",
+    logReductionLabel: "Microbial Pathogen Lethality:",
+    enzymeInactivationLabel: "Residual PPO / PME Enzyme Activity:",
+    cycloneSeparationLabel: "Cyclone Gas-Liquid Degassing Efficiency:",
+    asmeSafetyMarginLabel: "ASME BPVC Vessel Pressure Safety Factor:",
+    fdaHaccpStatusLabel: "FDA Juice HACCP 5-Log Status:",
+    safetyStatusLabel: "Process Operational Status:",
+    primaryRiskLabel: "Primary Kinetic Limitation:",
+    mechanismsLabel: "Active Dense-Phase Inactivation Mechanisms:",
+    mitigationLabel: "Recommended Engineering Action:",
+    scienceTitle: "Dense-Phase Fluid Thermodynamics & Inactivation Kinetics",
+    scienceSub: "Governing thermodynamic, mass-transfer, and microbial inactivation models for continuous HPCD food processing.",
+    tableTitle: "Dense-Phase CO2 Phase Equivalence & Process Parameter Matrix"
+  },
+  es: {
+    badge: "Termodinámica de Fase Densa y Esterilización No Térmica",
+    title: "Simulador de Solubilización por Microburbujas e Inactivación Enzimática con Dióxido de Carbono a Alta Presión (HPCD)",
+    subtitle: "Simule la pasteurización y esterilización continua no térmica de alimentos líquidos mediante CO2 en fase densa. Modele el equilibrio termodinámico a alta presión, la transferencia de masa por microburbujas Venturi, la permeación lipofílica de membranas celulares, el colapso por acidificación citoplasmática, la desnaturalización de polifenol oxidasa (PPO), la separación ciclónica y el cumplimiento de 5-log según FDA 21 CFR § 120 Juice HACCP.",
+    controlsTitle: "Geometría del Reactor HPCD y Parámetros Operacionales",
+    controlsSub: "Configure la presión del reactor, temperatura de proceso, diámetro de tobera Venturi, relación de masa CO2/líquido, caudal y patógeno objetivo.",
+    systemLabel: "Arquitectura del Sistema Continuo HPCD:",
+    systemHelp: "Seleccione la unidad comercial de CO2 a alta presión, rango de presión de diseño, volumen del reactor y metalurgia.",
+    matrixLabel: "Matriz de Alimento Líquido y Sustrato:",
+    matrixHelp: "Seleccione el sustrato de bebida, balance de azúcares/ácidos, actividad enzimática basal y patógeno pertinente.",
+    pressureLabel: "Presión Hidráulica de Operación (bar):",
+    pressureHelp: "Presión continua del sistema. Gobierna la densidad de fase y solubilidad del CO2 (punto crítico: 73,8 bar, 31,1°C).",
+    tempLabel: "Temperatura Isotérmica de Proceso (°C):",
+    tempHelp: "Temperatura del fluido en la serpentina de retención. Bajas temperaturas (30-45°C) preservan sabor natural y vitaminas.",
+    orificeLabel: "Diámetro de Orificio Venturi para Microburbujas (µm):",
+    orificeHelp: "Diámetro de garganta de tobera que determina el corte de burbujas, diámetro medio Sauter (d32) y área interfacial (a).",
+    co2RatioLabel: "Relación de Masa CO2 / Líquido (% p/p):",
+    co2RatioHelp: "Fracción de masa de CO2 denso/supercrítico inyectado en el flujo continuo del líquido.",
+    flowRateLabel: "Caudal Continuo de Proceso (L/h):",
+    flowRateHelp: "Caudal volumétrico que determina el tiempo de residencia presurizado y el número de Reynolds.",
+    targetLabel: "Microorganismo Patógeno o Enzima Objetivo:",
+    targetHelp: "Seleccione el microorganismo regulatorio o enzima degradante para el modelado cinético de inactivación.",
+    presetsTitle: "Configuraciones Comerciales Estándar",
+    presetCitrus5Log: "Pasteurización Aséptica Cítrica 5-Log (120 bar, 38°C, Venturi 25 µm, 10% CO2, 600 L/h)",
+    presetCiderPpo: "Inactivación de Pardo Enzimático PPO en Sidra de Manzana (140 bar, 40°C, 20 µm, 12% CO2, 500 L/h)",
+    presetEggSalmonella: "Eliminación No Térmica de Salmonella en Huevo Entero Líquido (160 bar, 36°C, 35 µm, 8% CO2, 450 L/h)",
+    presetChannelingHazard: "Peligro Crítico por Burbujas Macroscópicas Subcríticas y Falla 5-Log (45 bar, 24°C, 85 µm, 4% CO2)",
+    diagnosticTitle: "Diagnóstico Termodinámico de Fase Densa y Esterilidad en Tiempo Real",
+    diagnosticSub: "Estado de fase termodinámica de CO2 calculado, concentración de ácido carbónico disuelto, acidificación intracelular y márgenes ASME.",
+    co2PhaseStateLabel: "Estado Termodinámico del CO2:",
+    dissolvedCo2Label: "Concentración de CO2 Disuelto:",
+    phDropLabel: "Caída de pH Citoplasmático In-Situ (ΔpH):",
+    bubbleDiameterLabel: "Diámetro Medio Sauter de Microburbujas (d32):",
+    residenceTimeLabel: "Tiempo de Residencia Presurizado en Reactor:",
+    logReductionLabel: "Letalidad de Microorganismos Patógenos:",
+    enzymeInactivationLabel: "Actividad Residual de Enzima PPO / PME:",
+    cycloneSeparationLabel: "Eficiencia de Degasificación Ciclónica Gas-Líquido:",
+    asmeSafetyMarginLabel: "Factor de Seguridad de Presión de Recipiente ASME BPVC:",
+    fdaHaccpStatusLabel: "Estado de Cumplimiento 5-Log FDA Juice HACCP:",
+    safetyStatusLabel: "Estado Operacional del Proceso:",
+    primaryRiskLabel: "Limitación Cinética Primaria:",
+    mechanismsLabel: "Mecanismos Activos de Inactivación en Fase Densa:",
+    mitigationLabel: "Acción de Ingeniería Recomendada:",
+    scienceTitle: "Termodinámica de Fluidos en Fase Densa y Cinética de Inactivación",
+    scienceSub: "Modelos termodinámicos, de transferencia de masa y letalidad microbiana que rigen el procesamiento continuo con HPCD.",
+    tableTitle: "Matriz de Parámetros de Proceso y Equivalencias de Fase de CO2"
+  },
+  pt: {
+    badge: "Termodinâmica de Fase Densa e Esterilização Não Térmica",
+    title: "Simulador de Solubilização por Microbolhas e Inativação Enzimática com Dióxido de Carbono a Alta Pressão (HPCD)",
+    subtitle: "Simule a pasteurização e esterilização contínua não térmica de alimentos líquidos usando CO2 em fase densa. Modele o equilíbrio termodinâmico a alta pressão, transferência de massa por microbolhas Venturi, permeação lipofílica de membranas celulares, colapso por acidificação citoplasmática, desnaturação de polifenol oxidase (PPO), separação ciclônica e conformidade 5-log FDA 21 CFR § 120 Juice HACCP.",
+    controlsTitle: "Geometria do Reator HPCD e Parâmetros Operacionais",
+    controlsSub: "Configure pressão do reator, temperatura de processo, diâmetro do orifício Venturi, razão mássica CO2/líquido, vazão e patógeno-alvo.",
+    systemLabel: "Arquitetura do Sistema Contínuo HPCD:",
+    systemHelp: "Selecione a unidade comercial de CO2 a alta pressão, pressão de projeto, volume do reator e metalurgia de contato.",
+    matrixLabel: "Matriz Alimentar Líquida e Substrato:",
+    matrixHelp: "Selecione o substrato da bebida, balanço de açúcares/ácidos, atividade enzimática basal e patógeno pertinente.",
+    pressureLabel: "Pressão Hidráulica de Operação (bar):",
+    pressureHelp: "Pressão contínua do sistema. Governa a densidade de fase e solubilidade do CO2 (ponto crítico: 73,8 bar, 31,1°C).",
+    tempLabel: "Temperatura Isotérmica de Processo (°C):",
+    tempHelp: "Temperatura do fluido na serpentina de retenção. Temperaturas amenas (30-45°C) preservam sabor e vitaminas naturais.",
+    orificeLabel: "Diâmetro do Orifício Venturi para Microbolhas (µm):",
+    orificeHelp: "Diâmetro de garganta do bico que dita o cisalhamento das bolhas, diâmetro médio de Sauter (d32) e área interfacial (a).",
+    co2RatioLabel: "Razão Mássica CO2 / Líquido (% p/p):",
+    co2RatioHelp: "Fração mássica de CO2 denso/supercrítico injetado na corrente líquida contínua.",
+    flowRateLabel: "Vazão Contínua de Processo (L/h):",
+    flowRateHelp: "Vazão volumétrica que determina o tempo de residência pressurizado e o número de Reynolds.",
+    targetLabel: "Microorganismo Patogênico ou Enzima Alvo:",
+    targetHelp: "Selecione o patógeno regulatório ou enzima deteriorante para modelagem cinética de inativação.",
+    presetsTitle: "Predefinições Comerciais Padrão",
+    presetCitrus5Log: "Pasteurização Asséptica Cítrica 5-Log (120 bar, 38°C, Venturi 25 µm, 10% CO2, 600 L/h)",
+    presetCiderPpo: "Inativação do Escurecimento Enzimático PPO em Cidra de Maçã (140 bar, 40°C, 20 µm, 12% CO2, 500 L/h)",
+    presetEggSalmonella: "Eliminação Não Térmica de Salmonella em Ovo Integral Líquido (160 bar, 36°C, 35 µm, 8% CO2, 450 L/h)",
+    presetChannelingHazard: "Perigo Crítico por Macrobolhas Subcríticas e Falha de 5-Log (45 bar, 24°C, 85 µm, 4% CO2)",
+    diagnosticTitle: "Diagnóstico Termodinâmico de Fase Densa e Esterilidade em Tempo Real",
+    diagnosticSub: "Estado termodinâmico de fase do CO2 calculado, concentração de ácido carbônico dissolvido, acidificação intracelular e margens ASME.",
+    co2PhaseStateLabel: "Estado Termodinâmico do CO2:",
+    dissolvedCo2Label: "Concentração de CO2 Dissolvido:",
+    phDropLabel: "Queda de pH Citoplasmático In-Situ (ΔpH):",
+    bubbleDiameterLabel: "Diâmetro Médio de Sauter das Microbolhas (d32):",
+    residenceTimeLabel: "Tempo de Residência Pressurizado no Reator:",
+    logReductionLabel: "Letalidade de Microorganismos Patogênicos:",
+    enzymeInactivationLabel: "Atividade Residual da Enzima PPO / PME:",
+    cycloneSeparationLabel: "Eficiência de Degaseificação Ciclônica Gás-Líquido:",
+    asmeSafetyMarginLabel: "Fator de Segurança de Pressão de Vaso ASME BPVC:",
+    fdaHaccpStatusLabel: "Status de Conformidade 5-Log FDA Juice HACCP:",
+    safetyStatusLabel: "Status Operacional do Processo:",
+    primaryRiskLabel: "Limitação Cinética Primária:",
+    mechanismsLabel: "Mecanismos Ativos de Inativação em Fase Densa:",
+    mitigationLabel: "Ação de Engenharia Recomendada:",
+    scienceTitle: "Termodinâmica de Fluidos em Fase Densa e Cinética de Inativação",
+    scienceSub: "Modelos termodinâmicos, de transferência de massa e letalidade microbiana que regem o processamento contínuo com HPCD.",
+    tableTitle: "Matriz de Parâmetros de Processo e Equivalências de Fase de CO2"
+  },
+  'zh-cn': {
+    badge: "密相流体热力学与非热力灭菌工程",
+    title: "商用连续高压二氧化碳 (HPCD) 密相微气泡超微溶解析出与生物酶失活模拟器",
+    subtitle: "模拟商用连续密相二氧化碳（High-Pressure Carbon Dioxide / Dense-Phase CO2）液体食品常温灭菌工艺。精确计算超临界/密相CO2热力学相平衡、文丘里微气泡多相高传质溶解速率、嗜脂性质膜渗透与细胞质酸化崩溃动力学、多酚氧化酶（PPO）变性失活机制、旋风分离闪蒸脱气以及FDA 21 CFR § 120果汁HACCP 5-Log商业灭菌合规性。",
+    controlsTitle: "HPCD反应器结构与工艺运行控制参数",
+    controlsSub: "配置反应器工作压力、工艺温度、文丘里微米喷嘴孔径、CO2/液体质量比、物料处理流量及目标杀灭微生物/酶类基质。",
+    systemLabel: "连续HPCD反应器系统架构:",
+    systemHelp: "选择商用连续密相CO2灭菌机型、设计耐压等级、保温保压管容积及过流过温表面冶金体系。",
+    matrixLabel: "液体食品物料基质与目标介质:",
+    matrixHelp: "选择果汁或液体物料体系、糖酸比、内源酶活力基准及目标防控食源性致病菌。",
+    pressureLabel: "系统工作液压压力 (bar):",
+    pressureHelp: "连续系统承压。直接决定CO2密度与溶解度平衡常数（CO2临界点：73.8 bar, 31.1°C）。",
+    tempLabel: "反应器恒温工艺温度 (°C):",
+    tempHelp: "保温反应管路内部流体温度。低温运行（30-45°C）可彻底杜绝热氧化变色与天然热敏维生素损失。",
+    orificeLabel: "文丘里微米级微气泡喷嘴孔径 (µm):",
+    orificeHelp: "喷嘴喉部微孔口径，决定微气泡高剪切分散度、Sauter平均索特粒径 (d32) 与相界面积 (a)。",
+    co2RatioLabel: "CO2/液体质量混合比 (% w/w):",
+    co2RatioHelp: "注入连续物料流中的密相/超临界二氧化碳质量百分比。",
+    flowRateLabel: "连续工艺物料流速 (L/h):",
+    flowRateHelp: "决定流体雷诺数（Re）与加压反应管道内溶解释放驻留杀菌时间的体积处理量。",
+    targetLabel: "目标控制致病菌或褐变酶系:",
+    targetHelp: "选择用于计算非热动力学杀灭曲线的法规代表性致病菌或货架期酶。",
+    presetsTitle: "标准商用工艺预设方案",
+    presetCitrus5Log: "冷榨柑橘汁 5-Log 无菌巴氏灭菌 (120 bar, 38°C, 25 µm文丘里, 10% CO2, 600 L/h)",
+    presetCiderPpo: "鲜榨原汁苹果酒 PPO 酶褐变完全失活 (140 bar, 40°C, 20 µm, 12% CO2, 500 L/h)",
+    presetEggSalmonella: "鲜全蛋液非热力沙门氏菌彻底杀灭 (160 bar, 36°C, 35 µm, 8% CO2, 450 L/h)",
+    presetChannelingHazard: "亚临界大气泡汇聚与 5-Log 灭菌失效严重工况 (45 bar, 24°C, 85 µm, 4% CO2)",
+    diagnosticTitle: "实时密相热力学与无菌灭菌工程诊断",
+    diagnosticSub: "计算CO2热力学相态、溶解碳酸浓度、胞内pH崩溃降幅、微生物杀灭对数值及ASME容器安全裕度。",
+    co2PhaseStateLabel: "CO2 流体热力学相态:",
+    dissolvedCo2Label: "饱和溶解 CO2 质量浓度:",
+    phDropLabel: "胞内细胞质 pH 瞬态压降 (ΔpH):",
+    bubbleDiameterLabel: "微气泡索特平均粒径 (d32):",
+    residenceTimeLabel: "加压保温管内有效杀菌驻留时间:",
+    logReductionLabel: "食源性致病菌杀灭对数值 (Log):",
+    enzymeInactivationLabel: "多酚氧化酶 (PPO/PME) 残留酶活力:",
+    cycloneSeparationLabel: "旋风气液分离器闪蒸脱气效率:",
+    asmeSafetyMarginLabel: "ASME BPVC 承压容器结构安全系数:",
+    fdaHaccpStatusLabel: "FDA 果汁 HACCP 5-Log 法规状态:",
+    safetyStatusLabel: "工艺综合运行状态评估:",
+    primaryRiskLabel: "主要动力学限制瓶颈:",
+    mechanismsLabel: "主导演变之密相杀灭微观机理:",
+    mitigationLabel: "建议采取的工艺工程措施:",
+    scienceTitle: "密相流体热力学与非热力灭活理论依据",
+    scienceSub: "主导连续HPCD非热杀菌工艺的热力学相态平衡、微气泡传质与微生物杀灭动力学模型。",
+    tableTitle: "密相CO2相态参数与各食品基质处理参数对照矩阵"
+  },
+  ja: {
+    badge: "高密度流体熱力学・非加熱殺菌工学",
+    title: "産業用連続高圧二酸化炭素（HPCD）マイクロバブル超微細溶解・酵素失活解析シミュレータ",
+    subtitle: "液体食品の連続産業用高圧二酸化炭素（High-Pressure Carbon Dioxide / Dense-Phase CO2）非加熱殺菌プロセスをシミュレーション。超臨界・高密度相CO2熱力学相平衡、ベンチュリ・マイクロバブル高物質移動溶解、親油性細胞膜透過、細胞質pH低下崩壊、ポリフェノールオキシダーゼ（PPO）変性失活、サイクロン減圧分離、およびFDA 21 CFR § 120 Juice HACCP 5-Log適合性を高精度に解析します。",
+    controlsTitle: "HPCD反応器構造・運転制御パラメータ",
+    controlsSub: "反応圧力、プロセス温度、ベンチュリ・マイクロノズル孔径、CO2/液体質量比、物料流量、および対象微生物/酵素基質を設定します。",
+    systemLabel: "連続HPCDシステムアーキテクチャ:",
+    systemHelp: "産業用高圧CO2殺菌ユニット、設計耐圧グレード、反応保持容積、および接液金属材料を選択します。",
+    matrixLabel: "液体食品マトリクス・対象基質:",
+    matrixHelp: "飲料基質、糖酸比、内因性酵素初期活性、および対象食中毒菌を選択します。",
+    pressureLabel: "システム運転油圧圧力 (bar):",
+    pressureHelp: "連続加圧保持圧力。CO2の密度および溶解度平衡定数を決定します（CO2臨界点：73.8 bar, 31.1°C）。",
+    tempLabel: "反応器等温プロセス温度 (°C):",
+    tempHelp: "保持配管内の液体温度。30〜45°Cの低温領域で熱劣化変色やビタミンC熱分解を完全に回避します。",
+    orificeLabel: "ベンチュリ・マイクロバブル微細孔径 (µm):",
+    orificeHelp: "微小ノズル径。マイクロバブルのせん断分散度、ザウター平均粒径（d32）、気液接触比表面積（a）を決定します。",
+    co2RatioLabel: "CO2/液体質量混合比 (% w/w):",
+    co2RatioHelp: "連続液体流に注入される超臨界・高密度CO2の質量混合比率。",
+    flowRateLabel: "連続プロセス処理流量 (L/h):",
+    flowRateHelp: "加圧反応管内でのレイノルズ数および有効殺菌滞留時間を決定する体積流量。",
+    targetLabel: "制御対象致死病原菌または品質劣化酵素:",
+    targetHelp: "非加熱失活キネティクス計算を行う規制対象病原菌または褐変酵素を選択します。",
+    presetsTitle: "標準産業用運転プリセット",
+    presetCitrus5Log: "コールドプレス柑橘果汁 5-Log 無菌低温殺菌 (120 bar, 38°C, 25 µm, 10% CO2, 600 L/h)",
+    presetCiderPpo: "無ろ過リンゴサイダー PPO 酵素褐変完全不活性化 (140 bar, 40°C, 20 µm, 12% CO2, 500 L/h)",
+    presetEggSalmonella: "全液卵非加熱サルモネラ菌完全死滅 (160 bar, 36°C, 35 µm, 8% CO2, 450 L/h)",
+    presetChannelingHazard: "亜臨界粗大気泡合一・5-Log未達危険運転工況 (45 bar, 24°C, 85 µm, 4% CO2)",
+    diagnosticTitle: "リアルタイム高密度相熱力学・無菌診断",
+    diagnosticSub: "算出されたCO2熱力学相状態、飽和炭酸溶解濃度、細胞質pH低下量、微生物対数死滅率、およびASME安全率。",
+    co2PhaseStateLabel: "CO2 流体熱力学相状態:",
+    dissolvedCo2Label: "飽和溶解 CO2 質量濃度:",
+    phDropLabel: "細胞質内 pH 低下落差 (ΔpH):",
+    bubbleDiameterLabel: "マイクロバブル・ザウター平均粒径 (d32):",
+    residenceTimeLabel: "加圧保持管内有効殺菌滞留時間:",
+    logReductionLabel: "対象食中毒菌殺滅対数値 (Log):",
+    enzymeInactivationLabel: "ポリフェノールオキシダーゼ (PPO) 残存活性率:",
+    cycloneSeparationLabel: "サイクロン気液脱気分離効率:",
+    asmeSafetyMarginLabel: "ASME BPVC 圧力容器安全率:",
+    fdaHaccpStatusLabel: "FDA Juice HACCP 5-Log 適合性:",
+    safetyStatusLabel: "プロセス総合運転ステータス:",
+    primaryRiskLabel: "主要速度論的制限要因:",
+    mechanismsLabel: "主動的超臨界相殺滅メカニズム:",
+    mitigationLabel: "推奨される工学的対策:",
+    scienceTitle: "高密度流体熱力学・不活性化キネティクス理論",
+    scienceSub: "連続HPCD非加熱殺菌を支配する熱力学相平衡式、マイクロバブル物質移動式、および微生物死滅モデル。",
+    tableTitle: "高密度CO2相平衡・食品マトリクス処理パラメータ対比マトリクス"
+  }
+};
+
+const d = DICT[lang] || DICT.en;
+---
+
+<div class="bg-surface rounded-3xl border border-hairline p-6 md:p-10 shadow-sm max-w-5xl mx-auto my-8 font-sans text-ink">
+  <!-- Header Badge & Title -->
+  <div class="mb-8">
+    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-sky-600 text-white mb-3">
+      <span>💨</span>
+      <span>{d.badge}</span>
+    </div>
+    <h1 class="text-2xl md:text-4xl font-extrabold tracking-tight mb-4 text-ink">
+      {d.title}
+    </h1>
+    <p class="text-body text-sm md:text-base leading-relaxed text-muted">
+      {d.subtitle}
+    </p>
+  </div>
+
+  <!-- Operational Presets -->
+  <div class="mb-10 p-5 bg-surface-soft border border-hairline/80 rounded-2xl">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="text-sm font-bold text-ink uppercase tracking-wide">⚡ {d.presetsTitle}</span>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+      <button 
+        type="button" 
+        id="presetCitrusBtn"
+        class="text-left px-3.5 py-2.5 text-xs font-medium rounded-xl border border-hairline bg-surface hover:bg-sky-50 dark:hover:bg-sky-950/40 hover:border-sky-400 text-ink transition-colors flex items-center justify-between"
+      >
+        <span>🍊 {d.presetCitrus5Log}</span>
+        <span class="text-sky-600 font-bold ml-2">Load &rarr;</span>
+      </button>
+      <button 
+        type="button" 
+        id="presetCiderBtn"
+        class="text-left px-3.5 py-2.5 text-xs font-medium rounded-xl border border-hairline bg-surface hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:border-emerald-400 text-ink transition-colors flex items-center justify-between"
+      >
+        <span>🍏 {d.presetCiderPpo}</span>
+        <span class="text-emerald-600 font-bold ml-2">Load &rarr;</span>
+      </button>
+      <button 
+        type="button" 
+        id="presetEggBtn"
+        class="text-left px-3.5 py-2.5 text-xs font-medium rounded-xl border border-hairline bg-surface hover:bg-amber-50 dark:hover:bg-amber-950/40 hover:border-amber-400 text-ink transition-colors flex items-center justify-between"
+      >
+        <span>🥚 {d.presetEggSalmonella}</span>
+        <span class="text-amber-600 font-bold ml-2">Load &rarr;</span>
+      </button>
+      <button 
+        type="button" 
+        id="presetChannelingBtn"
+        class="text-left px-3.5 py-2.5 text-xs font-medium rounded-xl border border-hairline bg-surface hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:border-rose-400 text-ink transition-colors flex items-center justify-between"
+      >
+        <span>⚠️ {d.presetChannelingHazard}</span>
+        <span class="text-rose-600 font-bold ml-2">Load &rarr;</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Interactive Controls Section -->
+  <div class="mb-10">
+    <div class="mb-6">
+      <h2 class="text-lg md:text-xl font-bold tracking-tight text-ink flex items-center gap-2">
+        <span>🎛️</span>
+        <span>{d.controlsTitle}</span>
+      </h2>
+      <p class="text-xs md:text-sm text-muted mt-1">
+        {d.controlsSub}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-surface-soft p-6 rounded-2xl border border-hairline">
+      <!-- 1. System Selection -->
+      <div>
+        <label for="systemSelect" class="block text-xs font-bold uppercase tracking-wider text-ink mb-1">
+          {d.systemLabel}
+        </label>
+        <select 
+          id="systemSelect" 
+          class="w-full bg-surface border border-hairline rounded-xl px-3 py-2 text-xs md:text-sm text-ink focus:ring-2 focus:ring-sky-500 font-medium"
+        >
+          {hpcdData.hpcdSystems.map((sys) => (
+            <option value={sys.id} selected={sys.id === 'commercial_high_pressure_hpcd_600l'}>
+              {sys.name}
+            </option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1 leading-normal" id="systemDescriptionText">
+          {d.systemHelp}
+        </p>
+      </div>
+
+      <!-- 2. Matrix Selection -->
+      <div>
+        <label for="matrixSelect" class="block text-xs font-bold uppercase tracking-wider text-ink mb-1">
+          {d.matrixLabel}
+        </label>
+        <select 
+          id="matrixSelect" 
+          class="w-full bg-surface border border-hairline rounded-xl px-3 py-2 text-xs md:text-sm text-ink focus:ring-2 focus:ring-sky-500 font-medium"
+        >
+          {hpcdData.foodMatrices.map((mat) => (
+            <option value={mat.id} selected={mat.id === 'cold_pressed_orange_juice'}>
+              {mat.name}
+            </option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1 leading-normal" id="matrixDescriptionText">
+          {d.matrixHelp}
+        </p>
+      </div>
+
+      <!-- 3. Pressure Slider -->
+      <div>
+        <div class="flex justify-between items-center mb-1">
+          <label for="pressureSlider" class="text-xs font-bold uppercase tracking-wider text-ink">
+            {d.pressureLabel}
+          </label>
+          <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-sky-100 dark:bg-sky-900/60 text-sky-800 dark:text-sky-200" id="pressureValue">
+            120 bar
+          </span>
+        </div>
+        <input 
+          type="range" 
+          id="pressureSlider" 
+          min="30" 
+          max="250" 
+          step="5" 
+          value="120"
+          class="w-full h-2 bg-hairline rounded-lg appearance-none cursor-pointer accent-sky-600"
+        />
+        <div class="flex justify-between text-[10px] text-muted font-mono mt-0.5">
+          <span>30 bar (Sub-Critical)</span>
+          <span class="text-sky-600 font-bold">Pc = 73.8 bar</span>
+          <span>250 bar (Supercritical)</span>
+        </div>
+        <p class="text-[11px] text-muted mt-1 leading-normal">
+          {d.pressureHelp}
+        </p>
+      </div>
+
+      <!-- 4. Temperature Slider -->
+      <div>
+        <div class="flex justify-between items-center mb-1">
+          <label for="tempSlider" class="text-xs font-bold uppercase tracking-wider text-ink">
+            {d.tempLabel}
+          </label>
+          <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200" id="tempValue">
+            38 °C
+          </span>
+        </div>
+        <input 
+          type="range" 
+          id="tempSlider" 
+          min="20" 
+          max="55" 
+          step="1" 
+          value="38"
+          class="w-full h-2 bg-hairline rounded-lg appearance-none cursor-pointer accent-amber-600"
+        />
+        <div class="flex justify-between text-[10px] text-muted font-mono mt-0.5">
+          <span>20 °C</span>
+          <span class="text-amber-600 font-bold">Tc = 31.1 °C</span>
+          <span>55 °C</span>
+        </div>
+        <p class="text-[11px] text-muted mt-1 leading-normal">
+          {d.tempHelp}
+        </p>
+      </div>
+
+      <!-- 5. Venturi Orifice Slider -->
+      <div>
+        <div class="flex justify-between items-center mb-1">
+          <label for="orificeSlider" class="text-xs font-bold uppercase tracking-wider text-ink">
+            {d.orificeLabel}
+          </label>
+          <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/60 text-indigo-800 dark:text-indigo-200" id="orificeValue">
+            25 µm
+          </span>
+        </div>
+        <input 
+          type="range" 
+          id="orificeSlider" 
+          min="15" 
+          max="100" 
+          step="5" 
+          value="25"
+          class="w-full h-2 bg-hairline rounded-lg appearance-none cursor-pointer accent-indigo-600"
+        />
+        <div class="flex justify-between text-[10px] text-muted font-mono mt-0.5">
+          <span>15 µm (Sub-Micro)</span>
+          <span>50 µm</span>
+          <span>100 µm (Macro)</span>
+        </div>
+        <p class="text-[11px] text-muted mt-1 leading-normal">
+          {d.orificeHelp}
+        </p>
+      </div>
+
+      <!-- 6. CO2 Mass Ratio Slider -->
+      <div>
+        <div class="flex justify-between items-center mb-1">
+          <label for="co2RatioSlider" class="text-xs font-bold uppercase tracking-wider text-ink">
+            {d.co2RatioLabel}
+          </label>
+          <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200" id="co2RatioValue">
+            10.0 %
+          </span>
+        </div>
+        <input 
+          type="range" 
+          id="co2RatioSlider" 
+          min="2.0" 
+          max="20.0" 
+          step="0.5" 
+          value="10.0"
+          class="w-full h-2 bg-hairline rounded-lg appearance-none cursor-pointer accent-emerald-600"
+        />
+        <div class="flex justify-between text-[10px] text-muted font-mono mt-0.5">
+          <span>2.0%</span>
+          <span>10.0%</span>
+          <span>20.0%</span>
+        </div>
+        <p class="text-[11px] text-muted mt-1 leading-normal">
+          {d.co2RatioHelp}
+        </p>
+      </div>
+
+      <!-- 7. Flow Rate Slider -->
+      <div>
+        <div class="flex justify-between items-center mb-1">
+          <label for="flowRateSlider" class="text-xs font-bold uppercase tracking-wider text-ink">
+            {d.flowRateLabel}
+          </label>
+          <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-900/60 text-purple-800 dark:text-purple-200" id="flowRateValue">
+            600 L/h
+          </span>
+        </div>
+        <input 
+          type="range" 
+          id="flowRateSlider" 
+          min="50" 
+          max="3000" 
+          step="50" 
+          value="600"
+          class="w-full h-2 bg-hairline rounded-lg appearance-none cursor-pointer accent-purple-600"
+        />
+        <div class="flex justify-between text-[10px] text-muted font-mono mt-0.5">
+          <span>50 L/h</span>
+          <span>1,500 L/h</span>
+          <span>3,000 L/h</span>
+        </div>
+        <p class="text-[11px] text-muted mt-1 leading-normal">
+          {d.flowRateHelp}
+        </p>
+      </div>
+
+      <!-- 8. Target Pathogen / Enzyme Selection -->
+      <div>
+        <label for="targetSelect" class="block text-xs font-bold uppercase tracking-wider text-ink mb-1">
+          {d.targetLabel}
+        </label>
+        <select 
+          id="targetSelect" 
+          class="w-full bg-surface border border-hairline rounded-xl px-3 py-2 text-xs md:text-sm text-ink focus:ring-2 focus:ring-sky-500 font-medium"
+        >
+          {hpcdData.microbialTargets.map((tar) => (
+            <option value={tar.id} selected={tar.id === 'ecoli_o157h7'}>
+              {tar.organism}
+            </option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted mt-1 leading-normal" id="targetDescriptionText">
+          {d.targetHelp}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real-Time Diagnostic Dashboard -->
+  <div class="mb-10">
+    <div class="mb-6">
+      <h2 class="text-lg md:text-xl font-bold tracking-tight text-ink flex items-center gap-2">
+        <span>🔬</span>
+        <span>{d.diagnosticTitle}</span>
+      </h2>
+      <p class="text-xs md:text-sm text-muted mt-1">
+        {d.diagnosticSub}
+      </p>
+    </div>
+
+    <!-- Status Hero Card -->
+    <div class="p-6 rounded-2xl border mb-6 transition-all" id="statusHeroCard">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-muted mb-1">
+            {d.safetyStatusLabel}
+          </div>
+          <div class="text-2xl md:text-3xl font-extrabold flex items-center gap-2" id="safetyStatusText">
+            <span id="safetyStatusIcon">✅</span>
+            <span id="safetyStatusTitle">Optimal Supercritical CO2 Sterilization</span>
+          </div>
+        </div>
+        <div class="px-4 py-2 rounded-xl text-xs font-bold tracking-wider uppercase border" id="complianceBadge">
+          FDA 21 CFR § 120 COMPLIANT (≥ 5.0 LOG)
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-hairline/60 pt-4 text-xs">
+        <div>
+          <span class="font-bold text-muted block mb-0.5">{d.primaryRiskLabel}</span>
+          <span class="font-medium text-ink" id="primaryRiskText">Adequate mass transfer; no limiting bottlenecks detected.</span>
+        </div>
+        <div>
+          <span class="font-bold text-muted block mb-0.5">{d.mechanismsLabel}</span>
+          <span class="font-medium text-ink" id="mechanismsText">Dense-phase phospholipid extraction &amp; cytoplasmic pH collapse.</span>
+        </div>
+        <div>
+          <span class="font-bold text-muted block mb-0.5">{d.mitigationLabel}</span>
+          <span class="font-medium text-ink" id="mitigationText">Maintain holding pressure ≥ 110 bar for continuous aseptic run.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metrics Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <!-- 1. CO2 Phase State -->
+      <div class="p-4 bg-surface-soft border border-hairline rounded-xl">
+        <div class="text-[11px] font-bold text-muted uppercase tracking-wider mb-1">
+          {d.co2PhaseStateLabel}
+        </div>
+        <div class="text-lg md:text-xl font-extrabold text-sky-700 dark:text-sky-300 font-mono" id="metricPhaseState">
+          Supercritical Fluid
+        </div>
+        <div class="text-[10px] text-muted mt-1 font-mono" id="metricPhaseSub">
+          ρ ≈ 680 kg/m³ • P > Pc, T > Tc
+        </div>
+      </div>
+
+      <!-- 2. Dissolved CO2 Concentration -->
+      <div class="p-4 bg-surface-soft border border-hairline rounded-xl">
+        <div class="text-[11px] font-bold text-muted uppercase tracking-wider mb-1">
+          {d.dissolvedCo2Label}
+        </div>
+        <div class="text-lg md:text-xl font-extrabold text-indigo-700 dark:text-indigo-300 font-mono" id="metricDissolvedCo2">
+          28.4 g/L
+        </div>
+        <div class="text-[10px] text-muted mt-1 font-mono" id="metricDissolvedCo2Sub">
+          kH(T) • f_CO2 Henry's Law
+        </div>
+      </div>
+
+      <!-- 3. Cytoplasmic pH Drop -->
+      <div class="p-4 bg-surface-soft border border-hairline rounded-xl">
+        <div class="text-[11px] font-bold text-muted uppercase tracking-wider mb-1">
+          {d.phDropLabel}
+        </div>
+        <div class="text-lg md:text-xl font-extrabold text-rose-700 dark:text-rose-300 font-mono" id="metricPhDrop">
+          - 2.45 pH
+        </div>
+        <div class="text-[10px] text-muted mt-1 font-mono" id="metricPhDropSub">
+          Internal pH: 7.20 &rarr; 4.75
+        </div>
+      </div>
+
+      <!-- 4. Micro-Bubble Sauter Diameter -->
+      <div class="p-4 bg-surface-soft border border-hairline rounded-xl">
+        <div class="text-[11px] font-bold text-muted uppercase tracking-wider mb-1">
+          {d.bubbleDiameterLabel}
+        </div>
+        <div class="text-lg md:text-xl font-extrabold text-teal-700 dark:text-teal-300 font-mono" id="metricBubbleDiameter">
+          18.2 µm
+        </div>
+        <div class="text-[10px] text-muted mt-1 font-mono" id="metricBubbleSub">
+          Interfacial Area a ≈ 3,290 m²/m³
+        </div>
+      </div>
+
+      <!-- 5. Pressurized Residence Time -->
+      <div class="p-4 bg-surface-soft border border-hairline rounded-xl">
+        <div class="text-[11px] font-bold text-muted uppercase tracking-wider mb-1">
+          {d.residenceTimeLabel}
+        </div>
+        <div class="text-lg md:text-xl font-extrabold text-amber-700 dark:text-amber-300 font-mono" id="metricResidenceTime">
+          168.0 s
+        </div>
+        <div class="text-[10px] text-muted mt-1 font-mono" id="metricResidenceSub">
+          Holding Volume: 28.0 L
+        </div>
+      </div>
+
+      <!-- 6. Microbial Lethality (Log) -->
+      <div class="p-4 bg-surface-soft border border-hairline rounded-xl">
+        <div class="text-[11px] font-bold text-muted uppercase tracking-wider mb-1">
+          {d.logReductionLabel}
+        </div>
+        <div class="text-lg md:text-xl font-extrabold text-emerald-700 dark:text-emerald-300 font-mono" id="metricLogReduction">
+          6.42 Log
+        </div>
+        <div class="text-[10px] text-muted mt-1 font-mono" id="metricLogSub">
+          Survival Fraction: 3.8e-7
+        </div>
+      </div>
+
+      <!-- 7. Residual PPO Enzyme Activity -->
+      <div class="p-4 bg-surface-soft border border-hairline rounded-xl">
+        <div class="text-[11px] font-bold text-muted uppercase tracking-wider mb-1">
+          {d.enzymeInactivationLabel}
+        </div>
+        <div class="text-lg md:text-xl font-extrabold text-fuchsia-700 dark:text-fuchsia-300 font-mono" id="metricEnzymeActivity">
+          4.2 %
+        </div>
+        <div class="text-[10px] text-muted mt-1 font-mono" id="metricEnzymeSub">
+          95.8% Inactivated (Anti-Browning)
+        </div>
+      </div>
+
+      <!-- 8. ASME Vessel Safety Factor -->
+      <div class="p-4 bg-surface-soft border border-hairline rounded-xl">
+        <div class="text-[11px] font-bold text-muted uppercase tracking-wider mb-1">
+          {d.asmeSafetyMarginLabel}
+        </div>
+        <div class="text-lg md:text-xl font-extrabold text-sky-800 dark:text-sky-200 font-mono" id="metricAsmeSafety">
+          2.68x
+        </div>
+        <div class="text-[10px] text-muted mt-1 font-mono" id="metricAsmeSub">
+          P_burst: 320 bar (ASME VIII Div 1)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Deep Scientific & Engineering Foundations -->
+  <div class="mb-10 border-t border-hairline pt-8">
+    <div class="mb-6">
+      <h2 class="text-lg md:text-xl font-bold tracking-tight text-ink flex items-center gap-2">
+        <span>📚</span>
+        <span>{d.scienceTitle}</span>
+      </h2>
+      <p class="text-xs md:text-sm text-muted mt-1">
+        {d.scienceSub}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-body leading-relaxed">
+      <div class="p-5 bg-surface-soft border border-hairline rounded-2xl">
+        <h3 class="font-bold text-sm text-ink mb-2">1. Dense-Phase CO2 Equilibrium &amp; Henry's Law</h3>
+        <p class="mb-2">
+          At temperatures and pressures exceeding the carbon dioxide vapor-liquid coexistence curve ($P_c = 73.8\text{ bar}$, $T_c = 31.1^\circ\text{C}$), CO2 transitions into a dense-phase liquid or supercritical fluid exhibiting liquid-like densities ($\rho \approx 600 - 900\text{ kg/m}^3$) and gas-like diffusivities ($D \approx 10^{-4}\text{ cm}^2/\text{s}$). Dissolution into the aqueous continuous carrier is governed by high-pressure fugacity-corrected Henry's Law:
+        </p>
+        <div class="p-3 bg-surface border border-hairline rounded-xl font-mono text-[11px] mb-2 text-ink">
+          C_CO2 = k_H(T) &bull; &phi;(T, P) &bull; P &bull; exp[(v_CO2^&infin; &bull; (P - P_0)) / (R &bull; T)]
+        </div>
+        <p class="text-[11px] text-muted">
+          Where $\phi(T, P)$ is the high-pressure fugacity coefficient and $v_{\text{CO}_2}^\infty \approx 32.8\text{ cm}^3/\text{mol}$ is the partial molar volume of carbon dioxide at infinite aqueous dilution.
+        </p>
+      </div>
+
+      <div class="p-5 bg-surface-soft border border-hairline rounded-2xl">
+        <h3 class="font-bold text-sm text-ink mb-2">2. Venturi Micro-Bubble Shearing &amp; Interfacial Area</h3>
+        <p class="mb-2">
+          High-pressure Venturi injection nozzles create turbulent micro-orifice shearing ($\text{We} > 12$), fracturing dense CO2 into sub-micro bubbles ($d_{32} = 15 - 40\ \mu\text{m}$). This expands the interfacial gas-liquid specific contact area ($a$) by over two orders of magnitude compared to traditional static batch autoclaves:
+        </p>
+        <div class="p-3 bg-surface border border-hairline rounded-xl font-mono text-[11px] mb-2 text-ink">
+          a = (6 &bull; &epsilon;_CO2) / d_32 &asymp; 2,500 - 4,500 m&sup2;/m&sup3;
+        </div>
+        <p class="text-[11px] text-muted">
+          Accelerating mass transfer rate $dC_L/dt = k_L a \cdot (C^* - C_L)$, driving rapid fluid saturation in under 3.5 seconds of pipe flow.
+        </p>
+      </div>
+
+      <div class="p-5 bg-surface-soft border border-hairline rounded-2xl">
+        <h3 class="font-bold text-sm text-ink mb-2">3. Cytoplasmic Acidification &amp; Cell Lysis Kinetics</h3>
+        <p class="mb-2">
+          Uncharged, lipophilic dense CO2 rapidly diffuses across microbial phospholipid bilayers. Upon entering the neutral intracellular cytoplasm ($\text{pH} \approx 7.0 - 7.4$), CO2 dissociates into carbonic acid ($\text{H}_2\text{CO}_3 \rightleftharpoons \text{H}^+ + \text{HCO}_3^-$), collapsing internal cellular pH below 4.5. This exhausts proton-translocating ATPases, extracts vital membrane sterols, and triggers explosive structural lysis during rapid cyclone depressurization:
+        </p>
+        <div class="p-3 bg-surface border border-hairline rounded-xl font-mono text-[11px] mb-2 text-ink">
+          Log(N0 / N) = (t / D_eff) = (t / D_ref) &bull; (P / P_ref)^&alpha; &bull; exp[&beta; &bull; (T - T_ref)]
+        </div>
+        <p class="text-[11px] text-muted">
+          Empirical activation exponents ($\alpha = 1.8 - 2.4$) ensure rapid 5-log inactivation within 45 to 180 seconds at 35–42°C.
+        </p>
+      </div>
+
+      <div class="p-5 bg-surface-soft border border-hairline rounded-2xl">
+        <h3 class="font-bold text-sm text-ink mb-2">4. Aseptic Standards &amp; ASME Pressure Safety</h3>
+        <p class="mb-2">
+          Industrial continuous HPCD systems must operate in strict compliance with hygienic and pressure vessel regulatory standards:
+        </p>
+        <ul class="list-disc pl-4 space-y-1 text-[11px] text-muted">
+          <li><strong>FDA 21 CFR § 120:</strong> Mandatory validated continuous 5-log (99.999%) reduction of *E. coli* O157:H7 or *Salmonella* in commercial juice processing.</li>
+          <li><strong>ASME BPVC Section VIII:</strong> Division 1 &amp; 2 vessel wall thickness verification, rupture disk burst ratings, and hydro-testing at 1.5× maximum allowable working pressure.</li>
+          <li><strong>CGA G-6.1 &amp; OSHA:</strong> Safety exhaust ventilation limits protecting operators against high-concentration CO2 asphyxiation hazards (TWA 5,000 ppm).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comparison Table -->
+  <div class="border-t border-hairline pt-8">
+    <h2 class="text-base md:text-lg font-bold tracking-tight text-ink mb-4 flex items-center gap-2">
+      <span>📊</span>
+      <span>{d.tableTitle}</span>
+    </h2>
+    <div class="overflow-x-auto rounded-xl border border-hairline">
+      <table class="w-full text-left text-xs border-collapse">
+        <thead>
+          <tr class="bg-surface-soft border-b border-hairline text-ink">
+            <th class="p-3 font-bold">Food Matrix</th>
+            <th class="p-3 font-bold">Target Pathogen / Enzyme</th>
+            <th class="p-3 font-bold">Optimal Pressure</th>
+            <th class="p-3 font-bold">Process Temp</th>
+            <th class="p-3 font-bold">CO2 w/w Ratio</th>
+            <th class="p-3 font-bold">D-value (min)</th>
+            <th class="p-3 font-bold">FDA 5-Log Time</th>
+            <th class="p-3 font-bold">Organoleptic Integrity</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline">
+          <tr class="hover:bg-surface-soft/60">
+            <td class="p-3 font-medium">Cold-Pressed Orange Juice</td>
+            <td class="p-3 text-muted">E. coli O157:H7 &amp; PME</td>
+            <td class="p-3 font-mono font-bold text-sky-700">120 bar</td>
+            <td class="p-3 font-mono">38 °C</td>
+            <td class="p-3 font-mono">10.0%</td>
+            <td class="p-3 font-mono">0.42 min</td>
+            <td class="p-3 font-mono font-bold text-emerald-700">2.1 min (126 s)</td>
+            <td class="p-3 text-emerald-600 font-medium">Zero Cooked Off-Flavor (94% Vit C)</td>
+          </tr>
+          <tr class="hover:bg-surface-soft/60">
+            <td class="p-3 font-medium">Cloudy Raw Apple Cider</td>
+            <td class="p-3 text-muted">Salmonella &amp; PPO</td>
+            <td class="p-3 font-mono font-bold text-sky-700">140 bar</td>
+            <td class="p-3 font-mono">40 °C</td>
+            <td class="p-3 font-mono">12.0%</td>
+            <td class="p-3 font-mono">0.38 min</td>
+            <td class="p-3 font-mono font-bold text-emerald-700">1.9 min (114 s)</td>
+            <td class="p-3 text-emerald-600 font-medium">Preserved Fresh Polyphenols</td>
+          </tr>
+          <tr class="hover:bg-surface-soft/60">
+            <td class="p-3 font-medium">Raw Bioactive Coconut Water</td>
+            <td class="p-3 text-muted">L. monocytogenes &amp; POD</td>
+            <td class="p-3 font-mono font-bold text-sky-700">150 bar</td>
+            <td class="p-3 font-mono">36 °C</td>
+            <td class="p-3 font-mono">10.0%</td>
+            <td class="p-3 font-mono">0.55 min</td>
+            <td class="p-3 font-mono font-bold text-emerald-700">2.75 min (165 s)</td>
+            <td class="p-3 text-emerald-600 font-medium">Clear Color, Zero Pink Oxidation</td>
+          </tr>
+          <tr class="hover:bg-surface-soft/60">
+            <td class="p-3 font-medium">Liquid Whole Egg Homogenate</td>
+            <td class="p-3 text-muted">Salmonella enteritidis</td>
+            <td class="p-3 font-mono font-bold text-sky-700">160 bar</td>
+            <td class="p-3 font-mono">35 °C</td>
+            <td class="p-3 font-mono">8.0%</td>
+            <td class="p-3 font-mono">0.48 min</td>
+            <td class="p-3 font-mono font-bold text-emerald-700">2.4 min (144 s)</td>
+            <td class="p-3 text-emerald-600 font-medium">No Protein Coagulation (Foam Intact)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Technical Data Integration
+  const hpcdSystemsData = {
+    pilot_continuous_hpcd_50l: {
+      name: "Pilot R&D Continuous Dense-Phase HPCD Micro-Bubble System",
+      nominalThroughput: 50,
+      maxPressure: 150.0,
+      reactorVolume: 3.5,
+      venturiOrifice: 25.0,
+      co2Ratio: 0.08,
+      cycloneEfficiency: 99.4,
+      burstPressure: 280.0,
+      desc: "Pilot scale R&D continuous unit for process authority lethality validation."
+    },
+    commercial_high_pressure_hpcd_600l: {
+      name: "Commercial Continuous 600 L/h Dense-Phase CO2 Multi-Venturi Pasteurizer",
+      nominalThroughput: 600,
+      maxPressure: 130.0,
+      reactorVolume: 28.0,
+      venturiOrifice: 35.0,
+      co2Ratio: 0.10,
+      cycloneEfficiency: 99.8,
+      burstPressure: 320.0,
+      desc: "Commercial beverage pasteurizer featuring multi-stage Venturi micro-bubble injection."
+    },
+    industrial_supercritical_hpcd_2500l: {
+      name: "Industrial High-Capacity 2,500 L/h Supercritical CO2 Juice & Puree Line",
+      nominalThroughput: 2500,
+      maxPressure: 250.0,
+      reactorVolume: 110.0,
+      venturiOrifice: 45.0,
+      co2Ratio: 0.14,
+      cycloneEfficiency: 99.9,
+      burstPressure: 550.0,
+      desc: "High-tonnage industrial supercritical CO2 line for fruit purees and beverages."
+    },
+    compromised_channeling_hpcd: {
+      name: "Compromised / Under-Pressurized HPCD Line",
+      nominalThroughput: 750,
+      maxPressure: 55.0,
+      reactorVolume: 22.0,
+      venturiOrifice: 85.0,
+      co2Ratio: 0.04,
+      cycloneEfficiency: 91.2,
+      burstPressure: 160.0,
+      desc: "Severely degraded line operating below CO2 critical solubility threshold."
+    }
+  };
+
+  const foodMatricesData = {
+    cold_pressed_orange_juice: {
+      density: 1045,
+      nativePh: 3.65,
+      solubilityFactor: 1.15,
+      dRefMin: 1.45,
+      targetLog: 5.0,
+      ppoSensitivity: 0.85,
+      desc: "Acidic citrus suspension prone to severe thermal off-flavors under traditional heat."
+    },
+    cloudy_apple_cider: {
+      density: 1052,
+      nativePh: 3.85,
+      solubilityFactor: 1.08,
+      dRefMin: 1.38,
+      targetLog: 5.0,
+      ppoSensitivity: 1.15,
+      desc: "High-polyphenol unpasteurized apple juice subject to rapid enzymatic browning by PPO."
+    },
+    raw_coconut_water: {
+      density: 1020,
+      nativePh: 5.25,
+      solubilityFactor: 1.30,
+      dRefMin: 2.10,
+      targetLog: 5.0,
+      ppoSensitivity: 0.95,
+      desc: "Delicate low-acid electrolyte fluid requiring rapid cytoplasmic acidification."
+    },
+    liquid_whole_egg: {
+      density: 1032,
+      nativePh: 7.40,
+      solubilityFactor: 0.88,
+      dRefMin: 1.65,
+      targetLog: 5.0,
+      ppoSensitivity: 0.70,
+      desc: "High-protein colloidal matrix coagulating at 62-64°C; HPCD destroys Salmonella at 36°C."
+    }
+  };
+
+  const microbialTargetsData = {
+    ecoli_o157h7: {
+      name: "Escherichia coli O157:H7",
+      kP: 0.016,
+      kT: 0.045,
+      baseDVal: 1.45,
+      desc: "Gram-negative target for FDA Juice HACCP 5-log rule."
+    },
+    salmonella_enteritidis: {
+      name: "Salmonella enterica serovar Enteritidis",
+      kP: 0.015,
+      kT: 0.042,
+      baseDVal: 1.55,
+      desc: "Gram-negative foodborne pathogen with high cellular acidification sensitivity."
+    },
+    listeria_monocytogenes: {
+      name: "Listeria monocytogenes",
+      kP: 0.012,
+      kT: 0.038,
+      baseDVal: 2.80,
+      desc: "Gram-positive psychrotrophic pathogen with dense peptidoglycan cell wall."
+    },
+    ppo_enzyme: {
+      name: "Endogenous Polyphenol Oxidase (PPO)",
+      kP: 0.018,
+      kT: 0.052,
+      baseDVal: 3.60,
+      desc: "Binuclear copper enzyme responsible for rapid post-harvest enzymatic browning."
+    }
+  };
+
+  // DOM Elements
+  const systemSelect = document.getElementById('systemSelect') as HTMLSelectElement | null;
+  const matrixSelect = document.getElementById('matrixSelect') as HTMLSelectElement | null;
+  const targetSelect = document.getElementById('targetSelect') as HTMLSelectElement | null;
+  const pressureSlider = document.getElementById('pressureSlider') as HTMLInputElement | null;
+  const tempSlider = document.getElementById('tempSlider') as HTMLInputElement | null;
+  const orificeSlider = document.getElementById('orificeSlider') as HTMLInputElement | null;
+  const co2RatioSlider = document.getElementById('co2RatioSlider') as HTMLInputElement | null;
+  const flowRateSlider = document.getElementById('flowRateSlider') as HTMLInputElement | null;
+
+  // Displays
+  const pressureValue = document.getElementById('pressureValue');
+  const tempValue = document.getElementById('tempValue');
+  const orificeValue = document.getElementById('orificeValue');
+  const co2RatioValue = document.getElementById('co2RatioValue');
+  const flowRateValue = document.getElementById('flowRateValue');
+  const systemDescriptionText = document.getElementById('systemDescriptionText');
+  const matrixDescriptionText = document.getElementById('matrixDescriptionText');
+  const targetDescriptionText = document.getElementById('targetDescriptionText');
+
+  // Metrics
+  const metricPhaseState = document.getElementById('metricPhaseState');
+  const metricPhaseSub = document.getElementById('metricPhaseSub');
+  const metricDissolvedCo2 = document.getElementById('metricDissolvedCo2');
+  const metricDissolvedCo2Sub = document.getElementById('metricDissolvedCo2Sub');
+  const metricPhDrop = document.getElementById('metricPhDrop');
+  const metricPhDropSub = document.getElementById('metricPhDropSub');
+  const metricBubbleDiameter = document.getElementById('metricBubbleDiameter');
+  const metricBubbleSub = document.getElementById('metricBubbleSub');
+  const metricResidenceTime = document.getElementById('metricResidenceTime');
+  const metricResidenceSub = document.getElementById('metricResidenceSub');
+  const metricLogReduction = document.getElementById('metricLogReduction');
+  const metricLogSub = document.getElementById('metricLogSub');
+  const metricEnzymeActivity = document.getElementById('metricEnzymeActivity');
+  const metricEnzymeSub = document.getElementById('metricEnzymeSub');
+  const metricAsmeSafety = document.getElementById('metricAsmeSafety');
+  const metricAsmeSub = document.getElementById('metricAsmeSub');
+
+  // Hero Card
+  const statusHeroCard = document.getElementById('statusHeroCard');
+  const safetyStatusIcon = document.getElementById('safetyStatusIcon');
+  const safetyStatusTitle = document.getElementById('safetyStatusTitle');
+  const complianceBadge = document.getElementById('complianceBadge');
+  const primaryRiskText = document.getElementById('primaryRiskText');
+  const mechanismsText = document.getElementById('mechanismsText');
+  const mitigationText = document.getElementById('mitigationText');
+
+  // Presets
+  const presetCitrusBtn = document.getElementById('presetCitrusBtn');
+  const presetCiderBtn = document.getElementById('presetCiderBtn');
+  const presetEggBtn = document.getElementById('presetEggBtn');
+  const presetChannelingBtn = document.getElementById('presetChannelingBtn');
+
+  function updateSimulation() {
+    if (!systemSelect || !matrixSelect || !targetSelect || !pressureSlider || !tempSlider || !orificeSlider || !co2RatioSlider || !flowRateSlider) return;
+
+    const sysKey = systemSelect.value as keyof typeof hpcdSystemsData;
+    const matKey = matrixSelect.value as keyof typeof foodMatricesData;
+    const tarKey = targetSelect.value as keyof typeof microbialTargetsData;
+
+    const sys = hpcdSystemsData[sysKey] || hpcdSystemsData.commercial_high_pressure_hpcd_600l;
+    const mat = foodMatricesData[matKey] || foodMatricesData.cold_pressed_orange_juice;
+    const tar = microbialTargetsData[tarKey] || microbialTargetsData.ecoli_o157h7;
+
+    const pressure = parseFloat(pressureSlider.value);
+    const temp = parseFloat(tempSlider.value);
+    const orifice = parseFloat(orificeSlider.value);
+    const co2Ratio = parseFloat(co2RatioSlider.value);
+    const flowRate = parseFloat(flowRateSlider.value);
+
+    // Update Slider text
+    if (pressureValue) pressureValue.textContent = `${pressure.toFixed(0)} bar`;
+    if (tempValue) tempValue.textContent = `${temp.toFixed(0)} °C`;
+    if (orificeValue) orificeValue.textContent = `${orifice.toFixed(0)} µm`;
+    if (co2RatioValue) co2RatioValue.textContent = `${co2Ratio.toFixed(1)} %`;
+    if (flowRateValue) flowRateValue.textContent = `${flowRate.toFixed(0)} L/h`;
+
+    if (systemDescriptionText) systemDescriptionText.textContent = sys.desc;
+    if (matrixDescriptionText) matrixDescriptionText.textContent = mat.desc;
+    if (targetDescriptionText) targetDescriptionText.textContent = tar.desc;
+
+    // 1. Thermodynamic Phase State
+    const Pc = 73.8;
+    const Tc = 31.1;
+    let phaseState = "Supercritical Fluid";
+    let phaseDensity = 680; // kg/m³
+    let isSupercritical = false;
+    let isSubCritical = false;
+
+    if (pressure >= Pc && temp >= Tc) {
+      phaseState = "Supercritical Fluid";
+      phaseDensity = 450 + (pressure - Pc) * 1.8 + (40 - temp) * 4.5;
+      isSupercritical = true;
+    } else if (pressure >= Pc && temp < Tc) {
+      phaseState = "Dense-Phase Liquid CO2";
+      phaseDensity = 820 + (pressure - Pc) * 1.2;
+    } else if (pressure < Pc && temp >= Tc) {
+      phaseState = "Superheated Dense Vapor";
+      phaseDensity = 150 + pressure * 2.2;
+      isSubCritical = true;
+    } else {
+      phaseState = "Sub-Critical Subcooled Liquid";
+      phaseDensity = 750 + pressure * 1.5;
+      isSubCritical = true;
+    }
+
+    if (metricPhaseState) {
+      metricPhaseState.textContent = phaseState;
+      if (isSubCritical) {
+        metricPhaseState.className = "text-lg md:text-xl font-extrabold text-rose-600 font-mono";
+      } else {
+        metricPhaseState.className = "text-lg md:text-xl font-extrabold text-sky-700 dark:text-sky-300 font-mono";
+      }
+    }
+    if (metricPhaseSub) metricPhaseSub.textContent = `ρ ≈ ${phaseDensity.toFixed(0)} kg/m³ • Pc=73.8 bar, Tc=31.1°C`;
+
+    // 2. Micro-Bubble Sauter Mean Diameter d32
+    // d32 = orifice * (We^-0.4) where We = (rho * v^2 * d) / sigma
+    const nozzleVelocity = (flowRate / 3600 / 1000) / (Math.PI * Math.pow(orifice * 1e-6 / 2, 2) * 4);
+    const d32Microns = Math.max(12.0, Math.min(95.0, orifice * 0.72 * Math.pow(100 / Math.max(pressure, 30), 0.35)));
+    const specificAreaM2PerM3 = (6.0 * (co2Ratio / 100)) / (d32Microns * 1e-6);
+
+    if (metricBubbleDiameter) metricBubbleDiameter.textContent = `${d32Microns.toFixed(1)} µm`;
+    if (metricBubbleSub) metricBubbleSub.textContent = `Interfacial Area a ≈ ${specificAreaM2PerM3.toFixed(0)} m²/m³`;
+
+    // 3. Dissolved CO2 Concentration via Henry's Law with Fugacity Correction
+    // C_CO2 (g/L) = kH(T) * phi * P * mat.solubilityFactor
+    const kH_ambient = 1.45; // g/(L*bar) at 25°C
+    const kH_temp = kH_ambient * Math.exp(-0.024 * (temp - 25));
+    const fugacityCoeff = pressure > 100 ? (0.65 + 0.0018 * pressure) : (0.85 - 0.0012 * pressure);
+    const dissolvedCo2GL = Math.min(48.0, kH_temp * fugacityCoeff * pressure * mat.solubilityFactor * (co2Ratio / 10));
+
+    if (metricDissolvedCo2) metricDissolvedCo2.textContent = `${dissolvedCo2GL.toFixed(1)} g/L`;
+    if (metricDissolvedCo2Sub) metricDissolvedCo2Sub.textContent = `Fugacity: ${(pressure * fugacityCoeff).toFixed(1)} bar • Sol: ${(dissolvedCo2GL / 10.45).toFixed(1)}% w/v`;
+
+    // 4. Cytoplasmic pH Drop
+    // Delta pH = -log10(1 + 10^(pH_initial - pKa_carbonic) * (C_CO2 / C_ref))
+    const initialPh = mat.nativePh;
+    const phDrop = Math.min(3.2, Math.max(0.4, 0.45 * Math.log(dissolvedCo2GL + 1.0) * (matKey === 'raw_coconut_water' ? 1.25 : 1.0)));
+    const finalPh = Math.max(2.8, initialPh - phDrop);
+
+    if (metricPhDrop) metricPhDrop.textContent = `- ${phDrop.toFixed(2)} pH`;
+    if (metricPhDropSub) metricPhDropSub.textContent = `In-Situ pH: ${initialPh.toFixed(2)} → ${finalPh.toFixed(2)}`;
+
+    // 5. Pressurized Residence Time
+    // tau = V_reactor / (Q_liquid + Q_co2_dense)
+    const effectiveFlowRateM3PerHour = (flowRate * (1 + (co2Ratio / 100) * (1000 / phaseDensity))) / 1000;
+    const residenceTimeSec = (sys.reactorVolume / 1000 / effectiveFlowRateM3PerHour) * 3600;
+
+    if (metricResidenceTime) metricResidenceTime.textContent = `${residenceTimeSec.toFixed(1)} s`;
+    if (metricResidenceSub) metricResidenceSub.textContent = `Holding Volume: ${sys.reactorVolume.toFixed(1)} L (${(residenceTimeSec / 60).toFixed(2)} min)`;
+
+    // 6. Microbial Lethality (Log Reduction)
+    // D_eff = baseDVal / ( (P/100)^kP * exp(kT * (T - 25)) * (a / a_ref)^0.4 )
+    const pressureMultiplier = Math.pow(Math.max(pressure, 20) / 100, tar.kP * 55);
+    const tempMultiplier = Math.exp(tar.kT * (temp - 25));
+    const massTransferBoost = Math.pow(specificAreaM2PerM3 / 2500, 0.45);
+    const effectiveDValMin = Math.max(0.12, tar.baseDVal / (pressureMultiplier * tempMultiplier * massTransferBoost));
+    const residenceTimeMin = residenceTimeSec / 60;
+    
+    let calculatedLog = residenceTimeMin / effectiveDValMin;
+    if (isSubCritical) {
+      calculatedLog = calculatedLog * 0.42; // severe penalty for subcritical incomplete solubilization
+    }
+
+    if (metricLogReduction) {
+      metricLogReduction.textContent = `${calculatedLog.toFixed(2)} Log`;
+      if (calculatedLog >= 5.0) {
+        metricLogReduction.className = "text-lg md:text-xl font-extrabold text-emerald-700 dark:text-emerald-300 font-mono";
+      } else {
+        metricLogReduction.className = "text-lg md:text-xl font-extrabold text-amber-600 font-mono";
+      }
+    }
+    const survivalFraction = Math.pow(10, -calculatedLog);
+    if (metricLogSub) metricLogSub.textContent = `Survival: ${survivalFraction.toExponential(1)} • Deff: ${(effectiveDValMin * 60).toFixed(0)}s`;
+
+    // 7. Residual PPO Enzyme Activity (%)
+    // PPO inactivation rate k_ppo
+    const ppoInactRate = 0.012 * Math.pow(pressure / 100, 1.8) * Math.exp(0.06 * (temp - 30)) * mat.ppoSensitivity;
+    const residualActivityPercent = Math.max(0.2, Math.min(100.0, 100.0 * Math.exp(-ppoInactRate * (residenceTimeSec / 60))));
+
+    if (metricEnzymeActivity) metricEnzymeActivity.textContent = `${residualActivityPercent.toFixed(1)} %`;
+    if (metricEnzymeSub) metricEnzymeSub.textContent = `${(100 - residualActivityPercent).toFixed(1)}% Inactivated (Anti-Browning)`;
+
+    // 8. ASME BPVC Safety Factor
+    const burstPressure = sys.burstPressure || 320.0;
+    const asmeFactor = burstPressure / pressure;
+
+    if (metricAsmeSafety) {
+      metricAsmeSafety.textContent = `${asmeFactor.toFixed(2)}x`;
+      if (asmeFactor < 1.5) {
+        metricAsmeSafety.className = "text-lg md:text-xl font-extrabold text-rose-600 font-mono";
+      } else if (asmeFactor < 2.0) {
+        metricAsmeSafety.className = "text-lg md:text-xl font-extrabold text-amber-600 font-mono";
+      } else {
+        metricAsmeSafety.className = "text-lg md:text-xl font-extrabold text-sky-800 dark:text-sky-200 font-mono";
+      }
+    }
+    if (metricAsmeSub) metricAsmeSub.textContent = `P_burst: ${burstPressure.toFixed(0)} bar (ASME VIII Div 1)`;
+
+    // Process Status & Hero Card Assessment
+    if (statusHeroCard && safetyStatusIcon && safetyStatusTitle && complianceBadge && primaryRiskText && mechanismsText && mitigationText) {
+      if (asmeFactor < 1.35) {
+        // Overpressure Hazard
+        statusHeroCard.className = "p-6 rounded-2xl border mb-6 transition-all bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-800 text-rose-950 dark:text-rose-100";
+        safetyStatusIcon.textContent = "🚨";
+        safetyStatusTitle.textContent = "ASME Overpressure Hazard / Wall Burst Risk";
+        complianceBadge.className = "px-4 py-2 rounded-xl text-xs font-bold tracking-wider uppercase border border-rose-400 bg-rose-100 dark:bg-rose-900/60 text-rose-800 dark:text-rose-200";
+        complianceBadge.textContent = "ASME SECTION VIII BREACH (SF < 1.5x)";
+        primaryRiskText.textContent = "Operating pressure exceeds allowable continuous design working stress.";
+        mechanismsText.textContent = "Severe hoop stress on thin-wall tubes; risk of elastomeric Kalrez extrusion.";
+        mitigationText.textContent = "Immediately reduce backpressure valve setting or install ASME certified burst disk.";
+      } else if (isSubCritical || calculatedLog < 4.0) {
+        // Subcritical / Sterility Failure
+        statusHeroCard.className = "p-6 rounded-2xl border mb-6 transition-all bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-800 text-amber-950 dark:text-amber-100";
+        safetyStatusIcon.textContent = "⚠️";
+        safetyStatusTitle.textContent = "Sub-Critical Macro-Bubble & 5-Log Sterility Failure";
+        complianceBadge.className = "px-4 py-2 rounded-xl text-xs font-bold tracking-wider uppercase border border-amber-400 bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200";
+        complianceBadge.textContent = "NON-COMPLIANT (< 5.0 LOG REDUCTION)";
+        primaryRiskText.textContent = "CO2 in subcritical gas/vapor phase; large coalesced bubbles bypass microbial contact.";
+        mechanismsText.textContent = "Insufficient carbonic acid dissociation; bacterial proton pumps remain unexhausted.";
+        mitigationText.textContent = "Elevate hydraulic pressure ≥ 100 bar and reduce Venturi micro-orifice diameter ≤ 35 µm.";
+      } else if (calculatedLog >= 5.0) {
+        // Fully Compliant Gold Master
+        statusHeroCard.className = "p-6 rounded-2xl border mb-6 transition-all bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-emerald-950 dark:text-emerald-100";
+        safetyStatusIcon.textContent = "✅";
+        safetyStatusTitle.textContent = "Validated Dense-Phase CO2 Aseptic Sterilization";
+        complianceBadge.className = "px-4 py-2 rounded-xl text-xs font-bold tracking-wider uppercase border border-emerald-400 bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200";
+        complianceBadge.textContent = "FDA 21 CFR § 120 COMPLIANT (≥ 5.0 LOG)";
+        primaryRiskText.textContent = "Optimal supercritical fluid mass transfer; no microbial cold spots or channeling.";
+        mechanismsText.textContent = "Complete cell membrane lipid extraction, internal pH collapse, and cyclone degassing.";
+        mitigationText.textContent = "Maintain current continuous parameters (120-150 bar, 35-40°C) for validated HACCP run.";
+      } else {
+        // Marginal
+        statusHeroCard.className = "p-6 rounded-2xl border mb-6 transition-all bg-sky-50 dark:bg-sky-950/40 border-sky-300 dark:border-sky-800 text-sky-950 dark:text-sky-100";
+        safetyStatusIcon.textContent = "ℹ️";
+        safetyStatusTitle.textContent = "Marginal Log Reduction (4.0 - 4.9 Log)";
+        complianceBadge.className = "px-4 py-2 rounded-xl text-xs font-bold tracking-wider uppercase border border-sky-400 bg-sky-100 dark:bg-sky-900/60 text-sky-800 dark:text-sky-200";
+        complianceBadge.textContent = "MARGINAL (NEEDS +15S HOLDING TIME)";
+        primaryRiskText.textContent = "Microbial reduction approaches target but fails strict 5-log Juice HACCP criterion.";
+        mechanismsText.textContent = "Moderate cytoplasmic acidification with partial enzyme inactivation.";
+        mitigationText.textContent = "Increase CO2 injection ratio by 2% or slightly reduce throughput flow rate.";
+      }
+    }
+  }
+
+  // Preset Handlers
+  presetCitrusBtn?.addEventListener('click', () => {
+    if (systemSelect) systemSelect.value = 'commercial_high_pressure_hpcd_600l';
+    if (matrixSelect) matrixSelect.value = 'cold_pressed_orange_juice';
+    if (targetSelect) targetSelect.value = 'ecoli_o157h7';
+    if (pressureSlider) pressureSlider.value = '120';
+    if (tempSlider) tempSlider.value = '38';
+    if (orificeSlider) orificeSlider.value = '25';
+    if (co2RatioSlider) co2RatioSlider.value = '10.0';
+    if (flowRateSlider) flowRateSlider.value = '600';
+    updateSimulation();
+  });
+
+  presetCiderBtn?.addEventListener('click', () => {
+    if (systemSelect) systemSelect.value = 'commercial_high_pressure_hpcd_600l';
+    if (matrixSelect) matrixSelect.value = 'cloudy_apple_cider';
+    if (targetSelect) targetSelect.value = 'ppo_enzyme';
+    if (pressureSlider) pressureSlider.value = '140';
+    if (tempSlider) tempSlider.value = '40';
+    if (orificeSlider) orificeSlider.value = '20';
+    if (co2RatioSlider) co2RatioSlider.value = '12.0';
+    if (flowRateSlider) flowRateSlider.value = '500';
+    updateSimulation();
+  });
+
+  presetEggBtn?.addEventListener('click', () => {
+    if (systemSelect) systemSelect.value = 'commercial_high_pressure_hpcd_600l';
+    if (matrixSelect) matrixSelect.value = 'liquid_whole_egg';
+    if (targetSelect) targetSelect.value = 'salmonella_enteritidis';
+    if (pressureSlider) pressureSlider.value = '160';
+    if (tempSlider) tempSlider.value = '36';
+    if (orificeSlider) orificeSlider.value = '35';
+    if (co2RatioSlider) co2RatioSlider.value = '8.0';
+    if (flowRateSlider) flowRateSlider.value = '450';
+    updateSimulation();
+  });
+
+  presetChannelingBtn?.addEventListener('click', () => {
+    if (systemSelect) systemSelect.value = 'compromised_channeling_hpcd';
+    if (matrixSelect) matrixSelect.value = 'cold_pressed_orange_juice';
+    if (targetSelect) targetSelect.value = 'ecoli_o157h7';
+    if (pressureSlider) pressureSlider.value = '45';
+    if (tempSlider) tempSlider.value = '24';
+    if (orificeSlider) orificeSlider.value = '85';
+    if (co2RatioSlider) co2RatioSlider.value = '4.0';
+    if (flowRateSlider) flowRateSlider.value = '750';
+    updateSimulation();
+  });
+
+  // Listeners
+  [systemSelect, matrixSelect, targetSelect].forEach(el => el?.addEventListener('change', updateSimulation));
+  [pressureSlider, tempSlider, orificeSlider, co2RatioSlider, flowRateSlider].forEach(el => el?.addEventListener('input', updateSimulation));
+
+  // Initialize
+  updateSimulation();
+</script>

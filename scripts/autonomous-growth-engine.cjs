@@ -2,7 +2,7 @@
  * IsItKitchenSafe Autonomous Growth & Ops Engine (v2.0 - All-Day Smart Engine)
  * 
  * Continuous Operations & Growth Engine:
- * - 81 Interactive Diagnostic Tools Health & 5-Language Slug Parity (EN, ES, PT, JA, ZH-CN)
+ * - 111 Interactive Diagnostic Tools Health & 5-Language Slug Parity (EN, ES, PT, JA, ZH-CN)
  * - Cloudflare Pages _redirects budget monitor (2,000 line ceiling) & Edge Middleware sync
  * - Multi-Language Corpus & Database Integrity (66+ critical data assets)
  * - Structured Data (JSON-LD FAQPage, BreadcrumbList & Article/WebApplication) compliance audit
@@ -139,7 +139,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-vacuum-freeze-drying-tunnel-modeler', name: 'Commercial Continuous Vacuum Freeze-Drying Tunnel Ice Sublimation & Shelf Glycol Thermal Uniformity Modeler', category: 'Cryogenic Vacuum Physics & Industrial Lyophilization', component: 'CommercialVacuumFreezeDryingTunnelModeler.astro', dataFile: 'vacuum-freeze-drying-tunnel-data.json' },
   { slug: 'commercial-pef-electroporation-modeler', name: 'Commercial Continuous High-Voltage Pulsed Electric Field (PEF) Microbial Electroporation & Electrode Cavitation Modeler', category: 'Electrophysical Microbiology & Sanitary Hydrodynamics', component: 'CommercialPefElectroporationModeler.astro', dataFile: 'pef-electroporation-data.json' },
   { slug: 'commercial-rf-post-bake-leveling-modeler', name: 'Commercial Continuous Radio Frequency (RF) Post-Bake Moisture Leveling & Thermal Runaway Modeler', category: 'Radio Frequency Electromagnetics & Industrial Baking Safety', component: 'CommercialRfPostBakeLevelingModeler.astro', dataFile: 'rf-post-bake-leveling-data.json' },
-  { slug: 'commercial-ohmic-heating-sterilization-modeler', name: 'Commercial Continuous Ohmic Heating Liquid Sterilization Volumetric Electroporation & Electrode Fouling Modeler', category: 'Electrochemical Thermal Processing & Liquid Food Safety', component: 'CommercialOhmicHeatingModeler.astro', dataFile: 'ohmic-heating-sterilization-data.json' }
+  { slug: 'commercial-ohmic-heating-sterilization-modeler', name: 'Commercial Continuous Ohmic Heating Liquid Sterilization Volumetric Electroporation & Electrode Fouling Modeler', category: 'Electrochemical Thermal Processing & Liquid Food Safety', component: 'CommercialOhmicHeatingModeler.astro', dataFile: 'ohmic-heating-sterilization-data.json' },
+  { slug: 'commercial-hpcd-sterilization-modeler', name: 'Commercial Continuous High-Pressure Carbon Dioxide (HPCD) Dense-Phase Micro-Bubble Solubilization & Enzyme Inactivation Modeler', category: 'Dense-Phase Thermodynamics & Non-Thermal Sterilization', component: 'CommercialHpcdSterilizationModeler.astro', dataFile: 'hpcd-sterilization-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -369,7 +370,8 @@ function auditDatasets() {
     'vacuum-freeze-drying-tunnel-data.json',
     'pef-electroporation-data.json',
     'rf-post-bake-leveling-data.json',
-    'ohmic-heating-sterilization-data.json'
+    'ohmic-heating-sterilization-data.json',
+    'hpcd-sterilization-data.json'
 ];
 
   const datasetStats = {};
@@ -609,24 +611,17 @@ function auditGrowthOpportunities() {
   // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Continuous High-Pressure Carbon Dioxide (HPCD) Dense-Phase Micro-Bubble Solubilization & Enzyme Inactivation Modeler',
-      category: 'Dense-Phase Thermodynamics & Non-Thermal Sterilization',
-      intent: 'Models continuous dense-phase CO2 liquid food preservation (75 to 150 bar, 35°C to 50°C), cellular membrane acidification via carbonic acid permeation, irreversible baro-enzymatic polyphenol oxidase (PPO) denaturation, micro-bubble Venturi nozzle hydrodynamic shearing, and continuous depressurization gas-liquid cyclone separation.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '2,350+ US impressions'
-    },
-    {
       title: 'Commercial Continuous Industrial Forward Osmosis (FO) Membrane Concentration Polarization & Flux Attenuation Modeler',
       category: 'Membrane Thermodynamics & Liquid Concentration Safety',
       intent: 'Models commercial continuous hollow-fiber forward osmosis (FO) non-thermal juice concentration against concentrated draw solutes (NaCl/sucrose, osmotic pressure differential Δπ > 60 bar), internal concentration polarization (ICP) within porous asymmetric support layers, structural parameter (S-value) optimization, reverse draw solute reverse flux leakage (J_s), and CIP chemical membrane fouling restoration.',
-      priority: 'HIGH',
+      priority: 'CRITICAL_HIGH',
       estimatedMonthlyVolume: '2,100+ US impressions'
     },
     {
       title: 'Commercial Continuous Cold-Plasma (CP) In-Package Biofilm Decontamination & Reactive Nitrogen Species (RNS) Modeler',
       category: 'Non-Thermal Physics & Cold Plasma Toxicology',
       intent: 'Models atmospheric dielectric barrier discharge (DBD) cold plasma in-package post-seal sanitation, reactive oxygen/nitrogen species (RONS - ozone, NO, ONOO-) bacterial lysis kinetics, food lipid oxidation peroxide value limits, and ozone degradation kinetics.',
-      priority: 'MEDIUM',
+      priority: 'HIGH',
       estimatedMonthlyVolume: '1,950+ US impressions'
     },
     {
@@ -635,6 +630,13 @@ function auditGrowthOpportunities() {
       intent: 'Models continuous direct contact membrane distillation (DCMD) and vacuum membrane distillation (VMD) for thermosensitive fruit juice and aroma concentration, hydrophobic PTFE/PVDF microporous pore wetting capillary breakthrough pressures (LEPw), temperature and concentration boundary layer polarization coefficients, and trans-membrane vapor flux attenuation.',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '1,800+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous High-Power Ultrasound (HPU) Acoustic Cavitation Sonication & Enzyme Inactivation Modeler',
+      category: 'Acoustic Fluid Dynamics & Non-Thermal Processing',
+      intent: 'Models commercial continuous flow-through acoustic horns (20 to 40 kHz, 100 to 1,500 W/cm² acoustic intensity), transient acoustic micro-cavitation bubble collapse temperatures (>5,000 K localized hot spots) and micro-jets (>100 m/s), sonochemical hydroxyl radical (•OH) generation, and microbial cell sonoporation under Sanitary 3-A standards.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '1,720+ US impressions'
     }
   ];
 

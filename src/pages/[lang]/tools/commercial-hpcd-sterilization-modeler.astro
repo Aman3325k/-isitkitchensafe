@@ -1,0 +1,272 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import CommercialHpcdSterilizationModeler from '../../../components/CommercialHpcdSterilizationModeler.astro';
+import type { SupportedLanguage } from '../../../i18n/ui';
+import { useTranslations, useTranslatedPath } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+const t = useTranslations(lang);
+const tp = useTranslatedPath(lang);
+
+interface LocaleToolContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  lead: string;
+  breadcrumbsLabel: string;
+  faqs: Array<{ question: string; answer: string }>;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocaleToolContent> = {
+  es: {
+    pageTitle: "Simulador de Esterilización Continua por Dióxido de Carbono a Alta Presión (HPCD) | IsItKitchenSafe",
+    pageDescription: "Simule la pasteurización continua de alimentos líquidos mediante CO2 en fase densa. Modele la solubilización por microburbujas Venturi, colapso de pH citoplasmático, inactivación de enzimas PPO y cumplimiento 5-log FDA 21 CFR § 120 Juice HACCP.",
+    badge: "Termodinámica de Fase Densa y Esterilización No Térmica",
+    h1: "Simulador de Esterilización Continua por Dióxido de Carbono a Alta Presión (HPCD)",
+    lead: "Modele la pasteurización y esterilización continua no térmica con CO2 supercrítico y en fase densa para zumos prensados en frío, sidras, agua de coco y huevo líquido. Calcule el equilibrio termodinámico de fases, transferencia de masa por microburbujas Venturi, desnaturalización enzimática de PPO, desgasificación ciclónica y cumplimiento de la normativa FDA 21 CFR § 120 Juice HACCP.",
+    breadcrumbsLabel: "Simulador de Esterilización HPCD",
+    faqs: [
+      {
+        question: "¿Cómo logra el dióxido de carbono a alta presión (HPCD) pasteurizar líquidos sin daño térmico?",
+        answer: "El dióxido de carbono a alta presión continuo (HPCD o CO2 en fase densa) opera entre 75 y 150 bar a temperaturas templadas (32°C a 45°C). En lugar de aplicar calor destructor, disuelve CO2 supercrítico o líquido directamente en el flujo continuo del alimento. El CO2 disuelto atraviesa velozmente la bicapa lipídica de las bacterias y se disocia en ácido carbónico, provocando el colapso del pH intracelular y extrayendo lípidos de la membrana. Dado que la temperatura permanece muy por debajo del umbral de daño térmico, se retiene más del 92% de vitamina C y se conservan intactos los aromas naturales y antioxidantes."
+      },
+      {
+        question: "¿Cuál es el papel de la tobera Venturi de microburbujas en la cinética de transferencia de masa del HPCD?",
+        answer: "En los sistemas discontinuos o autoclaves tradicionales, la disolución gas-líquido es muy lenta debido a la difusión laminar. La tobera Venturi continua somete el líquido a un microorificio de 15 a 45 µm a altísima tasa de corte, fragmentando el CO2 en billones de microburbujas con diámetro medio de Sauter (d32) inferior a 25 µm. Esto eleva el área de contacto interfacial a más de 3.000 m²/m³, permitiendo que la disolución alcance el equilibrio en solo 2 a 4 segundos y habilitando caudales continuos de 500 a 2.500 L/h."
+      },
+      {
+        question: "¿De qué manera el HPCD inactiva irreversiblemente las enzimas polifenol oxidasa (PPO) y pectina metilesterasa (PME)?",
+        answer: "Las enzimas endógenas como la PPO (responsable del pardeamiento oxidativo en la sidra) y la PME (causante de la pérdida de turbidez en cítricos) se desactivan por el efecto cosolvente del CO2 a alta presión y la acidificación conformacional. El CO2 denso despoja el agua estructural del bolsillo catalítico de la enzima, interactúa con los cofactores metálicos de cobre y destruye irreversiblemente la estructura secundaria helicoidal por encima de 110 bar, evitando el pardeamiento durante el almacenamiento."
+      },
+      {
+        question: "¿Cómo evita la separación ciclónica que el producto genere espuma excesiva o sobrepresión en la botella?",
+        answer: "Tras salir del serpentín de retención presurizado, el fluido pasa a través de una válvula reguladora hacia un separador ciclónico centrífugo a 1,5-2,5 bar. La súbita despresurización libera el CO2 disuelto en forma gaseosa. La fuerza centrífuga dirige el líquido desgasificado hacia la tolva inferior hacia el envasado aséptico, mientras el gas CO2 sale por la chimenea superior hacia recuperación o ventilación, con una eficiencia superior al 99,8%."
+      },
+      {
+        question: "¿Qué normativas regulan los equipos industriales de HPCD bajo la FDA y el código ASME BPVC?",
+        answer: "Bajo la norma FDA Juice HACCP (21 CFR § 120), los procesos de zumo deben demostrar una reducción mínima continua de 5 ciclos logarítmicos (99,999%) de patógenos como E. coli O157:H7 o Salmonella. Mecánicamente, al operar hasta 250 bar, los recipientes deben construirse bajo la norma ASME BPVC Sección VIII División 1 o 2, con discos de ruptura certificados a 1,5 veces la presión de trabajo, monitores de atmósfera ambiental CGA G-6.1 y diseño higiénico según 3-A Sanitary 64-00 o EHEDG Doc 17."
+      }
+    ]
+  },
+  pt: {
+    pageTitle: "Simulador de Esterilização Contínua por Dióxido de Carbono a Alta Pressão (HPCD) | IsItKitchenSafe",
+    pageDescription: "Simule a pasteurização contínua de alimentos líquidos via CO2 em fase densa. Modele a solubilização por microbolhas Venturi, colapso de pH citoplasmático, inativação enzimática de PPO e conformidade 5-log FDA 21 CFR § 120 Juice HACCP.",
+    badge: "Termodinâmica de Fase Densa e Esterilização Não Térmica",
+    h1: "Simulador de Esterilização Contínua por Dióxido de Carbono a Alta Pressão (HPCD)",
+    lead: "Modele a pasteurização e esterilização contínua não térmica com CO2 supercrítico e em fase densa para sucos prensados a frio, sidras, água de coco e ovo líquido. Calcule o equilíbrio termodinâmico de fases, transferência de massa por microbolhas Venturi, desnaturação enzimática de PPO, desgaseificação ciclônica e conformidade sanitária FDA 21 CFR § 120 Juice HACCP.",
+    breadcrumbsLabel: "Simulador de Esterilização HPCD",
+    faqs: [
+      {
+        question: "Como o dióxido de carbono a alta pressão (HPCD) pasteuriza líquidos sem danos térmicos?",
+        answer: "O dióxido de carbono a alta pressão contínuo (HPCD ou CO2 em fase densa) opera entre 75 e 150 bar em temperaturas brandas (32°C a 45°C). Em vez de recorrer ao calor degradante, dissolve CO2 supercrítico ou líquido diretamente no fluxo do produto. O CO2 dissolvido atravessa a membrana lipídica das bactérias, dissocia-se em ácido carbônico e provoca o colapso do pH intracelular, além de extrair lipídios essenciais. Como as temperaturas operam longe da desnaturação térmica, retém-se mais de 92% da vitamina C e preservam-se os aromas frescos originais."
+      },
+      {
+        question: "Qual o papel do bico injetor Venturi de microbolhas na cinética de transferência de massa do HPCD?",
+        answer: "Em reatores estáticos convencionais, a dissolução gás-líquido é extremamente restrita pela lenta difusão molecular. O bico injetor Venturi contínuo força o líquido através de um microorifício de 15 a 45 µm sob alta taxa de cisalhamento, fragmentando o CO2 denso em trilhões de microbolhas com diâmetro médio de Sauter (d32) abaixo de 25 µm. Isso expande a área interfacial específica para mais de 3.000 m²/m³, permitindo atingir o equilíbrio de saturação em 2 a 4 segundos e viabilizando vazões de 500 a 2.500 L/h."
+      },
+      {
+        question: "De que forma o HPCD inativa de modo irreversível as enzimas polifenol oxidase (PPO) e pectina metilesterase (PME)?",
+        answer: "Enzimas endógenas como a PPO (que causa o escurecimento em suco de maçã) e a PME (responsável pela perda de turbidez em sucos cítricos) são inativadas pela ação cosolvente do CO2 e pela acidificação conformacional. O CO2 sob pressão retira a água estrutural do sítio catalítico da enzima, desestabiliza cofatores metálicos e causa a perda definitiva da estrutura secundária helicoidal acima de 110 bar, garantindo estabilidade de cor sem necessidade de pasteurizadores a vapor."
+      },
+      {
+        question: "Como a separação ciclônica remove o CO2 após o tratamento sem gerar espuma excessiva?",
+        answer: "Ao término do tubo de retenção pressurizado, o líquido passa por uma válvula reguladora de contrapressão em direção a um separador ciclônico centrífugo operando a 1,5-2,5 bar. A queda brusca de pressão faz o CO2 dissolvido expandir em gás. O movimento centrífugo projeta o líquido clarificado para o fundo cônico em direção ao envase asséptico, enquanto o CO2 é exaurido pelo topo para reciclagem ou ventilação, com eficiência superior a 99,8%."
+      },
+      {
+        question: "Quais normas regulam equipamentos industriais de HPCD perante a FDA e o código ASME BPVC?",
+        answer: "Pela norma FDA Juice HACCP (21 CFR § 120), linhas de suco comerciais devem comprovar redução contínua mínima de 5 ciclos logarítmicos (99,999%) para patógenos como E. coli O157:H7 e Salmonella. Mecanicamente, por trabalharem a pressões de até 250 bar, os vasos devem cumprir o código ASME BPVC Seção VIII Divisão 1 ou 2, com discos de ruptura calibrados a 1,5x a pressão de operação, sensores de CO2 ambiente segundo a norma CGA G-6.1 e projeto sanitário 3-A 64-00 ou EHEDG Doc 17."
+      }
+    ]
+  },
+  'zh-cn': {
+    pageTitle: "商用连续高压二氧化碳 (HPCD) 密相灭菌模拟器 | IsItKitchenSafe",
+    pageDescription: "模拟商用连续高压二氧化碳（HPCD）密相常温杀菌工艺。精确计算文丘里微气泡超微溶解动力学、细胞质酸化破坏机制、多酚氧化酶（PPO）变性失活及FDA 21 CFR § 120果汁HACCP 5-Log合规性。",
+    badge: "密相流体热力学与非热力灭菌工程",
+    h1: "商用连续高压二氧化碳 (HPCD) 密相灭菌模拟器",
+    lead: "模拟商用连续超临界与密相二氧化碳（HPCD / DPCD）液体食品非热灭菌工艺，适用于冷榨果汁、鲜苹果酒、椰子水及全蛋液。精确计算高压CO2热力学相平衡、文丘里微米级微气泡超微溶解高传质速率、细胞质酸化崩溃动力学、多酚氧化酶（PPO）变性失活机制、旋风分离闪蒸脱气以及FDA 21 CFR § 120果汁HACCP 5-Log无菌合规性。",
+    breadcrumbsLabel: "HPCD密相灭菌模拟器",
+    faqs: [
+      {
+        question: "连续密相高压二氧化碳（HPCD）灭菌技术如何在杜绝热损伤的前提下实现液体彻底杀菌？",
+        answer: "连续高压二氧化碳（HPCD，亦称Dense-Phase CO2或DPCD）工艺在75至150 bar压力、32°C至45°C温和温度下运行。它无需任何高温热源，而是通过将密相或超临界CO2连续溶解注入物料流中。溶解的非极性CO2快速穿透细菌磷脂双分子层进入细胞质内部，解离产生碳酸造成胞内pH急剧崩溃，同时密相CO2充当嗜脂溶剂萃取细胞膜结构脂质并导致关键代谢酶变性。由于处理温度远低于热致变性门槛，天然热敏维生素C保留率高达92%以上，果汁鲜榨风味与抗氧化多酚完好如初。"
+      },
+      {
+        question: "文丘里微米级微气泡喷嘴在连续HPCD气液传质动力学中发挥何种关键作用？",
+        answer: "在传统间歇高压釜的层流扩散状态下，高压气体在液体中的溶解速率严重受阻于分子扩散瓶颈。连续文丘里微气泡喷嘴利用微孔节流口（15至45 µm）产生极高剪切雷诺数（We > 12），将密相CO2流剪切为数万亿颗索特平均粒径（d32）小于25 µm的微气泡群。这使得气液比表面积（a）暴增至3,000 m²/m²以上，在2至4秒内迅速达成热力学饱和溶解平衡，极大地缩短了加压保温管长度，使工业连续处理量达到500至2,500 L/h。"
+      },
+      {
+        question: "HPCD如何实现对多酚氧化酶（PPO）与果胶甲基酯酶（PME）的不可逆高压酶失活？",
+        answer: "多酚氧化酶（PPO，导致苹果汁褐变）与果胶甲基酯酶（PME，导致柑橘汁分层沉淀）在超临界/密相CO2环境与构象酸化下遭受双重变性破坏。高压高溶解度CO2剥离酶活性催化口袋表面的结构水化层，与铜锌金属辅因子配位，并在110 bar以上压力下导致α螺旋二级结构发生不可逆坍塌。旋风减压后酶蛋白无法复性，无需巴氏杀菌蒸汽锅炉即可确保产品常温货架期不褐变、不澄清。"
+      },
+      {
+        question: "旋风气液分离器如何在下游彻底脱除二氧化碳并防止灌装起泡与爆瓶？",
+        answer: "经加压保温管道充分杀菌后，饱和物料通过卫生级自动背压调节阀瞬间减压排入工作压力为1.5至2.5 bar的高效旋风分离器中。骤降的压力使溶解的CO2闪蒸析出。离心旋流加速度将脱气后的澄清液体沿抛光壁面导流至底部无菌灌装泵，而CO2气体则从分离器顶部排风口排出进入回收或排放系统，脱气效率达99.8%以上，彻底避免灌装时起泡溢流及后续货架期爆瓶隐患。"
+      },
+      {
+        question: "商用连续HPCD工业设备需符合美国FDA与ASME压力容器规范中的哪些强制条款？",
+        answer: "依据美国FDA果汁HACCP法规（21 CFR § 120.24），连续果汁生产线必须通过工艺验证证明对大肠杆菌O157:H7或沙门氏菌实现不低于5个对数级（99.999%）的稳定杀灭。在机械安全方面，由于运行压力高达250 bar，设备制造必须严格遵循ASME锅炉与压力容器规范（BPVC）第VIII卷第1或第2分册，配备1.5倍额定爆破压力的安全爆破片、CGA G-6.1二氧化碳车间环境报警联锁，以及3-A Sanitary Standard 64-00 / EHEDG Doc 17无菌自洁设计。"
+      }
+    ]
+  },
+  ja: {
+    pageTitle: "産業用連続高圧二酸化炭素（HPCD）非加熱殺菌シミュレータ | IsItKitchenSafe",
+    pageDescription: "液体食品の連続高圧二酸化炭素（HPCD）非加熱殺菌プロセスをシミュレーション。ベンチュリ・マイクロバブル超微細溶解物質移動、細胞質pH低下崩壊、PPO酵素変性失活、サイクロン脱気およびFDA 21 CFR § 120 Juice HACCP 5-Log適合性を高精度に解析します。",
+    badge: "高密度流体熱力学・非加熱殺菌工学",
+    h1: "産業用連続高圧二酸化炭素（HPCD）非加熱殺菌シミュレータ",
+    lead: "コールドプレス果汁、無ろ過リンゴサイダー、ココナッツウォーター、全液卵向けの産業用連続超臨界・高密度二酸化炭素（HPCD / DPCD）非加熱殺菌プロセスをモデル化。高圧CO2熱力学相平衡、ベンチュリ・マイクロバブル超微細溶解、細胞質pH崩壊、PPO酵素変性失活、サイクロン減圧脱気分離、およびFDA 21 CFR § 120 Juice HACCP 5-Log基準適合性を算出します。",
+    breadcrumbsLabel: "HPCD非加熱殺菌シミュレータ",
+    faqs: [
+      {
+        question: "連続高圧二酸化炭素（HPCD）非加熱殺菌技術はどのようにして熱損傷なしに液体食品を殺菌しますか？",
+        answer: "連続高圧二酸化炭素（HPCDまたは高密度相CO2・DPCD）は、75〜150 barの圧力かつ32°C〜45°Cの温和な温度帯で稼働します。高温蒸気を使用する代わりに、超臨界または高密度CO2を連続流体に溶解させます。溶解した非極性CO2は微生物の細胞膜を速やかに透過し、細胞質内で炭酸へ解离して内部pHを急低下（pH 4.5以下）させ、さらに親油性溶媒として細胞膜脂質を抽出します。熱変性温度を大幅に下回るため、ビタミンC残存率は92%以上を維持し、熱劣化による煮沸臭を生じることなく新鮮な風味を保持します。"
+      },
+      {
+        question: "ベンチュリ・マイクロバブル微細孔ノズルはHPCDの物質移動キネティクスにどのような役割を果たしますか？",
+        answer: "従来の静置式オートクレーブでは、気液溶解速度は遅い分子拡散律速によって著しく制限されます。連続ベンチュリ・マイクロバブルノズルは、15〜45 µmの微細オリフィスを介して流体を激しいせん断場（We > 12）に晒し、CO2をザウター平均粒径（d32）25 µm未満の無数のマイクロバブルに細分化します。これにより気液接触比表面積（a）は3,000 m²/m²以上に急拡大し、わずか2〜4秒で溶解平衡に達するため、保持配管を短縮し500〜2,500 L/hの連続大流量処理が可能となります。"
+      },
+      {
+        question: "HPCDはどのようにしてポリフェノールオキシダーゼ（PPO）やペクチンメチルエステラーゼ（PME）を不可逆的に失活させますか？",
+        answer: "リンゴ果汁の褐変を引き起こすPPOや、柑橘果汁の混濁破壊を招くPMEなどの内因性酵素は、高圧溶媒効果とコンフォメーション酸性化の複合作用によって失活します。高密度CO2は酵素活性中心の触媒ポケットから構造結合水を除去し、銅補因子と配位し、110 bar以上の圧力下でαヘリックス二次構造を不可逆的に変性させます。サイクロン減圧後も再活性化しないため、加熱することなく保存中の褐変を完全に防止します。"
+      },
+      {
+        question: "サイクロン減圧分離器はどのように下流での過度な発泡やボトル破損を防止しますか？",
+        answer: "加圧保持管を通過した飽和流体は、衛生的な自動背圧調整バルブを通過して1.5〜2.5 barで動作する遠心サイクロン分離器へフラッシュ噴射されます。急激な減圧によって溶解CO2が微細気泡として瞬時に気化・離脱します。遠心力によって脱気された清澄液体はコーン底部へ沈降し無菌充填ラインへ送液され、ガス状CO2は頂部ベンドから回収または換気系へ排出されます。脱気効率は99.8%を超え、充填時の発泡や容器破裂リスクを根絶します。"
+      },
+      {
+        question: "産業用連続HPCD装置は米FDAおよびASME BPVC圧力容器規格のどのような基準を満たす必要がありますか？",
+        answer: "米FDA Juice HACCP規制（21 CFR § 120.24）に基づき、連続果汁処理システムは対象病原菌（大腸菌O157:H7またはサルモネラ菌）に対して最低5-log（99.999%）の不活性化を実証する必要があります。機械的安全面では最大250 barで稼働するため、ASME BPVC Section VIII Division 1または2に準拠した容器設計、常用圧力の1.5倍に設定された安全ラプチャーディスク、CGA G-6.1に基づくCO2環境濃度監視警報、および3-A Sanitary Standard 64-00 / EHEDG Doc 17サニタリー構造の遵守が必須です。"
+      }
+    ]
+  }
+};
+
+const c = CONTENT[lang];
+
+const breadcrumbs = [
+  { label: t('nav.home'), href: tp('/') },
+  { label: t('nav.tools') || 'Tools', href: tp('/tools/') },
+  { label: c.breadcrumbsLabel }
+];
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "@id": `https://isitkitchensafe.com/${lang}/tools/commercial-hpcd-sterilization-modeler/#webapp`,
+      "url": `https://isitkitchensafe.com/${lang}/tools/commercial-hpcd-sterilization-modeler/`,
+      "name": c.h1,
+      "applicationCategory": "EngineeringApplication",
+      "operatingSystem": "All",
+      "browserRequirements": "Requires JavaScript. Requires HTML5 Canvas/CSS3.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": c.pageDescription
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": t('nav.home'),
+          "item": `https://isitkitchensafe.com${tp('/')}`
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": t('nav.tools') || 'Tools',
+          "item": `https://isitkitchensafe.com${tp('/tools/')}`
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": c.breadcrumbsLabel,
+          "item": `https://isitkitchensafe.com/${lang}/tools/commercial-hpcd-sterilization-modeler/`
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": c.faqs.map(faq => ({
+        "@type": "Question",
+        "name": faq.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": faq.answer
+        }
+      }))
+    }
+  ]
+};
+---
+
+<Layout
+  title={c.pageTitle}
+  description={c.pageDescription}
+  structuredData={structuredData}
+>
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <Breadcrumbs items={breadcrumbs} />
+
+    <header class="mb-8">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-sky-600 text-white">
+          {c.badge}
+        </span>
+        <span class="text-xs text-muted font-mono">FDA 21 CFR § 120 &bull; ASME Section VIII &bull; CGA G-6.1 &bull; 3-A 64-00</span>
+      </div>
+      <h1 class="text-display-sm md:text-display-md font-bold text-ink tracking-tight mb-4">
+        {c.h1}
+      </h1>
+      <p class="text-body-lg text-muted max-w-4xl leading-relaxed">
+        {c.lead}
+      </p>
+    </header>
+
+    <!-- Interactive Simulator Component -->
+    <CommercialHpcdSterilizationModeler lang={lang} />
+
+    <!-- FAQ Section with Schema-Compliant Formatting -->
+    <section class="my-16 border-t border-hairline pt-12">
+      <h2 class="text-title-lg font-bold text-ink mb-6">
+        {lang === 'es' && "Preguntas Frecuentes: Esterilización No Térmica Continua HPCD y Juice HACCP"}
+        {lang === 'pt' && "Perguntas Frequentes: Esterilização Não Térmica Contínua HPCD e Juice HACCP"}
+        {lang === 'zh-cn' && "常见问题解答：连续HPCD非热力灭菌工程与果汁HACCP法规"}
+        {lang === 'ja' && "よくある質問：連続HPCD高密度相二酸化炭素非加熱殺菌とJuice HACCP"}
+      </h2>
+      <div class="space-y-6">
+        {c.faqs.map(faq => (
+          <div class="p-6 rounded-2xl bg-surface-soft border border-hairline">
+            <h3 class="text-title-sm font-semibold text-ink mb-2">
+              {faq.question}
+            </h3>
+            <p class="text-body text-sm text-muted leading-relaxed">
+              {faq.answer}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+  </div>
+</Layout>

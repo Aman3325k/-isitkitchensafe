@@ -140,7 +140,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-vacuum-freeze-drying-tunnel-modeler',
   'tools/commercial-pef-electroporation-modeler',
   'tools/commercial-rf-post-bake-leveling-modeler',
-  'tools/commercial-ohmic-heating-sterilization-modeler'
+  'tools/commercial-ohmic-heating-sterilization-modeler',
+  'tools/commercial-hpcd-sterilization-modeler'
 ];
 
 const esSlugs = new Set([
