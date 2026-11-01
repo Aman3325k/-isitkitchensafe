@@ -151,7 +151,8 @@ const TOOLS_REGISTRY = [
 { slug: 'commercial-continuous-micro-fluidization-modeler', name: 'Commercial Continuous Micro-Fluidization High-Shear Liposome & Emulsion Nano-Encapsulation Modeler', category: 'Micro-Fluidics & Nano-Emulsion Physics', component: 'CommercialMicroFluidizationModeler.astro', dataFile: 'micro-fluidization-nano-encapsulation-data.json' },
 { slug: 'commercial-continuous-low-energy-electron-beam-modeler', name: 'Commercial Continuous Low-Energy Electron Beam (E-Beam) Surface Packaging Decontamination Modeler', category: 'Radiation Physics & Aseptic Packaging Hygiene', component: 'CommercialContinuousElectronBeamModeler.astro', dataFile: 'electron-beam-packaging-decontamination-data.json' },
   { slug: 'commercial-continuous-cold-hydrodynamic-cavitation-modeler', name: 'Commercial Continuous High-Pressure Cold Hydrodynamic Cavitation (CHC) Nano-Scale Sterilization & Texturizing Modeler', category: 'Cavitation Fluid Mechanics & Non-Thermal Rheology', component: 'CommercialColdHydrodynamicCavitationModeler.astro', dataFile: 'cold-hydrodynamic-cavitation-data.json' },
-  { slug: 'commercial-continuous-cold-gaseous-ozone-modeler', name: 'Commercial Continuous Atmospheric Cold Gaseous Ozone (O3) Conveyor In-Line Spore Sterilization & Off-Gas Destruction Modeler', category: 'Ozone Oxidation & Gaseous Sanitation', component: 'CommercialColdGaseousOzoneModeler.astro', dataFile: 'cold-gaseous-ozone-data.json' }
+  { slug: 'commercial-continuous-cold-gaseous-ozone-modeler', name: 'Commercial Continuous Atmospheric Cold Gaseous Ozone (O3) Conveyor In-Line Spore Sterilization & Off-Gas Destruction Modeler', category: 'Ozone Oxidation & Gaseous Sanitation', component: 'CommercialColdGaseousOzoneModeler.astro', dataFile: 'cold-gaseous-ozone-data.json' },
+  { slug: 'commercial-continuous-supercritical-fluid-chromatography-modeler', name: 'Commercial Continuous Supercritical Fluid Chromatography (SFC) Industrial Cannabinoid & Bioactive Purification Modeler', category: 'Supercritical Chromatography & Sanitary Separation', component: 'CommercialContinuousSfcModeler.astro', dataFile: 'supercritical-fluid-chromatography-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -391,7 +392,10 @@ function auditDatasets() {
     'supercritical-co2-inactivation-data.json',
     'dual-frequency-ultrasonic-data.json',
     'micro-fluidization-nano-encapsulation-data.json',
-    'electron-beam-packaging-decontamination-data.json'
+    'electron-beam-packaging-decontamination-data.json',
+    'cold-hydrodynamic-cavitation-data.json',
+    'cold-gaseous-ozone-data.json',
+    'supercritical-fluid-chromatography-data.json'
 ];
 
   const datasetStats = {};
@@ -631,24 +635,17 @@ function auditGrowthOpportunities() {
     // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Continuous Supercritical Fluid Chromatography (SFC) Industrial Cannabinoid & Bioactive Purification Modeler',
-      category: 'Supercritical Chromatography & Sanitary Separation',
-      intent: 'Models continuous multi-column supercritical fluid chromatography (SFC) utilizing dense CO2 and ethanol co-solvent mobile phases at up to 350 bar, axial dispersion, peak resolution, and ASME BPVC Section VIII relief sizing for high-purity bioactive separation.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '1,520+ US impressions'
-    },
-    {
       title: 'Commercial Continuous High-Frequency Microwave-Plasma In-Line Decontamination Modeler',
       category: 'Plasma Physics & Microwave Engineering',
       intent: 'Models continuous atmospheric pressure microwave-plasma jet (2.45 GHz, Ar/O2/N2 gas mixtures) rapid in-line packaging surface decontamination, active UV photonic radiation flux, hydroxyl radical generation kinetics, and heat-sensitive polymer surface functionalization without thermal deformation under FDA 21 CFR § 179.26.',
-      priority: 'HIGH',
+      priority: 'CRITICAL_HIGH',
       estimatedMonthlyVolume: '1,420+ US impressions'
     },
     {
       title: 'Commercial Continuous Electrohydrodynamic (EHD) Non-Thermal Airflow Dehydration & Vitamin C Preservation Modeler',
       category: 'Electrohydrodynamics & Non-Thermal Drying',
       intent: 'Models continuous high-voltage wire-to-plane corona discharge ionic wind (EHD) convection acceleration (ionic drift velocity > 3.5 m/s), low-temperature surface boundary layer disruption (20-35°C), zero-heat moisture evaporation kinetics, and ascorbic acid retention (>95%) for sensitive heat-labile fruits and enzymes.',
-      priority: 'MEDIUM',
+      priority: 'HIGH',
       estimatedMonthlyVolume: '1,350+ US impressions'
     },
     {
@@ -657,6 +654,13 @@ function auditGrowthOpportunities() {
       intent: 'Models continuous single-axis ultrasonic acoustic levitation (20-40 kHz Langevin transducers) micro-droplet trapping, acoustic radiation pressure acoustic streaming, containerless non-fouling evaporation kinetics, and zero-shear enzyme concentration.',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '1,280+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous Forward-Osmosis Freeze Concentration (FO-FC) Hybrid Thermolabile Modeler',
+      category: 'Cryogenic Osmosis & Non-Thermal Dewatering',
+      intent: 'Models continuous hybrid forward osmosis coupled with progressive freeze concentration (FO-FC) for ultra-sensitive fruit purees and dairy colostrum, ice crystal layer growth kinetics, draw solution osmotic pressure driving force (up to 120 bar), and 100% volatile aroma ester retention without thermal boiling.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '1,190+ US impressions'
     }
   ];
 
