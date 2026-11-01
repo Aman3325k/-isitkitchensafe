@@ -155,7 +155,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-continuous-cold-gaseous-ozone-modeler',
   'tools/commercial-continuous-supercritical-fluid-chromatography-modeler',
   'tools/commercial-continuous-microwave-plasma-decontamination-modeler',
-  'tools/commercial-continuous-electrohydrodynamic-ehd-modeler'
+  'tools/commercial-continuous-electrohydrodynamic-ehd-modeler',
+  'tools/commercial-continuous-acoustic-levitator-modeler'
 ];
 
 const esSlugs = new Set([
