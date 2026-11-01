@@ -154,7 +154,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-continuous-cold-hydrodynamic-cavitation-modeler',
   'tools/commercial-continuous-cold-gaseous-ozone-modeler',
   'tools/commercial-continuous-supercritical-fluid-chromatography-modeler',
-  'tools/commercial-continuous-microwave-plasma-decontamination-modeler'
+  'tools/commercial-continuous-microwave-plasma-decontamination-modeler',
+  'tools/commercial-continuous-electrohydrodynamic-ehd-modeler'
 ];
 
 const esSlugs = new Set([
