@@ -1,0 +1,1067 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import chcData from '../data/cold-hydrodynamic-cavitation-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  reactorLabel: string;
+  reactorHelp: string;
+  fluidLabel: string;
+  fluidHelp: string;
+  pathogenLabel: string;
+  pathogenHelp: string;
+  sanitaryLabel: string;
+  sanitaryHelp: string;
+  inletPressureLabel: string;
+  inletPressureHelp: string;
+  backpressureLabel: string;
+  backpressureHelp: string;
+  tempLabel: string;
+  tempHelp: string;
+  flowRateLabel: string;
+  flowRateHelp: string;
+  presetsTitle: string;
+  presetDairy: string;
+  presetJuice: string;
+  presetOat: string;
+  presetPuree: string;
+  presetHazard: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  cavitationNumberLabel: string;
+  collapsePressureLabel: string;
+  radicalFluxLabel: string;
+  logReductionLabel: string;
+  particleSizeLabel: string;
+  bulkTempRiseLabel: string;
+  acousticNoiseLabel: string;
+  complianceStatusLabel: string;
+  primaryLimitationLabel: string;
+  mitigationActionLabel: string;
+  scienceTitle: string;
+  scienceSub: string;
+  tableTitle: string;
+}
+
+const DICT: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Cavitation Fluid Mechanics & Non-Thermal Rheology",
+    title: "Commercial Continuous High-Pressure Cold Hydrodynamic Cavitation (CHC) Nano-Scale Sterilization & Texturizing Modeler",
+    subtitle: "Simulate continuous high-pressure cold hydrodynamic cavitation (CHC) non-thermal sterilization and nano-scale texturizing for liquid foods (dairy milk, cold-pressed juices, plant beverages, and purees). Model cavitation number (σ), Rayleigh-Plesset bubble collapse pressures (>1,000 bar), sonochemical hydroxyl radical flux (•OH), pathogen log10 reduction (Listeria, E. coli, Salmonella), lipid/protein nano-particle distribution (<200 nm), and sanitary CIP/SIP compliance under 3-A Sanitary Standards 04-05, EHEDG Doc 8 & 17, and ASME B31.3.",
+    controlsTitle: "Hydrodynamic Cavitation & Sanitary Flow Controls",
+    controlsSub: "Configure cavitation reactor geometry, food fluid medium, target foodborne pathogen, sanitary skid configuration, inlet feed pressure, backpressure, chamber temperature, and volumetric flow rate.",
+    reactorLabel: "Cavitation Reactor & Geometry Architecture:",
+    reactorHelp: "Select high-frequency rotary rotor-stator reactor (SPR), multi-orifice venturi plate, helical swirl acoustic cavitator, or eroded pitted throttle unit.",
+    fluidLabel: "Food Fluid Substrate & Rheology:",
+    fluidHelp: "Select dairy whole milk & WPC-80, cold-pressed citrus juice, plant-based oat/almond milk, or high-viscosity tomato puree.",
+    pathogenLabel: "Target Biological Pathogen / Spoilage Organism:",
+    pathogenHelp: "Select Listeria monocytogenes (Scott A), Escherichia coli O157:H7, Salmonella enterica, or Saccharomyces cerevisiae yeast.",
+    sanitaryLabel: "Sanitary Skid & Backpressure Architecture:",
+    sanitaryHelp: "Select 3-A Sanitary / EHEDG Class 1 aseptic skid, standard industrial sanitary skid, or unbuffered compromised line.",
+    inletPressureLabel: "Upstream Feed Pressure (bar):",
+    inletPressureHelp: "Fluid driving pressure prior to reactor restriction or rotor entry. Determines fluid velocity through cavitating zones.",
+    backpressureLabel: "Downstream Backpressure (bar):",
+    backpressureHelp: "Discharge regulation pressure controlling the cavitation number (σ) and violent bubble collapse location.",
+    tempLabel: "Fluid Process Temperature (°C):",
+    tempHelp: "Bulk stream temperature entering the cavitation chamber. Strictly non-thermal regime (<50°C).",
+    flowRateLabel: "Continuous Volumetric Flow Rate (L/h):",
+    flowRateHelp: "Continuous liquid throughput across the hydrodynamic cavitation reactor skid.",
+    presetsTitle: "Standard Sanitary Cavitation Validation Presets",
+    presetDairy: "Dairy Whole Milk Nano-Homogenization & Non-Thermal Pasteurization (Rotor-Stator, 18 bar, 3.5 bar, 25°C, L. monocytogenes)",
+    presetJuice: "Cold-Pressed Citrus Juice Non-Thermal Cold Stabilization (Venturi Plate, 45 bar, 4.0 bar, 18°C, E. coli)",
+    presetOat: "Plant-Based Barista Oat Milk Nano-Texturizing (Swirl Acoustic, 22 bar, 3.0 bar, 22°C, S. cerevisiae)",
+    presetPuree: "High-Viscosity Tomato Puree Fiber Disruption (Venturi Plate, 60 bar, 5.0 bar, 32°C, Salmonella)",
+    presetHazard: "Severe Cavitation Erosion Pitting & Hydraulic Water Hammer (Compromised Throttle, 15 bar, 0.2 bar, 58°C, Ambient Line)",
+    diagnosticTitle: "Cavitation Physics, Microbial Lethality & Rheology Diagnostics",
+    diagnosticSub: "Real-time calculation of cavitation number (σ), bubble collapse shock pressure, hydroxyl radical flux, pathogen log10 reduction, emulsion nano-droplet size, and sanitary CIP/SIP status.",
+    cavitationNumberLabel: "Cavitation Number (σ)",
+    collapsePressureLabel: "Bubble Collapse Shock Pressure (P_shock)",
+    radicalFluxLabel: "Hydroxyl Radical Flux (•OH)",
+    logReductionLabel: "Target Pathogen Log10 Kill",
+    particleSizeLabel: "Emulsion Nano-Droplet Mean (D_4,3)",
+    bulkTempRiseLabel: "Fluid Bulk Adiabatic Temp Rise (ΔT)",
+    acousticNoiseLabel: "Operating Acoustic Noise (SPL)",
+    complianceStatusLabel: "Sanitary Standards & Process Integrity",
+    primaryLimitationLabel: "Primary Hydrodynamic & Fluid Constraint",
+    mitigationActionLabel: "Recommended Sanitary Engineering Action",
+    scienceTitle: "Hydrodynamic Cavitation Physics, Bubble Dynamics & Non-Thermal Kinetics",
+    scienceSub: "In-depth engineering breakdown of Rayleigh-Plesset equation, choked cavitation numbers, sonochemical water sonolysis, micro-jet cellular disruption, and nano-emulsion fluid mechanics.",
+    tableTitle: "Hydrodynamic Cavitation Reactor Skids & Liquid Substrate Specifications"
+  },
+  es: {
+    badge: "Mecánica de Fluidos de Cavitación y Reología No Térmica",
+    title: "Simulador de Cavitación Hidrodinámica Fría (CHC) a Alta Presión para Esterilización y Texturizado",
+    subtitle: "Simule la cavitación hidrodinámica fría (CHC) continua a alta presión para pasteurización no térmica y nano-texturizado de alimentos líquidos (leche, zumos prensados en frío, bebidas vegetales y purés). Modele el número de cavitación (σ), presiones de colapso de burbujas (>1.000 bar), radicales hidroxilo (•OH), reducción log10 de patógenos (Listeria, E. coli, Salmonella), nano-distribución de partículas (<200 nm) y conformidad higiénica 3-A Sanitary 04-05 y EHEDG.",
+    controlsTitle: "Parámetros de Cavitación Hidrodinámica y Flujo Sanitario",
+    controlsSub: "Configure el reactor de cavitación, medio fluido, patógeno diana, arquitectura del skid sanitario, presión de alimentación, contrapresión, temperatura de proceso y caudal volumétrico.",
+    reactorLabel: "Reactor de Cavitación y Geometría:",
+    reactorHelp: "Seleccione reactor rotativo rotor-estator (SPR), placa venturi multi-orificio, cavitador acústico helicoidal o válvula estranguladora erosionada.",
+    fluidLabel: "Sustrato Fluido y Propiedades Reológicas:",
+    fluidHelp: "Seleccione leche entera con WPC-80, zumo cítrico prensado en frío, bebida de avena/almendra o puré espeso de tomate.",
+    pathogenLabel: "Microorganismo Patógeno / Alterante Diana:",
+    pathogenHelp: "Seleccione Listeria monocytogenes, Escherichia coli O157:H7, Salmonella enterica o levaduras Saccharomyces cerevisiae.",
+    sanitaryLabel: "Arquitectura del Skid Sanitario y Contrapresión:",
+    sanitaryHelp: "Seleccione skid aséptico 3-A / EHEDG Clase 1, skid sanitario industrial o línea descompensada con golpe de ariete.",
+    inletPressureLabel: "Presión de Entrada de Alimentación (bar):",
+    inletPressureHelp: "Presión de bombeo antes de la zona de constricción. Rige la velocidad local del fluido y el régimen de cavitación.",
+    backpressureLabel: "Contrapresión de Descarga Regulada (bar):",
+    backpressureHelp: "Presión aguas abajo que controla el número de cavitación (σ) y la intensidad del colapso de las microburbujas.",
+    tempLabel: "Temperatura del Fluido en Proceso (°C):",
+    tempHelp: "Temperatura a la entrada del reactor. Régimen estrictamente no térmico (<50°C) para evitar desnaturalización proteica.",
+    flowRateLabel: "Caudal Volumétrico Continuo (L/h):",
+    flowRateHelp: "Caudal volumétrico procesado en continuo a través del módulo de cavitación.",
+    presetsTitle: "Preajustes de Validación de Cavitación Sanitaria",
+    presetDairy: "Nano-Homogeneización y Pasteurización Fría de Leche (Rotor-Estator, 18 bar, 3,5 bar, 25°C, L. monocytogenes)",
+    presetJuice: "Estabilización Fría de Zumo Cítrico Prensado (Placa Venturi, 45 bar, 4,0 bar, 18°C, E. coli)",
+    presetOat: "Nano-Texturizado de Bebida de Avena Barista (Acústico Helicoidal, 22 bar, 3,0 bar, 22°C, S. cerevisiae)",
+    presetPuree: "Ruptura Celular de Puré de Tomate (Placa Venturi, 60 bar, 5,0 bar, 32°C, Salmonella)",
+    presetHazard: "Erosión Crítica por Picaduras y Golpe de Ariete (Válvula Degradada, 15 bar, 0,2 bar, 58°C, Sin Contrapresión)",
+    diagnosticTitle: "Física de Cavitación, Letalidad Microbiana y Reología",
+    diagnosticSub: "Cálculo en tiempo real del número de cavitación (σ), presión de choque de colapso, flujo de radicales hidroxilo, reducción log10, tamaño nanométrico de gota y estado CIP/SIP.",
+    cavitationNumberLabel: "Número de Cavitación (σ)",
+    collapsePressureLabel: "Presión de Choque de Colapso (P_shock)",
+    radicalFluxLabel: "Flujo de Radicales Hidroxilo (•OH)",
+    logReductionLabel: "Reducción Log10 del Patógeno",
+    particleSizeLabel: "Diámetro Medio de Gota (D_4,3)",
+    bulkTempRiseLabel: "Aumento Térmico Adiabático (ΔT)",
+    acousticNoiseLabel: "Nivel de Ruido Acústico (SPL)",
+    complianceStatusLabel: "Estado de Conformidad Normativa e Higiénica",
+    primaryLimitationLabel: "Restricción Hidrodinámica y de Fluido",
+    mitigationActionLabel: "Acción de Ingeniería Sanitaria Recomendada",
+    scienceTitle: "Física de Cavitación Hidrodinámica, Dinámica de Burbujas y Cinética No Térmica",
+    scienceSub: "Fundamentos de la ecuación de Rayleigh-Plesset, cavitación estrangulada, sonólisis de agua, cizallamiento celular por microchorros y fluidodinámica de nanoemulsiones.",
+    tableTitle: "Sistemas de Cavitación Hidrodinámica y Especificaciones de Fluidos"
+  },
+  pt: {
+    badge: "Mecânica dos Fluidos de Cavitação e Reologia Não Térmica",
+    title: "Simulador de Cavitação Hidrodinâmica Fria (CHC) a Alta Pressão para Esterilização e Texturização",
+    subtitle: "Simule a cavitação hidrodinâmica fria (CHC) contínua a alta pressão para pasteurização não térmica e nano-texturização de alimentos líquidos (leite, sucos prensados a frio, bebidas vegetais e purês). Modele o número de cavitação (σ), pressões de colapso de bolhas (>1.000 bar), fluxo de radicais hidroxila (•OH), letalidade de patógenos (Listeria, E. coli, Salmonella), distribuição de nano-partículas (<200 nm) e conformidade higiênica 3-A Sanitary 04-05 e EHEDG.",
+    controlsTitle: "Parâmetros de Cavitação Hidrodinâmica e Fluxo Sanitário",
+    controlsSub: "Configure a geometria do reator de cavitação, fluido alimentar, patógeno-alvo, skid sanitário, pressão de alimentação, contrapressão, temperatura do processo e vazão volumétrica.",
+    reactorLabel: "Reator de Cavitação e Geometria:",
+    reactorHelp: "Selecione reator rotativo rotor-estator (SPR), placa venturi multi-orifício, cavitador acústico helicoidal ou unidade estranguladora desgastada.",
+    fluidLabel: "Substrato Fluido e Propriedades Reológicas:",
+    fluidHelp: "Selecione leite integral com WPC-80, suco cítrico prensado a frio, bebida de aveia/amêndoa ou purê espesso de tomate.",
+    pathogenLabel: "Microrganismo Patogênico Alvo:",
+    pathogenHelp: "Selecione Listeria monocytogenes, Escherichia coli O157:H7, Salmonella enterica ou leveduras Saccharomyces cerevisiae.",
+    sanitaryLabel: "Arquitetura do Skid Sanitário e Contrapressão:",
+    sanitaryHelp: "Selecione skid asséptico 3-A / EHEDG Classe 1, skid sanitário padrão industrial ou linha descompensada com golpe de aríete.",
+    inletPressureLabel: "Pressão de Entrada de Alimentação (bar):",
+    inletPressureHelp: "Pressão de bombeamento a montante do reator. Determina a velocidade local do fluido e o regime de cavitação.",
+    backpressureLabel: "Contrapressão a Jusante Regulada (bar):",
+    backpressureHelp: "Pressão regulada a jusante que controla o número de cavitação (σ) e a intensidade do colapso das microbolhas.",
+    tempLabel: "Temperatura do Fluido no Processo (°C):",
+    tempHelp: "Temperatura na entrada do reator. Regime estritamente não térmico (<50°C) para preservar proteínas e nutrientes.",
+    flowRateLabel: "Vazão Volumétrica Contínua (L/h):",
+    flowRateHelp: "Vazão contínua processada através do skid de cavitação hidrodinâmica.",
+    presetsTitle: "Predefinições de Validação de Cavitação Sanitária",
+    presetDairy: "Nano-Homogeneização e Pasteurização Fria de Leite (Rotor-Estator, 18 bar, 3,5 bar, 25°C, L. monocytogenes)",
+    presetJuice: "Estabilização Fria de Suco Cítrico Prensado (Placa Venturi, 45 bar, 4,0 bar, 18°C, E. coli)",
+    presetOat: "Nano-Texturização de Bebida de Aveia Barista (Acústico Helicoidal, 22 bar, 3,0 bar, 22°C, S. cerevisiae)",
+    presetPuree: "Ruptura Celular de Purê de Tomate (Placa Venturi, 60 bar, 5,0 bar, 32°C, Salmonella)",
+    presetHazard: "Erosão Crítica por Pitting e Golpe de Aríete (Válvula Degradada, 15 bar, 0,2 bar, 58°C, Sem Contrapressão)",
+    diagnosticTitle: "Física de Cavitação, Letalidade Microbiana e Reologia",
+    diagnosticSub: "Cálculo em tempo real do número de cavitação (σ), pressão de choque de colapso, fluxo de radicais hidroxila, redução log10, tamanho nanométrico de gotículas e status CIP/SIP.",
+    cavitationNumberLabel: "Número de Cavitação (σ)",
+    collapsePressureLabel: "Pressão de Choque de Colapso (P_shock)",
+    radicalFluxLabel: "Fluxo de Radicais Hidroxila (•OH)",
+    logReductionLabel: "Redução Log10 do Patógeno",
+    particleSizeLabel: "Diâmetro Médio de Gotícula (D_4,3)",
+    bulkTempRiseLabel: "Aumento Térmico Adiabático (ΔT)",
+    acousticNoiseLabel: "Nível de Ruído Acústico (SPL)",
+    complianceStatusLabel: "Status de Conformidade Normativa e Higiênica",
+    primaryLimitationLabel: "Restrição Hidrodinâmica e do Fluido",
+    mitigationActionLabel: "Ação de Engenharia Sanitária Recomendada",
+    scienceTitle: "Física de Cavitação Hidrodinâmica, Dinâmica de Bolhas e Cinética Não Térmica",
+    scienceSub: "Fundamentos da equação de Rayleigh-Plesset, cavitação estrangulada, sonólise de água, cisalhamento celular por microjatos e mecânica de fluidos de nanoemulsões.",
+    tableTitle: "Sistemas de Cavitação Hidrodinâmica e Especificações de Fluidos"
+  },
+  'zh-cn': {
+    badge: "空化流体力学与非热食品流变工程",
+    title: "商业连续高压冷态水力空化 (CHC) 纳米级杀菌与质构重构模拟器",
+    subtitle: "模拟商业连续高压冷态水力空化（CHC）液体食品（生鲜牛乳、冷榨果汁、植物基燕麦奶与果泥）非热灭菌与纳米级质构重构过程。精确计算空化数（σ）、Rayleigh-Plesset 微气泡剧烈溃灭激波压力（>1,000 bar）、羟基自由基通量（•OH）、食源性致病菌对数杀灭率（李斯特菌、大肠杆菌、沙门氏菌）、脂质/蛋白质纳米粒径分布（<200 nm）及 3-A Sanitary 04-05、EHEDG 与 ASME B31.3 卫生工程合规状态。",
+    controlsTitle: "水力空化反应器与卫生流体工艺控制",
+    controlsSub: "配置水力空化发生器构型、液体物料流变特性、目标致病微生物、卫生管路架构、进料驱动压力、调节背压、物料温控与连续体积流量。",
+    reactorLabel: "水力空化发生器几何构型架构：",
+    reactorHelp: "选择高频转子-定子空化反应器 (SPR, 3,600 RPM)、多孔文丘里节流孔板、螺旋涡流声学空化喷嘴或气蚀点蚀损坏节流阀。",
+    fluidLabel: "食品物料基质与流变学特性：",
+    fluidHelp: "选择全脂牛乳及浓缩乳清蛋白 (WPC-80)、冷榨柑橘柠檬果汁、植物基燕麦/杏仁燕麦奶或高固形物番茄果浆。",
+    pathogenLabel: "目标食品致病菌 / 败坏微生物：",
+    pathogenHelp: "选择单核细胞增生李斯特菌 Listeria monocytogenes、大肠杆菌 O157:H7、鼠伤寒沙门氏菌或酿酒酵母 / 败坏霉菌。",
+    sanitaryLabel: "卫生级滑橇管路与背压调节系统：",
+    sanitaryHelp: "选择 3-A Sanitary / EHEDG Class 1 无菌管路、标准工业食品级管路或水锤严重失控管线。",
+    inletPressureLabel: "上游进料驱动压力 (bar)：",
+    inletPressureHelp: "物料进入空化收缩腔前的驱动流体静压。决定射流流速与空化初生条件。",
+    backpressureLabel: "下游受控稳定背压 (bar)：",
+    backpressureHelp: "空化腔下游调节背压。直接调控空化数 (σ) 并控制空化云剧烈溃灭的空间位置与强度。",
+    tempLabel: "物料连续处理温度 (°C)：",
+    tempHelp: "物料进入反应器的基准流温。保持严格非热状态 (<50°C)，避免热敏蛋白变性与风味劣变。",
+    flowRateLabel: "连续处理体积流量 (L/h)：",
+    flowRateHelp: "连续通过水力空化反应系统的小时物料处理量。",
+    presetsTitle: "标准卫生水力空化工艺验证预设",
+    presetDairy: "全脂牛乳纳米均质与非热温和低温灭菌 (转子-定子, 18 bar, 3.5 bar, 25°C, 李斯特菌)",
+    presetJuice: "冷榨柑橘原汁非热稳定与原生活性保留 (文丘里孔板, 45 bar, 4.0 bar, 18°C, 大肠杆菌)",
+    presetOat: "植物基咖啡大师燕麦奶纳米乳化质构 (螺旋声学, 22 bar, 3.0 bar, 22°C, 酿酒酵母)",
+    presetPuree: "高粘度番茄果浆微纤解离与增稠 (文丘里孔板, 60 bar, 5.0 bar, 32°C, 沙门氏菌)",
+    presetHazard: "严重气蚀点蚀破损与水锤激波失控 (损坏节流阀, 15 bar, 0.2 bar, 58°C, 无背压缓冲)",
+    diagnosticTitle: "空化动力学、微生物致死率与纳米流变工程诊断",
+    diagnosticSub: "实时计算无量纲空化数 (σ)、气泡溃灭瞬态冲击压力、声化学羟基自由基通量、致病菌对数杀灭值、微乳液纳米平均粒径与 CIP/SIP 状态。",
+    cavitationNumberLabel: "无量纲水力空化数 (σ)",
+    collapsePressureLabel: "微气泡瞬态溃灭冲击波压力 (P_shock)",
+    radicalFluxLabel: "声化学水解羟基自由基通量 (•OH)",
+    logReductionLabel: "目标致病菌 Log10 对数杀灭率",
+    particleSizeLabel: "乳液纳米微滴体积平均粒径 (D_4,3)",
+    bulkTempRiseLabel: "流体绝热黏性耗散温升 (ΔT)",
+    acousticNoiseLabel: "连续运行声压级噪声 (SPL)",
+    complianceStatusLabel: "卫生标准认证与工艺可靠性状态",
+    primaryLimitationLabel: "主要流体动力学与物理限制瓶颈",
+    mitigationActionLabel: "建议卫生流体工程优化措施",
+    scienceTitle: "水力空化流体物理学、气泡溃灭动力学与非热灭菌机理",
+    scienceSub: "系统解析 Rayleigh-Plesset 气泡非线性震荡方程、壅塞空化准则、水分子声化学自由基裂解、超高速微射流细胞膜机械穿孔及纳米均质机制。",
+    tableTitle: "水力空化发生系统与典型食品流体物性规格表"
+  },
+  ja: {
+    badge: "キャビテーション流体力学＆非加熱レオロジー工学",
+    title: "商業連続式高圧冷態水力キャビテーション (CHC) ナノ殺菌＆テクスチャー制御シミュレーター",
+    subtitle: "液状食品（生乳、コールドプレス果汁、植物性ミルク、ピューレ）に対する連続高圧冷態水力キャビテーション（CHC）非加熱殺菌およびナノスケール均質化プロセスをシミュレート。キャビテーション数（σ）、Rayleigh-Plesset気泡圧壊衝撃圧（>1,000 bar）、ソノケミカルヒドロキシラジカル束（•OH）、食中毒菌対数減少率（リステリア、大腸菌、サルモネラ）、ナノ粒子径分布（<200 nm）、3-A Sanitary 04-05およびEHEDG衛生規格適合性をリアルタイムにモデル化します。",
+    controlsTitle: "水力キャビテーション反応器＆サニタリー流体制御",
+    controlsSub: "反応器ジオメトリ、食品流体物性、対象微生物、サニタリースキッド、供給圧力、背圧、処理温度、および連続処理流量を設定します。",
+    reactorLabel: "キャビテーション反応器＆ジオメトリ構成：",
+    reactorHelp: "高周波ローター・ステーター型 (SPR, 3,600 RPM)、多孔ベンチュリプレート型、ヘリカルスワール音響型、またはキャビテーション壊食摩耗弁を選択。",
+    fluidLabel: "食品流体基質＆レオロジー特性：",
+    fluidHelp: "全脂乳・WPC-80濃縮乳清、コールドプレス柑橘果汁、植物性オーツ/アーモンドミルク、または高粘度トマトピューレを選択。",
+    pathogenLabel: "対象指標菌・食中毒病原体：",
+    pathogenHelp: "Listeria monocytogenes、Escherichia coli O157:H7、Salmonella enterica、またはSaccharomyces cerevisiae酵母を選択。",
+    sanitaryLabel: "サニタリースキッド＆背圧制御系：",
+    sanitaryHelp: "3-A / EHEDG Class 1無菌スキッド、標準工業用サニタリー配管、またはウォーターハンマー過大ラインを選択。",
+    inletPressureLabel: "上流側供給ポンプ圧力 (bar)：",
+    inletPressureHelp: "反応器流入前の流体駆動静圧。局所流速とキャビテーション初生条件を直接支配します。",
+    backpressureLabel: "下流側制御背圧 (bar)：",
+    backpressureHelp: "下流調整弁による制御背圧。キャビテーション数（σ）と気泡圧壊の局所衝撃強度を決定します。",
+    tempLabel: "流体プロセス処理温度 (°C)：",
+    tempHelp: "キャビテーションチャンバー流入温度。タンパク質変性を防止する厳格な非加熱域（<50°C）を維持。",
+    flowRateLabel: "連続処理体積流量 (L/h)：",
+    flowRateHelp: "水力キャビテーションスキッドを通過する連続時間あたり処理流量。",
+    presetsTitle: "サニタリー水力キャビテーション標準バリデーションプリセット",
+    presetDairy: "全脂乳ナノ均質化＆非加熱低温殺菌 (ローター・ステーター, 18 bar, 3.5 bar, 25°C, リステリア菌)",
+    presetJuice: "コールドプレス柑橘果汁の非加熱常温安定化 (ベンチュリ孔板, 45 bar, 4.0 bar, 18°C, 大腸菌)",
+    presetOat: "バリスタ用オーツミルクのナノ乳化テクスチャー制御 (ヘリカル音響, 22 bar, 3.0 bar, 22°C, 酵母)",
+    presetPuree: "高粘度トマトピューレの繊維微細化・増粘 (ベンチュリ孔板, 60 bar, 5.0 bar, 32°C, サルモネラ菌)",
+    presetHazard: "激しい壊食ピッティング＆水撃失控状態 (摩耗絞り弁, 15 bar, 0.2 bar, 58°C, 背圧喪失)",
+    diagnosticTitle: "キャビテーション速度論・殺菌能・レオロジー総合診断",
+    diagnosticSub: "無次元キャビテーション数（σ）、気泡圧壊衝撃圧力、OHラジカル発生束、病原菌対数減少率、エマルションナノ粒子径、およびCIP/SIP状態をリアルタイム計算。",
+    cavitationNumberLabel: "無次元水力キャビテーション数 (σ)",
+    collapsePressureLabel: "気泡圧壊過渡衝撃圧力 (P_shock)",
+    radicalFluxLabel: "ソノケミカルヒドロキシラジカル束 (•OH)",
+    logReductionLabel: "対象菌対数減少値 (Log10 Kill)",
+    particleSizeLabel: "エマルション体積平均粒子径 (D_4,3)",
+    bulkTempRiseLabel: "断熱粘性散逸温度上昇 (ΔT)",
+    acousticNoiseLabel: "運転音圧レベル騒音 (SPL)",
+    complianceStatusLabel: "衛生規格認証＆プロセス信頼性状態",
+    primaryLimitationLabel: "主要流体力学限界＆物性制約",
+    mitigationActionLabel: "推奨衛生エンジニアリング対策",
+    scienceTitle: "水力キャビテーション流体力学、気泡動態＆非加熱殺菌工学",
+    scienceSub: "Rayleigh-Plesset気泡非線形振動論、チョークドキャビテーション限界、ソノケミカル水解離ラジカル反応、マイクロジェット機械的穿孔およびナノ均質化メカニズムの技術的詳解。",
+    tableTitle: "水力キャビテーション反応システムおよび代表的食品流体物性仕様表"
+  }
+};
+
+const d = DICT[lang] || DICT.en;
+---
+
+<div class="bg-surface border border-hairline rounded-3xl p-6 sm:p-10 shadow-xs mb-12">
+  <!-- Header Bar -->
+  <div class="flex flex-wrap items-center justify-between gap-4 border-b border-hairline pb-6 mb-8">
+    <div>
+      <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-cyan-700 text-white mb-3">
+        {d.badge}
+      </span>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-ink tracking-tight">
+        {d.title}
+      </h1>
+      <p class="text-body text-sm sm:text-base mt-2 max-w-4xl leading-relaxed">
+        {d.subtitle}
+      </p>
+    </div>
+  </div>
+
+  <!-- Presets Bar -->
+  <div class="mb-10 bg-surface-soft border border-hairline rounded-2xl p-5">
+    <h3 class="text-xs font-bold uppercase tracking-wider text-muted mb-3">
+      {d.presetsTitle}
+    </h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+      <button
+        type="button"
+        id="btn-preset-dairy"
+        class="text-left px-3.5 py-2.5 rounded-xl border border-hairline bg-surface hover:border-cyan-600 hover:text-cyan-700 text-xs font-medium text-ink transition-all shadow-2xs"
+      >
+        🥛 {d.presetDairy}
+      </button>
+      <button
+        type="button"
+        id="btn-preset-juice"
+        class="text-left px-3.5 py-2.5 rounded-xl border border-hairline bg-surface hover:border-cyan-600 hover:text-cyan-700 text-xs font-medium text-ink transition-all shadow-2xs"
+      >
+        🍊 {d.presetJuice}
+      </button>
+      <button
+        type="button"
+        id="btn-preset-oat"
+        class="text-left px-3.5 py-2.5 rounded-xl border border-hairline bg-surface hover:border-cyan-600 hover:text-cyan-700 text-xs font-medium text-ink transition-all shadow-2xs"
+      >
+        🌾 {d.presetOat}
+      </button>
+      <button
+        type="button"
+        id="btn-preset-puree"
+        class="text-left px-3.5 py-2.5 rounded-xl border border-hairline bg-surface hover:border-cyan-600 hover:text-cyan-700 text-xs font-medium text-ink transition-all shadow-2xs"
+      >
+        🍅 {d.presetPuree}
+      </button>
+      <button
+        type="button"
+        id="btn-preset-hazard"
+        class="text-left px-3.5 py-2.5 rounded-xl border border-rose-300 bg-rose-50/70 hover:bg-rose-100/80 text-xs font-medium text-rose-800 transition-all shadow-2xs"
+      >
+        ⚠️ {d.presetHazard}
+      </button>
+    </div>
+  </div>
+
+  <!-- Interactive Grid: Controls & Real-Time Engine -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+    <!-- Left Column: Controls (5 Cols) -->
+    <div class="lg:col-span-5 space-y-6">
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-6">
+        <h2 class="text-base font-bold text-ink mb-1">
+          {d.controlsTitle}
+        </h2>
+        <p class="text-xs text-muted mb-6 leading-relaxed">
+          {d.controlsSub}
+        </p>
+
+        <div class="space-y-5 text-sm">
+          <!-- Reactor Selection -->
+          <div>
+            <label for="chc-reactor" class="block font-semibold text-ink text-xs mb-1">
+              {d.reactorLabel}
+            </label>
+            <select
+              id="chc-reactor"
+              class="w-full bg-surface border border-hairline rounded-xl px-3 py-2 text-xs text-ink focus:outline-hidden focus:ring-2 focus:ring-cyan-600"
+            >
+              {chcData.cavitationReactors.map(r => (
+                <option value={r.id}>{r.name}</option>
+              ))}
+            </select>
+            <span class="block text-2xs text-muted mt-1 leading-tight">{d.reactorHelp}</span>
+          </div>
+
+          <!-- Fluid Selection -->
+          <div>
+            <label for="chc-fluid" class="block font-semibold text-ink text-xs mb-1">
+              {d.fluidLabel}
+            </label>
+            <select
+              id="chc-fluid"
+              class="w-full bg-surface border border-hairline rounded-xl px-3 py-2 text-xs text-ink focus:outline-hidden focus:ring-2 focus:ring-cyan-600"
+            >
+              {chcData.fluidMedia.map(f => (
+                <option value={f.id}>{f.name}</option>
+              ))}
+            </select>
+            <span class="block text-2xs text-muted mt-1 leading-tight">{d.fluidHelp}</span>
+          </div>
+
+          <!-- Pathogen Selection -->
+          <div>
+            <label for="chc-pathogen" class="block font-semibold text-ink text-xs mb-1">
+              {d.pathogenLabel}
+            </label>
+            <select
+              id="chc-pathogen"
+              class="w-full bg-surface border border-hairline rounded-xl px-3 py-2 text-xs text-ink focus:outline-hidden focus:ring-2 focus:ring-cyan-600"
+            >
+              {chcData.targetPathogens.map(p => (
+                <option value={p.id}>{p.name}</option>
+              ))}
+            </select>
+            <span class="block text-2xs text-muted mt-1 leading-tight">{d.pathogenHelp}</span>
+          </div>
+
+          <!-- Sanitary Skid Selection -->
+          <div>
+            <label for="chc-sanitary" class="block font-semibold text-ink text-xs mb-1">
+              {d.sanitaryLabel}
+            </label>
+            <select
+              id="chc-sanitary"
+              class="w-full bg-surface border border-hairline rounded-xl px-3 py-2 text-xs text-ink focus:outline-hidden focus:ring-2 focus:ring-cyan-600"
+            >
+              {chcData.sanitaryConfigurations.map(s => (
+                <option value={s.id}>{s.name}</option>
+              ))}
+            </select>
+            <span class="block text-2xs text-muted mt-1 leading-tight">{d.sanitaryHelp}</span>
+          </div>
+
+          <!-- Sliders -->
+          <!-- Upstream Inlet Pressure -->
+          <div class="pt-2 border-t border-hairline/60">
+            <div class="flex justify-between items-center mb-1">
+              <label for="slider-inlet-pressure" class="font-semibold text-ink text-xs">
+                {d.inletPressureLabel}
+              </label>
+              <span id="val-inlet-pressure" class="font-mono text-xs font-bold text-cyan-800 bg-cyan-50 px-2 py-0.5 rounded-md">
+                18.0 bar
+              </span>
+            </div>
+            <input
+              type="range"
+              id="slider-inlet-pressure"
+              min="5"
+              max="80"
+              step="1"
+              value="18"
+              class="w-full accent-cyan-700 cursor-pointer"
+            />
+            <span class="block text-2xs text-muted mt-0.5">{d.inletPressureHelp}</span>
+          </div>
+
+          <!-- Downstream Backpressure -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label for="slider-backpressure" class="font-semibold text-ink text-xs">
+                {d.backpressureLabel}
+              </label>
+              <span id="val-backpressure" class="font-mono text-xs font-bold text-cyan-800 bg-cyan-50 px-2 py-0.5 rounded-md">
+                3.5 bar
+              </span>
+            </div>
+            <input
+              type="range"
+              id="slider-backpressure"
+              min="0.2"
+              max="12.0"
+              step="0.1"
+              value="3.5"
+              class="w-full accent-cyan-700 cursor-pointer"
+            />
+            <span class="block text-2xs text-muted mt-0.5">{d.backpressureHelp}</span>
+          </div>
+
+          <!-- Process Temperature -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label for="slider-temp" class="font-semibold text-ink text-xs">
+                {d.tempLabel}
+              </label>
+              <span id="val-temp" class="font-mono text-xs font-bold text-cyan-800 bg-cyan-50 px-2 py-0.5 rounded-md">
+                25.0 °C
+              </span>
+            </div>
+            <input
+              type="range"
+              id="slider-temp"
+              min="10"
+              max="65"
+              step="1"
+              value="25"
+              class="w-full accent-cyan-700 cursor-pointer"
+            />
+            <span class="block text-2xs text-muted mt-0.5">{d.tempHelp}</span>
+          </div>
+
+          <!-- Flow Rate -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label for="slider-flow" class="font-semibold text-ink text-xs">
+                {d.flowRateLabel}
+              </label>
+              <span id="val-flow" class="font-mono text-xs font-bold text-cyan-800 bg-cyan-50 px-2 py-0.5 rounded-md">
+                5,000 L/h
+              </span>
+            </div>
+            <input
+              type="range"
+              id="slider-flow"
+              min="500"
+              max="12000"
+              step="250"
+              value="5000"
+              class="w-full accent-cyan-700 cursor-pointer"
+            />
+            <span class="block text-2xs text-muted mt-0.5">{d.flowRateHelp}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Diagnostics, Gauges & Physics (7 Cols) -->
+    <div class="lg:col-span-7 space-y-6">
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-6">
+        <div class="flex items-center justify-between border-b border-hairline/60 pb-3 mb-6">
+          <div>
+            <h2 class="text-base font-bold text-ink">
+              {d.diagnosticTitle}
+            </h2>
+            <p class="text-xs text-muted mt-0.5">
+              {d.diagnosticSub}
+            </p>
+          </div>
+          <span id="live-indicator" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-2xs font-bold uppercase bg-emerald-100 text-emerald-800">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+            ACTIVE CAVITATION REGIME
+          </span>
+        </div>
+
+        <!-- 6 Core Metric Badges Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3.5 mb-6">
+          <!-- Cavitation Number -->
+          <div class="bg-surface border border-hairline rounded-xl p-3.5 flex flex-col justify-between">
+            <span class="text-2xs font-semibold text-muted leading-tight">{d.cavitationNumberLabel}</span>
+            <div class="mt-2">
+              <span id="metric-cavitation-number" class="text-lg font-black text-ink font-mono">0.14</span>
+              <span class="text-xs text-muted font-normal ml-0.5">σ</span>
+            </div>
+            <span id="sub-cavitation-number" class="text-2xs text-emerald-600 font-medium mt-1">Super-Cavitation (σ &lt; 0.20)</span>
+          </div>
+
+          <!-- Bubble Collapse Shock Pressure -->
+          <div class="bg-surface border border-hairline rounded-xl p-3.5 flex flex-col justify-between">
+            <span class="text-2xs font-semibold text-muted leading-tight">{d.collapsePressureLabel}</span>
+            <div class="mt-2">
+              <span id="metric-collapse-pressure" class="text-lg font-black text-cyan-800 font-mono">2,350</span>
+              <span class="text-xs text-muted font-normal ml-0.5">bar</span>
+            </div>
+            <span id="sub-collapse-pressure" class="text-2xs text-emerald-600 font-medium mt-1">Extreme Micro-Jet Shear</span>
+          </div>
+
+          <!-- Hydroxyl Radical Flux -->
+          <div class="bg-surface border border-hairline rounded-xl p-3.5 flex flex-col justify-between">
+            <span class="text-2xs font-semibold text-muted leading-tight">{d.radicalFluxLabel}</span>
+            <div class="mt-2">
+              <span id="metric-radical-flux" class="text-lg font-black text-ink font-mono">18.2</span>
+              <span class="text-xs text-muted font-normal ml-0.5">µmol/L</span>
+            </div>
+            <span id="sub-radical-flux" class="text-2xs text-emerald-600 font-medium mt-1">Sonochemical Water Sonolysis</span>
+          </div>
+
+          <!-- Pathogen Log10 Reduction -->
+          <div class="bg-surface border border-hairline rounded-xl p-3.5 flex flex-col justify-between">
+            <span class="text-2xs font-semibold text-muted leading-tight">{d.logReductionLabel}</span>
+            <div class="mt-2">
+              <span id="metric-log-reduction" class="text-lg font-black text-emerald-600 font-mono">5.42</span>
+              <span class="text-xs text-muted font-normal ml-0.5">log₁₀</span>
+            </div>
+            <span id="sub-log-reduction" class="text-2xs text-emerald-600 font-medium mt-1">FDA 5-log Target Met</span>
+          </div>
+
+          <!-- Nano-Particle Droplet Size -->
+          <div class="bg-surface border border-hairline rounded-xl p-3.5 flex flex-col justify-between">
+            <span class="text-2xs font-semibold text-muted leading-tight">{d.particleSizeLabel}</span>
+            <div class="mt-2">
+              <span id="metric-particle-size" class="text-lg font-black text-cyan-800 font-mono">168</span>
+              <span class="text-xs text-muted font-normal ml-0.5">nm</span>
+            </div>
+            <span id="sub-particle-size" class="text-2xs text-emerald-600 font-medium mt-1">Sub-Micron Nano-Emulsion</span>
+          </div>
+
+          <!-- Bulk Adiabatic Temp Rise -->
+          <div class="bg-surface border border-hairline rounded-xl p-3.5 flex flex-col justify-between">
+            <span class="text-2xs font-semibold text-muted leading-tight">{d.bulkTempRiseLabel}</span>
+            <div class="mt-2">
+              <span id="metric-temp-rise" class="text-lg font-black text-ink font-mono">+3.8</span>
+              <span class="text-xs text-muted font-normal ml-0.5">°C</span>
+            </div>
+            <span id="sub-temp-rise" class="text-2xs text-emerald-600 font-medium mt-1">Non-Thermal (&lt; 50°C Safe)</span>
+          </div>
+        </div>
+
+        <!-- Dynamic Cavitation Reactor & Micro-Bubble SVG Diagram -->
+        <div class="bg-surface border border-hairline rounded-2xl p-5 mb-6">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold text-ink uppercase tracking-wider">
+              Hydrodynamic Cavitation Chamber &amp; Bubble Collapse Dynamics
+            </span>
+            <span id="flow-status-tag" class="text-2xs font-semibold text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-full">
+              Stable Vortex Cavitation
+            </span>
+          </div>
+          
+          <div class="w-full bg-slate-950 rounded-xl p-4 overflow-hidden flex items-center justify-center">
+            <svg viewBox="0 0 540 220" class="w-full h-auto max-h-56 select-none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="chcFluidGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#0284c7" stop-opacity="0.9" />
+                  <stop offset="35%" stop-color="#06b6d4" stop-opacity="0.95" />
+                  <stop offset="70%" stop-color="#0284c7" stop-opacity="0.9" />
+                  <stop offset="100%" stop-color="#0369a1" stop-opacity="0.95" />
+                </linearGradient>
+                <radialGradient id="bubbleCollapseGrad" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+                  <stop offset="40%" stop-color="#fef08a" stop-opacity="0.9" />
+                  <stop offset="80%" stop-color="#06b6d4" stop-opacity="0.4" />
+                  <stop offset="100%" stop-color="#0891b2" stop-opacity="0" />
+                </radialGradient>
+                <filter id="chcGlow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+              </defs>
+
+              <!-- Reactor Housing Wall (Sanitary 316L SS) -->
+              <rect x="20" y="25" width="500" height="170" rx="14" fill="#0f172a" stroke="#334155" stroke-width="3" />
+              
+              <!-- Inlet Nozzle -->
+              <rect x="5" y="80" width="30" height="60" rx="3" fill="#1e293b" stroke="#475569" stroke-width="2" />
+              <text x="18" y="115" fill="#94a3b8" font-size="10" font-family="monospace" text-anchor="middle" transform="rotate(-90 18 115)">FEED</text>
+
+              <!-- Fluid Flow Stream -->
+              <path d="M 30,85 L 140,85 Q 170,105 210,105 L 340,105 Q 380,85 410,85 L 505,85 L 505,135 L 410,135 Q 380,115 340,115 L 210,115 Q 170,135 140,135 L 30,135 Z" fill="url(#chcFluidGrad)" opacity="0.85" />
+
+              <!-- Cavitation Orifice / Rotor Constriction -->
+              <rect id="svg-constriction-top" x="180" y="35" width="28" height="58" rx="4" fill="#334155" stroke="#64748b" stroke-width="2" />
+              <rect id="svg-constriction-bottom" x="180" y="127" width="28" height="58" rx="4" fill="#334155" stroke="#64748b" stroke-width="2" />
+              
+              <!-- High-Speed Cavitation Jet Throat -->
+              <rect x="182" y="93" width="24" height="34" fill="#38bdf8" opacity="0.3" />
+              
+              <!-- Cavitation Bubble Cloud Generation Zone -->
+              <g id="svg-bubble-cloud">
+                <!-- Growing Micro-Bubbles -->
+                <circle cx="225" cy="100" r="4.5" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1.5" />
+                <circle cx="238" cy="118" r="6" fill="#e0f2fe" stroke="#38bdf8" stroke-width="1.5" />
+                <circle cx="255" cy="98" r="8.5" fill="#bae6fd" stroke="#0284c7" stroke-width="1.8" />
+                <circle cx="270" cy="115" r="11" fill="#bae6fd" stroke="#0284c7" stroke-width="2" />
+                
+                <!-- Maximum Expansion & Violent Asymmetric Collapse Hotspot -->
+                <circle cx="300" cy="108" r="14" fill="url(#bubbleCollapseGrad)" stroke="#fef08a" stroke-width="2.5" filter="url(#chcGlow)" />
+                <circle cx="328" cy="102" r="10" fill="url(#bubbleCollapseGrad)" stroke="#fef08a" stroke-width="2" />
+
+                <!-- Shockwave Wavefronts -->
+                <ellipse cx="300" cy="108" rx="22" ry="18" fill="none" stroke="#fef08a" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.8" />
+                <ellipse cx="300" cy="108" rx="32" ry="26" fill="none" stroke="#38bdf8" stroke-width="1" stroke-dasharray="4,4" opacity="0.6" />
+                
+                <!-- Sonochemical Micro-Jets -->
+                <line x1="292" y1="108" x2="308" y2="108" stroke="#ffffff" stroke-width="3" stroke-linecap="round" />
+                <line x1="300" y1="100" x2="300" y2="116" stroke="#ffffff" stroke-width="3" stroke-linecap="round" />
+              </g>
+
+              <!-- Downstream Nano-Homogenized Stream -->
+              <g id="svg-nano-droplets">
+                <circle cx="380" cy="95" r="2" fill="#ffffff" opacity="0.9" />
+                <circle cx="395" cy="112" r="1.8" fill="#ffffff" opacity="0.9" />
+                <circle cx="415" cy="104" r="2.2" fill="#ffffff" opacity="0.9" />
+                <circle cx="435" cy="98" r="1.5" fill="#ffffff" opacity="0.9" />
+                <circle cx="455" cy="118" r="2" fill="#ffffff" opacity="0.9" />
+                <circle cx="475" cy="105" r="1.8" fill="#ffffff" opacity="0.9" />
+              </g>
+
+              <!-- Discharge Outlet Nozzle -->
+              <rect x="505" y="80" width="30" height="60" rx="3" fill="#1e293b" stroke="#475569" stroke-width="2" />
+              <text x="522" y="115" fill="#94a3b8" font-size="10" font-family="monospace" text-anchor="middle" transform="rotate(90 522 115)">OUTLET</text>
+
+              <!-- Annotations -->
+              <text x="75" y="55" fill="#38bdf8" font-size="11" font-weight="bold" font-family="sans-serif">P_in (Feed Pressure)</text>
+              <text x="180" y="22" fill="#cbd5e1" font-size="10" font-family="monospace">Vena Contracta</text>
+              <text x="260" y="160" fill="#fef08a" font-size="11" font-weight="bold" font-family="sans-serif">Collapse: &gt;1,000 bar • •OH Radicals</text>
+              <text x="420" y="55" fill="#38bdf8" font-size="11" font-weight="bold" font-family="sans-serif">P_back (Backpressure)</text>
+              <text x="420" y="165" fill="#94a3b8" font-size="10" font-family="sans-serif">Sub-Micron Nano-Emulsion</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Compliance & Engineering Status Banner -->
+        <div class="bg-surface border border-hairline rounded-2xl p-5 space-y-4">
+          <div>
+            <span class="text-2xs font-bold text-muted uppercase tracking-wider block mb-1">
+              {d.complianceStatusLabel}
+            </span>
+            <div id="compliance-badge" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 border border-emerald-300 text-emerald-800">
+              <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+              <span id="compliance-text">FULL COMPLIANCE: 3-A Sanitary 04-05 &bull; EHEDG Class 1 Aseptic &bull; FDA Juice HACCP 5-log</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-hairline/60 text-xs">
+            <div>
+              <span class="font-bold text-ink block mb-0.5">{d.primaryLimitationLabel}</span>
+              <p id="limitation-text" class="text-muted leading-relaxed">
+                Rotor cavitation shear is optimal. Backpressure safely confines bubble collapse inside fluid core, preventing cavitation pitting on 316L chamber walls.
+              </p>
+            </div>
+            <div>
+              <span class="font-bold text-ink block mb-0.5">{d.mitigationActionLabel}</span>
+              <p id="mitigation-text" class="text-muted leading-relaxed">
+                Maintain downstream backpressure &gt; 3.0 bar to avoid vapor flashing. Inspect sanitary mechanical seal face during scheduled 1,500-hour CIP cycle.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Deep Engineering Science Section -->
+  <div class="border-t border-hairline pt-10 mb-12">
+    <div class="max-w-3xl mb-8">
+      <h2 class="text-xl sm:text-2xl font-bold text-ink tracking-tight">
+        {d.scienceTitle}
+      </h2>
+      <p class="text-body text-sm mt-2 leading-relaxed">
+        {d.scienceSub}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-6">
+        <div class="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-800 font-bold flex items-center justify-center mb-4 text-sm font-mono">
+          01
+        </div>
+        <h3 class="font-bold text-ink text-base mb-2">
+          Hydrodynamic Cavitation Number (σ) &amp; Rayleigh-Plesset Bubble Kinetics
+        </h3>
+        <p class="text-body text-xs leading-relaxed mb-3">
+          Hydrodynamic cavitation occurs when fluid static pressure falls below its vapor pressure (<span class="font-mono font-semibold">P_v</span>) in constriction zones:
+        </p>
+        <div class="bg-surface border border-hairline rounded-xl p-3 font-mono text-2xs text-ink mb-3 overflow-x-auto">
+          σ = (P_down - P_v) / (0.5 · ρ · v²)
+        </div>
+        <p class="text-muted text-xs leading-relaxed">
+          When <span class="font-mono text-ink">σ &lt; 0.20</span>, intense cloud cavitation develops. Micro-bubbles expand radially according to the Rayleigh-Plesset differential equation and subsequently collapse asymmetrically, producing liquid micro-jets exceeding <span class="font-semibold text-ink">100 m/s</span> and shock pressures over <span class="font-semibold text-ink">1,500 bar</span>.
+        </p>
+      </div>
+
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-6">
+        <div class="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-800 font-bold flex items-center justify-center mb-4 text-sm font-mono">
+          02
+        </div>
+        <h3 class="font-bold text-ink text-base mb-2">
+          Sonochemical Hydroxyl Radical (•OH) Water Homolysis &amp; Pathogen Lethality
+        </h3>
+        <p class="text-body text-xs leading-relaxed mb-3">
+          Adiabatic compression inside collapsing cavitation cavities creates transient thermal hotspots (<span class="font-mono font-semibold">T &gt; 3,500 K</span>):
+        </p>
+        <div class="bg-surface border border-hairline rounded-xl p-3 font-mono text-2xs text-ink mb-3 overflow-x-auto">
+          H₂O + Cavitation Shock → •H + •OH
+        </div>
+        <p class="text-muted text-xs leading-relaxed">
+          Highly reactive hydroxyl radicals (<span class="font-mono text-ink">•OH</span>) react instantaneously with unsaturated lipids in microbial cell membranes, causing lipid peroxidation. Concurrently, intense hydraulic shear stress mechanically cleaves cell walls of <span class="italic text-ink">L. monocytogenes</span>, <span class="italic text-ink">E. coli</span>, and spoilage yeasts without bulk thermal heat.
+        </p>
+      </div>
+
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-6">
+        <div class="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-800 font-bold flex items-center justify-center mb-4 text-sm font-mono">
+          03
+        </div>
+        <h3 class="font-bold text-ink text-base mb-2">
+          Sub-Micron Nano-Emulsification &amp; Native Protein Preservation
+        </h3>
+        <p class="text-body text-xs leading-relaxed mb-3">
+          Extreme turbulent shear strain rates (<span class="font-mono font-semibold">γ̇ &gt; 10⁵ s⁻¹</span>) disrupt colloidal fat globules and macromolecular aggregates:
+        </p>
+        <div class="bg-surface border border-hairline rounded-xl p-3 font-mono text-2xs text-ink mb-3 overflow-x-auto">
+          D_4,3 ∝ (We_crit · γ / ρ_c)^0.6 · (ε_diss)^-0.4
+        </div>
+        <p class="text-muted text-xs leading-relaxed">
+          In dairy and plant-based emulsions, lipid droplet diameters drop below <span class="font-semibold text-ink">180 nm</span>, preventing creaming sedimentation. Because bulk process temperature remains below <span class="font-semibold text-ink">45°C</span>, immunoglobulins, lactoferrin, and Vitamin C retain &gt;95% of native bioactivity without Maillard browning.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Technical Specs Reference Table -->
+  <div class="border-t border-hairline pt-8">
+    <h3 class="text-sm font-bold text-ink uppercase tracking-wider mb-4">
+      {d.tableTitle}
+    </h3>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs border border-hairline rounded-xl overflow-hidden">
+        <thead class="bg-surface-soft text-muted font-bold border-b border-hairline">
+          <tr>
+            <th class="p-3">Reactor Model</th>
+            <th class="p-3">Cavitation Mechanism</th>
+            <th class="p-3">Max Pressure</th>
+            <th class="p-3">Cavitation Number (σ)</th>
+            <th class="p-3">Throughput (L/h)</th>
+            <th class="p-3">Sanitary Certification</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline">
+          {chcData.cavitationReactors.map(r => (
+            <tr class="hover:bg-surface-soft/50 transition-colors">
+              <td class="p-3 font-semibold text-ink">{r.name}</td>
+              <td class="p-3 text-muted">{r.classification}</td>
+              <td class="p-3 font-mono">{r.maxDischargePressureBar} bar</td>
+              <td class="p-3 font-mono font-semibold text-cyan-800">{r.cavitationNumberSigma}</td>
+              <td class="p-3 font-mono">{r.maxThroughputLitersPerHour.toLocaleString()} L/h</td>
+              <td class="p-3 text-2xs text-muted">{r.sanitaryCertifications}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script is:inline define:vars={{ chcData }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Controls
+    const selReactor = document.getElementById('chc-reactor');
+    const selFluid = document.getElementById('chc-fluid');
+    const selPathogen = document.getElementById('chc-pathogen');
+    const selSanitary = document.getElementById('chc-sanitary');
+
+    // Sliders
+    const sliderInletPressure = document.getElementById('slider-inlet-pressure');
+    const sliderBackpressure = document.getElementById('slider-backpressure');
+    const sliderTemp = document.getElementById('slider-temp');
+    const sliderFlow = document.getElementById('slider-flow');
+
+    // Value Badges
+    const valInletPressure = document.getElementById('val-inlet-pressure');
+    const valBackpressure = document.getElementById('val-backpressure');
+    const valTemp = document.getElementById('val-temp');
+    const valFlow = document.getElementById('val-flow');
+
+    // Diagnostic Metrics
+    const metricCavitationNumber = document.getElementById('metric-cavitation-number');
+    const subCavitationNumber = document.getElementById('sub-cavitation-number');
+    const metricCollapsePressure = document.getElementById('metric-collapse-pressure');
+    const subCollapsePressure = document.getElementById('sub-collapse-pressure');
+    const metricRadicalFlux = document.getElementById('metric-radical-flux');
+    const subRadicalFlux = document.getElementById('sub-radical-flux');
+    const metricLogReduction = document.getElementById('metric-log-reduction');
+    const subLogReduction = document.getElementById('sub-log-reduction');
+    const metricParticleSize = document.getElementById('metric-particle-size');
+    const subParticleSize = document.getElementById('sub-particle-size');
+    const metricTempRise = document.getElementById('metric-temp-rise');
+    const subTempRise = document.getElementById('sub-temp-rise');
+
+    // Status Tags & Compliance
+    const flowStatusTag = document.getElementById('flow-status-tag');
+    const complianceBadge = document.getElementById('compliance-badge');
+    const complianceText = document.getElementById('compliance-text');
+    const limitationText = document.getElementById('limitation-text');
+    const mitigationText = document.getElementById('mitigation-text');
+
+    // Preset Buttons
+    const btnDairy = document.getElementById('btn-preset-dairy');
+    const btnJuice = document.getElementById('btn-preset-juice');
+    const btnOat = document.getElementById('btn-preset-oat');
+    const btnPuree = document.getElementById('btn-preset-puree');
+    const btnHazard = document.getElementById('btn-preset-hazard');
+
+    function applyPreset(reactorId, fluidId, pathogenId, sanitaryId, inletP, backP, tempC, flowLh) {
+      if (selReactor) selReactor.value = reactorId;
+      if (selFluid) selFluid.value = fluidId;
+      if (selPathogen) selPathogen.value = pathogenId;
+      if (selSanitary) selSanitary.value = sanitaryId;
+      if (sliderInletPressure) sliderInletPressure.value = inletP;
+      if (sliderBackpressure) sliderBackpressure.value = backP;
+      if (sliderTemp) sliderTemp.value = tempC;
+      if (sliderFlow) sliderFlow.value = flowLh;
+      recalculate();
+    }
+
+    if (btnDairy) {
+      btnDairy.addEventListener('click', () => {
+        applyPreset('rotor_stator_shockwave_reactor', 'dairy_whole_milk_wpc', 'listeria_monocytogenes', 'sanitary_3a_ehedg_skid', 18, 3.5, 25, 5000);
+      });
+    }
+
+    if (btnJuice) {
+      btnJuice.addEventListener('click', () => {
+        applyPreset('multi_orifice_venturi_plate', 'cold_pressed_citrus_juice', 'escherichia_coli_o157h7', 'sanitary_3a_ehedg_skid', 45, 4.0, 18, 4000);
+      });
+    }
+
+    if (btnOat) {
+      btnOat.addEventListener('click', () => {
+        applyPreset('swirl_vortex_acoustic_cavitator', 'plant_based_oat_almond_emulsion', 'saccharomyces_cerevisiae_yeast', 'sanitary_3a_ehedg_skid', 22, 3.0, 22, 3500);
+      });
+    }
+
+    if (btnPuree) {
+      btnPuree.addEventListener('click', () => {
+        applyPreset('multi_orifice_venturi_plate', 'high_viscosity_tomato_puree', 'salmonella_enterica_typhimurium', 'standard_industrial_sanitary_skid', 60, 5.0, 32, 2500);
+      });
+    }
+
+    if (btnHazard) {
+      btnHazard.addEventListener('click', () => {
+        applyPreset('eroded_pitted_throttle_cavitator', 'high_viscosity_tomato_puree', 'listeria_monocytogenes', 'unbuffered_eroded_line', 15, 0.2, 58, 1500);
+      });
+    }
+
+    function recalculate() {
+      const inletP = parseFloat(sliderInletPressure.value);
+      const backP = parseFloat(sliderBackpressure.value);
+      const tempC = parseFloat(sliderTemp.value);
+      const flowLh = parseFloat(sliderFlow.value);
+
+      valInletPressure.textContent = `${inletP.toFixed(1)} bar`;
+      valBackpressure.textContent = `${backP.toFixed(1)} bar`;
+      valTemp.textContent = `${tempC.toFixed(1)} °C`;
+      valFlow.textContent = `${flowLh.toLocaleString()} L/h`;
+
+      const reactor = chcData.cavitationReactors.find(r => r.id === selReactor.value) || chcData.cavitationReactors[0];
+      const fluid = chcData.fluidMedia.find(f => f.id === selFluid.value) || chcData.fluidMedia[0];
+      const pathogen = chcData.targetPathogens.find(p => p.id === selPathogen.value) || chcData.targetPathogens[0];
+      const sanitary = chcData.sanitaryConfigurations.find(s => s.id === selSanitary.value) || chcData.sanitaryConfigurations[0];
+
+      const isEroded = reactor.id === 'eroded_pitted_throttle_cavitator';
+      const isUnbuffered = sanitary.id === 'unbuffered_eroded_line';
+
+      // 1. Cavitation Number (σ)
+      // σ = (P_back - P_vapor) / (0.5 * rho * v²)
+      // Effective differential pressure deltaP = inletP - backP
+      const deltaP = Math.max(1.0, inletP - backP);
+      let sigma = (backP * 100.0) / (deltaP * 120.0 + 10.0);
+      if (isEroded) sigma = 0.04;
+      sigma = Math.max(0.03, Math.min(0.85, sigma));
+
+      // 2. Bubble Collapse Shockwave Pressure (bar)
+      let baseCollapseP = reactor.cavitationCollapsePressureBar * (deltaP / 25.0) * (1.0 / (sigma + 0.1));
+      if (isEroded) baseCollapseP = 350.0;
+      const collapseP = Math.max(200.0, Math.min(5500.0, baseCollapseP));
+
+      // 3. Hydroxyl Radical Flux (•OH in µmol/L)
+      let radicalFlux = (reactor.hydroxylRadicalFluxMicroMolPerL * (collapseP / 2000.0) * pathogen.hydroxylSensitivityIndex);
+      if (isEroded) radicalFlux = 1.8;
+      radicalFlux = Math.max(0.5, Math.min(45.0, radicalFlux));
+
+      // 4. Pathogen Log10 Reduction
+      // Passes based on flow rate and reactor residence
+      const passes = Math.max(1.0, (reactor.maxThroughputLitersPerHour / flowLh) * 1.3);
+      let logReduction = (passes / pathogen.passesForOneLogKill) * (collapseP / 1500.0) * fluid.cavitationYieldFactor;
+      if (isEroded || isUnbuffered) logReduction *= 0.35;
+      logReduction = Math.max(0.2, Math.min(8.5, logReduction));
+
+      // 5. Emulsion Nano-Droplet Size (nm)
+      let particleSize = fluid.targetNanoParticleSizeNm * Math.pow(1500.0 / collapseP, 0.45);
+      if (isEroded) particleSize = 850.0;
+      particleSize = Math.max(65.0, Math.min(1200.0, particleSize));
+
+      // 6. Bulk Adiabatic Temperature Rise (°C)
+      // deltaT = (deltaP_bar * 1e5) / (rho * Cp)
+      // 1 bar ~ 0.024°C rise for water-like liquids
+      const tempRise = (deltaP * 0.18) * (1.0 + (fluid.viscosityCentipoise / 50.0));
+      const finalTemp = tempC + tempRise;
+
+      // Update Metrics Displays
+      metricCavitationNumber.textContent = sigma.toFixed(2);
+      if (sigma < 0.15) {
+        subCavitationNumber.textContent = 'Choked / Super-Cavitation';
+        subCavitationNumber.className = 'text-2xs text-cyan-700 font-semibold mt-1';
+      } else if (sigma <= 0.30) {
+        subCavitationNumber.textContent = 'Optimal Active Cavitation';
+        subCavitationNumber.className = 'text-2xs text-emerald-600 font-medium mt-1';
+      } else {
+        subCavitationNumber.textContent = 'Incipient / Weak Cavitation';
+        subCavitationNumber.className = 'text-2xs text-amber-600 font-medium mt-1';
+      }
+
+      metricCollapsePressure.textContent = Math.round(collapseP).toLocaleString();
+      if (collapseP >= 1500.0) {
+        metricCollapsePressure.className = 'text-lg font-black text-cyan-800 font-mono';
+        subCollapsePressure.textContent = 'Cell Wall Rupture Threshold Met';
+        subCollapsePressure.className = 'text-2xs text-emerald-600 font-medium mt-1';
+      } else {
+        metricCollapsePressure.className = 'text-lg font-black text-amber-700 font-mono';
+        subCollapsePressure.textContent = 'Sub-Lethal Shockwaves';
+        subCollapsePressure.className = 'text-2xs text-amber-600 font-medium mt-1';
+      }
+
+      metricRadicalFlux.textContent = radicalFlux.toFixed(1);
+      subRadicalFlux.textContent = radicalFlux > 15.0 ? 'Intense Water Sonolysis' : 'Moderate Radical Flux';
+
+      metricLogReduction.textContent = logReduction.toFixed(2);
+      if (logReduction >= pathogen.targetRegulatoryLogReduction) {
+        metricLogReduction.className = 'text-lg font-black text-emerald-600 font-mono';
+        subLogReduction.textContent = `Target Met (≥ ${pathogen.targetRegulatoryLogReduction}-log₁₀)`;
+        subLogReduction.className = 'text-2xs text-emerald-600 font-medium mt-1';
+      } else if (logReduction >= 3.0) {
+        metricLogReduction.className = 'text-lg font-black text-amber-600 font-mono';
+        subLogReduction.textContent = `Partial Kill (< ${pathogen.targetRegulatoryLogReduction}-log₁₀)`;
+        subLogReduction.className = 'text-2xs text-amber-600 font-medium mt-1';
+      } else {
+        metricLogReduction.className = 'text-lg font-black text-rose-600 font-mono';
+        subLogReduction.textContent = 'Deficient Disinfection';
+        subLogReduction.className = 'text-2xs text-rose-600 font-medium mt-1';
+      }
+
+      metricParticleSize.textContent = Math.round(particleSize);
+      if (particleSize <= 200.0) {
+        subParticleSize.textContent = 'Sub-200nm True Nano-Emulsion';
+        subParticleSize.className = 'text-2xs text-emerald-600 font-medium mt-1';
+      } else if (particleSize <= 450.0) {
+        subParticleSize.textContent = 'Fine Micro-Dispersion';
+        subParticleSize.className = 'text-2xs text-cyan-700 font-medium mt-1';
+      } else {
+        subParticleSize.textContent = 'Coarse Aggregates (> 450 nm)';
+        subParticleSize.className = 'text-2xs text-amber-600 font-medium mt-1';
+      }
+
+      metricTempRise.textContent = `+${tempRise.toFixed(1)}`;
+      if (finalTemp <= fluid.maxNonThermalTempLimitC) {
+        subTempRise.textContent = `Non-Thermal (Final: ${finalTemp.toFixed(1)}°C < ${fluid.maxNonThermalTempLimitC}°C)`;
+        subTempRise.className = 'text-2xs text-emerald-600 font-medium mt-1';
+      } else {
+        subTempRise.textContent = `OVERHEAT WARNING (Final: ${finalTemp.toFixed(1)}°C > ${fluid.maxNonThermalTempLimitC}°C)`;
+        subTempRise.className = 'text-2xs text-rose-600 font-medium mt-1';
+      }
+
+      // Compliance & Status Logic
+      if (isEroded || isUnbuffered) {
+        flowStatusTag.textContent = 'CRITICAL CAVITATION PITTING & WATER HAMMER';
+        flowStatusTag.className = 'text-2xs font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full';
+
+        complianceBadge.className = 'inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-50 border border-rose-300 text-rose-800';
+        complianceText.textContent = 'NON-COMPLIANT: Severe Cavitation Pitting • Metal Shedding • Biofilm Harboring';
+        limitationText.textContent = 'Unregulated backpressure allows vapor cavities to collapse directly onto stainless steel walls, causing deep pitting (>200 µm) and catastrophic water hammer vibration.';
+        mitigationText.textContent = 'IMMEDIATE SHUTDOWN REQUIRED: Replace pitted throttle valve with hardened tungsten-carbide insert venturi. Install sanitary closed-loop backpressure diaphragm valve.';
+      } else if (finalTemp > fluid.maxNonThermalTempLimitC) {
+        flowStatusTag.textContent = 'Thermal Limit Exceeded';
+        flowStatusTag.className = 'text-2xs font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full';
+
+        complianceBadge.className = 'inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-50 border border-amber-300 text-amber-800';
+        complianceText.textContent = 'THERMAL BOUNDARY WARNING: Bulk Temp Exceeds Non-Thermal Denaturation Ceiling';
+        limitationText.textContent = `Bulk process temperature (${finalTemp.toFixed(1)}°C) exceeds the ${fluid.maxNonThermalTempLimitC}°C critical threshold, risking protein denaturation or vitamin loss.`;
+        mitigationText.textContent = 'Increase cooling chiller capacity or reduce inlet pressure to keep discharge fluid below 45°C.';
+      } else {
+        flowStatusTag.textContent = 'Stable Vortex Cavitation';
+        flowStatusTag.className = 'text-2xs font-semibold text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-full';
+
+        complianceBadge.className = 'inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 border border-emerald-300 text-emerald-800';
+        complianceText.textContent = 'FULL COMPLIANCE: 3-A Sanitary 04-05 • EHEDG Class 1 Aseptic • FDA FSMA & Juice HACCP 5-log';
+        limitationText.textContent = 'Cavitation shear is balanced. Micro-bubble clouds collapse within the liquid core without wall impingement, ensuring zero alloy erosion.';
+        mitigationText.textContent = 'Operate according to validated CIP/SIP cycle (85°C caustic wash, peracetic acid sanitization). Verify elastomer seals every 1,500 run hours.';
+      }
+    }
+
+    // Event Listeners
+    [selReactor, selFluid, selPathogen, selSanitary].forEach(el => {
+      if (el) el.addEventListener('change', recalculate);
+    });
+
+    [sliderInletPressure, sliderBackpressure, sliderTemp, sliderFlow].forEach(el => {
+      if (el) el.addEventListener('input', recalculate);
+    });
+
+    // Initial Calculation
+    recalculate();
+  });
+</script>

@@ -150,7 +150,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-high-pressure-supercritical-co2-inactivation-modeler',
   'tools/commercial-continuous-dual-frequency-ultrasonic-modeler',
   'tools/commercial-continuous-micro-fluidization-modeler',
-  'tools/commercial-continuous-low-energy-electron-beam-modeler'
+  'tools/commercial-continuous-low-energy-electron-beam-modeler',
+  'tools/commercial-continuous-cold-hydrodynamic-cavitation-modeler'
 ];
 
 const esSlugs = new Set([
