@@ -2,7 +2,7 @@
  * IsItKitchenSafe Autonomous Growth & Ops Engine (v2.0 - All-Day Smart Engine)
  * 
  * Continuous Operations & Growth Engine:
- * - 111 Interactive Diagnostic Tools Health & 5-Language Slug Parity (EN, ES, PT, JA, ZH-CN)
+ * - 120 Interactive Diagnostic Tools Health & 5-Language Slug Parity (EN, ES, PT, JA, ZH-CN)
  * - Cloudflare Pages _redirects budget monitor (2,000 line ceiling) & Edge Middleware sync
  * - Multi-Language Corpus & Database Integrity (66+ critical data assets)
  * - Structured Data (JSON-LD FAQPage, BreadcrumbList & Article/WebApplication) compliance audit
@@ -148,7 +148,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-continuous-puvc-disinfection-modeler', name: 'Commercial Continuous Pulsed UV-C Light High-Intensity Fluid Disinfection & Pyrimidine Dimer Modeler', category: 'Photobiological Safety & Fluid Dynamics', component: 'CommercialPuvcDisinfectionModeler.astro', dataFile: 'puvc-disinfection-data.json' },
   { slug: 'commercial-high-pressure-supercritical-co2-inactivation-modeler', name: 'Commercial High-Pressure Supercritical CO2 Fluid Inactivation & Spore Solubilization Modeler', category: 'Dense-Phase Thermodynamics & Non-Thermal Sterilization', component: 'CommercialSupercriticalCo2InactivationModeler.astro', dataFile: 'supercritical-co2-inactivation-data.json' },
   { slug: 'commercial-continuous-dual-frequency-ultrasonic-modeler', name: 'Commercial Continuous Dual-Frequency Ultrasonic Desorption & Biofilm Disruption Modeler', category: 'Ultrasonic Cavitation & Surface Hygiene', component: 'CommercialDualFrequencyUltrasonicModeler.astro', dataFile: 'dual-frequency-ultrasonic-data.json' },
-{ slug: 'commercial-continuous-micro-fluidization-modeler', name: 'Commercial Continuous Micro-Fluidization High-Shear Liposome & Emulsion Nano-Encapsulation Modeler', category: 'Micro-Fluidics & Nano-Emulsion Physics', component: 'CommercialMicroFluidizationModeler.astro', dataFile: 'micro-fluidization-nano-encapsulation-data.json' }
+{ slug: 'commercial-continuous-micro-fluidization-modeler', name: 'Commercial Continuous Micro-Fluidization High-Shear Liposome & Emulsion Nano-Encapsulation Modeler', category: 'Micro-Fluidics & Nano-Emulsion Physics', component: 'CommercialMicroFluidizationModeler.astro', dataFile: 'micro-fluidization-nano-encapsulation-data.json' },
+{ slug: 'commercial-continuous-low-energy-electron-beam-modeler', name: 'Commercial Continuous Low-Energy Electron Beam (E-Beam) Surface Packaging Decontamination Modeler', category: 'Radiation Physics & Aseptic Packaging Hygiene', component: 'CommercialContinuousElectronBeamModeler.astro', dataFile: 'electron-beam-packaging-decontamination-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -387,7 +388,8 @@ function auditDatasets() {
     'puvc-disinfection-data.json',
     'supercritical-co2-inactivation-data.json',
     'dual-frequency-ultrasonic-data.json',
-    'micro-fluidization-nano-encapsulation-data.json'
+    'micro-fluidization-nano-encapsulation-data.json',
+    'electron-beam-packaging-decontamination-data.json'
 ];
 
   const datasetStats = {};
@@ -627,24 +629,17 @@ function auditGrowthOpportunities() {
     // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Continuous Low-Energy Electron Beam (E-Beam) Surface Packaging Decontamination Modeler',
-      category: 'Radiation Physics & Aseptic Packaging Hygiene',
-      intent: 'Models continuous low-energy electron beam (80-150 keV) non-thermal sterilization of carton preforms and polymer bottle caps, absorbed surface dose distribution (kGy), penetration depth curves in HDPE/PET, and bacterial endospore lethality without ozone accumulation under FDA 21 CFR § 179.26.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '1,740+ US impressions'
-    },
-    {
       title: 'Commercial Continuous High-Pressure Cold Hydrodynamic Cavitation (CHC) Nano-Scale Sterilization & Texturizing Modeler',
       category: 'Cavitation Fluid Mechanics & Non-Thermal Rheology',
       intent: 'Models continuous rotor-stator and orifice-plate cold hydrodynamic cavitation (generation of high-frequency micro-cavitation bubble clouds, localized collapse pressures > 1,000 bar), sonochemical microbial membrane perforation, and whey protein nano-texturizing under 3-A Sanitary standards.',
-      priority: 'HIGH',
+      priority: 'CRITICAL_HIGH',
       estimatedMonthlyVolume: '1,650+ US impressions'
     },
     {
       title: 'Commercial Continuous Atmospheric Cold Gaseous Ozone (O3) Conveyor In-Line Spore Sterilization & Off-Gas Destruction Modeler',
       category: 'Ozone Oxidation & Gaseous Sanitation',
       intent: 'Models continuous conveyor surface sanitization with high-concentration gaseous ozone (50-250 ppm), relative humidity activation kinetics (>80% RH), Clostridium and Aspergillus spore coat oxidation, and catalytic thermal ozone destruction under OSHA 29 CFR § 1910.1000.',
-      priority: 'MEDIUM',
+      priority: 'HIGH',
       estimatedMonthlyVolume: '1,560+ US impressions'
     },
     {
@@ -653,6 +648,13 @@ function auditGrowthOpportunities() {
       intent: 'Models continuous multi-column supercritical fluid chromatography (SFC) utilizing dense CO2 and ethanol co-solvent mobile phases at up to 350 bar, axial dispersion, peak resolution, and ASME BPVC Section VIII relief sizing for high-purity bioactive separation.',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '1,480+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous High-Frequency Microwave-Plasma In-Line Decontamination Modeler',
+      category: 'Plasma Physics & Microwave Engineering',
+      intent: 'Models continuous atmospheric pressure microwave-plasma jet (2.45 GHz, Ar/O2/N2 gas mixtures) rapid in-line packaging surface decontamination, active UV photonic radiation flux, hydroxyl radical generation kinetics, and heat-sensitive polymer surface functionalization without thermal deformation under FDA 21 CFR § 179.26.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '1,390+ US impressions'
     }
   ];
 

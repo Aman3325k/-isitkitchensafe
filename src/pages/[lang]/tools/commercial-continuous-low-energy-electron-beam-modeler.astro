@@ -1,0 +1,259 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import CommercialContinuousElectronBeamModeler from '../../../components/CommercialContinuousElectronBeamModeler.astro';
+import type { SupportedLanguage } from '../../../i18n/ui';
+import { useTranslations, useTranslatedPath } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+const t = useTranslations(lang);
+const tp = useTranslatedPath(lang);
+
+interface LocaleToolContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  lead: string;
+  breadcrumbsLabel: string;
+  faqs: Array<{ question: string; answer: string }>;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocaleToolContent> = {
+  es: {
+    pageTitle: "Simulador de Descontaminación de Envases por Haz de Electrones (E-Beam) de Baja Energía | IsItKitchenSafe",
+    pageDescription: "Simule la esterilización no térmica continua por haz de electrones de baja energía (80-160 keV) en envases de alimentos y bebidas (tapones de HDPE, preformas de PET, cartón aséptico y tarrinas de PP). Modele la dosis absorbida superficial (kGy), profundidad de penetración, letalidad de endosporas bacterianas (>6-log10), atenuación de rayos X Bremsstrahlung y supresión de ozono con nitrógeno según FDA 21 CFR § 179.26, OSHA 29 CFR § 1910.1096 y 3-A Sanitary.",
+    badge: "Física de Radiaciones e Higiene de Envasado Aséptico",
+    h1: "Simulador de Descontaminación de Envases por Haz de Electrones de Baja Energía",
+    lead: "Modele el procesamiento aséptico continuo con haz de electrones de baja energía. Calcule la dosis superficial en kGy, profundidad de penetración en polímeros (<60 µm), letalidad de Bacillus atrophaeus, control de radiación secundaria Bremsstrahlung y supresión de ozono con cortina de nitrógeno bajo normas FDA y OSHA.",
+    breadcrumbsLabel: "Simulador de Haz de Electrones de Baja Energía",
+    faqs: [
+      {
+        question: "¿Qué es la descontaminación de envases por haz de electrones de baja energía y en qué se diferencia de los esterilizantes químicos (H2O2 / PAA)?",
+        answer: "La descontaminación por haz de electrones de baja energía (LEEB, 80-160 keV) es una tecnología física no térmica que utiliza electrones acelerados generados eléctricamente en alto vacío. A diferencia del peróxido de hidrógeno vaporizado (VHP) o ácido peracético (PAA)—que requieren complejos túneles de secado con aire estéril para no superar los 0,5 ppm de residuo permitidos por la FDA—el haz de electrones atraviesa una lámina ultrafina de titanio (8-12 µm) e ioniza directamente el ADN de los patógenos en milisegundos. No emplea químicos, no genera aguas residuales y deja cero residuos en el envase."
+      },
+      {
+        question: "¿Cómo gobierna el voltaje de aceleración (keV) la profundidad de penetración y por qué el bajo voltaje es clave en envases alimentarios?",
+        answer: "El voltaje de aceleración determina la energía cinética de los electrones y su alcance práctico en polímeros (densidades de 0,90 a 1,40 g/cm³). A energías de 80 a 140 keV, los electrones solo penetran entre 25 y 65 µm. Dado que las esporas bacterianas están en la superficie externa (<5 µm), confinar la radiación a las primeras micras logra una letalidad superior a 6-log10 sin afectar el 98%+ del cuerpo del polímero, evitando fragilidad por escisión de cadenas, amarilleamiento y migración de subproductos volátiles (acetaldehído) al alimento."
+      },
+      {
+        question: "¿Por qué es obligatoria la inertización con nitrógeno de alta pureza durante la irradiación de envases?",
+        answer: "Cuando los electrones interactúan con el oxígeno ambiental (O2 ~20,9%), la intensa radiólisis fragmenta las moléculas de oxígeno generando altas concentraciones de ozono (O3 > 50 ppm) y óxidos de nitrógeno. El ozono oxida los polímeros provocando olores a rancio en los tapones, acelera la corrosión de la ventana de titanio y es tóxico para los operarios (límite OSHA de 0,10 ppm). El uso de cortinas laminares de nitrógeno (O2 residual < 80 ppm) inhibe la formación de ozono en más del 99,8%."
+      },
+      {
+        question: "¿Cómo se gestiona la radiación secundaria de rayos X Bremsstrahlung y qué normas de blindaje protegen al personal?",
+        answer: "Cuando los electrones desaceleran bruscamente al chocar con la ventana de titanio o el transportador, se generan rayos X secundarios (radiación de frenado o Bremsstrahlung). Para contenerlos, la zona de irradiación se encierra en túneles con blindaje de 8 a 12 mm de plomo o 25 a 35 mm de acero, complementados con laberintos de deflectores en las entradas y salidas. Enclavamientos redundantes Categoría 4 (PLe) desconectan la alta tensión en menos de 10 ms si se abre una compuerta, garantizando niveles externos inferiores a 0,25 µSv/h a 10 cm bajo la norma OSHA 1910.1096."
+      },
+      {
+        question: "¿Cómo valida la FDA la reducción de 6-log10 de endosporas en envases bajo 21 CFR § 179.26?",
+        answer: "La validación aséptica bajo FDA 21 CFR § 179.26 exige inocular envases con indicadores biológicos resistentes como Bacillus atrophaeus (ATCC 9372, D10 ≈ 4,2 kGy) o Clostridium botulinum Tipo A (D10 ≈ 2,5 kGy). Se requiere una dosis superficial de 25 a 30 kGy en toda la geometría del envase. Se utilizan películas dosimétricas radiocrómicas para mapear la dosis en roscas y zonas de sombra acústica, garantizando que ninguna zona quede por debajo del umbral letal requerido."
+      }
+    ]
+  },
+  pt: {
+    pageTitle: "Simulador de Descontaminação de Embalagens por Feixe de Elétrons (E-Beam) de Baixa Energia | IsItKitchenSafe",
+    pageDescription: "Simule a esterilização não térmica contínua por feixe de elétrons de baixa energia (80-160 keV) em embalagens de alimentos e bebidas (tampas de PEAD, pré-formas de PET, cartonados assépticos e potes de PP). Modele a dose absorvida superficial (kGy), profundidade de penetração, letalidade de endósporos (>6-log10), atenuação de raios X Bremsstrahlung e supressão de ozônio com N2 conforme FDA 21 CFR § 179.26, OSHA 29 CFR § 1910.1096 e normas 3-A.",
+    badge: "Física de Radiações e Higiene de Embalagem Asséptica",
+    h1: "Simulador de Descontaminação de Embalagens por Feixe de Elétrons de Baixa Energia",
+    lead: "Modele o processamento asséptico contínuo por feixe de elétrons de baixa energia. Calcule a dose superficial em kGy, penetração em polímeros (<60 µm), destruição de endósporos de Bacillus atrophaeus (>6-log10), atenuação de raios X Bremsstrahlung e controle de ozônio com cortina de N2 sob padrões FDA e OSHA.",
+    breadcrumbsLabel: "Simulador de Feixe de Elétrons de Baixa Energia",
+    faqs: [
+      {
+        question: "O que é a descontaminação por feixe de elétrons de baixa energia e como difere dos esterilizantes químicos (H2O2 / PAA)?",
+        answer: "A tecnologia de feixe de elétrons de baixa energia (LEEB, 80-160 keV) é um processo físico não térmico que acelera elétrons eletricamente gerados em alto vácuo. Ao contrário de métodos químicos convencionais com peróxido de hidrogênio (H2O2) ou ácido peracético (PAA)—que demandam longos túneis de secagem a ar estéril para manter resíduos abaixo do limite de 0,5 ppm da FDA—o feixe de elétrons atravessa uma janela ultrafina de titânio (8-12 µm) e fragmenta o DNA microbiano em milissegundos, com zero resíduo químico e sem consumo de água de enxágue."
+      },
+      {
+        question: "Como a tensão de aceleração (keV) define a penetração e por que a baixa tensão é crítica para embalagens alimentícias?",
+        answer: "A tensão elétrica de aceleração controla diretamente a energia cinética dos elétrons e seu alcance máximo no polímero. Em substratos como PEAD e PET (0,90 a 1,40 g/cm³), elétrons de 80 a 140 keV penetram apenas de 25 a 65 µm. Como os microrganismos contaminantes residem estritamente na superfície externa (<5 µm), restringir a dose à película exterior assegura letalidade >6-log10 sem degradar a massa do polímero, prevenindo fragilização estrutural, amarelamento ou migração de aldeídos voláteis para o alimento."
+      },
+      {
+        question: "Por que a inertização com nitrogênio de alta pureza é indispensável no túnel de radiação?",
+        answer: "Na presença de oxigênio do ar (20,9% O2), os elétrons ionizam as moléculas gerando concentrações letais de ozônio (O3 > 50 ppm) e vapores nitrosos. O ozônio causa envelhecimento oxidativo precoce dos plásticos, confere sabor e odor rançoso a tampas e degrada a folha de titânio da janela. O uso de cortinas laminares de nitrogênio líquido vaporizado (O2 residual < 80 ppm) suprime a formação de ozônio em mais de 99,8%, atendendo com folga ao teto de 0,10 ppm da OSHA."
+      },
+      {
+        question: "Como a radiação secundária de raios X Bremsstrahlung é retida com segurança para os operadores?",
+        answer: "A desaceleração súbita dos elétrons ao colidirem com materiais metálicos e plásticos gera emissão secundária contínua de raios X (Bremsstrahlung). As cabines industriais são projetadas com blindagem estrutural de 8 a 12 mm de chumbo (Pb) ou 25 a 35 mm de aço de alta densidade, combinadas a labirintos defletores nas esteiras. Intertravamentos de segurança Categoria 4 (PLe) desarmam a alta tensão em menos de 10 ms caso ocorra abertura acidental, mantendo a taxa de radiação externa abaixo de 0,25 µSv/h a 10 cm."
+      },
+      {
+        question: "Como os órgãos reguladores avaliam a redução de 6-log10 de endósporos segundo o FDA 21 CFR § 179.26?",
+        answer: "A conformidade perante a FDA 21 CFR § 179.26 e diretrizes assépticas da VDMA exige testes com bioindicadores de alta resistência como Bacillus atrophaeus (ATCC 9372, D10 ≈ 4,2 kGy) e Clostridium botulinum Tipo A (D10 ≈ 2,5 kGy). Calibra-se uma dose superficial mínima de 25 a 30 kGy em todas as superfícies de contato. Filmes dosimétricos radiocrômicos garantem uniformidade tridimensional em fendas de rosca e lacres invioláveis, certificando a ausência de zonas frias subdosadas."
+      }
+    ]
+  },
+  'zh-cn': {
+    pageTitle: "商业连续低能电子束 (E-Beam) 表面包装杀菌模拟器 | IsItKitchenSafe",
+    pageDescription: "模拟商业管线连续低能电子束（80-160 keV）食品与饮料包装（HDPE 瓶盖、PET 瓶胚、无菌复合纸盒与 PP 杯）非热表面杀菌过程。精确建模表面吸收剂量分布（kGy）、电子在聚合物中的渗透深度曲线、细菌芽孢致死动力学（>6-log10 杀灭）、轫致辐射 X 射线铅层屏蔽衰减及高纯氮气幕臭氧抑制特性，严格符合 FDA 21 CFR § 179.26、OSHA 29 CFR § 1910.1096 及 3-A 卫生标准。",
+    badge: "辐射物理学与无菌包装卫生工程",
+    h1: "商业连续低能电子束表面包装杀菌模拟器",
+    lead: "精确模拟商业低能电子束连续无菌包装杀菌过程。实时计算表面吸收辐射剂量（kGy）、聚合物电子物理渗透极限（<60 µm）、耐辐射萎缩芽孢杆菌 6-log10 致死动力学、二次轫致辐射 X 射线铅屏蔽衰减与高纯液氮幕臭氧抑制达标状态。",
+    breadcrumbsLabel: "低能电子束表面杀菌模拟器",
+    faqs: [
+      {
+        question: "什么是低能电子束（LEEB）包装表面杀菌技术？它与传统过氧化氢（H2O2）或过氧乙酸（PAA）化学灭菌有何本质区别？",
+        answer: "低能电子束（LEEB，80-160 keV）包装杀菌是一种先进的纯物理非热灭菌技术。传统化学湿法或气相灭菌（过氧化氢/过氧乙酸）需要消耗大量化学消毒液，且必须依赖高温无菌热风烘干隧道以满足 FDA 规定的残留量不得超过 0.5 ppm 的严苛门槛。而低能电子束是在真空高压电场下发射高速电子流，电子直接穿过 8-12 µm 的高纯钛箔窗口，在毫秒级时间内击穿微生物核酸双链，实现完全无化学残留、无废水排放、无水冲洗的即时冷杀菌。"
+      },
+      {
+        question: "加速电压（keV）如何决定电子穿透深度？为何食品包装必须严格采用低电压？",
+        answer: "加速电压直接决定了电子束的动能及在固体材料中的射程（R_p）。对于常见密度为 0.90-1.40 g/cm³ 的食品级塑料（如 HDPE、PET、PP），80-140 keV 的低能电子在聚合物表层的最大穿透深度仅为 25-65 µm。由于包装物表面的微生物污染均严格集中在最外表层（<5 µm），将电子能量精确限制在外表层微米级厚度内，既能实现 >6.0 log10 的芽孢彻底杀灭，又能保证 98% 以上的包装基体材料完全免受辐射影响，避免了聚合物交联降解、材料脆化变黄以及产生乙醛等挥发性小分子异味物质迁移至食品中。"
+      },
+      {
+        question: "为什么连续电子束包装灭菌隧道必须配备高纯氮气保护幕（N2 Blanket）？",
+        answer: "高能电子在富含氧气（O2 约 20.9%）的环境中会导致剧烈的辐射电离，使氧分子裂解并重组成极高浓度的剧毒强腐蚀性臭氧（O3 > 50 ppm）与氮氧化物。臭氧会导致塑料瓶盖表面严重氧化并产生蜡状酸败异味，同时加速钛箔窗口的高温氧化腐蚀，并对生产车间操作工造成严重呼吸系统职业危害（OSHA 8小时允许上限仅为 0.10 ppm）。通过建立气帘式高纯氮气保护幕（残氧 < 80 ppm），可将臭氧生成量抑制 99.8% 以上。"
+      },
+      {
+        question: "高速电子撞击产生的二次轫致辐射（Bremsstrahlung X-Ray）如何安全屏蔽？",
+        answer: "当高速运动的电子撞击钛箔窗口、金属输送链板及塑料容器时，电子急剧减速会将部分动能转化为高穿透力的连续 X 射线（即轫致辐射）。商业无菌灌装机通常将整个照射区域完全密闭在厚度为 8-12 mm 的高纯铅板（Pb）或 25-35 mm 的重型特种碳钢屏蔽箱体中，并在进出瓶通道设计多级迷宫式吸收挡板。系统配备冗余的 4 级（PLe）安全磁联锁开关，一旦任何检修门被打开，高压电源将在 10 毫秒内瞬间切断，确保机体外部 10 cm 处的杂散辐射剂量率严格低于 0.25 µSv/h，符合 OSHA 29 CFR § 1910.1096 与国际放射防护标准。"
+      },
+      {
+        question: "FDA 21 CFR § 179.26 如何对包装灭菌设备的 6-log10 芽孢杀灭率进行法定验证？",
+        answer: "美国 FDA 21 CFR § 179.26 及国际无菌包装验证指南要求采用抗性极强的标准生物指示剂芽孢菌株——如萎缩芽孢杆菌 Bacillus atrophaeus（ATCC 9372，辐射 D10 值约 4.2 kGy）或肉毒梭菌 A 型芽孢（D10 约 2.5 kGy）接种于瓶盖内螺纹、瓶胚内壁或纸盒内壁。设备经校准必须对 100% 的受照内表面提供不低于 25-30 kGy 的表面吸收剂量。在现场验证中，利用薄膜放射变色剂量计（B3/FWT Film）对瓶盖螺纹深处及防盗环凹槽等几何阴影死角进行三维剂量场测绘，确保无任何剂量欠缺冷点。"
+      }
+    ]
+  },
+  ja: {
+    pageTitle: "商業連続式低エネルギー電子線 (E-Beam) 表面包装殺菌シミュレーター | IsItKitchenSafe",
+    pageDescription: "飲料・食品包装（HDPEキャップ、PETプリフォーム、アセプティック紙容器スリーブ、PPカップ）に対する連続低エネルギー電子線（80〜160 keV）非加熱表面滅菌プロセスをシミュレート。表面吸収線量分布（kGy）、樹脂透過深さ曲線、耐熱耐放射線性芽胞の不活性化挙動（>6-log10殺滅）、制動X線遮蔽減衰、および高純度窒素カーテンによるオゾン抑制をFDA 21 CFR § 179.26、OSHA 29 CFR § 1910.1096、3-A Sanitary基準に準拠して精密にモデル化します。",
+    badge: "放射線物理学＆無菌包装衛生工学",
+    h1: "商業連続式低エネルギー電子線表面包装殺菌シミュレーター",
+    lead: "低エネルギー電子線による連続アセプティック包装滅菌プロセスを精密シミュレート。表面吸収線量（kGy）、ポリマーへの電子到達限界（<60 µm）、耐放射線性芽胞菌の不活性化動理学（>6-log10）、制動X線の鉛遮蔽減衰、および窒素イナートによるオゾン抑制をFDAおよびOSHA基準に基づいてリアルタイム解析します。",
+    breadcrumbsLabel: "低エネルギー電子線滅菌シミュレーター",
+    faqs: [
+      {
+        question: "低エネルギー電子線（LEEB）表面滅菌とは何ですか？過酸化水素（H2O2）や過酢酸（PAA）殺菌とどのように異なりますか？",
+        answer: "低エネルギー電子線（LEEB、80〜160 keV）殺菌は、真空電界中で加速された電子を利用する最先端の非加熱物理滅菌技術です。従来の過酸化水素水蒸気（VHP）や過酢酸（PAA）を用いる湿式・気相滅菌では、FDA規制（残留許容量0.5 ppm以下）をクリアするために大規模な無菌熱風乾燥工程が不可欠でした。一方、低エネルギー電子線は超薄型チタン窓（8〜12 µm）から射出され、包装表面の微生物DNAをミリ秒単位で直接電離破壊します。化学薬剤や滅菌リンス水を一切使用せず、有害残留物ゼロの完全ドライ無菌化を実現します。"
+      },
+      {
+        question: "加速電圧（keV）は電子の透過深さにどう影響しますか？食品包装で低電圧が必須な理由は何ですか？",
+        answer: "加速電圧は電子の運動エネルギーと包装樹脂中での到達飛程（R_p）を決定します。HDPEやPETなどの樹脂（密度0.90〜1.40 g/cm³）に対し、80〜140 keVの低エネルギー電子は表面からわずか25〜65 µmしか浸透しません。微生物は包装の最外表面（<5 µm）にのみ存在するため、電子照射を表面薄層のみに限定することで、バルク樹脂の98%以上を未照射のまま保ちながら確実な6-log10以上の無菌性を達成できます。これにより、ポリマー鎖の架橋・主鎖切断による脆化や着色、アセトアルデヒド等の揮発性異臭成分の食品移行を防止します。"
+      },
+      {
+        question: "電子線照射トンネル内で高純度窒素イナート（N2カーテン）が必須な理由は何ですか？",
+        answer: "大気中の酸素（約20.9% O2）に高エネルギー電子線が照射されると、激しい放射線分解により高濃度のオゾン（O3 > 50 ppm）や窒素酸化物が発生します。オゾンは樹脂表面を酸化させてキャップに蝋様・酸敗異臭を付着させ、チタン箔窓を酸化脆化させ、さらに作業環境への深刻な健康被害をもたらします（OSHA基準では8時間TWA許容量は0.10 ppm以下）。残存酸素濃度を80 ppm以下に抑える高純度液化窒素カーテンを形成することで、オゾン生成を99.8%以上遮断します。"
+      },
+      {
+        question: "電子衝突で発生する二次制動放射線（Bremsstrahlung X線）はどのように安全遮蔽されますか？",
+        answer: "高速電子がチタン窓や搬送ベルト等の物質に衝突して急激に減速する際、透過性の高い連続X線（制動放射線）が発生します。無菌包装機では、照射部全体を厚さ8〜12 mmの鉛板（Pb）または25〜35 mmの高密度特殊鋼板で完全に密閉し、搬送口には多段ラビリンス構造を配置して漏洩X線を減衰させます。さらにカテゴリー4（PLe）の安全インターロックを装備し、アクセス扉開放時は10ミリ秒以内に高圧電源を瞬時遮断することで、装置外表面10 cmでの線量率を0.25 µSv/h以下に厳格に保ちます。"
+      },
+      {
+        question: "FDA 21 CFR § 179.26に基づく6-log10芽胞殺滅の法的是認プロセスはどのように行われますか？",
+        answer: "米国FDA 21 CFR § 179.26およびVDMA無菌性ガイドラインでは、極めて高い放射線耐性を持つ生物指標菌（Bacillus atrophaeus ATCC 9372、D10値約4.2 kGy、またはClostridium botulinum A型芽胞）をキャップ内ネジ部やプリフォーム内壁に接種して検証します。すべての表面において最低25〜30 kGy以上の吸収線量を均一に付与することが求められます。検証時はラジオクロミック薄膜線量計（B3フィルム）を用い、ネジ谷部などの幾何学的陰影部を含む三次元線量マッピングを実施してコールドスポット（線量不足領域）の皆無を証明します。"
+      }
+    ]
+  }
+};
+
+const c = CONTENT[lang as Exclude<SupportedLanguage, 'en'>];
+
+const breadcrumbs = [
+  { label: t('nav.home'), href: tp('/') },
+  { label: t('nav.tools'), href: tp('/tools/') },
+  { label: c.breadcrumbsLabel }
+];
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "@id": `https://isitkitchensafe.com/${lang}/tools/commercial-continuous-low-energy-electron-beam-modeler/#webapp`,
+      "url": `https://isitkitchensafe.com/${lang}/tools/commercial-continuous-low-energy-electron-beam-modeler/`,
+      "name": c.h1,
+      "applicationCategory": "EngineeringApplication",
+      "operatingSystem": "All",
+      "browserRequirements": "Requires JavaScript. Requires HTML5 Canvas/CSS3.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": c.pageDescription
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": t('nav.home'),
+          "item": `https://isitkitchensafe.com/${lang}/`
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": t('nav.tools'),
+          "item": `https://isitkitchensafe.com/${lang}/tools/`
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": c.breadcrumbsLabel,
+          "item": `https://isitkitchensafe.com/${lang}/tools/commercial-continuous-low-energy-electron-beam-modeler/`
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": c.faqs.map(faq => ({
+        "@type": "Question",
+        "name": faq.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": faq.answer
+        }
+      }))
+    }
+  ]
+};
+---
+
+<Layout title={c.pageTitle} description={c.pageDescription}>
+  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <Breadcrumbs items={breadcrumbs} />
+
+    <div class="mt-6">
+      <CommercialContinuousElectronBeamModeler lang={lang} />
+    </div>
+
+    <!-- Supplementary Scientific FAQs Section -->
+    <section class="mt-16 border-t border-hairline pt-12">
+      <div class="max-w-3xl mb-8">
+        <h2 class="text-2xl font-bold text-ink tracking-tight">
+          {c.h1} — FAQs
+        </h2>
+        <p class="text-body text-sm mt-2">
+          {c.lead}
+        </p>
+      </div>
+
+      <div class="space-y-6">
+        {c.faqs.map(faq => (
+          <div class="bg-surface-soft border border-hairline rounded-2xl p-6">
+            <h3 class="text-base font-bold text-ink mb-2">
+              {faq.question}
+            </h3>
+            <p class="text-body text-sm leading-relaxed">
+              {faq.answer}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+  </main>
+</Layout>
