@@ -151,7 +151,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-continuous-dual-frequency-ultrasonic-modeler',
   'tools/commercial-continuous-micro-fluidization-modeler',
   'tools/commercial-continuous-low-energy-electron-beam-modeler',
-  'tools/commercial-continuous-cold-hydrodynamic-cavitation-modeler'
+  'tools/commercial-continuous-cold-hydrodynamic-cavitation-modeler',
+  'tools/commercial-continuous-cold-gaseous-ozone-modeler'
 ];
 
 const esSlugs = new Set([
