@@ -2,7 +2,7 @@
  * IsItKitchenSafe Autonomous Growth & Ops Engine (v2.0 - All-Day Smart Engine)
  * 
  * Continuous Operations & Growth Engine:
- * - 131 Interactive Diagnostic Tools Health & 5-Language Slug Parity (EN, ES, PT, JA, ZH-CN)
+ * - 132 Interactive Diagnostic Tools Health & 5-Language Slug Parity (EN, ES, PT, JA, ZH-CN)
  * - Cloudflare Pages _redirects budget monitor (2,000 line ceiling) & Edge Middleware sync
  * - Multi-Language Corpus & Database Integrity (66+ critical data assets)
  * - Structured Data (JSON-LD FAQPage, BreadcrumbList & Article/WebApplication) compliance audit
@@ -160,7 +160,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-continuous-subcritical-water-hydrolysis-modeler', name: 'Commercial Continuous Subcritical Water Hydrolysis (SCWH) Bioactive Peptides & Antioxidant Extraction Modeler', category: 'Subcritical Thermodynamics & Green Extraction', component: 'CommercialContinuousSubcriticalWaterHydrolysisModeler.astro', dataFile: 'subcritical-water-hydrolysis-data.json' },
   { slug: 'commercial-continuous-high-voltage-arc-discharge-modeler', name: 'Commercial Continuous High-Voltage Arc Discharge Hydrodynamic Shockwave (HVP) Meat Tenderization & Extraction Modeler', category: 'Electrohydraulic Processing & Shockwave Physics', component: 'CommercialContinuousHighVoltageArcDischargeModeler.astro', dataFile: 'high-voltage-arc-discharge-data.json' },
   { slug: 'commercial-continuous-cold-atmospheric-plasma-activated-water-modeler', name: 'Commercial Continuous Cold Atmospheric Plasma-Activated Water (PAW) In-Line Hydrodynamic Reactor & Nitrite-Free Curing Modeler', category: 'Plasma-Liquid Physics & Non-Thermal Sanitation', component: 'CommercialContinuousColdAtmosphericPlasmaActivatedWaterModeler.astro', dataFile: 'plasma-activated-water-paw-data.json' },
-  { slug: 'commercial-continuous-sfe-counter-current-fractionation-modeler', name: 'Commercial Continuous Supercritical Fluid Extraction Counter-Current Packed Column Fractionation (SFE-CC) Essential Oil Modeler', category: 'Supercritical Fluid Extraction & Flavor Engineering', component: 'CommercialContinuousSfeCounterCurrentFractionationModeler.astro', dataFile: 'sfe-counter-current-fractionation-data.json' }
+  { slug: 'commercial-continuous-sfe-counter-current-fractionation-modeler', name: 'Commercial Continuous Supercritical Fluid Extraction Counter-Current Packed Column Fractionation (SFE-CC) Essential Oil Modeler', category: 'Supercritical Fluid Extraction & Flavor Engineering', component: 'CommercialContinuousSfeCounterCurrentFractionationModeler.astro', dataFile: 'sfe-counter-current-fractionation-data.json' },
+  { slug: 'commercial-continuous-megasonic-standing-wave-separator-modeler', name: 'Commercial Continuous Dual-Frequency Megasonic Standing Wave Food Separation & Defatting Modeler', category: 'Acoustophoretic Fluid Mechanics & Green Refining', component: 'CommercialContinuousMegasonicStandingWaveSeparatorModeler.astro', dataFile: 'megasonic-standing-wave-separator-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -411,7 +412,8 @@ function auditDatasets() {
     'subcritical-water-hydrolysis-data.json',
     'high-voltage-arc-discharge-data.json',
     'plasma-activated-water-paw-data.json',
-    'sfe-counter-current-fractionation-data.json'
+    'sfe-counter-current-fractionation-data.json',
+    'megasonic-standing-wave-separator-data.json'
 ];
 
   const datasetStats = {};
@@ -651,32 +653,32 @@ function auditGrowthOpportunities() {
     // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Continuous Dual-Frequency Ultrasonic Megasonic Standing Wave Food Separation & Defatting Modeler',
-      category: 'Acoustophoretic Fluid Mechanics & Green Refining',
-      intent: 'Models continuous multi-transducer dual-frequency (400 kHz and 1.6 MHz) acoustic radiation force Bjerknes standing wave particle manipulation, non-chemical milk fat globule fractionation, microalgae lipid harvesting, and sanitary flow-through acoustic resonator attenuation.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '1,380+ US impressions'
-    },
-    {
       title: 'Commercial Continuous Forward-Osmosis Nano-Filtration (FO-NF) Industrial Whey Protein Desalting & Permeate Modeler',
       category: 'Membrane Separation & Clean Fractionation',
       intent: 'Models continuous forward-osmosis coupled with low-fouling loose nanofiltration (FO-NF) hollow-fiber membranes for non-thermal desalting of sweet and acid whey streams, lactose concentration (>24% Brix), mineral partition flux (>85% NaCl/KCl permeation), bioactive lactoferrin and immunoglobulin G preservation (>99.1%), and sanitary clean-in-place (CIP) hydraulic flux recovery.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '1,240+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '1,320+ US impressions'
     },
     {
       title: 'Commercial Continuous Electrodialysis Bipolar Membrane (EDBM) Organic Acid Recovery & Demineralization Modeler',
       category: 'Electrochemical Separation & Byproduct Valorization',
       intent: 'Models continuous water-splitting bipolar membrane electrodialysis (EDBM, 0.8–1.5 V/cell, 250–500 A/m²) for clean circular recovery of lactic, citric, and tartaric acids from fermented food processing effluents, simultaneous base (NaOH/KOH) generation, zero-salt waste acidification, and sanitary ion-exchange membrane fouling resistance.',
       priority: 'HIGH',
-      estimatedMonthlyVolume: '1,160+ US impressions'
+      estimatedMonthlyVolume: '1,240+ US impressions'
     },
     {
       title: 'Commercial Continuous High-Pressure Nanosecond Pulsed Electric Field (nsPEF) Intracellular Extraction Modeler',
       category: 'Nanosecond Bioelectrics & Phytochemical Recovery',
       intent: 'Models ultra-short pulse (10–100 ns, 40–80 kV/cm) non-thermal organelle electro-permeabilization, high-efficiency intracellular polyphenol and anthocyanin extraction from winemaking pomace and berry press cake, zero thermal anthocyanin degradation, and continuous coaxial treatment chamber dielectric breakdown containment.',
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '1,150+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous Supercritical CO2 Assisted Spray Freeze-Drying (SFD) Thermolabile Biotherapeutic & Food Ingredient Modeler',
+      category: 'Supercritical Cryogenics & Aseptic Spray Lyophilization',
+      intent: 'Models continuous low-temperature supercritical CO2 assisted atomization coupled with cryogenic spray freeze-drying (SFD) in liquid nitrogen for ultra-porous powder generation, zero protein denaturation, and continuous vacuum sublimation.',
       priority: 'MEDIUM',
-      estimatedMonthlyVolume: '1,080+ US impressions'
+      estimatedMonthlyVolume: '1,060+ US impressions'
     }
   ];
 
