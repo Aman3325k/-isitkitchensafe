@@ -155,7 +155,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-continuous-supercritical-fluid-chromatography-modeler', name: 'Commercial Continuous Supercritical Fluid Chromatography (SFC) Industrial Cannabinoid & Bioactive Purification Modeler', category: 'Supercritical Chromatography & Sanitary Separation', component: 'CommercialContinuousSfcModeler.astro', dataFile: 'supercritical-fluid-chromatography-data.json' },
   { slug: 'commercial-continuous-microwave-plasma-decontamination-modeler', name: 'Commercial Continuous High-Frequency Microwave-Plasma In-Line Decontamination Modeler', category: 'Plasma Physics & Microwave Engineering', component: 'CommercialContinuousMicrowavePlasmaModeler.astro', dataFile: 'microwave-plasma-decontamination-data.json' },
   { slug: 'commercial-continuous-electrohydrodynamic-ehd-modeler', name: 'Commercial Continuous Electrohydrodynamic (EHD) Non-Thermal Airflow Dehydration & Vitamin C Preservation Modeler', category: 'Electrohydrodynamics & Non-Thermal Drying', component: 'CommercialContinuousEhdModeler.astro', dataFile: 'electrohydrodynamic-ehd-dehydration-data.json' },
-  { slug: 'commercial-continuous-acoustic-levitator-modeler', name: 'Commercial Continuous Acoustic Levitator Micro-Droplet Contactless Evaporative Modeler', category: 'Acoustic Levitation & Containerless Processing', component: 'CommercialContinuousAcousticLevitatorModeler.astro', dataFile: 'acoustic-levitator-contactless-evaporation-data.json' }
+  { slug: 'commercial-continuous-acoustic-levitator-modeler', name: 'Commercial Continuous Acoustic Levitator Micro-Droplet Contactless Evaporative Modeler', category: 'Acoustic Levitation & Containerless Processing', component: 'CommercialContinuousAcousticLevitatorModeler.astro', dataFile: 'acoustic-levitator-contactless-evaporation-data.json' },
+  { slug: 'commercial-continuous-fo-fc-freeze-concentration-modeler', name: 'Commercial Continuous Forward-Osmosis Freeze Concentration (FO-FC) Hybrid Thermolabile Modeler', category: 'Cryogenic Osmosis & Non-Thermal Dewatering', component: 'CommercialContinuousFoFcModeler.astro', dataFile: 'fo-fc-freeze-concentration-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -398,7 +399,11 @@ function auditDatasets() {
     'electron-beam-packaging-decontamination-data.json',
     'cold-hydrodynamic-cavitation-data.json',
     'cold-gaseous-ozone-data.json',
-    'supercritical-fluid-chromatography-data.json'
+    'supercritical-fluid-chromatography-data.json',
+    'microwave-plasma-decontamination-data.json',
+    'electrohydrodynamic-ehd-dehydration-data.json',
+    'acoustic-levitator-contactless-evaporation-data.json',
+    'fo-fc-freeze-concentration-data.json'
 ];
 
   const datasetStats = {};
@@ -638,32 +643,32 @@ function auditGrowthOpportunities() {
     // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Continuous Forward-Osmosis Freeze Concentration (FO-FC) Hybrid Thermolabile Modeler',
-      category: 'Cryogenic Osmosis & Non-Thermal Dewatering',
-      intent: 'Models continuous hybrid forward osmosis coupled with progressive freeze concentration (FO-FC) for ultra-sensitive fruit purees and dairy colostrum, ice crystal layer growth kinetics, draw solution osmotic pressure driving force (up to 120 bar), and 100% volatile aroma ester retention without thermal boiling.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '1,320+ US impressions'
-    },
-    {
       title: 'Commercial Continuous Subcritical Water Hydrolysis (SCWH) Bioactive Peptides & Antioxidant Extraction Modeler',
       category: 'Subcritical Thermodynamics & Green Extraction',
       intent: 'Models continuous high-temperature pressurized subcritical water (120-240°C, 25-60 bar) dielectric constant tuning (ε from 80 to 30), rapid non-solvent plant protein hydrolysis into biofunctional anti-hypertensive peptides, phenolic antioxidant release kinetics, and ASME Section VIII sanitary relief design.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '1,240+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '1,340+ US impressions'
     },
     {
       title: 'Commercial Continuous High-Voltage Arc Discharge Hydrodynamic Shockwave (HVP) Meat Tenderization & Extraction Modeler',
       category: 'Electrohydraulic Processing & Shockwave Physics',
       intent: 'Models continuous underwater high-voltage pulsed arc electrohydraulic discharge (HVP/HED, 30-50 kV, 15-30 kJ/pulse) plasma spark breakdown, intense supersonic acoustic shockwave generation (100-350 MPa, 2-5 µs rise time), structural myofibrillar fragmentation, Warner-Bratzler shear force reduction (-45%), and sanitary ASME Section VIII containment vessel design.',
-      priority: 'MEDIUM',
-      estimatedMonthlyVolume: '1,170+ US impressions'
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '1,280+ US impressions'
     },
     {
       title: 'Commercial Continuous Cold Atmospheric Plasma-Activated Water (PAW) In-Line Hydrodynamic Reactor & Nitrite-Free Curing Modeler',
       category: 'Plasma-Liquid Physics & Non-Thermal Sanitation',
       intent: 'Models continuous atmospheric cold plasma-liquid interfacial discharge generation of plasma-activated water (PAW: peroxynitrite ONOO⁻, aqueous singlet oxygen ¹O2, HNO2/NO3⁻), bacterial spore log reduction (>5.5-log), zero-chemical organic antimicrobial wash, clean-label nitrite-free meat curing kinetics, and sanitary AISI 316L venturi hydrodynamic reactor cavitation mixing.',
       priority: 'MEDIUM',
-      estimatedMonthlyVolume: '1,120+ US impressions'
+      estimatedMonthlyVolume: '1,190+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous High-Pressure Supercritical CO2 Dense-Phase Pasteurization (HPCD) Bioactive Juice Modeler',
+      category: 'Supercritical Fluid Physics & Aseptic Processing',
+      intent: 'Models continuous micro-bubble supercritical carbon dioxide (SC-CO2, 80-150 bar, 35-42°C) dense-phase interfacial cellular penetration, bacterial endospore and pectinesterase (PME) inactivation kinetics in cloudy citrus juices, high-pressure decompression cavitation cell wall bursting, and ASME Section VIII sanitary relief containment.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '1,110+ US impressions'
     }
   ];
 
