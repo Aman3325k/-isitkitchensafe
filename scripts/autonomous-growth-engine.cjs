@@ -162,7 +162,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-continuous-cold-atmospheric-plasma-activated-water-modeler', name: 'Commercial Continuous Cold Atmospheric Plasma-Activated Water (PAW) In-Line Hydrodynamic Reactor & Nitrite-Free Curing Modeler', category: 'Plasma-Liquid Physics & Non-Thermal Sanitation', component: 'CommercialContinuousColdAtmosphericPlasmaActivatedWaterModeler.astro', dataFile: 'plasma-activated-water-paw-data.json' },
   { slug: 'commercial-continuous-sfe-counter-current-fractionation-modeler', name: 'Commercial Continuous Supercritical Fluid Extraction Counter-Current Packed Column Fractionation (SFE-CC) Essential Oil Modeler', category: 'Supercritical Fluid Extraction & Flavor Engineering', component: 'CommercialContinuousSfeCounterCurrentFractionationModeler.astro', dataFile: 'sfe-counter-current-fractionation-data.json' },
   { slug: 'commercial-continuous-megasonic-standing-wave-separator-modeler', name: 'Commercial Continuous Dual-Frequency Megasonic Standing Wave Food Separation & Defatting Modeler', category: 'Acoustophoretic Fluid Mechanics & Green Refining', component: 'CommercialContinuousMegasonicStandingWaveSeparatorModeler.astro', dataFile: 'megasonic-standing-wave-separator-data.json' },
-  { slug: 'commercial-continuous-fo-nf-whey-desalting-modeler', name: 'Commercial Continuous Forward-Osmosis Nano-Filtration (FO-NF) Industrial Whey Protein Desalting & Permeate Modeler', category: 'Membrane Separation & Clean Fractionation', component: 'CommercialContinuousFoNfWheyDesaltingModeler.astro', dataFile: 'fo-nf-whey-desalting-data.json' }
+  { slug: 'commercial-continuous-fo-nf-whey-desalting-modeler', name: 'Commercial Continuous Forward-Osmosis Nano-Filtration (FO-NF) Industrial Whey Protein Desalting & Permeate Modeler', category: 'Membrane Separation & Clean Fractionation', component: 'CommercialContinuousFoNfWheyDesaltingModeler.astro', dataFile: 'fo-nf-whey-desalting-data.json' },
+  { slug: 'commercial-continuous-edbm-acid-recovery-modeler', name: 'Commercial Continuous Electrodialysis Bipolar Membrane (EDBM) Organic Acid Recovery & Demineralization Modeler', category: 'Electrochemical Separation & Byproduct Valorization', component: 'CommercialContinuousEdbmAcidRecoveryModeler.astro', dataFile: 'edbm-acid-recovery-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -655,32 +656,32 @@ function auditGrowthOpportunities() {
     // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Continuous Electrodialysis Bipolar Membrane (EDBM) Organic Acid Recovery & Demineralization Modeler',
-      category: 'Electrochemical Separation & Byproduct Valorization',
-      intent: 'Models continuous water-splitting bipolar membrane electrodialysis (EDBM, 0.8–1.5 V/cell, 250–500 A/m²) for clean circular recovery of lactic, citric, and tartaric acids from fermented food processing effluents, simultaneous base (NaOH/KOH) generation, zero-salt waste acidification, and sanitary ion-exchange membrane fouling resistance.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '1,240+ US impressions'
-    },
-    {
       title: 'Commercial Continuous High-Pressure Nanosecond Pulsed Electric Field (nsPEF) Intracellular Extraction Modeler',
       category: 'Nanosecond Bioelectrics & Phytochemical Recovery',
       intent: 'Models ultra-short pulse (10–100 ns, 40–80 kV/cm) non-thermal organelle electro-permeabilization, high-efficiency intracellular polyphenol and anthocyanin extraction from winemaking pomace and berry press cake, zero thermal anthocyanin degradation, and continuous coaxial treatment chamber dielectric breakdown containment.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '1,150+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '1,280+ US impressions'
     },
     {
       title: 'Commercial Continuous Supercritical CO2 Assisted Spray Freeze-Drying (SFD) Thermolabile Biotherapeutic & Food Ingredient Modeler',
       category: 'Supercritical Cryogenics & Aseptic Spray Lyophilization',
       intent: 'Models continuous low-temperature supercritical CO2 assisted atomization coupled with cryogenic spray freeze-drying (SFD) in liquid nitrogen for ultra-porous powder generation, zero protein denaturation, and continuous vacuum sublimation.',
       priority: 'HIGH',
-      estimatedMonthlyVolume: '1,060+ US impressions'
+      estimatedMonthlyVolume: '1,180+ US impressions'
     },
     {
       title: 'Commercial Continuous High-Pressure Supercritical Fluid Extrusion (SCFX) Bioactive Food Matrix Micro-Texturizing Modeler',
       category: 'Supercritical Extrusion & Aerated Food Matrix Physics',
       intent: 'Models continuous high-pressure supercritical carbon dioxide fluid extrusion (SCFX, 15–35 MPa, 35–85°C) for non-thermal expansion, closed-cell micro-cellular pore texturizing of plant proteins and starches, volatile flavor retention (>94%), and thermal degradation mitigation compared to conventional high-shear steam expansion.',
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '1,090+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous Dielectric Barrier Discharge Cold Plasma Mist (DBD-CPM) Post-Harvest Sanitation Modeler',
+      category: 'Atmospheric Non-Thermal Aerosol Physics & Microbiological Safety',
+      intent: 'Models continuous dielectric barrier discharge cold atmospheric plasma aerosolized water-mist (DBD-CPM, 12–25 kV, 15–40 kHz) generation of reactive oxygen and nitrogen species (RONS: •OH, O2•⁻, ONOO⁻) for non-thermal surface sanitization of fresh produce, zero chemical chlorine residues, and bacterial log reduction (>5.2-log).',
       priority: 'MEDIUM',
-      estimatedMonthlyVolume: '1,040+ US impressions'
+      estimatedMonthlyVolume: '980+ US impressions'
     }
   ];
 

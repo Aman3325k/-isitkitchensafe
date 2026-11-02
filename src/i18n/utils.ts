@@ -163,7 +163,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-continuous-cold-atmospheric-plasma-activated-water-modeler',
   'tools/commercial-continuous-sfe-counter-current-fractionation-modeler',
   'tools/commercial-continuous-megasonic-standing-wave-separator-modeler',
-  'tools/commercial-continuous-fo-nf-whey-desalting-modeler'
+  'tools/commercial-continuous-fo-nf-whey-desalting-modeler',
+  'tools/commercial-continuous-edbm-acid-recovery-modeler'
 ];
 
 const esSlugs = new Set([

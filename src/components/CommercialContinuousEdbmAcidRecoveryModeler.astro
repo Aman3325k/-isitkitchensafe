@@ -1,0 +1,1224 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import edbmData from '../data/edbm-acid-recovery-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  systemLabel: string;
+  systemHelp: string;
+  matrixLabel: string;
+  matrixHelp: string;
+  currentDensityLabel: string;
+  currentDensityHelp: string;
+  tempLabel: string;
+  tempHelp: string;
+  flowLabel: string;
+  flowHelp: string;
+  targetAcidLabel: string;
+  targetAcidHelp: string;
+  chilledJacketLabel: string;
+  chilledJacketHelp: string;
+  pulsedCipLabel: string;
+  pulsedCipHelp: string;
+  presetsTitle: string;
+  presetLactic: string;
+  presetCitric: string;
+  presetTartaric: string;
+  presetFermentation: string;
+  presetHazard: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  acidYieldLabel: string;
+  currentEfficiencyLabel: string;
+  secLabel: string;
+  causticLabel: string;
+  demineralizationLabel: string;
+  gypsumAvoidedLabel: string;
+  limitingMarginLabel: string;
+  overallStatusLabel: string;
+  diagramTitle: string;
+  diagramSub: string;
+  scienceTitle: string;
+  scienceSub: string;
+  tableTitle: string;
+}
+
+const DICT: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Electrochemical Separation & Byproduct Valorization",
+    title: "Commercial Continuous Electrodialysis Bipolar Membrane (EDBM) Organic Acid Recovery & Demineralization Modeler",
+    subtitle: "Simulate continuous water-splitting electrodialysis with bipolar membranes (EDBM, 0.8–1.5 V/cell, 200–500 A/m²) for non-thermal recovery of pure lactic, citric, and tartaric acids from fermented food processing effluents, simultaneous circular generation of food-grade caustic alkali (NaOH/KOH), zero-gypsum waste acidification, and sanitary 3-A Standard 45-03 compliance.",
+    controlsTitle: "Continuous EDBM Stack Operating Parameters",
+    controlsSub: "Configure electro-membrane stack architecture, incoming organic salt effluent matrix, applied current density, operating temperature, volumetric throughput, and sanitary anti-fouling protocols.",
+    systemLabel: "Electro-Membrane Stack Configuration:",
+    systemHelp: "Select commercial 3-compartment EDBM skid (BPM-AEM-CEM), 2-compartment cation-bipolar unit, 2-compartment anion-bipolar extractor, or pilot research rig.",
+    matrixLabel: "Incoming Organic Salt Effluent Matrix:",
+    matrixHelp: "Select Greek yogurt acid whey permeate, citrus peel wash effluent, wine lees vinification wash, neutralized fermentation broth, or bacterial succinate stream.",
+    currentDensityLabel: "Applied Operating Current Density (i):",
+    currentDensityHelp: "Direct current density applied across bipolar and ion-exchange membrane active areas (100 to 650 A/m²).",
+    tempLabel: "Controlled Stack Operating Temperature (T_op):",
+    tempHelp: "Temperature of the circulating fluid streams (8°C to 50°C). Chilled temperatures protect heat-sensitive bioactives and prevent membrane thermal stress.",
+    flowLabel: "Continuous Feed Volumetric Throughput (Q_feed):",
+    flowHelp: "Volumetric feed flow rate pumped through the inter-membrane flow channels (500 to 5,000 L/h).",
+    targetAcidLabel: "Target Recovered Free Organic Acid (g/L):",
+    targetAcidHelp: "Target concentration of free, undissociated organic acid in the circulating acid recovery loop (20 to 180 g/L).",
+    chilledJacketLabel: "Active Inter-Stage Chilled Glycol Cooling:",
+    chilledJacketHelp: "Enables sanitary 2°C–6°C counter-current glycol cooling to absorb ohmic Joule heat and protect ion-exchange membranes from thermal aging.",
+    pulsedCipLabel: "Reversible-Polarity Pulsed Anti-Fouling CIP:",
+    pulsedCipHelp: "Activates periodic reverse electrical pulses and automated descaling to dismantle colloidal protein cakes and prevent Ca(OH)2 / CaCO3 scaling.",
+    presetsTitle: "High-Intent Commercial Processing Presets",
+    presetLactic: "Greek Yogurt Acid Whey Circular Lactic Acid & Base Recovery (350 A/m², 14°C, 3200 L/h, 3-Compartment)",
+    presetCitric: "Citrus Effluent High-Titer Citric Acid & Biofertilizer KOH Generation (400 A/m², 16°C, 2800 L/h, 3-Compartment)",
+    presetTartaric: "Wine Lees Vinification Tartaric Acid Recovery & Desalting (300 A/m², 12°C, 2400 L/h, 2-Compartment)",
+    presetFermentation: "Industrial Fermentation Zero-Waste Acidification & Caustic Loop (450 A/m², 18°C, 3600 L/h, 3-Compartment)",
+    presetHazard: "Over-Limiting Current & Membrane Scaling Burnout Hazard Alert (620 A/m², 42°C, No Cooling, No CIP)",
+    diagnosticTitle: "EDBM Electrochemical Flux & Circular Valorization Telemetry",
+    diagnosticSub: "Real-time thermodynamic computation of free acid recovery yield, Faradaic current efficiency, specific electrical energy consumption, regenerated alkali titer, and gypsum waste elimination.",
+    acidYieldLabel: "Organic Acid Extraction Yield (Y_acid):",
+    currentEfficiencyLabel: "Faradaic Current Efficiency (η_current):",
+    secLabel: "Specific Energy Footprint (SEC):",
+    causticLabel: "Regenerated Caustic Alkali (NaOH/KOH):",
+    demineralizationLabel: "Mineral Ash Depletion Rate (R_demin):",
+    gypsumAvoidedLabel: "Gypsum Solid Waste Eliminated:",
+    limitingMarginLabel: "Limiting Current Density Margin (Δi_lim):",
+    overallStatusLabel: "Process Validation & Safety Classification:",
+    diagramTitle: "3-Compartment Electrodialysis with Bipolar Membranes Flow Schematic",
+    diagramSub: "Visualizing catalytic water dissociation at the bipolar junction (H+/OH-), carboxylate anion migration across AEM, cation transfer across CEM, and circular byproduct recovery.",
+    scienceTitle: "Scientific Principles: Electrochemical Water Dissociation & Zero-Gypsum Acidification",
+    scienceSub: "Comprehensive analysis of catalytic water-splitting physics in bipolar junctions, limiting current density thresholds, stoichiometric gypsum elimination, and 3-A Sanitary Standard 45-03 compliance.",
+    tableTitle: "Continuous EDBM vs Alternative Acid Recovery & Demineralization Technologies"
+  },
+  es: {
+    badge: "Separación Electroquímica y Valorización de Subproductos",
+    title: "Simulador Continuo de Electrodiálisis con Membranas Bipolares (EDBM) para Recuperación de Ácidos Orgánicos y Desmineralización",
+    subtitle: "Simule la disociación catalítica de agua mediante electrodiálisis con membranas bipolares (EDBM, 0,8–1,5 V/celda, 200–500 A/m²) para la recuperación no térmica de ácidos láctico, cítrico y tartárico puros a partir de efluentes agroalimentarios fermentados, generación simultánea de álcali cáustico (NaOH/KOH), eliminación total de residuos de yeso y cumplimiento de la norma sanitaria 3-A 45-03.",
+    controlsTitle: "Parámetros Operativos del Stack Continuo EDBM",
+    controlsSub: "Configure la arquitectura del stack electromembranal, matriz de sales orgánicas, densidad de corriente aplicada, temperatura de operación, caudal volumétrico y protocolos sanitarios antiincrustantes.",
+    systemLabel: "Configuración del Stack Electroquímico:",
+    systemHelp: "Seleccione el skid comercial de 3 compartimentos (BPM-AEM-CEM), la unidad catiónica de 2 compartimentos, el extractor aniónico de 2 compartimentos o el equipo piloto de investigación.",
+    matrixLabel: "Matriz de Efluente de Entrada:",
+    matrixHelp: "Seleccione permeado de suero ácido de yogur griego, efluente de lavado de cítricos, lías de vinificación vinícola, caldo de fermentación neutralizado o efluente bacteriano de succinato.",
+    currentDensityLabel: "Densidad de Corriente Aplicada (i):",
+    currentDensityHelp: "Densidad de corriente continua aplicada sobre las áreas activas de las membranas bipolares e intercambiadoras (100 a 650 A/m²).",
+    tempLabel: "Temperatura Controlada del Stack (T_op):",
+    tempHelp: "Temperatura del circuito de fluidos (8°C a 50°C). Temperaturas refrigeradas previenen el envejecimiento térmico de las membranas.",
+    flowLabel: "Caudal Volumétrico Continuo (Q_feed):",
+    flowHelp: "Caudal de alimentación bombeado a través de los canales intermembranales (500 a 5.000 L/h).",
+    targetAcidLabel: "Ácido Orgánico Libre Objetivo (g/L):",
+    targetAcidHelp: "Concentración objetivo de ácido orgánico no disociado en el lazo de recuperación de ácido (20 a 180 g/L).",
+    chilledJacketLabel: "Refrigeración por Glicol Interetapas Activa:",
+    chilledJacketHelp: "Activa enfriamiento sanitario con glicol a 2°C–6°C para disipar calor óhmico Joule y proteger las membranas poliméricas.",
+    pulsedCipLabel: "CIP Pulsado de Polaridad Reversible:",
+    pulsedCipHelp: "Activa pulsos eléctricos inversos periódicos para desintegrar tortas coloidales y prevenir incrustaciones minerales de Ca(OH)2 / CaCO3.",
+    presetsTitle: "Preajustes Industriales de Alto Rendimiento",
+    presetLactic: "Recuperación Circular de Ácido Láctico y Sosa en Suero Ácido de Yogur Griego (350 A/m², 14°C, 3200 L/h, 3 Compartimentos)",
+    presetCitric: "Ácido Cítrico de Alto Título y KOH Biofertilizante en Efluente Cítrico (400 A/m², 16°C, 2800 L/h, 3 Compartimentos)",
+    presetTartaric: "Recuperación de Ácido Tartárico y Desalado en Lías de Vino (300 A/m², 12°C, 2400 L/h, 2 Compartimentos)",
+    presetFermentation: "Lazo Cerrado de Acidificación y Sosa en Fermentación Industrial (450 A/m², 18°C, 3600 L/h, 3 Compartimentos)",
+    presetHazard: "Alerta de Peligro: Sobrecorriente Límite e Incrustación Severa de Membranas (620 A/m², 42°C, Sin Frío, Sin CIP)",
+    diagnosticTitle: "Telemetría Electroquímica y de Valorización Circular EDBM",
+    diagnosticSub: "Cálculo termodinámico en tiempo real del rendimiento de extracción ácida, eficiencia faradaica de corriente, consumo eléctrico específico, título de álcali cáustico generado y eliminación de lodos de yeso.",
+    acidYieldLabel: "Rendimiento de Extracción Ácida (Y_acid):",
+    currentEfficiencyLabel: "Eficiencia Faradaica de Corriente (η_current):",
+    secLabel: "Consumo Eléctrico Específico (SEC):",
+    causticLabel: "Álcali Cáustico Regenerado (NaOH/KOH):",
+    demineralizationLabel: "Tasa de Desmineralización de Cenizas (R_demin):",
+    gypsumAvoidedLabel: "Residuo Sólido de Yeso Evitado:",
+    limitingMarginLabel: "Margen de Densidad de Corriente Límite (Δi_lim):",
+    overallStatusLabel: "Validación de Proceso y Clasificación de Seguridad:",
+    diagramTitle: "Esquema de Flujo de Electrodiálisis con Membranas Bipolares de 3 Compartimentos",
+    diagramSub: "Visualización de disociación catalítica del agua en la unión bipolar (H+/OH-), migración de aniones carboxilato a través de la AEM, transferencia de cationes a través de la CEM y subproductos circulares.",
+    scienceTitle: "Principios Científicos: Disociación Electroquímica del Agua y Acidificación Sin Yeso",
+    scienceSub: "Análisis profundo de la catálisis en interfaces bipolares, límites de corriente polarográfica, eliminación estequiométrica de yeso y norma 3-A 45-03.",
+    tableTitle: "Comparativa EDBM Continuo vs Tecnologías Alternativas de Recuperación de Ácidos y Desmineralización"
+  },
+  pt: {
+    badge: "Separação Eletroquímica e Valorização de Subprodutos",
+    title: "Simulador Contínuo de Eletrodiálise com Membranas Bipolares (EDBM) para Recuperação de Ácidos Orgânicos e Desmineralização",
+    subtitle: "Simule a dissociação catalítica da água por eletrodiálise com membranas bipolares (EDBM, 0,8–1,5 V/célula, 200–500 A/m²) para a recuperação não térmica de ácidos lático, cítrico e tartárico puros a partir de efluentes agroalimentares fermentados, geração simultânea de álcali cáustico (NaOH/KOH), eliminação total de resíduos de gesso e conformidade sanitária com a norma 3-A 45-03.",
+    controlsTitle: "Parâmetros Operacionais do Stack Contínuo EDBM",
+    controlsSub: "Configure a arquitetura do stack de eletromembranas, matriz de sais orgânicos, densidade de corrente aplicada, temperatura de operação, vazão volumétrica e protocolos sanitários anti-incrustação.",
+    systemLabel: "Configuração do Stack Eletroquímico:",
+    systemHelp: "Selecione o skid comercial de 3 compartimentos (BPM-AEM-CEM), a unidade catiônica de 2 compartimentos, o extrator aniônico de 2 compartimentos ou o equipamento piloto de pesquisa.",
+    matrixLabel: "Matriz de Efluente de Entrada:",
+    matrixHelp: "Selecione permeado de soro ácido de iogurte grego, efluente de lavagem cítrica, borras de vinificação, caldo de fermentação neutralizado ou efluente bacteriano de succinato.",
+    currentDensityLabel: "Densidade de Corrente Aplicada (i):",
+    currentDensityHelp: "Densidade de corrente contínua aplicada sobre as áreas ativas das membranas bipolares e trocadoras de íons (100 a 650 A/m²).",
+    tempLabel: "Temperatura Controlada do Stack (T_op):",
+    tempHelp: "Temperatura do circuito de fluidos (8°C a 50°C). Temperaturas refrigeradas evitam a degradação térmica das membranas.",
+    flowLabel: "Vazão Volumétrica Contínua (Q_feed):",
+    flowHelp: "Vazão de alimentação bombeada através dos canais intermembranas (500 a 5.000 L/h).",
+    targetAcidLabel: "Ácido Orgânico Livre Alvo (g/L):",
+    targetAcidHelp: "Concentração alvo de ácido orgânico não dissociado no laço de recuperação ácida (20 a 180 g/L).",
+    chilledJacketLabel: "Resfriamento por Glicol Interestágios Ativo:",
+    chilledJacketHelp: "Ativa resfriamento sanitário com glicol a 2°C–6°C para dissipar calor Joule ôhmico e proteger as membranas poliméricas.",
+    pulsedCipLabel: "CIP Pulsado de Polaridade Reversível:",
+    pulsedCipHelp: "Ativa pulsos elétricos reversos periódicos para desagregar biofilmes e prevenir incrustações minerais de Ca(OH)2 / CaCO3.",
+    presetsTitle: "Predefinições Industriais de Alto Desempenho",
+    presetLactic: "Recuperação Circular de Ácido Lático e Soda em Soro Ácido de Iogurte Grego (350 A/m², 14°C, 3200 L/h, 3 Compartimentos)",
+    presetCitric: "Ácido Cítrico de Alto Título e KOH Biofertilizante em Efluente Cítrico (400 A/m², 16°C, 2800 L/h, 3 Compartimentos)",
+    presetTartaric: "Recuperação de Ácido Tartárico e Dessalinização em Borras de Vinho (300 A/m², 12°C, 2400 L/h, 2 Compartimentos)",
+    presetFermentation: "Circuito Fechado de Acidificação e Soda em Fermentação Industrial (450 A/m², 18°C, 3600 L/h, 3 Compartimentos)",
+    presetHazard: "Alerta de Perigo: Sobrecorrente Limite e Incrustação Severa de Membranas (620 A/m², 42°C, Sem Resfriamento, Sem CIP)",
+    diagnosticTitle: "Telemetria Eletroquímica e de Valorização Circular EDBM",
+    diagnosticSub: "Cálculo termodinâmico em tempo real do rendimento de extração ácida, eficiência faradaica de corrente, consumo específico de energia elétrica, concentração de álcali cáustico regenerado e eliminação de lodos de gesso.",
+    acidYieldLabel: "Rendimento de Extração Ácida (Y_acid):",
+    currentEfficiencyLabel: "Eficiência Faradaica de Corrente (η_current):",
+    secLabel: "Consumo Específico de Energia (SEC):",
+    causticLabel: "Álcali Cáustico Regenerado (NaOH/KOH):",
+    demineralizationLabel: "Taxa de Desmineralização Mineral (R_demin):",
+    gypsumAvoidedLabel: "Resíduo Sólido de Gesso Evitado:",
+    limitingMarginLabel: "Margem de Densidade de Corrente Limite (Δi_lim):",
+    overallStatusLabel: "Validação de Processo e Classificação de Segurança:",
+    diagramTitle: "Esquema de Fluxo de Eletrodiálise com Membranas Bipolares de 3 Compartimentos",
+    diagramSub: "Visualização da dissociação catalítica da água na junção bipolar (H+/OH-), migração de ânions carboxilato através da AEM, transferência de cátions através da CEM e coprodutos circulares.",
+    scienceTitle: "Princípios Científicos: Dissociação Eletroquímica da Água e Acidificação Sem Gesso",
+    scienceSub: "Análise profunda da catálise em interfaces bipolares, correntes limites de polarização, eliminação estequiométrica de gesso e conformidade 3-A 45-03.",
+    tableTitle: "Comparativo EDBM Contínuo vs Tecnologias Alternativas de Recuperação de Ácidos e Desmineralização"
+  },
+  'zh-cn': {
+    badge: "电化学分离与副产物高值化循环工程",
+    title: "工业连续双极膜电渗析（EDBM）有机酸清洁回收与脱盐浓缩模拟器",
+    subtitle: "精确模拟基于连续双极膜水解离电渗析（EDBM，0.8–1.5 V/膜对，200–500 A/m²）的非热发酵流体纯化工艺。模拟从酸乳清与发酵液中高收率提取高纯度乳酸、柠檬酸与酒石酸、原位同槽联产高浓度食品级烧碱（NaOH/KOH）、实现零石膏危废酸化及 3-A 卫生标准 45-03 严苛合规认证。",
+    controlsTitle: "工业连续 EDBM 膜堆运行控制台",
+    controlsSub: "配置电驱动膜堆组件架构、进料有机酸盐基质、操作电流密度、运行流体温度、连续处理流速及卫生级防污染与脉冲反洗方案。",
+    systemLabel: "电驱动膜堆系统装备构型:",
+    systemHelp: "选择工业三室式 EDBM 撬装（BPM-AEM-CEM）、二室阳极脱阳离子脱盐装置、二室阴极羧酸根定向提取单元或实验研发测试台。",
+    matrixLabel: "原料发酵副产物流体类型:",
+    matrixHelp: "选择希腊酸奶酸乳清高钙乳酸渗透液、柑橘加工果渣洗液、葡萄酒酿造酒脚酒石酸提取液、中性浓缩乳清发酵液或丁二酸生物发酵液。",
+    currentDensityLabel: "施加运行电流密度 (i):",
+    currentDensityHelp: "垂直穿透双极膜与离子交换膜有效工作面的直流电流密度（100 至 650 A/m²）。",
+    tempLabel: "循环流体受控温度 (T_op):",
+    tempHelp: "膜分离循环受控流体温度（8°C 至 50°C）。低温运行可有效防止高分子膜材料发生热降解与水解老化。",
+    flowLabel: "连续进料体积处理流量 (Q_feed):",
+    flowHelp: "由隔板流道连续泵送循环的原液进料体积流速（500 至 5,000 L/h）。",
+    targetAcidLabel: "目标游离有机酸回收浓度 (g/L):",
+    targetAcidHelp: "酸循环回路中生成的纯净非解离有机酸目标终产物浓度（20 至 180 g/L）。",
+    chilledJacketLabel: "卫生级段间乙二醇冷冻循环夹套:",
+    chilledJacketHelp: "启用 2°C–6°C 卫生级逆流乙二醇冷却回路，吸收欧姆焦耳热，彻底消除膜堆热老化风险。",
+    pulsedCipLabel: "正负极性交变脉冲在线防垢 CIP:",
+    pulsedCipHelp: "启动周期性反向微脉冲电场与自动除垢冲洗，迅速破坏胶体滤饼并抑制 Ca(OH)2 / CaCO3 晶相结垢。",
+    presetsTitle: "高价值工业连续生产工况预设",
+    presetLactic: "希腊酸奶酸乳清循环提取乳酸与联产烧碱 (350 A/m², 14°C, 3200 L/h, 三室系统)",
+    presetCitric: "柑橘加工废液高浓度柠檬酸与生物肥料 KOH 联产 (400 A/m², 16°C, 2800 L/h, 三室系统)",
+    presetTartaric: "葡萄酒酒脚与皮渣洗液酒石酸提取与脱盐 (300 A/m², 12°C, 2400 L/h, 二室系统)",
+    presetFermentation: "工业发酵零石膏废酸循环提取与烧碱回流系统 (450 A/m², 18°C, 3600 L/h, 三室系统)",
+    presetHazard: "危险工况警告：超极限电流与膜表面严重水解结垢烧损 (620 A/m², 42°C, 无冷却, 无 CIP)",
+    diagnosticTitle: "EDBM 电化学通量与循环经济物理遥测指标",
+    diagnosticSub: "实时热力学计算游离酸提取收率、法拉第电流效率、单位产品比电耗、联产高纯碱液摩尔浓度及固体石膏废渣削减量。",
+    acidYieldLabel: "游离有机酸提取收率 (Y_acid):",
+    currentEfficiencyLabel: "法拉第有效电流效率 (η_current):",
+    secLabel: "单位产品比能耗 (SEC):",
+    causticLabel: "原位联产食品级高浓度碱 (NaOH/KOH):",
+    demineralizationLabel: "矿物灰分脱盐脱除率 (R_demin):",
+    gypsumAvoidedLabel: "彻底消除石膏固体危废排放量:",
+    limitingMarginLabel: "极限电流密度安全裕度 (Δi_lim):",
+    overallStatusLabel: "工艺合规与卫生安全等级:",
+    diagramTitle: "工业连续三室双极膜电渗析（EDBM）流体与离子迁移工艺流程图",
+    diagramSub: "展示双极膜催化水解离结区（H+/OH- 分裂）、羧酸根阴离子穿透 AEM 迁移、阳离子穿透 CEM 迁移以及零废渣副产物循环回路。",
+    scienceTitle: "科学原理解析：双极膜电解水界面催化动力学与零石膏清洁酸化",
+    scienceSub: "深入解析双极膜纳米过渡区水解离物理学、极化极限电流密度临界判据、石膏废渣源头削减化学计量平衡及 3-A 卫生标准 45-03 规范。",
+    tableTitle: "连续 EDBM 与传统硫酸酸化法、普通电渗析及离子交换树脂技术综合对比"
+  },
+  ja: {
+    badge: "電気化学分離＆バイオプロダクト循環高度化",
+    title: "商業用連続式バイポーラ膜電気透析（EDBM）有機酸回収＆脱塩シミュレーター",
+    subtitle: "水分解バイポーラ膜電気透析（EDBM, 0.8〜1.5 V/セル, 200〜500 A/m²）による、発酵食品廃液からの非加熱高純度乳酸・クエン酸・酒石酸連続回収プロセスを解析。食品衛生適合アルカリ（NaOH/KOH）の同槽併産、硫酸由来石膏廃棄物ゼロ化、および 3-A サニタリー規格 45-03 適合性を精密計算。",
+    controlsTitle: "連続式 EDBM スタック運転制御パラメータ",
+    controlsSub: "電気膜スタック構成、原料有機酸塩性状マトリクス、印加電流密度、運転温度、連続処理流量、および衛生洗浄防汚シーケンスを設定。",
+    systemLabel: "電気化学膜スタック装置構成:",
+    systemHelp: "商業用3室式 EDBM スキッド（BPM-AEM-CEM）、2室式カチオンバイポーラ装置、2室式アニオンバイポーラ抽出機、またはパイロット研究試験機を選択。",
+    matrixLabel: "供給有機塩廃液マトリクス:",
+    matrixHelp: "ギリシャヨーグルト酸性ホエー透過液、柑橘果汁果皮洗浄液、ワイン澱酒石酸塩抽出液、中和乳清発酵ブロス、またはコハク酸発酵液を選択。",
+    currentDensityLabel: "印加運転電流密度 (i):",
+    currentDensityHelp: "バイポーラ膜およびイオン交換膜の有効面に垂直に流れる直流電流密度（100〜650 A/m²）。",
+    tempLabel: "制御スタック運転温度 (T_op):",
+    tempHelp: "膜濃縮ループの受託制御温度（8℃〜50℃）。低温運転により有機高分子膜の熱劣化および加水分解を防止。",
+    flowLabel: "連続供給流量 (Q_feed):",
+    flowHelp: "膜間スペーサー流路を通過する原液供給液の体積流量（500〜5,000 L/h）。",
+    targetAcidLabel: "目標遊離有機酸回収濃度 (g/L):",
+    targetAcidHelp: "酸循環ループで生成される遊離・非解離有機酸の目標最終製品濃度（20〜180 g/L）。",
+    chilledJacketLabel: "段間サニタリー低温グリコール冷却ジャケット:",
+    chilledJacketHelp: "2℃〜6℃の向流グリコール冷却ジャケットを作動させ、オーム性ジュール熱を吸収して膜の長寿命化を実現。",
+    pulsedCipLabel: "極性反転パルス通電防汚 CIP シーケンス:",
+    pulsedCipHelp: "周期的逆パルス電場と自動スケール洗浄を併用し、コロイド状タンパク質被膜を瞬時に分解して Ca(OH)2 結垢を防止。",
+    presetsTitle: "高効率商業運転プリセット",
+    presetLactic: "ギリシャヨーグルト酸性ホエー循環型乳酸回収＆苛性ソーダ併産（350 A/m², 14℃, 3200 L/h, 3室システム）",
+    presetCitric: "柑橘加工廃液高濃度クエン酸＆バイオ肥料 KOH 併産（400 A/m², 16℃, 2800 L/h, 3室システム）",
+    presetTartaric: "ワイン澱・搾りかす洗浄液酒石酸回収＆脱塩脱カリウム（300 A/m², 12℃, 2400 L/h, 2室システム）",
+    presetFermentation: "工業発酵石膏フリー完全循環型酸抽出＆苛性アルカリ還流（450 A/m², 18℃, 3600 L/h, 3室システム）",
+    presetHazard: "危険アラート：限界電流密度超過・重度スケーリング膜焼損（620 A/m², 42℃, 冷却停止, CIP停止）",
+    diagnosticTitle: "EDBM 電気化学水流束＆循環型経済物理テレメトリ",
+    diagnosticSub: "遊離酸抽出収率、ファラデー電流効率、単位製品比エネルギー消費量、副生苛性アルカリ濃度、および石膏廃棄物削減量をリアルタイム計算。",
+    acidYieldLabel: "遊離有機酸抽出収率 (Y_acid):",
+    currentEfficiencyLabel: "ファラデー有効電流効率 (η_current):",
+    secLabel: "製品あたり比エネルギー消費量 (SEC):",
+    causticLabel: "原位併産食品グレードアルカリ (NaOH/KOH):",
+    demineralizationLabel: "ミネラル灰分脱塩・脱イオン率 (R_demin):",
+    gypsumAvoidedLabel: "完全削減石膏固形産業廃棄物量:",
+    limitingMarginLabel: "限界電流密度安全マージン (Δi_lim):",
+    overallStatusLabel: "プロセス適合性＆衛生安全分類:",
+    diagramTitle: "商業用連続式3室型バイポーラ膜電気透析（EDBM）イオン移動系統図",
+    diagramSub: "バイポーラ界面触媒水分解（H+/OH-）、AEM を透過するカルボン酸アニオン移動、CEM を透過する陽イオン移動、および完全循環型副産物ループを表示。",
+    scienceTitle: "科学的原理：バイポーラ界面触媒的水解離機構と石膏フリー酸性化",
+    scienceSub: "バイポーラ膜ナノ触媒層における水解離物理学、限界電流密度閾値計算法、石膏廃棄物全廃の化学量論的根拠、および 3-A サニタリー規格 45-03 適合性を解析。",
+    tableTitle: "連続 EDBM と従来型硫酸沈殿法、通常電気透析、およびイオン交換樹脂法の比較"
+  }
+};
+
+const d = DICT[lang] || DICT.en;
+---
+
+<div class="space-y-10 my-8" id="edbm-acid-recovery-root">
+  <!-- Header Card -->
+  <div class="p-8 rounded-3xl bg-surface-soft border border-hairline shadow-sm">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+      <span class="inline-block px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-indigo-950 text-indigo-200 border border-indigo-800">
+        {d.badge}
+      </span>
+      <span class="text-xs text-muted font-mono">
+        3-A Sanitary 45-03 &bull; EHEDG Class I &bull; FDA 21 CFR § 178.3297 &bull; Zero Gypsum Waste
+      </span>
+    </div>
+    <h1 class="text-title-xl font-bold text-ink tracking-tight mb-3">
+      {d.title}
+    </h1>
+    <p class="text-body text-base max-w-4xl text-muted leading-relaxed">
+      {d.subtitle}
+    </p>
+  </div>
+
+  <!-- Presets Bar -->
+  <div class="p-6 rounded-2xl bg-surface-soft border border-hairline space-y-4">
+    <div class="flex items-center justify-between">
+      <h2 class="text-sm font-semibold text-ink uppercase tracking-wider">
+        {d.presetsTitle}
+      </h2>
+      <span class="text-xs text-muted font-mono">1-Click Automated Industrial Calibration</span>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      <button 
+        type="button" 
+        id="btn-preset-lactic"
+        class="text-left p-3.5 rounded-xl border border-hairline bg-surface hover:border-indigo-500/50 hover:bg-indigo-950/20 transition-all text-xs space-y-1.5 cursor-pointer"
+      >
+        <div class="font-bold text-ink flex items-center justify-between">
+          <span>🧀 Greek Yogurt Lactic</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-900/40 text-indigo-300 font-mono">350 A/m²</span>
+        </div>
+        <p class="text-muted leading-tight line-clamp-2">
+          {d.presetLactic}
+        </p>
+      </button>
+
+      <button 
+        type="button" 
+        id="btn-preset-citric"
+        class="text-left p-3.5 rounded-xl border border-hairline bg-surface hover:border-amber-500/50 hover:bg-amber-950/20 transition-all text-xs space-y-1.5 cursor-pointer"
+      >
+        <div class="font-bold text-ink flex items-center justify-between">
+          <span>🍊 Citrus Peel Citric</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-900/40 text-amber-300 font-mono">400 A/m²</span>
+        </div>
+        <p class="text-muted leading-tight line-clamp-2">
+          {d.presetCitric}
+        </p>
+      </button>
+
+      <button 
+        type="button" 
+        id="btn-preset-tartaric"
+        class="text-left p-3.5 rounded-xl border border-hairline bg-surface hover:border-rose-500/50 hover:bg-rose-950/20 transition-all text-xs space-y-1.5 cursor-pointer"
+      >
+        <div class="font-bold text-ink flex items-center justify-between">
+          <span>🍇 Wine Lees Tartaric</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-rose-900/40 text-rose-300 font-mono">300 A/m²</span>
+        </div>
+        <p class="text-muted leading-tight line-clamp-2">
+          {d.presetTartaric}
+        </p>
+      </button>
+
+      <button 
+        type="button" 
+        id="btn-preset-fermentation"
+        class="text-left p-3.5 rounded-xl border border-hairline bg-surface hover:border-emerald-500/50 hover:bg-emerald-950/20 transition-all text-xs space-y-1.5 cursor-pointer"
+      >
+        <div class="font-bold text-ink flex items-center justify-between">
+          <span>🔄 Closed-Loop Caustic</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-900/40 text-emerald-300 font-mono">450 A/m²</span>
+        </div>
+        <p class="text-muted leading-tight line-clamp-2">
+          {d.presetFermentation}
+        </p>
+      </button>
+
+      <button 
+        type="button" 
+        id="btn-preset-hazard"
+        class="text-left p-3.5 rounded-xl border border-hairline bg-surface hover:border-red-500/50 hover:bg-red-950/20 transition-all text-xs space-y-1.5 cursor-pointer sm:col-span-2 lg:col-span-1"
+      >
+        <div class="font-bold text-red-400 flex items-center justify-between">
+          <span>⚠️ Over-Limiting Hazard</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-red-900/40 text-red-300 font-mono">620 A/m²</span>
+        </div>
+        <p class="text-muted leading-tight line-clamp-2">
+          {d.presetHazard}
+        </p>
+      </button>
+    </div>
+  </div>
+
+  <!-- Interactive Controls & Live Telemetry Layout -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <!-- Controls (7 cols) -->
+    <div class="lg:col-span-7 p-7 rounded-3xl bg-surface-soft border border-hairline space-y-6 shadow-sm">
+      <div class="border-b border-hairline/60 pb-4">
+        <h2 class="text-title-md font-bold text-ink">
+          {d.controlsTitle}
+        </h2>
+        <p class="text-xs text-muted mt-1 leading-relaxed">
+          {d.controlsSub}
+        </p>
+      </div>
+
+      <!-- Skid Select -->
+      <div class="space-y-1.5">
+        <label for="edbm-skid-select" class="block text-xs font-semibold text-ink">
+          {d.systemLabel}
+        </label>
+        <select 
+          id="edbm-skid-select"
+          class="w-full bg-surface border border-hairline rounded-xl px-3 py-2.5 text-xs text-ink focus:outline-none focus:border-indigo-500"
+        >
+          {edbmData.membraneSystems.map((sys, idx) => (
+            <option value={idx}>{sys.name}</option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted leading-tight">
+          {d.systemHelp}
+        </p>
+      </div>
+
+      <!-- Feed Matrix Select -->
+      <div class="space-y-1.5">
+        <label for="edbm-matrix-select" class="block text-xs font-semibold text-ink">
+          {d.matrixLabel}
+        </label>
+        <select 
+          id="edbm-matrix-select"
+          class="w-full bg-surface border border-hairline rounded-xl px-3 py-2.5 text-xs text-ink focus:outline-none focus:border-indigo-500"
+        >
+          {edbmData.feedEffluentMatrices.map((mat, idx) => (
+            <option value={idx}>{mat.name}</option>
+          ))}
+        </select>
+        <p class="text-[11px] text-muted leading-tight">
+          {d.matrixHelp}
+        </p>
+      </div>
+
+      <!-- Sliders Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
+        <!-- Current Density Slider -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <label for="current-density-slider" class="font-semibold text-ink">
+              {d.currentDensityLabel}
+            </label>
+            <span id="current-density-val" class="font-mono font-bold text-indigo-400 bg-surface px-2 py-0.5 rounded border border-hairline">
+              350 A/m²
+            </span>
+          </div>
+          <input 
+            type="range" 
+            id="current-density-slider" 
+            min="100" 
+            max="650" 
+            step="10" 
+            value="350"
+            class="w-full accent-indigo-500 cursor-pointer"
+          />
+          <p class="text-[11px] text-muted">
+            {d.currentDensityHelp}
+          </p>
+        </div>
+
+        <!-- Temperature Slider -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <label for="temp-slider" class="font-semibold text-ink">
+              {d.tempLabel}
+            </label>
+            <span id="temp-val" class="font-mono font-bold text-teal-400 bg-surface px-2 py-0.5 rounded border border-hairline">
+              14°C
+            </span>
+          </div>
+          <input 
+            type="range" 
+            id="temp-slider" 
+            min="8" 
+            max="50" 
+            step="1" 
+            value="14"
+            class="w-full accent-teal-500 cursor-pointer"
+          />
+          <p class="text-[11px] text-muted">
+            {d.tempHelp}
+          </p>
+        </div>
+
+        <!-- Feed Flow Rate Slider -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <label for="feed-flow-slider" class="font-semibold text-ink">
+              {d.flowLabel}
+            </label>
+            <span id="feed-flow-val" class="font-mono font-bold text-indigo-400 bg-surface px-2 py-0.5 rounded border border-hairline">
+              3,200 L/h
+            </span>
+          </div>
+          <input 
+            type="range" 
+            id="feed-flow-slider" 
+            min="500" 
+            max="5000" 
+            step="100" 
+            value="3200"
+            class="w-full accent-indigo-500 cursor-pointer"
+          />
+          <p class="text-[11px] text-muted">
+            {d.flowHelp}
+          </p>
+        </div>
+
+        <!-- Target Free Acid Slider -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <label for="target-acid-slider" class="font-semibold text-ink">
+              {d.targetAcidLabel}
+            </label>
+            <span id="target-acid-val" class="font-mono font-bold text-amber-400 bg-surface px-2 py-0.5 rounded border border-hairline">
+              95 g/L
+            </span>
+          </div>
+          <input 
+            type="range" 
+            id="target-acid-slider" 
+            min="20" 
+            max="180" 
+            step="5" 
+            value="95"
+            class="w-full accent-amber-500 cursor-pointer"
+          />
+          <p class="text-[11px] text-muted">
+            {d.targetAcidHelp}
+          </p>
+        </div>
+      </div>
+
+      <!-- Toggles Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-hairline/60">
+        <!-- Chilled Jacket Toggle -->
+        <div class="flex items-start gap-3 p-3.5 rounded-xl bg-surface border border-hairline">
+          <input 
+            type="checkbox" 
+            id="chilled-jacket-toggle" 
+            checked 
+            class="mt-1 h-4 w-4 rounded border-hairline text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+          />
+          <div class="space-y-0.5">
+            <label for="chilled-jacket-toggle" class="text-xs font-semibold text-ink cursor-pointer">
+              {d.chilledJacketLabel}
+            </label>
+            <p class="text-[11px] text-muted leading-tight">
+              {d.chilledJacketHelp}
+            </p>
+          </div>
+        </div>
+
+        <!-- Pulsed CIP Toggle -->
+        <div class="flex items-start gap-3 p-3.5 rounded-xl bg-surface border border-hairline">
+          <input 
+            type="checkbox" 
+            id="pulsed-cip-toggle" 
+            checked 
+            class="mt-1 h-4 w-4 rounded border-hairline text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+          />
+          <div class="space-y-0.5">
+            <label for="pulsed-cip-toggle" class="text-xs font-semibold text-ink cursor-pointer">
+              {d.pulsedCipLabel}
+            </label>
+            <p class="text-[11px] text-muted leading-tight">
+              {d.pulsedCipHelp}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Telemetry & Metrics (5 cols) -->
+    <div class="lg:col-span-5 space-y-6">
+      <div class="p-7 rounded-3xl bg-surface-soft border border-hairline space-y-5 shadow-sm">
+        <div class="border-b border-hairline/60 pb-3 flex items-center justify-between">
+          <div>
+            <h2 class="text-title-md font-bold text-ink">
+              {d.diagnosticTitle}
+            </h2>
+            <p class="text-xs text-muted mt-0.5">
+              {d.diagnosticSub}
+            </p>
+          </div>
+          <span id="overall-status-badge" class="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-950 text-emerald-300 border border-emerald-800">
+            OPTIMAL EDBM
+          </span>
+        </div>
+
+        <!-- Telemetry Cards Grid -->
+        <div class="grid grid-cols-2 gap-3.5">
+          <!-- Acid Yield -->
+          <div class="p-3.5 rounded-2xl bg-surface border border-hairline space-y-1">
+            <span class="text-[11px] text-muted block leading-tight">{d.acidYieldLabel}</span>
+            <span id="metric-acid-yield" class="text-lg font-mono font-bold text-indigo-400">92.4%</span>
+            <div class="w-full bg-surface-soft h-1.5 rounded-full overflow-hidden">
+              <div id="bar-acid-yield" class="bg-indigo-500 h-full rounded-full" style="width: 92.4%"></div>
+            </div>
+          </div>
+
+          <!-- Current Efficiency -->
+          <div class="p-3.5 rounded-2xl bg-surface border border-hairline space-y-1">
+            <span class="text-[11px] text-muted block leading-tight">{d.currentEfficiencyLabel}</span>
+            <span id="metric-current-efficiency" class="text-lg font-mono font-bold text-teal-400">84.8%</span>
+            <div class="w-full bg-surface-soft h-1.5 rounded-full overflow-hidden">
+              <div id="bar-current-eff" class="bg-teal-500 h-full rounded-full" style="width: 84.8%"></div>
+            </div>
+          </div>
+
+          <!-- SEC -->
+          <div class="p-3.5 rounded-2xl bg-surface border border-hairline space-y-1">
+            <span class="text-[11px] text-muted block leading-tight">{d.secLabel}</span>
+            <span id="metric-sec" class="text-lg font-mono font-bold text-emerald-400">1.62 kWh/kg</span>
+            <span class="text-[10px] text-muted block">Benchmark: 1.4–2.2</span>
+          </div>
+
+          <!-- Regenerated Caustic -->
+          <div class="p-3.5 rounded-2xl bg-surface border border-hairline space-y-1">
+            <span class="text-[11px] text-muted block leading-tight">{d.causticLabel}</span>
+            <span id="metric-caustic" class="text-lg font-mono font-bold text-cyan-400">2.15 M NaOH</span>
+            <span class="text-[10px] text-cyan-300/80 block">Circular Caustic Coproduct</span>
+          </div>
+
+          <!-- Demineralization Rate -->
+          <div class="p-3.5 rounded-2xl bg-surface border border-hairline space-y-1">
+            <span class="text-[11px] text-muted block leading-tight">{d.demineralizationLabel}</span>
+            <span id="metric-demineralization" class="text-lg font-mono font-bold text-indigo-300">89.4% Ash</span>
+            <span class="text-[10px] text-muted block">Demineralized Sugar Stream</span>
+          </div>
+
+          <!-- Gypsum Waste Avoided -->
+          <div class="p-3.5 rounded-2xl bg-surface border border-hairline space-y-1">
+            <span class="text-[11px] text-muted block leading-tight">{d.gypsumAvoidedLabel}</span>
+            <span id="metric-gypsum-avoided" class="text-lg font-mono font-bold text-emerald-300">1.42 kg/kg</span>
+            <span class="text-[10px] text-emerald-400/80 block">Zero CaSO4 Hazardous Waste</span>
+          </div>
+        </div>
+
+        <!-- Limiting Current Density Safety Margin Card -->
+        <div class="p-4 rounded-2xl bg-surface border border-hairline space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-semibold text-ink">{d.limitingMarginLabel}</span>
+            <span id="metric-limiting-margin" class="font-mono font-bold text-emerald-400">+142 A/m² Margin</span>
+          </div>
+          <div class="w-full bg-surface-soft h-2 rounded-full overflow-hidden">
+            <div id="bar-limiting-margin" class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width: 72%"></div>
+          </div>
+          <p id="limiting-warning-txt" class="text-[11px] text-muted leading-tight">
+            Operating safely below the limiting current density threshold (i &lt; i_lim). Zero water splitting at monopolar membranes.
+          </p>
+        </div>
+
+        <!-- Compliance Banner Box -->
+        <div id="diagnostic-notice-box" class="p-4 rounded-2xl border bg-emerald-950/20 border-emerald-800/60 text-xs space-y-1">
+          <div class="flex items-center gap-2">
+            <span id="notice-tag" class="font-bold text-emerald-300">✓ 3-A SANITARY COMPLIANT</span>
+            <span class="text-muted font-mono text-[10px]">3-A Standard 45-03 &bull; EHEDG Class I</span>
+          </div>
+          <p id="notice-desc" class="text-muted leading-relaxed">
+            All fluid channels, bipolar membrane seals, and inter-membrane gaskets comply with sanitary food-contact standards. Reversible-polarity pulsed CIP maintains clean surfaces without chemical degradation.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive SVG Schematic Diagram -->
+  <div class="p-8 rounded-3xl bg-surface-soft border border-hairline shadow-sm space-y-4">
+    <div>
+      <h2 class="text-title-md font-bold text-ink">
+        {d.diagramTitle}
+      </h2>
+      <p class="text-xs text-muted mt-1 leading-relaxed">
+        {d.diagramSub}
+      </p>
+    </div>
+
+    <div class="w-full overflow-x-auto py-2">
+      <svg viewBox="0 0 960 480" class="w-full min-w-[760px] h-auto select-none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Definitions -->
+        <defs>
+          <linearGradient id="gradAcid" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#818cf8" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#4f46e5" stop-opacity="0.7"/>
+          </linearGradient>
+          <linearGradient id="gradBase" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#0284c7" stop-opacity="0.7"/>
+          </linearGradient>
+          <linearGradient id="gradSalt" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#a855f7" stop-opacity="0.2"/>
+            <stop offset="100%" stop-color="#6b21a8" stop-opacity="0.5"/>
+          </linearGradient>
+          <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8"/>
+          </marker>
+          <marker id="arrowRed" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#f87171"/>
+          </marker>
+          <marker id="arrowBlue" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#38bdf8"/>
+          </marker>
+          <marker id="arrowGreen" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#34d399"/>
+          </marker>
+        </defs>
+
+        <!-- Outer Skid Frame -->
+        <rect x="30" y="25" width="900" height="430" rx="20" fill="#0f172a" stroke="#334155" stroke-width="2"/>
+        <text x="55" y="55" fill="#e2e8f0" font-size="14" font-weight="bold">3-A SANITARY 45-03 STAINLESS STEEL 316L ENCLOSURE</text>
+        <text x="730" y="55" fill="#38bdf8" font-size="12" font-family="monospace">EDBM STACK [150 CELL PAIRS]</text>
+
+        <!-- Anode (+) and Cathode (-) Electrodes -->
+        <!-- Anode (+) on Left -->
+        <rect x="70" y="90" width="30" height="300" rx="6" fill="#dc2626" opacity="0.85"/>
+        <text x="85" y="245" fill="#ffffff" font-size="14" font-weight="bold" text-anchor="middle" transform="rotate(-90 85 245)">ANODE (+) [Ti/IrO2]</text>
+
+        <!-- Cathode (-) on Right -->
+        <rect x="860" y="90" width="30" height="300" rx="6" fill="#2563eb" opacity="0.85"/>
+        <text x="875" y="245" fill="#ffffff" font-size="14" font-weight="bold" text-anchor="middle" transform="rotate(90 875 245)">CATHODE (-) [SS 316L]</text>
+
+        <!-- Repeating Cell Pair Stack Boundary -->
+        <rect x="130" y="90" width="700" height="300" rx="10" fill="#1e293b" stroke="#475569" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+        <!-- Bipolar Membrane 1 (BPM) -->
+        <rect x="170" y="95" width="24" height="290" fill="#6366f1" rx="4"/>
+        <line x1="182" y1="95" x2="182" y2="385" stroke="#f1f5f9" stroke-width="1.5" stroke-dasharray="2,2"/>
+        <text x="182" y="85" fill="#818cf8" font-size="11" font-weight="bold" text-anchor="middle">BPM</text>
+
+        <!-- Acid Compartment -->
+        <rect x="205" y="95" width="130" height="290" fill="url(#gradAcid)" rx="4"/>
+        <text x="270" y="125" fill="#e0e7ff" font-size="12" font-weight="bold" text-anchor="middle">ACID CHAMBER</text>
+        <text x="270" y="145" fill="#c7d2fe" font-size="10" text-anchor="middle">Pure Free Acid (HL)</text>
+        <text id="svg-acid-titer" x="270" y="365" fill="#a5b4fc" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">HL: 95.0 g/L</text>
+
+        <!-- Anion Exchange Membrane (AEM) -->
+        <rect x="345" y="95" width="20" height="290" fill="#f59e0b" rx="4"/>
+        <text x="355" y="85" fill="#f59e0b" font-size="11" font-weight="bold" text-anchor="middle">AEM</text>
+
+        <!-- Feed / Salt Depletion Compartment -->
+        <rect x="375" y="95" width="190" height="290" fill="url(#gradSalt)" rx="4"/>
+        <text x="470" y="125" fill="#f3e8ff" font-size="12" font-weight="bold" text-anchor="middle">FEED / SALT CHAMBER</text>
+        <text x="470" y="145" fill="#d8b4fe" font-size="10" text-anchor="middle">Lactate / Citrate / Ash Stream</text>
+        <text id="svg-feed-status" x="470" y="365" fill="#e9d5ff" font-size="11" font-family="monospace" font-weight="bold" text-anchor="middle">3,200 L/h | 14°C</text>
+
+        <!-- Cation Exchange Membrane (CEM) -->
+        <rect x="575" y="95" width="20" height="290" fill="#10b981" rx="4"/>
+        <text x="585" y="85" fill="#34d399" font-size="11" font-weight="bold" text-anchor="middle">CEM</text>
+
+        <!-- Base Compartment -->
+        <rect x="605" y="95" width="130" height="290" fill="url(#gradBase)" rx="4"/>
+        <text x="670" y="125" fill="#e0f2fe" font-size="12" font-weight="bold" text-anchor="middle">BASE CHAMBER</text>
+        <text x="670" y="145" fill="#bae6fd" font-size="10" text-anchor="middle">Clean Alkali (NaOH/KOH)</text>
+        <text id="svg-base-titer" x="670" y="365" fill="#7dd3fc" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">2.15 M Alkali</text>
+
+        <!-- Bipolar Membrane 2 (BPM) -->
+        <rect x="745" y="95" width="24" height="290" fill="#6366f1" rx="4"/>
+        <line x1="757" y1="95" x2="757" y2="385" stroke="#f1f5f9" stroke-width="1.5" stroke-dasharray="2,2"/>
+        <text x="757" y="85" fill="#818cf8" font-size="11" font-weight="bold" text-anchor="middle">BPM</text>
+
+        <!-- Ionic Migration Vectors Inside Stack -->
+        <!-- Protons H+ from BPM into Acid chamber -->
+        <path d="M 194 200 L 225 200" stroke="#f87171" stroke-width="2.5" marker-end="url(#arrowRed)"/>
+        <text x="210" y="190" fill="#fca5a5" font-size="11" font-weight="bold">H⁺</text>
+
+        <!-- Carboxylate Anions (L-, Cit-, Tar-) migrating from Feed across AEM into Acid chamber -->
+        <path d="M 400 240 L 330 240" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#arrow)"/>
+        <text x="365" y="230" fill="#fcd34d" font-size="11" font-weight="bold">L⁻ / Cit⁻</text>
+
+        <!-- Cations (Na+, K+, Ca2+) migrating from Feed across CEM into Base chamber -->
+        <path d="M 540 240 L 615 240" stroke="#34d399" stroke-width="2.5" marker-end="url(#arrowGreen)"/>
+        <text x="560" y="230" fill="#6ee7b7" font-size="11" font-weight="bold">Na⁺ / K⁺</text>
+
+        <!-- Hydroxide Ions OH- from BPM 2 into Base chamber -->
+        <path d="M 745 200 L 715 200" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrowBlue)"/>
+        <text x="725" y="190" fill="#7dd3fc" font-size="11" font-weight="bold">OH⁻</text>
+
+        <!-- Product Exit Arrows Bottom -->
+        <!-- Pure Acid Exit -->
+        <path d="M 270 385 L 270 425" stroke="#818cf8" stroke-width="3" marker-end="url(#arrow)"/>
+        <text x="270" y="445" fill="#c7d2fe" font-size="11" font-weight="bold" text-anchor="middle">PURE ORGANIC ACID</text>
+
+        <!-- Demineralized Stream Exit -->
+        <path d="M 470 385 L 470 425" stroke="#c084fc" stroke-width="3" marker-end="url(#arrow)"/>
+        <text x="470" y="445" fill="#e9d5ff" font-size="11" font-weight="bold" text-anchor="middle">DESALTED SUGAR EFFLUENT</text>
+
+        <!-- Clean Alkali Exit -->
+        <path d="M 670 385 L 670 425" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrow)"/>
+        <text x="670" y="445" fill="#7dd3fc" font-size="11" font-weight="bold" text-anchor="middle">REUSABLE CLEAN CAUSTIC</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Deep Scientific Principles & Regulatory Compliance Section -->
+  <div class="p-8 rounded-3xl bg-surface-soft border border-hairline shadow-sm space-y-8">
+    <div>
+      <h2 class="text-title-md font-bold text-ink">
+        {d.scienceTitle}
+      </h2>
+      <p class="text-xs text-muted mt-1 leading-relaxed">
+        {d.scienceSub}
+      </p>
+    </div>
+
+    <!-- Science Cards 2x2 Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs leading-relaxed">
+      <!-- 1. Bipolar Water Splitting Physics -->
+      <div class="p-5 rounded-2xl bg-surface border border-hairline space-y-2.5">
+        <div class="flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full bg-indigo-900/60 text-indigo-300 font-bold flex items-center justify-center font-mono">1</span>
+          <h3 class="font-bold text-ink text-sm">Catalytic Water Splitting at Bipolar Junctions</h3>
+        </div>
+        <p class="text-muted">
+          A bipolar membrane (BPM) consists of a cation-exchange layer (CEL) and an anion-exchange layer (AEL) chemically joined by an ultra-thin hydrophilic catalytic junction containing nanostructured transition metal oxides (e.g. ZrO2 or Fe(OH)x). Under reverse electrical bias, water molecules entering the junction dissociate catalytically:
+        </p>
+        <div class="p-3 rounded-xl bg-surface-soft font-mono text-[11px] text-indigo-300 border border-hairline">
+          H₂O + (Cat) &rarr; H⁺ + OH⁻ &nbsp;&nbsp;[&Delta;V_cat &approx; 0.83 V + &eta;_overpotential]
+        </div>
+        <p class="text-muted">
+          Protons migrate into the acid chamber while hydroxide ions migrate into the base chamber, generating pure acid and alkali in situ without external chemicals.
+        </p>
+      </div>
+
+      <!-- 2. Limiting Current Density & Anti-Fouling -->
+      <div class="p-5 rounded-2xl bg-surface border border-hairline space-y-2.5">
+        <div class="flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full bg-teal-900/60 text-teal-300 font-bold flex items-center justify-center font-mono">2</span>
+          <h3 class="font-bold text-ink text-sm">Limiting Current Density &amp; Donnan Exclusion</h3>
+        </div>
+        <p class="text-muted">
+          Operating current density must remain strictly below the limiting current density threshold (i &lt; i_lim) dictated by boundary layer diffusion:
+        </p>
+        <div class="p-3 rounded-xl bg-surface-soft font-mono text-[11px] text-teal-300 border border-hairline">
+          i_lim = (z &middot; F &middot; D_bulk &middot; C_bulk) / (&delta;_BL &middot; [t_mem - t_sol])
+        </div>
+        <p class="text-muted">
+          Exceeding i_lim causes complete salt ion depletion at the membrane surface, triggering parasitic water splitting at monopolar membranes, severe Joule heating, and Ca(OH)2 scale precipitation on alkaline interfaces.
+        </p>
+      </div>
+
+      <!-- 3. Zero-Gypsum Circular Bioeconomy -->
+      <div class="p-5 rounded-2xl bg-surface border border-hairline space-y-2.5">
+        <div class="flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full bg-emerald-900/60 text-emerald-300 font-bold flex items-center justify-center font-mono">3</span>
+          <h3 class="font-bold text-ink text-sm">Stoichiometric Gypsum Sludge Elimination</h3>
+        </div>
+        <p class="text-muted">
+          Conventional industrial acidification of organic acid salts requires concentrated sulfuric acid (H2SO4), yielding 1.0 to 1.9 kg of hazardous calcium sulfate dihydrate (gypsum, CaSO4&middot;2H2O) sludge per kg of recovered acid:
+        </p>
+        <div class="p-3 rounded-xl bg-surface-soft font-mono text-[11px] text-emerald-300 border border-hairline">
+          Ca(Lactate)₂ + H₂SO₄ &rarr; 2 Lactic Acid + CaSO₄&darr; (1.42 kg waste/kg)
+        </div>
+        <p class="text-muted">
+          EDBM eliminates 100% of this solid waste, producing pure organic acid alongside reusable caustic alkali for a true circular, zero-salt waste manufacturing loop.
+        </p>
+      </div>
+
+      <!-- 4. Sanitary Standards & Electrolytic Safety -->
+      <div class="p-5 rounded-2xl bg-surface border border-hairline space-y-2.5">
+        <div class="flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full bg-amber-900/60 text-amber-300 font-bold flex items-center justify-center font-mono">4</span>
+          <h3 class="font-bold text-ink text-sm">Sanitary 3-A 45-03 &amp; OSHA H2 Gas Safety</h3>
+        </div>
+        <p class="text-muted">
+          Stack design complies with 3-A Sanitary Standards 45-03 and EHEDG Class I aseptic criteria: electro-polished 316L SS endplates (Ra &lt; 0.4 &micro;m), USP Class VI elastomer gaskets, and zero dead legs.
+        </p>
+        <div class="p-3 rounded-xl bg-surface-soft font-mono text-[11px] text-amber-300 border border-hairline">
+          LEL &lt; 1% H₂ by volume &bull; Forced-air dilution &bull; 50 ms DC interlock
+        </div>
+        <p class="text-muted">
+          Electrode rinse loops feature active forced-air dilution blowers maintaining cathodic hydrogen off-gassing far below the 25% Lower Explosive Limit.
+        </p>
+      </div>
+    </div>
+
+    <!-- Comparative Table -->
+    <div class="space-y-3 pt-4 border-t border-hairline/60">
+      <h3 class="text-sm font-semibold text-ink uppercase tracking-wider">
+        {d.tableTitle}
+      </h3>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="border-b border-hairline text-muted">
+              <th class="py-3 px-4 font-semibold">Technology</th>
+              <th class="py-3 px-4 font-semibold">Acid Recovery Yield</th>
+              <th class="py-3 px-4 font-semibold">Solid Waste (Gypsum)</th>
+              <th class="py-3 px-4 font-semibold">Circular Coproduct</th>
+              <th class="py-3 px-4 font-semibold">Specific Energy (SEC)</th>
+              <th class="py-3 px-4 font-semibold">Operating Temperature</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-hairline/60 text-ink">
+            <tr class="bg-indigo-950/20">
+              <td class="py-3.5 px-4 font-bold text-indigo-300">Continuous EDBM (Flagship)</td>
+              <td class="py-3.5 px-4 font-mono font-bold text-indigo-400">92% to 98%</td>
+              <td class="py-3.5 px-4 font-mono text-emerald-400 font-bold">0.0 kg (Zero Waste)</td>
+              <td class="py-3.5 px-4 font-bold text-cyan-300">Pure 2.0–2.5 M NaOH/KOH</td>
+              <td class="py-3.5 px-4 font-mono text-indigo-300">1.4 to 2.2 kWh/kg</td>
+              <td class="py-3.5 px-4 font-mono text-teal-300">10°C to 18°C (Non-Thermal)</td>
+            </tr>
+            <tr>
+              <td class="py-3.5 px-4 font-medium">Chemical Acidification (H2SO4)</td>
+              <td class="py-3.5 px-4 font-mono">82% to 88%</td>
+              <td class="py-3.5 px-4 font-mono text-red-400">1.0 to 1.9 kg/kg acid</td>
+              <td class="py-3.5 px-4 text-muted">None (Hazardous Sludge)</td>
+              <td class="py-3.5 px-4 font-mono">Chemical Cost Driven</td>
+              <td class="py-3.5 px-4 font-mono">60°C to 80°C (High Heat)</td>
+            </tr>
+            <tr>
+              <td class="py-3.5 px-4 font-medium">Conventional Electrodialysis (ED)</td>
+              <td class="py-3.5 px-4 font-mono">75% to 85%</td>
+              <td class="py-3.5 px-4 font-mono">Salt Brine Wastewater</td>
+              <td class="py-3.5 px-4 text-muted">None (Saline Waste)</td>
+              <td class="py-3.5 px-4 font-mono">2.5 to 4.2 kWh/kg</td>
+              <td class="py-3.5 px-4 font-mono">15°C to 30°C</td>
+            </tr>
+            <tr>
+              <td class="py-3.5 px-4 font-medium">Ion-Exchange Resin Columns</td>
+              <td class="py-3.5 px-4 font-mono">78% to 86%</td>
+              <td class="py-3.5 px-4 font-mono">Acid/Base Regen Waste</td>
+              <td class="py-3.5 px-4 text-muted">None (Regenerant Brine)</td>
+              <td class="py-3.5 px-4 font-mono">High Chemical Footprint</td>
+              <td class="py-3.5 px-4 font-mono">20°C to 45°C</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function initEdbmModeler() {
+    const root = document.getElementById('edbm-acid-recovery-root');
+    if (!root) return;
+
+    // Control Elements
+    const skidSelect = document.getElementById('edbm-skid-select') as HTMLSelectElement | null;
+    const matrixSelect = document.getElementById('edbm-matrix-select') as HTMLSelectElement | null;
+    const currentDensitySlider = document.getElementById('current-density-slider') as HTMLInputElement | null;
+    const tempSlider = document.getElementById('temp-slider') as HTMLInputElement | null;
+    const feedFlowSlider = document.getElementById('feed-flow-slider') as HTMLInputElement | null;
+    const targetAcidSlider = document.getElementById('target-acid-slider') as HTMLInputElement | null;
+    const chilledJacketToggle = document.getElementById('chilled-jacket-toggle') as HTMLInputElement | null;
+    const pulsedCipToggle = document.getElementById('pulsed-cip-toggle') as HTMLInputElement | null;
+
+    // Badges
+    const currentDensityVal = document.getElementById('current-density-val');
+    const tempVal = document.getElementById('temp-val');
+    const feedFlowVal = document.getElementById('feed-flow-val');
+    const targetAcidVal = document.getElementById('target-acid-val');
+
+    // Telemetry Elements
+    const metricAcidYield = document.getElementById('metric-acid-yield');
+    const barAcidYield = document.getElementById('bar-acid-yield');
+    const metricCurrentEfficiency = document.getElementById('metric-current-efficiency');
+    const barCurrentEff = document.getElementById('bar-current-eff');
+    const metricSec = document.getElementById('metric-sec');
+    const metricCaustic = document.getElementById('metric-caustic');
+    const metricDemineralization = document.getElementById('metric-demineralization');
+    const metricGypsumAvoided = document.getElementById('metric-gypsum-avoided');
+    const metricLimitingMargin = document.getElementById('metric-limiting-margin');
+    const barLimitingMargin = document.getElementById('bar-limiting-margin');
+    const limitingWarningTxt = document.getElementById('limiting-warning-txt');
+    const overallStatusBadge = document.getElementById('overall-status-badge');
+    const noticeBox = document.getElementById('diagnostic-notice-box');
+    const noticeTag = document.getElementById('notice-tag');
+    const noticeDesc = document.getElementById('notice-desc');
+
+    // SVG Telemetry Elements
+    const svgAcidTiter = document.getElementById('svg-acid-titer');
+    const svgFeedStatus = document.getElementById('svg-feed-status');
+    const svgBaseTiter = document.getElementById('svg-base-titer');
+
+    // Preset Buttons
+    const btnLactic = document.getElementById('btn-preset-lactic');
+    const btnCitric = document.getElementById('btn-preset-citric');
+    const btnTartaric = document.getElementById('btn-preset-tartaric');
+    const btnFermentation = document.getElementById('btn-preset-fermentation');
+    const btnHazard = document.getElementById('btn-preset-hazard');
+
+    function calculateTelemetry() {
+      if (!skidSelect || !matrixSelect || !currentDensitySlider || !tempSlider || !feedFlowSlider || !targetAcidSlider) return;
+
+      const skidIdx = parseInt(skidSelect.value, 10);
+      const matrixIdx = parseInt(matrixSelect.value, 10);
+      const currentDensity = parseFloat(currentDensitySlider.value);
+      const temp = parseFloat(tempSlider.value);
+      const flow = parseFloat(feedFlowSlider.value);
+      const targetAcid = parseFloat(targetAcidSlider.value);
+      const isJacket = chilledJacketToggle ? chilledJacketToggle.checked : true;
+      const isPulsedCip = pulsedCipToggle ? pulsedCipToggle.checked : true;
+
+      // Update Slider Value Badges
+      if (currentDensityVal) currentDensityVal.textContent = `${currentDensity.toFixed(0)} A/m²`;
+      if (tempVal) tempVal.textContent = `${temp.toFixed(0)}°C`;
+      if (feedFlowVal) feedFlowVal.textContent = `${flow.toLocaleString()} L/h`;
+      if (targetAcidVal) targetAcidVal.textContent = `${targetAcid.toFixed(0)} g/L`;
+
+      // Matrix Baseline Parameters
+      // [Greek Yogurt, Citrus Wash, Wine Lees, Fermentation Broth, Succinate Broth]
+      const baseAcidConcentration = [45.0, 58.0, 36.0, 78.0, 62.0][matrixIdx] || 45.0;
+      const baseConductivity = [9.4, 11.8, 8.2, 24.5, 21.0][matrixIdx] || 10.0;
+      const acidType = ['Lactic Acid', 'Citric Acid', 'Tartaric Acid', 'Lactic Acid', 'Succinic Acid'][matrixIdx] || 'Lactic Acid';
+      const gypsumMultiplier = [1.42, 1.34, 1.15, 1.45, 1.46][matrixIdx] || 1.42;
+
+      // Limiting Current Density Calculation:
+      // i_lim scales with conductivity and flow velocity, decreases if fouling or high temperature
+      const flowVelocityFactor = Math.pow(flow / 3200, 0.45);
+      const tempViscosityFactor = 1.0 + (temp - 15) * 0.015;
+      const cipFactor = isPulsedCip ? 1.0 : 0.78;
+      const baselineIlim = (baseConductivity * 38.5) * flowVelocityFactor * tempViscosityFactor * cipFactor;
+      const limitingMargin = baselineIlim - currentDensity;
+
+      // Current Efficiency (Faradaic Efficiency):
+      // Optimal around 250-400 A/m2. Drops if i > i_lim or if severe back-diffusion
+      let currentEfficiency = 0.88;
+      if (currentDensity < baselineIlim) {
+        currentEfficiency = 0.88 - (currentDensity / baselineIlim) * 0.08;
+      } else {
+        // Over-limiting current: parasitic water dissociation at monopolar membranes
+        const overRatio = currentDensity / baselineIlim;
+        currentEfficiency = Math.max(0.42, 0.80 - (overRatio - 1.0) * 0.65);
+      }
+      if (!isPulsedCip) currentEfficiency -= 0.06;
+      if (!isJacket && temp > 30) currentEfficiency -= 0.07;
+      currentEfficiency = Math.max(0.35, Math.min(0.96, currentEfficiency));
+
+      // Acid Recovery Yield (Y_acid):
+      let acidYield = 0.94;
+      if (currentDensity < 200) {
+        acidYield = 0.75 + (currentDensity / 200) * 0.15;
+      } else if (currentDensity <= baselineIlim) {
+        acidYield = 0.90 + Math.min(0.06, (currentDensity - 200) / 1000);
+      } else {
+        acidYield = Math.max(0.55, 0.92 - (currentDensity - baselineIlim) * 0.002);
+      }
+      if (!isPulsedCip) acidYield -= 0.05;
+      acidYield = Math.max(0.48, Math.min(0.985, acidYield));
+
+      // Specific Energy Consumption (SEC in kWh/kg acid):
+      // Voltage per cell pair: U_cell = U_dissociation (0.83 to 1.1 V) + I*R_ohmic
+      const cellOhms = (1.8 / baseConductivity) * (isPulsedCip ? 1.0 : 1.35);
+      const cellVoltage = 1.02 + (currentDensity / 1000) * cellOhms * (isJacket ? 1.0 : 1.25);
+      let sec = (cellVoltage * 26.8) / (currentEfficiency * (acidType.includes('Citric') ? 64.0 : 90.0));
+      sec = Math.max(1.15, Math.min(5.50, sec));
+
+      // Regenerated Caustic Alkali (M NaOH/KOH):
+      let causticMolarity = (targetAcid / baseAcidConcentration) * 1.85 * currentEfficiency;
+      causticMolarity = Math.max(0.5, Math.min(3.2, causticMolarity));
+
+      // Demineralization / Ash Depletion Rate:
+      let demineralizationRate = acidYield * (skidIdx === 1 ? 0.88 : 0.96);
+      demineralizationRate = Math.max(0.45, Math.min(0.975, demineralizationRate));
+
+      // Gypsum Waste Avoided:
+      const gypsumAvoidedKg = gypsumMultiplier * acidYield;
+
+      // DOM Updates
+      if (metricAcidYield) metricAcidYield.textContent = `${(acidYield * 100).toFixed(1)}%`;
+      if (barAcidYield) barAcidYield.style.width = `${Math.min(100, acidYield * 100)}%`;
+
+      if (metricCurrentEfficiency) metricCurrentEfficiency.textContent = `${(currentEfficiency * 100).toFixed(1)}%`;
+      if (barCurrentEff) barCurrentEff.style.width = `${Math.min(100, currentEfficiency * 100)}%`;
+
+      if (metricSec) metricSec.textContent = `${sec.toFixed(2)} kWh/kg`;
+      if (metricCaustic) metricCaustic.textContent = `${causticMolarity.toFixed(2)} M Alkali`;
+      if (metricDemineralization) metricDemineralization.textContent = `${(demineralizationRate * 100).toFixed(1)}% Ash`;
+      if (metricGypsumAvoided) metricGypsumAvoided.textContent = `${gypsumAvoidedKg.toFixed(2)} kg/kg`;
+
+      // Limiting Margin UI
+      if (metricLimitingMargin) {
+        if (limitingMargin >= 0) {
+          metricLimitingMargin.textContent = `+${limitingMargin.toFixed(0)} A/m² Margin`;
+          metricLimitingMargin.className = 'font-mono font-bold text-emerald-400';
+          if (barLimitingMargin) {
+            barLimitingMargin.className = 'bg-emerald-500 h-full rounded-full transition-all duration-300';
+            barLimitingMargin.style.width = `${Math.min(100, (limitingMargin / 250) * 100)}%`;
+          }
+          if (limitingWarningTxt) {
+            limitingWarningTxt.textContent = `Operating safely below limiting current density (i_lim = ${baselineIlim.toFixed(0)} A/m²). Zero monopolar water splitting.`;
+            limitingWarningTxt.className = 'text-[11px] text-muted leading-tight';
+          }
+        } else {
+          metricLimitingMargin.textContent = `${limitingMargin.toFixed(0)} A/m² EXCEEDED`;
+          metricLimitingMargin.className = 'font-mono font-bold text-red-400';
+          if (barLimitingMargin) {
+            barLimitingMargin.className = 'bg-red-500 h-full rounded-full transition-all duration-300';
+            barLimitingMargin.style.width = '100%';
+          }
+          if (limitingWarningTxt) {
+            limitingWarningTxt.textContent = `CRITICAL HAZARD: Over-limiting current density! Boundary layer ion starvation causing severe Joule heating and Ca(OH)2 scaling.`;
+            limitingWarningTxt.className = 'text-[11px] text-red-400 font-medium leading-tight';
+          }
+        }
+      }
+
+      // Overall Badge & Compliance Notice
+      const isCriticalHazard = (limitingMargin < -20 || (!isJacket && temp > 38 && currentDensity > 450));
+      if (isCriticalHazard) {
+        if (overallStatusBadge) {
+          overallStatusBadge.textContent = 'CRITICAL HAZARD';
+          overallStatusBadge.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-red-950 text-red-300 border border-red-800';
+        }
+        if (noticeBox) {
+          noticeBox.className = 'p-4 rounded-2xl border bg-red-950/30 border-red-800/80 text-xs space-y-1';
+        }
+        if (noticeTag) {
+          noticeTag.textContent = '⚠️ OVER-LIMITING THERMAL & SCALING ALARM';
+          noticeTag.className = 'font-bold text-red-400';
+        }
+        if (noticeDesc) {
+          noticeDesc.textContent = `Applied current density exceeds hydrodynamic boundary layer replenishment rate. Parasitic water dissociation at monopolar membranes risks irreversible scorching and scaling. Engage chilled cooling jacket and activate pulsed CIP immediately.`;
+        }
+      } else {
+        if (overallStatusBadge) {
+          overallStatusBadge.textContent = 'OPTIMAL EDBM';
+          overallStatusBadge.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-950 text-emerald-300 border border-emerald-800';
+        }
+        if (noticeBox) {
+          noticeBox.className = 'p-4 rounded-2xl border bg-emerald-950/20 border-emerald-800/60 text-xs space-y-1';
+        }
+        if (noticeTag) {
+          noticeTag.textContent = '✓ 3-A SANITARY COMPLIANT';
+          noticeTag.className = 'font-bold text-emerald-300';
+        }
+        if (noticeDesc) {
+          noticeDesc.textContent = `All fluid channels, bipolar membrane seals, and inter-membrane gaskets comply with 3-A Sanitary Standard 45-03. Continuous zero-gypsum circular valorization operating at ${sec.toFixed(2)} kWh/kg.`;
+        }
+      }
+
+      // SVG Live Updates
+      if (svgAcidTiter) svgAcidTiter.textContent = `HL: ${targetAcid.toFixed(0)} g/L (${(acidYield * 100).toFixed(0)}%)`;
+      if (svgFeedStatus) svgFeedStatus.textContent = `${flow.toLocaleString()} L/h | ${temp.toFixed(0)}°C`;
+      if (svgBaseTiter) svgBaseTiter.textContent = `${causticMolarity.toFixed(2)} M Alkali`;
+    }
+
+    // Attach Event Listeners
+    [skidSelect, matrixSelect, currentDensitySlider, tempSlider, feedFlowSlider, targetAcidSlider, chilledJacketToggle, pulsedCipToggle].forEach(el => {
+      if (el) {
+        el.addEventListener('input', calculateTelemetry);
+        el.addEventListener('change', calculateTelemetry);
+      }
+    });
+
+    // Preset Handlers
+    if (btnLactic) {
+      btnLactic.addEventListener('click', () => {
+        if (skidSelect) skidSelect.value = '0';
+        if (matrixSelect) matrixSelect.value = '0';
+        if (currentDensitySlider) currentDensitySlider.value = '350';
+        if (tempSlider) tempSlider.value = '14';
+        if (feedFlowSlider) feedFlowSlider.value = '3200';
+        if (targetAcidSlider) targetAcidSlider.value = '95';
+        if (chilledJacketToggle) chilledJacketToggle.checked = true;
+        if (pulsedCipToggle) pulsedCipToggle.checked = true;
+        calculateTelemetry();
+      });
+    }
+
+    if (btnCitric) {
+      btnCitric.addEventListener('click', () => {
+        if (skidSelect) skidSelect.value = '0';
+        if (matrixSelect) matrixSelect.value = '1';
+        if (currentDensitySlider) currentDensitySlider.value = '400';
+        if (tempSlider) tempSlider.value = '16';
+        if (feedFlowSlider) feedFlowSlider.value = '2800';
+        if (targetAcidSlider) targetAcidSlider.value = '115';
+        if (chilledJacketToggle) chilledJacketToggle.checked = true;
+        if (pulsedCipToggle) pulsedCipToggle.checked = true;
+        calculateTelemetry();
+      });
+    }
+
+    if (btnTartaric) {
+      btnTartaric.addEventListener('click', () => {
+        if (skidSelect) skidSelect.value = '1';
+        if (matrixSelect) matrixSelect.value = '2';
+        if (currentDensitySlider) currentDensitySlider.value = '300';
+        if (tempSlider) tempSlider.value = '12';
+        if (feedFlowSlider) feedFlowSlider.value = '2400';
+        if (targetAcidSlider) targetAcidSlider.value = '75';
+        if (chilledJacketToggle) chilledJacketToggle.checked = true;
+        if (pulsedCipToggle) pulsedCipToggle.checked = false;
+        calculateTelemetry();
+      });
+    }
+
+    if (btnFermentation) {
+      btnFermentation.addEventListener('click', () => {
+        if (skidSelect) skidSelect.value = '0';
+        if (matrixSelect) matrixSelect.value = '3';
+        if (currentDensitySlider) currentDensitySlider.value = '450';
+        if (tempSlider) tempSlider.value = '18';
+        if (feedFlowSlider) feedFlowSlider.value = '3600';
+        if (targetAcidSlider) targetAcidSlider.value = '135';
+        if (chilledJacketToggle) chilledJacketToggle.checked = true;
+        if (pulsedCipToggle) pulsedCipToggle.checked = true;
+        calculateTelemetry();
+      });
+    }
+
+    if (btnHazard) {
+      btnHazard.addEventListener('click', () => {
+        if (skidSelect) skidSelect.value = '0';
+        if (matrixSelect) matrixSelect.value = '0';
+        if (currentDensitySlider) currentDensitySlider.value = '620';
+        if (tempSlider) tempSlider.value = '42';
+        if (feedFlowSlider) feedFlowSlider.value = '1100';
+        if (targetAcidSlider) targetAcidSlider.value = '150';
+        if (chilledJacketToggle) chilledJacketToggle.checked = false;
+        if (pulsedCipToggle) pulsedCipToggle.checked = false;
+        calculateTelemetry();
+      });
+    }
+
+    // Initial Run
+    calculateTelemetry();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initEdbmModeler);
+  } else {
+    initEdbmModeler();
+  }
+</script>
