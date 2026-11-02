@@ -157,7 +157,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-continuous-electrohydrodynamic-ehd-modeler', name: 'Commercial Continuous Electrohydrodynamic (EHD) Non-Thermal Airflow Dehydration & Vitamin C Preservation Modeler', category: 'Electrohydrodynamics & Non-Thermal Drying', component: 'CommercialContinuousEhdModeler.astro', dataFile: 'electrohydrodynamic-ehd-dehydration-data.json' },
   { slug: 'commercial-continuous-acoustic-levitator-modeler', name: 'Commercial Continuous Acoustic Levitator Micro-Droplet Contactless Evaporative Modeler', category: 'Acoustic Levitation & Containerless Processing', component: 'CommercialContinuousAcousticLevitatorModeler.astro', dataFile: 'acoustic-levitator-contactless-evaporation-data.json' },
   { slug: 'commercial-continuous-fo-fc-freeze-concentration-modeler', name: 'Commercial Continuous Forward-Osmosis Freeze Concentration (FO-FC) Hybrid Thermolabile Modeler', category: 'Cryogenic Osmosis & Non-Thermal Dewatering', component: 'CommercialContinuousFoFcModeler.astro', dataFile: 'fo-fc-freeze-concentration-data.json' },
-  { slug: 'commercial-continuous-subcritical-water-hydrolysis-modeler', name: 'Commercial Continuous Subcritical Water Hydrolysis (SCWH) Bioactive Peptides & Antioxidant Extraction Modeler', category: 'Subcritical Thermodynamics & Green Extraction', component: 'CommercialContinuousSubcriticalWaterHydrolysisModeler.astro', dataFile: 'subcritical-water-hydrolysis-data.json' }
+  { slug: 'commercial-continuous-subcritical-water-hydrolysis-modeler', name: 'Commercial Continuous Subcritical Water Hydrolysis (SCWH) Bioactive Peptides & Antioxidant Extraction Modeler', category: 'Subcritical Thermodynamics & Green Extraction', component: 'CommercialContinuousSubcriticalWaterHydrolysisModeler.astro', dataFile: 'subcritical-water-hydrolysis-data.json' },
+  { slug: 'commercial-continuous-high-voltage-arc-discharge-modeler', name: 'Commercial Continuous High-Voltage Arc Discharge Hydrodynamic Shockwave (HVP) Meat Tenderization & Extraction Modeler', category: 'Electrohydraulic Processing & Shockwave Physics', component: 'CommercialContinuousHighVoltageArcDischargeModeler.astro', dataFile: 'high-voltage-arc-discharge-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -644,32 +645,32 @@ function auditGrowthOpportunities() {
     // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Continuous High-Voltage Arc Discharge Hydrodynamic Shockwave (HVP) Meat Tenderization & Extraction Modeler',
-      category: 'Electrohydraulic Processing & Shockwave Physics',
-      intent: 'Models continuous underwater high-voltage pulsed arc electrohydraulic discharge (HVP/HED, 30-50 kV, 15-30 kJ/pulse) plasma spark breakdown, intense supersonic acoustic shockwave generation (100-350 MPa, 2-5 µs rise time), structural myofibrillar fragmentation, Warner-Bratzler shear force reduction (-45%), and sanitary ASME Section VIII containment vessel design.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '1,420+ US impressions'
-    },
-    {
       title: 'Commercial Continuous Cold Atmospheric Plasma-Activated Water (PAW) In-Line Hydrodynamic Reactor & Nitrite-Free Curing Modeler',
       category: 'Plasma-Liquid Physics & Non-Thermal Sanitation',
       intent: 'Models continuous atmospheric cold plasma-liquid interfacial discharge generation of plasma-activated water (PAW: peroxynitrite ONOO⁻, aqueous singlet oxygen ¹O2, HNO2/NO3⁻), bacterial spore log reduction (>5.5-log), zero-chemical organic antimicrobial wash, clean-label nitrite-free meat curing kinetics, and sanitary AISI 316L venturi hydrodynamic reactor cavitation mixing.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '1,290+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '1,460+ US impressions'
     },
     {
       title: 'Commercial Continuous High-Pressure Supercritical CO2 Dense-Phase Pasteurization (HPCD) Bioactive Juice Modeler',
       category: 'Supercritical Fluid Physics & Aseptic Processing',
       intent: 'Models continuous micro-bubble supercritical carbon dioxide (SC-CO2, 80-150 bar, 35-42°C) dense-phase interfacial cellular penetration, bacterial endospore and pectinesterase (PME) inactivation kinetics in cloudy citrus juices, high-pressure decompression cavitation cell wall bursting, and ASME Section VIII sanitary relief containment.',
-      priority: 'MEDIUM',
-      estimatedMonthlyVolume: '1,180+ US impressions'
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '1,320+ US impressions'
     },
     {
       title: 'Commercial Continuous Dual-Frequency Ultrasonic Megasonic Standing Wave Food Separation & Defatting Modeler',
       category: 'Acoustophoretic Fluid Mechanics & Green Refining',
       intent: 'Models continuous multi-transducer dual-frequency (400 kHz and 1.6 MHz) acoustic radiation force Bjerknes standing wave particle manipulation, non-chemical milk fat globule fractionation, microalgae lipid harvesting, and sanitary flow-through acoustic resonator attenuation.',
       priority: 'MEDIUM',
-      estimatedMonthlyVolume: '1,090+ US impressions'
+      estimatedMonthlyVolume: '1,190+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous Supercritical Fluid Extraction Counter-Current Packed Column Fractionation (SFE-CC) Essential Oil Modeler',
+      category: 'Supercritical Fluid Extraction & Flavor Engineering',
+      intent: 'Models continuous counter-current dense CO2 extraction (80-250 bar, 35-65°C) in structured packing columns for high-purity fractionation of citrus peel essential oils, non-thermal deterpenation, oxygenated flavor recovery (>94%), and ASME Section VIII relief design.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '1,080+ US impressions'
     }
   ];
 
