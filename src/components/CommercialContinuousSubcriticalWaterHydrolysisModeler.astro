@@ -1,0 +1,950 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import scwhData from '../data/subcritical-water-hydrolysis-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  systemLabel: string;
+  systemHelp: string;
+  feedstockLabel: string;
+  feedstockHelp: string;
+  tempLabel: string;
+  tempHelp: string;
+  pressureLabel: string;
+  pressureHelp: string;
+  residenceLabel: string;
+  residenceHelp: string;
+  solidsLabel: string;
+  solidsHelp: string;
+  presetsTitle: string;
+  presetBsg: string;
+  presetCollagen: string;
+  presetSoy: string;
+  presetPomace: string;
+  presetHazard: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  dielectricLabel: string;
+  kwLabel: string;
+  dhLabel: string;
+  lowMwLabel: string;
+  aceLabel: string;
+  oracLabel: string;
+  hmfLabel: string;
+  energyLabel: string;
+  safetyMarginLabel: string;
+  diagramTitle: string;
+  diagramSub: string;
+  scienceTitle: string;
+  scienceSub: string;
+  tableTitle: string;
+}
+
+const DICT: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Subcritical Thermodynamics & Green Extraction",
+    title: "Commercial Continuous Subcritical Water Hydrolysis (SCWH) Modeler",
+    subtitle: "Simulate continuous high-temperature pressurized subcritical water (120°C–240°C, 25–65 bar) for green non-solvent plant protein hydrolysis into anti-hypertensive bioactive peptides and phenolic antioxidants. Model dielectric constant tuning (ε 80 to 28), water auto-ionization kinetics, peptide molecular weight distribution, and ASME Section VIII sanitary relief safety under FDA 21 CFR § 117.",
+    controlsTitle: "Continuous SCWH Reactor & Thermodynamic Controls",
+    controlsSub: "Configure continuous high-pressure tubular reactor, biomass feedstock, process temperature, subcritical hydraulic pressure, and slurry residence time.",
+    systemLabel: "Subcritical Water Hydrolysis Skid Architecture",
+    systemHelp: "Select commercial sanitary Hastelloy/316L tubular continuous reactor system.",
+    feedstockLabel: "Agro-Industrial Biomass Slurry Feedstock",
+    feedstockHelp: "Select agro-food processing byproduct containing target proteins and bound polyphenols.",
+    tempLabel: "Reactor Hydrolysis Temperature (T):",
+    tempHelp: "Subcritical pressurized liquid temperature (120°C to 240°C).",
+    pressureLabel: "Hydraulic Operating Pressure (P):",
+    pressureHelp: "System pressure maintained above saturated vapor pressure (20 to 65 bar).",
+    residenceLabel: "Plug-Flow Reactor Residence Time (t_r):",
+    residenceHelp: "Continuous slurry reaction time inside heated tubular coil (1.0 to 15.0 min).",
+    solidsLabel: "Slurry Biomass Solids Loading (S):",
+    solidsHelp: "Suspended dry matter solids concentration in raw feed slurry (5% to 25% w/w).",
+    presetsTitle: "High-Intent Commercial Presets",
+    presetBsg: "Brewer's Spent Grain ACE-Inhibitory Peptides (185°C, 6.5m)",
+    presetCollagen: "Fish Skin Low-MW Collagen Tripeptides (165°C, 4.5m)",
+    presetSoy: "Soy Okara Isoflavone Aglycones & Oligopeptides (195°C, 5.0m)",
+    presetPomace: "Apple Pomace Phenolic Antioxidant Green Recovery (150°C, 8.0m)",
+    presetHazard: "Thermal Pyrolysis & 5-HMF Toxic Degradation Hazard (235°C, 12m)",
+    diagnosticTitle: "Continuous Reaction Kinetics & Thermodynamic Telemetry",
+    diagnosticSub: "Real-time solvent polarity, water ionization, degree of hydrolysis, bioactive yields, and safety margins.",
+    dielectricLabel: "Water Dielectric Constant (ε):",
+    kwLabel: "Self-Ionization Constant (pKw):",
+    dhLabel: "Degree of Hydrolysis (DH):",
+    lowMwLabel: "Peptides < 3 kDa Fraction:",
+    aceLabel: "ACE-Inhibitory Bioactivity (IC50):",
+    oracLabel: "Antioxidant ORAC Capacity:",
+    hmfLabel: "Thermal Degradation / 5-HMF Status:",
+    energyLabel: "Net Specific Energy (Heat Recovered):",
+    safetyMarginLabel: "Subcritical Saturated Pressure Margin:",
+    diagramTitle: "Continuous Industrial Subcritical Water Hydrolysis (SCWH) Flow Architecture",
+    diagramSub: "Visualizing high-pressure slurry feeding, counter-current regenerative preheating, tubular plug-flow reactor, millisecond quench chilling, and dome-loaded ceramic BPR.",
+    scienceTitle: "Scientific Principles & Subcritical Water Thermodynamics",
+    scienceSub: "Detailed solvent polarity transitions, self-catalyzing Kw auto-ionization, Arrhenius peptide cleavage, and ASME Section VIII relief design.",
+    tableTitle: "Industrial Peptide Extraction & Hydrolysis Benchmarking"
+  },
+  es: {
+    badge: "Termodinámica Subcrítica y Extracción Verde",
+    title: "Simulador Continuo de Hidrólisis con Agua Subcrítica (SCWH)",
+    subtitle: "Simule la hidrólisis continua con agua subcrítica presurizada (120°C–240°C, 25–65 bar) para la obtención limpia y sin solventes de péptidos bioactivos antihipertensivos y antioxidantes fenólicos a partir de proteínas vegetales. Modele la constante dieléctrica (ε de 80 a 28), autoionización del agua, peso molecular y seguridad ASME Sección VIII bajo FDA 21 CFR § 117.",
+    controlsTitle: "Controles Termodinámicos y del Reactor Continuo SCWH",
+    controlsSub: "Configure el reactor tubular de alta presión, biomasa agroindustrial, temperatura de proceso, presión hidráulica y tiempo de residencia del fango.",
+    systemLabel: "Arquitectura del Sistema de Hidrólisis Subcrítica",
+    systemHelp: "Seleccione el reactor continuo comercial de Hastelloy o acero inoxidable 316L.",
+    feedstockLabel: "Biomasa Agroindustrial de Alimentación",
+    feedstockHelp: "Seleccione el subproducto agroalimentario rico en proteínas y polifenoles enlazados.",
+    tempLabel: "Temperatura de Hidrólisis del Reactor (T):",
+    tempHelp: "Temperatura del líquido presurizado en estado subcrítico (120°C a 240°C).",
+    pressureLabel: "Presión Hidráulica de Operación (P):",
+    pressureHelp: "Presión del sistema mantenida por encima de la presión de vapor saturado (20 a 65 bar).",
+    residenceLabel: "Tiempo de Residencia en Flujo Pistón (t_r):",
+    residenceHelp: "Tiempo de reacción continuo dentro del serpentín tubular (1.0 a 15.0 min).",
+    solidsLabel: "Concentración de Sólidos en el Fango (S):",
+    solidsHelp: "Porcentaje en masa de materia seca suspendida en el fango crudo (5% a 25% p/p).",
+    presetsTitle: "Configuraciones Comerciales de Alto Rendimiento",
+    presetBsg: "Bagazo de Cerveza - Péptidos Antihipertensivos (185°C, 6.5m)",
+    presetCollagen: "Piel de Pescado - Tripéptidos de Colágeno (165°C, 4.5m)",
+    presetSoy: "Okara de Soja - Agliconas de Isoflavona y Péptidos (195°C, 5.0m)",
+    presetPomace: "Orujo de Manzana - Extracción Verde de Antioxidantes (150°C, 8.0m)",
+    presetHazard: "Peligro de Pirolisis Térmica y Degradación a 5-HMF (235°C, 12m)",
+    diagnosticTitle: "Cinética de Reacción y Telemetría Termodinámica Continua",
+    diagnosticSub: "Polaridad del solvente, autoionización, grado de hidrólisis, rendimiento bioactivo y márgenes de seguridad en tiempo real.",
+    dielectricLabel: "Constante Dieléctrica del Agua (ε):",
+    kwLabel: "Constante de Autoionización (pKw):",
+    dhLabel: "Grado de Hidrólisis (DH):",
+    lowMwLabel: "Fracción de Péptidos < 3 kDa:",
+    aceLabel: "Bioactividad Antihipertensiva (IC50):",
+    oracLabel: "Capacidad Antioxidante ORAC:",
+    hmfLabel: "Estado de Degradación Térmica / 5-HMF:",
+    energyLabel: "Energía Específica Neta (Calor Recuperado):",
+    safetyMarginLabel: "Margen de Presión Subcrítica Saturada:",
+    diagramTitle: "Diagrama de Flujo del Proceso Continuo Industrial SCWH",
+    diagramSub: "Visualización de bomba de fango de alta presión, precalentador regenerativo, reactor tubular, enfriador de choque y válvula reguladora de contrapresión cerámica (BPR).",
+    scienceTitle: "Principios Científicos y Termodinámica del Agua Subcrítica",
+    scienceSub: "Transición de polaridad dieléctrica, autocatálisis por Kw, degradación de Arrhenius y diseño de alivio ASME Sección VIII.",
+    tableTitle: "Comparativa Industrial de Hidrólisis y Extracción de Péptidos"
+  },
+  pt: {
+    badge: "Termodinâmica Subcrítica e Extração Verde",
+    title: "Simulador Contínuo de Hidrólise com Água Subcrítica (SCWH)",
+    subtitle: "Simule a hidrólise contínua com água subcrítica pressurizada (120°C–240°C, 25–65 bar) para extração limpa e sem solventes de peptídeos bioativos anti-hipertensivos e antioxidantes fenólicos a partir de proteínas vegetais. Modele a constante dielétrica (ε 80 a 28), autoionização da água, distribuição de massa molecular e segurança ASME Seção VIII sob FDA 21 CFR § 117.",
+    controlsTitle: "Controles Termodinâmicos e do Reator Contínuo SCWH",
+    controlsSub: "Configure o reator tubular de alta pressão, biomassa agroindustrial, temperatura, pressão hidráulica e tempo de residência da suspensão.",
+    systemLabel: "Arquitetura do Skid de Hidrólise Subcrítica",
+    systemHelp: "Selecione o sistema contínuo comercial de Hastelloy ou aço inox 316L.",
+    feedstockLabel: "Biomassa Agroindustrial de Alimentação",
+    feedstockHelp: "Selecione o subproduto rico em proteínas e polifenóis ligados.",
+    tempLabel: "Temperatura de Hidrólise no Reator (T):",
+    tempHelp: "Temperatura do líquido pressurizado em estado subcrítico (120°C a 240°C).",
+    pressureLabel: "Pressão Hidráulica de Operação (P):",
+    pressureHelp: "Pressão mantida acima da pressão de vapor saturado (20 a 65 bar).",
+    residenceLabel: "Tempo de Residência em Fluxo Pistão (t_r):",
+    residenceHelp: "Tempo de reação contínua na serpentina aquecida (1.0 a 15.0 min).",
+    solidsLabel: "Concentração de Sólidos na Suspensão (S):",
+    solidsHelp: "Teor de matéria seca suspensa na alimentação (5% a 25% p/p).",
+    presetsTitle: "Configurações Comerciais de Alto Desempenho",
+    presetBsg: "Bagaço de Malte Cervejeiro - Peptídeos Anti-hipertensivos (185°C, 6.5m)",
+    presetCollagen: "Pele de Peixe - Tripeptídeos de Colágeno (165°C, 4.5m)",
+    presetSoy: "Okara de Soja - Agliconas de Isoflavona e Peptídeos (195°C, 5.0m)",
+    presetPomace: "Bagaço de Maçã - Extração Verde de Antioxidantes (150°C, 8.0m)",
+    presetHazard: "Perigo de Pirólise Térmica e Degradação 5-HMF (235°C, 12m)",
+    diagnosticTitle: "Cinética de Reação e Telemetria Termodinâmica Contínua",
+    diagnosticSub: "Polaridade do solvente, autoionização, grau de hidrólise, rendimento de bioativos e margens de segurança em tempo real.",
+    dielectricLabel: "Constante Dielétrica da Água (ε):",
+    kwLabel: "Constante de Autoionização (pKw):",
+    dhLabel: "Grau de Hidrólise (DH):",
+    lowMwLabel: "Fração de Peptídeos < 3 kDa:",
+    aceLabel: "Bioatividade Anti-hipertensiva (IC50):",
+    oracLabel: "Capacidade Antioxidante ORAC:",
+    hmfLabel: "Status de Degradação Térmica / 5-HMF:",
+    energyLabel: "Energia Específica Líquida (Calor Recuperado):",
+    safetyMarginLabel: "Margem de Pressão Saturada Subcrítica:",
+    diagramTitle: "Fluxograma Industrial Contínuo de Hidrólise Subcrítica (SCWH)",
+    diagramSub: "Visualização de bomba de alta pressão, trocador regenerativo, reator tubular, resfriador de choque e válvula reguladora de contrapressão cerâmica (BPR).",
+    scienceTitle: "Princípios Científicos e Termodinâmica da Água Subcrítica",
+    scienceSub: "Transição da constante dielétrica, autocatálise por Kw, cinética de Arrhenius e alívio ASME Seção VIII.",
+    tableTitle: "Benchmarking Industrial de Hidrólise e Extração de Peptídeos"
+  },
+  ja: {
+    badge: "亜臨界熱力学＆グリーン抽出",
+    title: "商業用連続式亜臨界水加水分解（SCWH）シミュレーター",
+    subtitle: "高温高圧の亜臨界水（120°C〜240°C、25〜65 bar）を用いて、植物性タンパク質を有機溶媒なしで降圧活性ペプチドや抗酸化ポリフェノールへと連続加水分解するプロセスをシミュレートします。誘電率制御（ε 80→28）、自己イオン化反応速度、分子量分布、ASME Section VIII安全リリーフ弁設計を検証します。",
+    controlsTitle: "連続SCWH反応器および熱力学制御設定",
+    controlsSub: "高圧管型プラグフロー反応器、バイオマス原料、反応温度、亜臨界保持圧力、および滞留時間を設定します。",
+    systemLabel: "亜臨界水加水分解スキッド構造",
+    systemHelp: "サニタリーハステロイまたはSUS316L管型連続反応器を選択します。",
+    feedstockLabel: "農産業バイオマススラリー原料",
+    feedstockHelp: "タンパク質や結合ポリフェノールを豊富に含む食品加工副産物を選択します。",
+    tempLabel: "反応器加水分解温度（T）：",
+    tempHelp: "亜臨界液相を保持する加熱温度（120°C〜240°C）。",
+    pressureLabel: "作動油圧保持圧力（P）：",
+    pressureHelp: "飽和蒸気圧以上に維持されたシステム圧力（20〜65 bar）。",
+    residenceLabel: "管型反応器内滞留時間（t_r）：",
+    residenceHelp: "加熱コイル内におけるスラリーの連続反応時間（1.0〜15.0分）。",
+    solidsLabel: "スラリー固形分濃度（S）：",
+    solidsHelp: "原料スラリー中の懸濁固形分重量比（5%〜25% w/w）。",
+    presetsTitle: "高需要商業運転プリセット",
+    presetBsg: "ビール麦芽粕・降圧ペプチド抽出（185°C、6.5分）",
+    presetCollagen: "魚皮・低分子コラーゲントリペプチド抽出（165°C、4.5分）",
+    presetSoy: "大豆おから・イソフラボンアグリコン＆ペプチド（195°C、5.0分）",
+    presetPomace: "リンゴ搾り粕・抗酸化ポリフェノール抽出（150°C、8.0分）",
+    presetHazard: "熱分解・5-HMF過剰生成ハザード警告（235°C、12分）",
+    diagnosticTitle: "連続反応速度論＆亜臨界熱力学テレメトリ",
+    diagnosticSub: "溶媒極性、水自己解離定数、加水分解度、機能性成分収率、安全マージンをリアルタイム解析。",
+    dielectricLabel: "水の誘電率（ε）：",
+    kwLabel: "水の自己解離指数（pKw）：",
+    dhLabel: "加水分解度（DH）：",
+    lowMwLabel: "分子量3 kDa未満ペプチド比率：",
+    aceLabel: "ACE阻害活性（IC50）：",
+    oracLabel: "抗酸化ORAC活性値：",
+    hmfLabel: "熱劣化・5-HMF生成ステータス：",
+    energyLabel: "正味比消費エネルギー（熱回収後）：",
+    safetyMarginLabel: "亜臨界飽和蒸気圧マージン：",
+    diagramTitle: "商業用連続式亜臨界水加水分解（SCWH）プロセスフロー構成",
+    diagramSub: "高圧スラリーポンプ、対向流熱回収予熱器、管型プラグフロー反応器、急冷熱交換器、セラミック背圧弁（BPR）の構成図。",
+    scienceTitle: "科学的原理と亜臨界水の熱力学",
+    scienceSub: "誘電率転移挙動、水自己解離オートプロトリシス、アレニウス反応速度式、ASME規格安全設計。",
+    tableTitle: "産業用ペプチド抽出・加水分解技術比較"
+  },
+  'zh-cn': {
+    badge: "亚临界热力学与绿色提取",
+    title: "工业连续式亚临界水水解（SCWH）模拟器",
+    subtitle: "模拟高温高压亚临界水（120°C–240°C，25–65 bar）在无化学溶剂条件下将植物蛋白连续水解为抗高血压生物活性肽及多酚抗氧化物的工艺过程。评估介电常数调控（ε 从 80 降至 28）、水自电离动力学、肽段分子量分布及 ASME Section VIII 压力安全泄放设计。",
+    controlsTitle: "连续 SCWH 反应器与热力学参数控制",
+    controlsSub: "配置连续高压管式反应器、生物质原料、反应温度、亚临界系统压力及物料停留时间。",
+    systemLabel: "亚临界水解反应系统架构",
+    systemHelp: "选择卫生级哈氏合金 C-276 或 316L 不锈钢管式连续反应系统。",
+    feedstockLabel: "农业食品加工副产物生物质浆料",
+    feedstockHelp: "选择富含蛋白质及结合态多酚的农副原料废弃物。",
+    tempLabel: "反应器水解温度（T）：",
+    tempHelp: "处于液相受压亚临界状态下的反应温度（120°C 至 240°C）。",
+    pressureLabel: "系统工作水压（P）：",
+    pressureHelp: "维持在饱和蒸汽压之上的系统液压（20 至 65 bar）。",
+    residenceLabel: "管式塞流反应器停留时间（t_r）：",
+    residenceHelp: "高压加热盘管内的物料连续反应时间（1.0 至 15.0 分钟）。",
+    solidsLabel: "浆料固形物干基浓度（S）：",
+    solidsHelp: "原料物料中悬浮干固形物的重量百分比（5% 至 25% w/w）。",
+    presetsTitle: "行业典型商业工况预设",
+    presetBsg: "啤酒糟降血压 ACE 抑制活性肽（185°C，6.5分钟）",
+    presetCollagen: "鱼皮低分子胶原蛋白三肽提取（165°C，4.5分钟）",
+    presetSoy: "大豆豆渣异黄酮苷元及多肽绿色转化（195°C，5.0分钟）",
+    presetPomace: "苹果渣多酚抗氧化物零溶剂回收（150°C，8.0分钟）",
+    presetHazard: "热分解过度与 5-HMF 毒副产物生成风险（235°C，12分钟）",
+    diagnosticTitle: "连续反应动力学与热力学监测遥测",
+    diagnosticSub: "实时监测溶剂极性转化、水自电离催化活性、水解度、活性肽产率及安全泄压余量。",
+    dielectricLabel: "水介电常数（ε）：",
+    kwLabel: "水自电离平衡常数（pKw）：",
+    dhLabel: "蛋白质水解度（DH）：",
+    lowMwLabel: "分子量 < 3 kDa 活性肽比例：",
+    aceLabel: "降血压 ACE 抑制活性（IC50）：",
+    oracLabel: "抗氧化 ORAC 自由基清除力：",
+    hmfLabel: "热分解副产物 / 5-HMF 状态：",
+    energyLabel: "净单位能耗（热集成回收后）：",
+    safetyMarginLabel: "亚临界防闪蒸过压安全裕度：",
+    diagramTitle: "工业级连续亚临界水水解（SCWH）工艺流程架构",
+    diagramSub: "展示高压浆料喂料泵、逆流再生预热换热器、管式塞流反应器、毫秒级骤冷器及气动陶瓷背压阀（BPR）。",
+    scienceTitle: "科学原理解析与亚临界水热力学",
+    scienceSub: "深入解析介电常数极性转变、自解离氢离子自催化水解、阿伦尼乌斯动力学及 ASME 规范泄压安全。",
+    tableTitle: "工业活性肽提取与水解技术对比"
+  }
+};
+
+const d = DICT[lang] || DICT.en;
+const systems = scwhData.scwhSystems;
+const feedstocks = scwhData.biomassFeedstocks;
+const polarities = scwhData.dielectricPolarityScale;
+const benchmarks = scwhData.industrialPeptideExtractionBenchmarks;
+---
+
+<div class="scwh-modeler-container my-8 font-sans">
+  <!-- Header Card -->
+  <div class="bg-gradient-to-br from-amber-950 via-slate-900 to-emerald-950 border border-amber-500/30 rounded-2xl p-6 sm:p-8 shadow-xl text-white mb-8">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase bg-amber-500/20 text-amber-300 border border-amber-500/40">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        {d.badge}
+      </span>
+      <span class="text-xs font-mono text-amber-200/80 bg-black/40 px-3 py-1 rounded-lg border border-white/10">
+        ASME BPVC VIII &bull; 120°C–240°C &bull; 100% Solvent-Free
+      </span>
+    </div>
+    <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-3">
+      {d.title}
+    </h1>
+    <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-4xl">
+      {d.subtitle}
+    </p>
+  </div>
+
+  <!-- Presets -->
+  <div class="bg-surface-soft border border-hairline rounded-2xl p-5 mb-8 shadow-xs">
+    <div class="text-xs font-bold uppercase tracking-wider text-muted mb-3 flex items-center gap-2">
+      <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+      </svg>
+      {d.presetsTitle}
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+      <button 
+        type="button" 
+        data-preset="bsg" 
+        class="scwh-preset-btn text-left p-3 rounded-xl border border-hairline/80 bg-surface hover:border-amber-500/50 hover:bg-amber-500/5 transition-all text-xs"
+      >
+        <span class="block font-semibold text-ink mb-1">🌾 {d.presetBsg.split('(')[0]}</span>
+        <span class="block text-[11px] text-muted">{d.presetBsg.match(/\((.*?)\)/)?.[0] || '185°C, 6.5m'}</span>
+      </button>
+
+      <button 
+        type="button" 
+        data-preset="collagen" 
+        class="scwh-preset-btn text-left p-3 rounded-xl border border-hairline/80 bg-surface hover:border-cyan-500/50 hover:bg-cyan-500/5 transition-all text-xs"
+      >
+        <span class="block font-semibold text-ink mb-1">🐟 {d.presetCollagen.split('(')[0]}</span>
+        <span class="block text-[11px] text-muted">{d.presetCollagen.match(/\((.*?)\)/)?.[0] || '165°C, 4.5m'}</span>
+      </button>
+
+      <button 
+        type="button" 
+        data-preset="soy" 
+        class="scwh-preset-btn text-left p-3 rounded-xl border border-hairline/80 bg-surface hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all text-xs"
+      >
+        <span class="block font-semibold text-ink mb-1">🌱 {d.presetSoy.split('(')[0]}</span>
+        <span class="block text-[11px] text-muted">{d.presetSoy.match(/\((.*?)\)/)?.[0] || '195°C, 5.0m'}</span>
+      </button>
+
+      <button 
+        type="button" 
+        data-preset="pomace" 
+        class="scwh-preset-btn text-left p-3 rounded-xl border border-hairline/80 bg-surface hover:border-orange-500/50 hover:bg-orange-500/5 transition-all text-xs"
+      >
+        <span class="block font-semibold text-ink mb-1">🍎 {d.presetPomace.split('(')[0]}</span>
+        <span class="block text-[11px] text-muted">{d.presetPomace.match(/\((.*?)\)/)?.[0] || '150°C, 8.0m'}</span>
+      </button>
+
+      <button 
+        type="button" 
+        data-preset="hazard" 
+        class="scwh-preset-btn text-left p-3 rounded-xl border border-red-500/30 bg-red-950/10 hover:border-red-500 hover:bg-red-950/20 transition-all text-xs"
+      >
+        <span class="block font-semibold text-red-500 mb-1">⚠️ {d.presetHazard.split('(')[0]}</span>
+        <span class="block text-[11px] text-red-400/80">{d.presetHazard.match(/\((.*?)\)/)?.[0] || '235°C, 12m'}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Grid: Controls + Live Diagnostics -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
+    <!-- Controls Column (7 cols) -->
+    <div class="lg:col-span-7 bg-surface-soft border border-hairline rounded-2xl p-6 shadow-xs flex flex-col justify-between">
+      <div>
+        <div class="border-b border-hairline pb-4 mb-5">
+          <h2 class="text-lg font-bold text-ink tracking-tight flex items-center gap-2">
+            <svg class="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+            </svg>
+            {d.controlsTitle}
+          </h2>
+          <p class="text-xs text-muted mt-1">{d.controlsSub}</p>
+        </div>
+
+        <div class="space-y-5">
+          <!-- System Selection -->
+          <div>
+            <label for="scwh-system-select" class="block text-xs font-semibold uppercase text-muted mb-1.5">
+              {d.systemLabel}
+            </label>
+            <select id="scwh-system-select" class="w-full text-xs sm:text-sm bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-ink focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-all">
+              {systems.map(sys => (
+                <option value={sys.id}>{sys.name} ({sys.classification})</option>
+              ))}
+            </select>
+            <p class="text-[11px] text-muted mt-1">{d.systemHelp}</p>
+          </div>
+
+          <!-- Feedstock Selection -->
+          <div>
+            <label for="scwh-feedstock-select" class="block text-xs font-semibold uppercase text-muted mb-1.5">
+              {d.feedstockLabel}
+            </label>
+            <select id="scwh-feedstock-select" class="w-full text-xs sm:text-sm bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-ink focus:ring-2 focus:ring-amber-500 focus:outline-hidden transition-all">
+              {feedstocks.map(feed => (
+                <option value={feed.id}>
+                  {feed.name} — Protein: {feed.proteinContentPercentDryBasis}% dry wt &bull; {feed.targetBioactivePeptides}
+                </option>
+              ))}
+            </select>
+            <p class="text-[11px] text-muted mt-1">{d.feedstockHelp}</p>
+          </div>
+
+          <!-- Slider 1: Temperature -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label for="scwh-temp-slider" class="text-xs font-semibold text-ink">
+                {d.tempLabel}
+              </label>
+              <span id="scwh-temp-val" class="font-mono text-sm font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
+                185°C
+              </span>
+            </div>
+            <input 
+              type="range" 
+              id="scwh-temp-slider" 
+              min="120" 
+              max="240" 
+              step="1" 
+              value="185" 
+              class="w-full accent-amber-500 cursor-pointer h-2 bg-hairline rounded-lg"
+            />
+            <div class="flex justify-between text-[10px] text-muted font-mono mt-1">
+              <span>120°C (Mild Polyphenol)</span>
+              <span>180°C (Peptide Cleavage)</span>
+              <span>240°C (Severe Subcritical)</span>
+            </div>
+            <p class="text-[11px] text-muted mt-1">{d.tempHelp}</p>
+          </div>
+
+          <!-- Slider 2: Pressure -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label for="scwh-pressure-slider" class="text-xs font-semibold text-ink">
+                {d.pressureLabel}
+              </label>
+              <span id="scwh-pressure-val" class="font-mono text-sm font-bold text-cyan-500 bg-cyan-500/10 px-2 py-0.5 rounded-md border border-cyan-500/20">
+                35 bar
+              </span>
+            </div>
+            <input 
+              type="range" 
+              id="scwh-pressure-slider" 
+              min="20" 
+              max="65" 
+              step="1" 
+              value="35" 
+              class="w-full accent-cyan-500 cursor-pointer h-2 bg-hairline rounded-lg"
+            />
+            <div class="flex justify-between text-[10px] text-muted font-mono mt-1">
+              <span>20 bar (Min Liquid P)</span>
+              <span>40 bar (Optimal Process)</span>
+              <span>65 bar (ASME Ceiling)</span>
+            </div>
+            <p class="text-[11px] text-muted mt-1">{d.pressureHelp}</p>
+          </div>
+
+          <!-- Slider 3: Residence Time -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label for="scwh-residence-slider" class="text-xs font-semibold text-ink">
+                {d.residenceLabel}
+              </label>
+              <span id="scwh-residence-val" class="font-mono text-sm font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                6.5 min
+              </span>
+            </div>
+            <input 
+              type="range" 
+              id="scwh-residence-slider" 
+              min="1.0" 
+              max="15.0" 
+              step="0.5" 
+              value="6.5" 
+              class="w-full accent-emerald-500 cursor-pointer h-2 bg-hairline rounded-lg"
+            />
+            <div class="flex justify-between text-[10px] text-muted font-mono mt-1">
+              <span>1.0 min (Flash Extract)</span>
+              <span>7.0 min (Deep Proteolysis)</span>
+              <span>15.0 min (Extended PFR)</span>
+            </div>
+            <p class="text-[11px] text-muted mt-1">{d.residenceHelp}</p>
+          </div>
+
+          <!-- Slider 4: Solids Loading -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label for="scwh-solids-slider" class="text-xs font-semibold text-ink">
+                {d.solidsLabel}
+              </label>
+              <span id="scwh-solids-val" class="font-mono text-sm font-bold text-indigo-500 bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/20">
+                12.0%
+              </span>
+            </div>
+            <input 
+              type="range" 
+              id="scwh-solids-slider" 
+              min="5.0" 
+              max="25.0" 
+              step="0.5" 
+              value="12.0" 
+              class="w-full accent-indigo-500 cursor-pointer h-2 bg-hairline rounded-lg"
+            />
+            <div class="flex justify-between text-[10px] text-muted font-mono mt-1">
+              <span>5.0% (Dilute Slurry)</span>
+              <span>15.0% (Standard Pumpable)</span>
+              <span>25.0% (High-Paste Limit)</span>
+            </div>
+            <p class="text-[11px] text-muted mt-1">{d.solidsHelp}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Telemetry Diagnostics Column (5 cols) -->
+    <div class="lg:col-span-5 bg-surface-soft border border-hairline rounded-2xl p-6 shadow-xs flex flex-col justify-between">
+      <div>
+        <div class="border-b border-hairline pb-4 mb-5">
+          <h2 class="text-lg font-bold text-ink tracking-tight flex items-center gap-2">
+            <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            {d.diagnosticTitle}
+          </h2>
+          <p class="text-xs text-muted mt-1">{d.diagnosticSub}</p>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Dielectric Constant & Solvent Polarity -->
+          <div class="bg-surface p-3.5 rounded-xl border border-hairline">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-semibold text-muted">{d.dielectricLabel}</span>
+              <span id="telemetry-dielectric" class="text-sm font-bold font-mono text-ink">36.8</span>
+            </div>
+            <div class="text-[11px] text-muted flex items-center justify-between">
+              <span>Equivalent Solvent Polarity:</span>
+              <span id="telemetry-equivalent-solvent" class="font-medium text-amber-500">Ethanol / Methanol Blend</span>
+            </div>
+          </div>
+
+          <!-- Kw Self-Ionization & Autocatalysis -->
+          <div class="bg-surface p-3.5 rounded-xl border border-hairline">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-semibold text-muted">{d.kwLabel}</span>
+              <span id="telemetry-kw" class="text-sm font-bold font-mono text-cyan-500">11.26</span>
+            </div>
+            <div class="text-[11px] text-muted flex items-center justify-between">
+              <span>H⁺ / OH⁻ Auto-Catalysis:</span>
+              <span id="telemetry-autocatalysis" class="font-medium text-emerald-500">28.4× Room Water</span>
+            </div>
+          </div>
+
+          <!-- Degree of Hydrolysis (DH) -->
+          <div class="bg-surface p-3.5 rounded-xl border border-hairline">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-xs font-semibold text-muted">{d.dhLabel}</span>
+              <span id="telemetry-dh" class="text-sm font-bold font-mono text-emerald-500">31.4%</span>
+            </div>
+            <div class="w-full bg-hairline rounded-full h-1.5 overflow-hidden">
+              <div id="telemetry-dh-bar" class="bg-emerald-500 h-1.5 rounded-full transition-all duration-300" style="width: 31.4%;"></div>
+            </div>
+          </div>
+
+          <!-- Bioactive Fractions & ACE Inhibition -->
+          <div class="bg-surface p-3.5 rounded-xl border border-hairline">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-semibold text-muted">{d.lowMwLabel}</span>
+              <span id="telemetry-lowmw" class="text-sm font-bold font-mono text-indigo-500">82.5%</span>
+            </div>
+            <div class="flex items-center justify-between text-[11px] text-muted">
+              <span>{d.aceLabel}</span>
+              <span id="telemetry-ace" class="font-medium font-mono text-ink">0.24 mg/mL</span>
+            </div>
+            <div class="flex items-center justify-between text-[11px] text-muted mt-1">
+              <span>{d.oracLabel}</span>
+              <span id="telemetry-orac" class="font-medium font-mono text-ink">485 µmol TE/g</span>
+            </div>
+          </div>
+
+          <!-- 5-HMF & Thermal Degradation Status -->
+          <div class="bg-surface p-3.5 rounded-xl border border-hairline">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-semibold text-muted">{d.hmfLabel}</span>
+              <span id="telemetry-hmf-badge" class="px-2 py-0.5 rounded text-[11px] font-bold uppercase bg-emerald-500/10 text-emerald-500 border border-emerald-500/30">
+                CLEAN / OPTIMAL
+              </span>
+            </div>
+            <p id="telemetry-hmf-desc" class="text-[11px] text-muted">
+              5-HMF &lt; 4.5 mg/kg. Clean-label food compliant with zero pyrolysis.
+            </p>
+          </div>
+
+          <!-- Energy & ASME Safety Margin -->
+          <div class="bg-surface p-3.5 rounded-xl border border-hairline">
+            <div class="flex items-center justify-between text-[11px] text-muted mb-1">
+              <span>{d.energyLabel}</span>
+              <span id="telemetry-energy" class="font-bold font-mono text-ink">0.58 MJ/kg dry wt</span>
+            </div>
+            <div class="flex items-center justify-between text-[11px] text-muted">
+              <span>{d.safetyMarginLabel}</span>
+              <span id="telemetry-margin" class="font-bold font-mono text-cyan-500">+23.8 bar (No Flashing)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SVG Process Flow Diagram -->
+  <div class="bg-surface-soft border border-hairline rounded-2xl p-6 mb-8 shadow-xs">
+    <div class="border-b border-hairline pb-4 mb-5">
+      <h3 class="text-base font-bold text-ink tracking-tight flex items-center gap-2">
+        <svg class="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+        </svg>
+        {d.diagramTitle}
+      </h3>
+      <p class="text-xs text-muted mt-1">{d.diagramSub}</p>
+    </div>
+
+    <div class="w-full overflow-x-auto py-2">
+      <svg class="w-full min-w-[720px] h-64 text-ink select-none" viewBox="0 0 840 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Background Grid -->
+        <defs>
+          <linearGradient id="scwhGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.2"/>
+            <stop offset="50%" stop-color="#f59e0b" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#10b981" stop-opacity="0.2"/>
+          </linearGradient>
+          <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="3" result="glow"/>
+            <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+          </filter>
+        </defs>
+
+        <rect x="10" y="10" width="820" height="220" rx="14" fill="#0f172a" stroke="#334155" stroke-width="1.5"/>
+
+        <!-- Flow Line Main (Loop) -->
+        <path d="M 90 120 L 210 120 L 330 120 L 490 120 L 610 120 L 730 120" stroke="url(#scwhGrad)" stroke-width="6" stroke-linecap="round"/>
+        <path d="M 90 120 L 730 120" stroke="#f59e0b" stroke-width="2" stroke-dasharray="6 4" stroke-opacity="0.6"/>
+
+        <!-- Regenerative Heat Exchange Return Loop -->
+        <path d="M 540 120 C 540 190, 270 190, 270 120" stroke="#10b981" stroke-width="2" stroke-dasharray="4 4" stroke-opacity="0.7"/>
+        <text x="405" y="185" fill="#10b981" font-size="10" font-family="monospace" text-anchor="middle">Counter-Current Sensible Heat Recovery (82.5% Eff)</text>
+
+        <!-- Node 1: Slurry Feed Tank -->
+        <g transform="translate(40, 80)">
+          <rect width="90" height="80" rx="8" fill="#1e293b" stroke="#64748b" stroke-width="1.5"/>
+          <circle cx="45" cy="40" r="18" fill="#334155"/>
+          <text x="45" y="32" fill="#94a3b8" font-size="9" font-family="sans-serif" font-weight="bold" text-anchor="middle">FEED SLURRY</text>
+          <text x="45" y="44" fill="#cbd5e1" font-size="8" font-family="monospace" text-anchor="middle">5–20% Solids</text>
+          <text x="45" y="55" fill="#38bdf8" font-size="8" font-family="monospace" text-anchor="middle">25°C &bull; 1 bar</text>
+        </g>
+
+        <!-- Node 2: High-Pressure Slurry Diaphragm Pump -->
+        <g transform="translate(170, 85)">
+          <polygon points="40,10 75,35 40,60 5,35" fill="#0369a1" stroke="#38bdf8" stroke-width="1.5"/>
+          <text x="40" y="33" fill="#ffffff" font-size="9" font-family="sans-serif" font-weight="bold" text-anchor="middle">HP PUMP</text>
+          <text x="40" y="44" fill="#bae6fd" font-size="8" font-family="monospace" text-anchor="middle">30–65 bar</text>
+        </g>
+
+        <!-- Node 3: Regenerative Heat Exchanger -->
+        <g transform="translate(260, 80)">
+          <rect width="95" height="80" rx="8" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+          <path d="M 15 25 Q 45 40 15 55 M 80 25 Q 50 40 80 55" stroke="#10b981" stroke-width="2" fill="none"/>
+          <text x="47" y="30" fill="#a7f3d0" font-size="9" font-family="sans-serif" font-weight="bold" text-anchor="middle">HEAT RECOVERY</text>
+          <text x="47" y="43" fill="#cbd5e1" font-size="8" font-family="monospace" text-anchor="middle">Shell &amp; Tube</text>
+          <text x="47" y="55" fill="#34d399" font-size="8" font-family="monospace" text-anchor="middle">Preheat 140°C</text>
+        </g>
+
+        <!-- Node 4: Continuous Tubular Plug Flow Reactor (PFR) -->
+        <g transform="translate(390, 65)">
+          <rect width="130" height="110" rx="10" fill="#451a03" stroke="#f59e0b" stroke-width="2" filter="url(#glow)"/>
+          <!-- Heating Coils -->
+          <path d="M 20 45 C 35 25, 45 65, 60 45 C 75 25, 85 65, 100 45" stroke="#fbbf24" stroke-width="3" fill="none"/>
+          <path d="M 20 75 C 35 55, 45 95, 60 75 C 75 55, 85 95, 100 75" stroke="#fbbf24" stroke-width="3" fill="none"/>
+          <text x="65" y="28" fill="#fef3c7" font-size="10" font-family="sans-serif" font-weight="bold" text-anchor="middle">TUBULAR PFR</text>
+          <text x="65" y="93" fill="#fde68a" font-size="9" font-family="monospace" text-anchor="middle">160°C–240°C</text>
+          <text x="65" y="104" fill="#fed7aa" font-size="8" font-family="monospace" text-anchor="middle">ε 80→30 &bull; pKw 11.2</text>
+        </g>
+
+        <!-- Node 5: Rapid Quench Chiller -->
+        <g transform="translate(560, 80)">
+          <rect width="90" height="80" rx="8" fill="#1e293b" stroke="#06b6d4" stroke-width="1.5"/>
+          <path d="M 20 30 L 70 30 M 20 50 L 70 50" stroke="#06b6d4" stroke-width="2" stroke-dasharray="4 2"/>
+          <text x="45" y="32" fill="#a5f3fc" font-size="9" font-family="sans-serif" font-weight="bold" text-anchor="middle">QUENCH CHILL</text>
+          <text x="45" y="44" fill="#cbd5e1" font-size="8" font-family="monospace" text-anchor="middle">&lt; 15 sec</text>
+          <text x="45" y="55" fill="#38bdf8" font-size="8" font-family="monospace" text-anchor="middle">Arrest 5-HMF</text>
+        </g>
+
+        <!-- Node 6: Ceramic Backpressure Regulator (BPR) -->
+        <g transform="translate(685, 85)">
+          <polygon points="35,10 65,35 35,60 5,35" fill="#312e81" stroke="#818cf8" stroke-width="1.5"/>
+          <text x="35" y="32" fill="#ffffff" font-size="9" font-family="sans-serif" font-weight="bold" text-anchor="middle">CERAMIC BPR</text>
+          <text x="35" y="44" fill="#c7d2fe" font-size="8" font-family="monospace" text-anchor="middle">ΔP = 0 bar</text>
+          <text x="35" y="68" fill="#10b981" font-size="8" font-family="monospace" text-anchor="middle">Pure Peptides</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Detailed Science & Industrial Comparison Section -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+    <!-- Scientific Explanations -->
+    <div class="bg-surface-soft border border-hairline rounded-2xl p-6 shadow-xs">
+      <h3 class="text-base font-bold text-ink tracking-tight mb-3 flex items-center gap-2">
+        <svg class="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+        </svg>
+        {d.scienceTitle}
+      </h3>
+      <p class="text-xs text-muted mb-4">{d.scienceSub}</p>
+
+      <div class="space-y-4 text-xs text-muted leading-relaxed">
+        <div class="p-3 bg-surface rounded-xl border border-hairline">
+          <span class="font-bold text-ink block mb-1">1. Dielectric Constant (ε) Tuning & Green Extraction</span>
+          Under ambient conditions (25°C, 1 bar), water has a high dielectric constant (ε ≈ 78.5) that dissolves only highly polar ionic salts. As water is pressurized above its boiling point into the subcritical state (150°C–220°C), hydrogen bonds weaken significantly, causing ε to plummet from 78.5 down to ~31.4—identical to methanol and ethanol. This enables water to dissolve hydrophobic flavonoids, ferulate esters, and non-polar amino acids without requiring explosive or toxic petro-solvents.
+        </div>
+
+        <div class="p-3 bg-surface rounded-xl border border-hairline">
+          <span class="font-bold text-ink block mb-1">2. Auto-Ionization (Kw) Self-Catalytic Proteolysis</span>
+          The ion product of water, Kw = [H⁺][OH⁻], increases by nearly 1,000-fold between 25°C (pKw = 14.0) and 200°C–240°C (pKw ≈ 11.2). At 200°C, the concentration of active hydronium and hydroxide ions is ~30 times higher than at room temperature. The pressurized hot water acts as an intrinsic, self-neutralizing acid-base catalyst that rapidly cleaves peptide bonds without requiring mineral acids (HCl) or chemical alkalis (NaOH), eliminating downstream desalination.
+        </div>
+
+        <div class="p-3 bg-surface rounded-xl border border-hairline">
+          <span class="font-bold text-ink block mb-1">3. Kinetic Temperature Limits & 5-HMF Degradation</span>
+          While higher temperatures accelerate peptide cleavage under Arrhenius kinetics (activation energy Ea ≈ 65–85 kJ/mol), temperatures exceeding 210°C–220°C trigger rapid sugar dehydration and Maillard pyrolysis, synthesizing 5-hydroxymethylfurfural (5-HMF) and furfural. Maintaining reactor residence time under 7 minutes and incorporating millisecond quench cooling below 60°C guarantees 5-HMF concentrations remain well below the 25 mg/kg regulatory ceiling.
+        </div>
+      </div>
+    </div>
+
+    <!-- Polarity & Benchmarks Scale -->
+    <div class="bg-surface-soft border border-hairline rounded-2xl p-6 shadow-xs">
+      <h3 class="text-base font-bold text-ink tracking-tight mb-3 flex items-center gap-2">
+        <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+        </svg>
+        {d.tableTitle}
+      </h3>
+      <p class="text-xs text-muted mb-4">Comparison of subcritical water hydrolysis versus conventional enzymatic and chemical technologies.</p>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-[11px] text-left border-collapse">
+          <thead>
+            <tr class="border-b border-hairline text-ink font-semibold">
+              <th class="py-2 pr-2">Technology</th>
+              <th class="py-2 px-2">Chemicals</th>
+              <th class="py-2 px-2">Time</th>
+              <th class="py-2 px-2">Peptides &lt; 3kDa</th>
+              <th class="py-2 pl-2">Clean Label</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-hairline/60 text-muted">
+            {benchmarks.map(b => (
+              <tr class={b.technology.includes('Subcritical') ? 'bg-amber-500/10 font-medium text-ink' : ''}>
+                <td class="py-2.5 pr-2 font-semibold">{b.technology.split('(')[0]}</td>
+                <td class="py-2.5 px-2">{b.chemicalReagents}</td>
+                <td class="py-2.5 px-2 font-mono">{b.reactionDuration}</td>
+                <td class="py-2.5 px-2 font-mono">{b.peptideYieldUnder3kDaPercent}</td>
+                <td class="py-2.5 pl-2">{b.regulatoryCleanLabelStatus.split('/')[0]}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Client-side dynamic simulation and telemetry calculation
+  document.addEventListener('DOMContentLoaded', () => {
+    const tempSlider = document.getElementById('scwh-temp-slider') as HTMLInputElement;
+    const tempVal = document.getElementById('scwh-temp-val');
+    const pressureSlider = document.getElementById('scwh-pressure-slider') as HTMLInputElement;
+    const pressureVal = document.getElementById('scwh-pressure-val');
+    const residenceSlider = document.getElementById('scwh-residence-slider') as HTMLInputElement;
+    const residenceVal = document.getElementById('scwh-residence-val');
+    const solidsSlider = document.getElementById('scwh-solids-slider') as HTMLInputElement;
+    const solidsVal = document.getElementById('scwh-solids-val');
+    const feedstockSelect = document.getElementById('scwh-feedstock-select') as HTMLSelectElement;
+
+    // Telemetry DOM elements
+    const telDielectric = document.getElementById('telemetry-dielectric');
+    const telEquivalentSolvent = document.getElementById('telemetry-equivalent-solvent');
+    const telKw = document.getElementById('telemetry-kw');
+    const telAutocatalysis = document.getElementById('telemetry-autocatalysis');
+    const telDh = document.getElementById('telemetry-dh');
+    const telDhBar = document.getElementById('telemetry-dh-bar');
+    const telLowMw = document.getElementById('telemetry-lowmw');
+    const telAce = document.getElementById('telemetry-ace');
+    const telOrac = document.getElementById('telemetry-orac');
+    const telHmfBadge = document.getElementById('telemetry-hmf-badge');
+    const telHmfDesc = document.getElementById('telemetry-hmf-desc');
+    const telEnergy = document.getElementById('telemetry-energy');
+    const telMargin = document.getElementById('telemetry-margin');
+
+    // Preset Buttons
+    const presetButtons = document.querySelectorAll('.scwh-preset-btn');
+
+    function updateSimulation() {
+      if (!tempSlider || !pressureSlider || !residenceSlider || !solidsSlider) return;
+
+      const T = parseFloat(tempSlider.value);
+      const P = parseFloat(pressureSlider.value);
+      const tr = parseFloat(residenceSlider.value);
+      const solids = parseFloat(solidsSlider.value);
+      const feedType = feedstockSelect ? feedstockSelect.value : 'spent_brewers_grain';
+
+      if (tempVal) tempVal.textContent = `${T.toFixed(0)}°C`;
+      if (pressureVal) pressureVal.textContent = `${P.toFixed(0)} bar`;
+      if (residenceVal) residenceVal.textContent = `${tr.toFixed(1)} min`;
+      if (solidsVal) solidsVal.textContent = `${solids.toFixed(1)}%`;
+
+      // 1. Dielectric Constant epsilon(T) empirical polynomial fit
+      // e(25) = 78.5, e(100) = 55.3, e(200) = 34.5, e(240) = 28.2
+      const epsilon = Math.max(26.0, 78.5 - 0.28 * (T - 25) + 0.00035 * Math.pow(T - 25, 2));
+      if (telDielectric) telDielectric.textContent = epsilon.toFixed(1);
+
+      let equivSolvent = 'Pure Water (Polar)';
+      if (epsilon < 30) equivSolvent = 'Ethanol / Propanol Mixture';
+      else if (epsilon < 33) equivSolvent = 'Acetone / Isopropanol (ε ≈ 21–30)';
+      else if (epsilon < 36) equivSolvent = 'Pure Ethanol (ε ≈ 24.3 to 32)';
+      else if (epsilon < 42) equivSolvent = 'Acetonitrile / Methanol Blend';
+      else if (epsilon < 50) equivSolvent = 'Methanol / Ethylene Glycol';
+      else equivSolvent = 'Formamide / DMSO Polarity';
+      if (telEquivalentSolvent) telEquivalentSolvent.textContent = equivSolvent;
+
+      // 2. Ionization constant pKw: drops from 14.0 at 25°C to 11.2 at 220°C
+      // pKw(T) ≈ 14.0 - 0.024*(T - 25) + 0.00005*(T - 25)^2
+      const pKw = Math.max(11.18, 14.0 - 0.024 * (T - 25) + 0.00005 * Math.pow(T - 25, 2));
+      if (telKw) telKw.textContent = pKw.toFixed(2);
+      const ionDensityRatio = Math.pow(10, (14.0 - pKw) / 2);
+      if (telAutocatalysis) telAutocatalysis.textContent = `${ionDensityRatio.toFixed(1)}× Room Water`;
+
+      // 3. Degree of Hydrolysis (DH %)
+      // DH = baseRate * [1 - exp(-k * tr)]
+      let baseFeedFactor = 1.0;
+      let feedHmfThreshold = 210;
+      if (feedType === 'marine_fish_collagen_skin') { baseFeedFactor = 1.35; feedHmfThreshold = 220; }
+      else if (feedType === 'soy_protein_isolate_slurry') { baseFeedFactor = 1.15; feedHmfThreshold = 215; }
+      else if (feedType === 'apple_citrus_pomace') { baseFeedFactor = 0.85; feedHmfThreshold = 190; }
+      else if (feedType === 'wheat_bran_aleurone') { baseFeedFactor = 0.95; feedHmfThreshold = 205; }
+
+      const k = 0.04 * Math.exp(0.028 * (T - 120)) * baseFeedFactor;
+      const maxDh = Math.min(48.0, 18.0 + 0.18 * (T - 120));
+      const dh = Math.min(maxDh, maxDh * (1.0 - Math.exp(-k * tr)));
+
+      if (telDh) telDh.textContent = `${dh.toFixed(1)}%`;
+      if (telDhBar) telDhBar.style.width = `${Math.min(100, (dh / 50.0) * 100)}%`;
+
+      // 4. Low-MW Peptides (< 3 kDa) fraction & Bioactivities
+      const lowMwPercent = Math.min(94.0, Math.max(35.0, 42.0 + dh * 1.35 - (tr > 10 ? (tr - 10) * 1.2 : 0)));
+      if (telLowMw) telLowMw.textContent = `${lowMwPercent.toFixed(1)}%`;
+
+      // ACE-Inhibitory IC50 (mg/mL): lower is more potent. Optimal around 180°C–200°C
+      let aceIc50 = 0.85;
+      if (T >= 160 && T <= 205) {
+        aceIc50 = Math.max(0.12, 0.55 - (dh / 100) * 0.95);
+      } else if (T > 205) {
+        aceIc50 = 0.25 + (T - 205) * 0.025; // degradation
+      }
+      if (telAce) telAce.textContent = `${aceIc50.toFixed(2)} mg/mL`;
+
+      // Antioxidant ORAC: higher is better
+      const oracVal = Math.round((210 + dh * 8.5 + (T - 120) * 1.8) * (solids / 12.0));
+      if (telOrac) telOrac.textContent = `${oracVal} µmol TE/g`;
+
+      // 5. 5-HMF & Degradation Risk
+      if (T > feedHmfThreshold + 15 || (T > feedHmfThreshold && tr > 8.0)) {
+        if (telHmfBadge) {
+          telHmfBadge.className = 'px-2 py-0.5 rounded text-[11px] font-bold uppercase bg-red-500/20 text-red-400 border border-red-500/40';
+          telHmfBadge.textContent = 'HIGH PYROLYSIS HAZARD';
+        }
+        if (telHmfDesc) {
+          telHmfDesc.textContent = `5-HMF > 35 mg/kg! High furfural & acrylamide generation. Quench immediately and lower reactor temperature.`;
+        }
+      } else if (T > feedHmfThreshold || tr > 11.0) {
+        if (telHmfBadge) {
+          telHmfBadge.className = 'px-2 py-0.5 rounded text-[11px] font-bold uppercase bg-amber-500/20 text-amber-400 border border-amber-500/40';
+          telHmfBadge.textContent = 'ELEVATED MAILLARD WARNING';
+        }
+        if (telHmfDesc) {
+          telHmfDesc.textContent = `5-HMF 12–25 mg/kg. Maillard browning present. Safe for technical feed, nearing food-grade limit.`;
+        }
+      } else {
+        if (telHmfBadge) {
+          telHmfBadge.className = 'px-2 py-0.5 rounded text-[11px] font-bold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/40';
+          telHmfBadge.textContent = 'CLEAN / OPTIMAL';
+        }
+        if (telHmfDesc) {
+          telHmfDesc.textContent = `5-HMF < 4.5 mg/kg. 100% Clean-label food compliant with zero pyrolysis.`;
+        }
+      }
+
+      // 6. Net Specific Energy (MJ/kg dry wt) with 82.5% heat recovery
+      const netEnergy = Math.max(0.38, 0.35 + 0.0022 * (T - 120) + (1.0 / (solids / 10.0)) * 0.12);
+      if (telEnergy) telEnergy.textContent = `${netEnergy.toFixed(2)} MJ/kg dry wt`;
+
+      // 7. Saturated Vapor Pressure Psat(T) via Antoine equation approximation:
+      // Psat(120°C) ≈ 1.98 bar, Psat(180°C) ≈ 10.0 bar, Psat(200°C) ≈ 15.5 bar, Psat(240°C) ≈ 33.4 bar
+      const pSat = Math.exp(11.78 - 3816.4 / (T + 227.0));
+      const margin = P - pSat;
+      if (telMargin) {
+        if (margin < 3.0) {
+          telMargin.className = 'font-bold font-mono text-red-500';
+          telMargin.textContent = `${margin.toFixed(1)} bar (CRITICAL FLASH VAPOR HAZARD!)`;
+        } else {
+          telMargin.className = 'font-bold font-mono text-cyan-500';
+          telMargin.textContent = `+${margin.toFixed(1)} bar (No Flashing &bull; Stable Liquid)`;
+        }
+      }
+    }
+
+    // Attach listeners
+    tempSlider?.addEventListener('input', updateSimulation);
+    pressureSlider?.addEventListener('input', updateSimulation);
+    residenceSlider?.addEventListener('input', updateSimulation);
+    solidsSlider?.addEventListener('input', updateSimulation);
+    feedstockSelect?.addEventListener('change', updateSimulation);
+
+    // Preset configurations
+    presetButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const preset = btn.getAttribute('data-preset');
+        if (preset === 'bsg') {
+          if (tempSlider) tempSlider.value = '185';
+          if (pressureSlider) pressureSlider.value = '35';
+          if (residenceSlider) residenceSlider.value = '6.5';
+          if (solidsSlider) solidsSlider.value = '12.0';
+          if (feedstockSelect) feedstockSelect.value = 'spent_brewers_grain';
+        } else if (preset === 'collagen') {
+          if (tempSlider) tempSlider.value = '165';
+          if (pressureSlider) pressureSlider.value = '30';
+          if (residenceSlider) residenceSlider.value = '4.5';
+          if (solidsSlider) solidsSlider.value = '8.0';
+          if (feedstockSelect) feedstockSelect.value = 'marine_fish_collagen_skin';
+        } else if (preset === 'soy') {
+          if (tempSlider) tempSlider.value = '195';
+          if (pressureSlider) pressureSlider.value = '42';
+          if (residenceSlider) residenceSlider.value = '5.0';
+          if (solidsSlider) solidsSlider.value = '10.0';
+          if (feedstockSelect) feedstockSelect.value = 'soy_protein_isolate_slurry';
+        } else if (preset === 'pomace') {
+          if (tempSlider) tempSlider.value = '150';
+          if (pressureSlider) pressureSlider.value = '25';
+          if (residenceSlider) residenceSlider.value = '8.0';
+          if (solidsSlider) solidsSlider.value = '15.0';
+          if (feedstockSelect) feedstockSelect.value = 'apple_citrus_pomace';
+        } else if (preset === 'hazard') {
+          if (tempSlider) tempSlider.value = '235';
+          if (pressureSlider) pressureSlider.value = '36';
+          if (residenceSlider) residenceSlider.value = '12.0';
+          if (solidsSlider) solidsSlider.value = '20.0';
+          if (feedstockSelect) feedstockSelect.value = 'wheat_bran_aleurone';
+        }
+        updateSimulation();
+      });
+    });
+
+    // Initial run
+    updateSimulation();
+  });
+</script>
