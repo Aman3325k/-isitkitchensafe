@@ -159,7 +159,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-continuous-acoustic-levitator-modeler',
   'tools/commercial-continuous-fo-fc-freeze-concentration-modeler',
   'tools/commercial-continuous-subcritical-water-hydrolysis-modeler',
-  'tools/commercial-continuous-high-voltage-arc-discharge-modeler'
+  'tools/commercial-continuous-high-voltage-arc-discharge-modeler',
+  'tools/commercial-continuous-cold-atmospheric-plasma-activated-water-modeler'
 ];
 
 const esSlugs = new Set([
