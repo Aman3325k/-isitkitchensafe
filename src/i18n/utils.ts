@@ -167,7 +167,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-continuous-edbm-acid-recovery-modeler',
   'tools/commercial-continuous-nspef-extraction-modeler',
   'tools/commercial-continuous-sfd-spray-freeze-drying-modeler',
-  'tools/commercial-continuous-scfx-supercritical-extrusion-modeler'
+  'tools/commercial-continuous-scfx-supercritical-extrusion-modeler',
+  'tools/commercial-continuous-dbd-cpm-cold-plasma-mist-modeler'
 ];
 
 const esSlugs = new Set([

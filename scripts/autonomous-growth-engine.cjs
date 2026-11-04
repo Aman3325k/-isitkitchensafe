@@ -166,7 +166,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-continuous-edbm-acid-recovery-modeler', name: 'Commercial Continuous Electrodialysis Bipolar Membrane (EDBM) Organic Acid Recovery & Demineralization Modeler', category: 'Electrochemical Separation & Byproduct Valorization', component: 'CommercialContinuousEdbmAcidRecoveryModeler.astro', dataFile: 'edbm-acid-recovery-data.json' },
   { slug: 'commercial-continuous-nspef-extraction-modeler', name: 'Commercial Continuous High-Pressure Nanosecond Pulsed Electric Field (nsPEF) Intracellular Extraction Modeler', category: 'Nanosecond Bioelectrics & Phytochemical Recovery', component: 'CommercialContinuousNspefExtractionModeler.astro', dataFile: 'nspef-extraction-data.json' },
   { slug: 'commercial-continuous-sfd-spray-freeze-drying-modeler', name: 'Commercial Continuous Supercritical CO2 Assisted Spray Freeze-Drying (SFD) Modeler', category: 'Supercritical Cryogenics & Aseptic Spray Lyophilization', component: 'CommercialContinuousSfdSprayFreezeDryingModeler.astro', dataFile: 'sfd-spray-freeze-drying-data.json' },
-  { slug: 'commercial-continuous-scfx-supercritical-extrusion-modeler', name: 'Commercial Continuous High-Pressure Supercritical Fluid Extrusion (SCFX) Bioactive Food Matrix Micro-Texturizing Modeler', category: 'Supercritical Extrusion & Aerated Food Matrix Physics', component: 'CommercialContinuousScfxSupercriticalExtrusionModeler.astro', dataFile: 'scfx-supercritical-extrusion-data.json' }
+  { slug: 'commercial-continuous-scfx-supercritical-extrusion-modeler', name: 'Commercial Continuous High-Pressure Supercritical Fluid Extrusion (SCFX) Bioactive Food Matrix Micro-Texturizing Modeler', category: 'Supercritical Extrusion & Aerated Food Matrix Physics', component: 'CommercialContinuousScfxSupercriticalExtrusionModeler.astro', dataFile: 'scfx-supercritical-extrusion-data.json' },
+  { slug: 'commercial-continuous-dbd-cpm-cold-plasma-mist-modeler', name: 'Commercial Continuous Dielectric Barrier Discharge Cold Plasma Mist (DBD-CPM) Post-Harvest Sanitation Modeler', category: 'Atmospheric Non-Thermal Aerosol Physics & Microbiological Safety', component: 'CommercialContinuousDbdCpmColdPlasmaMistModeler.astro', dataFile: 'dbd-cpm-cold-plasma-mist-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -423,7 +424,8 @@ function auditDatasets() {
     'edbm-acid-recovery-data.json',
     'nspef-extraction-data.json',
     'sfd-spray-freeze-drying-data.json',
-    'scfx-supercritical-extrusion-data.json'
+    'scfx-supercritical-extrusion-data.json',
+    'dbd-cpm-cold-plasma-mist-data.json'
 ];
 
   const datasetStats = {};
@@ -663,17 +665,10 @@ function auditGrowthOpportunities() {
     // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Continuous Dielectric Barrier Discharge Cold Plasma Mist (DBD-CPM) Post-Harvest Sanitation Modeler',
-      category: 'Atmospheric Non-Thermal Aerosol Physics & Microbiological Safety',
-      intent: 'Models continuous dielectric barrier discharge cold atmospheric plasma aerosolized water-mist (DBD-CPM, 12–25 kV, 15–40 kHz) generation of reactive oxygen and nitrogen species (RONS: •OH, O2•⁻, ONOO⁻) for non-thermal surface sanitization of fresh produce, zero chemical chlorine residues, and bacterial log reduction (>5.2-log).',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '1,280+ US impressions'
-    },
-    {
       title: 'Commercial Continuous High-Frequency Acoustic Standing Wave Micro-Streaming (ASW-MS) Lipid Crystallization & Emulsion Modeler',
       category: 'Megasonic Food Rheology & Non-Thermal Crystallization',
       intent: 'Models continuous high-frequency MHz acoustic micro-streaming, selective shear-induced nucleation of beta-prime polymorphic crystals in cocoa butter and plant lipids, elimination of trans-fat generation, and continuous non-thermal tempering.',
-      priority: 'HIGH',
+      priority: 'CRITICAL_HIGH',
       estimatedMonthlyVolume: '1,050+ US impressions'
     },
     {
@@ -687,8 +682,15 @@ function auditGrowthOpportunities() {
       title: 'Commercial Continuous Subcritical Water Dynamic Accelerated Solvent Extraction (SCW-ASE) Polyphenol & Flavonoid Recovery Modeler',
       category: 'Subcritical Fluid Hydrodynamics & Botanical Extraction Physics',
       intent: 'Models continuous pressurized hot subcritical water dynamic extraction (120–220°C, 30–80 bar, sub-boiling liquid phase) with in-line ceramic cross-flow filtration for zero-solvent organic recovery of anthocyanins, proanthocyanidins, and quercetin without toxic ethanol or methanol residues.',
-      priority: 'MEDIUM',
+      priority: 'HIGH',
       estimatedMonthlyVolume: '860+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous Atmospheric Pulsed High-Voltage Electron Fog (P-HVEF) Aseptic Packaging & Bulk Decontamination Modeler',
+      category: 'Atmospheric Pulsed Electron Aerodynamics & In-Line Sterilization',
+      intent: 'Models continuous pulsed high-voltage electron cloud generation (P-HVEF, 40–90 kV, 50–200 ns pulses) in dense clean nitrogen-fog curtains for zero-water, zero-chemical in-line sterilization of beverage container preforms and dry bulk powders.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '790+ US impressions'
     }
   ];
 
