@@ -1,0 +1,1038 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import scfxData from '../data/scfx-supercritical-extrusion-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  systemLabel: string;
+  systemHelp: string;
+  feedstockLabel: string;
+  feedstockHelp: string;
+  pressureLabel: string;
+  pressureHelp: string;
+  tempLabel: string;
+  tempHelp: string;
+  co2DoseLabel: string;
+  co2DoseHelp: string;
+  screwSpeedLabel: string;
+  screwSpeedHelp: string;
+  moistureLabel: string;
+  moistureHelp: string;
+  dpdtLabel: string;
+  dpdtHelp: string;
+  recoveryLabel: string;
+  recoveryHelp: string;
+  presetsTitle: string;
+  presetPeaProtein: string;
+  presetOatBetaGlucan: string;
+  presetAnthocyaninCollagen: string;
+  presetProbioticCereal: string;
+  presetHazard: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  expansionRatioLabel: string;
+  cellDensityLabel: string;
+  poreDiameterLabel: string;
+  retainedBioactivityLabel: string;
+  smeLabel: string;
+  viscosityReductionLabel: string;
+  voidFractionLabel: string;
+  overallStatusLabel: string;
+  diagramTitle: string;
+  diagramSub: string;
+  scienceTitle: string;
+  scienceSub: string;
+  tableTitle: string;
+}
+
+const DICT: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Supercritical Extrusion & Aerated Food Matrix Physics",
+    title: "Commercial Continuous High-Pressure Supercritical Fluid Extrusion (SCFX) Modeler",
+    subtitle: "Simulate continuous supercritical CO2 fluid extrusion (SCFX) for low-temperature micro-cellular puffing, high-retention texturizing of plant proteins, sensitive nutraceuticals, and functional crisps under 3-A Sanitary Standards 45-03 & 74-07 and EHEDG Class I aseptic guidelines.",
+    controlsTitle: "Continuous SCFX Thermodynamic Operating Parameters",
+    controlsSub: "Configure supercritical CO2 injection pressure, barrel melt temperature, CO2 dosing percentage, screw speed, feed moisture, die pressure drop rate (dP/dt), and closed-loop CO2 recovery.",
+    systemLabel: "SCFX Extruder Architecture & Barrel Skid:",
+    systemHelp: "Select industrial co-rotating twin-screw skid, counter-rotating intermeshing reactor, cleanroom pilot development line, or continuous multi-roller planetary system.",
+    feedstockLabel: "Thermolabile Biomaterial / Food Matrix:",
+    feedstockHelp: "Select isolated pea/faba bean protein, oat flour with beta-glucan, wild berry anthocyanin with marine collagen, native whey isolate with probiotics, or fortified infant cereal.",
+    pressureLabel: "Supercritical CO2 Injection Pressure (P_scCO2):",
+    pressureHelp: "CO2 delivery pressure injected directly into the extruder barrel mixing zone (80 to 280 bar). Higher pressure increases dissolved gas supersaturation.",
+    tempLabel: "Barrel Melt Extrusion Temperature (T_barrel):",
+    tempHelp: "Temperature of the dough melt in the metering and die section (40 to 125°C). SCFX enables expansion below 70°C, preventing thermal denaturation.",
+    co2DoseLabel: "Supercritical CO2 Dosing Rate (w_CO2):",
+    co2DoseHelp: "Mass percentage of supercritical CO2 injected relative to total dough feed rate (0.2 to 3.5 wt%). Controls molecular plasticization and cellular expansion.",
+    screwSpeedLabel: "Extruder Screw Speed (N_screw):",
+    screwSpeedHelp: "Rotational speed of the extruder screws (100 to 450 RPM). Governs melt shear rate, residence time, and specific mechanical energy (SME).",
+    moistureLabel: "Feed Dough Moisture Content (M_feed):",
+    moistureHelp: "Moisture content of the hydrated biopolymer slurry (15 to 30 wt% wet basis). Influences starch gelatinization and glass transition boundaries.",
+    dpdtLabel: "Die Decompression Rate (dP/dt):",
+    dpdtHelp: "Pressure drop rate across the micro-die orifice (1.0 to 5.0 GPa/s). High decompression rate triggers explosive micro-cellular homogeneous nucleation.",
+    recoveryLabel: "Closed-Loop scCO2 Vacuum Scavenger & Liquefaction:",
+    recoveryHelp: "Captures and recompresses >95% of expanded CO2 off-gas, mitigating carbon footprint and nitrogen purge costs.",
+    presetsTitle: "High-Intent Commercial Operating Presets",
+    presetPeaProtein: "Plant-Based Micro-Porous Pea Protein (180 bar, 65°C, 2.0% CO2, 280 RPM, 24% H2O)",
+    presetOatBetaGlucan: "Oat Beta-Glucan Bioactive Crisp (150 bar, 72°C, 1.6% CO2, 250 RPM, 20% H2O)",
+    presetAnthocyaninCollagen: "Wild Berry Anthocyanin & Marine Collagen Puff (210 bar, 52°C, 2.4% CO2, 300 RPM, 22% H2O)",
+    presetProbioticCereal: "Native Whey & Encapsulated Probiotic Crunch (160 bar, 48°C, 2.2% CO2, 220 RPM, 26% H2O)",
+    presetHazard: "Thermal Scorch & CO2 Starvation Collapse Hazard (80 bar, 125°C, 0.4% CO2, 420 RPM, 15% H2O)",
+    diagnosticTitle: "Continuous SCFX Process Telemetry & Quality Indicators",
+    diagnosticSub: "Real-time thermodynamic computation of sectional expansion ratio (SEI), micro-cell density, mean pore diameter, retained bioactivity, specific mechanical energy (SME), and melt plasticization.",
+    expansionRatioLabel: "Sectional Expansion Ratio (SEI / ER):",
+    cellDensityLabel: "Micro-Cell Nucleation Density (N_cell):",
+    poreDiameterLabel: "Mean Micro-Pore Diameter (d_pore):",
+    retainedBioactivityLabel: "Retained Bioactivity & Antioxidant Integrity:",
+    smeLabel: "Specific Mechanical Energy (SME):",
+    viscosityReductionLabel: "Melt Viscosity Reduction (Plasticization):",
+    voidFractionLabel: "Closed-Cell Void Fraction (ε_void):",
+    overallStatusLabel: "Process Validation & SCFX Quality Classification:",
+    diagramTitle: "Continuous High-Pressure SCFX System Flow Schematic",
+    diagramSub: "Visualizing high-pressure scCO2 dosing, twin-screw plasticizing barrel, high-rate micro-die nucleation, and closed-loop gas recovery.",
+    scienceTitle: "Scientific Principles: Supercritical Extrusion & Micro-Cellular Rheology",
+    scienceSub: "Thermodynamics of scCO2 dissolution, Henry's law plasticization, explosive homogeneous nucleation, thermal inactivation kinetics, and sanitary 3-A Standards 45-03 & 74-07 compliance.",
+    tableTitle: "Continuous SCFX vs Alternative Industrial Extrusion Technologies"
+  },
+  es: {
+    badge: "Extrusión Supercrítica y Física de Matrices Alimentarias Aireadas",
+    title: "Simulador Continuo de Extrusión con Fluidos Supercríticos (SCFX)",
+    subtitle: "Simule la extrusión continua con CO2 supercrítico (SCFX) para la expansión microcelular a baja temperatura, texturizado de proteínas vegetales de alta retención, nutracéuticos y snacks funcionales bajo normas sanitarias 3-A 45-03 y 74-07 y directrices EHEDG Clase I.",
+    controlsTitle: "Parámetros Termodinámicos de Operación SCFX",
+    controlsSub: "Configure la presión de inyección de scCO2, temperatura del fundido en cilindro, dosificación de CO2, velocidad de husillo, humedad del alimento, caída de presión en boquilla (dP/dt) y recuperación de CO2.",
+    systemLabel: "Arquitectura del Extrusor SCFX y Skid de Cilindros:",
+    systemHelp: "Seleccione extrusor de doble husillo corrotante industrial, reactor contrarrotante interpenetrado, línea piloto de sala limpia o sistema planetario multirrodillo.",
+    feedstockLabel: "Biomaterial Termolábil / Matriz Alimentaria:",
+    feedstockHelp: "Seleccione aislado de proteína de guisante/haba, harina de avena con beta-glucano, antocianinas con colágeno marino, suero nativo con probióticos o cereal infantil fortificado.",
+    pressureLabel: "Presión de Inyección de CO2 Supercrítico (P_scCO2):",
+    pressureHelp: "Presión de inyección de CO2 en la zona de mezclado del cilindro (80 a 280 bar). Mayor presión eleva la sobresaturación y nucleación.",
+    tempLabel: "Temperatura del Fundido en Cilindro (T_barrel):",
+    tempHelp: "Temperatura de la masa en la sección de dosificación y boquilla (40 a 125°C). SCFX permite expandir por debajo de 70°C sin desnaturalización.",
+    co2DoseLabel: "Tasa de Dosificación de CO2 Supercrítico (w_CO2):",
+    co2DoseHelp: "Porcentaje másico de scCO2 inyectado respecto al flujo de masa (0,2 a 3,5 % en peso). Controla la plastificación molecular y expansión.",
+    screwSpeedLabel: "Velocidad de Husillos del Extrusor (N_screw):",
+    screwSpeedHelp: "Velocidad angular de los husillos (100 a 450 RPM). Rige la tasa de cizalla, tiempo de residencia y energía mecánica específica (SME).",
+    moistureLabel: "Contenido de Humedad de la Masa (M_feed):",
+    moistureHelp: "Humedad de la suspensión hidratada (15 a 30 % base húmeda). Influye en la viscosidad y transiciones vítreas.",
+    dpdtLabel: "Velocidad de Descompresión en Boquilla (dP/dt):",
+    dpdtHelp: "Tasa de caída de presión en el orificio de salida (1,0 a 5,0 GPa/s). Una alta tasa induce nucleación homogénea explosiva.",
+    recoveryLabel: "Captura al Vacío y Licuefacción de scCO2 en Circuito Cerrado:",
+    recoveryHelp: "Recupera y recomprime más del 95% del CO2 liberado, reduciendo costos y huella de carbono.",
+    presetsTitle: "Preajustes Industriales de Alta Eficiencia",
+    presetPeaProtein: "Proteína de Guisante Microcelular (180 bar, 65°C, 2,0% CO2, 280 RPM, 24% H2O)",
+    presetOatBetaGlucan: "Crujiente de Beta-Glucano de Avena (150 bar, 72°C, 1,6% CO2, 250 RPM, 20% H2O)",
+    presetAnthocyaninCollagen: "Snack de Antocianina y Colágeno Marino (210 bar, 52°C, 2,4% CO2, 300 RPM, 22% H2O)",
+    presetProbioticCereal: "Suero Nativo y Probióticos Encapsulados (160 bar, 48°C, 2,2% CO2, 220 RPM, 26% H2O)",
+    presetHazard: "Alerta de Chamuscado Térmico y Colapso por Falta de CO2 (80 bar, 125°C, 0,4% CO2, 420 RPM, 15% H2O)",
+    diagnosticTitle: "Telemetría de Proceso SCFX e Indicadores de Calidad",
+    diagnosticSub: "Cálculo termodinámico en tiempo real del índice de expansión seccional (SEI), densidad microcelular, diámetro de poro, bioactividad retenida, energía mecánica específica y plastificación.",
+    expansionRatioLabel: "Índice de Expansión Seccional (SEI / ER):",
+    cellDensityLabel: "Densidad de Nucleación Microcelular (N_cell):",
+    poreDiameterLabel: "Diámetro Medio de Microporo (d_pore):",
+    retainedBioactivityLabel: "Bioactividad y Capacidad Antioxidante Retenida:",
+    smeLabel: "Energía Mecánica Específica (SME):",
+    viscosityReductionLabel: "Reducción de Viscosidad del Fundido (Plastificación):",
+    voidFractionLabel: "Fracción de Huecos de Célula Cerrada (ε_void):",
+    overallStatusLabel: "Validación y Clasificación de Calidad SCFX:",
+    diagramTitle: "Esquema de Flujo del Sistema Continuo SCFX",
+    diagramSub: "Visualización de inyección de scCO2, cilindro plastificante de doble husillo, boquilla de nucleación microcelular y recuperación de gas.",
+    scienceTitle: "Principios Científicos: Extrusión Supercrítica y Reología Microcelular",
+    scienceSub: "Termodinámica de disolución con ley de Henry, nucleación homogénea explosiva, cinética de inactivación térmica y normas 3-A 45-03 y 74-07.",
+    tableTitle: "Comparativa de SCFX Frente a Otras Tecnologías de Extrusión"
+  },
+  pt: {
+    badge: "Extrusão Supercrítica e Física de Matrizes Alimentares Aeradas",
+    title: "Simulador Contínuo de Extrusão com Fluidos Supercríticos (SCFX)",
+    subtitle: "Simule a extrusão contínua com CO2 supercrítico (SCFX) para expansão microcelular a baixa temperatura, texturização de proteínas vegetais de alta retenção, nutracêuticos e snacks funcionais sob normas 3-A 45-03 e 74-07 e EHEDG Classe I.",
+    controlsTitle: "Parâmetros Termodinâmicos de Operação SCFX",
+    controlsSub: "Configure a pressão de injeção de scCO2, temperatura do fundido no cilindro, dosagem de CO2, rotação dos fusos, umidade do produto, descompressão na matriz (dP/dt) e recuperação de CO2.",
+    systemLabel: "Arquitetura do Extrusor SCFX e Skid de Cilindros:",
+    systemHelp: "Selecione extrusor de dupla rosca corrotante industrial, reator contrarrotante interpenetrado, linha piloto de sala limpa ou sistema planetário multi-rolos.",
+    feedstockLabel: "Biomaterial Termolábil / Matriz Alimentar:",
+    feedstockHelp: "Selecione isolado proteico de ervilha/fava, farinha de aveia com beta-glucana, antocianinas com colágeno marinho, soro nativo com probióticos ou cereal infantil fortificado.",
+    pressureLabel: "Pressão de Injeção de CO2 Supercrítico (P_scCO2):",
+    pressureHelp: "Pressão de injeção de CO2 na zona de mistura do cilindro (80 a 280 bar). Maior pressão eleva a supersaturação e taxa de nucleação.",
+    tempLabel: "Temperatura do Fundido no Cilindro (T_barrel):",
+    tempHelp: "Temperatura da massa na seção de dosagem e matriz (40 a 125°C). O SCFX viabiliza expansão abaixo de 70°C sem desnaturação.",
+    co2DoseLabel: "Taxa de Dosagem de CO2 Supercrítico (w_CO2):",
+    co2DoseHelp: "Porcentagem mássica de scCO2 injetado em relação à alimentação (0,2 a 3,5 % em peso). Controla plastificação e expansão celular.",
+    screwSpeedLabel: "Velocidade de Rotação dos Fusos (N_screw):",
+    screwSpeedHelp: "Velocidade angular dos fusos (100 a 450 RPM). Governa a taxa de cisalhamento, tempo de residência e energia mecânica específica (SME).",
+    moistureLabel: "Teor de Umidade da Massa (M_feed):",
+    moistureHelp: "Umidade da suspensão hidratada (15 a 30 % base úmida). Influencia a viscosidade e limites de transição vítrea.",
+    dpdtLabel: "Taxa de Descompressão na Matriz (dP/dt):",
+    dpdtHelp: "Taxa de queda de pressão no orifício de saída (1,0 a 5,0 GPa/s). Alta taxa induz nucleação homogênea explosiva.",
+    recoveryLabel: "Captura a Vácuo e Liquefação de scCO2 em Circuito Fechado:",
+    recoveryHelp: "Recupera e recomprime mais de 95% do CO2 liberado, reduzindo custos e pegada de carbono.",
+    presetsTitle: "Predefinições Industriais de Alta Eficiência",
+    presetPeaProtein: "Proteína de Ervilha Microcelular (180 bar, 65°C, 2,0% CO2, 280 RPM, 24% H2O)",
+    presetOatBetaGlucan: "Crocante de Beta-Glucana de Aveia (150 bar, 72°C, 1,6% CO2, 250 RPM, 20% H2O)",
+    presetAnthocyaninCollagen: "Snack de Antocianina e Colágeno Marinho (210 bar, 52°C, 2,4% CO2, 300 RPM, 22% H2O)",
+    presetProbioticCereal: "Soro Nativo e Probióticos Encapsulados (160 bar, 48°C, 2,2% CO2, 220 RPM, 26% H2O)",
+    presetHazard: "Alerta de Queima Térmica e Colapso por Falta de CO2 (80 bar, 125°C, 0,4% CO2, 420 RPM, 15% H2O)",
+    diagnosticTitle: "Telemetria de Processo SCFX e Indicadores de Qualidade",
+    diagnosticSub: "Cálculo termodinâmico em tempo real da razão de expansão seccional (SEI), densidade microcelular, diâmetro de poro, bioatividade retida, energia mecânica específica e plastificação.",
+    expansionRatioLabel: "Razão de Expansão Seccional (SEI / ER):",
+    cellDensityLabel: "Densidade de Nucleação Microcelular (N_cell):",
+    poreDiameterLabel: "Diâmetro Médio de Microporo (d_pore):",
+    retainedBioactivityLabel: "Bioatividade e Capacidade Antioxidante Retida:",
+    smeLabel: "Energia Mecânica Específica (SME):",
+    viscosityReductionLabel: "Redução de Viscosidade do Fundido (Plastificação):",
+    voidFractionLabel: "Fração de Vazios de Célula Fechada (ε_void):",
+    overallStatusLabel: "Validação e Classificação Operacional SCFX:",
+    diagramTitle: "Fluxograma do Sistema Contínuo SCFX",
+    diagramSub: "Visualização de injeção de scCO2, cilindro plastificante de dupla rosca, matriz de nucleação microcelular e recuperação de gás.",
+    scienceTitle: "Princípios Científicos: Extrusão Supercrítica e Reologia Microcelular",
+    scienceSub: "Termodinâmica de dissolução com lei de Henry, nucleação homogênea explosiva, cinética de inativação térmica e normas 3-A 45-03 e 74-07.",
+    tableTitle: "Comparativo de SCFX Frente a Outras Tecnologias de Extrusão"
+  },
+  'zh-cn': {
+    badge: "超临界流体挤压膨化与微孔多孔食品基质物理学",
+    title: "工业连续高压超临界二氧化碳流体挤压（SCFX）微孔质构模拟器",
+    subtitle: "精确模拟工业连续超临界CO2流体挤压（SCFX）工艺，实现植物基蛋白、高敏营养素及功能性脆粒在极低熔体温度（45–75°C）下的闭孔微发泡超密多孔质构重构与热敏养分零热变性加工，完全符合 3-A 45-03/74-07 卫生标准与 EHEDG Class I 无菌规范。",
+    controlsTitle: "连续 SCFX 热力学流变与挤压工艺控制参数",
+    controlsSub: "配置机筒高压超临界CO2注入压力、熔体控温、CO2质量投料比、双螺杆转速、物料水分、模头瞬态卸压梯度（dP/dt）及气体闭环回收系统。",
+    systemLabel: "SCFX 挤出机系统架构与机筒机组:",
+    systemHelp: "选择工业级同向平行双螺杆连续机组、高扭矩啮合异向反应机组、洁净区中试研发机组或连续高通量行星滚柱挤出系统。",
+    feedstockLabel: "热敏生物原料 / 功能食品基质类型:",
+    feedstockHelp: "选择黄豌豆/蚕豆高纯蛋白、燕麦全粉葡聚糖纤维、野生蓝莓花青素配深海胶原肽、纯天然乳清浓缩物配益生菌或强化婴幼儿米粉。",
+    pressureLabel: "超临界CO2机筒注入压力 (P_scCO2):",
+    pressureHelp: "直接注入机筒高压混合区的CO2压力（80至280 bar）。压力越高，CO2在黏弹性聚合物熔体中的溶解度与热力学过饱和度越高。",
+    tempLabel: "机筒末端及模头熔体温度 (T_barrel):",
+    tempHelp: "物料通过计量段与模头时的实际温度（40至125°C）。SCFX 可在70°C以下实现超强膨化，杜绝美拉德焦糊与活性物变性破坏。",
+    co2DoseLabel: "超临界CO2微孔发泡注入比例 (w_CO2):",
+    co2DoseHelp: "注入的 scCO2 质量流量与物料干基质量流量之比（0.2至3.5 wt%）。起分子增塑剂与气相物理发泡剂双重作用。",
+    screwSpeedLabel: "双螺杆驱动转速 (N_screw):",
+    screwSpeedHelp: "挤出机螺杆转速（100至450 RPM）。决定物料剪切速率、机筒物料停留时间与比机械能（SME）功耗。",
+    moistureLabel: "物料入料含水率 (M_feed):",
+    moistureHelp: "原料粉料加水混合后的初始湿基含水率（15至30 wt%）。直接决定淀粉凝胶化与玻璃化转变相图边界。",
+    dpdtLabel: "模头微孔瞬态卸压速率 (dP/dt):",
+    dpdtHelp: "熔体穿过精密微孔模头时的压力释放梯度（1.0至5.0 GPa/s）。极速卸压引发超临界气核爆发性均相微孔成核。",
+    recoveryLabel: "闭环超临界CO2真空捕集与冷凝液化再压缩:",
+    recoveryHelp: "高效捕获并液化重压超95%的泄放CO2尾气，大幅降低工业生产气体成本与碳排放。",
+    presetsTitle: "高价值工业化推荐运行预设",
+    presetPeaProtein: "植物基高保真超密微孔豌豆素肉模式 (180 bar, 65°C, 2.0% CO2, 280 RPM, 24% 水分)",
+    presetOatBetaGlucan: "全谷物燕麦β-葡聚糖降脂功能脆球模式 (150 bar, 72°C, 1.6% CO2, 250 RPM, 20% 水分)",
+    presetAnthocyaninCollagen: "深海胶原肽野生蓝莓花青素冻龄脆泡模式 (210 bar, 52°C, 2.4% CO2, 300 RPM, 22% 水分)",
+    presetProbioticCereal: "活性益生菌天然乳清微囊化功能营养脆粒模式 (160 bar, 48°C, 2.2% CO2, 220 RPM, 26% 水分)",
+    presetHazard: "高温热焦化失活与CO2饥饿气泡塌陷失效模式 (80 bar, 125°C, 0.4% CO2, 420 RPM, 15% 水分)",
+    diagnosticTitle: "连续 SCFX 实时运行遥测与质构品质指标",
+    diagnosticSub: "实时计算截面膨化倍率（SEI）、微孔气泡成核密度、平均孔径、热敏养分生物留存率、比机械能消耗（SME）与熔体增塑降黏率。",
+    expansionRatioLabel: "截面膨化倍率指数 (SEI / ER):",
+    cellDensityLabel: "微孔超密均相成核密度 (N_cell):",
+    poreDiameterLabel: "截面平均微孔泡孔直径 (d_pore):",
+    retainedBioactivityLabel: "热敏生物活性与抗氧化能力留存率:",
+    smeLabel: "单位比机械能能耗 (SME):",
+    viscosityReductionLabel: "熔体分子增塑降黏幅度:",
+    voidFractionLabel: "闭孔多孔体孔隙率 (ε_void):",
+    overallStatusLabel: "SCFX 工艺验证与成品品质等级综合评定:",
+    diagramTitle: "工业连续超临界流体挤压（SCFX）全系统工艺流程示意图",
+    diagramSub: "动态呈现高压CO2定量注入、同向双螺杆低温塑化混合、微孔模头瞬态爆破成核与CO2气体封闭回收循环。",
+    scienceTitle: "核心工程原理: 超临界流体微发泡与非热质构流变动力学",
+    scienceSub: "深入解析亨利定律气液高压熔混机制、经典均相极速卸压成核理论、自由体积增塑降黏模型、热敏破坏阿伦尼乌斯动力学及 3-A 卫生标准。",
+    tableTitle: "超临界 SCFX 与传统工业挤出技术全方位技术对比"
+  },
+  ja: {
+    badge: "超臨界流体押し出し成形＆微細多孔質食品物理工学",
+    title: "商業用連続式高圧超臨界流体押出成形（SCFX）微細テクスチャーシミュレーター",
+    subtitle: "超臨界CO2押出成形（SCFX）プロセスを統合解析。植物性タンパク質、熱失活しやすいビタミン、プロバイオティクス含有食品を45〜75°Cの超低温で微細連続発泡成形（3-A 45-03/74-07衛生規格およびEHEDG Class I無菌設計準拠）。",
+    controlsTitle: "連続 SCFX 熱力学レオロジー制御パラメータ",
+    controlsSub: "シリンダー内超臨界CO2注入圧力、溶融樹脂温度、CO2注入率、スクリュー回転数、水分率、ダイ急減圧速度（dP/dt）、CO2循環回収を設定。",
+    systemLabel: "SCFX 押出機機構＆バレルユニット:",
+    systemHelp: "産業用同方向回転二軸押出機、高トルク噛み合い異方向反応機、クリーンルーム用パイロット機、遊星ローラー式連続押出機から選択。",
+    feedstockLabel: "熱失活性バイオ原料 / 食品マトリクス:",
+    feedstockHelp: "エンドウ豆/ソラマメ単離タンパク質、β-グルカン高含有オート麦、ブルーベリーアントシアニン＆海洋性コラーゲン、天然ホエイ＆プロバイオティクス、強化離乳食から選択。",
+    pressureLabel: "超臨界CO2バレル注入圧力 (P_scCO2):",
+    pressureHelp: "バレル混合ゾーンへ直接注入されるCO2圧力（80〜280 bar）。高圧ほど高分子溶融体への溶解度と核生成過飽和度が向上。",
+    tempLabel: "バレル・ダイ溶融生地温度 (T_barrel):",
+    tempHelp: "ダイ吐出直前の生地実測温度（40〜125°C）。SCFXは70°C以下の極低温で高膨化を実現し、熱変性とアクリルアミド生成を根絶。",
+    co2DoseLabel: "超臨界CO2微細発泡注入比率 (w_CO2):",
+    co2DoseHelp: "原料供給流量に対する scCO2 注入質量比率（0.2〜3.5 wt%）。高分子可塑化と多孔セル膨張を司る。",
+    screwSpeedLabel: "押出スクリュー回転数 (N_screw):",
+    screwSpeedHelp: "スクリューの回転速度（100〜450 RPM）。生地剪断速度、滞留時間、比機械エネルギー（SME）を決定。",
+    moistureLabel: "原料仕込み水分率 (M_feed):",
+    moistureHelp: "水分添加後の湿潤基準水分率（15〜30 wt%）。糊化度とガラス転移境界を左右。",
+    dpdtLabel: "ダイオリフィス急減圧速度 (dP/dt):",
+    dpdtHelp: "ダイ微細孔通過時の圧力開放速度（1.0〜5.0 GPa/s）。急激な減圧が爆発的な均一微細気泡核生成を誘発。",
+    recoveryLabel: "クローズドループ scCO2 真空捕集＆再液化圧縮回収:",
+    recoveryHelp: "膨張放出したCO2ガスの95%以上を液化再圧縮して循環利用し、コストと環境負荷を低減。",
+    presetsTitle: "高効率商業生産プリセット",
+    presetPeaProtein: "植物性微細多孔質エンドウ豆ミートモード (180 bar, 65°C, 2.0% CO2, 280 RPM, 24% 水分)",
+    presetOatBetaGlucan: "全粒オート麦β-グルカン機能性クリスプモード (150 bar, 72°C, 1.6% CO2, 250 RPM, 20% 水分)",
+    presetAnthocyaninCollagen: "野生ベリーアントシアニン＆コラーゲン美肌スナックモード (210 bar, 52°C, 2.4% CO2, 300 RPM, 22% 水分)",
+    presetProbioticCereal: "活性プロバイオティクス高含有ホエイシリアルモード (160 bar, 48°C, 2.2% CO2, 220 RPM, 26% 水分)",
+    presetHazard: "熱劣化焦げ付き＆CO2不足セル崩壊ハザード警告モード (80 bar, 125°C, 0.4% CO2, 420 RPM, 15% 水分)",
+    diagnosticTitle: "連続 SCFX プロセステレメトリ＆品質指標",
+    diagnosticSub: "断面膨化倍率（SEI）、微小気泡核生成密度、平均孔径、熱失活性成分残存率、比機械エネルギー（SME）、溶融粘度低下率をリアルタイム算出。",
+    expansionRatioLabel: "断面膨化倍率指数 (SEI / ER):",
+    cellDensityLabel: "微小気泡核生成密度 (N_cell):",
+    poreDiameterLabel: "平均微細孔セル径 (d_pore):",
+    retainedBioactivityLabel: "生理活性物質＆抗酸化能残存率:",
+    smeLabel: "単位比機械エネルギー (SME):",
+    viscosityReductionLabel: "溶融生地可塑化粘度低下率:",
+    voidFractionLabel: "独立気泡ボイド率 (ε_void):",
+    overallStatusLabel: "SCFX プロセス妥当性＆品質総合評価:",
+    diagramTitle: "連続式超臨界流体押出成形全系統図",
+    diagramSub: "高圧scCO2注入、二軸混練バレル、微小ダイ均一微細発泡、CO2循環回収ループを可視化。",
+    scienceTitle: "科学的基礎: 超臨界微細発泡＆非加熱テクスチャリング工学",
+    scienceSub: "ヘンリーの法則に基づくscCO2溶解、爆発的均一核生成機構、自由体積理論による可塑化、アレニウス熱失活動力学、3-A 45-03衛生基準適合性。",
+    tableTitle: "超臨界 SCFX と従来の産業用押出技術の総合比較"
+  }
+};
+
+const d = DICT[lang] || DICT.en;
+---
+
+<div class="space-y-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" id="scfx-modeler-app">
+  <!-- Header Banner -->
+  <header class="space-y-4 text-center sm:text-left border-b border-hairline/60 pb-8">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-950 text-emerald-300 border border-emerald-800">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      {d.badge}
+    </div>
+    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-ink">
+      {d.title}
+    </h1>
+    <p class="text-base sm:text-lg text-muted max-w-4xl leading-relaxed">
+      {d.subtitle}
+    </p>
+  </header>
+
+  <!-- Main Simulator Layout (2 Columns) -->
+  <main class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <!-- Controls (Left 6 Cols) -->
+    <div class="lg:col-span-6 bg-surface-soft border border-hairline rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
+      <div class="border-b border-hairline/60 pb-4">
+        <h2 class="text-lg font-bold text-ink tracking-tight flex items-center gap-2">
+          <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+          </svg>
+          {d.controlsTitle}
+        </h2>
+        <p class="text-xs text-muted mt-1">{d.controlsSub}</p>
+      </div>
+
+      <!-- Presets Selector -->
+      <div class="space-y-2">
+        <label class="text-xs font-bold uppercase tracking-wider text-muted block">
+          {d.presetsTitle}
+        </label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <button type="button" id="btn-preset-pea" class="text-left p-2.5 rounded-xl border border-hairline bg-surface hover:border-emerald-500/50 hover:bg-emerald-500/5 transition text-xs font-medium text-ink">
+            🌱 {d.presetPeaProtein.split('(')[0]}
+          </button>
+          <button type="button" id="btn-preset-oat" class="text-left p-2.5 rounded-xl border border-hairline bg-surface hover:border-emerald-500/50 hover:bg-emerald-500/5 transition text-xs font-medium text-ink">
+            🌾 {d.presetOatBetaGlucan.split('(')[0]}
+          </button>
+          <button type="button" id="btn-preset-antho" class="text-left p-2.5 rounded-xl border border-hairline bg-surface hover:border-emerald-500/50 hover:bg-emerald-500/5 transition text-xs font-medium text-ink">
+            🫐 {d.presetAnthocyaninCollagen.split('(')[0]}
+          </button>
+          <button type="button" id="btn-preset-probiotic" class="text-left p-2.5 rounded-xl border border-hairline bg-surface hover:border-emerald-500/50 hover:bg-emerald-500/5 transition text-xs font-medium text-ink">
+            🥛 {d.presetProbioticCereal.split('(')[0]}
+          </button>
+        </div>
+        <button type="button" id="btn-preset-hazard" class="w-full text-left p-2.5 rounded-xl border border-rose-800/40 bg-rose-950/20 hover:bg-rose-950/40 transition text-xs font-medium text-rose-300">
+          ⚠️ {d.presetHazard.split('(')[0]}
+        </button>
+      </div>
+
+      <!-- Parameter Inputs -->
+      <div class="space-y-4 pt-2">
+        <!-- System Architecture -->
+        <div class="space-y-1.5">
+          <label for="input-system" class="text-xs font-semibold text-ink flex justify-between">
+            <span>{d.systemLabel}</span>
+          </label>
+          <select id="input-system" class="w-full rounded-xl border border-hairline bg-surface px-3 py-2 text-xs font-medium text-ink focus:outline-hidden focus:ring-2 focus:ring-emerald-500">
+            {scfxData.systemArchitectures.map(s => (
+              <option value={s.id}>{s.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted">{d.systemHelp}</p>
+        </div>
+
+        <!-- Feedstock Biomaterial -->
+        <div class="space-y-1.5">
+          <label for="input-feedstock" class="text-xs font-semibold text-ink flex justify-between">
+            <span>{d.feedstockLabel}</span>
+          </label>
+          <select id="input-feedstock" class="w-full rounded-xl border border-hairline bg-surface px-3 py-2 text-xs font-medium text-ink focus:outline-hidden focus:ring-2 focus:ring-emerald-500">
+            {scfxData.bioproductFeedstocks.map(f => (
+              <option value={f.id}>{f.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted">{d.feedstockHelp}</p>
+        </div>
+
+        <!-- scCO2 Injection Pressure -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label for="input-pressure" class="text-xs font-semibold text-ink">
+              {d.pressureLabel}
+            </label>
+            <span id="display-pressure" class="text-xs font-mono font-bold text-emerald-400">180 bar</span>
+          </div>
+          <input type="range" id="input-pressure" min="80" max="280" step="5" value="180" class="w-full accent-emerald-500 cursor-pointer" />
+          <p class="text-[11px] text-muted">{d.pressureHelp}</p>
+        </div>
+
+        <!-- Melt Temperature -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label for="input-temp" class="text-xs font-semibold text-ink">
+              {d.tempLabel}
+            </label>
+            <span id="display-temp" class="text-xs font-mono font-bold text-emerald-400">65 °C</span>
+          </div>
+          <input type="range" id="input-temp" min="40" max="125" step="1" value="65" class="w-full accent-emerald-500 cursor-pointer" />
+          <p class="text-[11px] text-muted">{d.tempHelp}</p>
+        </div>
+
+        <!-- scCO2 Dosing Percentage -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label for="input-co2-dose" class="text-xs font-semibold text-ink">
+              {d.co2DoseLabel}
+            </label>
+            <span id="display-co2-dose" class="text-xs font-mono font-bold text-emerald-400">2.0 wt%</span>
+          </div>
+          <input type="range" id="input-co2-dose" min="0.2" max="3.5" step="0.1" value="2.0" class="w-full accent-emerald-500 cursor-pointer" />
+          <p class="text-[11px] text-muted">{d.co2DoseHelp}</p>
+        </div>
+
+        <!-- Screw Speed RPM -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label for="input-screw-speed" class="text-xs font-semibold text-ink">
+              {d.screwSpeedLabel}
+            </label>
+            <span id="display-screw-speed" class="text-xs font-mono font-bold text-emerald-400">280 RPM</span>
+          </div>
+          <input type="range" id="input-screw-speed" min="100" max="450" step="10" value="280" class="w-full accent-emerald-500 cursor-pointer" />
+          <p class="text-[11px] text-muted">{d.screwSpeedHelp}</p>
+        </div>
+
+        <!-- Feed Moisture Content -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label for="input-moisture" class="text-xs font-semibold text-ink">
+              {d.moistureLabel}
+            </label>
+            <span id="display-moisture" class="text-xs font-mono font-bold text-emerald-400">24.0 %</span>
+          </div>
+          <input type="range" id="input-moisture" min="15.0" max="30.0" step="0.5" value="24.0" class="w-full accent-emerald-500 cursor-pointer" />
+          <p class="text-[11px] text-muted">{d.moistureHelp}</p>
+        </div>
+
+        <!-- Die Pressure Drop Rate dP/dt -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label for="input-dpdt" class="text-xs font-semibold text-ink">
+              {d.dpdtLabel}
+            </label>
+            <span id="display-dpdt" class="text-xs font-mono font-bold text-emerald-400">3.2 GPa/s</span>
+          </div>
+          <input type="range" id="input-dpdt" min="1.0" max="5.0" step="0.1" value="3.2" class="w-full accent-emerald-500 cursor-pointer" />
+          <p class="text-[11px] text-muted">{d.dpdtHelp}</p>
+        </div>
+
+        <!-- Closed-Loop scCO2 Recovery Checkbox -->
+        <div class="pt-2">
+          <label class="flex items-center gap-3 p-3 rounded-xl border border-hairline bg-surface hover:bg-surface-elevated cursor-pointer transition">
+            <input type="checkbox" id="input-recovery" checked class="w-4 h-4 accent-emerald-500 rounded cursor-pointer" />
+            <div>
+              <span class="text-xs font-bold text-ink block">{d.recoveryLabel}</span>
+              <span class="text-[11px] text-muted block mt-0.5">{d.recoveryHelp}</span>
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Diagnostics & Results (Right 6 Cols) -->
+    <div class="lg:col-span-6 space-y-6">
+      <div class="bg-surface-soft border border-hairline rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
+        <div class="border-b border-hairline/60 pb-4">
+          <h2 class="text-lg font-bold text-ink tracking-tight flex items-center gap-2">
+            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            {d.diagnosticTitle}
+          </h2>
+          <p class="text-xs text-muted mt-1">{d.diagnosticSub}</p>
+        </div>
+
+        <!-- Primary Indicators Grid (4 Key Cards) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Sectional Expansion Ratio (SEI) -->
+          <div class="p-4 rounded-2xl bg-surface border border-hairline space-y-1">
+            <span class="text-[11px] text-muted font-medium block">{d.expansionRatioLabel}</span>
+            <div class="flex items-baseline gap-2">
+              <span id="res-expansion" class="text-2xl font-black text-emerald-400 font-mono">5.4x</span>
+              <span class="text-[10px] text-muted">Target: 4.5–7.0x</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-1.5 mt-2 overflow-hidden">
+              <div id="bar-expansion" class="bg-emerald-500 h-full rounded-full transition-all" style="width: 77%"></div>
+            </div>
+          </div>
+
+          <!-- Micro-Cell Nucleation Density -->
+          <div class="p-4 rounded-2xl bg-surface border border-hairline space-y-1">
+            <span class="text-[11px] text-muted font-medium block">{d.cellDensityLabel}</span>
+            <div class="flex items-baseline gap-2">
+              <span id="res-cell-density" class="text-2xl font-black text-emerald-400 font-mono">5.6 × 10⁷</span>
+              <span class="text-[10px] text-muted">cells/cm³</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-1.5 mt-2 overflow-hidden">
+              <div id="bar-cell-density" class="bg-emerald-500 h-full rounded-full transition-all" style="width: 80%"></div>
+            </div>
+          </div>
+
+          <!-- Mean Micro-Pore Diameter -->
+          <div class="p-4 rounded-2xl bg-surface border border-hairline space-y-1">
+            <span class="text-[11px] text-muted font-medium block">{d.poreDiameterLabel}</span>
+            <div class="flex items-baseline gap-2">
+              <span id="res-pore-diameter" class="text-2xl font-black text-emerald-400 font-mono">36.0 µm</span>
+              <span class="text-[10px] text-muted">&lt; 50 µm Ultra-Fine</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-1.5 mt-2 overflow-hidden">
+              <div id="bar-pore-diameter" class="bg-emerald-500 h-full rounded-full transition-all" style="width: 72%"></div>
+            </div>
+          </div>
+
+          <!-- Retained Bioactivity & Antioxidants -->
+          <div class="p-4 rounded-2xl bg-surface border border-hairline space-y-1">
+            <span class="text-[11px] text-muted font-medium block">{d.retainedBioactivityLabel}</span>
+            <div class="flex items-baseline gap-2">
+              <span id="res-bioactivity" class="text-2xl font-black text-emerald-400 font-mono">98.4%</span>
+              <span class="text-[10px] text-muted">&gt; 95% Target</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-1.5 mt-2 overflow-hidden">
+              <div id="bar-bioactivity" class="bg-emerald-500 h-full rounded-full transition-all" style="width: 98%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Secondary Metrics Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 border-t border-hairline/60 pt-4">
+          <div class="p-3 rounded-xl bg-surface border border-hairline space-y-1">
+            <span class="text-[10px] text-muted block">{d.smeLabel}</span>
+            <span id="res-sme" class="text-sm font-bold font-mono text-ink">51.5 Wh/kg</span>
+          </div>
+          <div class="p-3 rounded-xl bg-surface border border-hairline space-y-1">
+            <span class="text-[10px] text-muted block">{d.viscosityReductionLabel}</span>
+            <span id="res-viscosity" class="text-sm font-bold font-mono text-ink">62.4%</span>
+          </div>
+          <div class="p-3 rounded-xl bg-surface border border-hairline space-y-1">
+            <span class="text-[10px] text-muted block">{d.voidFractionLabel}</span>
+            <span id="res-void" class="text-sm font-bold font-mono text-ink">81.5%</span>
+          </div>
+        </div>
+
+        <!-- Overall Status Banner -->
+        <div id="status-card" class="p-4 rounded-2xl border border-emerald-500/30 bg-emerald-950/20 space-y-2 transition-all">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-muted">{d.overallStatusLabel}</span>
+            <span id="status-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-900/60 text-emerald-300 border border-emerald-700/50">
+              OPTIMAL MICRO-CELLULAR BIOACTIVE SUPERCRITICAL EXTRUSION
+            </span>
+          </div>
+          <p id="status-desc" class="text-xs text-ink/80 leading-relaxed">
+            The extrusion process operates within the optimal supercritical dissolution window. High gas supersaturation and rapid micro-die decompression yield dense closed-cell micro-pores (25–45 µm) with smooth mouthfeel. Melt temperature remains safely below thermal denaturation thresholds, preserving over 98% of heat-sensitive bioactives and nutrients with 60% lower specific mechanical energy (SME) than steam extrusion.
+          </p>
+        </div>
+      </div>
+
+      <!-- Compliance Badges -->
+      <div class="p-4 rounded-2xl bg-surface-soft border border-hairline flex flex-wrap gap-2 text-xs">
+        <span class="px-2.5 py-1 rounded-lg bg-surface border border-hairline font-mono text-muted">3-A Sanitary Standard 45-03 & 74-07</span>
+        <span class="px-2.5 py-1 rounded-lg bg-surface border border-hairline font-mono text-muted">EHEDG Class I Aseptic</span>
+        <span class="px-2.5 py-1 rounded-lg bg-surface border border-hairline font-mono text-muted">ASME Section VIII Div 1 (350 bar)</span>
+        <span class="px-2.5 py-1 rounded-lg bg-surface border border-hairline font-mono text-muted">FDA 21 CFR § 111 & § 117 cGMP</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- Interactive Diagram Section -->
+  <section class="bg-surface-soft border border-hairline rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
+    <div class="border-b border-hairline/60 pb-4">
+      <h2 class="text-lg font-bold text-ink tracking-tight flex items-center gap-2">
+        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        </svg>
+        {d.diagramTitle}
+      </h2>
+      <p class="text-xs text-muted mt-1">{d.diagramSub}</p>
+    </div>
+
+    <!-- SVG Flow Diagram -->
+    <div class="w-full overflow-x-auto">
+      <svg class="w-full min-w-[760px] h-auto text-ink font-sans" viewBox="0 0 920 440" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="920" height="440" rx="16" fill="#0f172a" stroke="#1e293b" stroke-width="2"/>
+
+        <!-- 1. Supercritical CO2 Delivery & Dosing Module -->
+        <g transform="translate(30, 40)">
+          <rect width="180" height="150" rx="12" fill="#1e293b" stroke="#334155" stroke-width="1.5" />
+          <text x="90" y="28" text-anchor="middle" font-size="12" font-weight="bold" fill="#38bdf8">scCO2 Precision Dosing Skid</text>
+          <text x="90" y="46" text-anchor="middle" font-size="10" fill="#94a3b8">P: 100–300 bar | T: 35–55°C</text>
+          
+          <!-- Booster Pump Graphic -->
+          <circle cx="50" cy="88" r="22" fill="#0f172a" stroke="#38bdf8" stroke-width="2" />
+          <path d="M 40 88 L 60 88 M 50 78 L 50 98" stroke="#38bdf8" stroke-width="2" />
+          <text x="50" y="122" text-anchor="middle" font-size="9" fill="#94a3b8">Syringe / Diaphragm</text>
+
+          <!-- Coriolis Meter -->
+          <rect x="95" y="74" width="65" height="28" rx="6" fill="#0f172a" stroke="#10b981" stroke-width="1.5" />
+          <text x="127" y="92" text-anchor="middle" font-size="9" font-weight="bold" fill="#10b981">Coriolis Mass Flow</text>
+          
+          <text x="90" y="142" text-anchor="middle" font-size="9" fill="#38bdf8">scCO2 Injection: 0.5–3.5 wt%</text>
+        </g>
+
+        <!-- Connection Arrow from CO2 skid to Extruder Barrel -->
+        <path d="M 210 115 L 260 115" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrow)" />
+
+        <!-- 2. Twin-Screw Extruder Barrel Section -->
+        <g transform="translate(260, 30)">
+          <rect width="360" height="280" rx="14" fill="#0b1329" stroke="#38bdf8" stroke-width="2" />
+          <text x="180" y="26" text-anchor="middle" font-size="12" font-weight="bold" fill="#38bdf8">Twin-Screw SCFX Extrusion Barrel</text>
+          <text x="180" y="44" text-anchor="middle" font-size="10" fill="#94a3b8">Low Melt Temp: 45–75°C | Modular Screws (L/D 36:1)</text>
+
+          <!-- Barrel Heating/Cooling Jackets -->
+          <rect x="20" y="65" width="320" height="20" rx="4" fill="#1e293b" stroke="#334155" stroke-width="1" />
+          <text x="180" y="79" text-anchor="middle" font-size="9" fill="#38bdf8">Zone 1–8 Decoupled Glycol/Electric Thermal Jackets</text>
+
+          <!-- Intermeshing Twin Screws -->
+          <g transform="translate(20, 95)">
+            <rect width="320" height="70" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1.5" />
+            <!-- Screw Shaft 1 -->
+            <line x1="10" y1="20" x2="310" y2="20" stroke="#94a3b8" stroke-width="3" />
+            <path d="M 20 10 Q 35 30 50 10 Q 65 30 80 10 Q 95 30 110 10 Q 125 30 140 10 Q 155 30 170 10 Q 185 30 200 10 Q 215 30 230 10 Q 245 30 260 10 Q 275 30 290 10" stroke="#e2e8f0" stroke-width="2" fill="none" />
+            
+            <!-- Screw Shaft 2 -->
+            <line x1="10" y1="50" x2="310" y2="50" stroke="#94a3b8" stroke-width="3" />
+            <path d="M 20 40 Q 35 60 50 40 Q 65 60 80 40 Q 95 60 110 40 Q 125 60 140 40 Q 155 60 170 40 Q 185 60 200 40 Q 215 60 230 40 Q 245 60 260 40 Q 275 60 290 40" stroke="#cbd5e1" stroke-width="2" fill="none" />
+
+            <!-- scCO2 Injection Port Indicator -->
+            <polygon points="170,-15 180,-5 160,-5" fill="#38bdf8" />
+            <text x="170" y="-18" text-anchor="middle" font-size="8" font-weight="bold" fill="#38bdf8">scCO2 Port</text>
+          </g>
+
+          <!-- Micro-Viscosity Reduction Callout -->
+          <rect x="30" y="180" width="300" height="40" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1" />
+          <text x="180" y="198" text-anchor="middle" font-size="9" fill="#10b981">scCO2 Dissolution &amp; Molecular Plasticization</text>
+          <text x="180" y="212" text-anchor="middle" font-size="8" fill="#94a3b8">Dough Viscosity Drops 50–70% | Specific Mechanical Energy &lt;60 Wh/kg</text>
+
+          <text x="180" y="250" text-anchor="middle" font-size="9" fill="#e0f2fe">Native Folded Bioactives &amp; Live Cultures Intact</text>
+          <text x="180" y="268" text-anchor="middle" font-size="8" fill="#64748b">3-A 45-03 Electropolished 316L Stainless Steel</text>
+        </g>
+
+        <!-- Connection from Barrel to Die -->
+        <path d="M 620 150 L 670 150" stroke="#10b981" stroke-width="3" />
+
+        <!-- 3. Decompression Die & Rotary Face Cutter -->
+        <g transform="translate(670, 30)">
+          <rect width="220" height="280" rx="14" fill="#1e293b" stroke="#10b981" stroke-width="2" />
+          <text x="110" y="26" text-anchor="middle" font-size="12" font-weight="bold" fill="#10b981">Die &amp; Rotary Cutter</text>
+          <text x="110" y="44" text-anchor="middle" font-size="10" fill="#94a3b8">Decompression dP/dt &gt; 3 GPa/s</text>
+
+          <!-- Micro-Orifice Die Plate -->
+          <rect x="20" y="70" width="25" height="100" rx="4" fill="#475569" stroke="#94a3b8" stroke-width="1.5" />
+          <line x1="20" y1="95" x2="45" y2="95" stroke="#f59e0b" stroke-width="3" />
+          <line x1="20" y1="120" x2="45" y2="120" stroke="#f59e0b" stroke-width="3" />
+          <line x1="20" y1="145" x2="45" y2="145" stroke="#f59e0b" stroke-width="3" />
+
+          <!-- High-Speed Rotary Cutter Blade -->
+          <g transform="translate(60, 120)">
+            <circle cx="0" cy="0" r="18" fill="#0f172a" stroke="#ef4444" stroke-width="1.5" />
+            <line x1="-25" y1="0" x2="25" y2="0" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" />
+            <line x1="0" y1="-25" x2="0" y2="25" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" />
+            <text x="0" y="38" text-anchor="middle" font-size="8" fill="#ef4444">Servo Cutter</text>
+          </g>
+
+          <!-- Micro-Cellular Expanded Puffs -->
+          <g transform="translate(130, 80)">
+            <!-- Puff 1 -->
+            <circle cx="20" cy="20" r="14" fill="#0f172a" stroke="#10b981" stroke-width="1.5" />
+            <circle cx="16" cy="16" r="2.5" fill="#38bdf8" />
+            <circle cx="24" cy="18" r="2" fill="#38bdf8" />
+            <circle cx="18" cy="24" r="2" fill="#38bdf8" />
+            <!-- Puff 2 -->
+            <circle cx="55" cy="50" r="16" fill="#0f172a" stroke="#10b981" stroke-width="1.5" />
+            <circle cx="50" cy="46" r="2.5" fill="#38bdf8" />
+            <circle cx="60" cy="48" r="2" fill="#38bdf8" />
+            <circle cx="54" cy="56" r="2.5" fill="#38bdf8" />
+            <!-- Puff 3 -->
+            <circle cx="25" cy="85" r="15" fill="#0f172a" stroke="#10b981" stroke-width="1.5" />
+            <circle cx="22" cy="82" r="2" fill="#38bdf8" />
+            <circle cx="29" cy="87" r="2" fill="#38bdf8" />
+          </g>
+
+          <text x="110" y="210" text-anchor="middle" font-size="10" font-weight="bold" fill="#10b981">Homogeneous Micro-Pores</text>
+          <text x="110" y="226" text-anchor="middle" font-size="9" fill="#94a3b8">Pore Size: 25–45 µm | Void: 80%</text>
+          <text x="110" y="242" text-anchor="middle" font-size="8" fill="#64748b">Crisp Fracture &bull; Instant Dissolution</text>
+        </g>
+
+        <!-- 4. Closed-Loop CO2 Vacuum Scavenger & Recovery -->
+        <g transform="translate(30, 240)">
+          <rect width="180" height="150" rx="12" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" />
+          <text x="90" y="26" text-anchor="middle" font-size="12" font-weight="bold" fill="#38bdf8">CO2 Recovery Scavenger</text>
+          <text x="90" y="44" text-anchor="middle" font-size="10" fill="#94a3b8">Closed-Loop Circuit (&gt;95%)</text>
+
+          <!-- Condenser Chiller Coil -->
+          <path d="M 40 75 Q 60 60 80 75 Q 100 90 120 75 Q 140 60 160 75" stroke="#38bdf8" stroke-width="2.5" fill="none" />
+          <path d="M 40 100 Q 60 85 80 100 Q 100 115 120 100 Q 140 85 160 100" stroke="#38bdf8" stroke-width="2.5" fill="none" />
+
+          <text x="90" y="125" text-anchor="middle" font-size="9" fill="#10b981">Cryogenic Liquefaction Chiller</text>
+          <text x="90" y="140" text-anchor="middle" font-size="8" fill="#94a3b8">Zero Atmospheric Venting</text>
+        </g>
+
+        <!-- Hood collection line from Die back to Recovery Skid -->
+        <path d="M 780 310 L 780 370 L 210 370" stroke="#38bdf8" stroke-width="1.8" stroke-dasharray="4 3" />
+        <text x="495" y="364" text-anchor="middle" font-size="9" fill="#38bdf8">&larr; Hood Vacuum Scavenger Line (&gt;95% CO2 Recaptured) &larr;</text>
+
+        <!-- Arrow Def -->
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8" />
+          </marker>
+        </defs>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Scientific Principles & Engineering Foundations -->
+  <section class="bg-surface-soft border border-hairline rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
+    <div class="border-b border-hairline/60 pb-4">
+      <h2 class="text-lg font-bold text-ink tracking-tight flex items-center gap-2">
+        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+        {d.scienceTitle}
+      </h2>
+      <p class="text-xs text-muted mt-1">{d.scienceSub}</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-xs text-ink/80 leading-relaxed">
+      <!-- 1. Dissolution & Plasticization -->
+      <div class="p-5 rounded-2xl bg-surface border border-hairline space-y-3">
+        <div class="flex items-center gap-2 text-emerald-400 font-bold">
+          <span class="w-6 h-6 rounded-full bg-emerald-950 flex items-center justify-center text-xs border border-emerald-800">1</span>
+          <h3>scCO2 Dissolution &amp; Henry's Law</h3>
+        </div>
+        <p>
+          At pressures exceeding its critical point (Pc = 73.8 bar, Tc = 31.1°C), carbon dioxide exhibits gas-like diffusivity and liquid-like density. Injected into the extruder barrel at 100–280 bar, scCO2 dissolves into the hydrated protein-starch melt following Henry's law:
+        </p>
+        <div class="p-2.5 rounded-lg bg-surface-soft font-mono text-emerald-300 text-center">
+          C_CO2 = K_H(T) &times; P_scCO2
+        </div>
+        <p>
+          The dissolved gas molecules wedge between biopolymer chains, increasing free volume and acting as a molecular plasticizer. This reduces melt viscosity by 40–70% and lowers glass transition temperature (Tg), enabling smooth transport and extrusion at 45–65°C rather than standard 150°C steam melting.
+        </p>
+      </div>
+
+      <!-- 2. Explosive Micro-Cellular Nucleation -->
+      <div class="p-5 rounded-2xl bg-surface border border-hairline space-y-3">
+        <div class="flex items-center gap-2 text-emerald-400 font-bold">
+          <span class="w-6 h-6 rounded-full bg-emerald-950 flex items-center justify-center text-xs border border-emerald-800">2</span>
+          <h3>Homogeneous Micro-Cellular Nucleation</h3>
+        </div>
+        <p>
+          As the pressurized dough approaches the die orifice, it undergoes extreme thermodynamic instability characterized by an instantaneous pressure drop rate (dP/dt &gt; 2.5 GPa/s). Classical nucleation theory dictates the homogeneous bubble nucleation rate:
+        </p>
+        <div class="p-2.5 rounded-lg bg-surface-soft font-mono text-emerald-300 text-center">
+          J_nuc = J_0 &times; exp(&minus;&Delta;G* / k_B T)
+        </div>
+        <p>
+          High supersaturation collapses the activation energy barrier (&Delta;G*), driving simultaneous spontaneous nucleation of billions of micro-bubbles per cm³ (10⁶–10⁸ cells/cm³). Unlike coarse steam voids (&gt;500 µm), SCFX cells average 25–45 µm with uniform closed-cell walls.
+        </p>
+      </div>
+
+      <!-- 3. Bioactive Retention & 3-A Standards -->
+      <div class="p-5 rounded-2xl bg-surface border border-hairline space-y-3">
+        <div class="flex items-center gap-2 text-emerald-400 font-bold">
+          <span class="w-6 h-6 rounded-full bg-emerald-950 flex items-center justify-center text-xs border border-emerald-800">3</span>
+          <h3>Non-Thermal Preservation &amp; 3-A Compliance</h3>
+        </div>
+        <p>
+          Thermal inactivation of sensitive plant polyphenols, immunoglobulins, and probiotic spores follows Arrhenius kinetics:
+        </p>
+        <div class="p-2.5 rounded-lg bg-surface-soft font-mono text-emerald-300 text-center">
+          k_deg = A_0 &times; exp(&minus;E_a / R T_melt)
+        </div>
+        <p>
+          By maintaining melt temperatures strictly below 70°C, thermal degradation rate constants approach zero, retaining &gt;97% of bioactives and eliminating acrylamide (&lt;10 ppb). Product-contact surfaces strictly meet 3-A Sanitary Standard 45-03 &amp; 74-07 and EHEDG Class I with electropolished AISI 316L (Ra &le; 0.38 µm).
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Comparative Technology Table -->
+  <section class="bg-surface-soft border border-hairline rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
+    <div class="border-b border-hairline/60 pb-4">
+      <h2 class="text-lg font-bold text-ink tracking-tight flex items-center gap-2">
+        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        </svg>
+        {d.tableTitle}
+      </h2>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-xs text-left border-collapse">
+        <thead>
+          <tr class="border-b border-hairline text-muted uppercase tracking-wider text-[10px]">
+            <th class="py-3 px-4">Technology</th>
+            <th class="py-3 px-4">Operating Temp</th>
+            <th class="py-3 px-4">Blowing Agent</th>
+            <th class="py-3 px-4">Pore Morphology</th>
+            <th class="py-3 px-4">Cell Density</th>
+            <th class="py-3 px-4">Retained Bioactivity</th>
+            <th class="py-3 px-4">SME (Wh/kg)</th>
+            <th class="py-3 px-4">Acrylamide Risk</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline/60">
+          {scfxData.comparisonTechnologies.map((row, idx) => (
+            <tr class={idx === 0 ? "bg-emerald-950/20 font-semibold text-ink" : "text-ink/80 hover:bg-surface/50 transition"}>
+              <td class="py-3 px-4 font-bold flex items-center gap-2">
+                {idx === 0 && <span class="w-2 h-2 rounded-full bg-emerald-400"></span>}
+                {row.technology}
+              </td>
+              <td class="py-3 px-4">{row.operatingTemperatureRange}</td>
+              <td class="py-3 px-4">{row.blowingAgent}</td>
+              <td class="py-3 px-4">{row.cellMorphology}</td>
+              <td class="py-3 px-4">{row.microCellDensityPerCm3}</td>
+              <td class="py-3 px-4">{row.retainedBioactivity}</td>
+              <td class="py-3 px-4 font-mono">{row.specificMechanicalEnergyWhPerKg}</td>
+              <td class="py-3 px-4">{row.acrylamideRisk}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script is:inline define:vars={{ scfxDataJson: JSON.stringify(scfxData) }}>
+  (function() {
+    const data = JSON.parse(scfxDataJson);
+
+    // Elements
+    const inputSystem = document.getElementById('input-system');
+    const inputFeedstock = document.getElementById('input-feedstock');
+    const inputPressure = document.getElementById('input-pressure');
+    const inputTemp = document.getElementById('input-temp');
+    const inputCo2Dose = document.getElementById('input-co2-dose');
+    const inputScrewSpeed = document.getElementById('input-screw-speed');
+    const inputMoisture = document.getElementById('input-moisture');
+    const inputDpdt = document.getElementById('input-dpdt');
+    const inputRecovery = document.getElementById('input-recovery');
+
+    const displayPressure = document.getElementById('display-pressure');
+    const displayTemp = document.getElementById('display-temp');
+    const displayCo2Dose = document.getElementById('display-co2-dose');
+    const displayScrewSpeed = document.getElementById('display-screw-speed');
+    const displayMoisture = document.getElementById('display-moisture');
+    const displayDpdt = document.getElementById('display-dpdt');
+
+    const resExpansion = document.getElementById('res-expansion');
+    const resCellDensity = document.getElementById('res-cell-density');
+    const resPoreDiameter = document.getElementById('res-pore-diameter');
+    const resBioactivity = document.getElementById('res-bioactivity');
+    const resSme = document.getElementById('res-sme');
+    const resViscosity = document.getElementById('res-viscosity');
+    const resVoid = document.getElementById('res-void');
+
+    const barExpansion = document.getElementById('bar-expansion');
+    const barCellDensity = document.getElementById('bar-cell-density');
+    const barPoreDiameter = document.getElementById('bar-pore-diameter');
+    const barBioactivity = document.getElementById('bar-bioactivity');
+
+    const statusCard = document.getElementById('status-card');
+    const statusBadge = document.getElementById('status-badge');
+    const statusDesc = document.getElementById('status-desc');
+
+    function calculate() {
+      const p = parseFloat(inputPressure.value);
+      const t = parseFloat(inputTemp.value);
+      const dose = parseFloat(inputCo2Dose.value);
+      const rpm = parseFloat(inputScrewSpeed.value);
+      const moisture = parseFloat(inputMoisture.value);
+      const dpdt = parseFloat(inputDpdt.value);
+      const recovery = inputRecovery.checked;
+
+      // Update Slider Displays
+      displayPressure.textContent = `${p} bar`;
+      displayTemp.textContent = `${t} °C`;
+      displayCo2Dose.textContent = `${dose.toFixed(1)} wt%`;
+      displayScrewSpeed.textContent = `${rpm} RPM`;
+      displayMoisture.textContent = `${moisture.toFixed(1)} %`;
+      displayDpdt.textContent = `${dpdt.toFixed(1)} GPa/s`;
+
+      const feedstock = data.bioproductFeedstocks.find(f => f.id === inputFeedstock.value) || data.bioproductFeedstocks[0];
+      const system = data.systemArchitectures.find(s => s.id === inputSystem.value) || data.systemArchitectures[0];
+
+      // 1. Viscosity reduction via scCO2 plasticization
+      // Viscosity reduction scales with dissolved CO2 and temperature
+      const plasticizationFactor = Math.min(78, (dose * 18.5) + ((t - 40) * 0.22) + ((p - 80) * 0.08));
+      const finalViscosity = Math.max(45, feedstock.initialViscosityPaS * (1 - plasticizationFactor / 100));
+
+      // 2. Sectional Expansion Ratio (SEI / ER)
+      // Expansion increases with CO2 dose & pressure up to an optimal ceiling, drops if overheated (>95°C) or starved (<0.8%)
+      let expansion = 2.0 + (dose * 1.5) + ((p - 80) * 0.012) + ((dpdt - 1.0) * 0.45);
+      if (t > 90) {
+        // Overheat causes cell rupture & collapse
+        expansion -= (t - 90) * 0.08;
+      }
+      if (moisture < 18) {
+        expansion -= (18 - moisture) * 0.15;
+      }
+      expansion = Math.max(1.8, Math.min(7.5, expansion));
+
+      // 3. Cell Density (cells/cm³)
+      // Homogeneous nucleation driven by (P_scCO2 - P_sat) and dpdt
+      const logDensity = 5.0 + ((p - 80) / 200) * 2.2 + ((dpdt - 1.0) / 4.0) * 1.2 - (t > 95 ? (t - 95) * 0.04 : 0);
+      const cellDensityVal = Math.pow(10, Math.max(4.2, Math.min(8.2, logDensity)));
+
+      // 4. Mean Micro-Pore Diameter (microns)
+      // High cell density + high expansion creates uniform micro-cells (20-60 µm); low cell density causes coarse cells (>300 µm)
+      const voidFraction = Math.max(50, Math.min(88, 55 + (expansion - 2.0) * 6.0));
+      let poreDiameter = Math.pow((6 * (voidFraction / 100)) / (Math.PI * cellDensityVal), 1/3) * 10000;
+      if (poreDiameter < 22) poreDiameter = 22;
+      if (poreDiameter > 520) poreDiameter = 520;
+
+      // 5. Retained Bioactivity (%)
+      // Thermally sensitive; drops above feedstock.thermalSensitivityThresholdCelsius
+      let bioactivity = 99.5;
+      if (t > feedstock.thermalSensitivityThresholdCelsius) {
+        const excessHeat = t - feedstock.thermalSensitivityThresholdCelsius;
+        bioactivity -= Math.pow(excessHeat, 1.35) * 1.2;
+      }
+      // High screw shear can cause minor degradation
+      if (rpm > 350) {
+        bioactivity -= (rpm - 350) * 0.02;
+      }
+      bioactivity = Math.max(38.0, Math.min(99.6, bioactivity));
+
+      // 6. Specific Mechanical Energy (SME, Wh/kg)
+      // SME = (Torque * RPM) / Throughput; reduced by plasticization
+      const baseSme = system.specificMechanicalEnergyWhPerKg;
+      let smeVal = baseSme * (rpm / 260) * (1 - plasticizationFactor / 180);
+      if (moisture < 20) smeVal += (20 - moisture) * 2.5;
+      smeVal = Math.max(32, Math.min(185, smeVal));
+
+      // Update DOM
+      resExpansion.textContent = `${expansion.toFixed(1)}x`;
+      resCellDensity.textContent = cellDensityVal >= 1e6 ? `${(cellDensityVal / 1e6).toFixed(1)} × 10⁶` : `${(cellDensityVal / 1e3).toFixed(0)} × 10³`;
+      resPoreDiameter.textContent = `${poreDiameter.toFixed(1)} µm`;
+      resBioactivity.textContent = `${bioactivity.toFixed(1)}%`;
+      resSme.textContent = `${smeVal.toFixed(1)} Wh/kg`;
+      resViscosity.textContent = `${plasticizationFactor.toFixed(1)}%`;
+      resVoid.textContent = `${voidFraction.toFixed(1)}%`;
+
+      barExpansion.style.width = `${Math.min(100, (expansion / 7.2) * 100)}%`;
+      barCellDensity.style.width = `${Math.min(100, (logDensity / 8.2) * 100)}%`;
+      barPoreDiameter.style.width = `${Math.min(100, Math.max(15, 100 - (poreDiameter / 500) * 100))}%`;
+      barBioactivity.style.width = `${Math.min(100, bioactivity)}%`;
+
+      // Status Assessment
+      if (t > 95 || bioactivity < 75.0) {
+        statusCard.className = "p-4 rounded-2xl border border-rose-800/50 bg-rose-950/25 space-y-2 transition-all";
+        statusBadge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-900/60 text-rose-300 border border-rose-700/50";
+        statusBadge.textContent = "THERMAL SCORCH & VOLATILE BIOACTIVE DEGRADATION HAZARD";
+        statusDesc.textContent = `Melt temperature (${t}°C) exceeds thermal stability thresholds for ${feedstock.name}. Active bioactives are denaturing rapidly (retention: ${bioactivity.toFixed(1)}%), and bubble walls are rupturing into irregular, coarse macro-pores (${poreDiameter.toFixed(0)} µm) with Maillard off-flavors. Immediate barrel cooling and scCO2 pressure increase required.`;
+      } else if (dose < 0.8 || p < 110) {
+        statusCard.className = "p-4 rounded-2xl border border-amber-800/50 bg-amber-950/25 space-y-2 transition-all";
+        statusBadge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-900/60 text-amber-300 border border-amber-700/50";
+        statusBadge.textContent = "INSUFFICIENT scCO2 DOSING & HIGH SME ENERGY HAZARD";
+        statusDesc.textContent = `Low scCO2 dosing (${dose.toFixed(1)} wt%) or injection pressure (${p} bar) provides inadequate molecular plasticization. The dough remains viscous, driving high motor load (SME: ${smeVal.toFixed(1)} Wh/kg) with limited micro-cellular expansion (${expansion.toFixed(1)}x). Increase scCO2 injection to ≥1.5 wt%.`;
+      } else {
+        statusCard.className = "p-4 rounded-2xl border border-emerald-500/30 bg-emerald-950/20 space-y-2 transition-all";
+        statusBadge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-900/60 text-emerald-300 border border-emerald-700/50";
+        statusBadge.textContent = "OPTIMAL MICRO-CELLULAR BIOACTIVE SUPERCRITICAL EXTRUSION";
+        statusDesc.textContent = `The process operates within optimal supercritical dissolution and explosive micro-cellular nucleation regimes. Rapid die decompression (dP/dt = ${dpdt.toFixed(1)} GPa/s) yields uniform closed-cell micro-pores (${poreDiameter.toFixed(1)} µm) with smooth texture. Low melt temperature (${t}°C) preserves ${bioactivity.toFixed(1)}% of bioactive integrity under 3-A Sanitary Standards 45-03 & 74-07.`;
+      }
+    }
+
+    // Attach Listeners
+    [inputSystem, inputFeedstock, inputPressure, inputTemp, inputCo2Dose, inputScrewSpeed, inputMoisture, inputDpdt, inputRecovery].forEach(el => {
+      if (el) el.addEventListener('input', calculate);
+    });
+
+    // Presets
+    document.getElementById('btn-preset-pea')?.addEventListener('click', () => {
+      inputSystem.value = 'industrial_co_rotating_twin_screw_scfx_extruder';
+      inputFeedstock.value = 'plant_protein_isolate_pea_faba';
+      inputPressure.value = 180;
+      inputTemp.value = 65;
+      inputCo2Dose.value = 2.0;
+      inputScrewSpeed.value = 280;
+      inputMoisture.value = 24.0;
+      inputDpdt.value = 3.2;
+      inputRecovery.checked = true;
+      calculate();
+    });
+
+    document.getElementById('btn-preset-oat')?.addEventListener('click', () => {
+      inputSystem.value = 'industrial_co_rotating_twin_screw_scfx_extruder';
+      inputFeedstock.value = 'whole_grain_oat_beta_glucan_crisp';
+      inputPressure.value = 150;
+      inputTemp.value = 72;
+      inputCo2Dose.value = 1.6;
+      inputScrewSpeed.value = 250;
+      inputMoisture.value = 20.0;
+      inputDpdt.value = 2.8;
+      inputRecovery.checked = true;
+      calculate();
+    });
+
+    document.getElementById('btn-preset-antho')?.addEventListener('click', () => {
+      inputSystem.value = 'counter_rotating_intermeshing_scfx_reactor';
+      inputFeedstock.value = 'marine_collagen_berry_polyphenol_puff';
+      inputPressure.value = 210;
+      inputTemp.value = 52;
+      inputCo2Dose.value = 2.4;
+      inputScrewSpeed.value = 300;
+      inputMoisture.value = 22.0;
+      inputDpdt.value = 3.8;
+      inputRecovery.checked = true;
+      calculate();
+    });
+
+    document.getElementById('btn-preset-probiotic')?.addEventListener('click', () => {
+      inputSystem.value = 'modular_pilot_scale_scfx_line';
+      inputFeedstock.value = 'whey_protein_crisp_isolate';
+      inputPressure.value = 160;
+      inputTemp.value = 48;
+      inputCo2Dose.value = 2.2;
+      inputScrewSpeed.value = 220;
+      inputMoisture.value = 26.0;
+      inputDpdt.value = 3.5;
+      inputRecovery.checked = true;
+      calculate();
+    });
+
+    document.getElementById('btn-preset-hazard')?.addEventListener('click', () => {
+      inputSystem.value = 'industrial_co_rotating_twin_screw_scfx_extruder';
+      inputFeedstock.value = 'plant_protein_isolate_pea_faba';
+      inputPressure.value = 80;
+      inputTemp.value = 125;
+      inputCo2Dose.value = 0.4;
+      inputScrewSpeed.value = 420;
+      inputMoisture.value = 15.0;
+      inputDpdt.value = 1.2;
+      inputRecovery.checked = false;
+      calculate();
+    });
+
+    calculate();
+  })();
+</script>

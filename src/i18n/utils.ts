@@ -166,7 +166,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-continuous-fo-nf-whey-desalting-modeler',
   'tools/commercial-continuous-edbm-acid-recovery-modeler',
   'tools/commercial-continuous-nspef-extraction-modeler',
-  'tools/commercial-continuous-sfd-spray-freeze-drying-modeler'
+  'tools/commercial-continuous-sfd-spray-freeze-drying-modeler',
+  'tools/commercial-continuous-scfx-supercritical-extrusion-modeler'
 ];
 
 const esSlugs = new Set([
