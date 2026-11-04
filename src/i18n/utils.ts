@@ -169,7 +169,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-continuous-sfd-spray-freeze-drying-modeler',
   'tools/commercial-continuous-scfx-supercritical-extrusion-modeler',
   'tools/commercial-continuous-dbd-cpm-cold-plasma-mist-modeler',
-  'tools/commercial-continuous-asw-ms-lipid-crystallization-modeler'
+  'tools/commercial-continuous-asw-ms-lipid-crystallization-modeler',
+  'tools/commercial-continuous-hc-hdj-liposome-modeler'
 ];
 
 const esSlugs = new Set([
