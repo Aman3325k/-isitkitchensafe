@@ -167,7 +167,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-continuous-nspef-extraction-modeler', name: 'Commercial Continuous High-Pressure Nanosecond Pulsed Electric Field (nsPEF) Intracellular Extraction Modeler', category: 'Nanosecond Bioelectrics & Phytochemical Recovery', component: 'CommercialContinuousNspefExtractionModeler.astro', dataFile: 'nspef-extraction-data.json' },
   { slug: 'commercial-continuous-sfd-spray-freeze-drying-modeler', name: 'Commercial Continuous Supercritical CO2 Assisted Spray Freeze-Drying (SFD) Modeler', category: 'Supercritical Cryogenics & Aseptic Spray Lyophilization', component: 'CommercialContinuousSfdSprayFreezeDryingModeler.astro', dataFile: 'sfd-spray-freeze-drying-data.json' },
   { slug: 'commercial-continuous-scfx-supercritical-extrusion-modeler', name: 'Commercial Continuous High-Pressure Supercritical Fluid Extrusion (SCFX) Bioactive Food Matrix Micro-Texturizing Modeler', category: 'Supercritical Extrusion & Aerated Food Matrix Physics', component: 'CommercialContinuousScfxSupercriticalExtrusionModeler.astro', dataFile: 'scfx-supercritical-extrusion-data.json' },
-  { slug: 'commercial-continuous-dbd-cpm-cold-plasma-mist-modeler', name: 'Commercial Continuous Dielectric Barrier Discharge Cold Plasma Mist (DBD-CPM) Post-Harvest Sanitation Modeler', category: 'Atmospheric Non-Thermal Aerosol Physics & Microbiological Safety', component: 'CommercialContinuousDbdCpmColdPlasmaMistModeler.astro', dataFile: 'dbd-cpm-cold-plasma-mist-data.json' }
+  { slug: 'commercial-continuous-dbd-cpm-cold-plasma-mist-modeler', name: 'Commercial Continuous Dielectric Barrier Discharge Cold Plasma Mist (DBD-CPM) Post-Harvest Sanitation Modeler', category: 'Atmospheric Non-Thermal Aerosol Physics & Microbiological Safety', component: 'CommercialContinuousDbdCpmColdPlasmaMistModeler.astro', dataFile: 'dbd-cpm-cold-plasma-mist-data.json' },
+  { slug: 'commercial-continuous-asw-ms-lipid-crystallization-modeler', name: 'Commercial Continuous High-Frequency Acoustic Standing Wave Micro-Streaming (ASW-MS) Lipid Crystallization & Emulsion Modeler', category: 'Megasonic Food Rheology & Non-Thermal Crystallization', component: 'CommercialContinuousAswMsLipidCrystallizationModeler.astro', dataFile: 'asw-ms-lipid-crystallization-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -425,7 +426,8 @@ function auditDatasets() {
     'nspef-extraction-data.json',
     'sfd-spray-freeze-drying-data.json',
     'scfx-supercritical-extrusion-data.json',
-    'dbd-cpm-cold-plasma-mist-data.json'
+    'dbd-cpm-cold-plasma-mist-data.json',
+    'asw-ms-lipid-crystallization-data.json'
 ];
 
   const datasetStats = {};
@@ -665,32 +667,32 @@ function auditGrowthOpportunities() {
     // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Continuous High-Frequency Acoustic Standing Wave Micro-Streaming (ASW-MS) Lipid Crystallization & Emulsion Modeler',
-      category: 'Megasonic Food Rheology & Non-Thermal Crystallization',
-      intent: 'Models continuous high-frequency MHz acoustic micro-streaming, selective shear-induced nucleation of beta-prime polymorphic crystals in cocoa butter and plant lipids, elimination of trans-fat generation, and continuous non-thermal tempering.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '1,050+ US impressions'
-    },
-    {
       title: 'Commercial Continuous High-Pressure Micro-Capillary Hydrodynamic Jet (HC-HDJ) In-Line Liposome Modeler',
       category: 'High-Pressure Nano-Hydrodynamics & Bioactive Encapsulation',
       intent: 'Models continuous high-pressure micro-capillary opposed hydrodynamic jet collision (HC-HDJ, 100–300 MPa) for ultra-narrow nano-liposome sizing (40–80 nm), encapsulation efficiency (>92%), and sanitary 3-A standard compliance.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '920+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '1,080+ US impressions'
     },
     {
       title: 'Commercial Continuous Subcritical Water Dynamic Accelerated Solvent Extraction (SCW-ASE) Polyphenol & Flavonoid Recovery Modeler',
       category: 'Subcritical Fluid Hydrodynamics & Botanical Extraction Physics',
       intent: 'Models continuous pressurized hot subcritical water dynamic extraction (120–220°C, 30–80 bar, sub-boiling liquid phase) with in-line ceramic cross-flow filtration for zero-solvent organic recovery of anthocyanins, proanthocyanidins, and quercetin without toxic ethanol or methanol residues.',
       priority: 'HIGH',
-      estimatedMonthlyVolume: '860+ US impressions'
+      estimatedMonthlyVolume: '940+ US impressions'
     },
     {
       title: 'Commercial Continuous Atmospheric Pulsed High-Voltage Electron Fog (P-HVEF) Aseptic Packaging & Bulk Decontamination Modeler',
       category: 'Atmospheric Pulsed Electron Aerodynamics & In-Line Sterilization',
       intent: 'Models continuous pulsed high-voltage electron cloud generation (P-HVEF, 40–90 kV, 50–200 ns pulses) in dense clean nitrogen-fog curtains for zero-water, zero-chemical in-line sterilization of beverage container preforms and dry bulk powders.',
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '880+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous Supercritical CO2 High-Pressure Micro-Bubble Carbonation & In-Line Sterilization (scCO2-MBC) Modeler',
+      category: 'Dense-Phase Fluid Thermodynamics & Cold Beverage Safety',
+      intent: 'Models continuous high-pressure dense-phase supercritical CO2 micro-bubble dissolution (scCO2-MBC, 75–160 bar, 20–35°C) for simultaneous micro-bubble carbonation, cellular membrane solubilization of beverage spoilage yeasts (Zygosaccharomyces bailii), and zero-heat vitamin retention in craft ciders and botanical tonics.',
       priority: 'MEDIUM',
-      estimatedMonthlyVolume: '790+ US impressions'
+      estimatedMonthlyVolume: '820+ US impressions'
     }
   ];
 
