@@ -165,7 +165,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-continuous-megasonic-standing-wave-separator-modeler',
   'tools/commercial-continuous-fo-nf-whey-desalting-modeler',
   'tools/commercial-continuous-edbm-acid-recovery-modeler',
-  'tools/commercial-continuous-nspef-extraction-modeler'
+  'tools/commercial-continuous-nspef-extraction-modeler',
+  'tools/commercial-continuous-sfd-spray-freeze-drying-modeler'
 ];
 
 const esSlugs = new Set([
