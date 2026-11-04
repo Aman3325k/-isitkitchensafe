@@ -169,7 +169,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-continuous-scfx-supercritical-extrusion-modeler', name: 'Commercial Continuous High-Pressure Supercritical Fluid Extrusion (SCFX) Bioactive Food Matrix Micro-Texturizing Modeler', category: 'Supercritical Extrusion & Aerated Food Matrix Physics', component: 'CommercialContinuousScfxSupercriticalExtrusionModeler.astro', dataFile: 'scfx-supercritical-extrusion-data.json' },
   { slug: 'commercial-continuous-dbd-cpm-cold-plasma-mist-modeler', name: 'Commercial Continuous Dielectric Barrier Discharge Cold Plasma Mist (DBD-CPM) Post-Harvest Sanitation Modeler', category: 'Atmospheric Non-Thermal Aerosol Physics & Microbiological Safety', component: 'CommercialContinuousDbdCpmColdPlasmaMistModeler.astro', dataFile: 'dbd-cpm-cold-plasma-mist-data.json' },
   { slug: 'commercial-continuous-asw-ms-lipid-crystallization-modeler', name: 'Commercial Continuous High-Frequency Acoustic Standing Wave Micro-Streaming (ASW-MS) Lipid Crystallization & Emulsion Modeler', category: 'Megasonic Food Rheology & Non-Thermal Crystallization', component: 'CommercialContinuousAswMsLipidCrystallizationModeler.astro', dataFile: 'asw-ms-lipid-crystallization-data.json' },
-  { slug: 'commercial-continuous-hc-hdj-liposome-modeler', name: 'Commercial Continuous High-Pressure Micro-Capillary Hydrodynamic Jet (HC-HDJ) In-Line Liposome Modeler', category: 'High-Pressure Nano-Hydrodynamics & Bioactive Encapsulation', component: 'CommercialContinuousHcHdjLiposomeModeler.astro', dataFile: 'hc-hdj-liposome-data.json' }
+  { slug: 'commercial-continuous-hc-hdj-liposome-modeler', name: 'Commercial Continuous High-Pressure Micro-Capillary Hydrodynamic Jet (HC-HDJ) In-Line Liposome Modeler', category: 'High-Pressure Nano-Hydrodynamics & Bioactive Encapsulation', component: 'CommercialContinuousHcHdjLiposomeModeler.astro', dataFile: 'hc-hdj-liposome-data.json' },
+  { slug: 'commercial-continuous-scw-ase-extraction-modeler', name: 'Commercial Continuous Subcritical Water Dynamic Accelerated Solvent Extraction (SCW-ASE) Polyphenol & Flavonoid Recovery Modeler', category: 'Subcritical Fluid Hydrodynamics & Botanical Extraction Physics', component: 'CommercialContinuousScwAseExtractionModeler.astro', dataFile: 'scw-ase-extraction-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -429,7 +430,8 @@ function auditDatasets() {
     'scfx-supercritical-extrusion-data.json',
     'dbd-cpm-cold-plasma-mist-data.json',
     'asw-ms-lipid-crystallization-data.json',
-    'hc-hdj-liposome-data.json'
+    'hc-hdj-liposome-data.json',
+    'scw-ase-extraction-data.json'
 ];
 
   const datasetStats = {};
@@ -669,32 +671,32 @@ function auditGrowthOpportunities() {
     // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Continuous Subcritical Water Dynamic Accelerated Solvent Extraction (SCW-ASE) Polyphenol & Flavonoid Recovery Modeler',
-      category: 'Subcritical Fluid Hydrodynamics & Botanical Extraction Physics',
-      intent: 'Models continuous pressurized hot subcritical water dynamic extraction (120–220°C, 30–80 bar, sub-boiling liquid phase) with in-line ceramic cross-flow filtration for zero-solvent organic recovery of anthocyanins, proanthocyanidins, and quercetin without toxic ethanol or methanol residues.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '1,120+ US impressions'
-    },
-    {
       title: 'Commercial Continuous Atmospheric Pulsed High-Voltage Electron Fog (P-HVEF) Aseptic Packaging & Bulk Decontamination Modeler',
       category: 'Atmospheric Pulsed Electron Aerodynamics & In-Line Sterilization',
       intent: 'Models continuous pulsed high-voltage electron cloud generation (P-HVEF, 40–90 kV, 50–200 ns pulses) in dense clean nitrogen-fog curtains for zero-water, zero-chemical in-line sterilization of beverage container preforms and dry bulk powders.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '960+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '1,180+ US impressions'
     },
     {
       title: 'Commercial Continuous Supercritical CO2 High-Pressure Micro-Bubble Carbonation & In-Line Sterilization (scCO2-MBC) Modeler',
       category: 'Dense-Phase Fluid Thermodynamics & Cold Beverage Safety',
       intent: 'Models continuous high-pressure dense-phase supercritical CO2 micro-bubble dissolution (scCO2-MBC, 75–160 bar, 20–35°C) for simultaneous micro-bubble carbonation, cellular membrane solubilization of beverage spoilage yeasts (Zygosaccharomyces bailii), and zero-heat vitamin retention in craft ciders and botanical tonics.',
       priority: 'HIGH',
-      estimatedMonthlyVolume: '890+ US impressions'
+      estimatedMonthlyVolume: '990+ US impressions'
     },
     {
       title: 'Commercial Continuous Dynamic High-Pressure Homogenization-Assisted Pulsed UV-C Light (DHPH-PUVC) Aseptic Fluid Sterilization Modeler',
       category: 'Synergistic Photobiological Hydrodynamics & Cold Liquid Sterilization',
       intent: 'Models continuous turbulent thin-film annular quartz flow coupling high-pressure homogenization shearing (150–250 MPa) with high-intensity pulsed xenon UV-C sterilization (200–280 nm, 30 J/cm²) for >6-log bacterial endospore destruction (Bacillus cereus, Clostridium sporogenes) in cloudy juices and liquid eggs without thermal pasteurization cooked off-notes.',
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '880+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous High-Shear Hydrodynamic Cavitation-Assisted Enzymatic Hydrolysis (HC-AEH) Modeler',
+      category: 'Cavitation Tribochemistry & Industrial Bioprocessing',
+      intent: 'Models continuous rotor-stator controlled hydrodynamic cavitation micro-bubble collapse (30–60 kHz, 10–25 bar) for non-thermal macromolecular unfolding and accelerated multi-enzyme biocatalysis of plant proteins and dietary fiber without thermal enzyme deactivation.',
       priority: 'MEDIUM',
-      estimatedMonthlyVolume: '810+ US impressions'
+      estimatedMonthlyVolume: '780+ US impressions'
     }
   ];
 
