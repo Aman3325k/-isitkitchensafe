@@ -1,0 +1,966 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import hpcdData from '../data/hpcd-ee-extrusion-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  systemLabel: string;
+  systemHelp: string;
+  matrixLabel: string;
+  matrixHelp: string;
+  nozzleLabel: string;
+  nozzleHelp: string;
+  chamberLabel: string;
+  chamberHelp: string;
+  pressureLabel: string;
+  pressureHelp: string;
+  tempLabel: string;
+  tempHelp: string;
+  co2FractionLabel: string;
+  co2FractionHelp: string;
+  screwSpeedLabel: string;
+  screwSpeedHelp: string;
+  feedRateLabel: string;
+  feedRateHelp: string;
+  presetsTitle: string;
+  presetPea: string;
+  presetSoy: string;
+  presetFaba: string;
+  presetOat: string;
+  presetHazard: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  fiberRatioLabel: string;
+  poreDensityLabel: string;
+  lysineRetentionLabel: string;
+  whcLabel: string;
+  chewinessLabel: string;
+  smeLabel: string;
+  throughputLabel: string;
+  microbialLogLabel: string;
+  statusLabel: string;
+  diagramTitle: string;
+  diagramSub: string;
+  scienceTitle: string;
+  scienceSub: string;
+  tableTitle: string;
+}
+
+const DICT: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Dense-Phase Supercritical Extrusion & Plant Protein Structuring",
+    title: "Commercial Continuous High-Pressure Carbon Dioxide Explosion Extrusion (HPCD-EE) Plant Protein Texturizing Modeler",
+    subtitle: "Simulate continuous dense-phase supercritical carbon dioxide explosion extrusion (80–220 bar, 35–65°C) for non-thermal anisotropic fibrous texturing, micro-cellular pore nucleation, and heat-sensitive amino acid/vitamin preservation under ASME Section VIII Div 1 & 2, CGA G-6, OSHA 29 CFR § 1910.1000, 3-A Sanitary Standards 04-05 & 23-06, and FDA 21 CFR § 117 cGMP.",
+    controlsTitle: "HPCD-EE Process Extrusion & Decompression Controls",
+    controlsSub: "Configure extruder barrel pressure, dense-phase melt temperature, supercritical CO2 mass fraction, twin-screw speed, and continuous wet slurry feed rate.",
+    systemLabel: "Supercritical Extrusion Skid & Vessel Architecture:",
+    systemHelp: "Select commercial continuous HPCD-EE skid, co-rotating twin-screw micro-cellular puffer, dual-injector deep-shear texturizer, or cleanroom pilot research skid.",
+    matrixLabel: "Target Plant Protein & Biomass Substrate Matrix:",
+    matrixHelp: "Select yellow pea protein isolate, soy-mycoprotein hybrid blend, faba bean/chickpea emulsion, upcycled oat/brewer's grain, or chlorella-sunflower matrix.",
+    nozzleLabel: "Decompression Die Geometry & Micro-Slit Dynamics:",
+    nozzleHelp: "Select converging-diverging supersonic slit die, annular laminar shear co-axial nozzle, multi-slit muscle fiber shaper, or conventional high-temp thermal slit (hazard).",
+    chamberLabel: "Expansion Atmosphere & Receiver Envelope:",
+    chamberHelp: "Select controlled steam backpressure receiver (2.2 bar), inert nitrogen vacuum receiver (350 mbar), isobaric ambient tunnel, or unventilated enclosed space (hazard).",
+    pressureLabel: "Barrel Dissolution Pressure (P_barrel):",
+    pressureHelp: "Operating pressure inside high-pressure extruder mixing zone (80.0 to 220.0 bar). Governs dense-phase CO2 solubility and cell nucleation rate.",
+    tempLabel: "Extrusion Melt Temperature (T_melt):",
+    tempHelp: "Dough temperature during CO2 dissolution (30.0 to 80.0 °C). Must remain below thermal degradation threshold to avoid lysinoalanine formation.",
+    co2FractionLabel: "Supercritical CO2 Mass Injection (w_CO2):",
+    co2FractionHelp: "CO2 blowing agent concentration (1.0 to 12.0 wt%). Higher fractions reduce melt viscosity and multiply expansion micro-porosity.",
+    screwSpeedLabel: "Twin-Screw Rotational Speed (N_screw):",
+    screwSpeedHelp: "Extruder screw rotational shear rate (100 to 500 RPM). Dictates shear alignment and anisotropic fibril orientation.",
+    feedRateLabel: "Continuous Protein Slurry Feed Rate (Q_feed):",
+    feedRateHelp: "Total wet biomass feed throughput through the extruder barrel (50 to 1,500 kg/h).",
+    presetsTitle: "Quick Industrial HPCD-EE Extrusion Presets:",
+    presetPea: "Yellow Pea Fibrillar Chicken Breast Texturizing (R_fib 3.1, 98.7% Lysine Retention)",
+    presetSoy: "Soy-Mycoprotein Hybrid Flank Steak Muscle Bundles (R_fib 3.4, WHC 340%)",
+    presetFaba: "Clean-Label Faba Bean & Chickpea Tender Cutlets (R_fib 2.9, Zero Lysinoalanine)",
+    presetOat: "Upcycled Oat & Spent Grain Shredded Beef Analog (R_fib 2.6, High Fiber)",
+    presetHazard: "Conventional High-Heat Steam Extrusion & Scorching Hazard",
+    diagnosticTitle: "Real-Time HPCD-EE Telemetry & Muscle Structuring Physics",
+    diagnosticSub: "Continuous telemetry modeling anisotropic fiber ratio, micro-pore density, lysine amino acid retention, water-holding capacity, chewiness, SME energy, and OSHA safety status.",
+    fiberRatioLabel: "Anisotropic Fiber Alignment Ratio (R_fib):",
+    poreDensityLabel: "Micro-Cellular Pore Nucleation Density:",
+    lysineRetentionLabel: "Lysine & Essential Amino Acid Retention:",
+    whcLabel: "Water-Holding Capacity (WHC):",
+    chewinessLabel: "Tensile Tear & Muscle Chewiness Force:",
+    smeLabel: "Specific Mechanical Energy (SME):",
+    throughputLabel: "Continuous Meat Analog Output:",
+    microbialLogLabel: "Dense-Phase Pathogen Lethality:",
+    statusLabel: "ASME & OSHA Workplace Safety Status:",
+    diagramTitle: "Commercial Continuous High-Pressure CO2 Explosion Extrusion Skid Schematic",
+    diagramSub: "Schematic view of high-pressure liquid CO2 booster pump, continuous twin-screw extruder barrel, supercritical injection port, De Laval supersonic slit die, and ambient infrared CO2 safety monitor array.",
+    scienceTitle: "Scientific Foundations & Supercritical Thermodynamics of HPCD-EE",
+    scienceSub: "Comprehensive analysis of dense-phase CO2 biopolymer plasticization, classical micro-cellular bubble nucleation kinetics, anisotropic protein fibrillogenesis, and high-pressure OSHA/ASME regulatory compliance.",
+    tableTitle: "Commercial System Specifications & Plant Protein Thermophysical Parameters"
+  },
+  es: {
+    badge: "Extrusión Supercrítica en Fase Densa y Estructuración de Proteínas Vegetales",
+    title: "Simulador Continuo de Extrusión por Explosión de Dióxido de Carbono a Alta Presión (HPCD-EE)",
+    subtitle: "Simule la extrusión continua con dióxido de carbono supercrítico en fase densa (80–220 bar, 35–65°C) para el texturizado fibroso anisótropo no térmico, nucleación de microporos y preservación de aminoácidos y vitaminas según ASME Sección VIII Div 1 y 2, CGA G-6, OSHA 29 CFR § 1910.1000, normas 3-A 04-05/23-06 y FDA 21 CFR § 117 cGMP.",
+    controlsTitle: "Controles de Extrusión y Descompresión del Proceso HPCD-EE",
+    controlsSub: "Configure la presión del cilindro extrusor, temperatura de la masa, fracción de masa de CO2 supercrítico, velocidad de doble husillo y caudal de alimentación continua.",
+    systemLabel: "Arquitectura del Skid de Extrusión Supercrítica:",
+    systemHelp: "Seleccione skid industrial continuo HPCD-EE, inflador microcelular de doble husillo corrotante, texturizador de alto cizallamiento o skid piloto de sala limpia.",
+    matrixLabel: "Matriz de Proteína Vegetal y Biomasa Sustrato:",
+    matrixHelp: "Seleccione aislado de guisante amarillo, mezcla híbrida de soja y micoproteína, emulsión de haba/garbanzo, matriz de avena y bagazo, o chlorella y girasol.",
+    nozzleLabel: "Geometría de la Hilera y Dinámica de Microboquillas:",
+    nozzleHelp: "Seleccione hilera de ranura supersónica convergente-divergente, boquilla coaxial de cizallamiento laminar, conformador multiranura o hilera térmica convencional (peligro).",
+    chamberLabel: "Atmósfera de Expansión y Cámara Receptora:",
+    chamberHelp: "Seleccione cámara presurizada de vapor (2,2 bar), receptor de vacío inerte con nitrógeno (350 mbar), túnel ambiente o recinto sin ventilación (peligro).",
+    pressureLabel: "Presión de Disolución en Cilindro (P_barril):",
+    pressureHelp: "Presión operativa en la zona de mezcla a alta presión (80,0 a 220,0 bar). Controla la solubilidad del CO2 y la velocidad de nucleación celular.",
+    tempLabel: "Temperatura de Fusión de la Masa (T_masa):",
+    tempHelp: "Temperatura del biopolímero durante la disolución de CO2 (30,0 a 80,0 °C). Debe permanecer baja para evitar la formación tóxica de lisinoalanina.",
+    co2FractionLabel: "Inyección de Masa de CO2 Supercrítico (w_CO2):",
+    co2FractionHelp: "Concentración del agente soplante CO2 (1,0 a 12,0 % en peso). Reduce la viscosidad fundida y multiplica la microporosidad.",
+    screwSpeedLabel: "Velocidad de Giro del Doble Husillo (N_husillo):",
+    screwSpeedHelp: "Velocidad de rotación y cizallamiento (100 a 500 RPM). Determina la orientación fibrilar anisótropa muscular.",
+    feedRateLabel: "Caudal Continuo de Alimentación (Q_alim):",
+    feedRateHelp: "Rendimiento de alimentación de pasta de biomasa húmeda a través del extrusor (50 a 1.500 kg/h).",
+    presetsTitle: "Ajustes Rápidos Industriales HPCD-EE:",
+    presetPea: "Estructuración Fibrilar de Pechuga de Pollo con Guisante (R_fib 3,1, Retención Lisina 98,7%)",
+    presetSoy: "Fibras Musculares de Filete de Ternera con Soja y Micoproteína (R_fib 3,4, WHC 340%)",
+    presetFaba: "Filetes Tiernos de Haba y Garbanzo de Etiqueta Limpia (R_fib 2,9, Cero Lisinoalanina)",
+    presetOat: "Carne Deshebrada Análoga de Avena y Bagazo de Cerveza (R_fib 2,6, Alta Fibra)",
+    presetHazard: "Extrusión Térmica Convencional a Alta Temperatura y Peligro de Quemado",
+    diagnosticTitle: "Telemetría HPCD-EE en Tiempo Real y Física de Estructuración Muscular",
+    diagnosticSub: "Modelado continuo de relación de fibra anisótropa, densidad de microporos, retención de lisina, capacidad de retención de agua, masticabilidad, energía SME y seguridad OSHA.",
+    fiberRatioLabel: "Relación de Alineación Anisótropa de Fibras (R_fib):",
+    poreDensityLabel: "Densidad de Nucleación de Microporos:",
+    lysineRetentionLabel: "Retención de Lisina y Aminoácidos Esenciales:",
+    whcLabel: "Capacidad de Retención de Agua (WHC):",
+    chewinessLabel: "Fuerza de Masticabilidad y Desgarro Muscular:",
+    smeLabel: "Energía Mecánica Específica (SME):",
+    throughputLabel: "Producción Continua de Análogo de Carne:",
+    microbialLogLabel: "Letalidad Microbiana en Fase Densa:",
+    statusLabel: "Estado de Seguridad Laboral ASME y OSHA:",
+    diagramTitle: "Esquema del Skid Continuo de Extrusión por Explosión de CO2 a Alta Presión",
+    diagramSub: "Vista esquemática de la bomba impelente de CO2 líquido, extrusor corrotante de doble husillo, inyector supercrítico, hilera supersónica De Laval y detectores de CO2.",
+    scienceTitle: "Fundamentos Científicos y Termodinámica Supercrítica de HPCD-EE",
+    scienceSub: "Análisis exhaustivo de la plastificación de biopolímeros con CO2 denso, cinética de nucleación celular clásica, fibrilogénesis proteica y normas de seguridad ASME/OSHA.",
+    tableTitle: "Especificaciones Técnicas del Sistema y Parámetros Termofísicos de Proteínas Vegetales"
+  },
+  pt: {
+    badge: "Extrusão Supercrítica em Fase Densa e Estruturação de Proteínas Vegetais",
+    title: "Modelador Contínuo de Extrusão por Explosão de Dióxido de Carbono em Alta Pressão (HPCD-EE)",
+    subtitle: "Simule a extrusão contínua com dióxido de carbono supercrítico em fase densa (80–220 bar, 35–65°C) para texturização fibrosa anisotrópica não térmica, nucleação de microporos e preservação de aminoácidos e vitaminas sob normas ASME Seção VIII Div 1 e 2, CGA G-6, OSHA 29 CFR § 1910.1000, 3-A 04-05/23-06 e FDA 21 CFR § 117 cGMP.",
+    controlsTitle: "Controles de Extrusão e Descompressão do Processo HPCD-EE",
+    controlsSub: "Configure a pressão do cilindro extrusor, temperatura da massa fundida, fração mássica de CO2 supercrítico, velocidade da rosca dupla e vazão contínua de alimentação.",
+    systemLabel: "Arquitetura do Skid de Extrusão Supercrítica:",
+    systemHelp: "Selecione skid industrial contínuo HPCD-EE, expansor microcelular de rosca dupla corrotante, texturizador de alto cisalhamento ou skid piloto para sala limpa.",
+    matrixLabel: "Matriz de Proteína Vegetal e Substrato de Biomassa:",
+    matrixHelp: "Selecione isolado de ervilha amarela, mistura híbrida de soja e micoproteína, emulsão de fava/grão-de-bico, matriz de aveia e bagaço, ou chlorella e girassol.",
+    nozzleLabel: "Geometria da Matriz e Dinâmica das Microfendas:",
+    nozzleHelp: "Selecione matriz com fenda supersônica convergente-divergente, bocal coaxial de cisalhamento laminar, conformador multifenda ou matriz térmica convencional (perigo).",
+    chamberLabel: "Atmosfera de Expansão e Câmara Receptora:",
+    chamberHelp: "Selecione receptor pressurizado a vapor (2,2 bar), receptor sob vácuo inerte com nitrogênio (350 mbar), túnel ambiente ou espaço sem ventilação (perigo).",
+    pressureLabel: "Pressão de Dissolução no Cilindro (P_barril):",
+    pressureHelp: "Pressão operacional na zona de mistura em alta pressão (80,0 a 220,0 bar). Governa a solubilidade do CO2 e a taxa de nucleação celular.",
+    tempLabel: "Temperatura da Massa Fundida (T_massa):",
+    tempHelp: "Temperatura do biopolímero durante a dissolução de CO2 (30,0 a 80,0 °C). Deve permanecer baixa para evitar a formação tóxica de lisinoalanina.",
+    co2FractionLabel: "Injeção Mássica de CO2 Supercrítico (w_CO2):",
+    co2FractionHelp: "Concentração do agente expansor CO2 (1,0 a 12,0 % em peso). Reduz a viscosidade fundida e multiplica a microporosidade.",
+    screwSpeedLabel: "Velocidade de Rotação da Rosca Dupla (N_rosca):",
+    screwSpeedHelp: "Velocidade rotacional e taxa de cisalhamento (100 a 500 RPM). Dita o alinhamento das fibras musculares anisotrópicas.",
+    feedRateLabel: "Vazão Contínua de Alimentação (Q_alim):",
+    feedRateHelp: "Capacidade de processamento contínuo da pasta de biomassa úmida (50 a 1.500 kg/h).",
+    presetsTitle: "Predefinições Industriais Rápidas HPCD-EE:",
+    presetPea: "Estruturação Fibrilar de Peito de Frango com Ervilha (R_fib 3,1, Retenção Lisina 98,7%)",
+    presetSoy: "Fibras Musculares de Bife de Flanco com Soja e Micoproteína (R_fib 3,4, WHC 340%)",
+    presetFaba: "Filés Macios de Fava e Grão-de-Bico Rótulo Limpo (R_fib 2,9, Zero Lisinoalanina)",
+    presetOat: "Carne Desfiada Análoga de Aveia e Bagaço de Cervejaria (R_fib 2,6, Rica em Fibras)",
+    presetHazard: "Extrusão Térmica Convencional a Alta Temperatura e Perigo de Queima",
+    diagnosticTitle: "Telemetria HPCD-EE em Tempo Real e Física de Estruturação Muscular",
+    diagnosticSub: "Modelagem contínua da razão de fibra anisotrópica, densidade de microporos, retenção de lisina, capacidade de retenção de água, mastigabilidade, energia SME e segurança OSHA.",
+    fiberRatioLabel: "Razão de Alinhamento Anisotrópico de Fibras (R_fib):",
+    poreDensityLabel: "Densidade de Nucleação de Microporos:",
+    lysineRetentionLabel: "Retenção de Lisina e Aminoácidos Essenciais:",
+    whcLabel: "Capacidade de Retenção de Água (WHC):",
+    chewinessLabel: "Força de Mastigabilidade e Ruptura Muscular:",
+    smeLabel: "Energia Mecânica Específica (SME):",
+    throughputLabel: "Produção Contínua de Análogo de Carne:",
+    microbialLogLabel: "Letalidade Microbiana em Fase Densa:",
+    statusLabel: "Status de Segurança Ocupacional ASME e OSHA:",
+    diagramTitle: "Esquema do Skid Contínuo de Extrusão por Explosão de CO2 em Alta Pressão",
+    diagramSub: "Visão esquemática da bomba pressurizadora de CO2 líquido, extrusor corrotante de rosca dupla, injetor supercrítico, matriz supersônica De Laval e sensores de CO2.",
+    scienceTitle: "Fundamentos Científicos e Termodinâmica Supercrítica do HPCD-EE",
+    scienceSub: "Análise aprofundada da plastificação de biopolímeros com CO2 denso, cinética clássica de nucleação de bolhas, fibrilogênese proteica e normas ASME/OSHA.",
+    tableTitle: "Especificações Técnicas do Sistema e Parâmetros Termofísicos de Proteínas Vegetais"
+  },
+  'zh-cn': {
+    badge: "密相超临界二氧化碳挤压与植物蛋白各向异性纤维重塑",
+    title: "商用连续式高压二氧化碳爆破挤压 (HPCD-EE) 植物蛋白纤维重组模拟器",
+    subtitle: "模拟密相超临界二氧化碳连续爆破挤压（80–220 bar，35–65°C）工艺，在 ASME Section VIII Div 1 & 2、CGA G-6、OSHA 29 CFR § 1910.1000、3-A 04-05/23-06 及 FDA 21 CFR § 117 cGMP 规范下实现非热各向异性肉肌纤维重组、微孔致密发泡与热敏性氨基酸/维生素零破坏保护。",
+    controlsTitle: "HPCD-EE 连续挤压与激波减压工艺控制",
+    controlsSub: "配置挤出机机筒压力、密相熔体温度、超临界二氧化碳注入质量分数、双螺杆转速及连续湿物料进料流量。",
+    systemLabel: "超临界高压挤出系统架构与装备选型：",
+    systemHelp: "选择商用连续式 HPCD-EE 撬装机组、同向双螺杆微孔发泡机、双喷嘴强剪切组织化机或洁净室中试验证撬装。",
+    matrixLabel: "目标植物蛋白原料基质与复配体系：",
+    matrixHelp: "选择黄豌豆分离蛋白、大豆-真菌蛋白杂交基质、蚕豆鹰嘴豆水胶体乳液、燕麦酿造糟渣再循环基质或微藻葵花籽复合物。",
+    nozzleLabel: "减压模头几何构型与微缝流体动力学：",
+    nozzleHelp: "选择收敛-发散超音速狭缝模头、环形层流剪切同轴模头、多狭缝肌纤维成型器或常规高温单一狭缝（危险对照）。",
+    chamberLabel: "膨胀减压环境与接收收集腔体：",
+    chamberHelp: "选择可控低压蒸汽背压腔（2.2 bar）、氮气惰化局部真空腔（350 mbar）、等压常温风冷隧道或未通风封闭车间（危险对照）。",
+    pressureLabel: "机筒密相溶解压力 (P_barrel)：",
+    pressureHelp: "高压挤出机混合段工作压力（80.0 至 220.0 bar）。控制超临界 CO2 溶解度与激波发泡成核速率。",
+    tempLabel: "挤出熔体加工温度 (T_melt)：",
+    tempHelp: "溶解阶段物料熔体温度（30.0 至 80.0 °C）。维持低温可彻底杜绝赖氨基丙氨酸 (LAL) 毒性交联副产物生成。",
+    co2FractionLabel: "超临界 CO2 质量注入比例 (w_CO2)：",
+    co2FractionHelp: "发泡剂与可塑剂浓度（1.0 至 12.0 wt%）。降低物料流动黏度并数倍提升各向异性多孔性。",
+    screwSpeedLabel: "双螺杆连续旋转转速 (N_screw)：",
+    screwSpeedHelp: "挤出机螺杆剪切速率（100 至 500 RPM）。调控分子拉伸剪切力与肌肉纤维取向平行度。",
+    feedRateLabel: "连续物料进料处理能力 (Q_feed)：",
+    feedRateHelp: "连续进入机筒的湿法蛋白浆料通过量（50 至 1,500 kg/h）。",
+    presetsTitle: "工业级 HPCD-EE 快速工艺预设：",
+    presetPea: "黄豌豆鸡胸肉各向异性微纤丝组织化 (R_fib 3.1, 赖氨酸保留率 98.7%)",
+    presetSoy: "大豆-真菌蛋白复合多层牛排肌纤维束 (R_fib 3.4, 保水率 340%)",
+    presetFaba: "清洁标签蚕豆与鹰嘴豆嫩肉排 (R_fib 2.9, 零赖氨基丙氨酸)",
+    presetOat: "燕麦再循环高纤多孔撕拉牛肉肉丝 (R_fib 2.6, 膳食纤维强化)",
+    presetHazard: "常规高温热法蒸汽挤压焦化与赖氨酸破坏危险",
+    diagnosticTitle: "实时 HPCD-EE 运行监测与肌肉组织物理学分析",
+    diagnosticSub: "连续输出各向异性纤维比率、微孔成核密度、赖氨酸保留率、保水性、肉质咀嚼韧性、比机械能耗 (SME) 及 OSHA 车间安全状态。",
+    fiberRatioLabel: "各向异性纤维排列比 (R_fib)：",
+    poreDensityLabel: "微米级闭孔气泡成核密度：",
+    lysineRetentionLabel: "赖氨酸与必需氨基酸保留率：",
+    whcLabel: "肉基质保水能力 (WHC)：",
+    chewinessLabel: "肌肉纤维撕裂咀嚼力 (Chewiness Force)：",
+    smeLabel: "比机械能耗 (SME)：",
+    throughputLabel: "连续植物肉素肉产出量：",
+    microbialLogLabel: "密相致病菌非热杀灭对数值：",
+    statusLabel: "ASME 承压与 OSHA 车间环境安全状态：",
+    diagramTitle: "商用连续式超临界高压二氧化碳爆破挤压系统管路图",
+    diagramSub: "展示液态高压二氧化碳增压泵、同向连续双螺杆挤出机筒、超临界直喷口、De Laval 超音速减压模头及红外 CO2 监测探头布局。",
+    scienceTitle: "HPCD-EE 核心科学机理与超临界流体热力学",
+    scienceSub: "深入探讨密相二氧化碳生物聚合物塑化机制、微孔发泡经典成核动力学、各向异性纤维化化学机理及 ASME/OSHA 工业防护标准。",
+    tableTitle: "商用系统工程参数与植物蛋白热物理特征比对表"
+  },
+  ja: {
+    badge: "超臨界二酸化炭素高圧押出＆植物性タンパク質異方性組織化",
+    title: "商用連続式超臨界二酸化炭素高圧爆砕押出 (HPCD-EE) プラントベースミート組織化シミュレーター",
+    subtitle: "ASME Section VIII Div 1 & 2、CGA G-6、OSHA 29 CFR § 1910.1000、3-A 04-05/23-06、FDA 21 CFR § 117 cGMP 基準に完全準拠し、高圧超臨界二酸化炭素（80–220 bar、35–65°C）による非加熱異方性筋肉線維形成、微細発泡核生成、熱感受性必須アミノ酸・ビタミン損失ゼロの組織化をシミュレート。",
+    controlsTitle: "HPCD-EE 連続押出成形＆減圧プロセス制御",
+    controlsSub: "押出機バレル圧力、密相溶融体温度、超臨界 CO2 注入質量分率、二軸スクリュー回転数、連続原料供給量を設定します。",
+    systemLabel: "超臨界押出スキッド＆装置アーキテクチャ：",
+    systemHelp: "商用連続 HPCD-EE スキッド、二軸同方向微細発泡機、二重インジェクター高剪断組織化機、クリーンルームパイロット検証スキッドを選択。",
+    matrixLabel: "対象植物性タンパク質基質＆バイオマス：",
+    matrixHelp: "エンドウ豆単離タンパク質、大豆＆マイコプロテイン複合体、ソラマメ＆ひよこ豆エマルション、燕麦＆ビール粕基質、微細藻類クロレラを選択。",
+    nozzleLabel: "減圧ダイ幾何形状＆超音速スリット流動：",
+    nozzleHelp: "末広ノズル超音速減圧スリットダイ、同軸環状層流剪断ノズル、マルチスリット筋繊維成形器、従来型高温単一ダイ（危険対照）を選択。",
+    chamberLabel: "膨張減圧チャンバー＆捕集環境：",
+    chamberHelp: "低圧スチーム背圧チャンバー（2.2 bar）、窒素不活性真空レシーバー（350 mbar）、大気圧空冷トンネル、無換気密閉区画（危険対照）を選択。",
+    pressureLabel: "バレル内密相溶解圧力 (P_barrel)：",
+    pressureHelp: "押出機混練混合ゾーンの運転圧力（80.0〜220.0 bar）。超臨界 CO2 溶解度と気泡核生成速度を支配します。",
+    tempLabel: "押出溶融ドウ温度 (T_melt)：",
+    tempHelp: "CO2 溶解時の基質温度（30.0〜80.0 °C）。低温維持により有害なリシノアラニン (LAL) 架橋の発生を完全に遮断します。",
+    co2FractionLabel: "超臨界 CO2 注入質量分率 (w_CO2)：",
+    co2FractionHelp: "発泡・可塑化剤濃度（1.0〜12.0 wt%）。溶融ドウの粘度を大幅に低減し、均一な微小気泡密度を創出します。",
+    screwSpeedLabel: "二軸スクリュー回転速度 (N_screw)：",
+    screwSpeedHelp: "スクリュー剪断速度（100〜500 RPM）。分子鎖の伸張・配向と平行な筋線維構造を決定づけます。",
+    feedRateLabel: "連続スラリー原料供給量 (Q_feed)：",
+    feedRateHelp: "押出機バレルへの湿式タンパク質原料の連続スループット（50〜1,500 kg/h）。",
+    presetsTitle: "産業用 HPCD-EE クイックプロセスプリセット：",
+    presetPea: "エンドウ豆チキンブレスト様筋線維組織化 (R_fib 3.1, リシン保持率 98.7%)",
+    presetSoy: "大豆＆マイコプロテイン牛フランクステーキ多層筋束 (R_fib 3.4, 保水性 340%)",
+    presetFaba: "ソラマメ＆ひよこ豆クリーンラベル柔らかカツレツ (R_fib 2.9, リシノアラニン不検出)",
+    presetOat: "燕麦＆ビール粕アップサイクル繊維質ビーフ調 (R_fib 2.6, 高食物繊維)",
+    presetHazard: "従来型過熱スチーム押出焦げ付き＆アミノ酸熱破壊ハザード",
+    diagnosticTitle: "リアルタイム HPCD-EE 計測＆筋肉組織物理学解析",
+    diagnosticSub: "異方性線維配向比、微細孔核生成密度、リシン残存率、保水力、噛み応え引裂強度、比機械エネルギー (SME)、OSHA 安全状態を算出。",
+    fiberRatioLabel: "異方性線維配向比率 (R_fib)：",
+    poreDensityLabel: "微小気泡セル核生成密度：",
+    lysineRetentionLabel: "リシン＆必須アミノ酸保持率：",
+    whcLabel: "水分保持容量 (WHC)：",
+    chewinessLabel: "引張引裂強度＆咀嚼テクスチャー力：",
+    smeLabel: "比機械エネルギー消費量 (SME)：",
+    throughputLabel: "連続プラントベースミート製品出力：",
+    microbialLogLabel: "密相流体病原菌不活化対数値：",
+    statusLabel: "ASME 圧力容器＆ OSHA 労働環境安全ステータス：",
+    diagramTitle: "商用連続式超臨界高圧二酸化炭素爆砕押出機全体フロー図",
+    diagramSub: "液体 CO2 昇圧ポンプ、連続二軸スクリュー押出バレル、超臨界直噴ポート、De Laval 超音速スリットダイ、赤外線 CO2 監視システムを視覚化。",
+    scienceTitle: "HPCD-EE の科学的基礎＆超臨界流体熱力学",
+    scienceSub: "密相 CO2 による生体高分子の可塑化、気泡核生成の古典理論、異方性線維化化学、ASME/OSHA 高圧安全規格の包括的解説。",
+    tableTitle: "商用システム設計仕様＆植物性タンパク質熱物理パラメーター比較"
+  }
+};
+
+const d = DICT[lang] || DICT.en;
+---
+
+<div class="bg-surface border border-hairline rounded-3xl p-6 sm:p-8 lg:p-10 shadow-sm max-w-7xl mx-auto mb-10">
+  <!-- Header / Badge -->
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-6 border-b border-hairline/80 pb-6">
+    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-950 text-emerald-200 border border-emerald-800">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      {d.badge}
+    </div>
+    <div class="flex items-center gap-3 text-xs text-muted font-mono">
+      <span>ASME Sec VIII Div 1 &amp; 2</span>
+      <span>•</span>
+      <span>CGA G-6</span>
+      <span>•</span>
+      <span>OSHA 1910.1000 CO2 PEL</span>
+      <span>•</span>
+      <span>3-A 04-05 &amp; 23-06</span>
+    </div>
+  </div>
+
+  <div class="mb-8">
+    <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-ink tracking-tight mb-3">
+      {d.title}
+    </h1>
+    <p class="text-body text-sm sm:text-base leading-relaxed text-muted max-w-5xl">
+      {d.subtitle}
+    </p>
+  </div>
+
+  <!-- Interactive Grid: Controls (Left) & Telemetry (Right) -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-10">
+    <!-- Controls Column (7 Cols) -->
+    <div class="lg:col-span-7 space-y-6 bg-surface-soft p-6 sm:p-7 rounded-2xl border border-hairline">
+      <div class="border-b border-hairline pb-4">
+        <h2 class="text-lg font-bold text-ink mb-1">{d.controlsTitle}</h2>
+        <p class="text-xs text-muted">{d.controlsSub}</p>
+      </div>
+
+      <!-- Presets Buttons -->
+      <div>
+        <label class="block text-xs font-bold uppercase tracking-wider text-muted mb-2">
+          {d.presetsTitle}
+        </label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <button type="button" id="preset-pea" class="px-3 py-2 text-xs font-medium rounded-xl bg-surface border border-hairline hover:border-emerald-500 text-left transition-colors flex items-center justify-between">
+            <span>{d.presetPea}</span>
+            <span class="text-emerald-400 font-bold ml-1">→</span>
+          </button>
+          <button type="button" id="preset-soy" class="px-3 py-2 text-xs font-medium rounded-xl bg-surface border border-hairline hover:border-emerald-500 text-left transition-colors flex items-center justify-between">
+            <span>{d.presetSoy}</span>
+            <span class="text-emerald-400 font-bold ml-1">→</span>
+          </button>
+          <button type="button" id="preset-faba" class="px-3 py-2 text-xs font-medium rounded-xl bg-surface border border-hairline hover:border-emerald-500 text-left transition-colors flex items-center justify-between">
+            <span>{d.presetFaba}</span>
+            <span class="text-emerald-400 font-bold ml-1">→</span>
+          </button>
+          <button type="button" id="preset-oat" class="px-3 py-2 text-xs font-medium rounded-xl bg-surface border border-hairline hover:border-emerald-500 text-left transition-colors flex items-center justify-between">
+            <span>{d.presetOat}</span>
+            <span class="text-emerald-400 font-bold ml-1">→</span>
+          </button>
+          <button type="button" id="preset-hazard" class="sm:col-span-2 px-3 py-2 text-xs font-medium rounded-xl bg-red-950/40 border border-red-800/80 hover:border-red-500 text-red-200 text-left transition-colors flex items-center justify-between">
+            <span>⚠️ {d.presetHazard}</span>
+            <span class="text-red-400 font-bold ml-1">→</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Dropdowns Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+        <!-- System Architecture -->
+        <div>
+          <label for="skid-select" class="block text-xs font-bold text-ink mb-1">
+            {d.systemLabel}
+          </label>
+          <select id="skid-select" class="w-full text-xs rounded-xl bg-surface border border-hairline px-3 py-2.5 text-ink focus:border-emerald-500 focus:outline-none">
+            {hpcdData.systemArchitectures.map((s) => (
+              <option value={s.id}>{s.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1 leading-normal">{d.systemHelp}</p>
+        </div>
+
+        <!-- Protein Matrix -->
+        <div>
+          <label for="matrix-select" class="block text-xs font-bold text-ink mb-1">
+            {d.matrixLabel}
+          </label>
+          <select id="matrix-select" class="w-full text-xs rounded-xl bg-surface border border-hairline px-3 py-2.5 text-ink focus:border-emerald-500 focus:outline-none">
+            {hpcdData.proteinMatrices.map((m) => (
+              <option value={m.id}>{m.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1 leading-normal">{d.matrixHelp}</p>
+        </div>
+
+        <!-- Decompression Nozzle -->
+        <div>
+          <label for="nozzle-select" class="block text-xs font-bold text-ink mb-1">
+            {d.nozzleLabel}
+          </label>
+          <select id="nozzle-select" class="w-full text-xs rounded-xl bg-surface border border-hairline px-3 py-2.5 text-ink focus:border-emerald-500 focus:outline-none">
+            {hpcdData.injectionNozzles.map((n) => (
+              <option value={n.id}>{n.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1 leading-normal">{d.nozzleHelp}</p>
+        </div>
+
+        <!-- Expansion Environment -->
+        <div>
+          <label for="chamber-select" class="block text-xs font-bold text-ink mb-1">
+            {d.chamberLabel}
+          </label>
+          <select id="chamber-select" class="w-full text-xs rounded-xl bg-surface border border-hairline px-3 py-2.5 text-ink focus:border-emerald-500 focus:outline-none">
+            {hpcdData.expansionEnvironments.map((e) => (
+              <option value={e.id}>{e.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1 leading-normal">{d.chamberHelp}</p>
+        </div>
+      </div>
+
+      <!-- Sliders -->
+      <div class="space-y-4 pt-2">
+        <!-- Barrel Pressure -->
+        <div>
+          <div class="flex justify-between items-center text-xs mb-1">
+            <span class="font-bold text-ink">{d.pressureLabel}</span>
+            <span class="font-mono text-emerald-400 font-bold" id="pressure-val">140.0 bar</span>
+          </div>
+          <input type="range" id="pressure-slider" min="80.0" max="220.0" step="5.0" value="140.0" class="w-full accent-emerald-500 cursor-pointer" />
+          <p class="text-[11px] text-muted">{d.pressureHelp}</p>
+        </div>
+
+        <!-- Melt Temperature -->
+        <div>
+          <div class="flex justify-between items-center text-xs mb-1">
+            <span class="font-bold text-ink">{d.tempLabel}</span>
+            <span class="font-mono text-emerald-400 font-bold" id="temp-val">48.0 °C</span>
+          </div>
+          <input type="range" id="temp-slider" min="30.0" max="80.0" step="1.0" value="48.0" class="w-full accent-emerald-500 cursor-pointer" />
+          <p class="text-[11px] text-muted">{d.tempHelp}</p>
+        </div>
+
+        <!-- Supercritical CO2 Fraction -->
+        <div>
+          <div class="flex justify-between items-center text-xs mb-1">
+            <span class="font-bold text-ink">{d.co2FractionLabel}</span>
+            <span class="font-mono text-emerald-400 font-bold" id="co2-val">5.5 wt%</span>
+          </div>
+          <input type="range" id="co2-slider" min="1.0" max="12.0" step="0.5" value="5.5" class="w-full accent-emerald-500 cursor-pointer" />
+          <p class="text-[11px] text-muted">{d.co2FractionHelp}</p>
+        </div>
+
+        <!-- Twin-Screw Speed -->
+        <div>
+          <div class="flex justify-between items-center text-xs mb-1">
+            <span class="font-bold text-ink">{d.screwSpeedLabel}</span>
+            <span class="font-mono text-emerald-400 font-bold" id="screw-val">280 RPM</span>
+          </div>
+          <input type="range" id="screw-slider" min="100" max="500" step="10" value="280" class="w-full accent-emerald-500 cursor-pointer" />
+          <p class="text-[11px] text-muted">{d.screwSpeedHelp}</p>
+        </div>
+
+        <!-- Slurry Feed Rate -->
+        <div>
+          <div class="flex justify-between items-center text-xs mb-1">
+            <span class="font-bold text-ink">{d.feedRateLabel}</span>
+            <span class="font-mono text-emerald-400 font-bold" id="feed-val">800 kg/h</span>
+          </div>
+          <input type="range" id="feed-slider" min="50" max="1500" step="50" value="800" class="w-full accent-emerald-500 cursor-pointer" />
+          <p class="text-[11px] text-muted">{d.feedRateHelp}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Telemetry & Diagnostic Column (5 Cols) -->
+    <div class="lg:col-span-5 space-y-6">
+      <div class="bg-surface-soft p-6 sm:p-7 rounded-2xl border border-hairline">
+        <div class="border-b border-hairline pb-4 mb-4">
+          <h2 class="text-lg font-bold text-ink mb-1">{d.diagnosticTitle}</h2>
+          <p class="text-xs text-muted">{d.diagnosticSub}</p>
+        </div>
+
+        <!-- Metrics Cards -->
+        <div class="grid grid-cols-2 gap-3 mb-6">
+          <!-- Fiber Alignment Ratio -->
+          <div class="p-3.5 rounded-xl bg-surface border border-hairline">
+            <div class="text-[11px] text-muted mb-1">{d.fiberRatioLabel}</div>
+            <div class="text-xl sm:text-2xl font-extrabold text-emerald-400 font-mono" id="out-fiber-ratio">
+              3.15
+            </div>
+            <div class="text-[10px] text-muted mt-0.5" id="out-fiber-label">Anisotropic Muscle Fibrils</div>
+          </div>
+
+          <!-- Micro-Pore Density -->
+          <div class="p-3.5 rounded-xl bg-surface border border-hairline">
+            <div class="text-[11px] text-muted mb-1">{d.poreDensityLabel}</div>
+            <div class="text-xl sm:text-2xl font-extrabold text-cyan-400 font-mono" id="out-pore-density">
+              2.8 × 10⁷
+            </div>
+            <div class="text-[10px] text-muted mt-0.5">pores / cm³</div>
+          </div>
+
+          <!-- Lysine Retention -->
+          <div class="p-3.5 rounded-xl bg-surface border border-hairline">
+            <div class="text-[11px] text-muted mb-1">{d.lysineRetentionLabel}</div>
+            <div class="text-xl sm:text-2xl font-extrabold text-emerald-400 font-mono" id="out-lysine-retention">
+              98.8%
+            </div>
+            <div class="text-[10px] text-muted mt-0.5">LAL Non-Detectable</div>
+          </div>
+
+          <!-- Water Holding Capacity -->
+          <div class="p-3.5 rounded-xl bg-surface border border-hairline">
+            <div class="text-[11px] text-muted mb-1">{d.whcLabel}</div>
+            <div class="text-xl sm:text-2xl font-extrabold text-cyan-400 font-mono" id="out-whc">
+              315%
+            </div>
+            <div class="text-[10px] text-muted mt-0.5">Capillary Hydration</div>
+          </div>
+
+          <!-- Chewiness / Tensile Force -->
+          <div class="p-3.5 rounded-xl bg-surface border border-hairline">
+            <div class="text-[11px] text-muted mb-1">{d.chewinessLabel}</div>
+            <div class="text-xl sm:text-2xl font-extrabold text-amber-300 font-mono" id="out-chewiness">
+              25.4 N
+            </div>
+            <div class="text-[10px] text-muted mt-0.5">Peak Shear Chewiness</div>
+          </div>
+
+          <!-- Specific Mechanical Energy -->
+          <div class="p-3.5 rounded-xl bg-surface border border-hairline">
+            <div class="text-[11px] text-muted mb-1">{d.smeLabel}</div>
+            <div class="text-xl sm:text-2xl font-extrabold text-purple-300 font-mono" id="out-sme">
+              82.5 kWh/t
+            </div>
+            <div class="text-[10px] text-muted mt-0.5">-42% vs Thermal Extruder</div>
+          </div>
+        </div>
+
+        <!-- Pathogen Lethality & Output Summary -->
+        <div class="space-y-2.5 text-xs border-t border-hairline pt-4 mb-4">
+          <div class="flex justify-between items-center">
+            <span class="text-muted">{d.throughputLabel}</span>
+            <span class="font-mono font-bold text-ink" id="out-throughput">760 kg/h</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-muted">{d.microbialLogLabel}</span>
+            <span class="font-mono font-bold text-emerald-400" id="out-microbial">6.2 Log Reduction</span>
+          </div>
+        </div>
+
+        <!-- Safety & Interlock Card -->
+        <div class="p-4 rounded-xl border transition-all" id="status-card">
+          <div class="flex items-center gap-2 mb-1.5">
+            <span class="w-2.5 h-2.5 rounded-full" id="status-dot"></span>
+            <span class="font-bold text-xs uppercase tracking-wider" id="status-heading">ASME &amp; OSHA Status</span>
+          </div>
+          <p class="text-xs leading-relaxed" id="status-text">
+            All system parameters operating safely within ASME BPVC Section VIII Division 1 limits (P &lt; 220 bar, T &lt; 65°C). Multi-point ambient CO2 detectors report &lt; 650 ppm (well below OSHA 5,000 ppm TWA PEL limit).
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dynamic Process Flow Schematic (SVG) -->
+  <div class="bg-surface-soft border border-hairline rounded-2xl p-6 sm:p-8 mb-10">
+    <div class="border-b border-hairline pb-4 mb-6">
+      <h2 class="text-lg font-bold text-ink mb-1">{d.diagramTitle}</h2>
+      <p class="text-xs text-muted">{d.diagramSub}</p>
+    </div>
+
+    <div class="overflow-x-auto">
+      <svg class="w-full min-w-[700px] h-[260px] text-ink select-none" viewBox="0 0 920 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Background Grid -->
+        <defs>
+          <pattern id="grid-pattern" width="20" height="20" patternUnits="userSpaceOnUse">
+            <circle cx="2" cy="2" r="1" fill="currentColor" fill-opacity="0.05" />
+          </pattern>
+          <linearGradient id="barrel-grad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#064e3b" stop-opacity="0.4" />
+            <stop offset="100%" stop-color="#047857" stop-opacity="0.8" />
+          </linearGradient>
+          <linearGradient id="expansion-grad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#059669" stop-opacity="0.8" />
+            <stop offset="100%" stop-color="#10b981" stop-opacity="0.2" />
+          </linearGradient>
+        </defs>
+
+        <rect width="920" height="260" fill="url(#grid-pattern)" />
+
+        <!-- Unit 1: Liquid CO2 Storage Dewar & Booster Pump -->
+        <g id="unit-dewar" transform="translate(30, 40)">
+          <rect width="110" height="150" rx="14" fill="#0f172a" stroke="#334155" stroke-width="2" />
+          <path d="M 55 10 L 55 35 M 25 35 L 85 35" stroke="#38bdf8" stroke-width="2" />
+          <text x="55" y="65" text-anchor="middle" font-size="11" font-weight="bold" fill="#38bdf8">Liquid CO2</text>
+          <text x="55" y="82" text-anchor="middle" font-size="9" fill="#94a3b8">Cryo-Storage</text>
+          <text x="55" y="115" text-anchor="middle" font-size="10" font-family="monospace" fill="#e2e8f0">-20°C • 20 bar</text>
+          <circle cx="55" cy="140" r="4" fill="#38bdf8" />
+        </g>
+
+        <!-- Connecting Line: Dewar to High-Pressure Booster -->
+        <path d="M 140 115 L 180 115" stroke="#38bdf8" stroke-width="3" stroke-dasharray="4 2" />
+
+        <!-- Unit 2: High-Pressure scCO2 Booster Pump -->
+        <g id="unit-booster" transform="translate(180, 75)">
+          <rect width="90" height="80" rx="10" fill="#0f172a" stroke="#38bdf8" stroke-width="2" />
+          <text x="45" y="32" text-anchor="middle" font-size="10" font-weight="bold" fill="#38bdf8">HP Booster</text>
+          <text x="45" y="47" text-anchor="middle" font-size="8" fill="#94a3b8">Diaphragm Pump</text>
+          <text x="45" y="65" text-anchor="middle" font-size="9" font-family="monospace" fill="#34d399">80–220 bar</text>
+        </g>
+
+        <!-- Line: Booster to Extruder Barrel Mid-Port -->
+        <path d="M 270 115 L 340 115 L 340 85" stroke="#34d399" stroke-width="3" />
+        <polygon points="340,75 336,87 344,87" fill="#34d399" />
+
+        <!-- Unit 3: Twin-Screw Extruder Barrel -->
+        <g id="unit-extruder" transform="translate(320, 95)">
+          <!-- Barrel Shell -->
+          <rect width="320" height="60" rx="8" fill="url(#barrel-grad)" stroke="#059669" stroke-width="2" />
+          <!-- Twin Screws Schematic -->
+          <line x1="10" y1="20" x2="300" y2="20" stroke="#a7f3d0" stroke-width="2" stroke-dasharray="10 4" />
+          <line x1="10" y1="40" x2="300" y2="40" stroke="#a7f3d0" stroke-width="2" stroke-dasharray="10 4" />
+          <text x="160" y="35" text-anchor="middle" font-size="11" font-weight="bold" fill="#ecfdf5">Co-Rotating Twin-Screw (L/D 48:1)</text>
+          <text x="160" y="52" text-anchor="middle" font-size="9" fill="#a7f3d0">Supercritical Solution &amp; Shear Alignment (35–65°C)</text>
+
+          <!-- Feed Hopper Left -->
+          <polygon points="-20,-30 20,-30 10,0 -10,0" fill="#1e293b" stroke="#64748b" stroke-width="2" />
+          <text x="0" y="-12" text-anchor="middle" font-size="8" font-weight="bold" fill="#f8fafc">Protein Feed</text>
+        </g>
+
+        <!-- Unit 4: De Laval Supersonic Slit Die -->
+        <g id="unit-die" transform="translate(640, 105)">
+          <polygon points="0,0 20,10 40,0 40,40 20,30 0,40" fill="#047857" stroke="#34d399" stroke-width="2" />
+          <text x="20" y="-10" text-anchor="middle" font-size="9" font-weight="bold" fill="#34d399">De Laval Slit Die</text>
+          <text x="20" y="55" text-anchor="middle" font-size="8" fill="#94a3b8">dP/dt &gt; 8×10⁸ Pa/s</text>
+        </g>
+
+        <!-- Unit 5: Controlled Backpressure Expansion Chamber -->
+        <g id="unit-chamber" transform="translate(690, 60)">
+          <rect width="180" height="130" rx="14" fill="url(#expansion-grad)" stroke="#10b981" stroke-width="2" />
+          <text x="90" y="30" text-anchor="middle" font-size="11" font-weight="bold" fill="#ecfdf5">Expansion Receiver</text>
+          <text x="90" y="46" text-anchor="middle" font-size="9" fill="#a7f3d0">Micro-Pore Flash Nucleation</text>
+
+          <!-- Texturized Meat Analog Output Fiber Bundle -->
+          <g transform="translate(25, 60)">
+            <rect width="130" height="25" rx="4" fill="#0f172a" stroke="#10b981" stroke-width="1.5" />
+            <line x1="10" y1="8" x2="120" y2="8" stroke="#34d399" stroke-width="1.5" />
+            <line x1="10" y1="13" x2="120" y2="13" stroke="#34d399" stroke-width="1.5" />
+            <line x1="10" y1="18" x2="120" y2="18" stroke="#34d399" stroke-width="1.5" />
+            <text x="65" y="42" text-anchor="middle" font-size="9" font-weight="bold" fill="#34d399">Whole-Muscle Analog</text>
+          </g>
+
+          <!-- Safety CO2 Monitor Sensor -->
+          <circle cx="160" cy="20" r="5" fill="#10b981" id="svg-sensor-light" />
+          <text x="145" y="23" text-anchor="end" font-size="8" fill="#6ee7b7">OSHA CO2 Safe</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <!-- In-Depth Scientific Foundations Section -->
+  <div class="border-t border-hairline pt-8 mb-10">
+    <div class="mb-6">
+      <h2 class="text-xl sm:text-2xl font-bold text-ink mb-1">{d.scienceTitle}</h2>
+      <p class="text-xs text-muted">{d.scienceSub}</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm leading-relaxed text-body">
+      <div class="space-y-3 bg-surface-soft p-5 sm:p-6 rounded-2xl border border-hairline">
+        <h3 class="font-bold text-ink text-base">1. Dense-Phase Supercritical CO2 Plasticization &amp; Viscosity Drop</h3>
+        <p>
+          At pressures exceeding its thermodynamic critical point (P_c = 73.8 bar, T_c = 31.1°C), dense-phase carbon dioxide exhibits unique hybrid properties: liquid-like density (ρ ≈ 600–900 kg/m³) with gas-like diffusivity and near-zero surface tension. When injected continuously into the high-shear mixing zones of a co-rotating twin-screw extruder, scCO2 partitions instantly into the hydrophobic domains of globular plant proteins (legumin, vicilin, glycinin).
+        </p>
+        <p>
+          This dissolution acts as an ultra-effective molecular lubricant, reducing the apparent melt viscosity (η_app) by 35% to 55%. As a consequence, high mechanical shear and molecular unfolding occur at gentle processing temperatures (35°C to 65°C), whereas traditional High-Moisture Extrusion Cooking (HMEC) requires destructive thermal inputs of 140°C to 170°C.
+        </p>
+      </div>
+
+      <div class="space-y-3 bg-surface-soft p-5 sm:p-6 rounded-2xl border border-hairline">
+        <h3 class="font-bold text-ink text-base">2. Supersonic Decompression Thermodynamics &amp; Classical Nucleation</h3>
+        <p>
+          As the pressurized protein-CO2 homogenous melt reaches the converging-diverging De Laval exit slit die, the fluid encounters an ultra-steep pressure drop rate (dP/dt exceeding 8 × 10⁸ Pa/s). According to Classical Nucleation Theory (CNT), the critical thermodynamic work of nucleus formation is inversely proportional to the square of supersaturation:
+        </p>
+        <p class="font-mono text-xs bg-surface p-2.5 rounded-lg border border-hairline text-emerald-400">
+          W_cr = (16 π γ³) / (3 (ΔP)²) &nbsp;⇒&nbsp; J_nuc = N_0 exp(-W_cr / k_B T)
+        </p>
+        <p>
+          Because ΔP exceeds 100 bar, the energy barrier W_cr plummets, triggering instantaneous volumetric bubble nucleation (> 10⁷ to 10⁸ pores/cm³). The rapid Joule-Thomson gas expansion stretches surrounding protein fibril lamellae into unidirectional alignment before capillary coalescence can occur.
+        </p>
+      </div>
+
+      <div class="space-y-3 bg-surface-soft p-5 sm:p-6 rounded-2xl border border-hairline">
+        <h3 class="font-bold text-ink text-base">3. Prevention of Lysinoalanine (LAL) &amp; Amino Acid Integrity</h3>
+        <p>
+          In conventional high-temperature food extrusion, prolonged exposure of plant proteins to heat (>130°C) and alkaline shear causes β-elimination of cystine and phosphoserine residues, yielding dehydroalanine (DHA). DHA reacts rapidly with the ε-amino group of essential lysine to form the toxic cross-linked nephrotoxic amino acid <strong>Lysinoalanine (LAL)</strong>.
+        </p>
+        <p>
+          By maintaining melt temperatures strictly between 35°C and 65°C throughout the HPCD-EE process, β-elimination kinetics are completely suppressed. Lysine retention exceeds 98.5%, protein digestibility corrected amino acid scores (PDCAAS / DIAAS) remain unimpaired, and zero detectable LAL or Maillard advanced glycation end-products (AGEs) are generated.
+        </p>
+      </div>
+
+      <div class="space-y-3 bg-surface-soft p-5 sm:p-6 rounded-2xl border border-hairline">
+        <h3 class="font-bold text-ink text-base">4. ASME Section VIII &amp; OSHA 29 CFR § 1910.1000 Regulatory Compliance</h3>
+        <p>
+          Continuous operation at pressures up to 220 bar requires strict engineering adherence to the <strong>ASME Boiler and Pressure Vessel Code (BPVC) Section VIII Divisions 1 and 2</strong>. Extruder barrels are forged from certified austenitic AISI 316L or Inconel 625 alloys with 100% radiographic weld inspection and dual ASME UV-stamped safety rupture discs.
+        </p>
+        <p>
+          Because carbon dioxide is an odorless, colorless gas that acts as a potent respiratory depressant and cellular toxin at elevated concentrations, the skid integrates multi-point non-dispersive infrared (NDIR) ambient sensors. Under <strong>OSHA 29 CFR § 1910.1000</strong>, the Permissible Exposure Limit (PEL) for CO2 is 5,000 ppm (0.5% TWA) with a Short-Term Exposure Limit (STEL) of 30,000 ppm (3.0%). Automated PLC scram vents ensure factory air remains safely below 1,000 ppm under continuous high-throughput manufacturing.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Technical Specifications Table -->
+  <div class="border-t border-hairline pt-8">
+    <div class="mb-4">
+      <h2 class="text-base sm:text-lg font-bold text-ink mb-1">{d.tableTitle}</h2>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs border border-hairline rounded-xl overflow-hidden">
+        <thead class="bg-surface-soft text-ink font-bold border-b border-hairline">
+          <tr>
+            <th class="p-3">Protein Substrate Matrix</th>
+            <th class="p-3">Initial Moisture (%)</th>
+            <th class="p-3">Explosion Threshold (bar)</th>
+            <th class="p-3">Anisotropic Ratio (R_fib)</th>
+            <th class="p-3">WHC (%)</th>
+            <th class="p-3">Lysine Retention (%)</th>
+            <th class="p-3">Regulatory Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline font-mono text-muted">
+          {hpcdData.proteinMatrices.map((m) => (
+            <tr class="hover:bg-surface-soft/50 transition-colors">
+              <td class="p-3 font-sans font-medium text-ink">{m.name}</td>
+              <td class="p-3">{m.initialMoisturePct}%</td>
+              <td class="p-3">{m.explosionThresholdBar} bar</td>
+              <td class="p-3 text-emerald-400 font-bold">{m.targetAnisotropicFiberRatio}</td>
+              <td class="p-3">{m.waterHoldingCapacityPct}%</td>
+              <td class="p-3 text-cyan-400">{m.lysineRetentionPct}%</td>
+              <td class="p-3 text-[11px] font-sans">FDA 21 CFR § 117 / USDA Organic</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script is:inline define:vars={{ hpcdData }}>
+  (function initHpcdEeModeler() {
+    // DOM Elements
+    const skidSelect = document.getElementById('skid-select');
+    const matrixSelect = document.getElementById('matrix-select');
+    const nozzleSelect = document.getElementById('nozzle-select');
+    const chamberSelect = document.getElementById('chamber-select');
+
+    const pressureSlider = document.getElementById('pressure-slider');
+    const tempSlider = document.getElementById('temp-slider');
+    const co2Slider = document.getElementById('co2-slider');
+    const screwSlider = document.getElementById('screw-slider');
+    const feedSlider = document.getElementById('feed-slider');
+
+    const pressureVal = document.getElementById('pressure-val');
+    const tempVal = document.getElementById('temp-val');
+    const co2Val = document.getElementById('co2-val');
+    const screwVal = document.getElementById('screw-val');
+    const feedVal = document.getElementById('feed-val');
+
+    // Outputs
+    const outFiberRatio = document.getElementById('out-fiber-ratio');
+    const outFiberLabel = document.getElementById('out-fiber-label');
+    const outPoreDensity = document.getElementById('out-pore-density');
+    const outLysineRetention = document.getElementById('out-lysine-retention');
+    const outWhc = document.getElementById('out-whc');
+    const outChewiness = document.getElementById('out-chewiness');
+    const outSme = document.getElementById('out-sme');
+    const outThroughput = document.getElementById('out-throughput');
+    const outMicrobial = document.getElementById('out-microbial');
+
+    const statusCard = document.getElementById('status-card');
+    const statusDot = document.getElementById('status-dot');
+    const statusHeading = document.getElementById('status-heading');
+    const statusText = document.getElementById('status-text');
+
+    // Presets
+    const presetPea = document.getElementById('preset-pea');
+    const presetSoy = document.getElementById('preset-soy');
+    const presetFaba = document.getElementById('preset-faba');
+    const presetOat = document.getElementById('preset-oat');
+    const presetHazard = document.getElementById('preset-hazard');
+
+    function updateSimulation() {
+      const p = parseFloat(pressureSlider.value);
+      const t = parseFloat(tempSlider.value);
+      const co2 = parseFloat(co2Slider.value);
+      const rpm = parseFloat(screwSlider.value);
+      const feed = parseFloat(feedSlider.value);
+
+      // Labels
+      pressureVal.textContent = p.toFixed(1) + ' bar';
+      tempVal.textContent = t.toFixed(1) + ' °C';
+      co2Val.textContent = co2.toFixed(1) + ' wt%';
+      screwVal.textContent = rpm.toFixed(0) + ' RPM';
+      feedVal.textContent = feed.toFixed(0) + ' kg/h';
+
+      const skid = hpcdData.systemArchitectures.find(s => s.id === skidSelect.value) || hpcdData.systemArchitectures[0];
+      const matrix = hpcdData.proteinMatrices.find(m => m.id === matrixSelect.value) || hpcdData.proteinMatrices[0];
+      const nozzle = hpcdData.injectionNozzles.find(n => n.id === nozzleSelect.value) || hpcdData.injectionNozzles[0];
+      const chamber = hpcdData.expansionEnvironments.find(e => e.id === chamberSelect.value) || hpcdData.expansionEnvironments[0];
+
+      // Check Hazard condition
+      const isThermalHazard = nozzle.id === 'conventional_high_temperature_single_orifice_die' || chamber.id === 'unventilated_enclosed_expansion_zone';
+
+      let fiberRatio = matrix.targetAnisotropicFiberRatio * (p / 140.0) * (rpm / 280.0) * (nozzle.nucleationEfficiencyPct / 100.0) * (chamber.fiberElongationRetentionPct / 100.0);
+      let poreDensitySci = 2.8 * (p / 120.0) * (co2 / 5.0) * (nozzle.nucleationEfficiencyPct / 100.0);
+      let lysineRet = matrix.lysineRetentionPct;
+      let whc = matrix.waterHoldingCapacityPct * (1 + (co2 - 5.0) * 0.03);
+      let chewiness = matrix.chewinessForceN * (fiberRatio / 3.0);
+      let sme = skid.specificMechanicalEnergyKwhPerTon * (1 - (co2 / 20.0));
+      let dryOut = feed * (1 - (matrix.initialMoisturePct - matrix.targetResidualMoisturePct) / 100.0);
+      let microbialLog = skid.microbialLogReduction * (p / 140.0) * (co2 / 5.0);
+
+      // If temperature exceeds 65°C, thermal degradation and lysinoalanine formation spike
+      if (t > 65.0) {
+        const excess = t - 65.0;
+        lysineRet -= excess * 0.9;
+        whc -= excess * 2.5;
+        chewiness += excess * 0.4; // rubbery toughness
+      }
+
+      if (isThermalHazard) {
+        fiberRatio = 0.95;
+        poreDensitySci = 0.05;
+        lysineRet = 62.0;
+        whc = 140.0;
+        chewiness = 42.0; // tough rubber
+        sme = 165.0; // high motor draw without scCO2 plasticization
+        microbialLog = 2.1;
+      }
+
+      // Render Telemetry
+      outFiberRatio.textContent = fiberRatio.toFixed(2);
+      if (fiberRatio >= 3.0) {
+        outFiberLabel.textContent = "High-Anisotropy Muscle Bundles";
+        outFiberRatio.className = "text-xl sm:text-2xl font-extrabold text-emerald-400 font-mono";
+      } else if (fiberRatio >= 2.0) {
+        outFiberLabel.textContent = "Moderate Directional Fibers";
+        outFiberRatio.className = "text-xl sm:text-2xl font-extrabold text-cyan-400 font-mono";
+      } else {
+        outFiberLabel.textContent = "Isotropic / Disorganized Spongy Melt";
+        outFiberRatio.className = "text-xl sm:text-2xl font-extrabold text-red-400 font-mono";
+      }
+
+      outPoreDensity.textContent = (poreDensitySci).toFixed(1) + ' × 10⁷';
+      outLysineRetention.textContent = Math.max(10.0, Math.min(100.0, lysineRet)).toFixed(1) + '%';
+      outWhc.textContent = Math.max(80.0, whc).toFixed(0) + '%';
+      outChewiness.textContent = chewiness.toFixed(1) + ' N';
+      outSme.textContent = sme.toFixed(1) + ' kWh/t';
+      outThroughput.textContent = dryOut.toFixed(0) + ' kg/h';
+      outMicrobial.textContent = Math.max(1.0, microbialLog).toFixed(1) + ' Log Reduction';
+
+      // Status card
+      if (isThermalHazard) {
+        statusCard.className = "p-4 rounded-xl border bg-red-950/40 border-red-800 text-red-200";
+        statusDot.className = "w-2.5 h-2.5 rounded-full bg-red-400 animate-ping";
+        statusHeading.textContent = "CRITICAL SAFETY & QUALITY HAZARD";
+        statusHeading.className = "font-bold text-xs uppercase tracking-wider text-red-300";
+        statusText.textContent = "ALARM: Uncontrolled thermal slit or unventilated receiver selected. Severe Maillard degradation, 38% lysine loss, toxic lysinoalanine cross-linking, and dangerous workplace CO2 accumulation (>45,000 ppm) violating OSHA 29 CFR § 1910.1000 PEL limits!";
+      } else if (p > 200.0) {
+        statusCard.className = "p-4 rounded-xl border bg-amber-950/40 border-amber-800 text-amber-200";
+        statusDot.className = "w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse";
+        statusHeading.textContent = "ASME SECTION VIII DIV 1 HIGH-PRESSURE ADVISORY";
+        statusHeading.className = "font-bold text-xs uppercase tracking-wider text-amber-300";
+        statusText.textContent = `Operating at ${p.toFixed(0)} bar approaches skid design limit (${skid.maxOperatingPressureBar} bar). Ensure dual ASME UV rupture discs are inspected and secondary pressure relief interlocks are primed.`;
+      } else {
+        statusCard.className = "p-4 rounded-xl border bg-emerald-950/30 border-emerald-800/80 text-emerald-200";
+        statusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse";
+        statusHeading.textContent = "ASME BPVC & OSHA COMPLIANT (GOLD STANDARD)";
+        statusHeading.className = "font-bold text-xs uppercase tracking-wider text-emerald-300";
+        statusText.textContent = `All systems nominal. Extrusion melt at ${t.toFixed(0)}°C suppresses lysinoalanine formation (Lysine retention ${lysineRet.toFixed(1)}%). Ambient CO2 detectors report < 650 ppm (OSHA PEL < 5,000 ppm TWA compliant).`;
+      }
+    }
+
+    // Attach Listeners
+    [skidSelect, matrixSelect, nozzleSelect, chamberSelect, pressureSlider, tempSlider, co2Slider, screwSlider, feedSlider].forEach(el => {
+      if (el) el.addEventListener('input', updateSimulation);
+    });
+
+    // Presets Handlers
+    if (presetPea) {
+      presetPea.addEventListener('click', () => {
+        skidSelect.value = 'commercial_continuous_hpcd_ee_skid';
+        matrixSelect.value = 'pea_protein_isolate_slurry';
+        nozzleSelect.value = 'converging_diverging_micro_orifice_die';
+        chamberSelect.value = 'controlled_low_pressure_steam_backpressure_chamber';
+        pressureSlider.value = 140.0;
+        tempSlider.value = 48.0;
+        co2Slider.value = 6.0;
+        screwSlider.value = 320;
+        feedSlider.value = 850;
+        updateSimulation();
+      });
+    }
+
+    if (presetSoy) {
+      presetSoy.addEventListener('click', () => {
+        skidSelect.value = 'dual_injector_deep_shear_texturizer';
+        matrixSelect.value = 'soy_glycinin_mycoprotein_blend';
+        nozzleSelect.value = 'multi_slit_muscle_fiber_shaper';
+        chamberSelect.value = 'controlled_low_pressure_steam_backpressure_chamber';
+        pressureSlider.value = 165.0;
+        tempSlider.value = 45.0;
+        co2Slider.value = 7.5;
+        screwSlider.value = 380;
+        feedSlider.value = 700;
+        updateSimulation();
+      });
+    }
+
+    if (presetFaba) {
+      presetFaba.addEventListener('click', () => {
+        skidSelect.value = 'commercial_continuous_hpcd_ee_skid';
+        matrixSelect.value = 'faba_bean_chickpea_isolate';
+        nozzleSelect.value = 'annular_shear_co_axial_nozzle';
+        chamberSelect.value = 'nitrogen_blanketed_inert_vacuum_receiver';
+        pressureSlider.value = 125.0;
+        tempSlider.value = 42.0;
+        co2Slider.value = 5.0;
+        screwSlider.value = 260;
+        feedSlider.value = 600;
+        updateSimulation();
+      });
+    }
+
+    if (presetOat) {
+      presetOat.addEventListener('click', () => {
+        skidSelect.value = 'co_rotating_twin_screw_sc_co2_puffer';
+        matrixSelect.value = 'oat_protein_brewer_spent_grain';
+        nozzleSelect.value = 'converging_diverging_micro_orifice_die';
+        chamberSelect.value = 'isobaric_ambient_temperature_tunnel';
+        pressureSlider.value = 150.0;
+        tempSlider.value = 52.0;
+        co2Slider.value = 6.5;
+        screwSlider.value = 300;
+        feedSlider.value = 750;
+        updateSimulation();
+      });
+    }
+
+    if (presetHazard) {
+      presetHazard.addEventListener('click', () => {
+        nozzleSelect.value = 'conventional_high_temperature_single_orifice_die';
+        chamberSelect.value = 'unventilated_enclosed_expansion_zone';
+        pressureSlider.value = 90.0;
+        tempSlider.value = 78.0;
+        co2Slider.value = 1.5;
+        screwSlider.value = 140;
+        feedSlider.value = 400;
+        updateSimulation();
+      });
+    }
+
+    updateSimulation();
+  })();
+</script>

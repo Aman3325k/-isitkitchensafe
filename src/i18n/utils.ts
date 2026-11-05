@@ -176,7 +176,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-continuous-scco2-mbc-carbonation-modeler',
   'tools/commercial-continuous-dhph-puvc-sterilization-modeler',
   'tools/commercial-continuous-hc-aeh-hydrolysis-modeler',
-  'tools/commercial-continuous-snd-bp-puffing-modeler'
+  'tools/commercial-continuous-snd-bp-puffing-modeler',
+  'tools/commercial-continuous-hpcd-ee-extrusion-modeler'
 ];
 
 const esSlugs = new Set([

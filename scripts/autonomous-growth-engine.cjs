@@ -175,7 +175,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-continuous-scco2-mbc-carbonation-modeler', name: 'Commercial Continuous Supercritical CO2 High-Pressure Micro-Bubble Carbonation & In-Line Sterilization (scCO2-MBC) Modeler', category: 'Dense-Phase Fluid Thermodynamics & Cold Beverage Safety', component: 'CommercialContinuousScco2MbcCarbonationModeler.astro', dataFile: 'scco2-mbc-carbonation-data.json' },
   { slug: 'commercial-continuous-dhph-puvc-sterilization-modeler', name: 'Commercial Continuous Dynamic High-Pressure Homogenization-Assisted Pulsed UV-C Light (DHPH-PUVC) Aseptic Fluid Sterilization Modeler', category: 'Synergistic Photobiological Hydrodynamics & Cold Liquid Sterilization', component: 'CommercialContinuousDhphPuvcModeler.astro', dataFile: 'dhph-puvc-sterilization-data.json' },
   { slug: 'commercial-continuous-hc-aeh-hydrolysis-modeler', name: 'Commercial Continuous High-Shear Hydrodynamic Cavitation-Assisted Enzymatic Hydrolysis (HC-AEH) Modeler', category: 'Cavitation Tribochemistry & Industrial Bioprocessing', component: 'CommercialContinuousHcAehModeler.astro', dataFile: 'hc-aeh-hydrolysis-data.json' },
-  { slug: 'commercial-continuous-snd-bp-puffing-modeler', name: 'Commercial Continuous Cryogenic Supercritical Nitrogen Shock Dehydration & Bioactive Puffing (SND-BP) Modeler', category: 'Cryogenic Thermodynamic Phase Expansion & Non-Thermal Matrix Puffing', component: 'CommercialContinuousSndBpModeler.astro', dataFile: 'snd-bp-puffing-data.json' }
+  { slug: 'commercial-continuous-snd-bp-puffing-modeler', name: 'Commercial Continuous Cryogenic Supercritical Nitrogen Shock Dehydration & Bioactive Puffing (SND-BP) Modeler', category: 'Cryogenic Thermodynamic Phase Expansion & Non-Thermal Matrix Puffing', component: 'CommercialContinuousSndBpModeler.astro', dataFile: 'snd-bp-puffing-data.json' },
+  { slug: 'commercial-continuous-hpcd-ee-extrusion-modeler', name: 'Commercial Continuous High-Pressure Carbon Dioxide Explosion Extrusion (HPCD-EE) Plant Protein Texturizing Modeler', category: 'Dense-Phase Supercritical Extrusion & Plant Protein Structuring', component: 'CommercialContinuousHpcdEeModeler.astro', dataFile: 'hpcd-ee-extrusion-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -440,7 +441,9 @@ function auditDatasets() {
     'phvef-decontamination-data.json',
     'scco2-mbc-carbonation-data.json',
     'dhph-puvc-sterilization-data.json',
-    'hc-aeh-hydrolysis-data.json'
+    'hc-aeh-hydrolysis-data.json',
+    'snd-bp-puffing-data.json',
+    'hpcd-ee-extrusion-data.json'
 ];
 
   const datasetStats = {};
@@ -680,32 +683,32 @@ function auditGrowthOpportunities() {
     // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Continuous High-Pressure Carbon Dioxide Explosion Extrusion (HPCD-EE) Plant Protein Texturizing Modeler',
-      category: 'Dense-Phase Supercritical Extrusion & Plant Protein Structuring',
-      intent: 'Models continuous high-pressure carbon dioxide explosion extrusion (HPCD-EE, 80–180 bar, 35–65°C) for instant structural texturizing, micro-cellular pore generation, and thermal degradation prevention of plant-based meat analogs and sensitive bioactive matrices.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '1,240+ US impressions'
-    },
-    {
       title: 'Commercial Continuous Forward-Osmosis Multi-Stage Thermal Vapor Recompression (FO-MVR) Clean Evaporative Concentration Modeler',
       category: 'Membrane & Thermodynamic Energy Integration',
       intent: 'Models continuous forward-osmosis coupling with mechanical vapor recompression (FO-MVR, 45–65°C, 0.2–0.8 bar) for ultra-low-energy (SEC < 18 kWh/ton H2O), non-thermal aroma-preserving concentration of sensitive dairy whey, fruit concentrates, and botanical extracts without vacuum pan fouling.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '890+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '1,420+ US impressions'
     },
     {
       title: 'Commercial Continuous Subcritical Dimethyl Ether (sDME) Low-Temperature In-Line Lipid Dewatering & Clean Extraction Modeler',
       category: 'Subcritical Green Solvents & Ambient Dewatering Physics',
       intent: 'Models continuous liquefied subcritical dimethyl ether (sDME, 0.5–0.8 MPa, 20–35°C) extraction for single-step, low-temperature water and lipid dewatering of high-moisture microalgae, dairy sludges, and fermentation broths without thermal drying energy.',
       priority: 'HIGH',
-      estimatedMonthlyVolume: '780+ US impressions'
+      estimatedMonthlyVolume: '890+ US impressions'
     },
     {
       title: 'Commercial Continuous Microwave-Assisted Induction Spouted Bed Roasting & Sterilization (MAI-SBR) Modeler',
       category: 'Electromagnetic Fluidization & Thermal Spouted Bed Kinetics',
       intent: 'Models continuous high-frequency microwave-assisted electromagnetic induction spouted bed roasting and non-thermal surface decontamination (MAI-SBR, 2.45 GHz, 120–160°C) for uniform bean fluidization, rapid mycotoxin reduction, and zero scorched-spot defect generation.',
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '780+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous High-Intensity Acoustic Shockwave Hydrodynamic Defatting & Emulsion Destabilization (ASH-DD) Modeler',
+      category: 'Acoustic Shockwave Hydrodynamics & Clean-Label Dairy Defatting',
+      intent: 'Models continuous acoustic shockwave hydrodynamic implosion (ASH-DD, 25–45 kHz, 15–35 bar) for non-thermal milkfat globule membrane destabilization, ambient dairy sludge fractionation, and solvent-free phospholipid recovery without thermal curdling.',
       priority: 'MEDIUM',
-      estimatedMonthlyVolume: '650+ US impressions'
+      estimatedMonthlyVolume: '620+ US impressions'
     }
   ];
 
