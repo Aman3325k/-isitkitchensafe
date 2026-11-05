@@ -178,7 +178,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-continuous-snd-bp-puffing-modeler', name: 'Commercial Continuous Cryogenic Supercritical Nitrogen Shock Dehydration & Bioactive Puffing (SND-BP) Modeler', category: 'Cryogenic Thermodynamic Phase Expansion & Non-Thermal Matrix Puffing', component: 'CommercialContinuousSndBpModeler.astro', dataFile: 'snd-bp-puffing-data.json' },
   { slug: 'commercial-continuous-hpcd-ee-extrusion-modeler', name: 'Commercial Continuous High-Pressure Carbon Dioxide Explosion Extrusion (HPCD-EE) Plant Protein Texturizing Modeler', category: 'Dense-Phase Supercritical Extrusion & Plant Protein Structuring', component: 'CommercialContinuousHpcdEeModeler.astro', dataFile: 'hpcd-ee-extrusion-data.json' },
   { slug: 'commercial-continuous-fo-mvr-concentration-modeler', name: 'Commercial Continuous Forward-Osmosis Multi-Stage Thermal Vapor Recompression (FO-MVR) Clean Evaporative Concentration Modeler', category: 'Membrane & Thermodynamic Energy Integration', component: 'CommercialContinuousFoMvrModeler.astro', dataFile: 'fo-mvr-concentration-data.json' },
-  { slug: 'commercial-continuous-sdme-lipid-dewatering-modeler', name: 'Commercial Continuous Subcritical Dimethyl Ether (sDME) Low-Temperature In-Line Lipid Dewatering & Clean Extraction Modeler', category: 'Subcritical Green Solvents & Ambient Dewatering Physics', component: 'CommercialContinuousSdmeDewateringModeler.astro', dataFile: 'sdme-lipid-dewatering-data.json' }
+  { slug: 'commercial-continuous-sdme-lipid-dewatering-modeler', name: 'Commercial Continuous Subcritical Dimethyl Ether (sDME) Low-Temperature In-Line Lipid Dewatering & Clean Extraction Modeler', category: 'Subcritical Green Solvents & Ambient Dewatering Physics', component: 'CommercialContinuousSdmeDewateringModeler.astro', dataFile: 'sdme-lipid-dewatering-data.json' },
+  { slug: 'commercial-continuous-mai-sbr-roasting-sterilization-modeler', name: 'Commercial Continuous Microwave-Assisted Induction Spouted Bed Roasting & Sterilization (MAI-SBR) Modeler', category: 'Electromagnetic Fluidization & Thermal Spouted Bed Kinetics', component: 'CommercialContinuousMaiSbrModeler.astro', dataFile: 'mai-sbr-roasting-sterilization-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -758,32 +759,32 @@ function auditGrowthOpportunities() {
     // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Continuous Microwave-Assisted Induction Spouted Bed Roasting & Sterilization (MAI-SBR) Modeler',
-      category: 'Electromagnetic Fluidization & Thermal Spouted Bed Kinetics',
-      intent: 'Models continuous high-frequency microwave-assisted electromagnetic induction spouted bed roasting and non-thermal surface decontamination (MAI-SBR, 2.45 GHz, 120–160°C) for uniform bean fluidization, rapid mycotoxin reduction, and zero scorched-spot defect generation.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '1,320+ US impressions'
-    },
-    {
       title: 'Commercial Continuous High-Intensity Acoustic Shockwave Hydrodynamic Defatting & Emulsion Destabilization (ASH-DD) Modeler',
       category: 'Acoustic Shockwave Hydrodynamics & Clean-Label Dairy Defatting',
       intent: 'Models continuous acoustic shockwave hydrodynamic implosion (ASH-DD, 25–45 kHz, 15–35 bar) for non-thermal milkfat globule membrane destabilization, ambient dairy sludge fractionation, and solvent-free phospholipid recovery without thermal curdling.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '890+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '1,150+ US impressions'
     },
     {
       title: 'Commercial Continuous Supercritical CO2 Static-Mixer Micro-Encapsulation & Core-Shell Modeler',
       category: 'Dense-Phase Micro-Encapsulation & Controlled Release Physics',
       intent: 'Models continuous supercritical CO2 rapid expansion (RESS/PGSS) through high-shear static mixer elements for sub-micron core-shell lipid/protein encapsulation of probiotics, hydrophobic vitamins, and botanical terpenes.',
       priority: 'HIGH',
-      estimatedMonthlyVolume: '740+ US impressions'
+      estimatedMonthlyVolume: '880+ US impressions'
     },
     {
       title: 'Commercial Continuous Low-Temperature Dense-Phase High-Pressure CO2 Pasteurization & In-Line Carbonation (LT-HPCD) Modeler',
       category: 'Supercritical Fluid Thermodynamics & Cold Beverage Preservation',
       intent: 'Models continuous low-temperature dense-phase CO2 pasteurization and dissolved gas saturation (LT-HPCD, 8.0–15.0 MPa, 18–32°C) for heat-free spore and yeast inactivation in cold-pressed juices and craft beverages.',
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '760+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous High-Pressure Supercritical CO2 Micro-Fluidic Liposome Extrusion (scCO2-MLE) Modeler',
+      category: 'Dense-Phase Nano-Encapsulation & Aseptic Liposome Physics',
+      intent: 'Models continuous supercritical CO2 micro-fluidic hydrodynamic cross-flow injection for solvent-free, monodisperse nano-liposome encapsulation (d_h 45–95 nm, PDI < 0.12) of bioactive peptides and polyphenols without high-pressure homogenization shearing.',
       priority: 'MEDIUM',
-      estimatedMonthlyVolume: '620+ US impressions'
+      estimatedMonthlyVolume: '680+ US impressions'
     }
   ];
 

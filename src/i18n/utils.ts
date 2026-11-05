@@ -179,7 +179,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-continuous-snd-bp-puffing-modeler',
   'tools/commercial-continuous-hpcd-ee-extrusion-modeler',
   'tools/commercial-continuous-fo-mvr-concentration-modeler',
-  'tools/commercial-continuous-sdme-lipid-dewatering-modeler'
+  'tools/commercial-continuous-sdme-lipid-dewatering-modeler',
+  'tools/commercial-continuous-mai-sbr-roasting-sterilization-modeler'
 ];
 
 const esSlugs = new Set([
