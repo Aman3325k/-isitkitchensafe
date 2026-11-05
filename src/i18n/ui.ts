@@ -82,6 +82,12 @@ export const ui = {
     'page.shareGuide': 'Share this Guide',
     'page.copyLink': 'Copy Link',
     'page.copied': 'Link Copied!',
+    'action.shareVerdict': 'Share Verdict',
+    'action.saveGuide': 'Save Guide',
+    'action.saved': 'Saved',
+    'action.printCard': 'Print Card',
+    'action.otherAppliances': 'Check Other Appliances for this Item',
+    'action.backToTop': 'Back to top',
 
     // Homepage Hero & Features
     'home.heroTitle': 'Is It Kitchen Safe?',
@@ -191,6 +197,12 @@ export const ui = {
     'page.shareGuide': 'Compartir esta Guía',
     'page.copyLink': 'Copiar Enlace',
     'page.copied': '¡Enlace Copiado!',
+    'action.shareVerdict': 'Compartir Veredicto',
+    'action.saveGuide': 'Guardar Guía',
+    'action.saved': 'Guardado',
+    'action.printCard': 'Imprimir Ficha',
+    'action.otherAppliances': 'Comprobar en Otros Electrodomésticos',
+    'action.backToTop': 'Volver arriba',
 
     // Homepage Hero & Features
     'home.heroTitle': '¿Es Seguro en la Cocina?',
@@ -300,6 +312,12 @@ export const ui = {
     'page.shareGuide': 'Compartilhar este Guia',
     'page.copyLink': 'Copiar Link',
     'page.copied': 'Link Copiado!',
+    'action.shareVerdict': 'Compartilhar Veredito',
+    'action.saveGuide': 'Salvar Guia',
+    'action.saved': 'Salvo',
+    'action.printCard': 'Imprimir Ficha',
+    'action.otherAppliances': 'Verificar em Outros Eletrodomésticos',
+    'action.backToTop': 'Voltar ao topo',
 
     // Homepage Hero & Features
     'home.heroTitle': 'É Seguro na Cozinha?',
@@ -409,6 +427,12 @@ export const ui = {
     'page.shareGuide': '分享此指南',
     'page.copyLink': '复制链接',
     'page.copied': '链接已复制！',
+    'action.shareVerdict': '分享结论',
+    'action.saveGuide': '收藏指南',
+    'action.saved': '已收藏',
+    'action.printCard': '打印卡片',
+    'action.otherAppliances': '查看该物品在其他电器的安全状态',
+    'action.backToTop': '返回顶部',
 
     // Homepage Hero & Features
     'home.heroTitle': '厨房安全速查手册',
@@ -518,6 +542,12 @@ export const ui = {
     'page.shareGuide': 'このガイドを共有',
     'page.copyLink': 'リンクをコピー',
     'page.copied': 'リンクをコピーしました！',
+    'action.shareVerdict': '判定を共有',
+    'action.saveGuide': '保存する',
+    'action.saved': '保存済み',
+    'action.printCard': 'カードを印刷',
+    'action.otherAppliances': '他の家電での安全性を確認',
+    'action.backToTop': 'トップへ戻る',
 
     // Homepage Hero & Features
     'home.heroTitle': 'キッチン家電の安全性早見表',

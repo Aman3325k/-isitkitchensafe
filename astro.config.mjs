@@ -69,6 +69,10 @@ export default defineConfig({
   site: 'https://isitkitchensafe.com',
   output: 'static',
   trailingSlash: 'always',
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: 'hover',
+  },
   build: {
     inlineStylesheets: 'auto',
     concurrency: 2,

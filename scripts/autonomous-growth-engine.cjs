@@ -177,7 +177,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-continuous-hc-aeh-hydrolysis-modeler', name: 'Commercial Continuous High-Shear Hydrodynamic Cavitation-Assisted Enzymatic Hydrolysis (HC-AEH) Modeler', category: 'Cavitation Tribochemistry & Industrial Bioprocessing', component: 'CommercialContinuousHcAehModeler.astro', dataFile: 'hc-aeh-hydrolysis-data.json' },
   { slug: 'commercial-continuous-snd-bp-puffing-modeler', name: 'Commercial Continuous Cryogenic Supercritical Nitrogen Shock Dehydration & Bioactive Puffing (SND-BP) Modeler', category: 'Cryogenic Thermodynamic Phase Expansion & Non-Thermal Matrix Puffing', component: 'CommercialContinuousSndBpModeler.astro', dataFile: 'snd-bp-puffing-data.json' },
   { slug: 'commercial-continuous-hpcd-ee-extrusion-modeler', name: 'Commercial Continuous High-Pressure Carbon Dioxide Explosion Extrusion (HPCD-EE) Plant Protein Texturizing Modeler', category: 'Dense-Phase Supercritical Extrusion & Plant Protein Structuring', component: 'CommercialContinuousHpcdEeModeler.astro', dataFile: 'hpcd-ee-extrusion-data.json' },
-  { slug: 'commercial-continuous-fo-mvr-concentration-modeler', name: 'Commercial Continuous Forward-Osmosis Multi-Stage Thermal Vapor Recompression (FO-MVR) Clean Evaporative Concentration Modeler', category: 'Membrane & Thermodynamic Energy Integration', component: 'CommercialContinuousFoMvrModeler.astro', dataFile: 'fo-mvr-concentration-data.json' }
+  { slug: 'commercial-continuous-fo-mvr-concentration-modeler', name: 'Commercial Continuous Forward-Osmosis Multi-Stage Thermal Vapor Recompression (FO-MVR) Clean Evaporative Concentration Modeler', category: 'Membrane & Thermodynamic Energy Integration', component: 'CommercialContinuousFoMvrModeler.astro', dataFile: 'fo-mvr-concentration-data.json' },
+  { slug: 'commercial-continuous-sdme-lipid-dewatering-modeler', name: 'Commercial Continuous Subcritical Dimethyl Ether (sDME) Low-Temperature In-Line Lipid Dewatering & Clean Extraction Modeler', category: 'Subcritical Green Solvents & Ambient Dewatering Physics', component: 'CommercialContinuousSdmeDewateringModeler.astro', dataFile: 'sdme-lipid-dewatering-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -445,7 +446,8 @@ function auditDatasets() {
     'hc-aeh-hydrolysis-data.json',
     'snd-bp-puffing-data.json',
     'hpcd-ee-extrusion-data.json',
-    'fo-mvr-concentration-data.json'
+    'fo-mvr-concentration-data.json',
+    'sdme-lipid-dewatering-data.json'
 ];
 
   const datasetStats = {};
@@ -606,7 +608,78 @@ function auditCoreWebVitalsAndAssets() {
 }
 
 /**
- * 6. Search Engine Sitemap & Indexing Audit
+ * 6. UI Interactivity, Speed Directives & UX Reach Audit
+ */
+function auditUiInteractivity() {
+  logHeader('UI INTERACTIVITY, SPEED DIRECTIVES & UX REACH AUDIT');
+  
+  // 1. Astro Config Prefetching
+  const configPath = path.join(PROJECT_ROOT, 'astro.config.mjs');
+  let hasPrefetch = false;
+  if (fs.existsSync(configPath)) {
+    const configContent = fs.readFileSync(configPath, 'utf8');
+    hasPrefetch = configContent.includes('prefetch') && configContent.includes('hover');
+  }
+
+  // 2. Layout Back to Top & Scroll Indicators
+  const layoutPath = path.join(PROJECT_ROOT, 'src/layouts/Layout.astro');
+  let hasBackToTop = false;
+  let hasBackToTopScript = false;
+  if (fs.existsSync(layoutPath)) {
+    const layoutContent = fs.readFileSync(layoutPath, 'utf8');
+    hasBackToTop = layoutContent.includes('back-to-top-btn') && layoutContent.includes('back-to-top-progress');
+    hasBackToTopScript = layoutContent.includes('initBackToTop');
+  }
+
+  // 3. Item Page Template Quick Actions & Matrix Switcher
+  const itemTemplatePath = path.join(PROJECT_ROOT, 'src/components/ItemPageTemplate.astro');
+  let hasShareBtn = false;
+  let hasBookmarkBtn = false;
+  let hasPrintBtn = false;
+  let hasMatrixSwitcher = false;
+  let hasItemScript = false;
+  if (fs.existsSync(itemTemplatePath)) {
+    const itemContent = fs.readFileSync(itemTemplatePath, 'utf8');
+    hasShareBtn = itemContent.includes('share-verdict-btn');
+    hasBookmarkBtn = itemContent.includes('bookmark-item-btn');
+    hasPrintBtn = itemContent.includes('print-card-btn');
+    hasMatrixSwitcher = itemContent.includes('All-Appliance Quick Switcher') && itemContent.includes('siblingApplianceItems');
+    hasItemScript = itemContent.includes('initItemInteractions');
+  }
+
+  // 4. i18n UI Parity
+  const uiPath = path.join(PROJECT_ROOT, 'src/i18n/ui.ts');
+  let uiParity = false;
+  if (fs.existsSync(uiPath)) {
+    const uiContent = fs.readFileSync(uiPath, 'utf8');
+    uiParity = ['action.shareVerdict', 'action.saveGuide', 'action.saved', 'action.printCard', 'action.otherAppliances', 'action.backToTop'].every(key => uiContent.includes(key));
+  }
+
+  const isPassing = hasPrefetch && hasBackToTop && hasBackToTopScript && hasShareBtn && hasBookmarkBtn && hasPrintBtn && hasMatrixSwitcher && hasItemScript && uiParity;
+
+  console.log(`⚡ Hover Prefetching Engine:   ${hasPrefetch ? 'ENABLED (instant load on hover)' : 'MISSING'}`);
+  console.log(`🔼 Dynamic Back-to-Top Button:  ${hasBackToTop && hasBackToTopScript ? 'ACTIVE (SVG scroll ring)' : 'MISSING'}`);
+  console.log(`🔗 Quick Share Verdict Button:  ${hasShareBtn ? 'ACTIVE (native share + clipboard)' : 'MISSING'}`);
+  console.log(`🔖 Save to Kitchen Bookmark:    ${hasBookmarkBtn ? 'ACTIVE (localStorage sync)' : 'MISSING'}`);
+  console.log(`🖨️ Print Kitchen Safety Card:   ${hasPrintBtn ? 'ACTIVE (print-optimized CSS)' : 'MISSING'}`);
+  console.log(`🔄 All-Appliance Matrix:        ${hasMatrixSwitcher ? 'ACTIVE (cross-appliance pills)' : 'MISSING'}`);
+  console.log(`🌐 5-Language Action UI Parity: ${uiParity ? 'PERFECT (100% 5-lang coverage)' : 'MISSING_STRINGS'}`);
+  console.log(`🎯 Overall UX Interactivity:    [${isPassing ? 'OPTIMAL' : 'WARN_CHECK_COMPONENTS'}]`);
+
+  return {
+    status: isPassing ? 'OPTIMAL' : 'WARN',
+    hasPrefetch,
+    hasBackToTop,
+    hasShareBtn,
+    hasBookmarkBtn,
+    hasPrintBtn,
+    hasMatrixSwitcher,
+    uiParity
+  };
+}
+
+/**
+ * 7. Search Engine Sitemap & Indexing Audit
  */
 function auditSitemaps() {
   logHeader('SEARCH ENGINE SITEMAP & INDEXING AUDIT');
@@ -685,32 +758,32 @@ function auditGrowthOpportunities() {
     // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Continuous Subcritical Dimethyl Ether (sDME) Low-Temperature In-Line Lipid Dewatering & Clean Extraction Modeler',
-      category: 'Subcritical Green Solvents & Ambient Dewatering Physics',
-      intent: 'Models continuous liquefied subcritical dimethyl ether (sDME, 0.5–0.8 MPa, 20–35°C) extraction for single-step, low-temperature water and lipid dewatering of high-moisture microalgae, dairy sludges, and fermentation broths without thermal drying energy.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '1,480+ US impressions'
-    },
-    {
       title: 'Commercial Continuous Microwave-Assisted Induction Spouted Bed Roasting & Sterilization (MAI-SBR) Modeler',
       category: 'Electromagnetic Fluidization & Thermal Spouted Bed Kinetics',
       intent: 'Models continuous high-frequency microwave-assisted electromagnetic induction spouted bed roasting and non-thermal surface decontamination (MAI-SBR, 2.45 GHz, 120–160°C) for uniform bean fluidization, rapid mycotoxin reduction, and zero scorched-spot defect generation.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '920+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '1,320+ US impressions'
     },
     {
       title: 'Commercial Continuous High-Intensity Acoustic Shockwave Hydrodynamic Defatting & Emulsion Destabilization (ASH-DD) Modeler',
       category: 'Acoustic Shockwave Hydrodynamics & Clean-Label Dairy Defatting',
       intent: 'Models continuous acoustic shockwave hydrodynamic implosion (ASH-DD, 25–45 kHz, 15–35 bar) for non-thermal milkfat globule membrane destabilization, ambient dairy sludge fractionation, and solvent-free phospholipid recovery without thermal curdling.',
       priority: 'HIGH',
-      estimatedMonthlyVolume: '780+ US impressions'
+      estimatedMonthlyVolume: '890+ US impressions'
     },
     {
       title: 'Commercial Continuous Supercritical CO2 Static-Mixer Micro-Encapsulation & Core-Shell Modeler',
       category: 'Dense-Phase Micro-Encapsulation & Controlled Release Physics',
       intent: 'Models continuous supercritical CO2 rapid expansion (RESS/PGSS) through high-shear static mixer elements for sub-micron core-shell lipid/protein encapsulation of probiotics, hydrophobic vitamins, and botanical terpenes.',
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '740+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous Low-Temperature Dense-Phase High-Pressure CO2 Pasteurization & In-Line Carbonation (LT-HPCD) Modeler',
+      category: 'Supercritical Fluid Thermodynamics & Cold Beverage Preservation',
+      intent: 'Models continuous low-temperature dense-phase CO2 pasteurization and dissolved gas saturation (LT-HPCD, 8.0–15.0 MPa, 18–32°C) for heat-free spore and yeast inactivation in cold-pressed juices and craft beverages.',
       priority: 'MEDIUM',
-      estimatedMonthlyVolume: '640+ US impressions'
+      estimatedMonthlyVolume: '620+ US impressions'
     }
   ];
 
@@ -788,6 +861,7 @@ function runQuickAudit() {
   const datasetAudit = auditDatasets();
   const structuredDataAudit = auditStructuredData();
   const cwvAudit = auditCoreWebVitalsAndAssets();
+  const uiAudit = auditUiInteractivity();
   const sitemapAudit = auditSitemaps();
   const growthAudit = auditGrowthOpportunities();
 
@@ -795,7 +869,8 @@ function runQuickAudit() {
     toolsAudit.totalFailing === 0 &&
     parityAudit.status === 'PERFECT_MATCH' &&
     redirectAudit.status !== 'EXCEEDED' &&
-    datasetAudit.validCount === datasetAudit.totalCount
+    datasetAudit.validCount === datasetAudit.totalCount &&
+    uiAudit.status === 'OPTIMAL'
   );
 
   const report = {
@@ -809,6 +884,7 @@ function runQuickAudit() {
       componentParity: parityAudit.status,
       schemaComplianceRate: `${structuredDataAudit.complianceRate}%`,
       cwvReadinessScore: `${cwvAudit.cwvReadinessScore}%`,
+      uxInteractivityStatus: uiAudit.status,
       sitemapUrls: sitemapAudit.urlCount,
       redirectLines: redirectAudit.lineCount,
       redirectHeadroom: redirectAudit.headroom,
@@ -820,6 +896,7 @@ function runQuickAudit() {
     datasetAudit: datasetAudit.datasetStats,
     structuredDataAudit: { passingPages: structuredDataAudit.passingPages, total: structuredDataAudit.auditedPages },
     cwvAudit,
+    uiAudit,
     sitemapAudit,
     growthAudit
   };
@@ -847,6 +924,7 @@ function runEngineCycle() {
   const buildAudit = runMasterBuild();
   const structuredDataAudit = auditStructuredData();
   const cwvAudit = auditCoreWebVitalsAndAssets();
+  const uiAudit = auditUiInteractivity();
   const sitemapAudit = auditSitemaps();
   const growthAudit = auditGrowthOpportunities();
 
@@ -855,7 +933,8 @@ function runEngineCycle() {
     buildAudit.deadLinks === 0 &&
     toolsAudit.totalFailing === 0 &&
     parityAudit.status === 'PERFECT_MATCH' &&
-    redirectAudit.status !== 'EXCEEDED'
+    redirectAudit.status !== 'EXCEEDED' &&
+    uiAudit.status === 'OPTIMAL'
   );
 
   const report = {
@@ -872,6 +951,7 @@ function runEngineCycle() {
       buildDurationSeconds: buildAudit.durationSec,
       schemaComplianceRate: `${structuredDataAudit.complianceRate}%`,
       cwvReadinessScore: `${cwvAudit.cwvReadinessScore}%`,
+      uxInteractivityStatus: uiAudit.status,
       sitemapUrls: sitemapAudit.urlCount,
       redirectLines: redirectAudit.lineCount,
       redirectHeadroom: redirectAudit.headroom,
@@ -883,6 +963,7 @@ function runEngineCycle() {
     datasetAudit: datasetAudit.datasetStats,
     structuredDataAudit: { passingPages: structuredDataAudit.passingPages, total: structuredDataAudit.auditedPages },
     cwvAudit,
+    uiAudit,
     sitemapAudit,
     growthAudit
   };

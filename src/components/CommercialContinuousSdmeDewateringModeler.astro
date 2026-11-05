@@ -1,0 +1,943 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import sdmeData from '../data/sdme-lipid-dewatering-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  systemLabel: string;
+  systemHelp: string;
+  matrixLabel: string;
+  matrixHelp: string;
+  solventLabel: string;
+  solventHelp: string;
+  compressorLabel: string;
+  compressorHelp: string;
+  tempLabel: string;
+  tempHelp: string;
+  pressureLabel: string;
+  pressureHelp: string;
+  ratioLabel: string;
+  ratioHelp: string;
+  feedRateLabel: string;
+  feedRateHelp: string;
+  presetsTitle: string;
+  presetAlgae: string;
+  presetDairy: string;
+  presetYeast: string;
+  presetSco: string;
+  presetHazard: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  secLabel: string;
+  energySavingLabel: string;
+  recoveryLabel: string;
+  residualDmeLabel: string;
+  dewateringLabel: string;
+  lipidYieldLabel: string;
+  residualMoistureLabel: string;
+  statusLabel: string;
+  diagramTitle: string;
+  diagramSub: string;
+  scienceTitle: string;
+  scienceSub: string;
+  tableTitle: string;
+}
+
+const DICT: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Subcritical Green Solvents & Ambient Dewatering Physics",
+    title: "Commercial Continuous Subcritical Dimethyl Ether (sDME) Low-Temperature In-Line Lipid Dewatering & Clean Extraction Modeler",
+    subtitle: "Simulate continuous liquefied subcritical dimethyl ether (sDME, 0.5–0.85 MPa, 20–35°C) extraction for single-step, low-temperature water and lipid dewatering of high-moisture microalgae, dairy sludges, and fermentation broths without thermal drying energy under ASME Section VIII Div 1 & 2, NFPA 58, ATEX Zone 1, 3-A Sanitary Standards 63-04, and FDA 21 CFR § 173.357.",
+    controlsTitle: "sDME Dewatering & Subcritical Extraction Controls",
+    controlsSub: "Configure extraction column operating temperature, liquefaction pressure, solvent-to-feed mass ratio, vapor recompression stage, and raw biomass slurry throughput.",
+    systemLabel: "Subcritical Extraction Skid Architecture:",
+    systemHelp: "Select commercial continuous sDME extraction skid, wet microalgae lipid harvester, industrial byproduct valorizer, or cleanroom modular research skid.",
+    matrixLabel: "High-Moisture Feedstock Slurry & Biomass:",
+    matrixHelp: "Select wet microalgal paste (Chlorella vulgaris), dairy acid whey lipid sludge, brewery spent yeast slurry, fresh soy okara pulp, or oleaginous yeast fermentation broth.",
+    solventLabel: "Subcritical Solvent Media & Entrainer Chemistry:",
+    solventHelp: "Select pure liquefied sDME (0.65 MPa, 25°C), sDME with 4.0 wt% bio-ethanol entrainer, sDME/scCO2 hybrid blend, or conventional hazardous hexane with pre-drying.",
+    compressorLabel: "Closed-Loop Vapor Recompression Stage:",
+    compressorHelp: "Select hermetic oil-free scroll compressor, ATEX Zone 1 variable-speed rotary screw recompressor, triple-diaphragm compressor, or atmospheric venting hazard.",
+    tempLabel: "Extraction Column Temperature (T_ext):",
+    tempHelp: "Operating liquid temperature inside the counter-current extraction column (15.0 to 45.0 °C). Kept near ambient to prevent lipid peroxidation and protein denaturation.",
+    pressureLabel: "Subcritical Column Pressure (P_ext):",
+    pressureHelp: "Operating gauge pressure maintained above DME liquefaction threshold (0.40 to 1.00 MPa / 4.0 to 10.0 bar). Ensures liquid-phase extraction without boiling.",
+    ratioLabel: "Solvent-to-Feed Ratio (R_s/f):",
+    ratioHelp: "Mass ratio of liquefied sDME to wet biomass feed (1.5 to 8.0 kg DME / kg feed). Governs extraction driving force and dewatering completeness.",
+    feedRateLabel: "Continuous Feed Inflow (Q_feed):",
+    feedRateHelp: "Total wet biomass slurry volumetric flow rate entering the continuous dewatering system (100 to 10,000 L/h).",
+    presetsTitle: "Quick Industrial sDME Operating Presets:",
+    presetAlgae: "Wet Microalgal Chlorella Lipid Harvester (86.5% Moisture, Zero Thermal Drying, 98.5% Lipid Yield)",
+    presetDairy: "Dairy Acid Whey Sludge MFGM Phospholipids & Lecithin Recovery (Ambient Dewatering)",
+    presetYeast: "Brewers Spent Yeast Flavor Bases & Protein Cake Upcycling (Debittered, <12% Moisture)",
+    presetSco: "Oleaginous Yeast Single-Cell Oil (SCO) Recovery (88% Moisture Broth, SEC 14.2 kWh/t)",
+    presetHazard: "Conventional High-Heat Hexane Extraction with Thermal Pre-Drying (Severe VOC Hazard)",
+    diagnosticTitle: "Real-Time sDME Dewatering Telemetry & Thermodynamic Kinetics",
+    diagnosticSub: "Continuous biophysical telemetry modeling specific electrical energy consumption (SEC), energy savings vs thermal drying, closed-loop DME recovery, residual solvent ppm, and safety interlocks.",
+    secLabel: "Specific Electrical Energy Consumption (SEC):",
+    energySavingLabel: "Thermal Energy Reduction vs Drying Boilers:",
+    recoveryLabel: "Closed-Loop DME Solvent Recovery Rate:",
+    residualDmeLabel: "Residual Solvent in Dry Meal (FDA limit < 1.0 ppm):",
+    dewateringLabel: "Single-Pass Water Dewatering Efficiency:",
+    lipidYieldLabel: "Total Neutral & Polar Lipid Extraction Yield:",
+    residualMoistureLabel: "Residual Cake Moisture Content (Wet Basis):",
+    statusLabel: "ASME Sec VIII / NFPA 58 / ATEX Zone 1 Compliance:",
+    diagramTitle: "Continuous Subcritical DME Extraction & Closed-Loop Vapor Recompression Flow Schematic",
+    diagramSub: "Process flow diagram showing high-moisture slurry pump, pressurized counter-current sDME contactor, dewatered protein cake centrifuge, flash calandria, hermetic vapor recompressor, water condenser, and liquid DME storage receiver.",
+    scienceTitle: "Thermodynamic Phase Equilibria & Green Solvent Biophysics",
+    scienceSub: "Scientific foundation of liquefied DME polarity, partial water miscibility, low boiling point (-24.8°C), and non-thermal cell membrane permeation.",
+    tableTitle: "Comparative Technical Matrix: sDME vs Conventional Extraction Technologies"
+  },
+  es: {
+    badge: "Disolventes Verdes Subcríticos y Deshidratación a Temperatura Ambiente",
+    title: "Simulador Continuo de Deshidratación de Lípidos y Extracción Limpia con Éter Dimetílico Subcrítico (sDME)",
+    subtitle: "Simule la extracción continua con éter dimetílico subcrítico licuado (sDME, 0,5–0,85 MPa, 20–35°C) para la deshidratación y extracción de lípidos en una sola etapa de microalgas, lodos lácteos y caldos de fermentación sin gasto de secado térmico bajo ASME Sec VIII, NFPA 58, ATEX Zona 1 y FDA 21 CFR § 173.357.",
+    controlsTitle: "Controles de Extracción Subcrítica y Deshidratación sDME",
+    controlsSub: "Configure la temperatura de la columna, la presión de licuefacción, la relación disolvente-alimento, la etapa de recompresión de vapor y el caudal de biomasa húmeda.",
+    systemLabel: "Arquitectura del Skid de Extracción Subcrítica:",
+    systemHelp: "Seleccione skid industrial sDME continuo, recolector de lípidos de microalgas húmedas, valorizador de subproductos o unidad modular piloto de investigación.",
+    matrixLabel: "Materia Prima de Alta Humedad y Biomasa:",
+    matrixHelp: "Seleccione pasta húmeda de microalgas (Chlorella vulgaris), lodos de suero lácteo ácido, suspensión de levadura cervecera, pulpa de okara de soja o caldo de levaduras oleaginosas.",
+    solventLabel: "Medio Disolvente Subcrítico y Agente Arrastrador:",
+    solventHelp: "Seleccione sDME licuado puro (0,65 MPa, 25°C), sDME con 4,0% bioetanol, mezcla sDME/scCO2 o método convencional de hexano con secado previo.",
+    compressorLabel: "Etapa de Recompresión de Vapor en Circuito Cerrado:",
+    compressorHelp: "Seleccione compresor scroll hermético sin aceite, compresor de tornillo ATEX Zona 1 con variador de frecuencia, compresor de triple diafragma o descarga atmosférica peligrosa.",
+    tempLabel: "Temperatura de la Columna (T_ext):",
+    tempHelp: "Temperatura del líquido en la columna de extracción (15,0 a 45,0 °C). Mantenida a temperatura ambiente para prevenir la oxidación lipídica.",
+    pressureLabel: "Presión Subcrítica de la Columna (P_ext):",
+    pressureHelp: "Presión manométrica mantenida por encima del umbral de licuefacción del DME (0,40 a 1,00 MPa / 4 a 10 bar) para evitar ebullición prematura.",
+    ratioLabel: "Relación Disolvente / Alimento (R_s/f):",
+    ratioHelp: "Relación en masa de sDME licuado respecto a la masa húmeda (1,5 a 8,0 kg DME / kg alimento). Determina la fuerza impulsora de deshidratación.",
+    feedRateLabel: "Caudal de Alimentación Continua (Q_feed):",
+    feedRateHelp: "Caudal volumétrico total de suspensión húmeda que ingresa al extractor continuo (100 a 10.000 L/h).",
+    presetsTitle: "Preajustes Industriales Rápidos sDME:",
+    presetAlgae: "Extracción de Lípidos de Microalgas Chlorella Húmedas (86,5% Humedad, Cero Secado Térmico, 98,5% Rendimiento)",
+    presetDairy: "Recuperación de Fosfolípidos y Lecitina MFGM de Lodos Lácteos (Deshidratación a Temperatura Ambiente)",
+    presetYeast: "Valorización de Levadura Cervecera Agotada y Harina Proteica (Desamargada, <12% Humedad)",
+    presetSco: "Extracción de Aceite Unicelular (SCO) de Levadura Oleaginosa (88% Humedad, SEC 14,2 kWh/t)",
+    presetHazard: "Extracción Convencional con Hexano a Alta Temperatura con Secado Térmico Previo (Riesgo Grave de Incendio)",
+    diagnosticTitle: "Telemetría de Deshidratación sDME en Tiempo Real y Cinética Termodinámica",
+    diagnosticSub: "Telemetría biofísica continua que modela el consumo eléctrico específico (SEC), ahorro de energía frente a calderas térmicas, recuperación en circuito cerrado y ppm residuales.",
+    secLabel: "Consumo Específico de Energía Eléctrica (SEC):",
+    energySavingLabel: "Ahorro de Energía Térmica frente a Secado Convencional:",
+    recoveryLabel: "Tasa de Recuperación de Disolvente DME en Circuito Cerrado:",
+    residualDmeLabel: "Disolvente Residual en Producto (Límite FDA < 1,0 ppm):",
+    dewateringLabel: "Eficiencia de Extracción de Agua en un Solo Paso:",
+    lipidYieldLabel: "Rendimiento de Extracción de Lípidos Totales:",
+    residualMoistureLabel: "Humedad Residual en la Torta de Biomasa:",
+    statusLabel: "Conformidad ASME Sec VIII / NFPA 58 / ATEX Zona 1:",
+    diagramTitle: "Esquema de Flujo de Extracción Continua con sDME y Recompresión en Circuito Cerrado",
+    diagramSub: "Diagrama de flujo mostrando la bomba de lodo húmedo, columna presurizada en contracorriente, centrífuga de sólidos, evaporador de desorción flash, compresor hermético y tanque acumulador de DME.",
+    scienceTitle: "Equilibrio Termodinámico de Fases y Biofísica del Disolvente Verde",
+    scienceSub: "Fundamentos científicos de la polaridad del DME líquido, solubilidad parcial de agua, bajo punto de ebullición (-24,8°C) y permeación celular no térmica.",
+    tableTitle: "Matriz Técnica Comparativa: sDME frente a Tecnologías Convencionales de Extracción"
+  },
+  pt: {
+    badge: "Solventes Verdes Subcríticos e Desidratação em Temperatura Ambiente",
+    title: "Modelador Contínuo de Desidratação de Lipídios e Extração Limpa com Éter Dimetílico Subcrítico (sDME)",
+    subtitle: "Simule a extração contínua com éter dimetílico subcrítico liquefeito (sDME, 0,5–0,85 MPa, 20–35°C) para desidratação e extração de lipídios em etapa única de microalgas, lamas lácteas e caldos de fermentação sem secagem térmica sob normas ASME Sec VIII, NFPA 58, ATEX Zona 1 e FDA 21 CFR § 173.357.",
+    controlsTitle: "Controles de Extração Subcrítica e Desidratação sDME",
+    controlsSub: "Configure a temperatura da coluna, pressão de liquefação, razão solvente/alimentação, estágio de recompressão e vazão de biomassa úmida.",
+    systemLabel: "Arquitetura do Skid de Extração Subcrítica:",
+    systemHelp: "Selecione skid contínuo industrial sDME, colhedor de lipídios de microalgas, valorizador de subprodutos lácteos ou unidade modular de pesquisa.",
+    matrixLabel: "Matéria-Prima de Alta Umidade e Biomassa:",
+    matrixHelp: "Selecione pasta de microalgas (Chlorella vulgaris), lodo de soro ácido lácteo, suspensão de levedura cervejeira, polpa de okara de soja ou caldo de leveduras oleaginosas.",
+    solventLabel: "Meio Solvente Subcrítico e Entranhador:",
+    solventHelp: "Selecione sDME liquefeito puro (0,65 MPa, 25°C), sDME com 4,0% bioetanol, blenda sDME/scCO2 ou hexano térmico convencional perigoso.",
+    compressorLabel: "Estágio de Recompressão de Vapor em Circuito Fechado:",
+    compressorHelp: "Selecione compressor scroll hermético sem óleo, compressor parafuso ATEX Zona 1 com inversor, compressor de triplo diafragma ou descarga atmosférica perigosa.",
+    tempLabel: "Temperatura da Coluna (T_ext):",
+    tempHelp: "Temperatura operacional do líquido na coluna de extração (15,0 a 45,0 °C), mantida próxima à ambiente para evitar peroxidação lipídica.",
+    pressureLabel: "Pressão Subcrítica da Columna (P_ext):",
+    pressureHelp: "Pressão manométrica mantida acima do ponto de liquefação do DME (0,40 a 1,00 MPa / 4 a 10 bar) para garantir extração em fase líquida.",
+    ratioLabel: "Razão Solvente / Alimentação (R_s/f):",
+    ratioHelp: "Razão mássica de sDME liquefeito por biomassa úmida (1,5 a 8,0 kg DME / kg alimento), ditando a eficiência de desidratação.",
+    feedRateLabel: "Vazão de Alimentação Contínua (Q_feed):",
+    feedRateHelp: "Vazão volumétrica total de suspensão úmida introduzida no extrator (100 a 10.000 L/h).",
+    presetsTitle: "Predefinições Industriais Rápidas sDME:",
+    presetAlgae: "Colhedor de Lipídios de Microalgas Chlorella (86,5% Umidade, Zero Secagem Térmica, 98,5% Rendimento)",
+    presetDairy: "Recuperação de Fosfolipídios e Lecitina de Lodo de Soro Lácteo (Desidratação a Frio)",
+    presetYeast: "Valorização de Levedura Cervejeira Exaurida e Torta Proteica (<12% Umidade, Desamargada)",
+    presetSco: "Recuperação de Óleo Unicelular (SCO) de Levedura Oleaginosa (88% Umidade, SEC 14,2 kWh/t)",
+    presetHazard: "Extração Convencional com Hexano a Alta Temperatura com Secagem Prévia (Alto Risco de Incêndio)",
+    diagnosticTitle: "Telemetria de Desidratação sDME em Tempo Real e Cinética Termodinâmica",
+    diagnosticSub: "Telemetria biofísica contínua modelando consumo específico de energia (SEC), economia térmica frente a caldeiras, recuperação em circuito fechado e ppm residual.",
+    secLabel: "Consumo Específico de Energia Elétrica (SEC):",
+    energySavingLabel: "Redução de Energia Térmica vs Secagem Convencional:",
+    recoveryLabel: "Taxa de Recuperação de Solvente DME em Circuito Fechado:",
+    residualDmeLabel: "Solvente Residual no Produto (Limite FDA < 1,0 ppm):",
+    dewateringLabel: "Eficiência de Remoção de Água em Passo Único:",
+    lipidYieldLabel: "Rendimento de Extração de Lipídios Totais:",
+    residualMoistureLabel: "Umidade Residual na Torta de Biomassa:",
+    statusLabel: "Conformidade ASME Sec VIII / NFPA 58 / ATEX Zona 1:",
+    diagramTitle: "Fluxograma de Extração Contínua com sDME e Recompressão de Vapor",
+    diagramSub: "Fluxograma de processo mostrando bomba de lodo úmido, coluna pressurizada em contracorrente, centrífuga de desaguamento, calandra flash, compressor hermético e vaso receptor de DME.",
+    scienceTitle: "Equilíbrio Termodinâmico de Fases e Biofísica do Solvente Verde",
+    scienceSub: "Fundamentos científicos da polaridade do DME liquefeito, solubilidade mútua com água, ponto de ebulição (-24,8°C) e permeação celular não térmica.",
+    tableTitle: "Matriz Técnica Comparativa: sDME vs Tecnologias Convencionais de Extração"
+  },
+  'zh-cn': {
+    badge: "亚临界绿色溶剂与常温脱水物理化学技术",
+    title: "商用连续式亚临界二甲醚 (sDME) 低温在线脂质脱水与清洁萃取模拟器",
+    subtitle: "模拟连续式液化亚临界二甲醚 (sDME, 0.5–0.85 MPa, 20–35°C) 萃取工艺，在 ASME Section VIII Div 1 & 2、NFPA 58、ATEX Zone 1、3-A 卫生标准 63-04 及 FDA 21 CFR § 173.357 规范下，实现高含水微藻、乳品乳清油泥及发酵液的一步法常温脱水脱脂，消除热力烘干能耗。",
+    controlsTitle: "sDME 常温脱水与亚临界萃取控制台",
+    controlsSub: "配置逆流萃取塔操作温度、液化压力、溶剂料液比、闭环二次蒸汽再压缩级数及高含水物料进料流量。",
+    systemLabel: "亚临界萃取装备架构体系:",
+    systemHelp: "选择商用连续式 sDME 脱水脱脂撬装系统、湿微藻油脂在线采收机组、乳品工业副产物高值化装备或洁净室模块化科研试验机组。",
+    matrixLabel: "高含水原料浆料与生物质种类:",
+    matrixHelp: "选择湿微藻浓缩膏 (小球藻 Chlorella vulgaris, 86.5% 水分)、乳品酸乳清离心油泥、啤酒废酵母悬浊液、新鲜大豆豆渣浆或产油酵母全发酵醪液。",
+    solventLabel: "亚临界溶剂介质与夹带剂配方:",
+    solventHelp: "选择纯液化亚临界 DME (0.65 MPa, 25°C)、含 4.0 wt% 生物乙醇极性夹带剂配方、sDME/scCO2 超临界混合体系或需前置烘干的高危正己烷法。",
+    compressorLabel: "全闭路溶剂蒸汽再压缩循环级:",
+    compressorHelp: "选择全封闭无油涡旋压缩机、ATEX 1 区防爆变频螺杆压缩机、高洁净金属三隔膜压缩机或直接对空排空危险模式。",
+    tempLabel: "萃取塔操作温度 (T_ext):",
+    tempHelp: "逆流萃取塔内液相操作温度 (15.0 至 45.0 °C)。常温运行彻底杜绝脂质热氧化酸败与蛋白质变性。",
+    pressureLabel: "亚临界饱和维持压力 (P_ext):",
+    pressureHelp: "维持在 DME 饱和蒸汽压以上的系统压力 (0.40 至 1.00 MPa / 4.0 至 10.0 bar)，保证溶剂全程处于液态。",
+    ratioLabel: "溶剂料液质量比 (R_s/f):",
+    ratioHelp: "液化 DME 与湿生物质进料的质量比 (1.5 至 8.0 kg DME / kg 物料)，决定脱水深度与传质推动力。",
+    feedRateLabel: "连续物料进料流量 (Q_feed):",
+    feedRateHelp: "送入连续式萃取脱水系统的湿浆料体积流量 (100 至 10,000 L/h)。",
+    presetsTitle: "工业级 sDME 快速运行工况预设:",
+    presetAlgae: "湿态小球藻油脂常温在线采收 (含水率 86.5%, 零热风干燥, 油脂回收率 98.5%)",
+    presetDairy: "乳清加工油泥 MFGM 磷脂与鞘磷脂回收 (常温同步脱水脱脂, 活性蛋白保留)",
+    presetYeast: "啤酒厂废酵母深度脱苦调味基料与高蛋白滤饼提取 (滤饼水分 <12%)",
+    presetSco: "解脂耶氏酵母单细胞油脂 (SCO) 连续提取 (88% 水分发酵醪液, SEC 14.2 kWh/t)",
+    presetHazard: "传统高温热力烘干伴随正己烷萃取工艺 (严重挥发性火灾与神经毒性隐患)",
+    diagnosticTitle: "实时 sDME 脱水热力学动力学与安全遥测",
+    diagnosticSub: "连续生物物理遥测：精确建模比电耗 (SEC)、相对烘干锅炉的节能量、全闭路溶剂回收率、成品残醚含量 (ppm) 及联锁状态。",
+    secLabel: "单位物料比电耗 (SEC):",
+    energySavingLabel: "相对传统相变热烘干的综合节能率:",
+    recoveryLabel: "全闭路循环 DME 溶剂回收率:",
+    residualDmeLabel: "干燥物料中残余二甲醚含量 (FDA 上限 < 1.0 ppm):",
+    dewateringLabel: "单程水分脱除效率:",
+    lipidYieldLabel: "总脂质 (中性油脂与极性磷脂) 萃取产率:",
+    residualMoistureLabel: "脱脂固渣脱水后残余含水率:",
+    statusLabel: "ASME Sec VIII / NFPA 58 / ATEX 1 区防爆认证状态:",
+    diagramTitle: "连续式亚临界二甲醚萃取与闭路蒸汽再压缩工艺流程示意图",
+    diagramSub: "包含高含水浆料进料泵、逆流承压萃取塔、固液脱水离心机、降膜闪蒸解吸罐、无油防爆蒸汽压缩机、水冷冷凝器及储液罐。",
+    scienceTitle: "热力学相平衡机理与绿色亚临界溶剂生物物理学",
+    scienceSub: "深入解析液态 DME 的偶极距 (1.30 D)、水分互溶特性 (7.8 wt%)、超低沸点 (-24.8°C) 及非热破壁萃取动力学。",
+    tableTitle: "综合技术对比表：sDME 工艺对比传统热烘干正己烷及超临界萃取"
+  },
+  ja: {
+    badge: "亜臨界グリーン溶媒＆常温脱水物理化学技術",
+    title: "商用連続式亜臨界ジメチルエーテル (sDME) 低温インライン脂質脱水・クリーン抽出シミュレーター",
+    subtitle: "ASME Section VIII Div 1 & 2、NFPA 58、ATEX Zone 1、3-A 衛生規格 63-04、FDA 21 CFR § 173.357 基準に準拠。液化亜臨界ジメチルエーテル（sDME、0.5–0.85 MPa、20–35°C）を用い、熱乾燥を一切伴わずに高水分微細藻類、乳清汚泥、発酵液から水分と脂質を1段階で常温同時抽出する連続プロセスをシミュレート。",
+    controlsTitle: "sDME 常温脱水＆亜臨界抽出操作パネル",
+    controlsSub: "向流抽出塔の操作温度、液化維持圧力、溶媒/原料比、閉ループ蒸気再圧縮段、湿潤原料スラリー供給量を設定します。",
+    systemLabel: "亜臨界抽出スキッド構造:",
+    systemHelp: "商用連続式 sDME 抽出スキッド、湿潤微細藻類脂質ハーベスター、乳清副産物高付加価値化装置、クリーンルーム研究用パイロット機から選択。",
+    matrixLabel: "高水分原料スラリー＆バイオマス:",
+    matrixHelp: "湿潤微細藻類ペースト（クロレラ Chlorella vulgaris）、乳清酸性遠心汚泥、ビール酵母スラリー、生おから繊維ペースト、油脂酵母発酵液から選択。",
+    solventLabel: "亜臨界溶媒媒体＆共溶媒配合:",
+    solventHelp: "純液化 sDME（0.65 MPa、25°C）、4.0 wt% バイオエタノール配合 sDME、sDME/scCO2 ハイブリッドブレンド、加熱前乾燥必須の危険なヘキサン法から選択。",
+    compressorLabel: "完全密閉溶媒蒸気再圧縮ステージ:",
+    compressorHelp: "オイルフリー全密閉スクロール圧縮機、ATEX Zone 1 防爆インバータースクリュー圧縮機、高純度トリプルダイヤフラム圧縮機、大気放出危険モードから選択。",
+    tempLabel: "抽出塔操作温度 (T_ext):",
+    tempHelp: "向流抽出塔内の液温（15.0〜45.0 °C）。常温域で運転し、脂質の酸化酸敗やタンパク質熱変性を根絶します。",
+    pressureLabel: "亜臨界液化維持圧力 (P_ext):",
+    pressureHelp: "DME の飽和蒸気圧以上に加圧維持されたシステム圧力（0.40〜1.00 MPa / 4.0〜10.0 bar）。気泡沸騰を防ぎ液相を保ちます。",
+    ratioLabel: "溶媒/原料質量比 (R_s/f):",
+    ratioHelp: "液化 DME と湿潤バイオマス供給量の質量比（1.5〜8.0 kg DME / kg 原料）。脱水駆動力と抽出収率を決定します。",
+    feedRateLabel: "連続原料供給流量 (Q_feed):",
+    feedRateHelp: "連続抽出脱水系へ流入する高水分スラリーの体積流量（100〜10,000 L/h）。",
+    presetsTitle: "工業用 sDME クイック運転プリセット:",
+    presetAlgae: "湿潤クロレラ微細藻類脂質ハーベスター（水分86.5％、加熱乾燥ゼロ、脂質回収率98.5％）",
+    presetDairy: "乳清遠心スラッジ MFGM 複合脂質・レシチン回収（常温脱水、タンパク質未変性）",
+    presetYeast: "ビール酵母エキス・脱苦高タンパク質残渣ケークアップサイクル（残余水分<12％）",
+    presetSco: "油脂蓄積酵母シングルセルオイル (SCO) 連続回収（水分88％ブロス、SEC 14.2 kWh/t）",
+    presetHazard: "従来型熱風乾燥機併用ヘキサン抽出法（深刻な火災・神経毒性 VOC 危険状態）",
+    diagnosticTitle: "リアルタイム sDME 脱水熱力学速度論＆安全性テレメトリー",
+    diagnosticSub: "比消費電力量（SEC）、乾燥ボイラー対比の省エネ率、完全密閉溶媒回収率、製品残留 DME 濃度（ppm）、安全インターロックをリアルタイム解析。",
+    secLabel: "単位処理あたり比消費電力量 (SEC):",
+    energySavingLabel: "従来の相変態加熱乾燥に対する総合省エネ率:",
+    recoveryLabel: "完全閉ループ DME 溶媒回収率:",
+    residualDmeLabel: "製品中残留ジメチルエーテル濃度（FDA 基準 < 1.0 ppm）:",
+    dewateringLabel: "ワンパス水分脱除効率:",
+    lipidYieldLabel: "総脂質（中性脂肪＆極性リン脂質）抽出収率:",
+    residualMoistureLabel: "脱脂固形ケーク残余含水率:",
+    statusLabel: "ASME Sec VIII / NFPA 58 / ATEX Zone 1 防爆準拠状態:",
+    diagramTitle: "連続式亜臨界ジメチルエーテル抽出＆密閉蒸気再圧縮プロセス系統図",
+    diagramSub: "湿潤スラリーポンプ、耐圧向流抽出塔、固液分離遠心脱水機、フラッシュ脱溶缶、無油防爆蒸気圧縮機、水冷凝縮器、液化DME受液槽。",
+    scienceTitle: "熱力学的相平衡理論＆グリーン亜臨界溶媒バイオフィジックス",
+    scienceSub: "液化 DME の双極子モーメント（1.30 D）、水に対する特異な部分相溶性（7.8 wt％）、超低沸点（-24.8°C）、非加熱破壁速度論の物理化学的解説。",
+    tableTitle: "技術比較マトリックス：sDME 対 従来型加熱乾燥ヘキサン抽出・超臨界 CO2 抽出"
+  }
+};
+
+const d = DICT[lang] || DICT.en;
+const systems = sdmeData.systemArchitectures;
+const feeds = sdmeData.feedMatrices;
+const solvents = sdmeData.solventConditions;
+const compressors = sdmeData.compressorStages;
+---
+
+<div class="my-10 p-6 md:p-8 bg-surface border border-hairline rounded-3xl shadow-xs">
+  <!-- Header Badge & Title -->
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+    <span class="inline-block px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-950 text-emerald-300 border border-emerald-800">
+      {d.badge}
+    </span>
+    <span class="text-xs text-muted font-mono">
+      sDME &bull; 0.50&ndash;0.85 MPa &bull; 20&ndash;35&deg;C &bull; ASME Sec VIII &bull; NFPA 58 &bull; ATEX Zone 1 &bull; 3-A 63-04
+    </span>
+  </div>
+
+  <h2 class="text-title-lg md:text-headline-sm font-medium text-ink tracking-tight mb-3">
+    {d.title}
+  </h2>
+  <p class="text-body text-sm leading-relaxed mb-8 max-w-4xl text-muted">
+    {d.subtitle}
+  </p>
+
+  <!-- Quick Presets -->
+  <div class="mb-8 p-5 bg-surface-soft border border-hairline rounded-2xl">
+    <h3 class="text-xs font-bold uppercase tracking-wider text-muted mb-3">
+      {d.presetsTitle}
+    </h3>
+    <div class="flex flex-wrap gap-2.5">
+      <button type="button" id="sdme-preset-algae" class="px-3.5 py-2 rounded-xl text-xs font-medium bg-surface hover:bg-surface-elevated border border-hairline text-ink transition-colors">
+        🌱 {d.presetAlgae}
+      </button>
+      <button type="button" id="sdme-preset-dairy" class="px-3.5 py-2 rounded-xl text-xs font-medium bg-surface hover:bg-surface-elevated border border-hairline text-ink transition-colors">
+        🥛 {d.presetDairy}
+      </button>
+      <button type="button" id="sdme-preset-yeast" class="px-3.5 py-2 rounded-xl text-xs font-medium bg-surface hover:bg-surface-elevated border border-hairline text-ink transition-colors">
+        🍺 {d.presetYeast}
+      </button>
+      <button type="button" id="sdme-preset-sco" class="px-3.5 py-2 rounded-xl text-xs font-medium bg-surface hover:bg-surface-elevated border border-hairline text-ink transition-colors">
+        🧪 {d.presetSco}
+      </button>
+      <button type="button" id="sdme-preset-hazard" class="px-3.5 py-2 rounded-xl text-xs font-medium bg-rose-950/40 hover:bg-rose-950/60 border border-rose-800/80 text-rose-300 transition-colors">
+        ⚠️ {d.presetHazard}
+      </button>
+    </div>
+  </div>
+
+  <!-- Interactive Controls Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+    <!-- Left Column: Architecture & Materials -->
+    <div class="space-y-6">
+      <div class="p-6 bg-surface-soft border border-hairline rounded-2xl space-y-5">
+        <h3 class="text-sm font-bold uppercase tracking-wider text-ink mb-1">
+          {d.controlsTitle}
+        </h3>
+        <p class="text-xs text-muted mb-4">
+          {d.controlsSub}
+        </p>
+
+        <!-- System Architecture Selection -->
+        <div>
+          <label for="sdme-system-select" class="block text-xs font-semibold text-ink mb-1">
+            {d.systemLabel}
+          </label>
+          <select id="sdme-system-select" class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs text-ink focus:outline-hidden focus:ring-1 focus:ring-emerald-500">
+            {systems.map((s) => (
+              <option value={s.id}>{s.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1" id="sdme-system-desc">
+            {systems[0].description}
+          </p>
+        </div>
+
+        <!-- Feedstock Matrix Selection -->
+        <div>
+          <label for="sdme-feed-select" class="block text-xs font-semibold text-ink mb-1">
+            {d.matrixLabel}
+          </label>
+          <select id="sdme-feed-select" class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs text-ink focus:outline-hidden focus:ring-1 focus:ring-emerald-500">
+            {feeds.map((f) => (
+              <option value={f.id}>{f.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1" id="sdme-feed-desc">
+            {feeds[0].description}
+          </p>
+        </div>
+
+        <!-- Solvent Media Selection -->
+        <div>
+          <label for="sdme-solvent-select" class="block text-xs font-semibold text-ink mb-1">
+            {d.solventLabel}
+          </label>
+          <select id="sdme-solvent-select" class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs text-ink focus:outline-hidden focus:ring-1 focus:ring-emerald-500">
+            {solvents.map((sv) => (
+              <option value={sv.id}>{sv.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1" id="sdme-solvent-desc">
+            {solvents[0].description}
+          </p>
+        </div>
+
+        <!-- Vapor Compressor Selection -->
+        <div>
+          <label for="sdme-compressor-select" class="block text-xs font-semibold text-ink mb-1">
+            {d.compressorLabel}
+          </label>
+          <select id="sdme-compressor-select" class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs text-ink focus:outline-hidden focus:ring-1 focus:ring-emerald-500">
+            {compressors.map((c) => (
+              <option value={c.id}>{c.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1" id="sdme-compressor-desc">
+            {compressors[0].description}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Numeric Sliders -->
+    <div class="space-y-6">
+      <div class="p-6 bg-surface-soft border border-hairline rounded-2xl space-y-6">
+        <h3 class="text-sm font-bold uppercase tracking-wider text-ink mb-1">
+          Extraction &amp; Decompression Kinetics
+        </h3>
+
+        <!-- Column Temperature Slider -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="sdme-temp-slider" class="text-xs font-semibold text-ink">
+              {d.tempLabel}
+            </label>
+            <span class="font-mono text-xs font-bold text-emerald-400" id="sdme-temp-val">
+              25.0 &deg;C
+            </span>
+          </div>
+          <input type="range" id="sdme-temp-slider" min="15.0" max="45.0" step="0.5" value="25.0" class="w-full accent-emerald-500 cursor-pointer" />
+          <p class="text-[11px] text-muted mt-1">{d.tempHelp}</p>
+        </div>
+
+        <!-- Extraction Pressure Slider -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="sdme-pressure-slider" class="text-xs font-semibold text-ink">
+              {d.pressureLabel}
+            </label>
+            <span class="font-mono text-xs font-bold text-emerald-400" id="sdme-pressure-val">
+              0.65 MPa
+            </span>
+          </div>
+          <input type="range" id="sdme-pressure-slider" min="0.40" max="1.00" step="0.02" value="0.65" class="w-full accent-emerald-500 cursor-pointer" />
+          <p class="text-[11px] text-muted mt-1">{d.pressureHelp}</p>
+        </div>
+
+        <!-- Solvent-to-Feed Ratio Slider -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="sdme-ratio-slider" class="text-xs font-semibold text-ink">
+              {d.ratioLabel}
+            </label>
+            <span class="font-mono text-xs font-bold text-emerald-400" id="sdme-ratio-val">
+              4.2 : 1
+            </span>
+          </div>
+          <input type="range" id="sdme-ratio-slider" min="1.5" max="8.0" step="0.1" value="4.2" class="w-full accent-emerald-500 cursor-pointer" />
+          <p class="text-[11px] text-muted mt-1">{d.ratioHelp}</p>
+        </div>
+
+        <!-- Feed Inflow Rate Slider -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="sdme-feed-slider" class="text-xs font-semibold text-ink">
+              {d.feedRateLabel}
+            </label>
+            <span class="font-mono text-xs font-bold text-emerald-400" id="sdme-feed-val">
+              3,500 L/h
+            </span>
+          </div>
+          <input type="range" id="sdme-feed-slider" min="100" max="10000" step="100" value="3500" class="w-full accent-emerald-500 cursor-pointer" />
+          <p class="text-[11px] text-muted mt-1">{d.feedRateHelp}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real-Time Diagnostic Dashboard -->
+  <div class="mb-10 p-6 md:p-8 bg-surface-elevated border border-hairline rounded-3xl shadow-sm">
+    <div class="flex items-center justify-between mb-6 border-b border-hairline/80 pb-4">
+      <div>
+        <h3 class="text-base font-bold text-ink">
+          {d.diagnosticTitle}
+        </h3>
+        <p class="text-xs text-muted mt-0.5">
+          {d.diagnosticSub}
+        </p>
+      </div>
+      <div id="sdme-safety-badge" class="px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wide bg-emerald-950 text-emerald-300 border border-emerald-800">
+        ASME &bull; NFPA 58 &bull; ATEX ZONE 1 OK
+      </div>
+    </div>
+
+    <!-- Metrics Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div class="p-4 bg-surface rounded-2xl border border-hairline">
+        <span class="block text-[11px] font-semibold text-muted uppercase tracking-wider mb-1">
+          {d.secLabel}
+        </span>
+        <span class="text-lg md:text-xl font-bold font-mono text-emerald-400" id="sdme-sec-metric">
+          14.2 kWh/t
+        </span>
+        <span class="block text-[10px] text-muted mt-0.5">Electrical Compressor Load</span>
+      </div>
+
+      <div class="p-4 bg-surface rounded-2xl border border-hairline">
+        <span class="block text-[11px] font-semibold text-muted uppercase tracking-wider mb-1">
+          {d.energySavingLabel}
+        </span>
+        <span class="text-lg md:text-xl font-bold font-mono text-emerald-400" id="sdme-energy-saving-metric">
+          97.8%
+        </span>
+        <span class="block text-[10px] text-muted mt-0.5">vs Thermal Steam Drying</span>
+      </div>
+
+      <div class="p-4 bg-surface rounded-2xl border border-hairline">
+        <span class="block text-[11px] font-semibold text-muted uppercase tracking-wider mb-1">
+          {d.recoveryLabel}
+        </span>
+        <span class="text-lg md:text-xl font-bold font-mono text-emerald-400" id="sdme-recovery-metric">
+          99.6%
+        </span>
+        <span class="block text-[10px] text-muted mt-0.5">Closed-Loop DME Recycling</span>
+      </div>
+
+      <div class="p-4 bg-surface rounded-2xl border border-hairline">
+        <span class="block text-[11px] font-semibold text-muted uppercase tracking-wider mb-1">
+          {d.residualDmeLabel}
+        </span>
+        <span class="text-lg md:text-xl font-bold font-mono text-emerald-400" id="sdme-residual-metric">
+          0.38 ppm
+        </span>
+        <span class="block text-[10px] text-muted mt-0.5">FDA/EFSA Spec: &lt; 1.0 ppm</span>
+      </div>
+
+      <div class="p-4 bg-surface rounded-2xl border border-hairline">
+        <span class="block text-[11px] font-semibold text-muted uppercase tracking-wider mb-1">
+          {d.dewateringLabel}
+        </span>
+        <span class="text-lg md:text-xl font-bold font-mono text-teal-400" id="sdme-dewatering-metric">
+          88.5%
+        </span>
+        <span class="block text-[10px] text-muted mt-0.5">Moisture Stripped to DME</span>
+      </div>
+
+      <div class="p-4 bg-surface rounded-2xl border border-hairline">
+        <span class="block text-[11px] font-semibold text-muted uppercase tracking-wider mb-1">
+          {d.lipidYieldLabel}
+        </span>
+        <span class="text-lg md:text-xl font-bold font-mono text-teal-400" id="sdme-lipid-yield-metric">
+          98.4%
+        </span>
+        <span class="block text-[10px] text-muted mt-0.5">Neutral TAGs + Polar Lipids</span>
+      </div>
+
+      <div class="p-4 bg-surface rounded-2xl border border-hairline">
+        <span class="block text-[11px] font-semibold text-muted uppercase tracking-wider mb-1">
+          {d.residualMoistureLabel}
+        </span>
+        <span class="text-lg md:text-xl font-bold font-mono text-teal-400" id="sdme-residual-moisture-metric">
+          11.2%
+        </span>
+        <span class="block text-[10px] text-muted mt-0.5">Dewatered Dry Cake Basis</span>
+      </div>
+
+      <div class="p-4 bg-surface rounded-2xl border border-hairline">
+        <span class="block text-[11px] font-semibold text-muted uppercase tracking-wider mb-1">
+          {d.statusLabel}
+        </span>
+        <span class="text-sm font-bold font-mono text-emerald-400" id="sdme-compliance-metric">
+          PASSED (Class 1 Div 1)
+        </span>
+        <span class="block text-[10px] text-muted mt-0.5">ASME Sec VIII &bull; 3-A 63-04</span>
+      </div>
+    </div>
+
+    <!-- Alert / Warning Banner -->
+    <div id="sdme-hazard-banner" class="hidden p-4 rounded-2xl bg-rose-950/60 border border-rose-800 text-rose-200 text-xs leading-relaxed">
+      <strong>🚨 CRITICAL SAFETY INTERLOCK ENGAGED:</strong> Hazardous extraction conditions detected! High-temperature petrochemical solvent or unsealed atmospheric venting risks catastrophic flash-fire auto-ignition, neurotoxic VOC inhalation, and irreversible protein denaturation.
+    </div>
+  </div>
+
+  <!-- Interactive SVG Process Flow Schematic -->
+  <div class="mb-10 p-6 md:p-8 bg-surface-soft border border-hairline rounded-3xl">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h3 class="text-base font-bold text-ink">
+          {d.diagramTitle}
+        </h3>
+        <p class="text-xs text-muted mt-0.5">
+          {d.diagramSub}
+        </p>
+      </div>
+      <span class="text-xs font-mono text-muted">Hermetic Closed-Loop P&amp;ID</span>
+    </div>
+
+    <div class="overflow-x-auto">
+      <svg viewBox="0 0 960 420" class="w-full min-w-[720px] max-w-full h-auto text-ink" style="background-color: #0b1117; border-radius: 1rem;">
+        <defs>
+          <linearGradient id="grad-column" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#064e3b" stop-opacity="0.8" />
+            <stop offset="100%" stop-color="#022c22" stop-opacity="0.9" />
+          </linearGradient>
+          <linearGradient id="grad-calandria" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#1e3a5f" stop-opacity="0.8" />
+            <stop offset="100%" stop-color="#0f172a" stop-opacity="0.9" />
+          </linearGradient>
+          <linearGradient id="grad-compressor" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#047857" stop-opacity="0.8" />
+            <stop offset="100%" stop-color="#065f46" stop-opacity="0.9" />
+          </linearGradient>
+          <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981" />
+          </marker>
+          <marker id="arrow-vapor" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 8 5 L 0 9 z" fill="#38bdf8" />
+          </marker>
+        </defs>
+
+        <!-- Process Flow Lines -->
+        <!-- Wet Slurry Line -->
+        <path d="M 60 140 L 160 140" stroke="#34d399" stroke-width="3" fill="none" marker-end="url(#arrow)" />
+        <text x="65" y="125" fill="#a7f3d0" font-size="11" font-family="monospace">Wet Biomass Slurry (85% H2O)</text>
+
+        <!-- Liquefied sDME Input to Column Bottom -->
+        <path d="M 780 340 L 260 340 L 260 260" stroke="#10b981" stroke-width="3" fill="none" stroke-dasharray="4,2" marker-end="url(#arrow)" />
+        <text x="440" y="330" fill="#6ee7b7" font-size="11" font-family="monospace">Recycled Liquefied sDME (0.65 MPa, 25&deg;C)</text>
+
+        <!-- Subcritical Column Vessel -->
+        <rect x="160" y="80" width="120" height="200" rx="20" fill="url(#grad-column)" stroke="#059669" stroke-width="2" />
+        <text x="175" y="110" fill="#ecfdf5" font-size="12" font-weight="bold">Counter-Current</text>
+        <text x="180" y="128" fill="#ecfdf5" font-size="12" font-weight="bold">sDME Column</text>
+        <text x="175" y="150" fill="#6ee7b7" font-size="10" font-family="monospace">0.65 MPa &bull; 25&deg;C</text>
+        <text x="175" y="170" fill="#a7f3d0" font-size="9">Counter-Current Trays</text>
+        <text x="175" y="185" fill="#a7f3d0" font-size="9">H2O + Lipids Dissolve</text>
+
+        <!-- Dewatered Meal Exit (Bottom) -->
+        <path d="M 220 280 L 220 370 L 100 370" stroke="#fbbf24" stroke-width="3" fill="none" marker-end="url(#arrow)" />
+        <rect x="60" y="345" width="80" height="50" rx="8" fill="#78350f" stroke="#d97706" stroke-width="1.5" />
+        <text x="68" y="365" fill="#fef3c7" font-size="10" font-weight="bold">Dewatered Cake</text>
+        <text x="68" y="380" fill="#fde68a" font-size="9" font-family="monospace">&lt;12% Moisture</text>
+
+        <!-- sDME Extract Stream (Top of Column to Flash Evaporator) -->
+        <path d="M 280 120 L 390 120" stroke="#38bdf8" stroke-width="3" fill="none" marker-end="url(#arrow)" />
+        <text x="290" y="110" fill="#7dd3fc" font-size="10" font-family="monospace">sDME + Lipids + H2O</text>
+
+        <!-- Flash Desorption Calandria -->
+        <rect x="390" y="70" width="130" height="210" rx="15" fill="url(#grad-calandria)" stroke="#0284c7" stroke-width="2" />
+        <text x="405" y="100" fill="#f0f9ff" font-size="12" font-weight="bold">Flash Desorption</text>
+        <text x="420" y="118" fill="#f0f9ff" font-size="12" font-weight="bold">Calandria</text>
+        <text x="405" y="145" fill="#38bdf8" font-size="10" font-family="monospace">&Delta;P Flash (0.1 MPa)</text>
+        <text x="405" y="165" fill="#bae6fd" font-size="9">DME Flash Evaporation</text>
+        <text x="405" y="180" fill="#bae6fd" font-size="9">T_boil = -24.8&deg;C</text>
+
+        <!-- Pure Extracted Lipids & Water Discharge -->
+        <path d="M 455 280 L 455 370 L 350 370" stroke="#10b981" stroke-width="3" fill="none" marker-end="url(#arrow)" />
+        <rect x="290" y="345" width="110" height="50" rx="8" fill="#064e3b" stroke="#059669" stroke-width="1.5" />
+        <text x="298" y="365" fill="#ecfdf5" font-size="10" font-weight="bold">Purified Extract</text>
+        <text x="298" y="380" fill="#6ee7b7" font-size="9" font-family="monospace">Lipids &amp; Water (No DME)</text>
+
+        <!-- DME Vapor to Compressor -->
+        <path d="M 520 120 L 610 120" stroke="#38bdf8" stroke-width="3" fill="none" marker-end="url(#arrow-vapor)" />
+        <text x="525" y="110" fill="#7dd3fc" font-size="10" font-family="monospace">DME Vapor Stream</text>
+
+        <!-- Vapor Recompressor (Scroll / Screw) -->
+        <rect x="610" y="80" width="120" height="100" rx="16" fill="url(#grad-compressor)" stroke="#10b981" stroke-width="2" />
+        <text x="625" y="110" fill="#ffffff" font-size="12" font-weight="bold">Hermetic Vapor</text>
+        <text x="625" y="128" fill="#ffffff" font-size="12" font-weight="bold">Recompressor</text>
+        <text x="625" y="150" fill="#a7f3d0" font-size="10" font-family="monospace">&eta;_is = 85% &bull; 0.65 MPa</text>
+
+        <!-- Recompressed High-Pressure Vapor to Condenser -->
+        <path d="M 730 130 L 810 130 L 810 180" stroke="#34d399" stroke-width="3" fill="none" marker-end="url(#arrow)" />
+
+        <!-- Water-Cooled Condenser -->
+        <rect x="750" y="180" width="120" height="80" rx="12" fill="#1e293b" stroke="#64748b" stroke-width="2" />
+        <text x="765" y="210" fill="#f8fafc" font-size="11" font-weight="bold">Water-Cooled</text>
+        <text x="770" y="226" fill="#f8fafc" font-size="11" font-weight="bold">Condenser</text>
+        <text x="765" y="244" fill="#94a3b8" font-size="9" font-family="monospace">20&deg;C Cooling Water</text>
+
+        <!-- Liquid DME Receiver Tank -->
+        <path d="M 810 260 L 810 290" stroke="#10b981" stroke-width="3" fill="none" marker-end="url(#arrow)" />
+        <rect x="750" y="290" width="120" height="70" rx="14" fill="#047857" stroke="#10b981" stroke-width="2" />
+        <text x="760" y="315" fill="#ecfdf5" font-size="11" font-weight="bold">Liquid sDME</text>
+        <text x="760" y="330" fill="#ecfdf5" font-size="11" font-weight="bold">Storage Buffer</text>
+        <text x="760" y="346" fill="#a7f3d0" font-size="9" font-family="monospace">99.6% Closed Loop</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Thermodynamic & Biophysical Equations Section -->
+  <div class="mb-10 p-6 md:p-8 bg-surface border border-hairline rounded-3xl">
+    <h3 class="text-base font-bold text-ink mb-1">
+      {d.scienceTitle}
+    </h3>
+    <p class="text-xs text-muted mb-6">
+      {d.scienceSub}
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs leading-relaxed text-body">
+      <div class="p-5 bg-surface-soft border border-hairline rounded-2xl space-y-3">
+        <h4 class="font-bold text-ink text-sm">
+          1. Subcritical Liquid-Liquid Extraction &amp; Partial Miscibility
+        </h4>
+        <p>
+          Unlike strictly non-polar solvents (e.g. n-hexane, supercritical CO<sub>2</sub>), liquefied dimethyl ether (sDME) possesses a dipole moment (&mu; = 1.30 D) and an ether oxygen atom with two lone electron pairs capable of acting as hydrogen-bond acceptors with water. Under subcritical conditions (0.50&ndash;0.85 MPa, 20&ndash;35&deg;C):
+        </p>
+        <div class="p-3 bg-surface rounded-xl font-mono text-[11px] text-emerald-400 border border-hairline">
+          x_w = f(T, P) &approx; 7.8 wt% H2O in liquid sDME (at 25&deg;C)<br />
+          x_DME = f'(T, P) &approx; 35.0 wt% sDME in aqueous phase
+        </div>
+        <p>
+          This dual solubility allows liquefied DME to simultaneously dissolve water and hydrophobic triacylglycerols (TAGs) directly from wet biological matrices (&gt;85% moisture) without expensive pre-drying.
+        </p>
+      </div>
+
+      <div class="p-5 bg-surface-soft border border-hairline rounded-2xl space-y-3">
+        <h4 class="font-bold text-ink text-sm">
+          2. Flash Desorption &amp; Isentropic Recompression Thermodynamics
+        </h4>
+        <p>
+          Due to its low boiling point (T<sub>b</sub> = -24.8&deg;C at 1 atm), depressurizing the extract phase from 0.65 MPa to atmospheric pressure causes spontaneous, non-thermal flash evaporation of DME vapor (&Delta;H<sub>vap</sub> = 467 kJ/kg):
+        </p>
+        <div class="p-3 bg-surface rounded-xl font-mono text-[11px] text-emerald-400 border border-hairline">
+          W_comp = ( &gamma; / (&gamma; - 1) ) &bull; ( P1 &bull; V1 / &eta;_is ) &bull; [ (P2 / P1)^((&gamma;-1)/&gamma;) - 1 ]<br />
+          SEC_electrical = W_comp / m_feed &lt; 15.0 kWh/ton wet slurry
+        </div>
+        <p>
+          The closed-loop compressor recompresses vapor to 0.65 MPa for condensation at 20&deg;C cooling water, capturing 99.6% of solvent with zero fossil-fueled thermal drying energy.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comparative Technical Matrix Table -->
+  <div class="p-6 md:p-8 bg-surface-soft border border-hairline rounded-3xl">
+    <h3 class="text-base font-bold text-ink mb-1">
+      {d.tableTitle}
+    </h3>
+    <p class="text-xs text-muted mb-6">
+      Comprehensive comparison of extraction thermodynamics, operational energy, and regulatory standards.
+    </p>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs text-body border-collapse">
+        <thead>
+          <tr class="border-b border-hairline text-ink font-semibold">
+            <th class="py-3 px-4">Extraction Technology</th>
+            <th class="py-3 px-4">Pre-Drying Energy</th>
+            <th class="py-3 px-4">Operating Temp &amp; Press</th>
+            <th class="py-3 px-4">Solvent Toxicity / Residue</th>
+            <th class="py-3 px-4">Specific Energy (SEC)</th>
+            <th class="py-3 px-4">Regulatory Compliance</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline/60">
+          <tr class="bg-emerald-950/20">
+            <td class="py-3.5 px-4 font-bold text-emerald-400">Continuous Subcritical DME (sDME)</td>
+            <td class="py-3.5 px-4 text-emerald-300 font-semibold">0.0 kWh (Direct Wet Feed)</td>
+            <td class="py-3.5 px-4 font-mono">20&ndash;35&deg;C &bull; 0.5&ndash;0.8 MPa</td>
+            <td class="py-3.5 px-4 text-emerald-300">Non-toxic, &lt; 0.5 ppm residual (FDA GRAS)</td>
+            <td class="py-3.5 px-4 font-bold text-emerald-400 font-mono">14.2 kWh/t</td>
+            <td class="py-3.5 px-4 text-emerald-300">ASME Sec VIII &bull; NFPA 58 &bull; 3-A 63-04</td>
+          </tr>
+          <tr>
+            <td class="py-3 px-4 font-medium text-ink">Conventional n-Hexane Extraction</td>
+            <td class="py-3 px-4 text-rose-400">650&ndash;750 kWh/t (Drum/Spray Drying)</td>
+            <td class="py-3 px-4 font-mono">60&ndash;75&deg;C &bull; 0.1 MPa</td>
+            <td class="py-3 px-4 text-rose-400">Neurotoxic (OSHA PEL 50 ppm, 10&ndash;50 ppm res)</td>
+            <td class="py-3 px-4 font-mono">680 kWh/t total</td>
+            <td class="py-3 px-4">OSHA 1910.106 &bull; EPA VOC Rules</td>
+          </tr>
+          <tr>
+            <td class="py-3 px-4 font-medium text-ink">Supercritical Carbon Dioxide (scCO2)</td>
+            <td class="py-3 px-4 text-amber-400">Requires Pre-Drying (&lt;10% H2O)</td>
+            <td class="py-3 px-4 font-mono">40&ndash;65&deg;C &bull; 25&ndash;50 MPa</td>
+            <td class="py-3 px-4 text-emerald-300">Zero residue (Inert CO2)</td>
+            <td class="py-3 px-4 font-mono">110&ndash;180 kWh/t</td>
+            <td class="py-3 px-4">ASME Sec VIII Div 2 &bull; CGA G-6</td>
+          </tr>
+          <tr>
+            <td class="py-3 px-4 font-medium text-ink">Thermal Vacuum Evaporation + Centrifuge</td>
+            <td class="py-3 px-4 text-rose-400">Full Thermal Boiling Load</td>
+            <td class="py-3 px-4 font-mono">65&ndash;90&deg;C &bull; 0.2&ndash;0.9 bar</td>
+            <td class="py-3 px-4 text-amber-400">Zero solvent, but thermal denaturation</td>
+            <td class="py-3 px-4 font-mono">220&ndash;350 kWh/t</td>
+            <td class="py-3 px-4">3-A 60-01 &bull; ASME BPVC</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Client-side Interactive Simulation Logic for sDME Modeler
+  document.addEventListener('DOMContentLoaded', () => {
+    const systemSelect = document.getElementById('sdme-system-select') as HTMLSelectElement | null;
+    const feedSelect = document.getElementById('sdme-feed-select') as HTMLSelectElement | null;
+    const solventSelect = document.getElementById('sdme-solvent-select') as HTMLSelectElement | null;
+    const compressorSelect = document.getElementById('sdme-compressor-select') as HTMLSelectElement | null;
+
+    const tempSlider = document.getElementById('sdme-temp-slider') as HTMLInputElement | null;
+    const pressureSlider = document.getElementById('sdme-pressure-slider') as HTMLInputElement | null;
+    const ratioSlider = document.getElementById('sdme-ratio-slider') as HTMLInputElement | null;
+    const feedSlider = document.getElementById('sdme-feed-slider') as HTMLInputElement | null;
+
+    const tempVal = document.getElementById('sdme-temp-val');
+    const pressureVal = document.getElementById('sdme-pressure-val');
+    const ratioVal = document.getElementById('sdme-ratio-val');
+    const feedVal = document.getElementById('sdme-feed-val');
+
+    const secMetric = document.getElementById('sdme-sec-metric');
+    const energySavingMetric = document.getElementById('sdme-energy-saving-metric');
+    const recoveryMetric = document.getElementById('sdme-recovery-metric');
+    const residualMetric = document.getElementById('sdme-residual-metric');
+    const dewateringMetric = document.getElementById('sdme-dewatering-metric');
+    const lipidYieldMetric = document.getElementById('sdme-lipid-yield-metric');
+    const residualMoistureMetric = document.getElementById('sdme-residual-moisture-metric');
+    const complianceMetric = document.getElementById('sdme-compliance-metric');
+    const safetyBadge = document.getElementById('sdme-safety-badge');
+    const hazardBanner = document.getElementById('sdme-hazard-banner');
+
+    function updateSimulation() {
+      if (!tempSlider || !pressureSlider || !ratioSlider || !feedSlider) return;
+
+      const temp = parseFloat(tempSlider.value);
+      const press = parseFloat(pressureSlider.value);
+      const ratio = parseFloat(ratioSlider.value);
+      const feed = parseFloat(feedSlider.value);
+
+      if (tempVal) tempVal.innerHTML = `${temp.toFixed(1)} &deg;C`;
+      if (pressureVal) pressureVal.innerHTML = `${press.toFixed(2)} MPa`;
+      if (ratioVal) ratioVal.innerHTML = `${ratio.toFixed(1)} : 1`;
+      if (feedVal) feedVal.innerHTML = `${Math.round(feed).toLocaleString()} L/h`;
+
+      const isHexaneHazard = solventSelect?.value === 'unpressurized_hexane_thermal_hazard';
+      const isVentingHazard = compressorSelect?.value === 'uncondensed_atmospheric_venting_hazard';
+      const isSevereHazard = isHexaneHazard || isVentingHazard;
+
+      if (isSevereHazard) {
+        if (hazardBanner) hazardBanner.classList.remove('hidden');
+        if (safetyBadge) {
+          safetyBadge.className = 'px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wide bg-rose-950 text-rose-300 border border-rose-800 animate-pulse';
+          safetyBadge.innerText = 'NON-COMPLIANT / SEVERE HAZARD';
+        }
+        if (complianceMetric) {
+          complianceMetric.className = 'text-sm font-bold font-mono text-rose-400';
+          complianceMetric.innerText = 'FAIL (EXPLOSION RISK)';
+        }
+        if (secMetric) secMetric.innerText = isHexaneHazard ? '680.0 kWh/t' : '45.0 kWh/t';
+        if (energySavingMetric) energySavingMetric.innerText = '0.0%';
+        if (recoveryMetric) recoveryMetric.innerText = isVentingHazard ? '0.0%' : '88.5%';
+        if (residualMetric) residualMetric.innerText = isHexaneHazard ? '45.0 ppm' : '18.5 ppm';
+        if (dewateringMetric) dewateringMetric.innerText = isHexaneHazard ? '12.0%' : '45.0%';
+        if (lipidYieldMetric) lipidYieldMetric.innerText = '72.0%';
+        if (residualMoistureMetric) residualMoistureMetric.innerText = '65.0%';
+        return;
+      }
+
+      if (hazardBanner) hazardBanner.classList.add('hidden');
+      if (safetyBadge) {
+        safetyBadge.className = 'px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wide bg-emerald-950 text-emerald-300 border border-emerald-800';
+        safetyBadge.innerText = 'ASME &bull; NFPA 58 &bull; ATEX ZONE 1 OK';
+      }
+      if (complianceMetric) {
+        complianceMetric.className = 'text-sm font-bold font-mono text-emerald-400';
+        complianceMetric.innerText = 'PASSED (Class 1 Div 1)';
+      }
+
+      // Physics modeling:
+      // Base SEC = ~13.8 kWh/t + pressure ratio effect + ratio effect
+      const baseSec = 12.0 + (press * 2.2) + (ratio * 0.45);
+      const energySavings = Math.min(98.5, Math.max(94.0, 99.0 - (baseSec / 15.0)));
+      const recoveryRate = Math.min(99.9, Math.max(99.0, 99.7 - (press < 0.5 ? 0.4 : 0.0)));
+      const residualDme = Math.max(0.05, 0.45 - (temp * 0.008) + (press > 0.8 ? 0.08 : 0.0));
+      const dewateringEff = Math.min(95.0, Math.max(82.0, 75.0 + (ratio * 2.8) + ((temp - 20) * 0.3)));
+      const lipidYield = Math.min(99.6, Math.max(92.0, 90.0 + (ratio * 1.5) + (press * 3.5)));
+      const residualMoisture = Math.max(8.0, 85.0 * (1 - (dewateringEff / 100)));
+
+      if (secMetric) secMetric.innerText = `${baseSec.toFixed(1)} kWh/t`;
+      if (energySavingMetric) energySavingMetric.innerText = `${energySavings.toFixed(1)}%`;
+      if (recoveryMetric) recoveryMetric.innerText = `${recoveryRate.toFixed(1)}%`;
+      if (residualMetric) residualMetric.innerText = `${residualDme.toFixed(2)} ppm`;
+      if (dewateringMetric) dewateringMetric.innerText = `${dewateringEff.toFixed(1)}%`;
+      if (lipidYieldMetric) lipidYieldMetric.innerText = `${lipidYield.toFixed(1)}%`;
+      if (residualMoistureMetric) residualMoistureMetric.innerText = `${residualMoisture.toFixed(1)}%`;
+    }
+
+    // Attach Event Listeners
+    [tempSlider, pressureSlider, ratioSlider, feedSlider].forEach((slider) => {
+      slider?.addEventListener('input', updateSimulation);
+    });
+
+    [systemSelect, feedSelect, solventSelect, compressorSelect].forEach((sel) => {
+      sel?.addEventListener('change', updateSimulation);
+    });
+
+    // Preset Buttons
+    document.getElementById('sdme-preset-algae')?.addEventListener('click', () => {
+      if (feedSelect) feedSelect.value = 'wet_chlorella_vulgaris_paste';
+      if (solventSelect) solventSelect.value = 'pure_liquefied_sdme';
+      if (compressorSelect) compressorSelect.value = 'hermetic_oil_free_scroll_recompressor';
+      if (tempSlider) tempSlider.value = '25.0';
+      if (pressureSlider) pressureSlider.value = '0.65';
+      if (ratioSlider) ratioSlider.value = '4.5';
+      if (feedSlider) feedSlider.value = '4000';
+      updateSimulation();
+    });
+
+    document.getElementById('sdme-preset-dairy')?.addEventListener('click', () => {
+      if (feedSelect) feedSelect.value = 'wet_dairy_whey_lipid_sludge';
+      if (solventSelect) solventSelect.value = 'sdme_bioethanol_entrainer';
+      if (compressorSelect) compressorSelect.value = 'atex_variable_speed_screw_recompressor';
+      if (tempSlider) tempSlider.value = '28.0';
+      if (pressureSlider) pressureSlider.value = '0.70';
+      if (ratioSlider) ratioSlider.value = '4.0';
+      if (feedSlider) feedSlider.value = '3500';
+      updateSimulation();
+    });
+
+    document.getElementById('sdme-preset-yeast')?.addEventListener('click', () => {
+      if (feedSelect) feedSelect.value = 'brewers_spent_yeast_slurry';
+      if (solventSelect) solventSelect.value = 'pure_liquefied_sdme';
+      if (compressorSelect) compressorSelect.value = 'atex_variable_speed_screw_recompressor';
+      if (tempSlider) tempSlider.value = '30.0';
+      if (pressureSlider) pressureSlider.value = '0.62';
+      if (ratioSlider) ratioSlider.value = '3.8';
+      if (feedSlider) feedSlider.value = '3000';
+      updateSimulation();
+    });
+
+    document.getElementById('sdme-preset-sco')?.addEventListener('click', () => {
+      if (feedSelect) feedSelect.value = 'fermentation_single_cell_oil_broth';
+      if (solventSelect) solventSelect.value = 'sdme_co2_hybrid_blend';
+      if (compressorSelect) compressorSelect.value = 'hermetic_oil_free_scroll_recompressor';
+      if (tempSlider) tempSlider.value = '24.0';
+      if (pressureSlider) pressureSlider.value = '0.75';
+      if (ratioSlider) ratioSlider.value = '5.0';
+      if (feedSlider) feedSlider.value = '5000';
+      updateSimulation();
+    });
+
+    document.getElementById('sdme-preset-hazard')?.addEventListener('click', () => {
+      if (solventSelect) solventSelect.value = 'unpressurized_hexane_thermal_hazard';
+      if (compressorSelect) compressorSelect.value = 'uncondensed_atmospheric_venting_hazard';
+      if (tempSlider) tempSlider.value = '45.0';
+      if (pressureSlider) pressureSlider.value = '0.40';
+      updateSimulation();
+    });
+
+    updateSimulation();
+  });
+</script>
