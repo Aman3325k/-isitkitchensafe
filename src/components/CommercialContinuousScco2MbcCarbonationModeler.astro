@@ -1,0 +1,974 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import scco2Data from '../data/scco2-mbc-carbonation-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  systemLabel: string;
+  systemHelp: string;
+  matrixLabel: string;
+  matrixHelp: string;
+  spargerLabel: string;
+  spargerHelp: string;
+  pressureLabel: string;
+  pressureHelp: string;
+  tempLabel: string;
+  tempHelp: string;
+  dwellLabel: string;
+  dwellHelp: string;
+  flowLabel: string;
+  flowHelp: string;
+  co2DoseLabel: string;
+  co2DoseHelp: string;
+  presetsTitle: string;
+  presetCider: string;
+  presetBeer: string;
+  presetJuice: string;
+  presetTonic: string;
+  presetHazard: string;
+  diagnosticTitle: string;
+  diagnosticSub: string;
+  carbonationLabel: string;
+  logReductionLabel: string;
+  doResidualLabel: string;
+  thermalDeltaLabel: string;
+  retentionLabel: string;
+  energyLabel: string;
+  throughputLabel: string;
+  overallStatusLabel: string;
+  diagramTitle: string;
+  diagramSub: string;
+  scienceTitle: string;
+  scienceSub: string;
+  tableTitle: string;
+}
+
+const DICT: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Dense-Phase Fluid Thermodynamics & Cold Beverage Safety",
+    title: "Commercial Continuous Supercritical CO2 High-Pressure Micro-Bubble Carbonation & In-Line Sterilization (scCO2-MBC) Modeler",
+    subtitle: "Simulate continuous high-pressure dense-phase supercritical carbon dioxide (scCO2, 75–160 bar, 20–35°C) micro-bubble dissolution for simultaneous high-precision beverage carbonation, 6-log spoilage yeast and bacterial pasteurization, dissolved oxygen stripping (DO < 10 ppb), and zero-heat sensory preservation under ASME Section VIII Div 1, 3-A Sanitary Standards 04-05 & 44-03, and FDA 21 CFR § 120 Juice HACCP.",
+    controlsTitle: "scCO2-MBC Fluid Thermodynamics & Sparger Controls",
+    controlsSub: "Configure supercritical operating pressure, fluid contact temperature, micro-bubble sparger porosity, contactor residence dwell time, volumetric flow rate, and CO2 injection ratio.",
+    systemLabel: "Continuous Skid Architecture & Reactor System:",
+    systemHelp: "Select rotary plug-flow sterilizer skid, counter-current structured packing column, high-shear micro-venturi infuser, or cleanroom pilot research skid.",
+    matrixLabel: "Target Beverage Matrix & Spoilage Flora:",
+    matrixHelp: "Select craft hard cider/perry, non-alcoholic craft beer, cold-pressed cloudy citrus juice, botanical adaptogen tonic, or sparkling raw kombucha.",
+    spargerLabel: "Micro-Bubble Generation Technology:",
+    spargerHelp: "Select sintered nano-porous titanium micro-sparger (0.8 µm), micro-venturi vortex nozzle, ceramic α-Al2O3 membrane, or coarse pipe diffuser (hazard).",
+    pressureLabel: "Contactor Operating Pressure (P_contactor):",
+    pressureHelp: "Working pressure (40.0 to 160.0 bar). Determines dense-phase CO2 density, solubility kinetics, and cellular envelope permeation.",
+    tempLabel: "Fluid Process Temperature (T_fluid):",
+    tempHelp: "Beverage stream temperature (15.0 to 45.0 °C). Governs CO2 supercritical phase transition (Tc = 31.1°C) and microbial membrane fluidity.",
+    dwellLabel: "Contactor Exposure Residence Time (t_dwell):",
+    dwellHelp: "Active transit duration inside the pressurized micro-bubble contactor loop (0.5 to 15.0 seconds).",
+    flowLabel: "Continuous Liquid Flow Rate (Q_liquid):",
+    flowHelp: "Volumetric beverage processing capacity through the high-pressure skid (500 to 8000 L/h).",
+    co2DoseLabel: "CO2 Mass Dosing Ratio (m_CO2):",
+    co2DoseHelp: "Mass of food-grade CO2 injected per liter of beverage (2.0 to 9.0 g/L). Dictates final carbonation effervescence.",
+    presetsTitle: "Quick Industrial Process Presets:",
+    presetCider: "Craft Hard Cider Non-Thermal Yeast Inactivation & Carbonation",
+    presetBeer: "Non-Alcoholic Craft Beer Lactic Acid Bacteria Kill (<0.5% ABV)",
+    presetJuice: "Cold-Pressed Citrus Juice HACCP 5-Log Pathogen Destruction",
+    presetTonic: "Sparkling Botanical Adaptogen Tonic (High Effervescence)",
+    presetHazard: "Low-Pressure Subcritical Macro-Bubble Cavitation Hazard",
+    diagnosticTitle: "Real-Time scCO2-MBC Telemetry & Microbial Kinetics",
+    diagnosticSub: "Continuous modeling of carbonation volume, microbial log-reduction, dissolved oxygen stripping, thermal delta, aroma retention, and ASME pressure vessel compliance.",
+    carbonationLabel: "Dissolved Carbonation Level:",
+    logReductionLabel: "Spoilage Organism Log Reduction:",
+    doResidualLabel: "Residual Dissolved Oxygen (DO):",
+    thermalDeltaLabel: "Beverage Thermal Rise (ΔT_beverage):",
+    retentionLabel: "Aroma / Vitamin C Retention:",
+    energyLabel: "Specific Energy Consumption:",
+    throughputLabel: "Continuous Packaging Throughput:",
+    overallStatusLabel: "Sanitary & Aseptic Status:",
+    diagramTitle: "Supercritical CO2 Micro-Bubble Dissolution & In-Line Sterilization Architecture",
+    diagramSub: "Schematic view of high-pressure fluid boosting, sub-micron porous sparging, micro-bubble contactor, automated BPR, and cold canning line.",
+    scienceTitle: "Scientific Foundations & Biophysical Mechanics of scCO2-MBC",
+    scienceSub: "Comprehensive analysis of high-pressure dense-phase fluid thermodynamics, Epstein-Plesset bubble dissolution kinetics, cytoplasmic acidification, and dissolved oxygen displacement.",
+    tableTitle: "Commercial System Specifications & Inactivation Reference Parameters"
+  },
+  es: {
+    badge: "Termodinámica de Fluidos en Fase Densa y Seguridad de Bebidas en Frío",
+    title: "Simulador Continuo de Carbonatación y Esterilización en Línea por Microburbujas de CO2 Supercrítico (scCO2-MBC)",
+    subtitle: "Simule la disolución continua de microburbujas de dióxido de carbono supercrítico en fase densa (scCO2, 75–160 bar, 20–35°C) para la carbonatación de alta precisión, pasteurización de levaduras y bacterias (>6 log), desoxigenación (OD < 10 ppb) y preservación organoléptica sin calor bajo normas ASME Sección VIII, 3-A 04-05 y FDA 21 CFR § 120 Juice HACCP.",
+    controlsTitle: "Termodinámica de Fluidos scCO2-MBC y Controles del Dispersor",
+    controlsSub: "Configure la presión de operación supercrítica, temperatura del fluido, porosidad del microdispersor, tiempo de residencia, caudal volumétrico y ratio de inyección de CO2.",
+    systemLabel: "Arquitectura del Skid Continuo y Sistema de Reacción:",
+    systemHelp: "Seleccione skid esterilizador de flujo pistón, columna empacada a contracorriente, infusor micro-venturi de alto cizallamiento o skid piloto de investigación.",
+    matrixLabel: "Matriz de Bebida y Flora Microbiana Objetivo:",
+    matrixHelp: "Seleccione sidra/perada artesanal, cerveza sin alcohol, zumo cítrico prensado en frío, tónica botánica adaptógena o kombucha fermentada.",
+    spargerLabel: "Tecnología de Generación de Microburbujas:",
+    spargerHelp: "Seleccione dispersor de titanio nanoporoso (0,8 µm), boquilla de vórtice micro-venturi, membrana cerámica de alúmina o tubo perforado convencional (peligro).",
+    pressureLabel: "Presión de Operación del Contactor (P_contactor):",
+    pressureHelp: "Presión de trabajo (40,0 a 160,0 bar). Determina la densidad del CO2 supercrítico, cinética de disolución y lisis celular.",
+    tempLabel: "Temperatura del Proceso del Fluido (T_fluido):",
+    tempHelp: "Temperatura de la bebida (15,0 a 45,0 °C). Rige la transición de fase supercrítica (Tc = 31,1°C) y fluidez de membrana.",
+    dwellLabel: "Tiempo de Residencia en el Contactor (t_residencia):",
+    dwellHelp: "Tiempo de contacto activo dentro del bucle presurizado de microburbujas (0,5 a 15,0 segundos).",
+    flowLabel: "Caudal Volumétrico Continuo (Q_líquido):",
+    flowHelp: "Capacidad de procesamiento continuo a través del skid de alta presión (500 a 8.000 L/h).",
+    co2DoseLabel: "Ratio de Dosificación Másica de CO2 (m_CO2):",
+    co2DoseHelp: "Masa de CO2 alimentario inyectado por litro de bebida (2,0 a 9,0 g/L). Determina la efervescencia final.",
+    presetsTitle: "Ajustes Rápidos Industriales:",
+    presetCider: "Sidra Artesanal: Inactivación de Levaduras y Carbonatación en Frío",
+    presetBeer: "Cerveza Artesanal Sin Alcohol: Eliminación de Bacterias Lácticas",
+    presetJuice: "Zumo Cítrico: Destrucción de Patógenos HACCP de 5 Logaritmos",
+    presetTonic: "Tónica Botánica Adaptógena Espumosa (Alta Efervescencia)",
+    presetHazard: "Peligro de Cavitación de Macroburbujas y Baja Presión Subcrítica",
+    diagnosticTitle: "Telemetría en Tiempo Real y Cinética Microbiana scCO2-MBC",
+    diagnosticSub: "Modelado continuo de volumen de carbonatación, reducción logarítmica microbiana, eliminación de oxígeno disuelto, incremento térmico y cumplimiento ASME.",
+    carbonationLabel: "Nivel de Carbonatación Disuelta:",
+    logReductionLabel: "Reducción Logarítmica de Esporas y Levaduras:",
+    doResidualLabel: "Oxígeno Disuelto Residual (OD):",
+    thermalDeltaLabel: "Elevación Térmica de la Bebida (ΔT_bebida):",
+    retentionLabel: "Retención de Aromas y Vitamina C:",
+    energyLabel: "Consumo Energético Específico:",
+    throughputLabel: "Rendimiento Continuo de Envasado:",
+    overallStatusLabel: "Estado Sanitario y Aséptico:",
+    diagramTitle: "Arquitectura de Disolución de Microburbujas de CO2 Supercrítico y Esterilización",
+    diagramSub: "Esquema de bombeo de alta presión, microdispersión porosa, contactor de flujo pistón, BPR automático y línea de enlatado en frío.",
+    scienceTitle: "Fundamentos Científicos y Biofísica del Proceso scCO2-MBC",
+    scienceSub: "Análisis exhaustivo de termodinámica de fluidos densos, cinética de disolución Epstein-Plesset, acidificación citoplasmática y desoxigenación por contracorriente.",
+    tableTitle: "Especificaciones del Sistema Comercial y Parámetros de Inactivación"
+  },
+  pt: {
+    badge: "Termodinâmica de Fluidos em Fase Densa e Segurança de Bebidas a Frio",
+    title: "Modelador Contínuo de Carbonatação e Esterilização em Linha por Microbolhas de CO2 Supercrítico (scCO2-MBC)",
+    subtitle: "Simule a dissolução contínua de microbolhas de dióxido de carbono supercrítico em fase densa (scCO2, 75–160 bar, 20–35°C) para carbonatação de alta precisão, pasteurização de leveduras e bactérias (>6 log), desoxigenação (OD < 10 ppb) e conservação sensorial sem calor sob ASME Seção VIII, normas 3-A 04-05 e FDA 21 CFR § 120 Juice HACCP.",
+    controlsTitle: "Termodinâmica de Fluidos scCO2-MBC e Controles do Dispersor",
+    controlsSub: "Configure a pressão operacional supercrítica, temperatura do fluido, porosidade do microdispersor, tempo de residência, vazão volumétrica e taxa de injeção de CO2.",
+    systemLabel: "Arquitetura do Skid Contínuo e Sistema Reator:",
+    systemHelp: "Selecione skid esterilizador de fluxo em pistão, coluna recheada contracorrente, infusor micro-venturi de alto cisalhamento ou skid piloto de pesquisa.",
+    matrixLabel: "Matriz de Bebida e Flora Microbiana Alvo:",
+    matrixHelp: "Selecione sidra/perada artesanal, cerveja sem álcool, suco cítrico prensado a frio, tônica botânica adaptógena ou kombucha fermentada.",
+    spargerLabel: "Tecnologia de Geração de Microbolhas:",
+    spargerHelp: "Selecione dispersor de titânio nanoporoso (0,8 µm), bico de vórtice micro-venturi, membrana cerâmica de alumina ou tubo perfurado convencional (perigo).",
+    pressureLabel: "Pressão de Operação do Contator (P_contator):",
+    pressureHelp: "Pressão de trabalho (40,0 a 160,0 bar). Determina a densidade do CO2 supercrítico, cinética de dissolução e lise celular.",
+    tempLabel: "Temperatura de Processo do Fluido (T_fluido):",
+    tempHelp: "Temperatura da bebida (15,0 a 45,0 °C). Rege a transição de fase supercrítica (Tc = 31,1°C) e fluidez da membrana.",
+    dwellLabel: "Tempo de Residência no Contator (t_residencia):",
+    dwellHelp: "Tempo de contato ativo no circuito pressurizado de microbolhas (0,5 a 15,0 segundos).",
+    flowLabel: "Vazão Volumétrica Contínua (Q_líquido):",
+    flowHelp: "Capacidade de processamento contínuo através do skid de alta pressão (500 a 8.000 L/h).",
+    co2DoseLabel: "Taxa de Dosagem Mássica de CO2 (m_CO2):",
+    co2DoseHelp: "Massa de CO2 alimentício injetado por litro de bebida (2,0 a 9,0 g/L). Determina a efervescência final.",
+    presetsTitle: "Predefinições Industriais Rápidas:",
+    presetCider: "Sidra Artesanal: Inativação de Leveduras e Carbonatação a Frio",
+    presetBeer: "Cerveja Artesanal Sem Álcool: Eliminação de Bactérias Láticas",
+    presetJuice: "Suco Cítrico: Destruição de Patógenos HACCP de 5 Logaritmos",
+    presetTonic: "Tônica Botânica Adaptógena Espumante (Alta Efervescência)",
+    presetHazard: "Perigo de Cavitação de Macrobolhas e Baixa Pressão Subcrítica",
+    diagnosticTitle: "Telemetria em Tempo Real e Cinética Microbiana scCO2-MBC",
+    diagnosticSub: "Modelagem contínua de volume de carbonatação, redução logarítmica microbiana, remoção de oxigênio dissolvido, elevação térmica e conformidade ASME.",
+    carbonationLabel: "Nível de Carbonatação Dissolvida:",
+    logReductionLabel: "Redução Logarítmica de Esporos e Leveduras:",
+    doResidualLabel: "Oxigênio Dissolvido Residual (OD):",
+    thermalDeltaLabel: "Elevação Térmica da Bebida (ΔT_bebida):",
+    retentionLabel: "Retenção de Aromas e Vitamina C:",
+    energyLabel: "Consumo Energético Específico:",
+    throughputLabel: "Rendimento Contínuo de Envase:",
+    overallStatusLabel: "Status Sanitário e Asséptico:",
+    diagramTitle: "Arquitetura de Dissolução de Microbolhas de CO2 Supercrítico e Esterilização",
+    diagramSub: "Esquema de bombeamento de alta pressão, microdispersão porosa, contator de fluxo em pistão, BPR automático e linha de envase a frio.",
+    scienceTitle: "Fundamentos Científicos e Biofísica do Processo scCO2-MBC",
+    scienceSub: "Análise abrangente da termodinâmica de fluidos densos, cinética de dissolução Epstein-Plesset, acidificação citoplasmática e desoxigenação por contracorrente.",
+    tableTitle: "Especificações do Sistema Comercial e Parâmetros de Inativação"
+  },
+  'zh-cn': {
+    badge: "稠密相流体热力学与低温饮料无菌安全工程",
+    title: "商业连续超临界二氧化碳高压微气泡碳酸化与在线无菌灭菌 (scCO2-MBC) 模拟器",
+    subtitle: "模拟在稠密相超临界二氧化碳 (scCO2, 75–160 bar, 20–35°C) 微气泡连续溶解环境下，实现饮料高精度注气碳酸化、腐败酵母与耐酸菌 6 级对数无热灭活、溶解氧深度脱除 (DO < 10 ppb) 及天然风味百分之百保留，符合 ASME Section VIII Div 1、3-A 卫生标准 04-05 & 44-03 以及 FDA 21 CFR § 120 果汁 HACCP 规范。",
+    controlsTitle: "scCO2-MBC 热力学物理参数与微孔发泡器调控",
+    controlsSub: "配置超临界运行压力、流体接触温度、微泡发生器孔隙率、接触管路停留时间、连续液体处理通量及 CO2 质量注入比。",
+    systemLabel: "连续撬装架构与反应接触系统：",
+    systemHelp: "选择高压活塞塞流式灭菌撬装系统、逆流规整填料吸收塔、高剪切微文丘里涡流混合器或洁净室科研级中试设备。",
+    matrixLabel: "目标饮料基质与特征腐败菌群：",
+    matrixHelp: "选择精酿苹果酒/梨酒、无醇精酿啤酒 (<0.5% ABV)、冷榨带胞橙汁、植物适应原气泡滋补液或发酵活菌康普茶。",
+    spargerLabel: "微米级气泡发生技术：",
+    spargerHelp: "选择烧结纳米微孔 2 级钛微发泡滤芯 (0.8 µm)、多级微文丘里射流喷嘴、陶瓷氧化铝微孔分离管或常规粗孔打孔管 (危险预警)。",
+    pressureLabel: "接触器工作压力 (P_contactor)：",
+    pressureHelp: "系统运行压力 (40.0 至 160.0 bar)。决定稠密相 CO2 密度、溶解动力学速率及微生物细胞膜穿透破坏力。",
+    tempLabel: "流体运行工艺温度 (T_fluid)：",
+    tempHelp: "物料温度 (15.0 至 45.0 °C)。调控二氧化碳超临界相变临界点 (Tc = 31.1°C) 与细胞膜脂双层流动性。",
+    dwellLabel: "高压接触器停留暴露时间 (t_dwell)：",
+    dwellHelp: "液体在超临界微气泡接触回路中的有效流动停留时间 (0.5 至 15.0 秒)。",
+    flowLabel: "连续液体体积流量 (Q_liquid)：",
+    flowHelp: "高压系统连续处理通量 (500 至 8,000 L/h)。",
+    co2DoseLabel: "CO2 质量注入配比 (m_CO2)：",
+    co2DoseHelp: "每升饮料中注入的食品级二氧化碳质量 (2.0 至 9.0 g/L)。决定最终气泡含气容积比。",
+    presetsTitle: "工业预设工艺场景：",
+    presetCider: "精酿苹果酒非热酵母灭活与冷法碳酸化 (4,500 L/h)",
+    presetBeer: "无醇啤酒乳酸菌与双乙酰菌非热杀菌 (<0.5% ABV)",
+    presetJuice: "冷榨鲜橙汁 FDA HACCP 5-Log 病原体瞬间灭活",
+    presetTonic: "高气泡感植物适应原草本水 (3.8 vols 强劲汽感)",
+    presetHazard: "低压亚临界宏观大气泡水锤空化与灭菌失效危险预警",
+    diagnosticTitle: "实时 scCO2-MBC 物理遥测与微生物动力学评估",
+    diagnosticSub: "连续计算溶解碳酸化容积比、微生物对数杀灭率、残余溶解氧浓度、温升、热敏芳香成分保留率及 ASME 容器安全余量。",
+    carbonationLabel: "溶解碳酸化含气容积倍数 (Volumes)：",
+    logReductionLabel: "腐败微生物与细菌芽孢对数杀灭值：",
+    doResidualLabel: "物料残余溶解氧 (DO)：",
+    thermalDeltaLabel: "饮料料液表面温升 (ΔT_beverage)：",
+    retentionLabel: "果香萜烯与维生素 C 保留率：",
+    energyLabel: "每百升比能耗指标：",
+    throughputLabel: "连续无菌灌装能力：",
+    overallStatusLabel: "卫生与无菌安全综合合规判定：",
+    diagramTitle: "超临界 CO2 微气泡高压溶解与在线无菌冷杀菌系统架构示意图",
+    diagramSub: "高压多柱塞增压、烧结微孔分散发泡、塞流接触反应管、自动电子背压阀 (BPR) 及低温无菌灌装线示意。",
+    scienceTitle: "scCO2-MBC 工艺的热力学原理与生化生物物理杀菌机制",
+    scienceSub: "深入解析高压稠密相亨利定律溶解度修正、Epstein-Plesset 微气泡传质动力学、细胞膜胞内剧烈酸化穿孔及高剪切脱氧置换。",
+    tableTitle: "商业设备技术参数与芽孢灭活动力学参考基准表"
+  },
+  ja: {
+    badge: "高密度流体熱力学＆低温飲料インライン無菌安全工学",
+    title: "商用連続超臨界CO2高圧マイクロバブル炭酸充填＆インライン滅菌 (scCO2-MBC) モデラー",
+    subtitle: "高密度超臨界二酸化炭素 (scCO2, 75–160 bar, 20–35°C) マイクロバブルの連続急速溶解により、高精度炭酸ガス充填、変敗酵母・乳酸菌の6-log非加熱殺菌、溶存酸素の極微脱気 (DO < 10 ppb)、および加熱劣化ゼロの香気成分保持を ASME Section VIII、3-A 衛生規格 04-05 & 44-03、FDA 21 CFR § 120 Juice HACCP に基づきシミュレートします。",
+    controlsTitle: "scCO2-MBC 熱力学パラメータ＆マイクロスパージャー制御",
+    controlsSub: "超臨界動作圧力、流体接触温度、マイクロスパージャー気孔径、接触滞留時間、連続流量、CO2注入比率を設定します。",
+    systemLabel: "連続スキッドアーキテクチャ＆反応接触器システム：",
+    systemHelp: "プラグフロー式高圧滅菌スキッド、向流式規則充填脱気塔、高せん断マイクロベンチュリ混合器、またはパイロット研究用スキッドを選択します。",
+    matrixLabel: "対象飲料マトリックス＆変敗微生物叢：",
+    matrixHelp: "クラフトハードサイダー/ペリー、ノンアルコールビール、コールドプレス柑橘果汁、ボタニカルアダプトゲン炭酸水、または発酵生コンブチャを選択します。",
+    spargerLabel: "マイクロバブル生成技術：",
+    spargerHelp: "焼結ナノ多孔質チタンスパージャー (0.8 µm)、マイクロベンチュリ渦流ノズル、多孔質アルミナセラミック管、または従来型粗孔ノズル（危険）を選択します。",
+    pressureLabel: "接触器動作圧力 (P_contactor)：",
+    pressureHelp: "作動圧力 (40.0〜160.0 bar)。超臨界CO2密度、溶解速度、および微生物細胞膜への透過破壊力を決定します。",
+    tempLabel: "流体プロセス温度 (T_fluid)：",
+    tempHelp: "飲料温度 (15.0〜45.0 °C)。CO2の超臨界相転移点 (Tc = 31.1°C) と細胞膜脂質二重層の流動性を制御します。",
+    dwellLabel: "接触管内滞留時間 (t_dwell)：",
+    dwellHelp: "加圧マイクロバブル接触ループ内での有効滞留時間 (0.5〜15.0 秒)。",
+    flowLabel: "連続液体流量 (Q_liquid)：",
+    flowHelp: "高圧スキッドの連続処理能力 (500〜8,000 L/h)。",
+    co2DoseLabel: "CO2質量注入比率 (m_CO2)：",
+    co2DoseHelp: "飲料1リットルあたりに注入される食品グレード炭酸ガス質量 (2.0〜9.0 g/L)。最終炭酸ガスボリュームを決定します。",
+    presetsTitle: "産業用クイックプリセット：",
+    presetCider: "クラフトサイダー：非加熱酵母殺菌＆精密炭酸ガス注入",
+    presetBeer: "ノンアルコールクラフトビール：乳酸菌・変敗菌完全死滅",
+    presetJuice: "コールドプレス果汁：FDA HACCP 5-Log病原菌不活性化",
+    presetTonic: "強炭酸ボタニカルアダプトゲントニック (高刺激ガス圧)",
+    presetHazard: "低圧亜臨界マクロバブル空化＆水撃破損ハザード警告",
+    diagnosticTitle: "リアルタイム scCO2-MBC テレメトリ＆殺菌動力学評価",
+    diagnosticSub: "炭酸充填ガスボリューム、微生物対数減少値、残存溶存酸素、温度上昇、香気保持率、ASME耐圧安全率を連続計算します。",
+    carbonationLabel: "溶存炭酸ガスボリューム (Volumes CO2)：",
+    logReductionLabel: "変敗酵母・耐酸性細菌対数減少値：",
+    doResidualLabel: "残存溶存酸素量 (DO)：",
+    thermalDeltaLabel: "飲料料液の温度上昇 (ΔT_beverage)：",
+    retentionLabel: "アロマテルペン・ビタミンC保持率：",
+    energyLabel: "比エネルギー消費量：",
+    throughputLabel: "連続無菌充填能力：",
+    overallStatusLabel: "衛生規格＆無菌総合判定：",
+    diagramTitle: "超臨界CO2マイクロバブル溶解＆インライン無菌化システム構成図",
+    diagramSub: "高圧プランジャー昇圧、焼結微孔スパージャー、プラグフロー接触管、自動電子背圧弁 (BPR)、低温製缶ラインの模式図。",
+    scienceTitle: "scCO2-MBC プロセスの熱力学原理と生体物理学的殺菌機構",
+    scienceSub: "高圧稠密流体のヘンリー則修正、Epstein-Plesset気泡物質移動動力学、細胞質内急激酸性化による膜融解、および向流脱気機構の詳解。",
+    tableTitle: "商用設備仕様および微生物不活性化基準データ"
+  }
+};
+
+const d = DICT[lang] || DICT.en;
+---
+
+<section class="max-w-6xl mx-auto px-4 py-8 text-ink">
+  <!-- Top Badge -->
+  <div class="mb-4">
+    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-teal-950 text-teal-200 border border-teal-800">
+      <svg class="w-3.5 h-3.5 text-teal-400" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+      </svg>
+      {d.badge}
+    </span>
+  </div>
+
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-ink mb-3">
+      {d.title}
+    </h1>
+    <p class="text-base sm:text-lg text-muted max-w-4xl leading-relaxed">
+      {d.subtitle}
+    </p>
+  </div>
+
+  <!-- Interactive Simulator Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-12">
+    <!-- Controls Column (5 cols) -->
+    <div class="lg:col-span-5 bg-surface-soft border border-hairline rounded-2xl p-6 shadow-xs space-y-6">
+      <div>
+        <h2 class="text-xl font-bold text-ink mb-1">{d.controlsTitle}</h2>
+        <p class="text-xs text-muted leading-relaxed">{d.controlsSub}</p>
+      </div>
+
+      <!-- Presets -->
+      <div class="space-y-2">
+        <label class="text-xs font-semibold uppercase tracking-wider text-muted block">{d.presetsTitle}</label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <button type="button" id="preset-cider" class="text-left text-xs font-medium p-2.5 rounded-lg border border-hairline bg-surface hover:bg-surface-elevated hover:border-teal-600 transition-colors">
+            🍏 {d.presetCider}
+          </button>
+          <button type="button" id="preset-beer" class="text-left text-xs font-medium p-2.5 rounded-lg border border-hairline bg-surface hover:bg-surface-elevated hover:border-teal-600 transition-colors">
+            🍺 {d.presetBeer}
+          </button>
+          <button type="button" id="preset-juice" class="text-left text-xs font-medium p-2.5 rounded-lg border border-hairline bg-surface hover:bg-surface-elevated hover:border-teal-600 transition-colors">
+            🍊 {d.presetJuice}
+          </button>
+          <button type="button" id="preset-tonic" class="text-left text-xs font-medium p-2.5 rounded-lg border border-hairline bg-surface hover:bg-surface-elevated hover:border-teal-600 transition-colors">
+            🌿 {d.presetTonic}
+          </button>
+        </div>
+        <button type="button" id="preset-hazard" class="w-full text-left text-xs font-medium p-2.5 rounded-lg border border-rose-800/60 bg-rose-950/20 text-rose-300 hover:bg-rose-950/40 transition-colors mt-1">
+          ⚠️ {d.presetHazard}
+        </button>
+      </div>
+
+      <div class="border-t border-hairline/60 pt-4 space-y-4">
+        <!-- Architecture Dropdown -->
+        <div>
+          <label for="system-select" class="block text-xs font-semibold text-ink mb-1">{d.systemLabel}</label>
+          <select id="system-select" class="w-full bg-surface border border-hairline rounded-lg px-3 py-2 text-xs text-ink focus:outline-none focus:border-teal-500">
+            {scco2Data.systemArchitectures.map(s => (
+              <option value={s.id}>{s.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1">{d.systemHelp}</p>
+        </div>
+
+        <!-- Target Beverage Matrix Dropdown -->
+        <div>
+          <label for="matrix-select" class="block text-xs font-semibold text-ink mb-1">{d.matrixLabel}</label>
+          <select id="matrix-select" class="w-full bg-surface border border-hairline rounded-lg px-3 py-2 text-xs text-ink focus:outline-none focus:border-teal-500">
+            {scco2Data.beverageMatrices.map(b => (
+              <option value={b.id}>{b.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1">{d.matrixHelp}</p>
+        </div>
+
+        <!-- Micro-Bubble Sparger Dropdown -->
+        <div>
+          <label for="sparger-select" class="block text-xs font-semibold text-ink mb-1">{d.spargerLabel}</label>
+          <select id="sparger-select" class="w-full bg-surface border border-hairline rounded-lg px-3 py-2 text-xs text-ink focus:outline-none focus:border-teal-500">
+            {scco2Data.microbubbleGenerators.map(m => (
+              <option value={m.id}>{m.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1">{d.spargerHelp}</p>
+        </div>
+
+        <!-- Sliders -->
+        <!-- Pressure Slider -->
+        <div>
+          <div class="flex justify-between items-center text-xs font-semibold text-ink mb-1">
+            <label for="pressure-slider">{d.pressureLabel}</label>
+            <span id="pressure-val" class="font-mono text-teal-400 font-bold">120.0 bar</span>
+          </div>
+          <input type="range" id="pressure-slider" min="40.0" max="160.0" step="1.0" value="120.0" class="w-full accent-teal-500" />
+          <p class="text-[11px] text-muted mt-1">{d.pressureHelp}</p>
+        </div>
+
+        <!-- Temperature Slider -->
+        <div>
+          <div class="flex justify-between items-center text-xs font-semibold text-ink mb-1">
+            <label for="temp-slider">{d.tempLabel}</label>
+            <span id="temp-val" class="font-mono text-teal-400 font-bold">32.0 °C</span>
+          </div>
+          <input type="range" id="temp-slider" min="15.0" max="45.0" step="0.5" value="32.0" class="w-full accent-teal-500" />
+          <p class="text-[11px] text-muted mt-1">{d.tempHelp}</p>
+        </div>
+
+        <!-- Dwell Time Slider -->
+        <div>
+          <div class="flex justify-between items-center text-xs font-semibold text-ink mb-1">
+            <label for="dwell-slider">{d.dwellLabel}</label>
+            <span id="dwell-val" class="font-mono text-teal-400 font-bold">3.5 s</span>
+          </div>
+          <input type="range" id="dwell-slider" min="0.5" max="15.0" step="0.1" value="3.5" class="w-full accent-teal-500" />
+          <p class="text-[11px] text-muted mt-1">{d.dwellHelp}</p>
+        </div>
+
+        <!-- Flow Rate Slider -->
+        <div>
+          <div class="flex justify-between items-center text-xs font-semibold text-ink mb-1">
+            <label for="flow-slider">{d.flowLabel}</label>
+            <span id="flow-val" class="font-mono text-teal-400 font-bold">4,500 L/h</span>
+          </div>
+          <input type="range" id="flow-slider" min="500" max="8000" step="100" value="4500" class="w-full accent-teal-500" />
+          <p class="text-[11px] text-muted mt-1">{d.flowHelp}</p>
+        </div>
+
+        <!-- CO2 Dosing Ratio Slider -->
+        <div>
+          <div class="flex justify-between items-center text-xs font-semibold text-ink mb-1">
+            <label for="co2-dose-slider">{d.co2DoseLabel}</label>
+            <span id="co2-dose-val" class="font-mono text-teal-400 font-bold">5.8 g/L</span>
+          </div>
+          <input type="range" id="co2-dose-slider" min="2.0" max="9.0" step="0.1" value="5.8" class="w-full accent-teal-500" />
+          <p class="text-[11px] text-muted mt-1">{d.co2DoseHelp}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Telemetry & Diagnostic Column (7 cols) -->
+    <div class="lg:col-span-7 space-y-6">
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-6 shadow-xs">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-xl font-bold text-ink mb-1">{d.diagnosticTitle}</h2>
+            <p class="text-xs text-muted">{d.diagnosticSub}</p>
+          </div>
+          <span id="status-pill" class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-950 text-emerald-300 border border-emerald-800">
+            OPTIMAL • ASEPTIC COLD PASS
+          </span>
+        </div>
+
+        <!-- Telemetry Cards Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+          <!-- Carbonation Level -->
+          <div class="bg-surface border border-hairline/80 rounded-xl p-3 flex flex-col justify-between">
+            <span class="text-[11px] text-muted font-medium">{d.carbonationLabel}</span>
+            <div class="mt-2">
+              <span id="out-carbonation" class="text-xl font-mono font-bold text-ink">2.95</span>
+              <span class="text-xs text-muted ml-1">vols CO2</span>
+            </div>
+            <div id="out-carbonation-sub" class="text-[10px] text-teal-400 mt-1">5.8 g/L • Crisp Fizz</div>
+          </div>
+
+          <!-- Microbial Log Reduction -->
+          <div class="bg-surface border border-hairline/80 rounded-xl p-3 flex flex-col justify-between">
+            <span class="text-[11px] text-muted font-medium">{d.logReductionLabel}</span>
+            <div class="mt-2">
+              <span id="out-log-red" class="text-xl font-mono font-bold text-emerald-400">&gt; 6.8</span>
+              <span class="text-xs text-muted ml-1">log kill</span>
+            </div>
+            <div id="out-log-red-sub" class="text-[10px] text-emerald-400 mt-1">FDA Juice HACCP PASS</div>
+          </div>
+
+          <!-- Dissolved Oxygen Residual -->
+          <div class="bg-surface border border-hairline/80 rounded-xl p-3 flex flex-col justify-between">
+            <span class="text-[11px] text-muted font-medium">{d.doResidualLabel}</span>
+            <div class="mt-2">
+              <span id="out-do-residual" class="text-xl font-mono font-bold text-ink">8.2</span>
+              <span class="text-xs text-muted ml-1">ppb DO</span>
+            </div>
+            <div id="out-do-residual-sub" class="text-[10px] text-emerald-400 mt-1">Target &lt; 15 ppb OK</div>
+          </div>
+
+          <!-- Thermal Delta -->
+          <div class="bg-surface border border-hairline/80 rounded-xl p-3 flex flex-col justify-between">
+            <span class="text-[11px] text-muted font-medium">{d.thermalDeltaLabel}</span>
+            <div class="mt-2">
+              <span id="out-thermal-delta" class="text-xl font-mono font-bold text-teal-400">0.0</span>
+              <span class="text-xs text-muted ml-1">°C rise</span>
+            </div>
+            <div class="text-[10px] text-teal-400 mt-1">Pure Non-Thermal</div>
+          </div>
+
+          <!-- Aroma / Vitamin Retention -->
+          <div class="bg-surface border border-hairline/80 rounded-xl p-3 flex flex-col justify-between">
+            <span class="text-[11px] text-muted font-medium">{d.retentionLabel}</span>
+            <div class="mt-2">
+              <span id="out-retention" class="text-xl font-mono font-bold text-emerald-400">99.6%</span>
+            </div>
+            <div id="out-retention-sub" class="text-[10px] text-emerald-400 mt-1">Zero Cooked Notes</div>
+          </div>
+
+          <!-- Energy Consumption -->
+          <div class="bg-surface border border-hairline/80 rounded-xl p-3 flex flex-col justify-between">
+            <span class="text-[11px] text-muted font-medium">{d.energyLabel}</span>
+            <div class="mt-2">
+              <span id="out-energy" class="text-xl font-mono font-bold text-ink">1.42</span>
+              <span class="text-xs text-muted ml-1">kWh/hL</span>
+            </div>
+            <div class="text-[10px] text-teal-400 mt-1">68% Less Than Steam</div>
+          </div>
+        </div>
+
+        <!-- Packaging Throughput & Machine Telemetry -->
+        <div class="border-t border-hairline/60 pt-4 space-y-3">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-muted">{d.throughputLabel}</span>
+            <span id="out-throughput-metric" class="font-mono font-bold text-ink">4,500 L/h (211 cans/min 355mL)</span>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-muted">CO2 Phase Regime & Micro-Bubble Size:</span>
+            <span id="out-phase-metric" class="font-mono font-medium text-teal-300">Supercritical scCO2 (ρ = 712 kg/m³) • d32 = 2.4 µm</span>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-muted">Interfacial Mass Transfer Surface Area:</span>
+            <span id="out-interfacial-metric" class="font-mono font-medium text-ink">28,500 m²/m³ contact area</span>
+          </div>
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-muted">ASME & 3-A Sanitary Pressure Safety Factor:</span>
+            <span id="out-safety-metric" class="font-mono font-bold text-emerald-400">SF = 2.45 (MAWP 185 bar • Overpressure OK)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Architectural SVG Diagram -->
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-6 shadow-xs">
+        <div class="mb-4">
+          <h3 class="text-base font-bold text-ink mb-0.5">{d.diagramTitle}</h3>
+          <p class="text-xs text-muted">{d.diagramSub}</p>
+        </div>
+
+        <div class="relative w-full aspect-[16/9] bg-surface rounded-xl border border-hairline overflow-hidden flex items-center justify-center p-2">
+          <svg viewBox="0 0 800 450" class="w-full h-full text-slate-300 font-sans select-none">
+            <defs>
+              <linearGradient id="scGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#0d9488" stop-opacity="0.8"/>
+                <stop offset="100%" stop-color="#042f2e" stop-opacity="0.9"/>
+              </linearGradient>
+              <linearGradient id="bubbleGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#2dd4bf" stop-opacity="0.9"/>
+                <stop offset="100%" stop-color="#0f766e" stop-opacity="0.4"/>
+              </linearGradient>
+              <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="3" result="glow"/>
+                <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+              </filter>
+            </defs>
+
+            <!-- Background Grid Lines -->
+            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" stroke-opacity="0.05" stroke-width="1"/>
+            </pattern>
+            <rect width="800" height="450" fill="url(#grid)"/>
+
+            <!-- High Pressure Liquid Infeed Pump -->
+            <rect x="50" y="190" width="110" height="90" rx="8" fill="#1e293b" stroke="#334155" stroke-width="2"/>
+            <text x="105" y="225" text-anchor="middle" fill="#f8fafc" font-size="11" font-weight="bold">HIGH-PRESSURE</text>
+            <text x="105" y="240" text-anchor="middle" fill="#94a3b8" font-size="9">Liquid Beverage Feed</text>
+            <text x="105" y="255" text-anchor="middle" fill="#2dd4bf" font-size="10" font-family="monospace">P = 120 bar</text>
+
+            <!-- CO2 Booster Storage & Compressor -->
+            <rect x="50" y="60" width="110" height="80" rx="8" fill="#042f2e" stroke="#0d9488" stroke-width="2"/>
+            <text x="105" y="95" text-anchor="middle" fill="#2dd4bf" font-size="11" font-weight="bold">scCO2 BOOSTER</text>
+            <text x="105" y="110" text-anchor="middle" fill="#99f6e4" font-size="9">Supercritical Density</text>
+            <text x="105" y="125" text-anchor="middle" fill="#5eead4" font-size="9" font-family="monospace">712 kg/m³ • 32°C</text>
+
+            <!-- Arrow from CO2 to Sparger -->
+            <path d="M 160 100 L 230 100 L 230 190" fill="none" stroke="#2dd4bf" stroke-width="2.5" stroke-dasharray="4 2"/>
+
+            <!-- Arrow from Beverage Feed to Chamber -->
+            <path d="M 160 235 L 210 235" fill="none" stroke="#38bdf8" stroke-width="3"/>
+
+            <!-- Main High-Pressure Micro-Bubble Contactor Vessel -->
+            <rect x="210" y="170" width="280" height="130" rx="12" fill="url(#scGradient)" stroke="#14b8a6" stroke-width="2.5" filter="url(#glow)"/>
+            
+            <!-- Sintered Nano-Porous Titanium Sparger Element -->
+            <rect x="225" y="215" width="40" height="40" rx="4" fill="#334155" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="245" y="238" text-anchor="middle" fill="#f1f5f9" font-size="8" font-weight="bold">Ti-SPARGER</text>
+            <text x="245" y="248" text-anchor="middle" fill="#67e8f9" font-size="7">0.8 µm</text>
+
+            <!-- Dispersed Micro-Bubbles Visual Cloud -->
+            <circle cx="280" cy="220" r="4" fill="#ccfbf1"/>
+            <circle cx="300" cy="245" r="3" fill="#99f6e4"/>
+            <circle cx="320" cy="205" r="5" fill="#5eead4"/>
+            <circle cx="340" cy="235" r="3.5" fill="#ccfbf1"/>
+            <circle cx="365" cy="215" r="4" fill="#99f6e4"/>
+            <circle cx="390" cy="245" r="4.5" fill="#5eead4"/>
+            <circle cx="410" cy="210" r="3" fill="#ccfbf1"/>
+            <circle cx="435" cy="235" r="5" fill="#99f6e4"/>
+            <circle cx="460" cy="225" r="3.5" fill="#5eead4"/>
+
+            <text x="360" y="195" text-anchor="middle" fill="#f0fdfa" font-size="12" font-weight="bold">PLUG-FLOW DENSE-PHASE CONTACTOR</text>
+            <text x="360" y="275" text-anchor="middle" fill="#99f6e4" font-size="9">Instant Henry's Law Dissolution • Membrane Cell Lysis &gt;6.5 Log</text>
+            <text x="360" y="290" text-anchor="middle" fill="#a7f3d0" font-size="9" font-family="monospace">t_dwell: 3.5s • ΔT: 0.0°C • DO &lt; 10 ppb</text>
+
+            <!-- ASME Rupture Disk Safety Valve -->
+            <path d="M 350 170 L 350 135" fill="none" stroke="#f43f5e" stroke-width="2"/>
+            <rect x="325" y="110" width="50" height="25" rx="4" fill="#881337" stroke="#f43f5e" stroke-width="1.5"/>
+            <text x="350" y="126" text-anchor="middle" fill="#ffe4e6" font-size="8" font-weight="bold">ASME DISK</text>
+
+            <!-- Piping to Back-Pressure Regulator (BPR) -->
+            <path d="M 490 235 L 540 235" fill="none" stroke="#2dd4bf" stroke-width="3"/>
+
+            <!-- Electronic Sanitary Back-Pressure Regulator Valve (BPR) -->
+            <polygon points="540,215 570,235 540,255" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+            <polygon points="600,215 570,235 600,255" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+            <rect x="560" y="190" width="20" height="25" fill="#0284c7"/>
+            <text x="570" y="180" text-anchor="middle" fill="#e0f2fe" font-size="10" font-weight="bold">AUTO BPR</text>
+            <text x="570" y="275" text-anchor="middle" fill="#94a3b8" font-size="8">Controlled Depressurization</text>
+
+            <!-- Cold Aseptic Packaging / Canning Filler Line -->
+            <path d="M 600 235 L 650 235" fill="none" stroke="#34d399" stroke-width="3"/>
+            <rect x="650" y="190" width="110" height="90" rx="8" fill="#064e3b" stroke="#059669" stroke-width="2"/>
+            <text x="705" y="225" text-anchor="middle" fill="#a7f3d0" font-size="11" font-weight="bold">COLD CAN FILLER</text>
+            <text x="705" y="240" text-anchor="middle" fill="#d1fae5" font-size="9">Aseptic Counter-Pressure</text>
+            <text x="705" y="255" text-anchor="middle" fill="#34d399" font-size="10" font-family="monospace">2.95 vols • DO &lt; 10 ppb</text>
+
+            <!-- Legend and Standards -->
+            <rect x="50" y="340" width="710" height="75" rx="8" fill="#0f172a" stroke="#1e293b" stroke-width="1.5"/>
+            <text x="70" y="365" fill="#38bdf8" font-size="10" font-weight="bold">Process Integrity:</text>
+            <text x="180" y="365" fill="#cbd5e1" font-size="10">ASME Section VIII Div 1 (185 bar rating) • 3-A Sanitary Standard 04-05 &amp; 44-03 • EHEDG Class I Aseptic</text>
+            <text x="70" y="392" fill="#34d399" font-size="10" font-weight="bold">Sanitary Validation:</text>
+            <text x="180" y="392" fill="#cbd5e1" font-size="10">FDA 21 CFR § 120 Juice HACCP (5-log reduction) • GRAS Direct Food Substance (FDA 21 CFR § 184.1240)</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scientific Biophysical Foundations -->
+  <div class="border-t border-hairline pt-12 max-w-4xl mx-auto space-y-8">
+    <div class="text-center">
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-ink tracking-tight">{d.scienceTitle}</h2>
+      <p class="text-sm text-muted mt-2">{d.scienceSub}</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-6 shadow-xs">
+        <h3 class="text-base font-bold text-ink mb-2">1. Dense-Phase CO2 Solubility &amp; Henry's Law</h3>
+        <p class="text-xs text-body leading-relaxed">
+          At elevated pressures exceeding the supercritical transition (Pc = 73.8 bar, Tc = 31.1°C), carbon dioxide behaves as a dense-phase fluid with liquid-like density (ρ ≈ 650–800 kg/m³) and gas-like diffusivity (D ≈ 10⁻⁷ m²/s). Dissolution into aqueous beverage streams deviates from ideal Henry's law and is governed by fugacity coefficients:
+        </p>
+        <div class="my-3 p-3 bg-surface rounded-lg font-mono text-[11px] text-teal-300 overflow-x-auto border border-hairline">
+          f_CO2(P, T) = y_CO2 · P · φ_CO2(P, T) = H(T) · x_CO2 · γ_CO2
+        </div>
+        <p class="text-xs text-body leading-relaxed">
+          By dispersing supercritical CO2 through sub-micron titanium pores (Sauter mean diameter d32 &lt; 3.0 µm), the interfacial surface area exceeds 28,000 m²/m³. This eliminates the standard 12-to-24-hour brite tank carbonation bottleneck down to an instantaneous 3.5-second in-line transit.
+        </p>
+      </div>
+
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-6 shadow-xs">
+        <h3 class="text-base font-bold text-ink mb-2">2. Non-Thermal Microbial Lysis Mechanics</h3>
+        <p class="text-xs text-body leading-relaxed">
+          Unlike thermal pasteurization which denatures proteins and produces cooked off-flavors, scCO2-MBC pasteurizes via five simultaneous non-thermal physical and biochemical mechanisms:
+        </p>
+        <ul class="text-xs text-body leading-relaxed list-disc list-inside space-y-1 mt-2">
+          <li><strong>Fluid Bilayer Solubilization:</strong> scCO2 readily dissolves into hydrophobic fatty acid acyl chains of fungal/bacterial membranes, increasing fluidity and permeability.</li>
+          <li><strong>Cytoplasmic Acidification:</strong> Diffused CO2 forms intracellular carbonic acid (H2CO3 ⇌ H⁺ + HCO3⁻), driving internal pH below 4.2 and inactivating vital decarboxylase enzymes.</li>
+          <li><strong>Explosive Micro-Depressurization:</strong> Rapid transit across the automatic back-pressure regulator causes rapid expansion of intracellular gas pockets, mechanically rupturing cell walls.</li>
+          <li><strong>Cellular De-energization:</strong> Collapse of the trans-membrane proton-motive force inhibits ATP synthesis in yeasts (<em>Zygosaccharomyces bailii</em>) and acid-tolerant spoilage bacilli.</li>
+        </ul>
+      </div>
+
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-6 shadow-xs">
+        <h3 class="text-base font-bold text-ink mb-2">3. Dissolved Oxygen (DO) Stripping</h3>
+        <p class="text-xs text-body leading-relaxed">
+          Dissolved oxygen is the principal catalyst of oxidative degradation, causing browning, loss of fresh hop terpenes (myrcene, humulene), and rapid ascorbic acid (Vitamin C) oxidation in juices and ciders. In scCO2-MBC, dense-phase CO2 micro-bubbles establish an immense chemical potential gradient:
+        </p>
+        <div class="my-3 p-3 bg-surface rounded-lg font-mono text-[11px] text-teal-300 overflow-x-auto border border-hairline">
+          J_O2 = k_L · a · (C_O2,bulk - C_O2,interface)
+        </div>
+        <p class="text-xs text-body leading-relaxed">
+          Because the injected CO2 micro-bubbles contain zero oxygen, oxygen molecules rapidly desorb from the liquid bulk into the micro-bubbles and are vented, stripping residual DO to below 10 ppb without needing vacuum deaeration tanks.
+        </p>
+      </div>
+
+      <div class="bg-surface-soft border border-hairline rounded-2xl p-6 shadow-xs">
+        <h3 class="text-base font-bold text-ink mb-2">4. ASME &amp; 3-A Sanitary Engineering Compliance</h3>
+        <p class="text-xs text-body leading-relaxed">
+          High-pressure supercritical food contact equipment requires rigorous mechanical certification:
+        </p>
+        <ul class="text-xs text-body leading-relaxed list-disc list-inside space-y-1 mt-2">
+          <li><strong>ASME Section VIII Div 1:</strong> All pressure vessels, tubes, and manifolds constructed with a 4:1 design factor on tensile strength and 100% full penetration radiographic weld inspection.</li>
+          <li><strong>3-A Sanitary Standard 04-05 &amp; 44-03:</strong> Contact surfaces electropolished to Ra ≤ 0.38 µm (15 µ-in) in AISI 316L or Hastelloy C-276, with full Clean-In-Place (CIP) self-drainability.</li>
+          <li><strong>FDA Juice HACCP 21 CFR § 120:</strong> Validated &gt;5-log non-thermal reduction of target pathogens (<em>E. coli</em> O157:H7, <em>Salmonella enterica</em>, <em>Listeria monocytogenes</em>).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reference Specifications Table -->
+  <div class="border-t border-hairline mt-12 pt-12 max-w-4xl mx-auto">
+    <h3 class="text-lg font-bold text-ink mb-4">{d.tableTitle}</h3>
+    <div class="overflow-x-auto border border-hairline rounded-xl">
+      <table class="w-full text-xs text-left text-body">
+        <thead class="bg-surface-soft text-ink uppercase font-semibold border-b border-hairline">
+          <tr>
+            <th class="px-4 py-3">Beverage Matrix</th>
+            <th class="px-4 py-3">Critical Spoilage Target</th>
+            <th class="px-4 py-3">Target CO2 Vol</th>
+            <th class="px-4 py-3">Pressure (bar)</th>
+            <th class="px-4 py-3">D-Value (min)</th>
+            <th class="px-4 py-3">Log Inactivation</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline bg-surface">
+          {scco2Data.beverageMatrices.map((m, i) => (
+            <tr class="hover:bg-surface-soft/50 transition-colors">
+              <td class="px-4 py-3 font-semibold text-ink">{m.name}</td>
+              <td class="px-4 py-3 font-mono text-muted">{m.spoilageTargetOrganisms.split(',')[0]}</td>
+              <td class="px-4 py-3 font-mono text-teal-400 font-bold">{m.targetCarbonationVols} vols</td>
+              <td class="px-4 py-3 font-mono">110 - 140 bar</td>
+              <td class="px-4 py-3 font-mono">{m.dValueMinAt120Bar32C} min</td>
+              <td class="px-4 py-3 font-mono text-emerald-400 font-bold">&gt; 6.2 log</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Reactive Client Script -->
+<script is:inline define:vars={{ scco2Data }}>
+  (function initScco2Modeler() {
+    const sysSelect = document.getElementById('system-select');
+    const matSelect = document.getElementById('matrix-select');
+    const sparSelect = document.getElementById('sparger-select');
+
+    const pressureSlider = document.getElementById('pressure-slider');
+    const tempSlider = document.getElementById('temp-slider');
+    const dwellSlider = document.getElementById('dwell-slider');
+    const flowSlider = document.getElementById('flow-slider');
+    const co2DoseSlider = document.getElementById('co2-dose-slider');
+
+    const pressureVal = document.getElementById('pressure-val');
+    const tempVal = document.getElementById('temp-val');
+    const dwellVal = document.getElementById('dwell-val');
+    const flowVal = document.getElementById('flow-val');
+    const co2DoseVal = document.getElementById('co2-dose-val');
+
+    // Outputs
+    const outCarbonation = document.getElementById('out-carbonation');
+    const outCarbonationSub = document.getElementById('out-carbonation-sub');
+    const outLogRed = document.getElementById('out-log-red');
+    const outLogRedSub = document.getElementById('out-log-red-sub');
+    const outDoResidual = document.getElementById('out-do-residual');
+    const outDoResidualSub = document.getElementById('out-do-residual-sub');
+    const outThermalDelta = document.getElementById('out-thermal-delta');
+    const outRetention = document.getElementById('out-retention');
+    const outRetentionSub = document.getElementById('out-retention-sub');
+    const outEnergy = document.getElementById('out-energy');
+    const outThroughputMetric = document.getElementById('out-throughput-metric');
+    const outPhaseMetric = document.getElementById('out-phase-metric');
+    const outInterfacialMetric = document.getElementById('out-interfacial-metric');
+    const outSafetyMetric = document.getElementById('out-safety-metric');
+    const statusPill = document.getElementById('status-pill');
+
+    function updateSimulation() {
+      const P = parseFloat(pressureSlider.value);
+      const T = parseFloat(tempSlider.value);
+      const t = parseFloat(dwellSlider.value);
+      const Q = parseFloat(flowSlider.value);
+      const dose = parseFloat(co2DoseSlider.value);
+
+      // Display inputs
+      pressureVal.textContent = P.toFixed(1) + ' bar';
+      tempVal.textContent = T.toFixed(1) + ' °C';
+      dwellVal.textContent = t.toFixed(1) + ' s';
+      flowVal.textContent = Math.round(Q).toLocaleString() + ' L/h';
+      co2DoseVal.textContent = dose.toFixed(1) + ' g/L';
+
+      const currentSys = scco2Data.systemArchitectures.find(s => s.id === sysSelect.value) || scco2Data.systemArchitectures[0];
+      const currentMat = scco2Data.beverageMatrices.find(m => m.id === matSelect.value) || scco2Data.beverageMatrices[0];
+      const currentSpar = scco2Data.microbubbleGenerators.find(m => m.id === sparSelect.value) || scco2Data.microbubbleGenerators[0];
+
+      // Carbonation volume conversion: 1 vol CO2 ≈ 1.96 g/L CO2 at STP
+      const theoreticalVols = dose / 1.96;
+      const dissolutionEfficiency = (currentSpar.co2DissolutionEfficiencyPct / 100) * (P >= 73.8 ? 1.0 : Math.max(0.4, P / 73.8));
+      const actualVols = theoreticalVols * dissolutionEfficiency;
+
+      outCarbonation.textContent = actualVols.toFixed(2);
+      if (actualVols < 2.0) {
+        outCarbonationSub.textContent = dose.toFixed(1) + ' g/L • Still / Soft Fizz';
+      } else if (actualVols <= 3.2) {
+        outCarbonationSub.textContent = dose.toFixed(1) + ' g/L • Standard Craft Sparkling';
+      } else {
+        outCarbonationSub.textContent = dose.toFixed(1) + ' g/L • High Sparkling Seltzer';
+      }
+
+      // Microbial Inactivation Kinetics
+      // D-value scaling: D(P, T) = D_ref * 10^((120 - P)/z_P) * 10^((32 - T)/z_T)
+      const dRef = currentMat.dValueMinAt120Bar32C; // in minutes
+      const zP = 45.0; // bar required for 10-fold change in D-value
+      const zT = 18.0; // °C required for 10-fold change in D-value
+      const effD = dRef * Math.pow(10, (120.0 - P) / zP) * Math.pow(10, (32.0 - T) / zT);
+      const tMin = t / 60.0;
+      
+      let spargerFactor = 1.0;
+      if (currentSpar.id === 'coarse_drilled_pipe_diffuser') {
+        spargerFactor = 0.08; // macro-bubbles fail to lyse cells
+      } else if (currentSpar.id === 'ceramic_multi_channel_membrane_contactor') {
+        spargerFactor = 1.15;
+      }
+
+      let logReduction = (tMin / effD) * spargerFactor;
+      if (P < 60.0) {
+        logReduction *= (P / 60.0);
+      }
+
+      if (logReduction >= 6.5) {
+        outLogRed.textContent = '> 6.5';
+        outLogRed.className = 'text-xl font-mono font-bold text-emerald-400';
+        outLogRedSub.textContent = 'FDA Juice HACCP PASS • Aseptic Commercial Sterility';
+        outLogRedSub.className = 'text-[10px] text-emerald-400 mt-1';
+      } else if (logReduction >= 5.0) {
+        outLogRed.textContent = logReduction.toFixed(1);
+        outLogRed.className = 'text-xl font-mono font-bold text-emerald-400';
+        outLogRedSub.textContent = 'FDA 5-Log Juice HACCP Compliance Achieved';
+        outLogRedSub.className = 'text-[10px] text-emerald-400 mt-1';
+      } else if (logReduction >= 3.0) {
+        outLogRed.textContent = logReduction.toFixed(1);
+        outLogRed.className = 'text-xl font-mono font-bold text-amber-400';
+        outLogRedSub.textContent = 'Partial Inactivation • Requires Refrigerated Cold Chain';
+        outLogRedSub.className = 'text-[10px] text-amber-400 mt-1';
+      } else {
+        outLogRed.textContent = logReduction.toFixed(1);
+        outLogRed.className = 'text-xl font-mono font-bold text-rose-400';
+        outLogRedSub.textContent = 'FAIL • Spoilage Risk (Yeasts / Lactic Bacteria Survive)';
+        outLogRedSub.className = 'text-[10px] text-rose-400 mt-1';
+      }
+
+      // Dissolved Oxygen Stripping
+      let baseDo = currentSys.dissolvedOxygenStrippingPpb;
+      if (currentSpar.id === 'coarse_drilled_pipe_diffuser') {
+        baseDo = 120.0; // severe poor stripping
+      } else {
+        baseDo = baseDo * (120.0 / Math.max(60.0, P)) * (4.0 / Math.max(1.0, actualVols));
+      }
+      outDoResidual.textContent = Math.max(2.5, baseDo).toFixed(1);
+      if (baseDo <= 15.0) {
+        outDoResidualSub.textContent = 'Pristine De-Aeration (DO < 15 ppb OK)';
+        outDoResidualSub.className = 'text-[10px] text-emerald-400 mt-1';
+      } else if (baseDo <= 30.0) {
+        outDoResidualSub.textContent = 'Moderate DO • Extended Shelf Life';
+        outDoResidualSub.className = 'text-[10px] text-amber-400 mt-1';
+      } else {
+        outDoResidualSub.textContent = 'HIGH OXYGEN INGRESS (Risk of Staling)';
+        outDoResidualSub.className = 'text-[10px] text-rose-400 mt-1';
+      }
+
+      // Thermal Delta & Retention
+      outThermalDelta.textContent = '0.0';
+      if (P >= 75.0 && currentSpar.id !== 'coarse_drilled_pipe_diffuser') {
+        outRetention.textContent = '99.6%';
+        outRetentionSub.textContent = '100% Native Esters, Terpenes & Vitamin C';
+      } else {
+        outRetention.textContent = '96.2%';
+        outRetentionSub.textContent = 'Subcritical Fluid • Slight Gas Pocket Shear';
+      }
+
+      // Specific Energy Consumption
+      const baseKwh = currentSys.specificEnergyKwhPerHl;
+      const calculatedEnergy = baseKwh * (P / 120.0) * (Q / 4500.0 > 1.0 ? 0.92 : 1.05);
+      outEnergy.textContent = calculatedEnergy.toFixed(2);
+
+      // Packaging Throughput
+      const cansPerMin = Math.round((Q / 0.355) / 60.0);
+      outThroughputMetric.textContent = Math.round(Q).toLocaleString() + ' L/h (' + cansPerMin + ' cans/min 355mL)';
+
+      // Phase & Density
+      const isSupercritical = P >= 73.8 && T >= 31.1;
+      let density = 712;
+      if (isSupercritical) {
+        density = Math.round(450 + (P - 73.8) * 3.2);
+        outPhaseMetric.textContent = 'Supercritical scCO2 (ρ = ' + density + ' kg/m³) • d32 = ' + currentSpar.sauterMeanDiameterUm + ' µm';
+      } else if (P >= 50.0) {
+        density = Math.round(780 + (P - 50.0) * 4.0);
+        outPhaseMetric.textContent = 'Subcritical Liquid CO2 (ρ = ' + density + ' kg/m³) • d32 = ' + currentSpar.sauterMeanDiameterUm + ' µm';
+      } else {
+        density = Math.round(15 + P * 1.5);
+        outPhaseMetric.textContent = 'Low-Pressure Dense Gas (ρ = ' + density + ' kg/m³) • Macro-Bubbles';
+      }
+
+      outInterfacialMetric.textContent = currentSpar.interfacialAreaM2PerM3.toLocaleString() + ' m²/m³ contact area';
+
+      // Safety Factor
+      const mawp = 185.0; // Maximum Allowable Working Pressure bar
+      const sf = (mawp / P).toFixed(2);
+      if (P <= 145.0) {
+        outSafetyMetric.textContent = 'SF = ' + sf + ' (MAWP ' + mawp + ' bar • ASME Compliant)';
+        outSafetyMetric.className = 'font-mono font-bold text-emerald-400';
+      } else if (P <= 160.0) {
+        outSafetyMetric.textContent = 'SF = ' + sf + ' (Near MAWP Ceiling • ASME Monitored)';
+        outSafetyMetric.className = 'font-mono font-bold text-amber-400';
+      } else {
+        outSafetyMetric.textContent = 'OVERPRESSURE ALERT (Rupture Disk Trip Threshold)';
+        outSafetyMetric.className = 'font-mono font-bold text-rose-400';
+      }
+
+      // Status Pill
+      if (currentSpar.id === 'coarse_drilled_pipe_diffuser') {
+        statusPill.textContent = 'HAZARD • MACRO-BUBBLE CAVITATION / STERILITY FAIL';
+        statusPill.className = 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-950 text-rose-300 border border-rose-800';
+      } else if (logReduction >= 5.0 && baseDo <= 15.0 && P <= 145.0) {
+        statusPill.textContent = 'OPTIMAL • ASEPTIC COLD PASS';
+        statusPill.className = 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-950 text-emerald-300 border border-emerald-800';
+      } else {
+        statusPill.textContent = 'WARNING • SUB-OPTIMAL PARAMETERS';
+        statusPill.className = 'inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-950 text-amber-300 border border-amber-800';
+      }
+    }
+
+    // Attach listeners
+    [sysSelect, matSelect, sparSelect].forEach(el => el.addEventListener('change', updateSimulation));
+    [pressureSlider, tempSlider, dwellSlider, flowSlider, co2DoseSlider].forEach(el => el.addEventListener('input', updateSimulation));
+
+    // Preset Handlers
+    document.getElementById('preset-cider')?.addEventListener('click', () => {
+      sysSelect.value = 'commercial_continuous_rotary_scco2_carbonation_sterilizer';
+      matSelect.value = 'craft_hard_cider_perry';
+      sparSelect.value = 'sintered_porous_titanium_sparger';
+      pressureSlider.value = '120.0';
+      tempSlider.value = '32.0';
+      dwellSlider.value = '3.5';
+      flowSlider.value = '4500';
+      co2DoseSlider.value = '5.8';
+      updateSimulation();
+    });
+
+    document.getElementById('preset-beer')?.addEventListener('click', () => {
+      sysSelect.value = 'commercial_continuous_rotary_scco2_carbonation_sterilizer';
+      matSelect.value = 'non_alcoholic_craft_beer';
+      sparSelect.value = 'sintered_porous_titanium_sparger';
+      pressureSlider.value = '130.0';
+      tempSlider.value = '34.0';
+      dwellSlider.value = '4.0';
+      flowSlider.value = '5000';
+      co2DoseSlider.value = '5.2';
+      updateSimulation();
+    });
+
+    document.getElementById('preset-juice')?.addEventListener('click', () => {
+      sysSelect.value = 'industrial_continuous_tubular_countercurrent_scco2_contactor';
+      matSelect.value = 'cold_pressed_cloudy_citrus_juice';
+      sparSelect.value = 'micro_orifice_venturi_vortex_nozzle';
+      pressureSlider.value = '140.0';
+      tempSlider.value = '35.0';
+      dwellSlider.value = '4.5';
+      flowSlider.value = '6000';
+      co2DoseSlider.value = '4.2';
+      updateSimulation();
+    });
+
+    document.getElementById('preset-tonic')?.addEventListener('click', () => {
+      sysSelect.value = 'sanitary_high_shear_static_mixer_scco2_infuser';
+      matSelect.value = 'botanical_herbal_adaptogen_tonic';
+      sparSelect.value = 'ceramic_multi_channel_membrane_contactor';
+      pressureSlider.value = '110.0';
+      tempSlider.value = '28.0';
+      dwellSlider.value = '3.0';
+      flowSlider.value = '3200';
+      co2DoseSlider.value = '7.5';
+      updateSimulation();
+    });
+
+    document.getElementById('preset-hazard')?.addEventListener('click', () => {
+      sysSelect.value = 'commercial_continuous_rotary_scco2_carbonation_sterilizer';
+      matSelect.value = 'craft_hard_cider_perry';
+      sparSelect.value = 'coarse_drilled_pipe_diffuser';
+      pressureSlider.value = '45.0';
+      tempSlider.value = '20.0';
+      dwellSlider.value = '1.2';
+      flowSlider.value = '6500';
+      co2DoseSlider.value = '4.0';
+      updateSimulation();
+    });
+
+    // Initial simulation run
+    updateSimulation();
+  })();
+</script>
