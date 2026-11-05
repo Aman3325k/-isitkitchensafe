@@ -173,7 +173,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-continuous-hc-hdj-liposome-modeler',
   'tools/commercial-continuous-scw-ase-extraction-modeler',
   'tools/commercial-continuous-phvef-decontamination-modeler',
-  'tools/commercial-continuous-scco2-mbc-carbonation-modeler'
+  'tools/commercial-continuous-scco2-mbc-carbonation-modeler',
+  'tools/commercial-continuous-dhph-puvc-sterilization-modeler'
 ];
 
 const esSlugs = new Set([

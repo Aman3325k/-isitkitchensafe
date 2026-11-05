@@ -2,7 +2,7 @@
  * IsItKitchenSafe Autonomous Growth & Ops Engine (v2.0 - All-Day Smart Engine)
  * 
  * Continuous Operations & Growth Engine:
- * - 132 Interactive Diagnostic Tools Health & 5-Language Slug Parity (EN, ES, PT, JA, ZH-CN)
+ * - 144 Interactive Diagnostic Tools Health & 5-Language Slug Parity (EN, ES, PT, JA, ZH-CN)
  * - Cloudflare Pages _redirects budget monitor (2,000 line ceiling) & Edge Middleware sync
  * - Multi-Language Corpus & Database Integrity (66+ critical data assets)
  * - Structured Data (JSON-LD FAQPage, BreadcrumbList & Article/WebApplication) compliance audit
@@ -172,7 +172,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-continuous-hc-hdj-liposome-modeler', name: 'Commercial Continuous High-Pressure Micro-Capillary Hydrodynamic Jet (HC-HDJ) In-Line Liposome Modeler', category: 'High-Pressure Nano-Hydrodynamics & Bioactive Encapsulation', component: 'CommercialContinuousHcHdjLiposomeModeler.astro', dataFile: 'hc-hdj-liposome-data.json' },
   { slug: 'commercial-continuous-scw-ase-extraction-modeler', name: 'Commercial Continuous Subcritical Water Dynamic Accelerated Solvent Extraction (SCW-ASE) Polyphenol & Flavonoid Recovery Modeler', category: 'Subcritical Fluid Hydrodynamics & Botanical Extraction Physics', component: 'CommercialContinuousScwAseExtractionModeler.astro', dataFile: 'scw-ase-extraction-data.json' },
   { slug: 'commercial-continuous-phvef-decontamination-modeler', name: 'Commercial Continuous Atmospheric Pulsed High-Voltage Electron Fog (P-HVEF) Aseptic Packaging & Bulk Decontamination Modeler', category: 'Atmospheric Pulsed Electron Aerodynamics & In-Line Sterilization', component: 'CommercialContinuousPhvefDecontaminationModeler.astro', dataFile: 'phvef-decontamination-data.json' },
-  { slug: 'commercial-continuous-scco2-mbc-carbonation-modeler', name: 'Commercial Continuous Supercritical CO2 High-Pressure Micro-Bubble Carbonation & In-Line Sterilization (scCO2-MBC) Modeler', category: 'Dense-Phase Fluid Thermodynamics & Cold Beverage Safety', component: 'CommercialContinuousScco2MbcCarbonationModeler.astro', dataFile: 'scco2-mbc-carbonation-data.json' }
+  { slug: 'commercial-continuous-scco2-mbc-carbonation-modeler', name: 'Commercial Continuous Supercritical CO2 High-Pressure Micro-Bubble Carbonation & In-Line Sterilization (scCO2-MBC) Modeler', category: 'Dense-Phase Fluid Thermodynamics & Cold Beverage Safety', component: 'CommercialContinuousScco2MbcCarbonationModeler.astro', dataFile: 'scco2-mbc-carbonation-data.json' },
+  { slug: 'commercial-continuous-dhph-puvc-sterilization-modeler', name: 'Commercial Continuous Dynamic High-Pressure Homogenization-Assisted Pulsed UV-C Light (DHPH-PUVC) Aseptic Fluid Sterilization Modeler', category: 'Synergistic Photobiological Hydrodynamics & Cold Liquid Sterilization', component: 'CommercialContinuousDhphPuvcModeler.astro', dataFile: 'dhph-puvc-sterilization-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -674,32 +675,32 @@ function auditGrowthOpportunities() {
     // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Continuous Dynamic High-Pressure Homogenization-Assisted Pulsed UV-C Light (DHPH-PUVC) Aseptic Fluid Sterilization Modeler',
-      category: 'Synergistic Photobiological Hydrodynamics & Cold Liquid Sterilization',
-      intent: 'Models continuous turbulent thin-film annular quartz flow coupling high-pressure homogenization shearing (150–250 MPa) with high-intensity pulsed xenon UV-C sterilization (200–280 nm, 30 J/cm²) for >6-log bacterial endospore destruction (Bacillus cereus, Clostridium sporogenes) in cloudy juices and liquid eggs without thermal pasteurization cooked off-notes.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '1,320+ US impressions'
-    },
-    {
       title: 'Commercial Continuous High-Shear Hydrodynamic Cavitation-Assisted Enzymatic Hydrolysis (HC-AEH) Modeler',
       category: 'Cavitation Tribochemistry & Industrial Bioprocessing',
       intent: 'Models continuous rotor-stator controlled hydrodynamic cavitation micro-bubble collapse (30–60 kHz, 10–25 bar) for non-thermal macromolecular unfolding and accelerated multi-enzyme biocatalysis of plant proteins and dietary fiber without thermal enzyme deactivation.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '980+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '1,150+ US impressions'
     },
     {
       title: 'Commercial Continuous Cryogenic Supercritical Nitrogen Shock Dehydration & Bioactive Puffing (SND-BP) Modeler',
       category: 'Cryogenic Thermodynamic Phase Expansion & Non-Thermal Matrix Puffing',
       intent: 'Models continuous ultra-fast cryogenic supercritical nitrogen matrix infusion (SND-BP, 35–50 bar, -150°C to -196°C) followed by rapid depressurization shock expansion for porous structural puffing and instant non-thermal sublimation drying of heat-sensitive probiotic snacks and functional fruit crisps.',
       priority: 'HIGH',
-      estimatedMonthlyVolume: '850+ US impressions'
+      estimatedMonthlyVolume: '890+ US impressions'
     },
     {
       title: 'Commercial Continuous High-Pressure Carbon Dioxide Explosion Extrusion (HPCD-EE) Plant Protein Texturizing Modeler',
       category: 'Dense-Phase Supercritical Extrusion & Plant Protein Structuring',
       intent: 'Models continuous high-pressure carbon dioxide explosion extrusion (HPCD-EE, 80–180 bar, 35–65°C) for instant structural texturizing, micro-cellular pore generation, and thermal degradation prevention of plant-based meat analogs and sensitive bioactive matrices.',
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '780+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous Forward-Osmosis Multi-Stage Thermal Vapor Recompression (FO-MVR) Clean Evaporative Concentration Modeler',
+      category: 'Membrane & Thermodynamic Energy Integration',
+      intent: 'Models continuous forward-osmosis coupling with mechanical vapor recompression (FO-MVR, 45–65°C, 0.2–0.8 bar) for ultra-low-energy (SEC < 18 kWh/ton H2O), non-thermal aroma-preserving concentration of sensitive dairy whey, fruit concentrates, and botanical extracts without vacuum pan fouling.',
       priority: 'MEDIUM',
-      estimatedMonthlyVolume: '760+ US impressions'
+      estimatedMonthlyVolume: '680+ US impressions'
     }
   ];
 
