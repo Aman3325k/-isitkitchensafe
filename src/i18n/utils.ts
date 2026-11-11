@@ -183,7 +183,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-continuous-mai-sbr-roasting-sterilization-modeler',
   'tools/commercial-continuous-ash-dd-defatting-modeler',
   'tools/commercial-continuous-scco2-sme-micro-encapsulation-modeler',
-  'tools/commercial-continuous-lt-hpcd-pasteurization-modeler'
+  'tools/commercial-continuous-lt-hpcd-pasteurization-modeler',
+  'tools/commercial-continuous-scco2-mle-liposome-modeler'
 ];
 
 const esSlugs = new Set([

@@ -182,7 +182,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-continuous-mai-sbr-roasting-sterilization-modeler', name: 'Commercial Continuous Microwave-Assisted Induction Spouted Bed Roasting & Sterilization (MAI-SBR) Modeler', category: 'Electromagnetic Fluidization & Thermal Spouted Bed Kinetics', component: 'CommercialContinuousMaiSbrModeler.astro', dataFile: 'mai-sbr-roasting-sterilization-data.json' },
   { slug: 'commercial-continuous-ash-dd-defatting-modeler', name: 'Commercial Continuous High-Intensity Acoustic Shockwave Hydrodynamic Defatting & Emulsion Destabilization (ASH-DD) Modeler', category: 'Acoustic Shockwave Hydrodynamics & Clean-Label Dairy Defatting', component: 'CommercialContinuousAshDdDefattingModeler.astro', dataFile: 'ash-dd-defatting-modeler-data.json' },
   { slug: 'commercial-continuous-scco2-sme-micro-encapsulation-modeler', name: 'Commercial Continuous Supercritical CO2 Static-Mixer Micro-Encapsulation & Core-Shell (scCO2-SME) Modeler', category: 'Dense-Phase Micro-Encapsulation & Controlled Release Physics', component: 'CommercialContinuousScco2SmeModeler.astro', dataFile: 'scco2-sme-micro-encapsulation-data.json' },
-  { slug: 'commercial-continuous-lt-hpcd-pasteurization-modeler', name: 'Commercial Continuous Low-Temperature Dense-Phase High-Pressure CO2 Pasteurization & In-Line Carbonation (LT-HPCD) Modeler', category: 'Supercritical Fluid Thermodynamics & Cold Beverage Preservation', component: 'CommercialContinuousLtHpcdModeler.astro', dataFile: 'lt-hpcd-pasteurization-data.json' }
+  { slug: 'commercial-continuous-lt-hpcd-pasteurization-modeler', name: 'Commercial Continuous Low-Temperature Dense-Phase High-Pressure CO2 Pasteurization & In-Line Carbonation (LT-HPCD) Modeler', category: 'Supercritical Fluid Thermodynamics & Cold Beverage Preservation', component: 'CommercialContinuousLtHpcdModeler.astro', dataFile: 'lt-hpcd-pasteurization-data.json' },
+  { slug: 'commercial-continuous-scco2-mle-liposome-modeler', name: 'Commercial Continuous High-Pressure Supercritical CO2 Micro-Fluidic Liposome Extrusion (scCO2-MLE) Modeler', category: 'Dense-Phase Nano-Encapsulation & Aseptic Liposome Physics', component: 'CommercialContinuousScco2MleLiposomeModeler.astro', dataFile: 'scco2-mle-liposome-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -455,7 +456,8 @@ function auditDatasets() {
     'mai-sbr-roasting-sterilization-data.json',
     'ash-dd-defatting-modeler-data.json',
     'scco2-sme-micro-encapsulation-data.json',
-    'lt-hpcd-pasteurization-data.json'
+    'lt-hpcd-pasteurization-data.json',
+    'scco2-mle-liposome-data.json'
 ];
 
   const datasetStats = {};
@@ -766,17 +768,10 @@ function auditGrowthOpportunities() {
     // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Continuous High-Pressure Supercritical CO2 Micro-Fluidic Liposome Extrusion (scCO2-MLE) Modeler',
-      category: 'Dense-Phase Nano-Encapsulation & Aseptic Liposome Physics',
-      intent: 'Models continuous supercritical CO2 micro-fluidic hydrodynamic cross-flow injection for solvent-free, monodisperse nano-liposome encapsulation (d_h 45–95 nm, PDI < 0.12) of bioactive peptides and polyphenols without high-pressure homogenization shearing.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '740+ US impressions'
-    },
-    {
       title: 'Commercial Continuous Hydrodynamic Cavitation-Assisted Cold Vacuum Evaporation (HC-CVE) Modeler',
       category: 'Non-Thermal Evaporative Physics & Vacuum Cavitation',
       intent: 'Models continuous non-thermal acoustic/hydrodynamic cavitation-assisted vacuum evaporation (25–35°C, 30–60 mbar) for heat-sensitive fruit puree, dairy whey, and enzyme broth concentration with zero vitamin thermal degradation.',
-      priority: 'HIGH',
+      priority: 'CRITICAL_HIGH',
       estimatedMonthlyVolume: '620+ US impressions'
     },
     {
@@ -790,8 +785,15 @@ function auditGrowthOpportunities() {
       title: 'Commercial Continuous High-Pressure Supercritical CO2 Fractionation of Astaxanthin & Bioactive Pigments (scCO2-FAP) Modeler',
       category: 'Supercritical Chromatography & Natural Antioxidant Refining',
       intent: 'Models continuous high-pressure multi-stage packed column supercritical CO2 counter-current fractionation (scCO2-FAP, 180–300 bar, 40–60°C) for clean extraction and isomeric enrichment of natural (3S,3\'S) astaxanthin esters from Haematococcus pluvialis microalgae without chemical solvent residues.',
-      priority: 'MEDIUM',
+      priority: 'HIGH',
       estimatedMonthlyVolume: '540+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous Subcritical Water Dynamic Micro-Tubular Extraction & Hydrothermal Carbonization (SCW-DME) Modeler',
+      category: 'Subcritical Hydrothermal Engineering & Bio-Refinery Physics',
+      intent: 'Models continuous subcritical water dynamic micro-tubular extraction and hydrothermal carbonization (SCW-DME, 150–250 bar, 160–220°C) for continuous valorization of agro-industrial food processing waste into bioactive prebiotic xylooligosaccharides without acid catalysts.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '480+ US impressions'
     }
   ];
 
