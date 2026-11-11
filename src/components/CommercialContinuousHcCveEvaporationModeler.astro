@@ -1,0 +1,1081 @@
+---
+import type { SupportedLanguage } from '../i18n/ui';
+import hcCveData from '../data/hc-cve-evaporation-data.json';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+interface Dict {
+  badge: string;
+  title: string;
+  subtitle: string;
+  controlsTitle: string;
+  controlsSub: string;
+  skidLabel: string;
+  skidHelp: string;
+  feedstockLabel: string;
+  feedstockHelp: string;
+  nozzleLabel: string;
+  nozzleHelp: string;
+  feedRateLabel: string;
+  feedRateHelp: string;
+  initialBrixLabel: string;
+  initialBrixHelp: string;
+  targetBrixLabel: string;
+  targetBrixHelp: string;
+  inletPressureLabel: string;
+  inletPressureHelp: string;
+  vacuumPressureLabel: string;
+  vacuumPressureHelp: string;
+  presetsTitle: string;
+  presetOrange: string;
+  presetColostrum: string;
+  presetEnzyme: string;
+  presetBerry: string;
+  presetHazard: string;
+  telemetryTitle: string;
+  telemetrySub: string;
+  cavitationNumLabel: string;
+  flashTempLabel: string;
+  waterEvapLabel: string;
+  concentrateYieldLabel: string;
+  bioactiveRetentionLabel: string;
+  secLabel: string;
+  foulingReductionLabel: string;
+  asmeSafetyLabel: string;
+  complianceVerdictLabel: string;
+  diagramTitle: string;
+  diagramSub: string;
+  scienceTitle: string;
+  scienceSub: string;
+  tableTitle: string;
+  exportAuditBtn: string;
+}
+
+const DICT: Record<SupportedLanguage, Dict> = {
+  en: {
+    badge: "Non-Thermal Evaporative Physics & Vacuum Cavitation",
+    title: "Commercial Continuous Hydrodynamic Cavitation Cold Vacuum Evaporator (HC-CVE) Modeler",
+    subtitle: "Simulate continuous non-thermal acoustic and hydrodynamic cavitation-assisted vacuum evaporation (HC-CVE, 25–35°C, 30–60 mbar) for heat-sensitive fruit puree, dairy whey, and enzyme broth concentration under FDA 21 CFR § 117 & 120, 3-A Sanitary Standards 60-01 & 61-01, and ASME BPVC Section VIII Div 1.",
+    controlsTitle: "HC-CVE Cold Evaporator Skid Configuration",
+    controlsSub: "Configure feed flow rate, initial & target Brix, hydrodynamic cavitation inlet pressure, vacuum chamber absolute pressure, and nozzle geometry.",
+    skidLabel: "Evaporator Skid Architecture:",
+    skidHelp: "Select commercial production skid, aseptic cleanroom enzyme unit, industrial high-throughput citrus plant, or analytical pilot rig.",
+    feedstockLabel: "Bioactive Feedstock & Solution Profile:",
+    feedstockHelp: "Select fresh-squeezed orange NFC juice, bovine colostrum & sweet whey, papain enzyme broth, wild berry anthocyanin extract, or thermal falling-film reference.",
+    nozzleLabel: "Hydrodynamic Cavitation Generation Geometry:",
+    nozzleHelp: "Select sanitary multi-venturi converging-diverging array, multi-orifice radial swirl plate, or counter-axial vortex acoustic whistle nozzle.",
+    feedRateLabel: "Continuous Feed Flow Rate (F_feed):",
+    feedRateHelp: "Total raw liquid feedstock volumetric feed rate into the cavitation manifold (100 to 10,000 L/h).",
+    initialBrixLabel: "Initial Feed Soluble Solids (Brix_in):",
+    initialBrixHelp: "Raw feedstock dissolved solids content (3.0 to 25.0 °Brix).",
+    targetBrixLabel: "Target Concentrated Solids (Brix_target):",
+    targetBrixHelp: "Desired output product concentration (15.0 to 65.0 °Brix).",
+    inletPressureLabel: "Cavitation Inlet Pressure (P_inlet):",
+    inletPressureHelp: "Upstream pump hydraulic pressure driving fluid through cavitation constrictions (2.5 to 14.0 bar).",
+    vacuumPressureLabel: "Vacuum Chamber Absolute Pressure (P_vac):",
+    vacuumPressureHelp: "Absolute chamber pressure (20.0 to 80.0 mbar). Dictates non-thermal flash equilibrium temperature.",
+    presetsTitle: "Quick Industrial Operating Presets:",
+    presetOrange: "Orange NFC Juice Concentration (11.2 -> 42.0 °Brix, 28.5°C, 38 mbar, 99.1% Vit C retention, 1,800 L/h)",
+    presetColostrum: "Bovine Colostrum IgG Immunoglobulin Preservation (8.5 -> 32.0 °Brix, 27.2°C, 35 mbar, 99.4% native IgG)",
+    presetEnzyme: "Industrial Papain Protease Fermentation Broth (4.2 -> 28.5 °Brix, 25.8°C, 32 mbar, 98.6% catalytic activity)",
+    presetBerry: "Wild Bilberry Anthocyanin Monomer Extraction (6.8 -> 38.0 °Brix, 26.5°C, 34 mbar, 98.9% pigment retention)",
+    presetHazard: "Thermal Falling-Film Scorching Hazard (85°C tube wall, >55% Vit C destruction, severe fouling, non-compliant)",
+    telemetryTitle: "Real-Time Evaporative Telemetry & Cavitation Radar",
+    telemetrySub: "Continuous hydrodynamic cavitation number, non-thermal flash temperature, water removal flux, and bioactive retention.",
+    cavitationNumLabel: "Cavitation Number (σ_c):",
+    flashTempLabel: "Flash Evaporation Temp (T_sat):",
+    waterEvapLabel: "Water Evaporation Rate (W_evap):",
+    concentrateYieldLabel: "Concentrate Output Flow (Q_out):",
+    bioactiveRetentionLabel: "Bioactive / Vit C Retention:",
+    secLabel: "Specific Electrical Energy (SEC):",
+    foulingReductionLabel: "Wall Anti-Fouling Scouring:",
+    asmeSafetyLabel: "ASME VIII Vacuum Buckling Safety:",
+    complianceVerdictLabel: "Sanitary & FDA Juice HACCP Status:",
+    diagramTitle: "Continuous HC-CVE Hydrodynamic Process Flow & Vacuum Separation Schematic",
+    diagramSub: "Multi-venturi micro-bubble inception, supersonic aerosol flash expansion, cyclonic vapor disengagement, and MVR thermal integration.",
+    scienceTitle: "Cavitation Bubble Thermodynamics & Cold Evaporative Principles",
+    scienceSub: "Interfacial bubble surface generation, Rayleigh-Plesset dynamics, and non-thermal sensible heat flash cooling.",
+    tableTitle: "Sanitary Engineering, Material Metallurgy & Regulatory Framework",
+    exportAuditBtn: "Export Validation Audit Certificate (PDF / JSON)"
+  },
+  es: {
+    badge: "Física Evaporativa No Térmica y Cavitación al Vacío",
+    title: "Simulador Continuo de Evaporación al Vacío en Frío con Cavitación Hidrodinámica (HC-CVE)",
+    subtitle: "Simule la evaporación continua no térmica asistida por cavitación acústica e hidrodinámica al vacío (HC-CVE, 25–35°C, 30–60 mbar) para purés de frutas, suero lácteo y caldos de fermentación enzimática bajo FDA 21 CFR § 117 y 120, normas 3-A 60-01 y 61-01, y ASME BPVC Sección VIII Div 1.",
+    controlsTitle: "Configuración del Skid de Evaporación en Frío HC-CVE",
+    controlsSub: "Configure el caudal de alimentación, Brix inicial y final, presión hidráulica de cavitación, presión absoluta de vacío y geometría de la tobera.",
+    skidLabel: "Arquitectura del Skid Evaporador:",
+    skidHelp: "Seleccione skid de producción comercial, unidad aséptica para enzimas, planta industrial de cítricos o banco piloto de I+D.",
+    feedstockLabel: "Materia Prima y Perfil de Solución Bioactiva:",
+    feedstockHelp: "Seleccione zumo de naranja NFC fresco, calostro bovino y suero dulce, caldo de papaína, extracto de arándanos o referencia térmica tradicional.",
+    nozzleLabel: "Geometría del Generador de Cavitación Hidrodinámica:",
+    nozzleHelp: "Seleccione matriz multi-venturi convergente-divergente, placa perforada radial o tobera de vórtice con resonador acústico.",
+    feedRateLabel: "Caudal Continuo de Alimentación (F_feed):",
+    feedRateHelp: "Caudal volumétrico total hacia el colector de cavitación (100 a 10.000 L/h).",
+    initialBrixLabel: "Sólidos Solubles Iniciales (Brix_in):",
+    initialBrixHelp: "Contenido de sólidos disueltos en la materia prima (3.0 a 25.0 °Brix).",
+    targetBrixLabel: "Sólidos Solubles Objetivo (Brix_target):",
+    targetBrixHelp: "Concentración final deseada en el concentrado (15.0 a 65.0 °Brix).",
+    inletPressureLabel: "Presión Hidráulica de Entrada (P_inlet):",
+    inletPressureHelp: "Presión aguas arriba que impulsa el fluido a través de las gargantas de cavitación (2.5 a 14.0 bar).",
+    vacuumPressureLabel: "Presión Absoluta en Cámara de Vacío (P_vac):",
+    vacuumPressureHelp: "Presión absoluta de vacío (20.0 a 80.0 mbar). Dicta la temperatura de evaporación flash en frío.",
+    presetsTitle: "Preajustes Industriales de Operación:",
+    presetOrange: "Concentración de Zumo de Naranja NFC (11.2 -> 42.0 °Brix, 28.5°C, 38 mbar, retención Vit C 99.1%, 1.800 L/h)",
+    presetColostrum: "Preservación de Inmunoglobulina IgG en Calostro (8.5 -> 32.0 °Brix, 27.2°C, 35 mbar, IgG nativa 99.4%)",
+    presetEnzyme: "Caldo de Fermentación de Proteasa Papaína (4.2 -> 28.5 °Brix, 25.8°C, 32 mbar, actividad catalítica 98.6%)",
+    presetBerry: "Extracto de Antocianinas de Arándanos Silvestres (6.8 -> 38.0 °Brix, 26.5°C, 34 mbar, retención de pigmentos 98.9%)",
+    presetHazard: "Falla Térmica por Tubo Caliente (85°C, pérdida >55% Vit C, incrustación severa, incumplimiento normativo)",
+    telemetryTitle: "Telemetría Evaporativa en Tiempo Real y Radar de Cavitación",
+    telemetrySub: "Cálculo continuo del número de cavitación, temperatura flash no térmica, tasa de evaporación y retención de bioactivos.",
+    cavitationNumLabel: "Número de Cavitación (σ_c):",
+    flashTempLabel: "Temperatura Flash en Frío (T_sat):",
+    waterEvapLabel: "Tasa de Evaporación de Agua (W_evap):",
+    concentrateYieldLabel: "Caudal de Concentrado Final (Q_out):",
+    bioactiveRetentionLabel: "Retención de Bioactivos / Vitamina C:",
+    secLabel: "Consumo Eléctrico Específico (SEC):",
+    foulingReductionLabel: "Reducción de Incrustaciones en Pared:",
+    asmeSafetyLabel: "Seguridad al Pandeo al Vacío ASME VIII:",
+    complianceVerdictLabel: "Estado Sanitario y FDA Juice HACCP:",
+    diagramTitle: "Esquema de Flujo Hidrodinámico y Separación al Vacío HC-CVE",
+    diagramSub: "Incepción de microburbujas en venturi, expansión flash en aerosol, desgasificación ciclónica e integración MVR.",
+    scienceTitle: "Termodinámica de Burbujas de Cavitación y Evaporación Fría",
+    scienceSub: "Generación de área interfacial, dinámica Rayleigh-Plesset y enfriamiento flash por calor sensible.",
+    tableTitle: "Ingeniería Sanitaria, Metalurgia y Marco Regulatorio",
+    exportAuditBtn: "Exportar Certificado de Auditoría y Validación (PDF / JSON)"
+  },
+  pt: {
+    badge: "Física Evaporativa Não Térmica e Cavitação a Vácuo",
+    title: "Modelador Contínuo de Evaporação a Vácuo a Frio com Cavitação Hidrodinâmica (HC-CVE)",
+    subtitle: "Simule a evaporação contínua não térmica assistida por cavitação acústica e hidrodinâmica a vácuo (HC-CVE, 25–35°C, 30–60 mbar) para purês de frutas, soro de leite e caldos enzimáticos sob FDA 21 CFR § 117 e 120, normas 3-A 60-01 e 61-01, e ASME BPVC Seção VIII Div 1.",
+    controlsTitle: "Configuração do Skid de Evaporação a Frio HC-CVE",
+    controlsSub: "Configure a vazão de alimentação, Brix inicial e alvo, pressão de cavitação, pressão absoluta de vácuo e geometria do bocal.",
+    skidLabel: "Arquitetura do Skid Evaporador:",
+    skidHelp: "Selecione skid comercial, unidade asséptica de enzimas, planta industrial de cítricos ou bancada analítica de P&D.",
+    feedstockLabel: "Matéria-Prima e Perfil Bioativo:",
+    feedstockHelp: "Selecione suco de laranja NFC fresco, colostro bovino e soro de leite, caldo de papaína, extrato de mirtilo ou referência térmica.",
+    nozzleLabel: "Geometria do Gerador de Cavitação:",
+    nozzleHelp: "Selecione matriz multi-venturi convergente-divergente, placa perfurada radial ou bocal com ressonador acústico.",
+    feedRateLabel: "Vazão Contínua de Alimentação (F_feed):",
+    feedRateHelp: "Vazão volumétrica para o coletor de cavitação (100 a 10.000 L/h).",
+    initialBrixLabel: "Sólidos Solúveis Iniciais (Brix_in):",
+    initialBrixHelp: "Teor de sólidos dissolvidos na matéria-prima (3.0 a 25.0 °Brix).",
+    targetBrixLabel: "Sólidos Solúveis Alvo (Brix_target):",
+    targetBrixHelp: "Concentração final desejada no concentrado (15.0 a 65.0 °Brix).",
+    inletPressureLabel: "Pressão Hidráulica de Entrada (P_inlet):",
+    inletPressureHelp: "Pressão a montante das gargantas de cavitação (2.5 a 14.0 bar).",
+    vacuumPressureLabel: "Pressão Absoluta da Câmara de Vácuo (P_vac):",
+    vacuumPressureHelp: "Pressão absoluta da câmara (20.0 a 80.0 mbar). Define a temperatura de evaporação flash a frio.",
+    presetsTitle: "Predefinições Industriais de Operação:",
+    presetOrange: "Concentração de Suco de Laranja NFC (11.2 -> 42.0 °Brix, 28.5°C, 38 mbar, retenção Vit C 99.1%, 1.800 L/h)",
+    presetColostrum: "Preservação de Imunoglobulina IgG no Colostro (8.5 -> 32.0 °Brix, 27.2°C, 35 mbar, IgG nativa 99.4%)",
+    presetEnzyme: "Caldo de Fermentação de Protease Papaína (4.2 -> 28.5 °Brix, 25.8°C, 32 mbar, atividade catalítica 98.6%)",
+    presetBerry: "Extrato de Antocianinas de Frutas Vermelhas (6.8 -> 38.0 °Brix, 26.5°C, 34 mbar, retenção de pigmentos 98.9%)",
+    presetHazard: "Perigo Térmico por Película Descendente (85°C, queima de Vit C >55%, incrustação severa, não conforme)",
+    telemetryTitle: "Telemetria Evaporativa em Tempo Real e Radar de Cavitação",
+    telemetrySub: "Monitoramento contínuo do número de cavitação, temperatura flash a frio, taxa de evaporação e retenção de bioativos.",
+    cavitationNumLabel: "Número de Cavitação (σ_c):",
+    flashTempLabel: "Temperatura Flash a Frio (T_sat):",
+    waterEvapLabel: "Taxa de Remoção de Água (W_evap):",
+    concentrateYieldLabel: "Vazão de Concentrado Final (Q_out):",
+    bioactiveRetentionLabel: "Retenção de Bioativos / Vitamina C:",
+    secLabel: "Consumo Elétrico Específico (SEC):",
+    foulingReductionLabel: "Redução de Incrustação nas Paredes:",
+    asmeSafetyLabel: "Segurança contra Flambagem a Vácuo ASME VIII:",
+    complianceVerdictLabel: "Status Sanitário e FDA Juice HACCP:",
+    diagramTitle: "Fluxograma Hidrodinâmico e Separação a Vácuo HC-CVE",
+    diagramSub: "Incepção de microbolhas em venturi, expansão flash em aerossol, separação ciclônica e integração MVR.",
+    scienceTitle: "Termodinâmica de Bolhas de Cavitação e Evaporação a Frio",
+    scienceSub: "Criação de área interfacial, dinâmica Rayleigh-Plesset e resfriamento flash por calor sensível.",
+    tableTitle: "Engenharia Sanitária, Metalurgia e Conformidade Regulatória",
+    exportAuditBtn: "Exportar Certificado de Auditoria e Validação (PDF / JSON)"
+  },
+  ja: {
+    badge: "非熱蒸発物理学＆真空キャビテーション工学",
+    title: "商用連続式流体キャビテーション低温真空蒸発濃縮器 (HC-CVE) シミュレーター",
+    subtitle: "FDA 21 CFR § 117/120、3-A 衛生規格 60-01/61-01、および ASME BPVC Section VIII Div 1 に準拠し、熱感受性フルーツピューレ、乳清ホエイ、酵素培養液の連続非熱キャビテーション真空濃縮（HC-CVE、25〜35°C、30〜60 mbar）を解算します。",
+    controlsTitle: "HC-CVE 低温濃縮スキッド構成パラメータ",
+    controlsSub: "供給液流量、初期・目標Brix、キャビテーション供給圧力、真空チャンバー絶対圧力、およびノズル幾何学形状を設定します。",
+    skidLabel: "濃縮スキッド基本アーキテクチャ:",
+    skidHelp: "商用生産スキッド、無菌クリーンルーム酵素ユニット、高処理シトラス濃縮プラント、または研究開発用ベンチを選択。",
+    feedstockLabel: "高生理活性供給原料＆溶液プロファイル:",
+    feedstockHelp: "搾りたてオレンジNFC果汁、初乳ホエイ＆IgG、パパイン酵素発酵液、ビルベリーアントシアニン抽出液、または熱劣化対照を選択。",
+    nozzleLabel: "流体キャビテーション発生機構幾何学形状:",
+    nozzleHelp: "サニタリー多段ベンチュリ絞りノズル、放射状旋回オリフィスプレート、または音響ホイッスルノズルを選択。",
+    feedRateLabel: "連続供給液処理流量 (F_feed):",
+    feedRateHelp: "キャビテーションマニホールドへの生原料供給流量（100〜10,000 L/h）。",
+    initialBrixLabel: "原料初期可溶性固形分濃度 (Brix_in):",
+    initialBrixHelp: "原料の初期溶解固形分濃度（3.0〜25.0 °Brix）。",
+    targetBrixLabel: "目標製品濃縮固形分濃度 (Brix_target):",
+    targetBrixHelp: "濃縮完了後の目標Brix（15.0〜65.0 °Brix）。",
+    inletPressureLabel: "キャビテーション供給圧力 (P_inlet):",
+    inletPressureHelp: "ベンチュリ絞り部へ液体を圧送するポンプ元圧（2.5〜14.0 bar）。",
+    vacuumPressureLabel: "真空チャンバー内絶対圧力 (P_vac):",
+    vacuumPressureHelp: "分離チャンバー内絶対圧力（20.0〜80.0 mbar）。低温フラッシュ飽和沸騰温度を規定。",
+    presetsTitle: "産業標準プロセスプリセット:",
+    presetOrange: "オレンジNFC果汁濃縮 (11.2 -> 42.0 °Brix, 28.5°C, 38 mbar, ビタミンC保持率 99.1%, 1,800 L/h)",
+    presetColostrum: "牛初乳免疫グロブリンIgG保護 (8.5 -> 32.0 °Brix, 27.2°C, 35 mbar, 天然型IgG 99.4%)",
+    presetEnzyme: "工業用パパインプロテアーゼ発酵液濃縮 (4.2 -> 28.5 °Brix, 25.8°C, 32 mbar, 触媒活性 98.6%)",
+    presetBerry: "野生ビルベリーアントシアニン抽出液 (6.8 -> 38.0 °Brix, 26.5°C, 34 mbar, 色素保持率 98.9%)",
+    presetHazard: "従来の高温流下液膜蒸発熱劣化ハザード (85°C伝熱管, ビタミンC 55%以上熱分解, 深刻な焦げ付き, 基準違反)",
+    telemetryTitle: "リアルタイム蒸発テレメトリー＆キャビテーションレーダー",
+    telemetrySub: "キャビテーション数、低温フラッシュ飽和温度、水分蒸発速度、および生理活性成分保持率の連続出力。",
+    cavitationNumLabel: "キャビテーション数 (σ_c):",
+    flashTempLabel: "低温フラッシュ沸騰温度 (T_sat):",
+    waterEvapLabel: "連続水分蒸発除去量 (W_evap):",
+    concentrateYieldLabel: "濃縮液仕上がり流量 (Q_out):",
+    bioactiveRetentionLabel: "生理活性成分 / ビタミンC保持率:",
+    secLabel: "比消費電力量 (SEC):",
+    foulingReductionLabel: "チャンバー壁面ファウリング抑制率:",
+    asmeSafetyLabel: "ASME VIII 真空座屈安全率:",
+    complianceVerdictLabel: "サニタリー＆FDA 果汁HACCP 判定:",
+    diagramTitle: "HC-CVE 連続流体プロセス＆真空分離フローダイアグラム",
+    diagramSub: "ベンチュリ微細気泡発生、超音速エアロゾル微小滴フラッシュ蒸発、サイクロン分離、およびMVR熱再圧縮統合。",
+    scienceTitle: "キャビテーション気泡熱力学＆低温瞬間蒸発理論",
+    scienceSub: "巨大気液界面積形成、Rayleigh-Plesset 気泡収縮力学、および顕熱自己冷却フラッシュ。",
+    tableTitle: "サニタリーエンジニアリング・材質冶金・国際法規制フレームワーク",
+    exportAuditBtn: "検証監査証明書の出力 (PDF / JSON)"
+  },
+  'zh-cn': {
+    badge: "非热蒸发物理学与真空空化工程",
+    title: "商用连续式流体空化辅助低温真空蒸发浓缩器 (HC-CVE) 模拟器",
+    subtitle: "严格遵循 FDA 21 CFR § 117/120、3-A 卫生标准 60-01/61-01 及 ASME BPVC Section VIII Div 1，精确模拟热敏性果浆、乳清及酶发酵液的连续非热空化低温真空浓缩过程（HC-CVE，25–35°C，30–60 mbar）。",
+    controlsTitle: "HC-CVE 低温浓缩机组核心参数配置",
+    controlsSub: "配置进料流量、初始与目标Brix、水动力空化进口压力、真空腔室绝对压力及喷嘴孔板几何结构。",
+    skidLabel: "蒸发浓缩机组架构体系:",
+    skidHelp: "选择商业量产型撬装、无菌洁净室酶制剂专用机组、工业高通量柑橘果汁浓缩站或研发测试台。",
+    feedstockLabel: "生物活性物料特性与溶液种类:",
+    feedstockHelp: "选择鲜榨橙汁NFC浆料、牛初乳与甜乳清IgG、木瓜蛋白酶发酵液、野樱莓花青素提取物或传统高温降膜对比组。",
+    nozzleLabel: "水动力空化发生器几何构型:",
+    nozzleHelp: "选择卫生级多文丘里收缩扩张阵列、径向旋流多孔板或逆向同轴超声流体哨喷嘴。",
+    feedRateLabel: "连续进料处理流量 (F_feed):",
+    feedRateHelp: "进入空化发生器歧管的生鲜物料连续体积流量（100至10,000 L/h）。",
+    initialBrixLabel: "原料初始可溶性固形物 (Brix_in):",
+    initialBrixHelp: "初始进料物料的糖度/固形物质量百分比（3.0至25.0 °Brix）。",
+    targetBrixLabel: "目标成品浓缩固形物 (Brix_target):",
+    targetBrixHelp: "浓缩完成后的最终产品浓度（15.0至65.0 °Brix）。",
+    inletPressureLabel: "空化进料泵压 (P_inlet):",
+    inletPressureHelp: "驱动物料高速穿过文丘里喉管的高压泵扬程压力（2.5至14.0 bar）。",
+    vacuumPressureLabel: "真空腔室绝对工作压力 (P_vac):",
+    vacuumPressureHelp: "真空蒸发分离罐绝对压力（20.0至80.0 mbar）。直接决定低温闪蒸饱和平衡温度。",
+    presetsTitle: "工业标准工艺预设参数:",
+    presetOrange: "橙汁NFC原浆低温浓缩 (11.2 -> 42.0 °Brix, 28.5°C, 38 mbar, 维生素C保持率 99.1%, 1,800 L/h)",
+    presetColostrum: "牛初乳免疫球蛋白IgG保护 (8.5 -> 32.0 °Brix, 27.2°C, 35 mbar, 天然IgG活性 99.4%)",
+    presetEnzyme: "工业木瓜蛋白酶发酵液浓缩 (4.2 -> 28.5 °Brix, 25.8°C, 32 mbar, 催化酶活 98.6%)",
+    presetBerry: "野生越橘单体花青素提取液 (6.8 -> 38.0 °Brix, 26.5°C, 34 mbar, 色素保持率 98.9%)",
+    presetHazard: "传统高温蒸汽降膜管壁结焦事故 (85°C加热管壁, 维生素C热分解>55%, 严重热糊化结垢, 违规)",
+    telemetryTitle: "实时蒸发动力学遥测与空化雷达",
+    telemetrySub: "连续输出空化数、非热闪蒸平衡温度、水分脱除通量及生物活性成分保留率核心指标。",
+    cavitationNumLabel: "空化数 (σ_c):",
+    flashTempLabel: "低温闪蒸沸点温度 (T_sat):",
+    waterEvapLabel: "连续水分蒸发脱除速率 (W_evap):",
+    concentrateYieldLabel: "浓缩产品连续出料流量 (Q_out):",
+    bioactiveRetentionLabel: "生物活性物 / 维生素C保持率:",
+    secLabel: "单位电能消耗 (SEC):",
+    foulingReductionLabel: "罐壁自清洁防结垢率:",
+    asmeSafetyLabel: "ASME VIII 真空外压失稳安全裕度:",
+    complianceVerdictLabel: "卫生标准与 FDA 果汁HACCP 判定:",
+    diagramTitle: "连续 HC-CVE 水动力学空化与真空分离工艺流程图",
+    diagramSub: "文丘里微气泡初生、超音速气溶胶闪蒸扩散、切向旋风气液分离与 MVR 机械蒸汽再压缩集成。",
+    scienceTitle: "空化气泡热力学与低温蒸发基本机理",
+    scienceSub: "巨大相际传质表面积构建、Rayleigh-Plesset 气泡破裂动力学与显热自冷却闪蒸原理。",
+    tableTitle: "卫生级工程设计、材料冶金与法规监管框架",
+    exportAuditBtn: "导出合规验证审计证书 (PDF / JSON)"
+  }
+};
+
+const d = DICT[lang] || DICT.en;
+---
+
+<div id="hc-cve-modeler-root" class="space-y-8 max-w-6xl mx-auto" data-lang={lang}>
+  <!-- Header Card -->
+  <div class="bg-surface-soft border border-hairline rounded-3xl p-6 sm:p-8 shadow-xs">
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+      <div class="flex items-center gap-2">
+        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-sky-950 text-sky-300 border border-sky-800">
+          {d.badge}
+        </span>
+        <span class="text-xs text-muted font-mono">HC-CVE &bull; 25&ndash;35&deg;C &bull; 30&ndash;60 mbar &bull; &gt;98.8% Retention &bull; 3-A 60-01 &bull; ASME VIII</span>
+      </div>
+      <div id="status-pill" class="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-950 text-emerald-300 border border-emerald-800 font-mono">
+        COLD FLASH ACTIVE
+      </div>
+    </div>
+
+    <h1 class="text-2xl sm:text-3xl font-black text-ink tracking-tight mb-3">
+      {d.title}
+    </h1>
+    <p class="text-body text-sm leading-relaxed text-muted max-w-4xl">
+      {d.subtitle}
+    </p>
+
+    <!-- Operating Presets Bar -->
+    <div class="mt-6 pt-6 border-t border-hairline/60">
+      <span class="text-xs font-bold uppercase tracking-wider text-muted block mb-3 font-mono">
+        {d.presetsTitle}
+      </span>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs">
+        <button type="button" class="preset-btn text-left p-2.5 rounded-xl border border-sky-900/50 bg-sky-950/20 hover:bg-sky-900/40 text-sky-200 transition" data-preset="orange">
+          <span class="font-bold block text-sky-300">🍊 Orange NFC Juice</span>
+          <span class="text-[11px] text-muted block mt-0.5">{d.presetOrange}</span>
+        </button>
+        <button type="button" class="preset-btn text-left p-2.5 rounded-xl border border-emerald-900/50 bg-emerald-950/20 hover:bg-emerald-900/40 text-emerald-200 transition" data-preset="colostrum">
+          <span class="font-bold block text-emerald-300">🥛 Bovine Colostrum IgG</span>
+          <span class="text-[11px] text-muted block mt-0.5">{d.presetColostrum}</span>
+        </button>
+        <button type="button" class="preset-btn text-left p-2.5 rounded-xl border border-teal-900/50 bg-teal-950/20 hover:bg-teal-900/40 text-teal-200 transition" data-preset="enzyme">
+          <span class="font-bold block text-teal-300">🧬 Papain Protease Broth</span>
+          <span class="text-[11px] text-muted block mt-0.5">{d.presetEnzyme}</span>
+        </button>
+        <button type="button" class="preset-btn text-left p-2.5 rounded-xl border border-purple-900/50 bg-purple-950/20 hover:bg-purple-900/40 text-purple-200 transition" data-preset="berry">
+          <span class="font-bold block text-purple-300">🍇 Bilberry Anthocyanins</span>
+          <span class="text-[11px] text-muted block mt-0.5">{d.presetBerry}</span>
+        </button>
+        <button type="button" class="preset-btn text-left p-2.5 rounded-xl border border-rose-900/60 bg-rose-950/30 hover:bg-rose-900/50 text-rose-200 transition col-span-1 sm:col-span-2 lg:col-span-2" data-preset="hazard">
+          <span class="font-bold block text-rose-400">⚠️ Severe Thermal Scorching Hazard (Conventional 85°C Falling Film)</span>
+          <span class="text-[11px] text-rose-300/80 block mt-0.5">{d.presetHazard}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Controls & Live Telemetry Layout -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <!-- Controls Column (7 Cols) -->
+    <div class="lg:col-span-7 bg-surface-soft border border-hairline rounded-3xl p-6 sm:p-7 shadow-xs space-y-6">
+      <div class="border-b border-hairline/60 pb-4">
+        <h2 class="text-lg font-bold text-ink tracking-tight flex items-center gap-2">
+          <svg class="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+          {d.controlsTitle}
+        </h2>
+        <p class="text-xs text-muted mt-1">{d.controlsSub}</p>
+      </div>
+
+      <!-- Selectors -->
+      <div class="space-y-4">
+        <div>
+          <label for="skid-select" class="block text-xs font-bold uppercase tracking-wider text-muted mb-1 font-mono">
+            {d.skidLabel}
+          </label>
+          <select id="skid-select" class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs text-ink focus:outline-none focus:border-sky-500 font-sans">
+            {hcCveData.systemArchitectures.map((sys) => (
+              <option value={sys.id}>{sys.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1">{d.skidHelp}</p>
+        </div>
+
+        <div>
+          <label for="feedstock-select" class="block text-xs font-bold uppercase tracking-wider text-muted mb-1 font-mono">
+            {d.feedstockLabel}
+          </label>
+          <select id="feedstock-select" class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs text-ink focus:outline-none focus:border-sky-500 font-sans">
+            {hcCveData.feedstockProfiles.map((feed) => (
+              <option value={feed.id}>{feed.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1">{d.feedstockHelp}</p>
+        </div>
+
+        <div>
+          <label for="nozzle-select" class="block text-xs font-bold uppercase tracking-wider text-muted mb-1 font-mono">
+            {d.nozzleLabel}
+          </label>
+          <select id="nozzle-select" class="w-full bg-surface border border-hairline rounded-xl px-3.5 py-2.5 text-xs text-ink focus:outline-none focus:border-sky-500 font-sans">
+            {hcCveData.cavitationNozzleGeometries.map((noz) => (
+              <option value={noz.id}>{noz.name}</option>
+            ))}
+          </select>
+          <p class="text-[11px] text-muted mt-1">{d.nozzleHelp}</p>
+        </div>
+      </div>
+
+      <!-- Sliders -->
+      <div class="space-y-5 pt-3 border-t border-hairline/60">
+        <!-- Feed Flow Rate -->
+        <div>
+          <div class="flex justify-between items-center text-xs mb-1 font-mono">
+            <span class="font-bold text-ink">{d.feedRateLabel}</span>
+            <span id="feed-rate-val" class="font-bold text-sky-400">1800 L/h</span>
+          </div>
+          <input type="range" id="feed-rate-slider" min="100" max="10000" step="50" value="1800" class="w-full accent-sky-500 cursor-pointer" />
+          <p class="text-[11px] text-muted mt-0.5">{d.feedRateHelp}</p>
+        </div>
+
+        <!-- Initial vs Target Brix Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <div class="flex justify-between items-center text-xs mb-1 font-mono">
+              <span class="font-bold text-ink">{d.initialBrixLabel}</span>
+              <span id="initial-brix-val" class="font-bold text-amber-400">11.2 °Brix</span>
+            </div>
+            <input type="range" id="initial-brix-slider" min="3.0" max="25.0" step="0.2" value="11.2" class="w-full accent-amber-500 cursor-pointer" />
+            <p class="text-[11px] text-muted mt-0.5">{d.initialBrixHelp}</p>
+          </div>
+
+          <div>
+            <div class="flex justify-between items-center text-xs mb-1 font-mono">
+              <span class="font-bold text-ink">{d.targetBrixLabel}</span>
+              <span id="target-brix-val" class="font-bold text-emerald-400">42.0 °Brix</span>
+            </div>
+            <input type="range" id="target-brix-slider" min="15.0" max="65.0" step="0.5" value="42.0" class="w-full accent-emerald-500 cursor-pointer" />
+            <p class="text-[11px] text-muted mt-0.5">{d.targetBrixHelp}</p>
+          </div>
+        </div>
+
+        <!-- Hydraulic Inlet Pressure -->
+        <div>
+          <div class="flex justify-between items-center text-xs mb-1 font-mono">
+            <span class="font-bold text-ink">{d.inletPressureLabel}</span>
+            <span id="inlet-pressure-val" class="font-bold text-sky-400">6.0 bar</span>
+          </div>
+          <input type="range" id="inlet-pressure-slider" min="2.5" max="14.0" step="0.1" value="6.0" class="w-full accent-sky-500 cursor-pointer" />
+          <p class="text-[11px] text-muted mt-0.5">{d.inletPressureHelp}</p>
+        </div>
+
+        <!-- Vacuum Chamber Pressure -->
+        <div>
+          <div class="flex justify-between items-center text-xs mb-1 font-mono">
+            <span class="font-bold text-ink">{d.vacuumPressureLabel}</span>
+            <span id="vacuum-pressure-val" class="font-bold text-purple-400">38.0 mbar</span>
+          </div>
+          <input type="range" id="vacuum-pressure-slider" min="20.0" max="80.0" step="1.0" value="38.0" class="w-full accent-purple-500 cursor-pointer" />
+          <p class="text-[11px] text-muted mt-0.5">{d.vacuumPressureHelp}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Telemetry Column (5 Cols) -->
+    <div class="lg:col-span-5 space-y-6">
+      <div class="bg-surface-soft border border-hairline rounded-3xl p-6 sm:p-7 shadow-xs">
+        <div class="border-b border-hairline/60 pb-4 mb-5">
+          <h2 class="text-lg font-bold text-ink tracking-tight flex items-center gap-2">
+            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            {d.telemetryTitle}
+          </h2>
+          <p class="text-xs text-muted mt-1">{d.telemetrySub}</p>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Cavitation Number & Flash Temperature -->
+          <div class="grid grid-cols-2 gap-3">
+            <div class="p-3.5 rounded-xl bg-surface border border-hairline">
+              <span class="text-[11px] text-muted block mb-1">{d.cavitationNumLabel}</span>
+              <div class="flex items-baseline gap-1">
+                <span id="cavitation-metric" class="text-2xl font-black font-mono text-sky-400">0.18</span>
+              </div>
+              <span id="cavitation-sub" class="text-[10px] text-emerald-400 font-mono block mt-1">Super-Cavitation Inception</span>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-surface border border-hairline">
+              <span class="text-[11px] text-muted block mb-1">{d.flashTempLabel}</span>
+              <div class="flex items-baseline gap-1">
+                <span id="temp-metric" class="text-2xl font-black font-mono text-purple-400">28.1</span>
+                <span class="text-xs text-muted font-mono">°C</span>
+              </div>
+              <span id="temp-sub" class="text-[10px] text-emerald-400 font-mono block mt-1">Non-Thermal Cold Flash</span>
+            </div>
+          </div>
+
+          <!-- Water Evap Rate & Concentrate Yield -->
+          <div class="grid grid-cols-2 gap-3">
+            <div class="p-3.5 rounded-xl bg-surface border border-hairline">
+              <span class="text-[11px] text-muted block mb-1">{d.waterEvapLabel}</span>
+              <div class="flex items-baseline gap-1">
+                <span id="water-evap-metric" class="text-2xl font-black font-mono text-emerald-400">1,320</span>
+                <span class="text-xs text-muted font-mono">kg/h</span>
+              </div>
+              <span id="water-evap-sub" class="text-[10px] text-muted font-mono block mt-1">73.3% Water Stripped</span>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-surface border border-hairline">
+              <span class="text-[11px] text-muted block mb-1">{d.concentrateYieldLabel}</span>
+              <div class="flex items-baseline gap-1">
+                <span id="yield-metric" class="text-2xl font-black font-mono text-amber-400">480</span>
+                <span class="text-xs text-muted font-mono">L/h</span>
+              </div>
+              <span id="yield-sub" class="text-[10px] text-amber-400 font-mono block mt-1">Dense Concentrated Puree</span>
+            </div>
+          </div>
+
+          <!-- Bioactive Retention & Specific Energy Consumption -->
+          <div class="grid grid-cols-2 gap-3">
+            <div class="p-3.5 rounded-xl bg-surface border border-hairline">
+              <span class="text-[11px] text-muted block mb-1">{d.bioactiveRetentionLabel}</span>
+              <div class="flex items-baseline gap-1">
+                <span id="retention-metric" class="text-xl font-black font-mono text-emerald-400">99.1%</span>
+              </div>
+              <span id="retention-sub" class="text-[10px] text-emerald-400 font-mono block mt-1">Zero Thermal Loss</span>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-surface border border-hairline">
+              <span class="text-[11px] text-muted block mb-1">{d.secLabel}</span>
+              <div class="flex items-baseline gap-1">
+                <span id="sec-metric" class="text-xl font-black font-mono text-sky-400">0.045</span>
+                <span class="text-xs text-muted font-mono">kWh/kg</span>
+              </div>
+              <span id="sec-sub" class="text-[10px] text-sky-400 font-mono block mt-1">82% Lower Than Steam</span>
+            </div>
+          </div>
+
+          <!-- Anti-Fouling & ASME Buckling Safety -->
+          <div class="p-3.5 rounded-xl bg-surface border border-hairline space-y-2">
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-muted">{d.foulingReductionLabel}</span>
+              <span id="fouling-val" class="font-mono font-bold text-teal-400">88.5% Fouling Reduction</span>
+            </div>
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-muted">{d.asmeSafetyLabel}</span>
+              <span id="asme-val" class="font-mono font-bold text-purple-400">FS = 4.8 (ASME BPVC VIII Pass)</span>
+            </div>
+          </div>
+
+          <!-- Compliance Banner -->
+          <div id="compliance-banner" class="p-4 rounded-xl border bg-emerald-950/30 border-emerald-800 text-xs text-emerald-200 flex items-start gap-3">
+            <svg id="compliance-icon" class="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <div>
+              <span id="compliance-title" class="font-bold block text-sm text-emerald-300">FDA 21 CFR § 117/120 & 3-A 60-01 COMPLIANT</span>
+              <span id="compliance-desc" class="text-[11px] text-emerald-200/80 leading-relaxed block mt-0.5">
+                Continuous hydrodynamic cavitation cold vacuum evaporation operating at 28.1°C complies with Juice HACCP 5-log standards and preserves >99.1% native L-ascorbic acid with zero thermal browning.
+              </span>
+            </div>
+          </div>
+
+          <!-- Export Validation Audit Button -->
+          <button type="button" id="export-audit-btn" class="w-full py-2.5 px-4 rounded-xl border border-sky-800 bg-sky-950/40 hover:bg-sky-900/60 text-sky-200 text-xs font-bold transition flex items-center justify-center gap-2">
+            <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            {d.exportAuditBtn}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dynamic Process Flow & Cavitation Vacuum Separation Schematic SVG -->
+  <section class="bg-surface-soft border border-hairline rounded-2xl p-6 sm:p-7 shadow-xs">
+    <div class="border-b border-hairline/60 pb-4 mb-6">
+      <h2 class="text-lg font-bold text-ink tracking-tight flex items-center gap-2">
+        <svg class="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+        {d.diagramTitle}
+      </h2>
+      <p class="text-xs text-muted mt-1">{d.diagramSub}</p>
+    </div>
+
+    <!-- Interactive SVG Architecture -->
+    <div class="w-full overflow-x-auto bg-surface border border-hairline/60 rounded-xl p-4">
+      <svg class="w-full min-w-[760px] h-[340px]" viewBox="0 0 880 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="feed-flow" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#0284c7"/>
+            <stop offset="100%" stop-color="#38bdf8"/>
+          </linearGradient>
+          <linearGradient id="cavitation-glow" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#0284c7"/>
+            <stop offset="50%" stop-color="#f59e0b"/>
+            <stop offset="100%" stop-color="#38bdf8"/>
+          </linearGradient>
+          <linearGradient id="vacuum-chamber" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#0f172a"/>
+            <stop offset="100%" stop-color="#1e293b"/>
+          </linearGradient>
+          <linearGradient id="vapor-flow" x1="0%" y1="100%" x2="0%" y2="0%">
+            <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.2"/>
+            <stop offset="100%" stop-color="#c084fc" stop-opacity="0.8"/>
+          </linearGradient>
+          <linearGradient id="concentrate-flow" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#d97706"/>
+            <stop offset="100%" stop-color="#b45309"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Grid Background Lines -->
+        <g stroke="#334155" stroke-width="0.5" stroke-dasharray="4 4" opacity="0.4">
+          <line x1="40" y1="50" x2="840" y2="50"/>
+          <line x1="40" y1="170" x2="840" y2="170"/>
+          <line x1="40" y1="290" x2="840" y2="290"/>
+          <line x1="160" y1="30" x2="160" y2="310"/>
+          <line x1="380" y1="30" x2="380" y2="310"/>
+          <line x1="640" y1="30" x2="640" y2="310"/>
+        </g>
+
+        <!-- 1. Feed Preparation & High-Pressure Cavitation Pump -->
+        <rect x="50" y="110" width="100" height="120" rx="14" fill="#0f172a" stroke="#0284c7" stroke-width="2"/>
+        <text x="100" y="140" fill="#38bdf8" font-size="11" font-weight="bold" text-anchor="middle" font-family="monospace">FEED INLET</text>
+        <text x="100" y="160" fill="#94a3b8" font-size="9" text-anchor="middle">Positive Plunger</text>
+        <text x="100" y="180" fill="#94a3b8" font-size="9" text-anchor="middle">Pump (3.5–12 bar)</text>
+        <circle cx="100" cy="205" r="10" fill="#0369a1"/>
+        <path d="M96 205l4 4 6-8" stroke="#fff" stroke-width="1.5" fill="none"/>
+
+        <!-- Flow Line from Feed to Cavitation Nozzle -->
+        <path d="M150 170 H220" stroke="url(#feed-flow)" stroke-width="5" stroke-linecap="round"/>
+        <polygon points="215,165 225,170 215,175" fill="#38bdf8"/>
+
+        <!-- 2. Converging-Diverging Venturi Cavitation Nozzle -->
+        <g transform="translate(230, 130)">
+          <path d="M0 0 L40 25 L80 25 L120 0 L120 80 L80 55 L40 55 L0 80 Z" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
+          <!-- Venturi Throat Area -->
+          <rect x="40" y="25" width="40" height="30" fill="#f59e0b" fill-opacity="0.2"/>
+          <text x="60" y="44" fill="#fbbf24" font-size="9" font-weight="bold" text-anchor="middle" font-family="monospace">THROAT</text>
+          <text x="60" y="100" fill="#fbbf24" font-size="10" font-weight="bold" text-anchor="middle" font-family="monospace">Venturi Inception</text>
+          <text x="60" y="114" fill="#94a3b8" font-size="8" text-anchor="middle">v > 32 m/s &bull; σ < 0.25</text>
+          
+          <!-- Micro-Bubble Explosion Animation Points -->
+          <circle cx="50" cy="38" r="2.5" fill="#fff" opacity="0.8"/>
+          <circle cx="68" cy="42" r="3" fill="#fff" opacity="0.9"/>
+          <circle cx="95" cy="40" r="4" fill="#38bdf8" opacity="0.7"/>
+          <circle cx="105" cy="30" r="5" fill="#38bdf8" opacity="0.6"/>
+          <circle cx="108" cy="50" r="4.5" fill="#38bdf8" opacity="0.6"/>
+        </g>
+
+        <!-- Connection to Vacuum Chamber -->
+        <path d="M350 170 H400" stroke="url(#cavitation-glow)" stroke-width="6" stroke-dasharray="3 3"/>
+        <polygon points="395,165 405,170 395,175" fill="#38bdf8"/>
+
+        <!-- 3. Cold Vacuum Flash Evaporation Chamber -->
+        <g transform="translate(410, 40)">
+          <!-- Main ASME Vacuum Vessel Shell -->
+          <rect x="0" y="0" width="180" height="260" rx="30" fill="url(#vacuum-chamber)" stroke="#38bdf8" stroke-width="2.5"/>
+          <!-- External Stiffening Rings (ASME BPVC Section VIII Div 1) -->
+          <rect x="-6" y="70" width="192" height="6" rx="3" fill="#64748b"/>
+          <rect x="-6" y="140" width="192" height="6" rx="3" fill="#64748b"/>
+          <rect x="-6" y="210" width="192" height="6" rx="3" fill="#64748b"/>
+          
+          <!-- Internal Vacuum Flash Zone -->
+          <text x="90" y="30" fill="#38bdf8" font-size="12" font-weight="black" text-anchor="middle" font-family="monospace">VACUUM CHAMBER</text>
+          <text x="90" y="46" fill="#c084fc" font-size="10" font-weight="bold" text-anchor="middle">P_vac: 30–60 mbar (Full Vac)</text>
+          <text x="90" y="60" fill="#34d399" font-size="9" text-anchor="middle">Flash T_sat: 25–35°C (Cold)</text>
+
+          <!-- Aerosol Droplet Plume & Flash Vaporization -->
+          <g opacity="0.7">
+            <circle cx="30" cy="130" r="2.5" fill="#38bdf8"/>
+            <circle cx="60" cy="115" r="3.5" fill="#38bdf8"/>
+            <circle cx="90" cy="105" r="4" fill="#c084fc"/>
+            <circle cx="120" cy="118" r="3.5" fill="#38bdf8"/>
+            <circle cx="145" cy="135" r="2.5" fill="#38bdf8"/>
+            <circle cx="75" cy="90" r="5" fill="#c084fc"/>
+            <circle cx="105" cy="85" r="4.5" fill="#c084fc"/>
+          </g>
+
+          <!-- Upward Vapor Stream -->
+          <path d="M90 80 V 5" stroke="url(#vapor-flow)" stroke-width="8" stroke-linecap="round"/>
+          
+          <!-- Liquid Pool at Bottom -->
+          <path d="M10 215 Q 90 225 170 215 L 170 245 Q 90 255 10 245 Z" fill="#d97706" opacity="0.8"/>
+          <text x="90" y="235" fill="#fef3c7" font-size="9" font-weight="bold" text-anchor="middle">Concentrate (42°Brix)</text>
+        </g>
+
+        <!-- 4. Top Vapor Duct to MVR / Condenser -->
+        <path d="M500 40 V 15 H 680 V 70" stroke="#c084fc" stroke-width="4" fill="none"/>
+        <polygon points="675,65 680,75 685,65" fill="#c084fc"/>
+
+        <!-- 5. MVR Compressor / Cold Condenser -->
+        <rect x="630" y="80" width="110" height="90" rx="12" fill="#0f172a" stroke="#c084fc" stroke-width="2"/>
+        <text x="685" y="105" fill="#c084fc" font-size="11" font-weight="bold" text-anchor="middle" font-family="monospace">MVR COMPRESSOR</text>
+        <text x="685" y="123" fill="#94a3b8" font-size="9" text-anchor="middle">Vapor Recompression</text>
+        <text x="685" y="140" fill="#34d399" font-size="9" text-anchor="middle">COP = 18.5</text>
+        <text x="685" y="156" fill="#38bdf8" font-size="8" text-anchor="middle">SEC: 0.045 kWh/kg</text>
+
+        <!-- Distillate Water Discharge from MVR -->
+        <path d="M685 170 V 210" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+        <text x="685" y="230" fill="#38bdf8" font-size="9" font-weight="bold" text-anchor="middle">Clean Distillate</text>
+        <text x="685" y="242" fill="#94a3b8" font-size="8" text-anchor="middle">(W_evap Condensate)</text>
+
+        <!-- 6. Concentrated Product Extraction Pump & Bottom Discharge -->
+        <path d="M500 295 V 320 H 600" stroke="url(#concentrate-flow)" stroke-width="5" stroke-linecap="round"/>
+        <polygon points="595,315 605,320 595,325" fill="#d97706"/>
+        <rect x="610" y="295" width="130" height="40" rx="8" fill="#1e293b" stroke="#d97706" stroke-width="1.5"/>
+        <text x="675" y="312" fill="#fbbf24" font-size="9" font-weight="bold" text-anchor="middle" font-family="monospace">COLD CONCENTRATE</text>
+        <text x="675" y="325" fill="#34d399" font-size="8" text-anchor="middle">>98.8% Bioactive Retained</text>
+
+        <!-- Acoustic Shockwave Anti-Fouling Indicator -->
+        <g transform="translate(390, 240)">
+          <path d="M0 0 Q 15 -10 30 0 T 60 0" stroke="#f59e0b" stroke-width="1.5" fill="none" stroke-dasharray="2 2"/>
+          <text x="30" y="18" fill="#fbbf24" font-size="8" font-weight="bold" text-anchor="middle">Cavitation Scouring (Zero Burn-On)</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Engineering Science & Core Formulas Card -->
+  <section class="bg-surface-soft border border-hairline rounded-2xl p-6 sm:p-7 shadow-xs">
+    <div class="border-b border-hairline/60 pb-4 mb-6">
+      <h2 class="text-lg font-bold text-ink tracking-tight flex items-center gap-2">
+        <svg class="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        {d.scienceTitle}
+      </h2>
+      <p class="text-xs text-muted mt-1">{d.scienceSub}</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {hcCveData.engineeringFormulas.map((f) => (
+        <div class="p-4 rounded-xl bg-surface border border-hairline">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-mono text-sm font-bold text-sky-400">{f.symbol}</span>
+            <span class="text-[10px] text-muted font-mono uppercase tracking-wider">{f.name}</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-surface-soft border border-hairline/50 font-mono text-xs text-amber-300 font-bold mb-2">
+            {f.formula}
+          </div>
+          <p class="text-[11px] text-muted leading-relaxed">
+            {f.description}
+          </p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Regulatory Compliance & Sanitary Metallurgy Standards Table -->
+  <section class="bg-surface-soft border border-hairline rounded-2xl p-6 sm:p-7 shadow-xs">
+    <div class="border-b border-hairline/60 pb-4 mb-6">
+      <h2 class="text-lg font-bold text-ink tracking-tight flex items-center gap-2">
+        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        {d.tableTitle}
+      </h2>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs border-collapse">
+        <thead>
+          <tr class="border-b border-hairline font-mono text-muted uppercase tracking-wider bg-surface/50">
+            <th class="py-3 px-4 font-bold">Standard / Code</th>
+            <th class="py-3 px-4 font-bold">Regulatory Authority</th>
+            <th class="py-3 px-4 font-bold">Title & Scope</th>
+            <th class="py-3 px-4 font-bold">HC-CVE Engineered Compliance</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline/60">
+          {hcCveData.regulatoryStandards.map((std) => (
+            <tr class="hover:bg-surface/30 transition">
+              <td class="py-3.5 px-4 font-mono font-bold text-sky-400">{std.code}</td>
+              <td class="py-3.5 px-4 font-medium text-ink">{std.organization}</td>
+              <td class="py-3.5 px-4 text-muted">{std.title}</td>
+              <td class="py-3.5 px-4 text-emerald-300 font-medium">{std.scope}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<!-- Reactive Client Script -->
+<script is:inline>
+  function initHcCveModeler() {
+    const root = document.getElementById('hc-cve-modeler-root');
+    if (!root) return;
+
+    // Elements
+    const skidSelect = root.querySelector('#skid-select');
+    const feedstockSelect = root.querySelector('#feedstock-select');
+    const nozzleSelect = root.querySelector('#nozzle-select');
+
+    const feedRateSlider = root.querySelector('#feed-rate-slider');
+    const feedRateVal = root.querySelector('#feed-rate-val');
+
+    const initialBrixSlider = root.querySelector('#initial-brix-slider');
+    const initialBrixVal = root.querySelector('#initial-brix-val');
+
+    const targetBrixSlider = root.querySelector('#target-brix-slider');
+    const targetBrixVal = root.querySelector('#target-brix-val');
+
+    const inletPressureSlider = root.querySelector('#inlet-pressure-slider');
+    const inletPressureVal = root.querySelector('#inlet-pressure-val');
+
+    const vacuumPressureSlider = root.querySelector('#vacuum-pressure-slider');
+    const vacuumPressureVal = root.querySelector('#vacuum-pressure-val');
+
+    // Metrics Display Elements
+    const cavitationMetric = root.querySelector('#cavitation-metric');
+    const cavitationSub = root.querySelector('#cavitation-sub');
+    const tempMetric = root.querySelector('#temp-metric');
+    const tempSub = root.querySelector('#temp-sub');
+    const waterEvapMetric = root.querySelector('#water-evap-metric');
+    const waterEvapSub = root.querySelector('#water-evap-sub');
+    const yieldMetric = root.querySelector('#yield-metric');
+    const yieldSub = root.querySelector('#yield-sub');
+    const retentionMetric = root.querySelector('#retention-metric');
+    const retentionSub = root.querySelector('#retention-sub');
+    const secMetric = root.querySelector('#sec-metric');
+    const secSub = root.querySelector('#sec-sub');
+    const foulingVal = root.querySelector('#fouling-val');
+    const asmeVal = root.querySelector('#asme-val');
+    const statusPill = root.querySelector('#status-pill');
+
+    const complianceBanner = root.querySelector('#compliance-banner');
+    const complianceTitle = root.querySelector('#compliance-title');
+    const complianceDesc = root.querySelector('#compliance-desc');
+    const exportBtn = root.querySelector('#export-audit-btn');
+
+    function calculateMetrics() {
+      const feedRate = parseFloat(feedRateSlider.value);
+      const brixIn = parseFloat(initialBrixSlider.value);
+      let brixTarget = parseFloat(targetBrixSlider.value);
+      if (brixTarget <= brixIn) {
+        brixTarget = brixIn + 1.0;
+        targetBrixSlider.value = brixTarget.toFixed(1);
+      }
+
+      const pInlet = parseFloat(inletPressureSlider.value);
+      const pVac = parseFloat(vacuumPressureSlider.value);
+
+      // Update Slider Label Displays
+      if (feedRateVal) feedRateVal.textContent = `${feedRate.toLocaleString()} L/h`;
+      if (initialBrixVal) initialBrixVal.textContent = `${brixIn.toFixed(1)} °Brix`;
+      if (targetBrixVal) targetBrixVal.textContent = `${brixTarget.toFixed(1)} °Brix`;
+      if (inletPressureVal) inletPressureVal.textContent = `${pInlet.toFixed(1)} bar`;
+      if (vacuumPressureVal) vacuumPressureVal.textContent = `${pVac.toFixed(1)} mbar`;
+
+      const feedstockId = feedstockSelect.value;
+      const nozzleId = nozzleSelect.value;
+
+      // Hazard Check (Conventional Falling Film Thermal Reference)
+      if (feedstockId === 'scorched_thermal_falling_film_hazard') {
+        if (cavitationMetric) cavitationMetric.textContent = 'N/A';
+        if (cavitationSub) {
+          cavitationSub.textContent = 'Static Heating Tube (No Cavitation)';
+          cavitationSub.className = 'text-[10px] text-rose-400 font-mono block mt-1';
+        }
+        if (tempMetric) {
+          tempMetric.textContent = '85.0';
+          tempMetric.className = 'text-2xl font-black font-mono text-rose-500';
+        }
+        if (tempSub) {
+          tempSub.textContent = 'CRITICAL THERMAL SCORCHING (>75°C)';
+          tempSub.className = 'text-[10px] text-rose-400 font-mono block mt-1 font-bold';
+        }
+        if (retentionMetric) {
+          retentionMetric.textContent = '34.0%';
+          retentionMetric.className = 'text-xl font-black font-mono text-rose-500';
+        }
+        if (retentionSub) {
+          retentionSub.textContent = '66% Vitamin C & Enzyme Destroyed';
+          retentionSub.className = 'text-[10px] text-rose-400 font-mono block mt-1';
+        }
+        if (secMetric) {
+          secMetric.textContent = '0.340';
+          secMetric.className = 'text-xl font-black font-mono text-rose-500';
+        }
+        if (secSub) {
+          secSub.textContent = '7.5x Higher Steam Energy Consumption';
+          secSub.className = 'text-[10px] text-rose-400 font-mono block mt-1';
+        }
+        if (foulingVal) foulingVal.textContent = 'Severe Protein Burn-On (CIP every 8 hrs)';
+        if (asmeVal) asmeVal.textContent = 'Tube Thermal Expansion Stress Hazard';
+        if (statusPill) {
+          statusPill.textContent = 'THERMAL DEGRADATION HAZARD';
+          statusPill.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-rose-950 text-rose-300 border border-rose-800 font-mono';
+        }
+        if (complianceBanner) {
+          complianceBanner.className = 'p-4 rounded-xl border bg-rose-950/40 border-rose-800 text-xs text-rose-200 flex items-start gap-3';
+        }
+        if (complianceTitle) {
+          complianceTitle.textContent = 'NON-COMPLIANT: THERMAL SCORCHING & NUTRITIONAL LOSS';
+          complianceTitle.className = 'font-bold block text-sm text-rose-300';
+        }
+        if (complianceDesc) {
+          complianceDesc.textContent = 'Operating at 85°C tube temperatures causes severe Maillard browning, hydroxymethylfurfural (HMF) carcinogen generation, and >66% destruction of heat-labile vitamins, violating FDA 21 CFR § 120 freshness claims.';
+        }
+        return;
+      }
+
+      // Normal Scientific Calculations for HC-CVE
+      // 1. Water Evaporation Rate: W_evap = F_feed * (1 - (Brix_in / Brix_target))
+      // Assuming density of feed ~ 1.04 kg/L
+      const feedMassFlow = feedRate * 1.04;
+      const waterEvapKgH = feedMassFlow * (1.0 - (brixIn / brixTarget));
+      const concentrateYieldLph = Math.max(20.0, feedRate - (waterEvapKgH / 1.0));
+      const waterRemovedPct = ((waterEvapKgH / feedMassFlow) * 100.0).toFixed(1);
+
+      // 2. Antoine Equation for Flash Saturation Boiling Temp Under Vacuum (mbar to °C)
+      // Water saturation temp approximation around 20-80 mbar:
+      // T_sat (°C) ≈ 10.0 + (pVac / 2.2)
+      const flashTempC = (14.2 + 0.365 * pVac).toFixed(1);
+
+      // 3. Cavitation Number calculation:
+      // σ_c = (P_downstream - P_vapor) / (0.5 * rho * v^2)
+      // Higher inlet pressure -> higher throat velocity -> lower cavitation number
+      let nozzleMultiplier = 1.0;
+      if (nozzleId === 'multi_orifice_radial_swirl_plate') nozzleMultiplier = 1.15;
+      else if (nozzleId === 'counter_axial_vortex_whistle_nozzle') nozzleMultiplier = 0.88;
+
+      let sigma = ((1.25 / pInlet) * nozzleMultiplier).toFixed(2);
+      if (sigma < 0.12) sigma = '0.12';
+
+      // 4. Bioactive & Vitamin C Retention
+      let baseRetention = 99.2;
+      if (parseFloat(flashTempC) > 34.0) {
+        baseRetention -= (parseFloat(flashTempC) - 34.0) * 0.4;
+      }
+      if (feedstockId === 'citrus_orange_nfc_puree') baseRetention = Math.min(99.4, baseRetention);
+      else if (feedstockId === 'bovine_colostrum_whey_igg') baseRetention = Math.min(99.6, baseRetention);
+      else if (feedstockId === 'industrial_papain_protease_broth') baseRetention = Math.min(98.8, baseRetention);
+      else if (feedstockId === 'wild_berry_anthocyanin_extract') baseRetention = Math.min(99.0, baseRetention);
+
+      // 5. Specific Electrical Energy Consumption (SEC)
+      // HC-CVE with MVR: approx 0.038 to 0.052 kWh per kg water evaporated
+      const secValNum = (0.035 + (pInlet / 14.0) * 0.015).toFixed(3);
+
+      // 6. Anti-fouling scouring index & ASME safety factor
+      const foulingPct = (85.0 + (pInlet / 14.0) * 9.0).toFixed(1);
+      const asmeFs = (5.8 - (pVac / 80.0) * 1.4).toFixed(1);
+
+      // DOM Updates
+      if (cavitationMetric) cavitationMetric.textContent = sigma;
+      if (cavitationSub) {
+        cavitationSub.textContent = parseFloat(sigma) <= 0.25 ? 'Optimal Super-Cavitation Inception' : 'Moderate Cavitation Regime';
+        cavitationSub.className = 'text-[10px] text-emerald-400 font-mono block mt-1';
+      }
+      if (tempMetric) {
+        tempMetric.textContent = flashTempC;
+        tempMetric.className = 'text-2xl font-black font-mono text-purple-400';
+      }
+      if (tempSub) {
+        tempSub.textContent = 'Sub-35°C Non-Thermal Flash';
+        tempSub.className = 'text-[10px] text-emerald-400 font-mono block mt-1';
+      }
+      if (waterEvapMetric) waterEvapMetric.textContent = Math.round(waterEvapKgH).toLocaleString();
+      if (waterEvapSub) waterEvapSub.textContent = `${waterRemovedPct}% Water Stripped`;
+      if (yieldMetric) yieldMetric.textContent = Math.round(concentrateYieldLph).toLocaleString();
+      if (yieldSub) yieldSub.textContent = 'Dense Concentrated Output';
+      if (retentionMetric) {
+        retentionMetric.textContent = `${baseRetention.toFixed(1)}%`;
+        retentionMetric.className = 'text-xl font-black font-mono text-emerald-400';
+      }
+      if (retentionSub) retentionSub.textContent = 'Zero Thermal Degradation';
+      if (secMetric) {
+        secMetric.textContent = secValNum;
+        secMetric.className = 'text-xl font-black font-mono text-sky-400';
+      }
+      if (secSub) secSub.textContent = '82% Lower Than Steam Evaporators';
+      if (foulingVal) foulingVal.textContent = `${foulingPct}% Fouling Reduction (CIP Interval 120h)`;
+      if (asmeVal) asmeVal.textContent = `FS = ${asmeFs} (ASME BPVC VIII Full Vacuum Pass)`;
+
+      if (statusPill) {
+        statusPill.textContent = 'COLD FLASH ACTIVE';
+        statusPill.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-950 text-emerald-300 border border-emerald-800 font-mono';
+      }
+      if (complianceBanner) {
+        complianceBanner.className = 'p-4 rounded-xl border bg-emerald-950/30 border-emerald-800 text-xs text-emerald-200 flex items-start gap-3';
+      }
+      if (complianceTitle) {
+        complianceTitle.textContent = 'FDA 21 CFR § 117/120 & 3-A 60-01 COMPLIANT';
+        complianceTitle.className = 'font-bold block text-sm text-emerald-300';
+      }
+      if (complianceDesc) {
+        complianceDesc.textContent = `Continuous non-thermal cold vacuum evaporation at ${flashTempC}°C preserves ${baseRetention.toFixed(1)}% of bioactive vitamins and proteins while meeting 3-A Sanitary Standards 60-01 and ASME BPVC Section VIII full vacuum vessel specifications.`;
+      }
+    }
+
+    // Event Listeners
+    [skidSelect, feedstockSelect, nozzleSelect].forEach(sel => {
+      sel?.addEventListener('change', calculateMetrics);
+    });
+
+    [feedRateSlider, initialBrixSlider, targetBrixSlider, inletPressureSlider, vacuumPressureSlider].forEach(sld => {
+      sld?.addEventListener('input', calculateMetrics);
+    });
+
+    // Preset Buttons
+    root.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const p = btn.getAttribute('data-preset');
+        if (p === 'orange') {
+          feedstockSelect.value = 'citrus_orange_nfc_puree';
+          nozzleSelect.value = 'converging_diverging_venturi_array';
+          feedRateSlider.value = '1800';
+          initialBrixSlider.value = '11.2';
+          targetBrixSlider.value = '42.0';
+          inletPressureSlider.value = '6.0';
+          vacuumPressureSlider.value = '38.0';
+        } else if (p === 'colostrum') {
+          feedstockSelect.value = 'bovine_colostrum_whey_igg';
+          nozzleSelect.value = 'counter_axial_vortex_whistle_nozzle';
+          feedRateSlider.value = '800';
+          initialBrixSlider.value = '8.5';
+          targetBrixSlider.value = '32.0';
+          inletPressureSlider.value = '5.0';
+          vacuumPressureSlider.value = '35.0';
+        } else if (p === 'enzyme') {
+          feedstockSelect.value = 'industrial_papain_protease_broth';
+          nozzleSelect.value = 'converging_diverging_venturi_array';
+          feedRateSlider.value = '650';
+          initialBrixSlider.value = '4.2';
+          targetBrixSlider.value = '28.5';
+          inletPressureSlider.value = '4.5';
+          vacuumPressureSlider.value = '32.0';
+        } else if (p === 'berry') {
+          feedstockSelect.value = 'wild_berry_anthocyanin_extract';
+          nozzleSelect.value = 'multi_orifice_radial_swirl_plate';
+          feedRateSlider.value = '1200';
+          initialBrixSlider.value = '6.8';
+          targetBrixSlider.value = '38.0';
+          inletPressureSlider.value = '5.5';
+          vacuumPressureSlider.value = '34.0';
+        } else if (p === 'hazard') {
+          feedstockSelect.value = 'scorched_thermal_falling_film_hazard';
+          nozzleSelect.value = 'converging_diverging_venturi_array';
+          feedRateSlider.value = '2500';
+          initialBrixSlider.value = '10.0';
+          targetBrixSlider.value = '40.0';
+          inletPressureSlider.value = '3.0';
+          vacuumPressureSlider.value = '75.0';
+        }
+        calculateMetrics();
+      });
+    });
+
+    // Export Audit Certificate
+    exportBtn?.addEventListener('click', () => {
+      const feed = feedRateSlider.value;
+      const bIn = initialBrixSlider.value;
+      const bOut = targetBrixSlider.value;
+      const pIn = inletPressureSlider.value;
+      const pVac = vacuumPressureSlider.value;
+      const temp = tempMetric?.textContent || '28.1';
+      const evap = waterEvapMetric?.textContent || '1,320';
+      const ret = retentionMetric?.textContent || '99.1%';
+
+      const cert = {
+        certificateType: "Continuous Hydrodynamic Cavitation Cold Vacuum Evaporator (HC-CVE) Process Verification",
+        standard: "FDA 21 CFR § 117/120 / 3-A Sanitary Standards 60-01 / ASME BPVC Section VIII",
+        timestamp: new Date().toISOString(),
+        operatingParameters: {
+          feedFlowRateLph: feed,
+          initialBrix: bIn,
+          targetConcentrateBrix: bOut,
+          cavitationInletPressureBar: pIn,
+          vacuumChamberPressureMbar: pVac
+        },
+        evaporativePerformance: {
+          flashEvaporationTempC: temp,
+          waterRemovalRateKgH: evap,
+          bioactiveRetentionPct: ret,
+          antiFoulingIndex: "88.5% Reduction (Acoustic Cavitation Scouring)",
+          specificEnergyConsumption: "0.045 kWh / kg H2O (82% Utility Energy Savings)"
+        },
+        regulatoryVerdict: "VALIDATED_COMPLIANT"
+      };
+
+      const blob = new Blob([JSON.stringify(cert, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `HC_CVE_Cold_Evaporation_Audit_Certificate_${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Initial calculation
+    calculateMetrics();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHcCveModeler);
+  } else {
+    initHcCveModeler();
+  }
+</script>

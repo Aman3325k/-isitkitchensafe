@@ -184,7 +184,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-continuous-ash-dd-defatting-modeler',
   'tools/commercial-continuous-scco2-sme-micro-encapsulation-modeler',
   'tools/commercial-continuous-lt-hpcd-pasteurization-modeler',
-  'tools/commercial-continuous-scco2-mle-liposome-modeler'
+  'tools/commercial-continuous-scco2-mle-liposome-modeler',
+  'tools/commercial-continuous-hc-cve-evaporation-modeler'
 ];
 
 const esSlugs = new Set([
