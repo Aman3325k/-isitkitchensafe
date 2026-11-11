@@ -187,7 +187,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-continuous-scco2-mle-liposome-modeler',
   'tools/commercial-continuous-hc-cve-evaporation-modeler',
   'tools/commercial-continuous-ma-hph-nano-emulsifier-modeler',
-  'tools/commercial-continuous-scco2-fap-fractionation-modeler'
+  'tools/commercial-continuous-scco2-fap-fractionation-modeler',
+  'tools/commercial-continuous-scw-dme-extraction-modeler'
 ];
 
 const esSlugs = new Set([
