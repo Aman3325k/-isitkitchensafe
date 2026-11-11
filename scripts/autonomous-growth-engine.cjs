@@ -185,7 +185,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-continuous-lt-hpcd-pasteurization-modeler', name: 'Commercial Continuous Low-Temperature Dense-Phase High-Pressure CO2 Pasteurization & In-Line Carbonation (LT-HPCD) Modeler', category: 'Supercritical Fluid Thermodynamics & Cold Beverage Preservation', component: 'CommercialContinuousLtHpcdModeler.astro', dataFile: 'lt-hpcd-pasteurization-data.json' },
   { slug: 'commercial-continuous-scco2-mle-liposome-modeler', name: 'Commercial Continuous High-Pressure Supercritical CO2 Micro-Fluidic Liposome Extrusion (scCO2-MLE) Modeler', category: 'Dense-Phase Nano-Encapsulation & Aseptic Liposome Physics', component: 'CommercialContinuousScco2MleLiposomeModeler.astro', dataFile: 'scco2-mle-liposome-data.json' },
   { slug: 'commercial-continuous-hc-cve-evaporation-modeler', name: 'Commercial Continuous Hydrodynamic Cavitation Cold Vacuum Evaporator (HC-CVE) Modeler', category: 'Non-Thermal Evaporative Physics & Vacuum Cavitation', component: 'CommercialContinuousHcCveEvaporationModeler.astro', dataFile: 'hc-cve-evaporation-data.json' },
-  { slug: 'commercial-continuous-ma-hph-nano-emulsifier-modeler', name: 'Commercial Continuous Megasonic-Assisted High-Pressure Homogenization Nano-Emulsifier (MA-HPH) Modeler', category: 'Acousto-Fluidic Rheology & High-Pressure Nano-Emulsions', component: 'CommercialContinuousMaHphModeler.astro', dataFile: 'ma-hph-nano-emulsifier-data.json' }
+  { slug: 'commercial-continuous-ma-hph-nano-emulsifier-modeler', name: 'Commercial Continuous Megasonic-Assisted High-Pressure Homogenization Nano-Emulsifier (MA-HPH) Modeler', category: 'Acousto-Fluidic Rheology & High-Pressure Nano-Emulsions', component: 'CommercialContinuousMaHphModeler.astro', dataFile: 'ma-hph-nano-emulsifier-data.json' },
+  { slug: 'commercial-continuous-scco2-fap-fractionation-modeler', name: 'Commercial Continuous Supercritical CO2 Fractionation of Astaxanthin & Bioactive Pigments (scCO2-FAP) Modeler', category: 'Supercritical Chromatography & Natural Antioxidant Refining', component: 'CommercialContinuousScco2FapModeler.astro', dataFile: 'scco2-fap-fractionation-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -460,7 +461,9 @@ function auditDatasets() {
     'scco2-sme-micro-encapsulation-data.json',
     'lt-hpcd-pasteurization-data.json',
     'scco2-mle-liposome-data.json',
-    'hc-cve-evaporation-data.json'
+    'hc-cve-evaporation-data.json',
+    'ma-hph-nano-emulsifier-data.json',
+    'scco2-fap-fractionation-data.json'
 ];
 
   const datasetStats = {};
@@ -771,17 +774,10 @@ function auditGrowthOpportunities() {
     // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Continuous High-Pressure Supercritical CO2 Fractionation of Astaxanthin & Bioactive Pigments (scCO2-FAP) Modeler',
-      category: 'Supercritical Chromatography & Natural Antioxidant Refining',
-      intent: 'Models continuous high-pressure multi-stage packed column supercritical CO2 counter-current fractionation (scCO2-FAP, 180–300 bar, 40–60°C) for clean extraction and isomeric enrichment of natural (3S,3\'S) astaxanthin esters from Haematococcus pluvialis microalgae without chemical solvent residues.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '640+ US impressions'
-    },
-    {
       title: 'Commercial Continuous Subcritical Water Dynamic Micro-Tubular Extraction & Hydrothermal Carbonization (SCW-DME) Modeler',
       category: 'Subcritical Hydrothermal Engineering & Bio-Refinery Physics',
       intent: 'Models continuous subcritical water dynamic micro-tubular extraction and hydrothermal carbonization (SCW-DME, 150–250 bar, 160–220°C) for continuous valorization of agro-industrial food processing waste into bioactive prebiotic xylooligosaccharides without acid catalysts.',
-      priority: 'HIGH',
+      priority: 'CRITICAL_HIGH',
       estimatedMonthlyVolume: '580+ US impressions'
     },
     {
@@ -795,8 +791,15 @@ function auditGrowthOpportunities() {
       title: 'Commercial Continuous Electrohydrodynamic Cold Atomization & Core-Shell Micro-Encapsulation (EHD-CME) Modeler',
       category: 'Electrohydrodynamics & Non-Thermal Nano-Structuring',
       intent: 'Models continuous high-voltage capillary electrohydrodynamic atomization (12–28 kV, Taylor cone-jet regime) for monodisperse room-temperature core-shell micro-encapsulation of live probiotic strains and labile omega-3 fatty acids without thermal or shear stress.',
-      priority: 'MEDIUM',
+      priority: 'HIGH',
       estimatedMonthlyVolume: '460+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous High-Shear Slit-Die Extrusion & Hydrodynamic Cavitation Texturizing of Mycoprotein (HSE-HCT) Modeler',
+      category: 'Rheological Food Physics & Non-Thermal Meat Analogue Structuring',
+      intent: 'Models continuous twin-screw high-moisture extrusion with cooled long slit-die (HSE) coupled with in-line micro-hydrodynamic cavitation (15–35 bar) for high-anisotropy fibrous texturizing of Fusarium venenatum mycoprotein biomass without chemical binding gums.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '430+ US impressions'
     }
   ];
 
