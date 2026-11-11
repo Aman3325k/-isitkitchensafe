@@ -181,7 +181,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-continuous-fo-mvr-concentration-modeler',
   'tools/commercial-continuous-sdme-lipid-dewatering-modeler',
   'tools/commercial-continuous-mai-sbr-roasting-sterilization-modeler',
-  'tools/commercial-continuous-ash-dd-defatting-modeler'
+  'tools/commercial-continuous-ash-dd-defatting-modeler',
+  'tools/commercial-continuous-scco2-sme-micro-encapsulation-modeler'
 ];
 
 const esSlugs = new Set([
