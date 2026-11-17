@@ -198,7 +198,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-continuous-hfd-vcs-modeler',
   'tools/commercial-continuous-osw-dor-modeler',
   'tools/commercial-continuous-scco2-mhb-modeler',
-  'tools/commercial-continuous-sas-eme-modeler'
+  'tools/commercial-continuous-sas-eme-modeler',
+  'tools/commercial-continuous-resolv-nano-liposome-modeler'
 ];
 
 const esSlugs = new Set([
