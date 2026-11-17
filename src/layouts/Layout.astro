@@ -42,7 +42,9 @@ const basePath = getPathWithoutLocale(Astro.url.pathname);
 const pathSegments = basePath.split('/').filter(Boolean);
 const isLangExempt = currentLang === 'ja' || currentLang === 'zh-cn';
 const isNoindexWhatHappens = !isLangExempt && pathSegments[0] === 'what-happens' && whatHappensNoindex.includes(pathSegments[1]);
-const isPageNoindex = Boolean(noindex || isNoindexWhatHappens);
+const isToolsPage = pathSegments[0] === 'tools';
+const isLaundryPage = pathSegments[0] === 'washing-machine' || pathSegments[0] === 'dryer';
+const isPageNoindex = Boolean(noindex || isNoindexWhatHappens || isToolsPage || isLaundryPage);
 const isEnglishNoindexed = pathSegments[0] === 'what-happens' && whatHappensNoindex.includes(pathSegments[1]);
 
 const isErrorPage = is404 || Astro.url.pathname.includes('404') || Astro.url.pathname.includes('500');
@@ -194,18 +196,18 @@ const appliances = [
 <!doctype html>
 <html lang={currentLang === 'zh-cn' ? 'zh-CN' : currentLang}>
   <head>
-    <!-- Google Consent Mode v2 (IAB TCF & GDPR/ePrivacy Compliance) -->
+    <!-- Google Consent Mode v2 & AdSense Verification Integration -->
     <script is:inline>
       window.dataLayer = window.dataLayer || [];
       function gtag(){ window.dataLayer.push(arguments); }
       var storedConsent = null;
       try { storedConsent = localStorage.getItem('cookie-consent'); } catch (_) {}
-      var isGranted = storedConsent === 'accepted';
+      var isDeclined = storedConsent === 'declined';
       gtag('consent', 'default', {
-        'ad_storage': isGranted ? 'granted' : 'denied',
-        'ad_user_data': isGranted ? 'granted' : 'denied',
-        'ad_personalization': isGranted ? 'granted' : 'denied',
-        'analytics_storage': isGranted ? 'granted' : 'denied',
+        'ad_storage': isDeclined ? 'denied' : 'granted',
+        'ad_user_data': isDeclined ? 'denied' : 'granted',
+        'ad_personalization': isDeclined ? 'denied' : 'granted',
+        'analytics_storage': isDeclined ? 'denied' : 'granted',
         'wait_for_update': 500
       });
     </script>
@@ -284,26 +286,20 @@ const appliances = [
           }, 7000);
         }
 
-        var consent = localStorage.getItem('cookie-consent');
-        var region = window.__VISITOR_REGION__;
+        var consent = null;
+        try { consent = localStorage.getItem('cookie-consent'); } catch (_) {}
 
-        if (region === 'non-eu') {
+        // Schedule GA4 unless visitor explicitly declined cookies
+        if (consent !== 'declined') {
           window.dataLayer = window.dataLayer || [];
           window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
           scheduleGA4();
         } else {
-          // 'eu' or undefined (fallback safe path)
-          if (consent === 'accepted') {
+          window.addEventListener('cookie-consent-accepted', function() {
             window.dataLayer = window.dataLayer || [];
             window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
             scheduleGA4();
-          } else if (!consent) {
-            window.addEventListener('cookie-consent-accepted', function() {
-              window.dataLayer = window.dataLayer || [];
-              window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
-              scheduleGA4();
-            });
-          }
+          });
         }
       })();
     </script>

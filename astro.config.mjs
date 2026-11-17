@@ -98,6 +98,18 @@ export default defineConfig({
           if (match && whatHappensNoindexSet.has(match[1])) {
             return false;
           }
+
+          // Exclude tools, washing-machine, and dryer from search sitemap to focus Google on core kitchen safety
+          if (
+            pathname === '/tools' || pathname.startsWith('/tools/') ||
+            pathname.match(/^\/(?:es|pt|zh-cn|ja)\/tools(?:\/|$)/) ||
+            pathname === '/washing-machine' || pathname.startsWith('/washing-machine/') ||
+            pathname.match(/^\/(?:es|pt|zh-cn|ja)\/washing-machine(?:\/|$)/) ||
+            pathname === '/dryer' || pathname.startsWith('/dryer/') ||
+            pathname.match(/^\/(?:es|pt|zh-cn|ja)\/dryer(?:\/|$)/)
+          ) {
+            return false;
+          }
         } catch {}
         return true;
       },
