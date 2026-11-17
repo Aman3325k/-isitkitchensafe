@@ -8,7 +8,7 @@ import itemsPt from '../data/items.pt.json';
 import itemsZh from '../data/items.zh-cn.json';
 import itemsJa from '../data/items.ja.json';
 import { generateMetaDescription } from '../utils/seoHelper.js';
-import { resolveAllGuidesForItem, getPeopleAlsoAsk } from '../utils/linkingHelper.js';
+import { resolveAllGuidesForItem, getPeopleAlsoAsk, getSmartRelatedItems } from '../utils/linkingHelper.js';
 import { getCategoryForMaterial } from '../utils/materialCategories';
 import { useTranslations, useTranslatedPath, getApplianceIn, getApplianceUrl, getDirectoryUrl, isDirectoryTranslatedInLocale } from '../i18n/utils';
 import type { SupportedLanguage } from '../i18n/ui';
@@ -49,51 +49,8 @@ for (const item of currentItemsDataset) {
   }
 }
 
-// Get details for related items (minimum 5 related item pages)
-let relatedItems: any[] = [];
-const seenSlugs = new Set<string>();
-if (data.slug) {
-  seenSlugs.add(data.slug);
-}
-
-for (const relatedSlug of (data.relatedItems || [])) {
-  if (seenSlugs.has(relatedSlug)) continue;
-  // Pick the entry matching the current page's appliance; fall back to the first only if none match
-  const matchingSameAppliance = currentItemsDataset.find(
-    (item: any) => item.slug === relatedSlug && item.appliance === data.appliance
-  );
-  const picked = matchingSameAppliance || currentItemsDataset.find(
-    (item: any) => item.slug === relatedSlug
-  );
-  if (picked) {
-    relatedItems.push(picked);
-    seenSlugs.add(relatedSlug);
-  }
-}
-
-if (relatedItems.length < 5) {
-  const sameApplianceItems = currentItemsDataset.filter(
-    (item: any) => item.appliance === data.appliance && !seenSlugs.has(item.slug)
-  );
-  for (const item of sameApplianceItems) {
-    if (relatedItems.length >= 5) break;
-    relatedItems.push(item);
-    seenSlugs.add(item.slug);
-  }
-}
-
-if (relatedItems.length < 5) {
-  const anyItems = currentItemsDataset.filter(
-    (item: any) => !seenSlugs.has(item.slug)
-  );
-  for (const item of anyItems) {
-    if (relatedItems.length >= 5) break;
-    relatedItems.push(item);
-    seenSlugs.add(item.slug);
-  }
-}
-
-relatedItems = relatedItems.slice(0, 5);
+// Get smart, topically-clustered related items (guaranteed minimum 5 relevant guides)
+const relatedItems = getSmartRelatedItems(data, currentItemsDataset);
 
 const allGuides = resolveAllGuidesForItem(data.item, data.slug);
 const paaList = getPeopleAlsoAsk(data.item, data.slug, allGuides, data.relatedItems || []);

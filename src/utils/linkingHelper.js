@@ -362,3 +362,67 @@ export function injectInlineLinks(text, itemsToMatch, linksInjected, linkCountRe
   
   return modifiedText;
 }
+
+// Generate smart, topically-clustered related items for an appliance item page
+export function getSmartRelatedItems(targetItem, currentDataset) {
+  if (!targetItem || !currentDataset || !currentDataset.length) return [];
+  
+  const isDrinkware = (slug, name) => 
+    /flask|stanley|yeti|tumbler|mug|cup|bottle|nalgene|thermos|glass|pitcher|owala|klean-kanteen|contigo|swell/i.test((slug || '') + ' ' + (name || ''));
+  const isCookware = (slug, name) => 
+    /pan|pot|skillet|sheet|dish|wok|dutch-oven|casserole|ramekin|roaster|bakeware|baking/i.test((slug || '') + ' ' + (name || ''));
+  const isLiners = (slug, name) => 
+    /foil|parchment|wax-paper|plastic-wrap|paper-towel|liner|mat/i.test((slug || '') + ' ' + (name || ''));
+  const isFood = (item) => {
+    const m = (item.material || '').toLowerCase();
+    return m.includes('food') || m.includes('vegetable') || m.includes('fruit') || 
+           m.includes('protein') || m.includes('dairy') || m.includes('grain') || 
+           m.includes('starch') || m.includes('oil') || m.includes('meat') || m.includes('fish');
+  };
+
+  const getSemanticCluster = (item) => {
+    if (!item) return 'general';
+    const slug = item.slug || '';
+    const name = item.item || '';
+    if (isDrinkware(slug, name)) return 'drinkware';
+    if (isCookware(slug, name)) return 'cookware';
+    if (isLiners(slug, name)) return 'liners';
+    if (isFood(item)) return 'food';
+    return 'general-kitchenware';
+  };
+
+  const targetCluster = getSemanticCluster(targetItem);
+  const targetIsFood = isFood(targetItem);
+  const targetMat = targetItem.material || '';
+  
+  const sameAppliance = currentDataset.filter(i => 
+    i && i.appliance === targetItem.appliance && i.slug !== targetItem.slug
+  );
+
+  const seenSlugs = new Set([targetItem.slug]);
+  const related = [];
+
+  const addItems = (list) => {
+    for (const item of list) {
+      if (related.length >= 5) break;
+      if (!seenSlugs.has(item.slug)) {
+        related.push(item);
+        seenSlugs.add(item.slug);
+      }
+    }
+  };
+
+  // 1. Same cluster & same material
+  addItems(sameAppliance.filter(i => i.material === targetMat && getSemanticCluster(i) === targetCluster));
+  
+  // 2. Same cluster within appliance
+  addItems(sameAppliance.filter(i => getSemanticCluster(i) === targetCluster));
+  
+  // 3. Same food or non-food domain within appliance
+  addItems(sameAppliance.filter(i => isFood(i) === targetIsFood));
+
+  // 4. Any same appliance fallback
+  addItems(sameAppliance);
+
+  return related.slice(0, 5);
+}
