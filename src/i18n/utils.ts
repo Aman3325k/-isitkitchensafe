@@ -190,7 +190,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-continuous-scco2-fap-fractionation-modeler',
   'tools/commercial-continuous-scw-dme-extraction-modeler',
   'tools/commercial-continuous-pef-hcd-disruption-modeler',
-  'tools/commercial-continuous-ehd-cme-micro-encapsulation-modeler'
+  'tools/commercial-continuous-ehd-cme-micro-encapsulation-modeler',
+  'tools/commercial-continuous-hse-hct-mycoprotein-texturizing-modeler'
 ];
 
 const esSlugs = new Set([
