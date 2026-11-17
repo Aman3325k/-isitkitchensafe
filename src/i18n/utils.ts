@@ -196,7 +196,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-continuous-fo-md-bioactive-concentration-modeler',
   'tools/commercial-continuous-dcm-lfad-modeler',
   'tools/commercial-continuous-hfd-vcs-modeler',
-  'tools/commercial-continuous-osw-dor-modeler'
+  'tools/commercial-continuous-osw-dor-modeler',
+  'tools/commercial-continuous-scco2-mhb-modeler'
 ];
 
 const esSlugs = new Set([
