@@ -190,7 +190,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-continuous-scw-dme-extraction-modeler', name: 'Commercial Continuous Subcritical Water Dynamic Micro-Tubular Extraction & Hydrothermal Carbonization (SCW-DME) Modeler', category: 'Subcritical Hydrothermal Engineering & Bio-Refinery Physics', component: 'CommercialContinuousScwDmeModeler.astro', dataFile: 'scw-dme-extraction-carbonization-data.json' },
   { slug: 'commercial-continuous-pef-hcd-disruption-modeler', name: 'Commercial Continuous Pulsed High-Voltage Electric Discharge & Hydrodynamic Cavitation Disruption of Microalgae (PEF-HCD) Modeler', category: 'Electroporation Physics & Hydrodynamic Biomass Disruption', component: 'CommercialContinuousPefHcdModeler.astro', dataFile: 'pef-hcd-disruption-microalgae-data.json' },
   { slug: 'commercial-continuous-ehd-cme-micro-encapsulation-modeler', name: 'Commercial Continuous Electrohydrodynamic Cold Atomization & Core-Shell Micro-Encapsulation (EHD-CME) Modeler', category: 'Electrohydrodynamics & Non-Thermal Nano-Structuring', component: 'CommercialContinuousEhdCmeModeler.astro', dataFile: 'ehd-cme-micro-encapsulation-data.json' },
-  { slug: 'commercial-continuous-hse-hct-mycoprotein-texturizing-modeler', name: 'Commercial Continuous High-Shear Slit-Die Extrusion & Hydrodynamic Cavitation Mycoprotein Texturizing (HSE-HCT) Modeler', category: 'Rheological Food Physics & Non-Thermal Meat Analogue Structuring', component: 'CommercialContinuousHseHctModeler.astro', dataFile: 'hse-hct-mycoprotein-texturizing-data.json' }
+  { slug: 'commercial-continuous-hse-hct-mycoprotein-texturizing-modeler', name: 'Commercial Continuous High-Shear Slit-Die Extrusion & Hydrodynamic Cavitation Mycoprotein Texturizing (HSE-HCT) Modeler', category: 'Rheological Food Physics & Non-Thermal Meat Analogue Structuring', component: 'CommercialContinuousHseHctModeler.astro', dataFile: 'hse-hct-mycoprotein-texturizing-data.json' },
+  { slug: 'commercial-continuous-scco2-esn-electrospinning-modeler', name: 'Commercial Continuous High-Pressure Supercritical CO2 Assisted Electrospinning of Nanofibrous Encapsulates (scCO2-ESN) Modeler', category: 'Supercritical Electrospinning & Bioactive Nanofiber Physics', component: 'CommercialContinuousScco2EsnModeler.astro', dataFile: 'scco2-esn-electrospinning-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -471,7 +472,8 @@ function auditDatasets() {
     'scw-dme-extraction-carbonization-data.json',
     'pef-hcd-disruption-microalgae-data.json',
     'ehd-cme-micro-encapsulation-data.json',
-    'hse-hct-mycoprotein-texturizing-data.json'
+    'hse-hct-mycoprotein-texturizing-data.json',
+    'scco2-esn-electrospinning-data.json'
 ];
 
   const datasetStats = {};
@@ -782,32 +784,32 @@ function auditGrowthOpportunities() {
     // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Continuous High-Pressure Supercritical CO2 Assisted Electrospinning of Nanofibrous Encapsulates (scCO2-ESN) Modeler',
-      category: 'Supercritical Electrospinning & Bioactive Nanofiber Physics',
-      intent: 'Models continuous dense-phase supercritical CO2 plasticization coupled with high-voltage multi-needle electrospinning (25–45 kV, 80–140 bar) for solvent-free, non-thermal fabrication of sub-micron core-shell protein-polysaccharide nanofibers encapsulating temperature-sensitive probiotics and bioactive peptides.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '550+ US impressions'
-    },
-    {
       title: 'Commercial Continuous Forward Osmosis & Membrane Distillation Concentration of Thermolabile Bioactive Juices (FO-MD) Modeler',
       category: 'Membrane Separation & Thermodynamic Mass Transfer',
       intent: 'Models continuous forward osmosis coupled with air-gap membrane distillation (FO-MD, 25–40°C, osmotic pressure gradient Δπ > 65 bar) for non-thermal concentration of thermolabile anthocyanins and polyphenolic juices with zero aroma volatilization.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '480+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '580+ US impressions'
     },
     {
       title: 'Commercial Continuous Dynamic Ceramic Membrane Micro-Filtration & Low-Frequency Acoustic Desorption (DCM-LFAD) Modeler',
       category: 'Dynamic Membrane Rheology & Acoustic Desorption Physics',
       intent: 'Models continuous rotating ceramic disk dynamic cross-flow micro-filtration (shear rates > 150,000 s^-1) coupled with in-line 28 kHz acoustic boundary layer desorption for non-thermal cold clarification of high-turbidity fruit juices and fermented broths with zero filter cake fouling.',
       priority: 'HIGH',
-      estimatedMonthlyVolume: '420+ US impressions'
+      estimatedMonthlyVolume: '460+ US impressions'
     },
     {
       title: 'Commercial Continuous High-Frequency Dielectric Sintering & Vacuum Cryo-Stabilization of Cellular Cultured Matrices (HFD-VCS) Modeler',
       category: 'Cellular Agriculture & Cryogenic Biomaterial Engineering',
       intent: 'Models continuous 27.12 MHz radio-frequency dielectric volumetric sintering coupled with ultra-fast deep vacuum cryo-stabilization for non-thermal structural solidification of 3D cultivated myoblast cell scaffolds without protein denaturation.',
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '410+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous Multi-Frequency Orthogonal Acoustic Standing Wave Demulsification & Oil Recovery (OSW-DOR) Modeler',
+      category: 'Acoustophoretic Fluid Physics & Clean Refining',
+      intent: 'Models continuous orthogonal dual-frequency megasonic standing waves (1.2 & 2.4 MHz) for non-thermal, reagent-free acoustic radiation force demulsification and high-yield cold-pressed oil droplet coalescence without thermal oxidation.',
       priority: 'MEDIUM',
-      estimatedMonthlyVolume: '380+ US impressions'
+      estimatedMonthlyVolume: '360+ US impressions'
     }
   ];
 
