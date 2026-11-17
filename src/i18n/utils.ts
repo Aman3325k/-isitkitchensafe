@@ -202,7 +202,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-continuous-resolv-nano-liposome-modeler',
   'tools/commercial-continuous-al-sad-aerogel-modeler',
   'tools/commercial-continuous-uhps-mfs-modeler',
-  'tools/commercial-continuous-hjc-sas-modeler'
+  'tools/commercial-continuous-hjc-sas-modeler',
+  'tools/commercial-continuous-sfm-dip-modeler'
 ];
 
 const esSlugs = new Set([
