@@ -1,0 +1,333 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import CommercialContinuousFoMdModeler from '../../../components/CommercialContinuousFoMdModeler.astro';
+import type { SupportedLanguage } from '../../../i18n/ui';
+import { useTranslations, useTranslatedPath } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+const t = useTranslations(lang);
+const tp = useTranslatedPath(lang);
+
+interface LocaleToolContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  lead: string;
+  breadcrumbsLabel: string;
+  faqs: Array<{ question: string; answer: string }>;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocaleToolContent> = {
+  es: {
+    pageTitle: "Simulador Continuo de Ósmosis Directa y Destilación por Membrana (FO-MD) | IsItKitchenSafe",
+    pageDescription: "Simule la ósmosis directa contracorriente combinada con destilación por membrana a baja temperatura (FO-MD, 18–45°C, Δπ > 65 bar) para la concentración no térmica de jugos termosensibles con antocianinas, polifenoles y aromas frutales hasta 68 °Brix bajo FDA 21 CFR § 120 Juice HACCP y normas 3-A.",
+    badge: "Separación por Membranas & Transferencia de Masa Termodinámica",
+    h1: "Simulador Continuo Integrado de Ósmosis Directa y Destilación por Membrana (FO-MD)",
+    lead: "Plataforma de modelado para la concentración no térmica y sin ebullición de jugos de frutas con alta carga de antocianinas, polifenoles y aromas volátiles mediante ósmosis directa acoplada a destilación por membrana con cámara de aire hasta 68 °Brix bajo normativas FDA 21 CFR § 120 y 3-A Sanitary Standards.",
+    breadcrumbsLabel: "Simulador Continuo FO-MD",
+    faqs: [
+      {
+        question: "¿Cómo concentra jugos el proceso integrado FO-MD sin provocar degradación térmica?",
+        answer: "La evaporación térmica convencional somete al jugo a temperaturas entre 65°C y 85°C al vacío, lo que destruye del 65% al 85% de las antocianinas, desencadena la formación de hidroximetilfurfural (HMF) por pardeamiento de Maillard y volatiliza los aromas frutales. En cambio, el sistema FO-MD opera a temperatura ambiente (18–24°C) en el lado del jugo. El gradiente de presión osmótica (Δπ de 45 a 85 bar) generado por una solución extractora densa de grado alimentario atrae naturalmente el agua a través de los poros de la membrana sin bombeo hidráulico ni ebullición. Luego, la solución extractora diluida se regenera en un circuito aislado de destilación por membrana a baja temperatura (38–46°C), donde el vapor de agua atraviesa poros hidrófobos de PTFE hacia un condensador frío, reconcentrando la solución para su recirculación continua en bucle cerrado."
+      },
+      {
+        question: "¿Qué principios físicos gobiernan la polarización de concentración interna (ICP) y el flujo de agua J_w?",
+        answer: "El flujo de agua sigue la ecuación de Darcy-Starling J_w = A · (σ · Δπ_eff - ΔP). Sin embargo, al penetrar el agua pura en la capa de soporte porosa de la membrana asimétrica, se diluye la solución extractora en la interfase activa, reduciendo notablemente la fuerza impulsora. Corregido por la polarización de concentración interna (ICP), el flujo se modela mediante J_w = A · [ (π_draw · exp(-J_w · S / D) - π_feed · exp(J_w · d_h / (Sh · D))) / (1 + (B / J_w) · (exp(J_w · S / D) - exp(-J_w · d_h / (Sh · D)))) ], donde S representa el parámetro estructural de la membrana. El uso de membranas biomiméticas de nanocompuestos con canales de acuaporina reduce S por debajo de 210 µm, permitiendo flujos de agua industriales estables entre 20 y 32 L/m²·h."
+      },
+      {
+        question: "¿Cómo alcanza el sistema FO-MD hasta 68 °Brix mientras la ósmosis inversa (RO) está limitada a 30 °Brix?",
+        answer: "La ósmosis inversa de alta presión (HPRO) depende de la presión hidráulica mecánica para vencer la presión osmótica de la solución. A 30 °Brix, un jugo ejerce unos 60 bar, pero al superar los 60 °Brix la presión osmótica se dispara por encima de los 85 bar, exigiendo presiones de bombeo superiores a 100–140 bar que aplastan y rompen las membranas poliméricas. Por el contrario, la ósmosis directa no utiliza presión hidráulica externa; la fuerza motriz la aporta el potencial químico de la solución extractora (capaz de generar más de 140 bar sin estrés físico), permitiendo superar los 65 °Brix con total seguridad operativa."
+      },
+      {
+        question: "¿Qué ventajas de descarbonización y consumo energético específico (SEC) ofrece FO-MD frente a la evaporación térmica?",
+        answer: "Los evaporadores térmicos de película descendente consumen entre 1,85 y 2,45 kWh de energía por litro de agua evaporada debido al elevado calor latente de cambio de fase (2.260 kJ/kg). El sistema FO-MD desacopla la extracción del calor: la ósmosis directa solo requiere la energía de bombeo de recirculación (0,06–0,08 kWh/L) y la regeneración por destilación de membrana aprovecha calor residual de bajo grado (38–45°C), reduciendo el consumo eléctrico específico total a solo 0,22–0,32 kWh/L, lo que representa un ahorro energético del 84% al 88% respecto a los sistemas térmicos a vapor."
+      },
+      {
+        question: "¿Qué normativas regulan la higiene, la reducción de 5 log de patógenos (Juice HACCP) y la fuga de solutos?",
+        answer: "Las operaciones cumplen estrictamente con FDA 21 CFR § 120 (Juice HACCP), que exige una reducción validada de 5 log de patógenos como E. coli O157:H7 y Salmonella. Al operar a temperaturas no pasteurizantes, el sistema se combina con barreras no térmicas como luz UV-C pulsada o microfiltración estéril. El flujo inverso de solutos se mantiene por debajo de 0,10 g/m²·h bajo FDA 21 CFR § 170.36 (GRAS), asegurando residuos indetectables (<0,1 ppm). Los componentes en contacto con alimentos cumplen con la norma 3-A 45-03 para sistemas de membrana de flujo cruzado en acero inoxidable 316L electropulido (Ra ≤ 0,38 µm)."
+      }
+    ]
+  },
+  pt: {
+    pageTitle: "Simulador Contínuo de Osmose Direta e Destilação por Membrana (FO-MD) | IsItKitchenSafe",
+    pageDescription: "Simule a osmose direta em contracorrente combinada com destilação por membrana a baixa temperatura (FO-MD, 18–45°C, Δπ > 65 bar) para concentração não térmica de sucos termossensíveis ricos em antocianinas, polifenóis e aromas até 68 °Brix sob conformidade com FDA 21 CFR § 120 e normas sanitárias 3-A.",
+    badge: "Separação por Membranas & Transferência de Massa Termodinâmica",
+    h1: "Simulador Contínuo Integrado de Osmose Direta e Destilação por Membrana (FO-MD)",
+    lead: "Plataforma de modelagem para concentração não térmica e sem fervura de sucos de frutas ricos em antocianinas, polifenóis e compostos aromáticos voláteis através de osmose direta acoplada a destilação por membrana com câmara de ar até 68 °Brix sob normas FDA 21 CFR § 120 Juice HACCP e 3-A Sanitary Standards.",
+    breadcrumbsLabel: "Simulador Contínuo FO-MD",
+    faqs: [
+      {
+        question: "Como o processo integrado FO-MD concentra sucos sem causar degradação térmica?",
+        answer: "A evaporação térmica a vácuo submete o suco a temperaturas de 65°C a 85°C, destruindo de 65% a 85% das antocianinas e da vitamina C, gerando hidroximetilfurfural (HMF) por escurecimento de Maillard e evaporando os ésteres aromáticos. O sistema FO-MD opera a temperaturas amenas (18–24°C) no circuito do suco: o gradiente osmótico (Δπ de 45 a 85 bar) criado por uma solução extratora densa atrai a água através da membrana sem pressão mecânica ou ebulição. A solução diluída é então regenerada em um módulo fechado de destilação por membrana a 38–46°C, onde o vapor atravessa os poros de PTFE até uma placa condensadora fria, retornando a solução reconcentrada ao ciclo."
+      },
+      {
+        question: "Quais leis de transferência de massa regem a polarização de concentração interna (ICP) e o fluxo de água J_w?",
+        answer: "O fluxo obedece à relação de Darcy-Starling J_w = A · (σ · Δπ_eff - ΔP). Contudo, a água que permeia para o suporte poroso da membrana asimétrica dilui a solução extratora na interface ativa, provocando a polarização de concentração interna (ICP). A equação corrigida pelo parâmetro estrutural S = (t · τ) / ε modela essa atenuação. A utilização de membranas nanocompósitas com aquaporinas biomiméticas reduz S para menos de 210 µm, sustentando fluxos de água industriais entre 20 e 32 L/m²·h mesmo em sucos altamente viscosos."
+      },
+      {
+        question: "Por que a tecnologia FO-MD atinge até 68 °Brix enquanto a osmose reversa (RO) é limitada a 30 °Brix?",
+        answer: "A osmose reversa de alta pressão (HPRO) necessita de pressão hidráulica superior à pressão osmótica do líquido. A 30 °Brix, a pressão atinge cerca de 60 bar, mas a 65 °Brix ultrapassa 85 bar, exigindo pressões mecânicas superiores a 120 bar que compactam e rompem as membranas. A osmose direta, por sua vez, não utiliza bombas de alta pressão; a força motriz é puramente química pela solução extratora (com pressão osmótica acima de 140 bar), viabilizando atingir 68 °Brix com total segurança mecânica."
+      },
+      {
+        question: "Quais são os ganhos de descarbonização e consumo energético específico (SEC) em relação à evaporação térmica?",
+        answer: "Os evaporadores térmicos industriais demandam entre 1,85 e 2,45 kWh por litro de água evaporada em virtude do elevado calor latente de vaporização. O sistema FO-MD consome apenas energia de circulação (0,06–0,08 kWh/L) na etapa de osmose, e a destilação por membrana aproveita calor residual de baixo custo (38–45°C), totalizando um consumo específico de apenas 0,22–0,32 kWh/L de água removida, o que proporciona uma redução de 84% a 88% na pegada de carbono industrial."
+      },
+      {
+        question: "Quais normas técnicas garantem a segurança sanitária, a redução de 5 log de patógenos e o controle de solutos?",
+        answer: "O processo atende à FDA 21 CFR § 120 (Juice HACCP), que preconiza a redução comprovada de 5 log de micro-organismos como Salmonella e E. coli. Como opera a frio, o skid é integrado a sistemas de UV-C pulsado ou microfiltração esterilizante. A retrodifusão de sais é mantida abaixo de 0,10 g/m²·h (resíduos inferiores a 0,1 ppm), em total consonância com FDA 21 CFR § 170.36 (GRAS). Todas as tubulações seguem a norma 3-A 45-03 em aço inoxidável 316L eletropolido (Ra ≤ 0,38 µm) e elastômeros Kalrez grau alimentício."
+      }
+    ]
+  },
+  ja: {
+    pageTitle: "商業用連続式正浸透・膜蒸留（FO-MD）濃縮システムモデラー | IsItKitchenSafe",
+    pageDescription: "FDA 21 CFR § 120 Juice HACCPおよび3-A衛生基準に準拠し、熱変性しやすいアントシアニン果汁や抗酸化ポリフェノール、香気エステル成分を、沸騰加熱を行わずに18〜45°Cの低温領域で最大68 °Brixまで非熱的に濃縮する連続向流FO-MD工程をシミュレートします。",
+    badge: "膜分離工学 & 熱力学物質移動物理",
+    h1: "商業用連続式正浸透・膜蒸留（FO-MD）果汁非熱的濃縮モデラー",
+    lead: "野生ビルベリー、タートチェリー、ザクロ、抹茶などの熱感受性果汁を、沸騰加熱や高圧機械負荷を一切かけずに、正浸透（FO）と低温気隙膜蒸留（MD）を連成させて最大68 °Brixまで非熱的・高品質に濃縮する先端プロセスシミュレーター。",
+    breadcrumbsLabel: "商業用連続FO-MDモデラー",
+    faqs: [
+      {
+        question: "統合型正浸透・膜蒸留（FO-MD）プロセスはどのようにして熱劣化ゼロで果汁を濃縮するのですか？",
+        answer: "従来の真空蒸発濃縮では果汁を65〜85°Cに加熱するため、アントシアニンやビタミンCが65〜85%熱分解し、メイラード反応によるHMF（ヒドロキシメチルフルフラール）の副生や香気エステルの揮散が生じます。対してFO-MDシステムでは、果汁側は18〜24°Cの常温・低温で中空糸正浸透膜を通流します。高濃度食品用ドロー溶液が生み出す浸透圧差（Δπ = 45〜85 bar）により、熱や高圧を一切かけずに水分子のみが自然浸透でドロー側に移動します。希釈されたドロー溶液は独立した低温膜蒸留（MD）ループ（38〜46°C）で加温され、疎水性PTFE微多孔膜を透過した純水蒸気のみを冷水プレートで凝縮回収し、ドロー溶液を完全閉回路で連続再生します。"
+      },
+      {
+        question: "内部濃度分極（ICP）と透過水流束J_wを決定する物質移動物理はどのようなものですか？",
+        answer: "FO膜の透過水流束はDarcy-Starling則 J_w = A · (σ · Δπ_eff - ΔP) に従います。しかし、水が非対称膜の多孔質支持層を通過する際、支持層内のドロー溶液が局所的に希釈される希釈型内部濃度分極（ICP）が生じ、見かけの浸透圧駆動力を減衰させます。膜構造パラメーター S = (t · τ) / ε を考慮した補正式により流束が決定されます。バイオミメティック・アクアポリンを包埋した薄膜ナノ複合（TFN）膜は、S値を従来の450 µm以上から210 µm未満へと大幅に低減し、高粘度濃縮時でも20〜32 L/m²·hの工業的高水流束を維持します。"
+      },
+      {
+        question: "逆浸透（RO）が約30 °Brixで限界を迎えるのに対し、なぜFO-MDは68 °Brixまで濃縮可能なのですか？",
+        answer: "高圧逆浸透（HPRO）は液の浸透圧を超える機械的油圧力を外部ポンプで印加する必要があります（J_w = A · (ΔP - Δπ)）。糖度の上昇に伴い果汁の浸透圧は指数関数的に増大し、65 °Brixでは80〜95 barに達するため、ROで濃縮するには120 bar以上の超高圧が必要となり、膜の圧壊、不可逆的ファウリング、電力消費の激増が生じます。一方、正浸透（FO）は外部油圧を必要とせず、ドロー溶液が自発的に生み出す超高浸透圧（140〜180 bar）を化学ポテンシャルとして利用するため、膜構造に過度な機械的負荷を与えることなく68 °Brixまで安定して濃縮できます。"
+      },
+      {
+        question: "従来の加熱蒸発濃縮と比較して、FO-MDはどれほどの脱炭素・省エネルギー（SEC）効果をもたらしますか？",
+        answer: "従来の流下薄膜式真空蒸発濃縮装置は、水の極めて高い蒸発潜熱（2,260 kJ/kg）のため、蒸発水分1リットルあたり1.85〜2.45 kWhの熱・電気エネルギーを消費します。FO-MDシステムでは、主脱水工程である正浸透は循環ポンプ動力のみ（0.06〜0.08 kWh/L）で稼働し、膜蒸留でのドロー液再生には工場廃温水や太陽熱などの38〜45°Cの低温未利用排熱を直接利用できます。これにより総比消費エネルギー（SEC）はわずか0.22〜0.32 kWh/Lとなり、蒸気加熱式蒸発缶対比で84〜88%のエネルギーおよびCO2排出量削減を達成します。"
+      },
+      {
+        question: "ジュース製造におけるHACCP 5-log微生物殺菌低減およびドロー溶質漏洩に関する法規制基準は？",
+        answer: "果汁濃縮製造はFDA 21 CFR § 120（Juice HACCP規則）に準拠し、大腸菌O157やサルモネラ菌などの病原菌に対する5-log低減が義務付けられています。FO濃縮は低温非加熱で行われるため、パルスUV-C照射や滅菌マイクロフィルトレーションがインライン連動されます。ドロー溶質の逆塩流束はFDA 21 CFR § 170.36（GRAS）基準に基づき0.10 g/m²·h未満に厳格制御され、製品中のドロー残留は0.1 ppm未満を維持します。接液部は3-A衛生基準45-03に適合した電解研磨316Lステンレス鋼（Ra ≤ 0.38 µm）を採用しています。"
+      }
+    ]
+  },
+  'zh-cn': {
+    pageTitle: "商业连续式正渗透与膜蒸馏（FO-MD）果汁浓缩模拟器 | IsItKitchenSafe",
+    pageDescription: "遵循FDA 21 CFR § 120果汁HACCP与3-A卫生设计标准，模拟连续逆流正渗透耦合低温气隙膜蒸馏（FO-MD，18–45°C，Δπ > 65 bar）技术，常温无沸腾浓缩高活性花青素、热敏多酚与果香精粹至68 °Brix。",
+    badge: "膜分离工程与热力学传质物理",
+    h1: "商业连续式正渗透与膜蒸馏（FO-MD）原汁非热浓缩模拟器",
+    lead: "专为野生越橘、酸樱桃、红石榴、冷萃抹茶等高价值热敏浆果汁打造的连续逆流正渗透与低温气隙膜蒸馏（FO-MD）一体化浓缩工程建模平台，在常温无沸腾条件下达成68 °Brix超高浓度，完美遵循FDA 21 CFR § 120与3-A Sanitary Standards。",
+    breadcrumbsLabel: "商业连续FO-MD模拟器",
+    faqs: [
+      {
+        question: "集成式正渗透与膜蒸馏（FO-MD）工艺如何在完全不产生热降解的前提下浓缩果汁？",
+        answer: "传统的真空降膜蒸发将果汁加热至65°C至85°C进行减压沸腾，导致65%至85%的花青素与维生素C分解破坏，并产生羟甲基糠醛（HMF）焦糖化杂味与挥发性果香散失。FO-MD工艺在果汁侧全程维持在18–24°C常温环境。高浓度食品级汲取液（Draw Solution）产生的强大渗透压梯度（Δπ = 45至85 bar）驱动水分子自发跨越中空纤维膜孔渗透至汲取液中，全程无需液压加压与热沸腾。稀释后的汲取液随后在独立的低温膜蒸馏（MD）撬块（38–46°C）中微热再生，纯水蒸气透过超疏水PTFE微孔在冷凝盘管表面液化排出，汲取质百分之百密闭循环回流至正渗透接触器。"
+      },
+      {
+        question: "决定膜内部浓差极化（ICP）与渗透水通量J_w的核心传质物理学公式是什么？",
+        answer: "水通量遵循Darcy-Starling定律 J_w = A · (σ · Δπ_eff - ΔP)。但在非对称膜多孔支撑层内部，渗透进入的纯水会严重稀释汲取液边界层，产生稀释型内部浓差极化（ICP），导致有效推动力大幅衰减。经ICP修正后的通量公式为 J_w = A · [ (π_draw · exp(-J_w · S / D) - π_feed · exp(J_w · d_h / (Sh · D))) / (1 + (B / J_w) · (exp(J_w · S / D) - exp(-J_w · d_h / (Sh · D)))) ]，其中S = (t · τ) / ε为膜结构参数。采用包埋仿生水通道蛋白的薄层纳米复合（TFN）正渗透膜，可将S值从450 µm以上压缩至210 µm以内，确保即使在果汁高粘度状态下仍能维持20至32 L/m²·h的工业级稳定水通量。"
+      },
+      {
+        question: "反渗透（RO）糖度通常被局限在30 °Brix以下，FO-MD为何能轻松突破至68 °Brix？",
+        answer: "高压反渗透（HPRO）必须通过高压机械泵施加超过溶液内部渗透压的机械净压。果汁糖度达到30 °Brix时渗透压约为60 bar，而一旦达到65 °Brix渗透压将急剧攀升至80–95 bar以上，若采用反渗透需施加大于120 bar的极端机械压力，这会导致聚合物膜结构压密、严重凝胶滤饼污堵及膜管破裂。正渗透（FO）不依赖外部机械流体加压，其驱动力来自汲取液本身的超高化学渗透势（可达140–180 bar），从而在膜两侧无机械剪切应力的情况下平稳跨越65 °Brix浓缩极限。"
+      },
+      {
+        question: "与传统蒸汽热降膜蒸发器相比，FO-MD能带来多大的脱碳与比能耗（SEC）削减？",
+        answer: "传统降膜蒸发器由于水的高汽化潜热（2,260 kJ/kg），每蒸发1升水分需消耗1.85至2.45 kWh的综合热电能源，带来巨量锅炉燃气消耗。FO-MD工艺将水分子抽离与热力分离解耦：正渗透初级脱水仅需低能耗循环泵电耗（0.06–0.08 kWh/L），膜蒸馏脱水再生则可直接利用工厂低品质废热（38–45°C）或太阳能集热器驱动，总折合电耗降至0.22–0.32 kWh/L，节能率高达84%至88%，大幅削减原汁浓缩碳足迹。"
+      },
+      {
+        question: "果汁制造中的HACCP 5-log病原菌杀灭以及汲取质反向扩散有哪些法规控制指标？",
+        answer: "商业机组严格符合FDA 21 CFR § 120（果汁HACCP）法规，确保对大肠杆菌O157和沙门氏菌达到经过验证的5-log致死灭活率，工艺常温段通过配备脉冲UV-C紫外杀菌系统或无菌微孔过滤阻隔实现。膜汲取质反向盐流通量依据FDA 21 CFR § 170.36（GRAS）严控在0.10 g/m²·h以内，成品微量汲取物残留低于0.1 ppm。所有流体接触部件均符合3-A Sanitary Standards 45-03卫生设计，采用Ra ≤ 0.38 µm电解抛光316L不锈钢与食品级全氟醚橡胶密封圈。"
+      }
+    ]
+  }
+};
+
+const c = CONTENT[lang as Exclude<SupportedLanguage, 'en'>];
+
+const breadcrumbs = [
+  { label: t('nav.home') || 'Home', href: tp('/') },
+  { label: t('nav.tools') || 'Tools', href: tp('/tools/') },
+  { label: c.breadcrumbsLabel }
+];
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "@id": `https://isitkitchensafe.com${Astro.url.pathname}#webapp`,
+      "url": `https://isitkitchensafe.com${Astro.url.pathname}`,
+      "name": c.pageTitle,
+      "applicationCategory": "EngineeringApplication",
+      "operatingSystem": "All",
+      "browserRequirements": "Requires JavaScript. Requires HTML5 Canvas/CSS3.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": c.pageDescription
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": t('nav.home') || "Home",
+          "item": `https://isitkitchensafe.com${tp('/')}`
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": t('nav.tools') || "Tools",
+          "item": `https://isitkitchensafe.com${tp('/tools/')}`
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": c.breadcrumbsLabel,
+          "item": `https://isitkitchensafe.com${Astro.url.pathname}`
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": c.faqs.map(faq => ({
+        "@type": "Question",
+        "name": faq.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": faq.answer
+        }
+      }))
+    }
+  ]
+};
+---
+
+<Layout title={c.pageTitle} description={c.pageDescription} lang={lang} availableLocales={availableLocales}>
+  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <Breadcrumbs items={breadcrumbs} />
+
+    <!-- Hero Header -->
+    <div class="mt-4 mb-8">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-sky-950 text-sky-300 border border-sky-800">
+          {c.badge}
+        </span>
+        <span class="text-xs text-muted font-mono">FO-MD &bull; 18&ndash;45°C &bull; 68 °Brix &bull; 0.0 ppm Solvents &bull; FDA Juice HACCP</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-ink tracking-tight mb-4">
+        {c.h1}
+      </h1>
+      <p class="text-base sm:text-lg text-muted max-w-4xl leading-relaxed">
+        {c.lead}
+      </p>
+    </div>
+
+    <!-- Mount Interactive Modeler Engine -->
+    <CommercialContinuousFoMdModeler lang={lang} />
+
+    <!-- Technical Narrative Deep Dive -->
+    <div class="mt-12 space-y-10">
+      <!-- FAQ Section -->
+      <section class="bg-surface-soft border border-hairline rounded-3xl p-6 sm:p-10">
+        <h2 class="text-xl sm:text-2xl font-bold text-ink mb-6">
+          {lang === 'es' ? 'Preguntas Frecuentes: Concentración FO-MD y Estándares Sanitarios' :
+           lang === 'pt' ? 'Perguntas Frequentes: Concentração FO-MD e Padrões Sanitários' :
+           lang === 'ja' ? 'よくある質問：商業用FO-MD濃縮技術と衛生工学基準' :
+           '常见问题解答：商业级FO-MD果汁浓缩技术与卫生合规标准'}
+        </h2>
+        <div class="space-y-6">
+          {c.faqs.map(faq => (
+            <div class="border-b border-hairline pb-5">
+              <h3 class="text-base font-bold text-ink mb-2">{faq.question}</h3>
+              <p class="text-sm text-muted leading-relaxed">{faq.answer}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Related Tools Navigation -->
+      <section class="bg-surface-soft border border-hairline rounded-3xl p-6 sm:p-10">
+        <h2 class="text-xl sm:text-2xl font-bold text-ink mb-4">
+          {lang === 'es' ? 'Herramientas Relacionadas de Ingeniería de Procesos Alimentarios' :
+           lang === 'pt' ? 'Ferramentas Relacionadas de Engenharia de Processos de Alimentos' :
+           lang === 'ja' ? '関連する食品プロセス工学診断ツール' :
+           '相关食品工艺工程诊断计算工具'}
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <a href={tp('/tools/commercial-continuous-fo-mvr-concentration-modeler/')} class="p-4 rounded-xl bg-surface border border-hairline hover:border-sky-500 transition-colors block">
+            <span class="text-xs font-bold text-sky-400 uppercase tracking-wider block mb-1">
+              {lang === 'es' || lang === 'pt' ? 'Engenharia de Membranas' : lang === 'ja' ? '膜分離工学' : '膜工程技术'}
+            </span>
+            <strong class="text-sm text-ink block mb-1">
+              {lang === 'es' ? 'Simulador Continuo FO-MVR' :
+               lang === 'pt' ? 'Simulador Contínuo FO-MVR' :
+               lang === 'ja' ? '連続式FO-MVR濃縮モデラー' :
+               '连续式FO-MVR浓缩模拟器'}
+            </strong>
+            <span class="text-xs text-muted block">
+              {lang === 'es' ? 'Modela ósmosis directa integrada con recompresión mecánica de vapor.' :
+               lang === 'pt' ? 'Modela osmose direta integrada com recompressão mecânica de vapor.' :
+               lang === 'ja' ? '正浸透と多段メカニカル蒸気再圧縮（MVR）の連成モデル。' :
+               '模拟正渗透耦合多效机械蒸汽再压缩连续浓缩工艺。'}
+            </span>
+          </a>
+          <a href={tp('/tools/commercial-continuous-fo-fc-freeze-concentration-modeler/')} class="p-4 rounded-xl bg-surface border border-hairline hover:border-sky-500 transition-colors block">
+            <span class="text-xs font-bold text-sky-400 uppercase tracking-wider block mb-1">
+              {lang === 'es' || lang === 'pt' ? 'Crioconcentração' : lang === 'ja' ? '凍結濃縮工学' : '冷冻浓缩技术'}
+            </span>
+            <strong class="text-sm text-ink block mb-1">
+              {lang === 'es' ? 'Simulador Híbrido FO-FC' :
+               lang === 'pt' ? 'Simulador Híbrido FO-FC' :
+               lang === 'ja' ? '連続式FO-FCハイブリッド濃縮モデラー' :
+               '连续式FO-FC混合浓缩模拟器'}
+            </strong>
+            <span class="text-xs text-muted block">
+              {lang === 'es' ? 'Modela ósmosis directa combinada con crioconcentración por congelación.' :
+               lang === 'pt' ? 'Modela osmose direta combinada com crioconcentração progressiva.' :
+               lang === 'ja' ? '正浸透と進行性凍結濃縮による超低温高純度濃縮モデル。' :
+               '模拟正渗透与渐进式冷冻结晶浓缩的超低温保质工艺。'}
+            </span>
+          </a>
+          <a href={tp('/tools/commercial-membrane-distillation-modeler/')} class="p-4 rounded-xl bg-surface border border-hairline hover:border-sky-500 transition-colors block">
+            <span class="text-xs font-bold text-sky-400 uppercase tracking-wider block mb-1">
+              {lang === 'es' || lang === 'pt' ? 'Física Térmica' : lang === 'ja' ? '膜蒸留物理' : '膜蒸馏物理'}
+            </span>
+            <strong class="text-sm text-ink block mb-1">
+              {lang === 'es' ? 'Simulador de Destilación por Membrana' :
+               lang === 'pt' ? 'Simulador de Destilação por Membrana' :
+               lang === 'ja' ? '連続式膜蒸留（MD）モデラー' :
+               '连续式膜蒸馏（MD）模拟器'}
+            </strong>
+            <span class="text-xs text-muted block">
+              {lang === 'es' ? 'Modela permeación de vapor y polarización térmica en poros hidrófobos.' :
+               lang === 'pt' ? 'Modela fluxo de vapor em poros hidrofóbicos e polarização térmica.' :
+               lang === 'ja' ? '疎水性微孔膜の水蒸気透過と温度分極現象の数値解析。' :
+               '模拟微孔超疏水膜水蒸气跨膜传递与温度极化动力学。'}
+            </span>
+          </a>
+        </div>
+      </section>
+    </div>
+  </div>
+</Layout>

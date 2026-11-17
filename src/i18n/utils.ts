@@ -192,7 +192,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-continuous-pef-hcd-disruption-modeler',
   'tools/commercial-continuous-ehd-cme-micro-encapsulation-modeler',
   'tools/commercial-continuous-hse-hct-mycoprotein-texturizing-modeler',
-  'tools/commercial-continuous-scco2-esn-electrospinning-modeler'
+  'tools/commercial-continuous-scco2-esn-electrospinning-modeler',
+  'tools/commercial-continuous-fo-md-bioactive-concentration-modeler'
 ];
 
 const esSlugs = new Set([
