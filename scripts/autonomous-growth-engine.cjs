@@ -200,7 +200,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-continuous-sas-eme-modeler', name: 'Commercial Continuous High-Pressure Supercritical CO2 Antisolvent Precipitation & Electrostatic Micro-Encapsulation (SAS-EME) Modeler', category: 'Supercritical Antisolvent Crystallization & Electrostatic Physics', component: 'CommercialContinuousSasEmeModeler.astro', dataFile: 'sas-eme-micro-encapsulation-data.json' },
   { slug: 'commercial-continuous-resolv-nano-liposome-modeler', name: 'Commercial Continuous Supercritical Fluid Rapid Expansion into Aqueous Media (RESOLV) Nano-Liposome Modeler', category: 'Supercritical Nano-Fluidics & Bioactive Delivery Physics', component: 'CommercialContinuousResolvNanoLiposomeModeler.astro', dataFile: 'resolv-nano-liposome-data.json' },
   { slug: 'commercial-continuous-al-sad-aerogel-modeler', name: 'Commercial Continuous Acoustically-Levitated Supercritical Sol-Gel Aerogel Microsphere Drying (AL-SAD) Modeler', category: 'Acoustic Levitation & Aerogel Nanomaterials Physics', component: 'CommercialContinuousAlSadAerogelModeler.astro', dataFile: 'al-sad-aerogel-drying-data.json' },
-  { slug: 'commercial-continuous-uhps-mfs-modeler', name: 'Commercial Continuous Ultra-High Pressure Supercritical CO2 Fluid High-Shear Micro-Fluidizer Nano-Emulsion Sterilization (UHPS-MFS) Modeler', category: 'Supercritical High-Pressure Nano-Fluidics & Aseptic Emulsion Processing', component: 'CommercialContinuousUhpsMfsModeler.astro', dataFile: 'uhps-mfs-nano-emulsion-data.json' }
+  { slug: 'commercial-continuous-uhps-mfs-modeler', name: 'Commercial Continuous Ultra-High Pressure Supercritical CO2 Fluid High-Shear Micro-Fluidizer Nano-Emulsion Sterilization (UHPS-MFS) Modeler', category: 'Supercritical High-Pressure Nano-Fluidics & Aseptic Emulsion Processing', component: 'CommercialContinuousUhpsMfsModeler.astro', dataFile: 'uhps-mfs-nano-emulsion-data.json' },
+  { slug: 'commercial-continuous-hjc-sas-modeler', name: 'Commercial Continuous Hydrodynamic Jet Cavitation-Assisted Supercritical Antisolvent Micronization (HJC-SAS) Modeler', category: 'Cavitation Hydrodynamics & Supercritical Antisolvent Physics', component: 'CommercialContinuousHjcSasModeler.astro', dataFile: 'hjc-sas-micronization-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -491,7 +492,8 @@ function auditDatasets() {
     'sas-eme-micro-encapsulation-data.json',
     'resolv-nano-liposome-data.json',
     'al-sad-aerogel-drying-data.json',
-    'uhps-mfs-nano-emulsion-data.json'
+    'uhps-mfs-nano-emulsion-data.json',
+    'hjc-sas-micronization-data.json'
 ];
 
   const datasetStats = {};
@@ -802,24 +804,17 @@ function auditGrowthOpportunities() {
     // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Continuous Hydrodynamic Jet Cavitation-Assisted Supercritical Antisolvent Micronization (HJC-SAS) Modeler',
-      category: 'Cavitation Hydrodynamics & Supercritical Antisolvent Physics',
-      intent: 'Models continuous high-velocity liquid micro-jet cavitation impingement inside high-pressure dense-phase supercritical CO2 antisolvent (120–200 bar, 35–42°C) for intense micro-mixing (Da < 0.05) and uniform sub-80 nm amorphous polyphenol co-crystal precipitation.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '410+ US impressions'
-    },
-    {
       title: 'Commercial Continuous Supercritical CO2 Foam Mat Drying & In-Line Porosimetry (SFM-DIP) Modeler',
       category: 'Supercritical Foam Physics & Aerated Food Matrix Preservation',
       intent: 'Models continuous supercritical CO2 bubble expansion into viscous food purees for non-thermal foam mat structure generation, sub-10 minute sublimation drying, and in-line acoustic porosimetry for heat-sensitive fruit purees and probiotic matrices.',
-      priority: 'HIGH',
+      priority: 'CRITICAL_HIGH',
       estimatedMonthlyVolume: '350+ US impressions'
     },
     {
       title: 'Commercial Continuous Focused-Microwave Atmospheric Cold Freeze-Drying & In-Line Lyophilization (FM-ACFD) Modeler',
       category: 'Microwave Electromagnetics & Atmospheric Cryogenic Sublimation',
       intent: 'Models continuous focused variable-frequency solid-state microwave energy absorption (2.45 GHz & 5.8 GHz, 150–600 W) coupled with atmospheric cold dry nitrogen fluidization (-20°C to -40°C, dew point < -60°C) for non-vacuum sublimation drying of heat-sensitive probiotic matrices and dairy enzymes with >95% viable cell recovery in under 45 minutes.',
-      priority: 'MEDIUM',
+      priority: 'HIGH',
       estimatedMonthlyVolume: '320+ US impressions'
     },
     {
@@ -828,6 +823,13 @@ function auditGrowthOpportunities() {
       intent: 'Models continuous pressurized hot subcritical water (T = 110–190°C, P = 25–60 bar) dynamic counter-current multi-stage column extraction for rapid, solvent-free recovery of high-purity polyphenols and thermolabile anthocyanins with in-line ceramic nanofiltration concentration.',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '290+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous Acoustically-Coupled High-Pressure Supercritical CO2 Liposome Encapsulator & In-Line Ultrafiltration (ACHP-SCL) Modeler',
+      category: 'Acousto-Fluidic Supercritical Encapsulation & Membrane Engineering',
+      intent: 'Models continuous high-pressure supercritical CO2 micro-fluidic liposome formation coupled with megasonic acoustic standing wave focusing (1.2 MHz) and in-line ceramic tangential-flow ultrafiltration for high-entrapment (>96%) bioactive delivery.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '280+ US impressions'
     }
   ];
 
