@@ -188,7 +188,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-continuous-ma-hph-nano-emulsifier-modeler', name: 'Commercial Continuous Megasonic-Assisted High-Pressure Homogenization Nano-Emulsifier (MA-HPH) Modeler', category: 'Acousto-Fluidic Rheology & High-Pressure Nano-Emulsions', component: 'CommercialContinuousMaHphModeler.astro', dataFile: 'ma-hph-nano-emulsifier-data.json' },
   { slug: 'commercial-continuous-scco2-fap-fractionation-modeler', name: 'Commercial Continuous Supercritical CO2 Fractionation of Astaxanthin & Bioactive Pigments (scCO2-FAP) Modeler', category: 'Supercritical Chromatography & Natural Antioxidant Refining', component: 'CommercialContinuousScco2FapModeler.astro', dataFile: 'scco2-fap-fractionation-data.json' },
   { slug: 'commercial-continuous-scw-dme-extraction-modeler', name: 'Commercial Continuous Subcritical Water Dynamic Micro-Tubular Extraction & Hydrothermal Carbonization (SCW-DME) Modeler', category: 'Subcritical Hydrothermal Engineering & Bio-Refinery Physics', component: 'CommercialContinuousScwDmeModeler.astro', dataFile: 'scw-dme-extraction-carbonization-data.json' },
-  { slug: 'commercial-continuous-pef-hcd-disruption-modeler', name: 'Commercial Continuous Pulsed High-Voltage Electric Discharge & Hydrodynamic Cavitation Disruption of Microalgae (PEF-HCD) Modeler', category: 'Electroporation Physics & Hydrodynamic Biomass Disruption', component: 'CommercialContinuousPefHcdModeler.astro', dataFile: 'pef-hcd-disruption-microalgae-data.json' }
+  { slug: 'commercial-continuous-pef-hcd-disruption-modeler', name: 'Commercial Continuous Pulsed High-Voltage Electric Discharge & Hydrodynamic Cavitation Disruption of Microalgae (PEF-HCD) Modeler', category: 'Electroporation Physics & Hydrodynamic Biomass Disruption', component: 'CommercialContinuousPefHcdModeler.astro', dataFile: 'pef-hcd-disruption-microalgae-data.json' },
+  { slug: 'commercial-continuous-ehd-cme-micro-encapsulation-modeler', name: 'Commercial Continuous Electrohydrodynamic Cold Atomization & Core-Shell Micro-Encapsulation (EHD-CME) Modeler', category: 'Electrohydrodynamics & Non-Thermal Nano-Structuring', component: 'CommercialContinuousEhdCmeModeler.astro', dataFile: 'ehd-cme-micro-encapsulation-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -778,32 +779,32 @@ function auditGrowthOpportunities() {
     // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Continuous Electrohydrodynamic Cold Atomization & Core-Shell Micro-Encapsulation (EHD-CME) Modeler',
-      category: 'Electrohydrodynamics & Non-Thermal Nano-Structuring',
-      intent: 'Models continuous high-voltage capillary electrohydrodynamic atomization (12–28 kV, Taylor cone-jet regime) for monodisperse room-temperature core-shell micro-encapsulation of live probiotic strains and labile omega-3 fatty acids without thermal or shear stress.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '510+ US impressions'
-    },
-    {
       title: 'Commercial Continuous High-Shear Slit-Die Extrusion & Hydrodynamic Cavitation Texturizing of Mycoprotein (HSE-HCT) Modeler',
       category: 'Rheological Food Physics & Non-Thermal Meat Analogue Structuring',
       intent: 'Models continuous twin-screw high-moisture extrusion with cooled long slit-die (HSE) coupled with in-line micro-hydrodynamic cavitation (15–35 bar) for high-anisotropy fibrous texturizing of Fusarium venenatum mycoprotein biomass without chemical binding gums.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '460+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '530+ US impressions'
     },
     {
       title: 'Commercial Continuous High-Pressure Supercritical CO2 Assisted Electrospinning of Nanofibrous Encapsulates (scCO2-ESN) Modeler',
       category: 'Supercritical Electrospinning & Bioactive Nanofiber Physics',
       intent: 'Models continuous dense-phase supercritical CO2 plasticization coupled with high-voltage multi-needle electrospinning (25–45 kV, 80–140 bar) for solvent-free, non-thermal fabrication of sub-micron core-shell protein-polysaccharide nanofibers encapsulating temperature-sensitive probiotics and bioactive peptides.',
       priority: 'HIGH',
-      estimatedMonthlyVolume: '410+ US impressions'
+      estimatedMonthlyVolume: '470+ US impressions'
     },
     {
       title: 'Commercial Continuous Forward Osmosis & Membrane Distillation Concentration of Thermolabile Bioactive Juices (FO-MD) Modeler',
       category: 'Membrane Separation & Thermodynamic Mass Transfer',
       intent: 'Models continuous forward osmosis coupled with air-gap membrane distillation (FO-MD, 25–40°C, osmotic pressure gradient Δπ > 65 bar) for non-thermal concentration of thermolabile anthocyanins and polyphenolic juices with zero aroma volatilization.',
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '420+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous Dynamic Ceramic Membrane Micro-Filtration & Low-Frequency Acoustic Desorption (DCM-LFAD) Modeler',
+      category: 'Dynamic Membrane Rheology & Acoustic Desorption Physics',
+      intent: 'Models continuous rotating ceramic disk dynamic cross-flow micro-filtration (shear rates > 150,000 s^-1) coupled with in-line 28 kHz acoustic boundary layer desorption for non-thermal cold clarification of high-turbidity fruit juices and fermented broths with zero filter cake fouling.',
       priority: 'MEDIUM',
-      estimatedMonthlyVolume: '380+ US impressions'
+      estimatedMonthlyVolume: '390+ US impressions'
     }
   ];
 
