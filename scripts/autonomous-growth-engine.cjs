@@ -194,7 +194,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-continuous-scco2-esn-electrospinning-modeler', name: 'Commercial Continuous High-Pressure Supercritical CO2 Assisted Electrospinning of Nanofibrous Encapsulates (scCO2-ESN) Modeler', category: 'Supercritical Electrospinning & Bioactive Nanofiber Physics', component: 'CommercialContinuousScco2EsnModeler.astro', dataFile: 'scco2-esn-electrospinning-data.json' },
   { slug: 'commercial-continuous-fo-md-bioactive-concentration-modeler', name: 'Commercial Continuous Forward Osmosis & Membrane Distillation Concentration of Thermolabile Bioactive Juices (FO-MD) Modeler', category: 'Membrane Separation & Thermodynamic Mass Transfer', component: 'CommercialContinuousFoMdModeler.astro', dataFile: 'fo-md-bioactive-concentration-data.json' },
   { slug: 'commercial-continuous-dcm-lfad-modeler', name: 'Commercial Continuous Dynamic Ceramic Membrane Micro-Filtration & Low-Frequency Acoustic Desorption (DCM-LFAD) Modeler', category: 'Dynamic Membrane Rheology & Acoustic Desorption Physics', component: 'CommercialContinuousDcmLfadModeler.astro', dataFile: 'dcm-lfad-ceramic-membrane-data.json' },
-  { slug: 'commercial-continuous-hfd-vcs-modeler', name: 'Commercial Continuous High-Frequency Dielectric Sintering & Vacuum Cryo-Stabilization of Cellular Cultured Matrices (HFD-VCS) Modeler', category: 'Cellular Agriculture & Cryogenic Biomaterial Engineering', component: 'CommercialContinuousHfdVcsModeler.astro', dataFile: 'hfd-vcs-cellular-matrix-data.json' }
+  { slug: 'commercial-continuous-hfd-vcs-modeler', name: 'Commercial Continuous High-Frequency Dielectric Sintering & Vacuum Cryo-Stabilization of Cellular Cultured Matrices (HFD-VCS) Modeler', category: 'Cellular Agriculture & Cryogenic Biomaterial Engineering', component: 'CommercialContinuousHfdVcsModeler.astro', dataFile: 'hfd-vcs-cellular-matrix-data.json' },
+  { slug: 'commercial-continuous-osw-dor-modeler', name: 'Commercial Continuous Multi-Frequency Orthogonal Acoustic Standing Wave Demulsification & Oil Recovery (OSW-DOR) Modeler', category: 'Acoustophoretic Fluid Physics & Clean Refining', component: 'CommercialContinuousOswDorModeler.astro', dataFile: 'osw-dor-acoustic-demulsification-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -479,7 +480,8 @@ function auditDatasets() {
     'scco2-esn-electrospinning-data.json',
     'fo-md-bioactive-concentration-data.json',
     'dcm-lfad-ceramic-membrane-data.json',
-    'hfd-vcs-cellular-matrix-data.json'
+    'hfd-vcs-cellular-matrix-data.json',
+    'osw-dor-acoustic-demulsification-data.json'
 ];
 
   const datasetStats = {};
@@ -790,24 +792,17 @@ function auditGrowthOpportunities() {
     // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Continuous Multi-Frequency Orthogonal Acoustic Standing Wave Demulsification & Oil Recovery (OSW-DOR) Modeler',
-      category: 'Acoustophoretic Fluid Physics & Clean Refining',
-      intent: 'Models continuous orthogonal dual-frequency megasonic standing waves (1.2 & 2.4 MHz) for non-thermal, reagent-free acoustic radiation force demulsification and high-yield cold-pressed oil droplet coalescence without thermal oxidation.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '460+ US impressions'
-    },
-    {
       title: 'Commercial Continuous Dense-Phase Supercritical CO2 Micro-Fluidic Hydrogel Bead Solidification & Core-Shell Bioactive Delivery (scCO2-MHB) Modeler',
       category: 'Supercritical Micro-Fluidics & Bioactive Delivery Physics',
       intent: 'Models continuous coaxial capillary micro-fluidic flow-focusing coupled with dense-phase supercritical CO2 dynamic sol-gel ionic gelation for monodisperse, solvent-free alginate-chitosan core-shell bead generation (10–80 µm) with >97.5% targeted colon-specific release.',
-      priority: 'HIGH',
+      priority: 'CRITICAL_HIGH',
       estimatedMonthlyVolume: '410+ US impressions'
     },
     {
       title: 'Commercial Continuous High-Pressure Supercritical CO2 Antisolvent Precipitation & Electrostatic Micro-Encapsulation (SAS-EME) Modeler',
       category: 'Supercritical Antisolvent Crystallization & Electrostatic Physics',
       intent: 'Models continuous supercritical antisolvent (SAS) precipitation coupled with coaxial electrostatic micro-atomization (15–45 kV, 90–160 bar, 35–42°C) for non-thermal, solvent-free formation of sub-micron crystalline curcumin and resveratrol encapsulates (<250 nm) with 99.1% dissolution bioavailability.',
-      priority: 'MEDIUM',
+      priority: 'HIGH',
       estimatedMonthlyVolume: '360+ US impressions'
     },
     {
@@ -816,6 +811,13 @@ function auditGrowthOpportunities() {
       intent: 'Models continuous rapid expansion of supercritical CO2 solutions into aqueous media (RESOLV, 180–320 bar, 38–45°C) across sapphire micro-orifices (d_nozzle = 50–120 µm) for solvent-free, single-step fabrication of stable unilamellar phospholipid nano-liposomes (<85 nm) with >94.5% entrapment efficiency of lipophilic antioxidants without high-pressure homogenization shearing.',
       priority: 'MEDIUM',
       estimatedMonthlyVolume: '320+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous Acoustically-Levitated Supercritical Sol-Gel Aerogel Microsphere Drying (AL-SAD) Modeler',
+      category: 'Acoustic Levitation & Aerogel Nanomaterials Physics',
+      intent: 'Models continuous containerless multi-transducer acoustic levitation standing wave node trapping (40 kHz, 160 dB SPL) integrated with dense-phase supercritical CO2 extraction (110–180 bar, 38–45°C) for contactless, single-step fabrication of monolithic ultra-porous silica-alginate aerogel microspheres (porosity > 96.5%, specific surface area > 720 m²/g) without capillary collapse.',
+      priority: 'MEDIUM',
+      estimatedMonthlyVolume: '290+ US impressions'
     }
   ];
 
