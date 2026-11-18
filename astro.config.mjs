@@ -64,6 +64,22 @@ function getWhatHappensNoindexSet() {
 
 const whatHappensNoindexSet = getWhatHappensNoindexSet();
 
+function getConsumerToolsAllowlistSet() {
+  const slugs = new Set();
+  const file = path.resolve(process.cwd(), 'src/data/consumer-tools-allowlist.json');
+  try {
+    if (fs.existsSync(file)) {
+      const list = JSON.parse(fs.readFileSync(file, 'utf8'));
+      for (const s of list) {
+        slugs.add(s.toLowerCase().trim());
+      }
+    }
+  } catch {}
+  return slugs;
+}
+
+const consumerToolsAllowlistSet = getConsumerToolsAllowlistSet();
+
 // https://astro.build/config
 export default defineConfig({
   site: 'https://isitkitchensafe.com',
@@ -99,10 +115,19 @@ export default defineConfig({
             return false;
           }
 
-          // Exclude tools, washing-machine, and dryer from search sitemap to focus Google on core kitchen safety
+          // Include /tools/ hub and allowlisted consumer tools across en, es, pt, zh-cn, ja; exclude non-allowlisted tools
+          const toolsMatch = pathname.match(/^(?:\/(?:es|pt|zh-cn|ja))?\/tools(?:\/(.*))?$/);
+          if (toolsMatch) {
+            const subPath = (toolsMatch[1] || '').replace(/\/+$/, '');
+            if (!subPath) {
+              return true;
+            }
+            const toolSlug = subPath.split('/')[0];
+            return consumerToolsAllowlistSet.has(toolSlug);
+          }
+
+          // Exclude washing-machine and dryer from search sitemap to focus Google on core kitchen safety
           if (
-            pathname === '/tools' || pathname.startsWith('/tools/') ||
-            pathname.match(/^\/(?:es|pt|zh-cn|ja)\/tools(?:\/|$)/) ||
             pathname === '/washing-machine' || pathname.startsWith('/washing-machine/') ||
             pathname.match(/^\/(?:es|pt|zh-cn|ja)\/washing-machine(?:\/|$)/) ||
             pathname === '/dryer' || pathname.startsWith('/dryer/') ||

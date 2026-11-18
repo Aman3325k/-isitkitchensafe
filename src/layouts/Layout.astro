@@ -5,6 +5,7 @@ import { getLangFromUrl, useTranslations, useTranslatedPath, getPathWithoutLocal
 import type { SupportedLanguage } from '../i18n/ui';
 import LanguagePicker from '../components/LanguagePicker.astro';
 import whatHappensNoindex from '../data/whatHappensNoindex.json';
+import consumerToolsAllowlist from '../data/consumer-tools-allowlist.json';
 
 interface Props {
   title: string;
@@ -18,6 +19,7 @@ interface Props {
   is404?: boolean;
   noindex?: boolean;
   ogType?: string;
+  ogImage?: string;
 }
 
 const { 
@@ -31,8 +33,13 @@ const {
   lang,
   is404 = false,
   noindex = false,
-  ogType = 'website'
+  ogType = 'website',
+  ogImage = 'https://isitkitchensafe.com/og-image.png'
 } = Astro.props;
+
+const resolvedOgImage = ogImage.startsWith('http://') || ogImage.startsWith('https://')
+  ? ogImage
+  : new URL(ogImage, 'https://isitkitchensafe.com').href;
 
 const currentLang = lang || getLangFromUrl(Astro.url);
 const t = useTranslations(currentLang);
@@ -42,7 +49,7 @@ const basePath = getPathWithoutLocale(Astro.url.pathname);
 const pathSegments = basePath.split('/').filter(Boolean);
 const isLangExempt = currentLang === 'ja' || currentLang === 'zh-cn';
 const isNoindexWhatHappens = !isLangExempt && pathSegments[0] === 'what-happens' && whatHappensNoindex.includes(pathSegments[1]);
-const isToolsPage = pathSegments[0] === 'tools';
+const isToolsPage = pathSegments[0] === 'tools' && pathSegments.length > 1 && !consumerToolsAllowlist.includes((pathSegments[1] || '').toLowerCase());
 const isLaundryPage = pathSegments[0] === 'washing-machine' || pathSegments[0] === 'dryer';
 const isPageNoindex = Boolean(noindex || isNoindexWhatHappens || isToolsPage || isLaundryPage);
 const isEnglishNoindexed = pathSegments[0] === 'what-happens' && whatHappensNoindex.includes(pathSegments[1]);
@@ -68,40 +75,28 @@ function formatAppliance(app: string) {
   if (app === 'blog') return 'Blog';
   if (app === 'material') return t('nav.material');
   if (app === 'tools') return t('nav.tools');
+  if (app === 'saved') return 'Saved Cheat Sheet';
+  if (app === 'methodology') return 'Methodology';
   const appKey = `appliance.${app}` as any;
   return t(appKey) || (app.charAt(0).toUpperCase() + app.slice(1));
 }
 
-// Generate FAQ JSON-LD Schema
-const defaultFaqs = [
-  {
-    question: "How do you check if kitchenware is appliance safe?",
-    answer: "Look for manufacturer stamps on the bottom of the item (such as a microwave wave symbol or dishwasher safe symbol), or consult the manufacturer manual."
-  },
-  {
-    question: "What makes an item unsafe for kitchen appliances?",
-    answer: "Unsafe materials typically react to heat, moisture, or waves, leading to warping, melting, cracking, rust, or the release of toxic chemical fumes."
-  },
-  {
-    question: "Where can I find official appliance safety guidelines?",
-    answer: "Official guidelines are published by government agencies like the USDA and FDA, as well as the appliance manufacturers themselves."
-  }
-];
-
-const finalFaqs = faqs && faqs.length > 0 ? faqs : defaultFaqs;
-
-const faqSchema = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": finalFaqs.map(faq => ({
-    "@type": "Question",
-    "name": faq.question,
-    "acceptedAnswer": {
-      "@type": "Answer",
-      "text": faq.answer
+// Generate FAQ JSON-LD Schema only when page provides visible FAQs
+const hasFaqs = Array.isArray(faqs) && faqs.length > 0;
+const faqSchema = hasFaqs
+  ? {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": faqs.map(faq => ({
+        "@type": "Question",
+        "name": faq.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": faq.answer
+        }
+      }))
     }
-  }))
-};
+  : null;
 
 // Generate Article JSON-LD Schema
 const lastModifiedIso = getLatestDataModifiedTime().toISOString();
@@ -163,7 +158,7 @@ const articleSchema = {
   "@type": "Article",
   "headline": title.split(' | ')[0],
   "description": description,
-  "image": "https://isitkitchensafe.com/og-image.png",
+  "image": resolvedOgImage,
   "author": {
     "@type": "Organization",
     "name": "IsItKitchenSafe",
@@ -352,7 +347,7 @@ const appliances = [
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content="https://isitkitchensafe.com/og-image.png" />
+    <meta property="og:image" content={resolvedOgImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Is It Kitchen Safe - Kitchen Safety Reference Guides" />
@@ -368,9 +363,9 @@ const appliances = [
     <meta name="twitter:url" content={canonicalUrl} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content="https://isitkitchensafe.com/og-image.png" />
+    <meta name="twitter:image" content={resolvedOgImage} />
 
-    {!excludeFaqSchema && faqSchema && (
+    {faqs && faqs.length > 0 && !excludeFaqSchema && faqSchema && (
       <script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
     )}
     {!excludeBreadcrumbSchema && !isErrorPage && breadcrumbSchema && (
@@ -497,6 +492,12 @@ const appliances = [
                 <span class="text-[9px] font-semibold text-muted bg-surface-soft border border-hairline px-1 py-0.5 rounded tracking-wider uppercase" title="Available in English only">EN</span>
               )}
             </a>
+            <a href={getDirectoryUrl('saved', currentLang)} class="text-body hover:text-ink text-[13px] font-normal transition-colors inline-flex items-center gap-1 whitespace-nowrap" title="Saved Cheat Sheet">
+              <span>Saved Cheat Sheet</span>
+            </a>
+            <a href={getDirectoryUrl('methodology', currentLang)} class="text-body hover:text-ink text-[13px] font-normal transition-colors inline-flex items-center gap-1 whitespace-nowrap">
+              <span>Methodology</span>
+            </a>
           </div>
 
           <!-- Secondary directories: "More" dropdown for intermediate desktop screens (1280px - 1679px) -->
@@ -514,7 +515,7 @@ const appliances = [
               </svg>
             </button>
             <div class="absolute right-0 top-full pt-1 hidden group-hover:block group-focus-within:block z-50">
-              <div class="w-48 bg-canvas border border-hairline rounded-md shadow-lg py-1.5 ring-1 ring-black/5 flex flex-col">
+              <div class="w-52 bg-canvas border border-hairline rounded-md shadow-lg py-1.5 ring-1 ring-black/5 flex flex-col">
                 <a href={getDirectoryUrl('compare', currentLang)} class="px-3.5 py-2 text-[13px] text-body hover:text-ink hover:bg-surface-soft transition-colors flex items-center justify-between">
                   <span>{t('nav.compare')}</span>
                   {currentLang !== 'en' && !isDirectoryTranslatedInLocale('compare', currentLang) && (
@@ -561,6 +562,13 @@ const appliances = [
                     <span class="text-[9px] font-semibold text-muted bg-surface-soft border border-hairline px-1 py-0.5 rounded tracking-wider uppercase">EN</span>
                   )}
                 </a>
+                <div class="border-t border-hairline my-1"></div>
+                <a href={getDirectoryUrl('saved', currentLang)} class="px-3.5 py-2 text-[13px] text-body hover:text-ink hover:bg-surface-soft transition-colors flex items-center justify-between">
+                  <span>Saved Cheat Sheet</span>
+                </a>
+                <a href={getDirectoryUrl('methodology', currentLang)} class="px-3.5 py-2 text-[13px] text-body hover:text-ink hover:bg-surface-soft transition-colors flex items-center justify-between">
+                  <span>Methodology</span>
+                </a>
               </div>
             </div>
           </div>
@@ -574,6 +582,32 @@ const appliances = [
         </nav>
 
         <div class="flex items-center gap-1 sm:gap-2 shrink-0">
+          <!-- Global Quick Search Modal Trigger (Ctrl+K / /) -->
+          <button
+            type="button"
+            id="quick-search-trigger"
+            class="min-w-[40px] min-h-[40px] sm:min-h-[36px] px-2 sm:px-2.5 py-1.5 flex items-center justify-center gap-1.5 text-ink hover:bg-surface-soft border border-hairline rounded-md active:scale-95 transition-all cursor-pointer shrink-0"
+            aria-label="Open Quick Search (Ctrl+K or /)"
+            title="Quick Search (Ctrl+K or /)"
+          >
+            <svg class="w-4 h-4 text-muted shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
+            </svg>
+            <kbd id="quick-search-kbd" class="hidden md:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono font-medium text-muted bg-surface-soft border border-hairline rounded leading-none">Ctrl K</kbd>
+          </button>
+
+          <!-- Compact Saved Cheat Sheet Link -->
+          <a
+            href={getDirectoryUrl('saved', currentLang)}
+            class="hidden sm:flex min-w-[36px] min-h-[36px] p-2 items-center justify-center text-ink hover:bg-surface-soft rounded-md active:scale-95 transition-all shrink-0"
+            aria-label="Saved Cheat Sheet"
+            title="Saved Cheat Sheet"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+            </svg>
+          </a>
+
           <div class="flex items-center">
             <LanguagePicker />
           </div>
@@ -698,6 +732,12 @@ const appliances = [
               <span class="text-[9px] font-semibold text-muted bg-canvas border border-hairline px-1 py-0.5 rounded tracking-wider uppercase" title="Available in English only">EN</span>
             )}
           </a>
+          <a href={getDirectoryUrl('saved', currentLang)} class="text-ink font-display font-medium text-sm min-h-[44px] py-2.5 px-2 flex items-center justify-center gap-1.5 bg-surface-soft active:bg-surface-strong rounded-md transition-colors">
+            <span>Saved Cheat Sheet</span>
+          </a>
+          <a href={getDirectoryUrl('methodology', currentLang)} class="text-ink font-display font-medium text-sm min-h-[44px] py-2.5 px-2 flex items-center justify-center gap-1.5 bg-surface-soft active:bg-surface-strong rounded-md transition-colors">
+            <span>Methodology</span>
+          </a>
         </div>
 
         <a href={getDirectoryUrl('about', currentLang)} class="text-body font-normal min-h-[44px] py-2.5 px-3 flex items-center justify-center gap-1.5 active:bg-surface-soft rounded-md transition-colors">
@@ -803,6 +843,16 @@ const appliances = [
               </a>
             </li>
             <li>
+              <a href={getDirectoryUrl('saved', currentLang)} class="text-muted hover:text-ink text-[14px] transition-colors font-medium inline-flex items-center gap-1.5">
+                <span>Saved Cheat Sheet</span>
+              </a>
+            </li>
+            <li>
+              <a href={getDirectoryUrl('methodology', currentLang)} class="text-muted hover:text-ink text-[14px] transition-colors font-medium inline-flex items-center gap-1.5">
+                <span>Methodology</span>
+              </a>
+            </li>
+            <li>
               <a href={getDirectoryUrl('sitemap-page', currentLang)} class="text-muted hover:text-ink text-[14px] transition-colors inline-flex items-center gap-1.5">
                 <span>{t('footer.sitemap')}</span>
               </a>
@@ -843,6 +893,113 @@ const appliances = [
         </p>
       </div>
     </footer>
+
+    <!-- Global Quick Search Modal (Ctrl+K / /) -->
+    <div
+      id="quick-search-modal"
+      data-search-path={currentLang === 'en' ? '/search-index.json' : `/${currentLang}/search-index.json`}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Quick Search"
+      aria-hidden="true"
+      class="fixed inset-0 z-[150] hidden items-start justify-center pt-[10vh] sm:pt-[14vh] px-4 bg-black/50 backdrop-blur-xs print:hidden"
+    >
+      <div
+        id="quick-search-panel"
+        class="w-full max-w-xl bg-canvas border border-hairline rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[75vh]"
+      >
+        <div class="flex items-center gap-2.5 px-4 py-3 border-b border-hairline">
+          <svg class="w-5 h-5 text-muted shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
+          </svg>
+          <input
+            id="quick-search-input"
+            type="text"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="Search items, materials, or appliances (e.g. pyrex microwave, cast iron)..."
+            aria-label="Quick search safety guides"
+            aria-controls="quick-search-results"
+            class="flex-1 min-w-0 bg-transparent text-ink placeholder:text-muted text-[15px] focus:outline-none"
+          />
+          <div id="quick-search-loading" class="hidden shrink-0" aria-hidden="true">
+            <svg class="animate-spin h-4 w-4 text-muted" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+          <button
+            type="button"
+            id="quick-search-clear"
+            class="hidden px-2 py-1 text-[11px] font-medium text-muted hover:text-ink bg-surface-soft rounded cursor-pointer transition-colors"
+            aria-label="Clear search"
+          >
+            Clear
+          </button>
+          <button
+            type="button"
+            id="quick-search-close"
+            class="px-2 py-1 text-[11px] font-mono text-muted hover:text-ink bg-surface-soft border border-hairline rounded cursor-pointer transition-colors"
+            aria-label="Close Quick Search"
+          >
+            ESC
+          </button>
+        </div>
+
+        <div id="quick-search-default" class="p-4 overflow-y-auto flex flex-col gap-4">
+          <div>
+            <p class="text-[11px] font-semibold uppercase tracking-wider text-muted mb-2">Kitchen Appliances</p>
+            <div class="flex flex-wrap gap-2">
+              {appliances.filter(a => a.slug !== 'dryer').map(app => (
+                <a
+                  href={getApplianceUrl(app.slug, currentLang)}
+                  class="px-3 py-1.5 text-[13px] font-medium text-ink bg-surface-soft hover:bg-surface-strong border border-hairline rounded-md transition-colors"
+                >
+                  {app.name}
+                </a>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p class="text-[11px] font-semibold uppercase tracking-wider text-muted mb-2">Popular Tools &amp; References</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <a href={getLocalizedUrl('/tools/kitchen-symbol-decoder/', currentLang)} class="px-3 py-2 text-[13px] text-ink bg-surface-soft hover:bg-surface-strong border border-hairline rounded-md transition-colors flex items-center justify-between">
+                <span class="font-medium">Kitchen Symbol Decoder</span>
+                <span class="text-[10px] font-bold uppercase text-signature-coral">Tool</span>
+              </a>
+              <a href={getDirectoryUrl('tools', currentLang)} class="px-3 py-2 text-[13px] text-ink bg-surface-soft hover:bg-surface-strong border border-hairline rounded-md transition-colors flex items-center justify-between">
+                <span class="font-medium">{t('nav.tools')}</span>
+                <span class="text-[10px] text-muted">Hub</span>
+              </a>
+              <a href={getDirectoryUrl('saved', currentLang)} class="px-3 py-2 text-[13px] text-ink bg-surface-soft hover:bg-surface-strong border border-hairline rounded-md transition-colors flex items-center justify-between">
+                <span class="font-medium">Saved Cheat Sheet</span>
+                <span class="text-[10px] text-muted">Bookmarks</span>
+              </a>
+              <a href={getDirectoryUrl('methodology', currentLang)} class="px-3 py-2 text-[13px] text-ink bg-surface-soft hover:bg-surface-strong border border-hairline rounded-md transition-colors flex items-center justify-between">
+                <span class="font-medium">Methodology</span>
+                <span class="text-[10px] text-muted">USDA/FDA</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div
+          id="quick-search-results"
+          role="listbox"
+          aria-label="Quick search results"
+          class="hidden overflow-y-auto divide-y divide-hairline/60"
+        ></div>
+
+        <div class="px-4 py-2.5 border-t border-hairline bg-surface-soft flex items-center justify-between gap-2 text-[11px] text-muted">
+          <div class="flex items-center gap-3">
+            <span><kbd class="px-1 py-0.5 bg-canvas border border-hairline rounded font-mono">↑↓</kbd> navigate</span>
+            <span><kbd class="px-1 py-0.5 bg-canvas border border-hairline rounded font-mono">↵</kbd> open</span>
+            <span><kbd class="px-1 py-0.5 bg-canvas border border-hairline rounded font-mono">ESC</kbd> close</span>
+          </div>
+          <span id="quick-search-status" aria-live="polite">Press / or Ctrl+K anywhere</span>
+        </div>
+      </div>
+    </div>
 
     <!-- Client-side navigation toggle and global search index load -->
     <script is:inline data-cfasync="false">
@@ -1313,10 +1470,299 @@ const appliances = [
         onScroll();
       }
 
+      function initQuickSearchModal() {
+        const modal = document.getElementById('quick-search-modal');
+        const panel = document.getElementById('quick-search-panel');
+        const trigger = document.getElementById('quick-search-trigger');
+        const kbdHint = document.getElementById('quick-search-kbd');
+        const input = document.getElementById('quick-search-input');
+        const clearBtn = document.getElementById('quick-search-clear');
+        const closeBtn = document.getElementById('quick-search-close');
+        const loadingEl = document.getElementById('quick-search-loading');
+        const defaultView = document.getElementById('quick-search-default');
+        const resultsEl = document.getElementById('quick-search-results');
+        const statusEl = document.getElementById('quick-search-status');
+
+        if (!modal || !input || !resultsEl) return;
+
+        if (kbdHint && /Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent || '')) {
+          kbdHint.textContent = '⌘K';
+        }
+
+        if (modal.dataset.bound === 'true') return;
+        modal.dataset.bound = 'true';
+
+        const searchPath = modal.dataset.searchPath || '/search-index.json';
+        window.__iksQuickSearchCache = window.__iksQuickSearchCache || {};
+        let isFetching = false;
+        let activeIdx = -1;
+        let currentItems = [];
+        let lastFocused = null;
+
+        const escapeHtml = (str) => String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+
+        const getCachedIndex = () => window.__iksQuickSearchCache[searchPath] || null;
+
+        const ensureIndexLoaded = async () => {
+          if (getCachedIndex() || isFetching) return;
+          isFetching = true;
+          if (loadingEl) loadingEl.classList.remove('hidden');
+          if (statusEl) statusEl.textContent = 'Loading safety index...';
+          try {
+            let res = await fetch(searchPath);
+            if (!res.ok && searchPath !== '/search-index.json') {
+              res = await fetch('/search-index.json');
+            }
+            if (res.ok) {
+              const data = await res.json();
+              window.__iksQuickSearchCache[searchPath] = Array.isArray(data) ? data : [];
+              if (statusEl) {
+                statusEl.textContent = `${window.__iksQuickSearchCache[searchPath].length.toLocaleString()} guides indexed`;
+              }
+              if (input.value.trim()) {
+                runFilter(input.value);
+              }
+            } else if (statusEl) {
+              statusEl.textContent = 'Search index unavailable';
+            }
+          } catch (_) {
+            if (statusEl) statusEl.textContent = 'Unable to load search index';
+          } finally {
+            isFetching = false;
+            if (loadingEl) loadingEl.classList.add('hidden');
+          }
+        };
+
+        const setActive = (nextIdx) => {
+          const rows = resultsEl.querySelectorAll('[data-qs-item]');
+          if (!rows.length) {
+            activeIdx = -1;
+            return;
+          }
+          if (activeIdx >= 0 && rows[activeIdx]) {
+            rows[activeIdx].classList.remove('bg-surface-soft');
+            rows[activeIdx].setAttribute('aria-selected', 'false');
+          }
+          activeIdx = nextIdx;
+          if (activeIdx >= 0 && rows[activeIdx]) {
+            rows[activeIdx].classList.add('bg-surface-soft');
+            rows[activeIdx].setAttribute('aria-selected', 'true');
+            rows[activeIdx].scrollIntoView({ block: 'nearest' });
+          }
+        };
+
+        const runFilter = (rawQuery) => {
+          const q = (rawQuery || '').trim().toLowerCase();
+          if (clearBtn) {
+            clearBtn.classList.toggle('hidden', !q);
+          }
+
+          if (!q) {
+            currentItems = [];
+            activeIdx = -1;
+            resultsEl.innerHTML = '';
+            resultsEl.classList.add('hidden');
+            if (defaultView) defaultView.classList.remove('hidden');
+            const cached = getCachedIndex();
+            if (statusEl) {
+              statusEl.textContent = cached ? `${cached.length.toLocaleString()} guides indexed` : 'Press / or Ctrl+K anywhere';
+            }
+            return;
+          }
+
+          if (defaultView) defaultView.classList.add('hidden');
+          resultsEl.classList.remove('hidden');
+
+          const index = getCachedIndex();
+          if (!index) {
+            resultsEl.innerHTML = '<div class="px-4 py-8 text-center text-[13px] text-muted">Loading safety guides...</div>';
+            ensureIndexLoaded();
+            return;
+          }
+
+          const tokens = q.split(/\s+/).filter(Boolean);
+          const scored = [];
+          for (let i = 0; i < index.length; i++) {
+            const entry = index[i];
+            const nameLower = (entry.name || '').toLowerCase();
+            const catLower = (entry.category || '').toLowerCase();
+            const kwLower = (entry.keywords || '').toLowerCase();
+            const haystack = `${nameLower} ${catLower} ${kwLower}`;
+
+            let matched = true;
+            for (let tIdx = 0; tIdx < tokens.length; tIdx++) {
+              if (!haystack.includes(tokens[tIdx])) {
+                matched = false;
+                break;
+              }
+            }
+            if (!matched) continue;
+
+            let score = 1;
+            if (nameLower === q) score = 100;
+            else if (nameLower.startsWith(q)) score = 50;
+            else if (nameLower.includes(q)) score = 25;
+            else if (catLower.includes(q)) score = 10;
+
+            scored.push({ entry, score });
+          }
+
+          scored.sort((a, b) => b.score - a.score || a.entry.name.length - b.entry.name.length);
+          currentItems = scored.slice(0, 12).map((s) => s.entry);
+          activeIdx = -1;
+
+          if (statusEl) {
+            statusEl.textContent = scored.length === 1 ? '1 match' : `${scored.length.toLocaleString()} matches`;
+          }
+
+          if (currentItems.length === 0) {
+            resultsEl.innerHTML = `<div class="px-4 py-8 text-center text-[13px] text-muted">No safety guides matched &ldquo;${escapeHtml(rawQuery.trim())}&rdquo;. Try an item or appliance name.</div>`;
+            return;
+          }
+
+          resultsEl.innerHTML = currentItems.map((item, idx) => `
+            <a
+              href="${escapeHtml(item.url)}"
+              role="option"
+              data-qs-item="${idx}"
+              aria-selected="false"
+              class="px-4 py-3 flex items-center justify-between gap-3 hover:bg-surface-soft focus:bg-surface-soft focus:outline-none transition-colors"
+            >
+              <div class="min-w-0 flex-1">
+                <div class="text-[14px] font-medium text-ink truncate">${escapeHtml(item.name)}</div>
+                <div class="text-[11px] text-muted truncate">${escapeHtml(item.url)}</div>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <span class="px-2 py-0.5 text-[11px] font-medium text-muted bg-surface-soft border border-hairline rounded capitalize">${escapeHtml(item.category || 'Guide')}</span>
+                <svg class="w-4 h-4 text-muted" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </a>
+          `).join('');
+          setActive(0);
+        };
+
+        const openModal = () => {
+          if (!modal.classList.contains('hidden')) return;
+          lastFocused = document.activeElement;
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+          modal.setAttribute('aria-hidden', 'false');
+          document.body.classList.add('overflow-hidden');
+          ensureIndexLoaded();
+          requestAnimationFrame(() => {
+            input.focus();
+            input.select();
+          });
+        };
+
+        const closeModal = () => {
+          if (modal.classList.contains('hidden')) return;
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+          modal.setAttribute('aria-hidden', 'true');
+          document.body.classList.remove('overflow-hidden');
+          if (lastFocused && typeof lastFocused.focus === 'function') {
+            lastFocused.focus();
+          }
+        };
+
+        if (trigger && trigger.dataset.bound !== 'true') {
+          trigger.dataset.bound = 'true';
+          trigger.addEventListener('click', (e) => {
+            e.preventDefault();
+            openModal();
+          });
+        }
+
+        if (closeBtn) {
+          closeBtn.addEventListener('click', closeModal);
+        }
+
+        if (clearBtn) {
+          clearBtn.addEventListener('click', () => {
+            input.value = '';
+            runFilter('');
+            input.focus();
+          });
+        }
+
+        modal.addEventListener('click', (e) => {
+          if (panel && !panel.contains(e.target)) {
+            closeModal();
+          }
+        });
+
+        input.addEventListener('input', () => {
+          runFilter(input.value);
+        });
+
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            closeModal();
+            return;
+          }
+          if (!currentItems.length) return;
+          if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setActive((activeIdx + 1) % currentItems.length);
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setActive(activeIdx <= 0 ? currentItems.length - 1 : activeIdx - 1);
+          } else if (e.key === 'Enter' && activeIdx >= 0 && currentItems[activeIdx]) {
+            e.preventDefault();
+            const targetUrl = currentItems[activeIdx].url;
+            closeModal();
+            window.location.href = targetUrl;
+          }
+        });
+
+        window.__iksQuickSearchControls = { openModal, closeModal, isOpen: () => !modal.classList.contains('hidden') };
+
+        if (!window.__iksQuickSearchKeyBound) {
+          window.__iksQuickSearchKeyBound = true;
+          document.addEventListener('keydown', (e) => {
+            const ctrl = window.__iksQuickSearchControls;
+            if (!ctrl) return;
+
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+              e.preventDefault();
+              if (ctrl.isOpen()) ctrl.closeModal();
+              else ctrl.openModal();
+              return;
+            }
+
+            if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+              const target = e.target;
+              const tag = target && target.tagName ? target.tagName.toLowerCase() : '';
+              const isEditable = tag === 'input' || tag === 'textarea' || tag === 'select' || (target && target.isContentEditable);
+              if (!isEditable && !ctrl.isOpen()) {
+                e.preventDefault();
+                ctrl.openModal();
+              }
+              return;
+            }
+
+            if (e.key === 'Escape' && ctrl.isOpen()) {
+              e.preventDefault();
+              ctrl.closeModal();
+            }
+          });
+        }
+      }
+
       function initLayoutInteractions() {
         initMobileMenu();
         initThemeToggle();
         initGlobalSearch();
+        initQuickSearchModal();
         setupLanguagePickers();
         initBackToTop();
       }

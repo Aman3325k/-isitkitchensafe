@@ -1,0 +1,1176 @@
+---
+import decoderData from '../data/kitchen-symbol-decoder-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+import { useTranslatedPath, getApplianceUrl } from '../i18n/utils';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+const translatePath = useTranslatedPath(lang);
+
+type CategoryKey = 'all' | 'plastic-resin' | 'appliance' | 'cooktop' | 'care';
+type VerdictVal = 'yes' | 'no' | 'depends';
+
+interface LocalizedSymbol {
+  id: string;
+  category: Exclude<CategoryKey, 'all'>;
+  code: string;
+  name: string;
+  shortMeaning: string;
+  svgKey: string;
+  maxTempF: number;
+  maxTempC: number;
+  tempMode?: 'max' | 'min';
+  tempDepends?: boolean;
+  verdicts: {
+    dishwasher: VerdictVal;
+    microwave: VerdictVal;
+    oven: VerdictVal;
+    freezer: VerdictVal;
+    airfryer: VerdictVal;
+  };
+  safetyExplanation: string;
+  watchOutFor: string;
+  commonItems: string[];
+  relatedLink: string;
+  searchKeywords: string[];
+}
+
+const UI_TEXT: Record<SupportedLanguage, {
+  searchPlaceholder: string;
+  searchAria: string;
+  clearSearch: string;
+  quickPicksLabel: string;
+  quickPicks: Array<{ label: string; query: string }>;
+  tabs: Record<CategoryKey, string>;
+  showingPrefix: string;
+  showingOf: string;
+  symbolsUnit: string;
+  noResultsTitle: string;
+  noResultsBody: string;
+  resetFilters: string;
+  verdictPanelBadge: string;
+  maxTempLabel: string;
+  minTempLabel: string;
+  dependsTempLabel: string;
+  matrixTitle: string;
+  appliances: {
+    dishwasher: string;
+    microwave: string;
+    oven: string;
+    freezer: string;
+    airfryer: string;
+  };
+  verdictLabels: {
+    yes: string;
+    depends: string;
+    no: string;
+  };
+  meaningHeading: string;
+  warningHeading: string;
+  commonItemsHeading: string;
+  readGuideBtn: string;
+  copyVerdictBtn: string;
+  copiedVerdictBtn: string;
+  pickAnotherBtn: string;
+  coreHubsHeading: string;
+  categoryNames: Record<Exclude<CategoryKey, 'all'>, string>;
+}> = {
+  en: {
+    searchPlaceholder: 'Search by number, shape, or keyword (e.g. "5", "waves", "wine glass", "coil", "PP")...',
+    searchAria: 'Search kitchen bottom symbols',
+    clearSearch: 'Clear',
+    quickPicksLabel: 'Popular:',
+    quickPicks: [
+      { label: '#5 PP', query: '5' },
+      { label: 'Wavy Lines', query: 'waves' },
+      { label: 'Wine Glass & Fork', query: 'wine glass' },
+      { label: 'Induction Coil', query: 'coil' },
+      { label: 'Snowflake', query: 'snowflake' },
+      { label: '#6 Styrofoam', query: '6' }
+    ],
+    tabs: {
+      all: 'All Symbols',
+      'plastic-resin': 'Plastic Codes #1–#7',
+      appliance: 'Appliance Icons',
+      cooktop: 'Cooktop Icons',
+      care: 'Care & Warnings'
+    },
+    showingPrefix: 'Showing',
+    showingOf: 'of',
+    symbolsUnit: 'symbols',
+    noResultsTitle: 'No matching kitchen symbol found',
+    noResultsBody: 'Try searching by resin number (1–7), shape ("waves", "snowflake", "fork", "coil"), or switch to All Symbols.',
+    resetFilters: 'Show All Symbols',
+    verdictPanelBadge: 'Instant Safety Verdict',
+    maxTempLabel: 'Max Safe Temp',
+    minTempLabel: 'Rated Down To',
+    dependsTempLabel: 'Temp Limit',
+    matrixTitle: '5-Appliance Compatibility Matrix',
+    appliances: {
+      dishwasher: 'Dishwasher',
+      microwave: 'Microwave',
+      oven: 'Oven',
+      freezer: 'Freezer',
+      airfryer: 'Air Fryer'
+    },
+    verdictLabels: {
+      yes: 'SAFE ✅',
+      depends: 'CAUTION ⚠️',
+      no: 'UNSAFE ❌'
+    },
+    meaningHeading: 'What This Symbol Means',
+    warningHeading: 'Watch Out For (Health & Heat Risks)',
+    commonItemsHeading: 'Common Items With This Mark',
+    readGuideBtn: 'Read Full Safety Guide',
+    copyVerdictBtn: 'Copy Verdict',
+    copiedVerdictBtn: 'Copied!',
+    pickAnotherBtn: '↑ Pick Another',
+    coreHubsHeading: 'Explore Core Appliance Safety Guides',
+    categoryNames: {
+      'plastic-resin': 'Plastic Resin Code',
+      appliance: 'Appliance Symbol',
+      cooktop: 'Cooktop Symbol',
+      care: 'Care & Warning'
+    }
+  },
+  es: {
+    searchPlaceholder: 'Busca por número, forma o palabra (ej. "5", "ondas", "copa", "bobina", "PP")...',
+    searchAria: 'Buscar símbolos de utensilios de cocina',
+    clearSearch: 'Limpiar',
+    quickPicksLabel: 'Populares:',
+    quickPicks: [
+      { label: '#5 PP', query: '5' },
+      { label: 'Ondas Microondas', query: 'ondas' },
+      { label: 'Copa y Tenedor', query: 'copa' },
+      { label: 'Inducción', query: 'induccion' },
+      { label: 'Copo de Nieve', query: 'nieve' },
+      { label: '#6 PS', query: '6' }
+    ],
+    tabs: {
+      all: 'Todos',
+      'plastic-resin': 'Plásticos #1–#7',
+      appliance: 'Electrodomésticos',
+      cooktop: 'Cocina y Placas',
+      care: 'Cuidado y Avisos'
+    },
+    showingPrefix: 'Mostrando',
+    showingOf: 'de',
+    symbolsUnit: 'símbolos',
+    noResultsTitle: 'No se encontró ningún símbolo coincidente',
+    noResultsBody: 'Prueba buscar por número (1–7), forma ("ondas", "copa", "bobina", "nieve") o selecciona Todos.',
+    resetFilters: 'Ver Todos los Símbolos',
+    verdictPanelBadge: 'Veredicto de Seguridad Instantáneo',
+    maxTempLabel: 'Temp. Máx. Segura',
+    minTempLabel: 'Apto Hasta',
+    dependsTempLabel: 'Límite Térmico',
+    matrixTitle: 'Matriz de Compatibilidad (5 Electrodomésticos)',
+    appliances: {
+      dishwasher: 'Lavavajillas',
+      microwave: 'Microondas',
+      oven: 'Horno',
+      freezer: 'Congelador',
+      airfryer: 'Freidora de Aire'
+    },
+    verdictLabels: {
+      yes: 'SEGURO ✅',
+      depends: 'PRECAUCIÓN ⚠️',
+      no: 'INSEGURO ❌'
+    },
+    meaningHeading: 'Qué Significa Este Símbolo',
+    warningHeading: 'Precauciones y Riesgos Químicos / Térmicos',
+    commonItemsHeading: 'Artículos Comunes con Esta Marca',
+    readGuideBtn: 'Leer Guía Completa',
+    copyVerdictBtn: 'Copiar Veredicto',
+    copiedVerdictBtn: '¡Copiado!',
+    pickAnotherBtn: '↑ Elegir Otro',
+    coreHubsHeading: 'Explorar Guías por Electrodoméstico',
+    categoryNames: {
+      'plastic-resin': 'Código Plástico',
+      appliance: 'Símbolo de Aparato',
+      cooktop: 'Símbolo de Placa',
+      care: 'Cuidado y Aviso'
+    }
+  },
+  pt: {
+    searchPlaceholder: 'Pesquise por número, forma ou palavra (ex.: "5", "ondas", "taça", "indução", "PP")...',
+    searchAria: 'Pesquisar símbolos no fundo de utensílios',
+    clearSearch: 'Limpar',
+    quickPicksLabel: 'Populares:',
+    quickPicks: [
+      { label: '#5 PP', query: '5' },
+      { label: 'Linhas Onduladas', query: 'ondas' },
+      { label: 'Taça e Garfo', query: 'taca' },
+      { label: 'Bobina Indução', query: 'inducao' },
+      { label: 'Floco de Neve', query: 'neve' },
+      { label: '#6 Isopor', query: '6' }
+    ],
+    tabs: {
+      all: 'Todos',
+      'plastic-resin': 'Plásticos #1–#7',
+      appliance: 'Eletrodomésticos',
+      cooktop: 'Fogões e Cooktops',
+      care: 'Cuidados e Avisos'
+    },
+    showingPrefix: 'Exibindo',
+    showingOf: 'de',
+    symbolsUnit: 'símbolos',
+    noResultsTitle: 'Nenhum símbolo correspondente encontrado',
+    noResultsBody: 'Tente buscar pelo número (1–7), forma ("ondas", "taça", "bobina", "neve") ou clique em Todos.',
+    resetFilters: 'Mostrar Todos',
+    verdictPanelBadge: 'Veredito Instantâneo de Segurança',
+    maxTempLabel: 'Temp. Máx. Segura',
+    minTempLabel: 'Suporta Até',
+    dependsTempLabel: 'Limite Térmico',
+    matrixTitle: 'Matriz de Compatibilidade (5 Eletrodomésticos)',
+    appliances: {
+      dishwasher: 'Lava-Louças',
+      microwave: 'Micro-ondas',
+      oven: 'Forno',
+      freezer: 'Freezer',
+      airfryer: 'Air Fryer'
+    },
+    verdictLabels: {
+      yes: 'SEGURO ✅',
+      depends: 'CUIDADO ⚠️',
+      no: 'INSEGURO ❌'
+    },
+    meaningHeading: 'O Que Este Símbolo Significa',
+    warningHeading: 'Atenção: Riscos Químicos e Térmicos',
+    commonItemsHeading: 'Itens Comuns com Esta Marca',
+    readGuideBtn: 'Ler Guia Completo',
+    copyVerdictBtn: 'Copiar Veredito',
+    copiedVerdictBtn: 'Copiado!',
+    pickAnotherBtn: '↑ Escolher Outro',
+    coreHubsHeading: 'Explorar Guias por Eletrodoméstico',
+    categoryNames: {
+      'plastic-resin': 'Código Plástico',
+      appliance: 'Ícone de Aparelho',
+      cooktop: 'Ícone de Fogão',
+      care: 'Cuidado e Aviso'
+    }
+  },
+  'zh-cn': {
+    searchPlaceholder: '输入数字、形状或关键词搜索（如 "5"、"波浪"、"酒杯"、"电磁炉"、"雪花"、"PP"）...',
+    searchAria: '搜索厨具与餐具底部符号',
+    clearSearch: '清除',
+    quickPicksLabel: '热门搜索：',
+    quickPicks: [
+      { label: '#5 PP', query: '5' },
+      { label: '波浪线', query: '波浪' },
+      { label: '酒杯与叉子', query: '酒杯' },
+      { label: '电磁炉线圈', query: '电磁炉' },
+      { label: '雪花冷冻', query: '雪花' },
+      { label: '#6 泡沫塑料', query: '6' }
+    ],
+    tabs: {
+      all: '全部图标',
+      'plastic-resin': '塑料编号 #1–#7',
+      appliance: '电器适用标志',
+      cooktop: '炉灶兼容标志',
+      care: '护理与警示'
+    },
+    showingPrefix: '显示',
+    showingOf: '/',
+    symbolsUnit: '个标志',
+    noResultsTitle: '未找到匹配的厨具图标',
+    noResultsBody: '请尝试搜索塑料编号（1–7）或图案描述（“波浪”、“酒杯”、“雪花”、“线圈”），或切换回全部图标。',
+    resetFilters: '显示全部图标',
+    verdictPanelBadge: '即时安全判定结果',
+    maxTempLabel: '最高安全温度',
+    minTempLabel: '最低耐受温度',
+    dependsTempLabel: '温度限制',
+    matrixTitle: '5大厨房电器兼容性矩阵',
+    appliances: {
+      dishwasher: '洗碗机',
+      microwave: '微波炉',
+      oven: '烤箱',
+      freezer: '冷冻室',
+      airfryer: '空气炸锅'
+    },
+    verdictLabels: {
+      yes: '安全 ✅',
+      depends: '谨慎 ⚠️',
+      no: '禁用 ❌'
+    },
+    meaningHeading: '该图标代表什么含义',
+    warningHeading: '重点警示（化学析出与高温风险）',
+    commonItemsHeading: '带有此标识的常见物品',
+    readGuideBtn: '查看完整安全指南',
+    copyVerdictBtn: '复制判定结果',
+    copiedVerdictBtn: '已复制！',
+    pickAnotherBtn: '↑ 选择其他图标',
+    coreHubsHeading: '浏览核心厨房电器安全指南',
+    categoryNames: {
+      'plastic-resin': '塑料树脂代码',
+      appliance: '电器适用标志',
+      cooktop: '炉灶兼容标志',
+      care: '护理与禁用警示'
+    }
+  },
+  ja: {
+    searchPlaceholder: '数字・形・キーワードで検索（例：「5」「波線」「ワイングラス」「IH」「雪」「PP」）...',
+    searchAria: 'キッチン用品・容器底面の記号を検索',
+    clearSearch: 'クリア',
+    quickPicksLabel: 'よく検索される記号：',
+    quickPicks: [
+      { label: '#5 PP', query: '5' },
+      { label: '波線（レンジ）', query: '波線' },
+      { label: 'グラス＆フォーク', query: 'フォーク' },
+      { label: 'IHコイル', query: 'ih' },
+      { label: '雪の結晶', query: '雪' },
+      { label: '#6 PS', query: '6' }
+    ],
+    tabs: {
+      all: 'すべて表示',
+      'plastic-resin': 'プラ番号 #1–#7',
+      appliance: '家電対応マーク',
+      cooktop: 'コンロ対応マーク',
+      care: 'お手入れ・警告'
+    },
+    showingPrefix: '表示中：',
+    showingOf: '/',
+    symbolsUnit: '件',
+    noResultsTitle: '該当するマークが見つかりませんでした',
+    noResultsBody: '樹脂番号（1〜7）や形（「波線」「フォーク」「コイル」「雪」）で検索するか、「すべて表示」に戻してください。',
+    resetFilters: 'すべてのマークを表示',
+    verdictPanelBadge: '安全性クイック判定',
+    maxTempLabel: '耐熱上限目安',
+    minTempLabel: '耐寒温度目安',
+    dependsTempLabel: '温度目安',
+    matrixTitle: '主要5家電の対応・安全性マトリクス',
+    appliances: {
+      dishwasher: '食洗機',
+      microwave: '電子レンジ',
+      oven: 'オーブン',
+      freezer: '冷凍庫',
+      airfryer: 'ノンフライヤー'
+    },
+    verdictLabels: {
+      yes: '安全 ✅',
+      depends: '要注意 ⚠️',
+      no: '不可 ❌'
+    },
+    meaningHeading: 'このマークの意味',
+    warningHeading: '注意点（溶出・破損・過熱リスク）',
+    commonItemsHeading: 'このマークが付いている主な製品',
+    readGuideBtn: '詳しい安全ガイドを読む',
+    copyVerdictBtn: '判定をコピー',
+    copiedVerdictBtn: 'コピーしました！',
+    pickAnotherBtn: '↑ 他の記号を選ぶ',
+    coreHubsHeading: '主要キッチン家電の安全ガイド',
+    categoryNames: {
+      'plastic-resin': 'プラ識別番号',
+      appliance: '家電マーク',
+      cooktop: 'コンロマーク',
+      care: '取扱・禁止マーク'
+    }
+  }
+};
+
+const ui = UI_TEXT[lang] || UI_TEXT.en;
+
+function makeResinSvg(num: string, label: string): string {
+  return `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" aria-hidden="true">
+    <path d="M26 11L32 5L38 11" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M23.5 18L32 6L40.5 18" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M46.5 28L54 41C55.2 43.1 53.7 45.8 51.2 45.8H39" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M43 42L39 45.8L43 49.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M25 45.8H12.8C10.3 45.8 8.8 43.1 10 41L17.5 28" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M13 29.5L17.8 27.6L19.4 32.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="32" y="37" text-anchor="middle" fill="currentColor" font-size="18" font-weight="800" font-family="system-ui, sans-serif">${num}</text>
+    <text x="32" y="59.5" text-anchor="middle" fill="currentColor" font-size="9.5" font-weight="700" letter-spacing="0.06em" font-family="system-ui, sans-serif">${label}</text>
+  </svg>`;
+}
+
+const SVG_MAP: Record<string, string> = {
+  'resin-1': makeResinSvg('1', 'PET'),
+  'resin-2': makeResinSvg('2', 'HDPE'),
+  'resin-3': makeResinSvg('3', 'PVC'),
+  'resin-4': makeResinSvg('4', 'LDPE'),
+  'resin-5': makeResinSvg('5', 'PP'),
+  'resin-6': makeResinSvg('6', 'PS'),
+  'resin-7': makeResinSvg('7', 'OTHER'),
+  'microwave-safe': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" aria-hidden="true">
+    <rect x="8" y="10" width="48" height="44" rx="6" stroke="currentColor" stroke-width="2.6"/>
+    <path d="M16 23C19 19.5 23 19.5 26 23C29 26.5 33 26.5 36 23C39 19.5 43 19.5 46 23" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M16 32C19 28.5 23 28.5 26 32C29 35.5 33 35.5 36 32C39 28.5 43 28.5 46 32" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M16 41C19 37.5 23 37.5 26 41C29 44.5 33 44.5 36 41C39 37.5 43 37.5 46 41" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+  </svg>`,
+  'dishwasher-safe': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" aria-hidden="true">
+    <rect x="9" y="9" width="46" height="46" rx="5" stroke="currentColor" stroke-width="2.5"/>
+    <path d="M19 16L17 21M27 15L25 20M35 16L33 21M43 15L41 20" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/>
+    <path d="M23 23L21 27M31 23L29 27M39 23L37 27" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/>
+    <circle cx="24" cy="39" r="9" stroke="currentColor" stroke-width="2.4"/>
+    <circle cx="24" cy="39" r="4.5" stroke="currentColor" stroke-width="1.8"/>
+    <path d="M40 31H48L46.5 44C46.3 46.2 45 48 44 48C43 48 41.7 46.2 41.5 44L40 31Z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>
+  </svg>`,
+  'top-rack-dishwasher': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" aria-hidden="true">
+    <rect x="9" y="9" width="46" height="46" rx="5" stroke="currentColor" stroke-width="2.5"/>
+    <path d="M20 15L18.5 19M28 15L26.5 19M36 15L34.5 19M44 15L42.5 19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+    <line x1="14" y1="31" x2="50" y2="31" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+    <rect x="20" y="23" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="2.2"/>
+    <rect x="35" y="24" width="9" height="7" rx="1.5" stroke="currentColor" stroke-width="2.2"/>
+    <path d="M32 48V37M32 37L27.5 41.5M32 37L36.5 41.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`,
+  'oven-safe': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" aria-hidden="true">
+    <rect x="10" y="9" width="44" height="46" rx="5" stroke="currentColor" stroke-width="2.5"/>
+    <line x1="10" y1="20" x2="54" y2="20" stroke="currentColor" stroke-width="2.2"/>
+    <circle cx="20" cy="14.5" r="2" fill="currentColor"/>
+    <circle cx="32" cy="14.5" r="2" fill="currentColor"/>
+    <circle cx="44" cy="14.5" r="2" fill="currentColor"/>
+    <rect x="16" y="26" width="32" height="22" rx="2.5" stroke="currentColor" stroke-width="2.2"/>
+    <path d="M22 33C24 31 26 31 28 33C30 35 32 35 34 33C36 31 38 31 40 33" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+    <path d="M22 41C24 39 26 39 28 41C30 43 32 43 34 41C36 39 38 39 40 41" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+  </svg>`,
+  'freezer-safe': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" aria-hidden="true">
+    <path d="M32 8V56M11.2 20L52.8 44M52.8 20L11.2 44" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M27 13L32 18L37 13M27 51L32 46L37 51" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M13 27L19.5 24.8L17.5 18.5M51 37L44.5 39.2L46.5 45.5" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M46.5 18.5L44.5 24.8L51 27M17.5 45.5L19.5 39.2L13 37" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`,
+  'food-contact-safe': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" aria-hidden="true">
+    <path d="M16 12H30L28.8 24C28.3 29 25.8 32 23 32C20.2 32 17.7 29 17.2 24L16 12Z" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/>
+    <path d="M23 32V52M16 52H30" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M40 12V25C40 28.5 42.2 31 45 31C47.8 31 50 28.5 50 25V12" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M45 12V52" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+  </svg>`,
+  'hand-wash-only': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" aria-hidden="true">
+    <path d="M9 28L14 50H50L55 28" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M12 36C16 33.5 20 38.5 24 36C28 33.5 32 38.5 36 36C40 33.5 44 38.5 48 36C50 34.8 51.5 35.2 52.5 36" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+    <path d="M26 29V15C26 13.3 27.3 12 29 12C30.7 12 32 13.3 32 15V26M32 18C32 16.3 33.3 15 35 15C36.7 15 38 16.3 38 18V27M38 20C38 18.6 39.1 17.5 40.5 17.5C41.9 17.5 43 18.6 43 20V31C43 35.5 39.5 39 35 39H31C27.5 39 24.5 36.8 23.2 33.5L20 26.5C19.3 25.1 20 23.4 21.5 22.8C22.8 22.3 24.3 22.9 25 24.2L26 26.5" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`,
+  'not-microwave-safe': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" aria-hidden="true">
+    <rect x="9" y="11" width="46" height="42" rx="6" stroke="currentColor" stroke-width="2.4" opacity="0.75"/>
+    <path d="M17 24C20 21 24 21 27 24C30 27 34 27 37 24C40 21 44 21 47 24" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" opacity="0.7"/>
+    <path d="M17 32C20 29 24 29 27 32C30 35 34 35 37 32C40 29 44 29 47 32" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" opacity="0.7"/>
+    <path d="M17 40C20 37 24 37 27 40C30 43 34 43 37 40C40 37 44 37 47 40" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" opacity="0.7"/>
+    <line x1="11" y1="11" x2="53" y2="53" stroke="#dc2626" stroke-width="4" stroke-linecap="round"/>
+    <line x1="53" y1="11" x2="11" y2="53" stroke="#dc2626" stroke-width="4" stroke-linecap="round"/>
+  </svg>`,
+  'not-dishwasher-safe': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" aria-hidden="true">
+    <rect x="10" y="10" width="44" height="44" rx="5" stroke="currentColor" stroke-width="2.4" opacity="0.75"/>
+    <path d="M21 17L19 22M31 16L29 21M41 17L39 22" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" opacity="0.7"/>
+    <circle cx="25" cy="39" r="8" stroke="currentColor" stroke-width="2.2" opacity="0.7"/>
+    <path d="M39 32H47L45.5 45H40.5L39 32Z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" opacity="0.7"/>
+    <line x1="10" y1="10" x2="54" y2="54" stroke="#dc2626" stroke-width="4" stroke-linecap="round"/>
+    <line x1="54" y1="10" x2="10" y2="54" stroke="#dc2626" stroke-width="4" stroke-linecap="round"/>
+  </svg>`,
+  'bpa-free': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" aria-hidden="true">
+    <circle cx="32" cy="32" r="23" stroke="currentColor" stroke-width="2.6"/>
+    <text x="32" y="30" text-anchor="middle" fill="currentColor" font-size="13.5" font-weight="800" font-family="system-ui, sans-serif">BPA</text>
+    <text x="32" y="44" text-anchor="middle" fill="#15803d" font-size="10.5" font-weight="800" letter-spacing="0.08em" font-family="system-ui, sans-serif">FREE</text>
+    <path d="M18 25L46 25" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" opacity="0.75"/>
+  </svg>`,
+  'no-broiler': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" aria-hidden="true">
+    <rect x="10" y="10" width="44" height="44" rx="5" stroke="currentColor" stroke-width="2.4" opacity="0.75"/>
+    <path d="M16 21L21 27L26 21L32 27L38 21L43 27L48 21" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M32 34C32 34 26 39.5 26 43.5C26 46.8 28.7 49 32 49C35.3 49 38 46.8 38 43.5C38 39.5 32 34 32 34Z" stroke="currentColor" stroke-width="2.2" opacity="0.75"/>
+    <line x1="11" y1="11" x2="53" y2="53" stroke="#dc2626" stroke-width="4" stroke-linecap="round"/>
+  </svg>`,
+  'induction-coil': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" aria-hidden="true">
+    <path d="M8 38C8 24 18 16 20 26C21.5 33.5 14 40 16 44C18 48 28 38 30 26C31.5 17 24 16 24 25C24 35 34 48 38 43C41.5 38.5 36 27 38 22C40 17 47 21 46 31C45 41 52 46 56 38" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="32" y="57" text-anchor="middle" fill="currentColor" font-size="8.5" font-weight="800" letter-spacing="0.08em" font-family="system-ui, sans-serif">INDUCTION</text>
+  </svg>`,
+  'gas-stovetop': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" aria-hidden="true">
+    <circle cx="32" cy="32" r="9" stroke="currentColor" stroke-width="2.5"/>
+    <path d="M32 9C32 9 28 14.5 28 17.5C28 19.7 29.8 21.2 32 21.2C34.2 21.2 36 19.7 36 17.5C36 14.5 32 9 32 9Z" fill="currentColor"/>
+    <path d="M32 55C32 55 28 49.5 28 46.5C28 44.3 29.8 42.8 32 42.8C34.2 42.8 36 44.3 36 46.5C36 49.5 32 55 32 55Z" fill="currentColor"/>
+    <path d="M9 32C9 32 14.5 28 17.5 28C19.7 28 21.2 29.8 21.2 32C21.2 34.2 19.7 36 17.5 36C14.5 36 9 32 9 32Z" fill="currentColor"/>
+    <path d="M55 32C55 32 49.5 28 46.5 28C44.3 28 42.8 29.8 42.8 32C42.8 34.2 44.3 36 46.5 36C49.5 36 55 32 55 32Z" fill="currentColor"/>
+    <circle cx="17.5" cy="17.5" r="3" fill="currentColor"/>
+    <circle cx="46.5" cy="17.5" r="3" fill="currentColor"/>
+    <circle cx="17.5" cy="46.5" r="3" fill="currentColor"/>
+    <circle cx="46.5" cy="46.5" r="3" fill="currentColor"/>
+  </svg>`,
+  'electric-stovetop': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" aria-hidden="true">
+    <path d="M32 32C32 29.5 34.5 28 36.5 29.5C39 31.5 38.5 36 35 38C30 40.5 24 37 24 31C24 23.5 31 19 38 20.5C46 22 49.5 30.5 47 38.5C44.5 47 35 51.5 26 49C16 46 11.5 35.5 14.5 25.5C17.5 15.5 28 10 38.5 12" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/>
+  </svg>`,
+  'radiant-cooktop': `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" aria-hidden="true">
+    <rect x="8" y="8" width="48" height="48" rx="7" stroke="currentColor" stroke-width="2.4"/>
+    <circle cx="32" cy="32" r="17" stroke="currentColor" stroke-width="2.4" stroke-dasharray="5 3"/>
+    <circle cx="32" cy="32" r="10.5" stroke="currentColor" stroke-width="2.4"/>
+    <circle cx="32" cy="32" r="3.5" fill="currentColor"/>
+  </svg>`
+};
+
+// Build localized symbols list
+const localizedSymbols: LocalizedSymbol[] = decoderData.symbols.map((raw: any) => {
+  const tr = lang !== 'en' && raw.translations && raw.translations[lang] ? raw.translations[lang] : null;
+  const localizedLink = translatePath(raw.relatedLink);
+  return {
+    id: raw.id,
+    category: raw.category,
+    code: raw.code,
+    name: tr?.name || raw.name,
+    shortMeaning: tr?.shortMeaning || raw.shortMeaning,
+    svgKey: raw.svgKey,
+    maxTempF: raw.maxTempF,
+    maxTempC: raw.maxTempC,
+    tempMode: raw.tempMode || 'max',
+    tempDepends: Boolean(raw.tempDepends),
+    verdicts: raw.verdicts,
+    safetyExplanation: tr?.safetyExplanation || raw.safetyExplanation,
+    watchOutFor: tr?.watchOutFor || raw.watchOutFor,
+    commonItems: tr?.commonItems || raw.commonItems,
+    relatedLink: localizedLink,
+    searchKeywords: Array.from(new Set([...(raw.searchKeywords || []), ...(tr?.searchKeywords || []), raw.code.toLowerCase()]))
+  };
+});
+
+// Default initially selected symbol (#5 PP - most searched!)
+const defaultSymbol = localizedSymbols.find(s => s.id === 'pp-5') || localizedSymbols[0];
+
+const categoryCounts: Record<CategoryKey, number> = {
+  all: localizedSymbols.length,
+  'plastic-resin': localizedSymbols.filter(s => s.category === 'plastic-resin').length,
+  appliance: localizedSymbols.filter(s => s.category === 'appliance').length,
+  cooktop: localizedSymbols.filter(s => s.category === 'cooktop').length,
+  care: localizedSymbols.filter(s => s.category === 'care').length
+};
+
+const coreApplianceLinks = [
+  { key: 'dishwasher', label: ui.appliances.dishwasher, href: getApplianceUrl('dishwasher', lang) },
+  { key: 'microwave', label: ui.appliances.microwave, href: getApplianceUrl('microwave', lang) },
+  { key: 'oven', label: ui.appliances.oven, href: getApplianceUrl('oven', lang) },
+  { key: 'freezer', label: ui.appliances.freezer, href: getApplianceUrl('freezer', lang) },
+  { key: 'airfryer', label: ui.appliances.airfryer, href: getApplianceUrl('airfryer', lang) }
+];
+
+const clientPayload = {
+  symbols: localizedSymbols,
+  svgMap: SVG_MAP,
+  ui: {
+    showingPrefix: ui.showingPrefix,
+    showingOf: ui.showingOf,
+    symbolsUnit: ui.symbolsUnit,
+    maxTempLabel: ui.maxTempLabel,
+    minTempLabel: ui.minTempLabel,
+    dependsTempLabel: ui.dependsTempLabel,
+    verdictLabels: ui.verdictLabels,
+    appliances: ui.appliances,
+    categoryNames: ui.categoryNames,
+    copyVerdictBtn: ui.copyVerdictBtn,
+    copiedVerdictBtn: ui.copiedVerdictBtn
+  }
+};
+
+function getBadgeClass(val: VerdictVal): string {
+  if (val === 'yes') return 'bg-green-100 text-green-900 dark:bg-emerald-950/70 dark:text-emerald-300 border border-green-300 dark:border-emerald-700';
+  if (val === 'depends') return 'bg-amber-100 text-amber-900 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-300 dark:border-amber-700';
+  return 'bg-red-100 text-red-900 dark:bg-red-950/70 dark:text-red-300 border border-red-300 dark:border-red-700';
+}
+
+function formatTempString(sym: LocalizedSymbol): string {
+  if (sym.tempMode === 'min') {
+    return `${sym.maxTempF}°F / ${sym.maxTempC}°C`;
+  }
+  if (sym.tempDepends) {
+    return `~${sym.maxTempF}°F / ${sym.maxTempC}°C*`;
+  }
+  return `${sym.maxTempF}°F / ${sym.maxTempC}°C`;
+}
+
+function getTempLabel(sym: LocalizedSymbol): string {
+  if (sym.tempMode === 'min') return ui.minTempLabel;
+  if (sym.tempDepends) return ui.dependsTempLabel;
+  return ui.maxTempLabel;
+}
+---
+
+<section
+  id="kitchen-symbol-decoder-app"
+  class="bg-canvas border border-hairline rounded-2xl shadow-sm overflow-hidden"
+  aria-label="Kitchen Bottom Symbol Decoder"
+>
+  <!-- Top Controls: Search + Quick Picks + Category Filter Tabs -->
+  <div class="p-5 md:p-6 bg-surface-soft border-b border-hairline space-y-4">
+    <!-- Search Input -->
+    <div class="relative">
+      <div class="pointer-events-none absolute inset-y-0 left-0 pl-3.5 flex items-center text-muted">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+      <input
+        id="ksd-search-input"
+        type="search"
+        autocomplete="off"
+        placeholder={ui.searchPlaceholder}
+        aria-label={ui.searchAria}
+        class="w-full h-12 pl-11 pr-20 rounded-xl bg-canvas border border-hairline text-ink placeholder:text-muted/80 text-[15px] focus:outline-none focus:ring-2 focus:ring-signature-coral/40 focus:border-signature-coral transition-all"
+      />
+      <button
+        id="ksd-clear-search"
+        type="button"
+        class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg text-xs font-semibold bg-surface-strong text-ink hover:opacity-85 transition-opacity cursor-pointer"
+      >
+        {ui.clearSearch}
+      </button>
+    </div>
+
+    <!-- Popular Quick-Search Chips -->
+    <div class="flex flex-wrap items-center gap-2 text-xs">
+      <span class="text-muted font-semibold">{ui.quickPicksLabel}</span>
+      {ui.quickPicks.map(chip => (
+        <button
+          type="button"
+          data-ksd-quick={chip.query}
+          class="px-2.5 py-1 rounded-full bg-canvas border border-hairline text-body hover:text-ink hover:border-signature-coral transition-colors cursor-pointer font-medium"
+        >
+          {chip.label}
+        </button>
+      ))}
+    </div>
+
+    <!-- Category Filter Tabs -->
+    <div class="flex flex-wrap items-center gap-2 pt-1" role="tablist" aria-label="Symbol categories">
+      {(['all', 'plastic-resin', 'appliance', 'cooktop', 'care'] as CategoryKey[]).map(cat => (
+        <button
+          type="button"
+          role="tab"
+          aria-selected={cat === 'all' ? 'true' : 'false'}
+          data-ksd-cat={cat}
+          class={`ksd-tab-btn inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs sm:text-[13px] font-semibold transition-all cursor-pointer border ${
+            cat === 'all'
+              ? 'bg-primary text-on-primary border-primary shadow-xs'
+              : 'bg-canvas text-body border-hairline hover:text-ink hover:border-border-strong'
+          }`}
+        >
+          <span>{ui.tabs[cat]}</span>
+          <span class={`text-[11px] px-1.5 py-0.5 rounded-full ${cat === 'all' ? 'bg-white/20 text-on-primary' : 'bg-surface-soft text-muted'}`}>
+            {categoryCounts[cat]}
+          </span>
+        </button>
+      ))}
+    </div>
+
+    <!-- Live Count Bar -->
+    <div class="flex items-center justify-between text-xs text-muted pt-0.5">
+      <p id="ksd-count-status" aria-live="polite">
+        {ui.showingPrefix} <strong class="text-ink">{localizedSymbols.length}</strong> {ui.showingOf} {localizedSymbols.length} {ui.symbolsUnit}
+      </p>
+    </div>
+  </div>
+
+  <!-- Main Workspace: Symbol Picker Grid + Sticky Instant Safety Verdict Panel -->
+  <div class="p-5 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <!-- Left Column: Visual Symbol Grid -->
+    <div id="ksd-grid-anchor" class="lg:col-span-7">
+      <div id="ksd-symbol-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {localizedSymbols.map(sym => {
+          const isSelected = sym.id === defaultSymbol.id;
+          return (
+            <button
+              type="button"
+              data-ksd-id={sym.id}
+              data-ksd-category={sym.category}
+              aria-pressed={isSelected ? 'true' : 'false'}
+              class={`ksd-symbol-card group text-left p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col items-center text-center gap-2 focus:outline-none focus:ring-2 focus:ring-signature-coral ${
+                isSelected
+                  ? 'bg-surface-soft border-signature-coral ring-2 ring-signature-coral/30 shadow-sm'
+                  : 'bg-canvas border-hairline hover:border-border-strong hover:bg-surface-soft/70'
+              }`}
+            >
+              <div class="w-14 h-14 flex items-center justify-center text-ink group-hover:scale-105 transition-transform" set:html={SVG_MAP[sym.svgKey]} />
+              <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-surface-strong/70 text-ink">
+                {sym.code}
+              </span>
+              <span class="text-[12.5px] font-semibold text-ink leading-snug line-clamp-2">
+                {sym.name}
+              </span>
+              <!-- Mini 3-dot glance for Microwave / Dishwasher / Oven -->
+              <div class="flex items-center gap-1.5 mt-auto pt-1 text-[10px] text-muted" aria-hidden="true">
+                <span class={`w-2 h-2 rounded-full ${sym.verdicts.dishwasher === 'yes' ? 'bg-green-600' : sym.verdicts.dishwasher === 'depends' ? 'bg-amber-500' : 'bg-red-600'}`} title={ui.appliances.dishwasher}></span>
+                <span class={`w-2 h-2 rounded-full ${sym.verdicts.microwave === 'yes' ? 'bg-green-600' : sym.verdicts.microwave === 'depends' ? 'bg-amber-500' : 'bg-red-600'}`} title={ui.appliances.microwave}></span>
+                <span class={`w-2 h-2 rounded-full ${sym.verdicts.oven === 'yes' ? 'bg-green-600' : sym.verdicts.oven === 'depends' ? 'bg-amber-500' : 'bg-red-600'}`} title={ui.appliances.oven}></span>
+                <span class={`w-2 h-2 rounded-full ${sym.verdicts.freezer === 'yes' ? 'bg-green-600' : sym.verdicts.freezer === 'depends' ? 'bg-amber-500' : 'bg-red-600'}`} title={ui.appliances.freezer}></span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      <!-- Empty Search State -->
+      <div id="ksd-empty-state" class="hidden py-12 px-6 text-center bg-surface-soft border border-dashed border-hairline rounded-xl">
+        <p class="text-base font-semibold text-ink mb-1.5">{ui.noResultsTitle}</p>
+        <p class="text-xs sm:text-sm text-muted max-w-md mx-auto mb-4">{ui.noResultsBody}</p>
+        <button
+          id="ksd-reset-filters"
+          type="button"
+          class="px-4 py-2 rounded-lg text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors cursor-pointer"
+        >
+          {ui.resetFilters}
+        </button>
+      </div>
+    </div>
+
+    <!-- Right Column: Sticky Instant Safety Verdict Panel -->
+    <aside
+      id="ksd-verdict-panel"
+      aria-live="polite"
+      class="lg:col-span-5 lg:sticky lg:top-[84px] bg-surface-soft border border-hairline rounded-2xl p-5 md:p-6 space-y-5 shadow-xs"
+    >
+      <!-- Panel Top Bar -->
+      <div class="flex items-center justify-between gap-2">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-signature-coral text-white">
+          {ui.verdictPanelBadge}
+        </span>
+        <button
+          id="ksd-scroll-grid"
+          type="button"
+          class="lg:hidden text-xs font-semibold text-link hover:underline cursor-pointer"
+        >
+          {ui.pickAnotherBtn}
+        </button>
+      </div>
+
+      <!-- Enlarged Visual + Name + Max Temp -->
+      <div class="flex items-start gap-4">
+        <div
+          id="ksd-v-svg"
+          class="w-20 h-20 shrink-0 p-2.5 rounded-xl bg-canvas border border-hairline text-ink flex items-center justify-center shadow-2xs"
+          set:html={SVG_MAP[defaultSymbol.svgKey]}
+        />
+        <div class="min-w-0 flex-1 space-y-1.5">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span id="ksd-v-code" class="px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-primary text-on-primary">
+              {defaultSymbol.code}
+            </span>
+            <span id="ksd-v-cat" class="px-2 py-0.5 rounded text-[11px] font-semibold bg-canvas border border-hairline text-muted">
+              {ui.categoryNames[defaultSymbol.category]}
+            </span>
+          </div>
+          <h2 id="ksd-v-name" class="text-[18px] font-semibold text-ink leading-snug">
+            {defaultSymbol.name}
+          </h2>
+          <p id="ksd-v-short" class="text-[13px] text-body leading-relaxed">
+            {defaultSymbol.shortMeaning}
+          </p>
+        </div>
+      </div>
+
+      <!-- Temperature Rating Strip -->
+      <div class="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl bg-canvas border border-hairline text-xs">
+        <span id="ksd-v-temp-label" class="font-semibold text-muted uppercase tracking-wider text-[11px]">
+          {getTempLabel(defaultSymbol)}
+        </span>
+        <span id="ksd-v-temp-val" class="font-bold text-ink text-sm">
+          {formatTempString(defaultSymbol)}
+        </span>
+      </div>
+
+      <!-- 5-Appliance Compatibility Matrix -->
+      <div class="space-y-2.5">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-muted">
+          {ui.matrixTitle}
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2" id="ksd-v-matrix">
+          {(['dishwasher', 'microwave', 'oven', 'freezer', 'airfryer'] as const).map(appKey => {
+            const verdict = defaultSymbol.verdicts[appKey];
+            return (
+              <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-canvas border border-hairline">
+                <span class="text-[13px] font-medium text-ink">{ui.appliances[appKey]}</span>
+                <span
+                  data-ksd-verdict-app={appKey}
+                  class={`px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide ${getBadgeClass(verdict)}`}
+                >
+                  {ui.verdictLabels[verdict]}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <!-- Plain-English Explanation -->
+      <div class="space-y-1.5">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-ink">
+          {ui.meaningHeading}
+        </h3>
+        <p id="ksd-v-explanation" class="text-[13.5px] text-body leading-relaxed">
+          {defaultSymbol.safetyExplanation}
+        </p>
+      </div>
+
+      <!-- Chemical / Heat Risk Warning Callout -->
+      <div class="p-3.5 rounded-xl bg-warning-bg border border-warning-border/70 space-y-1">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-warning flex items-center gap-1.5">
+          <span aria-hidden="true">⚠️</span>
+          <span>{ui.warningHeading}</span>
+        </h3>
+        <p id="ksd-v-watchout" class="text-[13px] text-ink/90 leading-relaxed">
+          {defaultSymbol.watchOutFor}
+        </p>
+      </div>
+
+      <!-- Common Items Carrying This Mark -->
+      <div class="space-y-2">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-muted">
+          {ui.commonItemsHeading}
+        </h3>
+        <div id="ksd-v-items" class="flex flex-wrap gap-1.5">
+          {defaultSymbol.commonItems.map(item => (
+            <span class="px-2.5 py-1 rounded-md text-xs bg-canvas border border-hairline text-body font-medium">
+              {item}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-wrap items-center gap-2.5 pt-2 border-t border-hairline">
+        <a
+          id="ksd-v-link"
+          href={defaultSymbol.relatedLink}
+          class="flex-1 min-w-[180px] inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-primary hover:bg-primary-active text-on-primary transition-colors text-center"
+        >
+          <span>{ui.readGuideBtn}</span>
+          <span aria-hidden="true">&rarr;</span>
+        </a>
+        <button
+          id="ksd-copy-verdict"
+          type="button"
+          class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-canvas border border-hairline text-ink hover:bg-surface-strong/50 transition-colors cursor-pointer"
+        >
+          <span>{ui.copyVerdictBtn}</span>
+        </button>
+      </div>
+
+      <!-- Core Appliance Hub Links -->
+      <div class="pt-2 border-t border-hairline/70 space-y-2">
+        <p class="text-[11px] font-bold uppercase tracking-wider text-muted">
+          {ui.coreHubsHeading}
+        </p>
+        <div class="flex flex-wrap gap-1.5">
+          {coreApplianceLinks.map(hub => (
+            <a
+              href={hub.href}
+              class="px-2.5 py-1 rounded-full text-[11.5px] font-medium bg-canvas border border-hairline text-link hover:border-link transition-colors"
+            >
+              {hub.label}
+            </a>
+          ))}
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- Embedded JSON Payload for Client Interactivity -->
+<script is:inline id="ksd-payload" type="application/json" set:html={JSON.stringify(clientPayload)} />
+
+<script is:inline>
+  (function () {
+    const payloadEl = document.getElementById('ksd-payload');
+    if (!payloadEl) return;
+
+    let data;
+    try {
+      data = JSON.parse(payloadEl.textContent || '{}');
+    } catch (_) {
+      return;
+    }
+
+    const symbols = data.symbols || [];
+    const svgMap = data.svgMap || {};
+    const ui = data.ui || {};
+    const byId = new Map(symbols.map((s) => [s.id, s]));
+
+    const searchInput = document.getElementById('ksd-search-input');
+    const clearBtn = document.getElementById('ksd-clear-search');
+    const resetBtn = document.getElementById('ksd-reset-filters');
+    const countStatus = document.getElementById('ksd-count-status');
+    const emptyState = document.getElementById('ksd-empty-state');
+    const gridEl = document.getElementById('ksd-symbol-grid');
+    const gridAnchor = document.getElementById('ksd-grid-anchor');
+    const verdictPanel = document.getElementById('ksd-verdict-panel');
+    const scrollGridBtn = document.getElementById('ksd-scroll-grid');
+    const copyBtn = document.getElementById('ksd-copy-verdict');
+
+    const tabButtons = Array.from(document.querySelectorAll('.ksd-tab-btn'));
+    const cardButtons = Array.from(document.querySelectorAll('.ksd-symbol-card'));
+    const quickPickButtons = Array.from(document.querySelectorAll('[data-ksd-quick]'));
+
+    const vSvg = document.getElementById('ksd-v-svg');
+    const vCode = document.getElementById('ksd-v-code');
+    const vCat = document.getElementById('ksd-v-cat');
+    const vName = document.getElementById('ksd-v-name');
+    const vShort = document.getElementById('ksd-v-short');
+    const vTempLabel = document.getElementById('ksd-v-temp-label');
+    const vTempVal = document.getElementById('ksd-v-temp-val');
+    const vExplanation = document.getElementById('ksd-v-explanation');
+    const vWatchout = document.getElementById('ksd-v-watchout');
+    const vItems = document.getElementById('ksd-v-items');
+    const vLink = document.getElementById('ksd-v-link');
+
+    let activeCategory = 'all';
+    let searchQuery = '';
+    let selectedId = 'pp-5';
+
+    function getBadgeClasses(val) {
+      if (val === 'yes') {
+        return 'px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide bg-green-100 text-green-900 dark:bg-emerald-950/70 dark:text-emerald-300 border border-green-300 dark:border-emerald-700';
+      }
+      if (val === 'depends') {
+        return 'px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide bg-amber-100 text-amber-900 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-300 dark:border-amber-700';
+      }
+      return 'px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide bg-red-100 text-red-900 dark:bg-red-950/70 dark:text-red-300 border border-red-300 dark:border-red-700';
+    }
+
+    function normalizeStr(str) {
+      return (str || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+    }
+
+    function selectSymbol(id, shouldScrollMobile) {
+      const sym = byId.get(id);
+      if (!sym) return;
+      selectedId = id;
+
+      // Update active card styles
+      cardButtons.forEach((btn) => {
+        const isAct = btn.getAttribute('data-ksd-id') === id;
+        btn.setAttribute('aria-pressed', isAct ? 'true' : 'false');
+        if (isAct) {
+          btn.classList.add('bg-surface-soft', 'border-signature-coral', 'ring-2', 'ring-signature-coral/30', 'shadow-sm');
+          btn.classList.remove('bg-canvas', 'border-hairline');
+        } else {
+          btn.classList.remove('bg-surface-soft', 'border-signature-coral', 'ring-2', 'ring-signature-coral/30', 'shadow-sm');
+          btn.classList.add('bg-canvas', 'border-hairline');
+        }
+      });
+
+      // Populate verdict panel
+      if (vSvg) vSvg.innerHTML = svgMap[sym.svgKey] || '';
+      if (vCode) vCode.textContent = sym.code;
+      if (vCat) vCat.textContent = (ui.categoryNames && ui.categoryNames[sym.category]) || sym.category;
+      if (vName) vName.textContent = sym.name;
+      if (vShort) vShort.textContent = sym.shortMeaning;
+
+      if (vTempLabel) {
+        if (sym.tempMode === 'min') vTempLabel.textContent = ui.minTempLabel;
+        else if (sym.tempDepends) vTempLabel.textContent = ui.dependsTempLabel;
+        else vTempLabel.textContent = ui.maxTempLabel;
+      }
+      if (vTempVal) {
+        const prefix = sym.tempDepends ? '~' : '';
+        const suffix = sym.tempDepends ? '*' : '';
+        vTempVal.textContent = `${prefix}${sym.maxTempF}°F / ${sym.maxTempC}°C${suffix}`;
+      }
+
+      ['dishwasher', 'microwave', 'oven', 'freezer', 'airfryer'].forEach((appKey) => {
+        const badgeEl = document.querySelector(`[data-ksd-verdict-app="${appKey}"]`);
+        if (!badgeEl) return;
+        const val = sym.verdicts[appKey];
+        badgeEl.className = getBadgeClasses(val);
+        badgeEl.textContent = (ui.verdictLabels && ui.verdictLabels[val]) || val;
+      });
+
+      if (vExplanation) vExplanation.textContent = sym.safetyExplanation;
+      if (vWatchout) vWatchout.textContent = sym.watchOutFor;
+
+      if (vItems) {
+        vItems.innerHTML = '';
+        (sym.commonItems || []).forEach((itemText) => {
+          const span = document.createElement('span');
+          span.className = 'px-2.5 py-1 rounded-md text-xs bg-canvas border border-hairline text-body font-medium';
+          span.textContent = itemText;
+          vItems.appendChild(span);
+        });
+      }
+
+      if (vLink) vLink.setAttribute('href', sym.relatedLink || '/');
+
+      // Update URL query param cleanly without scroll jump
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('symbol', id);
+        window.history.replaceState({}, '', url.toString());
+      } catch (_) {}
+
+      if (shouldScrollMobile && window.innerWidth < 1024 && verdictPanel) {
+        verdictPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function applyFilters() {
+      const q = normalizeStr(searchQuery.trim());
+      if (clearBtn) {
+        clearBtn.classList.toggle('hidden', q.length === 0);
+      }
+
+      let visibleCount = 0;
+      let firstVisibleId = null;
+      let selectedIsVisible = false;
+
+      cardButtons.forEach((btn) => {
+        const id = btn.getAttribute('data-ksd-id');
+        const cat = btn.getAttribute('data-ksd-category');
+        const sym = byId.get(id);
+        if (!sym) return;
+
+        const matchesCat = activeCategory === 'all' || cat === activeCategory;
+        let matchesQuery = true;
+        if (q.length > 0) {
+          const haystack = normalizeStr(
+            [
+              sym.code,
+              sym.name,
+              sym.shortMeaning,
+              sym.safetyExplanation,
+              ...(sym.commonItems || []),
+              ...(sym.searchKeywords || [])
+            ].join(' ')
+          );
+          matchesQuery = haystack.includes(q);
+        }
+
+        const isVisible = matchesCat && matchesQuery;
+        btn.classList.toggle('hidden', !isVisible);
+        if (isVisible) {
+          visibleCount++;
+          if (!firstVisibleId) firstVisibleId = id;
+          if (id === selectedId) selectedIsVisible = true;
+        }
+      });
+
+      if (countStatus) {
+        countStatus.innerHTML = `${ui.showingPrefix} <strong class="text-ink">${visibleCount}</strong> ${ui.showingOf} ${symbols.length} ${ui.symbolsUnit}`;
+      }
+      if (emptyState && gridEl) {
+        emptyState.classList.toggle('hidden', visibleCount > 0);
+        gridEl.classList.toggle('hidden', visibleCount === 0);
+      }
+
+      if (visibleCount > 0 && !selectedIsVisible && firstVisibleId) {
+        selectSymbol(firstVisibleId, false);
+      }
+    }
+
+    function setCategory(cat) {
+      activeCategory = cat;
+      tabButtons.forEach((btn) => {
+        const isAct = btn.getAttribute('data-ksd-cat') === cat;
+        btn.setAttribute('aria-selected', isAct ? 'true' : 'false');
+        const badge = btn.querySelector('span:last-child');
+        if (isAct) {
+          btn.classList.add('bg-primary', 'text-on-primary', 'border-primary', 'shadow-xs');
+          btn.classList.remove('bg-canvas', 'text-body', 'border-hairline');
+          if (badge) {
+            badge.classList.add('bg-white/20', 'text-on-primary');
+            badge.classList.remove('bg-surface-soft', 'text-muted');
+          }
+        } else {
+          btn.classList.remove('bg-primary', 'text-on-primary', 'border-primary', 'shadow-xs');
+          btn.classList.add('bg-canvas', 'text-body', 'border-hairline');
+          if (badge) {
+            badge.classList.remove('bg-white/20', 'text-on-primary');
+            badge.classList.add('bg-surface-soft', 'text-muted');
+          }
+        }
+      });
+      applyFilters();
+    }
+
+    // Bind symbol clicks
+    cardButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-ksd-id');
+        if (id) selectSymbol(id, true);
+      });
+    });
+
+    // Bind category tabs
+    tabButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const cat = btn.getAttribute('data-ksd-cat') || 'all';
+        setCategory(cat);
+      });
+    });
+
+    // Bind search input
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value || '';
+        applyFilters();
+      });
+    }
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        searchQuery = '';
+        if (searchInput) {
+          searchInput.value = '';
+          searchInput.focus();
+        }
+        applyFilters();
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        searchQuery = '';
+        if (searchInput) searchInput.value = '';
+        setCategory('all');
+      });
+    }
+
+    // Bind quick pick chips
+    quickPickButtons.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const q = chip.getAttribute('data-ksd-quick') || '';
+        searchQuery = q;
+        if (searchInput) searchInput.value = q;
+        setCategory('all');
+      });
+    });
+
+    // Scroll back up to symbol grid on mobile
+    if (scrollGridBtn && gridAnchor) {
+      scrollGridBtn.addEventListener('click', () => {
+        gridAnchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+
+    // Copy verdict shareable summary
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        const sym = byId.get(selectedId);
+        if (!sym) return;
+        const text = `${sym.name} (${sym.code}) — ${sym.shortMeaning}\n` +
+          `${ui.appliances.dishwasher}: ${ui.verdictLabels[sym.verdicts.dishwasher]} | ` +
+          `${ui.appliances.microwave}: ${ui.verdictLabels[sym.verdicts.microwave]} | ` +
+          `${ui.appliances.oven}: ${ui.verdictLabels[sym.verdicts.oven]} | ` +
+          `${ui.appliances.freezer}: ${ui.verdictLabels[sym.verdicts.freezer]} | ` +
+          `${ui.appliances.airfryer}: ${ui.verdictLabels[sym.verdicts.airfryer]}\n` +
+          `${window.location.href}`;
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(() => {
+            const labelSpan = copyBtn.querySelector('span');
+            if (labelSpan) {
+              labelSpan.textContent = ui.copiedVerdictBtn;
+              setTimeout(() => {
+                labelSpan.textContent = ui.copyVerdictBtn;
+              }, 2000);
+            }
+          }).catch(() => {});
+        }
+      });
+    }
+
+    // Check URL ?symbol=... on initial load
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const initialSym = params.get('symbol');
+      if (initialSym && byId.has(initialSym)) {
+        selectSymbol(initialSym, false);
+      }
+    } catch (_) {}
+  })();
+</script>

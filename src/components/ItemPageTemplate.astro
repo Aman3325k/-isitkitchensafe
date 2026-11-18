@@ -107,6 +107,112 @@ const howToSchema = (data.safe === 'yes' || data.safe === 'depends') ? {
   }))
 } : null;
 
+// AI-Ready Quick-Reference Summary Table Labels & Values
+const summaryLabels = {
+  heading: lang === 'es' ? 'Resumen de Seguridad de Referencia Rápida' :
+           lang === 'pt' ? 'Resumo de Segurança de Referência Rápida' :
+           lang === 'zh-cn' ? '安全速查摘要表' :
+           lang === 'ja' ? 'クイック安全早見表' :
+           'Quick-Reference Safety Summary',
+  item: lang === 'es' ? 'Artículo' : lang === 'pt' ? 'Item' : lang === 'zh-cn' ? '物品' : lang === 'ja' ? '対象アイテム' : 'Item',
+  appliance: lang === 'es' ? 'Electrodoméstico' : lang === 'pt' ? 'Eletrodoméstico' : lang === 'zh-cn' ? '适用电器' : lang === 'ja' ? '対象家電' : 'Appliance',
+  verdict: lang === 'es' ? 'Veredicto de Seguridad' : lang === 'pt' ? 'Veredito de Segurança' : lang === 'zh-cn' ? '安全结论' : lang === 'ja' ? '安全判定' : 'Safety Verdict',
+  materialRisk: lang === 'es' ? 'Material / Riesgo Principal' : lang === 'pt' ? 'Material / Risco Principal' : lang === 'zh-cn' ? '主要材质与风险' : lang === 'ja' ? '主な材質・リスク' : 'Primary Material / Risk',
+  quickAction: lang === 'es' ? 'Acción Recomendada' : lang === 'pt' ? 'Ação Recomendada' : lang === 'zh-cn' ? '建议操作' : lang === 'ja' ? '推奨アクション' : 'Quick Action'
+};
+
+const primaryRiskText = data.keyRisk || data.specific_warning || (data.warnings && data.warnings[0]) || '';
+const primaryMaterialRiskDisplay = data.material && primaryRiskText
+  ? `${data.material} — ${primaryRiskText}`
+  : (data.material || primaryRiskText || formattedAppliance);
+const quickActionText = data.tip || (data.tips && data.tips[0]) || (data.instructions && data.instructions[0]) || data.shortAnswer;
+
+// Contextual Consumer Tool Recommendation
+const matchContext = `${data.slug || ''} ${data.item || ''} ${data.material || ''}`.toLowerCase();
+let recommendedToolKey: 'symbol' | 'pan' | 'airfryer' | 'oil' = 'symbol';
+
+if (/\b(nonstick|non-stick|teflon|ptfe|pan|skillet|frying pan|fry pan)\b/i.test(matchContext)) {
+  recommendedToolKey = 'pan';
+} else if (/\b(oil|oils)\b/i.test(matchContext)) {
+  recommendedToolKey = 'oil';
+} else if (data.appliance === 'airfryer') {
+  recommendedToolKey = 'airfryer';
+} else if (data.appliance === 'dishwasher' || /\b(plastic|container|tupperware|bottle|tumbler|flask)\b/i.test(matchContext)) {
+  recommendedToolKey = 'symbol';
+}
+
+const toolCatalog = {
+  symbol: {
+    path: '/tools/kitchen-symbol-decoder/',
+    icon: '🔍',
+    badge: lang === 'es' ? 'Herramienta Interactiva' : lang === 'pt' ? 'Ferramenta Interativa' : lang === 'zh-cn' ? '互动工具' : lang === 'ja' ? 'インタラクティブツール' : 'Interactive Tool',
+    title: lang === 'es' ? 'Decodificador de Símbolos de Cocina' :
+           lang === 'pt' ? 'Decodificador de Símbolos de Cozinha' :
+           lang === 'zh-cn' ? '厨具底部安全标志识别器' :
+           lang === 'ja' ? 'キッチン用品マーク解読ツール' :
+           'Kitchen Bottom Symbol Decoder',
+    description: lang === 'es' ? '¿No estás seguro de los íconos en la base de tu recipiente? Identifica al instante los símbolos de lavavajillas, microondas y plásticos.' :
+                 lang === 'pt' ? 'Não tem certeza sobre os ícones no fundo do recipiente? Identifique na hora símbolos de lava-louças, micro-ondas e plásticos.' :
+                 lang === 'zh-cn' ? '不确定容器底部的符号含义？即时识别洗碗机、微波炉、耐热与塑料回收标志。' :
+                 lang === 'ja' ? '容器の底にあるマークの意味がわからない時は、食洗機・電子レンジ・耐熱マークを瞬時に判定できます。' :
+                 'Unsure about the icons stamped on the bottom of your container or cookware? Decode dishwasher, microwave, oven, and plastic resin symbols instantly.',
+    cta: lang === 'es' ? 'Abrir Decodificador' : lang === 'pt' ? 'Abrir Decodificador' : lang === 'zh-cn' ? '打开标志识别器' : lang === 'ja' ? 'マークを調べる' : 'Decode Bottom Symbols'
+  },
+  pan: {
+    path: '/tools/pan-scratch-inspector/',
+    icon: '🍳',
+    badge: lang === 'es' ? 'Herramienta Interactiva' : lang === 'pt' ? 'Ferramenta Interativa' : lang === 'zh-cn' ? '互动工具' : lang === 'ja' ? 'インタラクティブツール' : 'Interactive Tool',
+    title: lang === 'es' ? 'Inspector de Rayones en Sartenes Antiadherentes' :
+           lang === 'pt' ? 'Inspetor de Riscos em Panelas Antiaderentes' :
+           lang === 'zh-cn' ? '不粘锅划痕安全检测器' :
+           lang === 'ja' ? 'テフロン・フライパン傷診断ツール' :
+           'Nonstick Pan Scratch Inspector',
+    description: lang === 'es' ? 'Evalúa si tu sartén antiadherente o de teflón sigue siendo segura para cocinar o si debes reemplazarla por riesgo de PTFE/PFAS.' :
+                 lang === 'pt' ? 'Avalie se sua panela antiaderente ainda é segura para cozinhar ou se deve ser substituída devido ao desgaste do revestimento.' :
+                 lang === 'zh-cn' ? '评估不粘锅或特氟龙涂层划伤程度，判断是继续安全使用还是应立即更换。' :
+                 lang === 'ja' ? 'フッ素樹脂加工フライパンの傷の深さを診断し、使い続けて安全か買い替えるべきかを判定します。' :
+                 'Check whether your scratched nonstick skillet or pan is still safe to cook with or should be replaced to avoid coating flaking.',
+    cta: lang === 'es' ? 'Inspeccionar Sartén' : lang === 'pt' ? 'Inspecionar Panela' : lang === 'zh-cn' ? '开始检测锅具' : lang === 'ja' ? 'フライパンを診断' : 'Inspect Your Pan'
+  },
+  airfryer: {
+    path: '/tools/air-fryer-acrylamide-calculator/',
+    icon: '🔥',
+    badge: lang === 'es' ? 'Herramienta Interactiva' : lang === 'pt' ? 'Ferramenta Interativa' : lang === 'zh-cn' ? '互动工具' : lang === 'ja' ? 'インタラクティブツール' : 'Interactive Tool',
+    title: lang === 'es' ? 'Calculadora de Acrilamida en Freidora de Aire' :
+           lang === 'pt' ? 'Calculadora de Acrilamida na Air Fryer' :
+           lang === 'zh-cn' ? '空气炸锅丙烯酰胺温度计算器' :
+           lang === 'ja' ? 'ノンフライヤー アクリルアミド計算ツール' :
+           'Air Fryer Acrylamide & Temp Calculator',
+    description: lang === 'es' ? 'Optimiza el tiempo y la temperatura de tu freidora de aire para reducir la formación de acrilamida y evitar el sobrecalentamiento.' :
+                 lang === 'pt' ? 'Ajuste a temperatura e o tempo na air fryer para reduzir a formação de acrilamida e cozinhar com mais segurança.' :
+                 lang === 'zh-cn' ? '科学评估空气炸锅温度与时间组合，降低高温美拉德反应产生的丙烯酰胺风险。' :
+                 lang === 'ja' ? 'ノンフライヤーの加熱温度と時間からアクリルアミド生成リスクを評価し、安全な調理条件を見つけます。' :
+                 'Dial in safer air-fryer temperatures and cook times to minimize acrylamide formation and prevent overheating.',
+    cta: lang === 'es' ? 'Abrir Calculadora' : lang === 'pt' ? 'Abrir Calculadora' : lang === 'zh-cn' ? '打开计算器' : lang === 'ja' ? 'ツールを開く' : 'Run Air Fryer Calculator'
+  },
+  oil: {
+    path: '/tools/culinary-oil-smoke-point-simulator/',
+    icon: '🫒',
+    badge: lang === 'es' ? 'Herramienta Interactiva' : lang === 'pt' ? 'Ferramenta Interativa' : lang === 'zh-cn' ? '互动工具' : lang === 'ja' ? 'インタラクティブツール' : 'Interactive Tool',
+    title: lang === 'es' ? 'Simulador de Punto de Humo de Aceites' :
+           lang === 'pt' ? 'Simulador de Ponto de Fumaça de Óleos' :
+           lang === 'zh-cn' ? '食用油烟点安全模拟器' :
+           lang === 'ja' ? '調理油の発煙点シミュレーター' :
+           'Culinary Oil Smoke Point Simulator',
+    description: lang === 'es' ? 'Compara los puntos de humo y la estabilidad térmica de los aceites de cocina para evitar humo tóxico e incendios por grasa.' :
+                 lang === 'pt' ? 'Compare os pontos de fumaça e a estabilidade térmica dos óleos culinários para evitar fumaça tóxica e superaquecimento.' :
+                 lang === 'zh-cn' ? '对比各类食用油的烟点与高温氧化稳定性，避免油烟有害物质与厨房起火隐患。' :
+                 lang === 'ja' ? '調理油ごとの発煙点と熱安定性を比較し、有害な煙や過熱トラブルを防ぎます。' :
+                 'Compare cooking oil smoke points and thermal oxidation thresholds to prevent toxic fumes and grease flare-ups.',
+    cta: lang === 'es' ? 'Comparar Aceites' : lang === 'pt' ? 'Comparar Óleos' : lang === 'zh-cn' ? '模拟油温烟点' : lang === 'ja' ? '発煙点を確認' : 'Check Oil Smoke Points'
+  }
+};
+
+const recommendedTool = toolCatalog[recommendedToolKey];
+const recommendedToolUrl = translatePath(recommendedTool.path);
+const methodologyUrl = getDirectoryUrl('methodology', lang);
+const savedSheetUrl = getDirectoryUrl('saved', lang);
+
 ---
 
 <Layout title={pageTitle} description={pageDescription} faqs={data.faqs} lang={lang} availableLocales={availableLocales}>
@@ -241,9 +347,42 @@ const howToSchema = (data.safe === 'yes' || data.safe === 'depends') ? {
         'bg-warning-bg border border-warning-border/20'
       }`}>
         <h2 class="text-title-sm text-ink font-medium mb-3">{t('page.quickVerdict')}: {questionHeading}</h2>
-        <p class="short-answer text-title-md font-bold leading-relaxed text-ink mb-4">
+        <p class="short-answer text-title-md font-bold leading-relaxed text-ink mb-5">
           {data.shortAnswer}
         </p>
+
+        <!-- AI-Ready Quick-Reference Summary Table -->
+        <div class="overflow-x-auto bg-canvas border border-hairline rounded-md shadow-2xs my-5" id="quick-reference-summary">
+          <table class="w-full text-left border-collapse text-[13px]">
+            <caption class="sr-only">{summaryLabels.heading}: {data.item} ({formattedAppliance})</caption>
+            <tbody class="divide-y divide-hairline">
+              <tr>
+                <th scope="row" class="py-2.5 px-3.5 bg-surface-soft text-muted font-semibold w-[36%] sm:w-[30%] align-top">{summaryLabels.item}</th>
+                <td class="py-2.5 px-3.5 text-ink font-medium align-top">{data.item}</td>
+              </tr>
+              <tr>
+                <th scope="row" class="py-2.5 px-3.5 bg-surface-soft text-muted font-semibold align-top">{summaryLabels.appliance}</th>
+                <td class="py-2.5 px-3.5 text-ink align-top">{formattedAppliance}</td>
+              </tr>
+              <tr>
+                <th scope="row" class="py-2.5 px-3.5 bg-surface-soft text-muted font-semibold align-top">{summaryLabels.verdict}</th>
+                <td class="py-2.5 px-3.5 align-top">
+                  {data.safe === 'yes' && <span class="badge-yes px-2.5 py-0.5 text-[11px]">✓ {t('verdict.yes')}</span>}
+                  {data.safe === 'no' && <span class="badge-no px-2.5 py-0.5 text-[11px]">✗ {t('verdict.no')}</span>}
+                  {data.safe === 'depends' && <span class="badge-depends px-2.5 py-0.5 text-[11px]">⚠ {t('verdict.depends')}</span>}
+                </td>
+              </tr>
+              <tr>
+                <th scope="row" class="py-2.5 px-3.5 bg-surface-soft text-muted font-semibold align-top">{summaryLabels.materialRisk}</th>
+                <td class="py-2.5 px-3.5 text-body align-top">{primaryMaterialRiskDisplay}</td>
+              </tr>
+              <tr>
+                <th scope="row" class="py-2.5 px-3.5 bg-surface-soft text-muted font-semibold align-top">{summaryLabels.quickAction}</th>
+                <td class="py-2.5 px-3.5 text-ink font-medium align-top">{quickActionText}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         
         {data.material ? (
           <div>
@@ -381,10 +520,72 @@ const howToSchema = (data.safe === 'yes' || data.safe === 'depends') ? {
       </div>
     </section>
 
-    <!-- Source Disclosure Block -->
-    <div class="bg-surface-soft border border-hairline rounded-md p-4 mb-12 text-xs text-muted leading-relaxed">
-      <span>{t('page.sourceNotice')} {t('page.spottedError')} <a href={getDirectoryUrl('contact', lang)} class="hover:underline font-semibold text-ink">{t('page.contactUs')}</a></span>
-    </div>
+    <!-- Contextual Consumer Tool Recommendation Card -->
+    <section id="recommended-tool-card" class="mb-8 bg-surface-soft border border-hairline rounded-lg p-5 sm:p-6 shadow-xs no-print">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="min-w-0 flex-1">
+          <div class="flex flex-wrap items-center gap-2 mb-1.5">
+            <span class="text-base" aria-hidden="true">{recommendedTool.icon}</span>
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-signature-coral">{recommendedTool.badge}</span>
+          </div>
+          <h2 class="text-title-sm text-ink font-semibold mb-1.5 leading-snug">
+            {recommendedTool.title}
+          </h2>
+          <p class="text-[13px] text-body leading-relaxed">
+            {recommendedTool.description}
+          </p>
+        </div>
+        <div class="shrink-0">
+          <a
+            href={recommendedToolUrl}
+            class="min-h-[42px] px-4 py-2.5 bg-primary hover:bg-primary-active active:scale-[0.98] text-on-primary rounded-md text-xs font-medium inline-flex items-center gap-1.5 transition-all whitespace-nowrap"
+          >
+            <span>{recommendedTool.cta}</span>
+            <span aria-hidden="true">&rarr;</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Editorial Verification & Primary Sources Trust Bar + Saved Cheat Sheet Link -->
+    <section id="editorial-trust-bar" class="bg-surface-soft border border-hairline rounded-lg p-5 mb-12 text-xs text-muted leading-relaxed">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3.5 border-b border-hairline">
+        <div class="flex items-start gap-2.5 min-w-0 flex-1">
+          <svg class="w-4 h-4 text-success shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+          <div>
+            <p class="text-ink font-medium text-[13px] leading-snug">
+              {lang === 'es' ? 'Verificado según USDA FSIS, FDA 21 CFR y manuales de electrodomésticos del fabricante' :
+               lang === 'pt' ? 'Verificado conforme USDA FSIS, FDA 21 CFR e manuais de eletrodomésticos do fabricante' :
+               lang === 'zh-cn' ? '依据 USDA FSIS、FDA 21 CFR 规范及家电原厂使用手册交叉核验' :
+               lang === 'ja' ? 'USDA FSIS・FDA 21 CFR基準および各家電メーカー取扱説明書に基づき検証済み' :
+               'Verified against USDA FSIS, FDA 21 CFR & manufacturer appliance guidelines'}
+            </p>
+            <div class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px]">
+              <a href={methodologyUrl} class="text-link hover:underline font-medium">
+                {lang === 'es' ? 'Metodología de Verificación' :
+                 lang === 'pt' ? 'Metodologia de Verificação' :
+                 lang === 'zh-cn' ? '查看安全核验方法论' :
+                 lang === 'ja' ? '安全検証メソドロジーを見る' :
+                 'Read Safety Methodology'} &rarr;
+              </a>
+              <span class="text-hairline hidden sm:inline">•</span>
+              <a href={savedSheetUrl} class="text-ink hover:text-link hover:underline font-semibold no-print">
+                {lang === 'es' ? 'Ver Hoja de Referencia Imprimible para el Refrigerador →' :
+                 lang === 'pt' ? 'Ver Folha Imprimível para a Geladeira →' :
+                 lang === 'zh-cn' ? '查看可打印冰箱安全速查表 →' :
+                 lang === 'ja' ? '印刷用キッチン安全早見表を見る →' :
+                 'View Printable Fridge Cheat Sheet →'}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pt-3">
+        <span>{t('page.sourceNotice')} {t('page.spottedError')} <a href={getDirectoryUrl('contact', lang)} class="hover:underline font-semibold text-ink">{t('page.contactUs')}</a></span>
+      </div>
+    </section>
 
     <!-- FAQ Section -->
     <section id="faq-section" class="border-t border-hairline pt-12 mb-16 content-visibility-auto">
@@ -593,6 +794,7 @@ const howToSchema = (data.safe === 'yes' || data.safe === 'depends') ? {
             } else {
               items.push({
                 slug: slug,
+                name: name,
                 item: name,
                 appliance: appliance,
                 safe: safe,

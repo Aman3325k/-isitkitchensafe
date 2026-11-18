@@ -153,15 +153,17 @@ const linkHrefRegex = /<link\s+[^>]*?rel=["']alternate["'][^>]*?href=["']([^"']+
 
 for (const htmlFile of htmlFiles) {
   const content = fs.readFileSync(htmlFile, 'utf8');
+  const htmlWithoutScripts = content.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '');
   const relSource = path.relative(distDir, htmlFile).replace(/\\/g, '/');
   
-  // Extract <a> hrefs
+  // Extract <a> hrefs (outside <script> blocks)
   let match;
-  while ((match = hrefRegex.exec(content)) !== null) {
+  hrefRegex.lastIndex = 0;
+  while ((match = hrefRegex.exec(htmlWithoutScripts)) !== null) {
     totalHrefsChecked++;
     const rawHref = match[1].trim();
 
-    // Skip external URLs, mailto, tel, javascript, hash-only
+    // Skip external URLs, mailto, tel, javascript, hash-only, template expressions
     if (
       rawHref.startsWith('http://') ||
       rawHref.startsWith('https://') ||
@@ -170,7 +172,8 @@ for (const htmlFile of htmlFiles) {
       rawHref.startsWith('tel:') ||
       rawHref.startsWith('javascript:') ||
       rawHref.startsWith('#') ||
-      rawHref.startsWith('data:')
+      rawHref.startsWith('data:') ||
+      rawHref.includes('${')
     ) {
       continue;
     }
@@ -178,14 +181,15 @@ for (const htmlFile of htmlFiles) {
     if (!targetExists(rawHref)) {
       brokenLinks.push({
         source: relSource,
-        href: rawHref,
+        href: Buffer.from(rawHref, 'utf8').toString('utf8'),
         type: 'anchor'
       });
     }
   }
 
   // Extract <link rel="alternate"> hrefs (canonical/hreflang)
-  while ((match = linkHrefRegex.exec(content)) !== null) {
+  linkHrefRegex.lastIndex = 0;
+  while ((match = linkHrefRegex.exec(htmlWithoutScripts)) !== null) {
     totalHrefsChecked++;
     const rawHref = match[1].trim();
     let parsedPath = rawHref;
@@ -198,7 +202,7 @@ for (const htmlFile of htmlFiles) {
     if (!targetExists(parsedPath)) {
       brokenLinks.push({
         source: relSource,
-        href: rawHref,
+        href: Buffer.from(rawHref, 'utf8').toString('utf8'),
         type: 'hreflang-alternate'
       });
     }
