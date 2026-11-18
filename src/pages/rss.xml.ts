@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/instant-pot-pressure-release-checker/',
+    title: 'Pressure Cooker & Instant Pot Fill-Line & Release Safety Checker',
+    description:
+      'Interactive Instant Pot & stovetop pressure cooker safety checker grounded in UL 1026 & USDA standards: check 1/2 MAX vs. 2/3 MAX fill lines, Natural (NPR) vs. Quick Release (QR) timing, foaming valve-clog risk, minimum thin liquid by pot size (3-qt, 6-qt, 8-qt, stovetop), and BURN notice prevention across 22 foods.',
+    date: '2026-11-18',
+  },
+  {
     path: '/tools/kitchen-fire-emergency-guide/',
     title: 'Kitchen Grease Fire, Electrical & Burn Emergency First-Response Guide',
     description:

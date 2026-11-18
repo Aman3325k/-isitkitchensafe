@@ -230,6 +230,7 @@ const SPECIAL_PAGES = [
   'tools/oven-rack-bakeware-heat-adjuster',
   'tools/kitchen-fire-emergency-guide',
   'tools/instant-pot-pressure-release-checker',
+  'tools/slow-cooker-food-safety-checker',
   'methodology',
   'saved'
 ];

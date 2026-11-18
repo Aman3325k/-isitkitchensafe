@@ -228,7 +228,8 @@ const TOOLS_REGISTRY = [
   { slug: 'moldy-food-safety-checker', name: 'USDA Moldy Food Cut-Around vs. Throw-Out Safety Checker', category: 'Consumer Kitchen Safety', component: 'MoldyFoodSafetyChecker.astro', dataFile: 'moldy-food-safety-data.json' },
   { slug: 'oven-rack-bakeware-heat-adjuster', name: 'Interactive Oven Rack Position, Convection & Bakeware Material Heat Adjuster', category: 'Consumer Kitchen Safety', component: 'OvenRackBakewareHeatAdjuster.astro', dataFile: 'oven-rack-bakeware-heat-data.json' },
   { slug: 'kitchen-fire-emergency-guide', name: 'Kitchen Grease Fire, Electrical & Burn Emergency First-Response Guide', category: 'Consumer Kitchen Safety', component: 'KitchenFireEmergencyGuide.astro', dataFile: 'kitchen-fire-emergency-guide-data.json' },
-  { slug: 'instant-pot-pressure-release-checker', name: 'Pressure Cooker & Instant Pot Fill-Line, Natural vs. Quick Release & Foaming Food Safety Checker', category: 'Consumer Kitchen Safety', component: 'InstantPotPressureReleaseChecker.astro', dataFile: 'instant-pot-pressure-release-data.json' }
+  { slug: 'instant-pot-pressure-release-checker', name: 'Pressure Cooker & Instant Pot Fill-Line, Natural vs. Quick Release & Foaming Food Safety Checker', category: 'Consumer Kitchen Safety', component: 'InstantPotPressureReleaseChecker.astro', dataFile: 'instant-pot-pressure-release-data.json' },
+  { slug: 'slow-cooker-food-safety-checker', name: 'Slow Cooker & Crock-Pot Food Safety Checker', category: 'Consumer Kitchen Safety', component: 'SlowCookerFoodSafetyChecker.astro', dataFile: 'slow-cooker-food-safety-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -547,7 +548,8 @@ function auditDatasets() {
     'moldy-food-safety-data.json',
     'oven-rack-bakeware-heat-data.json',
     'kitchen-fire-emergency-guide-data.json',
-    'instant-pot-pressure-release-data.json'
+    'instant-pot-pressure-release-data.json',
+    'slow-cooker-food-safety-data.json'
 ];
 
   const datasetStats = {};

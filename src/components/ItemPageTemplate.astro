@@ -127,101 +127,164 @@ const primaryMaterialRiskDisplay = data.material && primaryRiskText
   : (data.material || primaryRiskText || formattedAppliance);
 const quickActionText = data.tip || (data.tips && data.tips[0]) || (data.instructions && data.instructions[0]) || data.shortAnswer;
 
-// Contextual Consumer Tool Recommendation (Smart 18-Tool Router across EN/ES/PT/ZH-CN/JA)
-const itemSlugLower = String(data.slug || '').toLowerCase();
-const itemNameLower = String(data.item || '').toLowerCase();
-const itemMatchText = `${itemSlugLower} ${itemNameLower}`;
-const itemApplianceLower = String(data.appliance || '').toLowerCase();
-
+// Contextual Consumer Tool Recommendation (Smart 24-Tool Router across EN/ES/PT/ZH-CN/JA)
 type RecommendedToolKey =
   | 'babyBottle'
+  | 'kitchenFire'
   | 'castIron'
   | 'induction'
+  | 'descaling'
+  | 'instantPot'
+  | 'foodAllergy'
+  | 'cleaner'
   | 'oil'
   | 'dishwasherDosage'
+  | 'pan'
+  | 'ovenRack'
+  | 'ovenTemp'
+  | 'plastic'
+  | 'powerOutage'
+  | 'thawing'
+  | 'moldyFood'
+  | 'pantry'
   | 'fridgeZone'
   | 'leftover'
-  | 'descaling'
-  | 'cleaner'
-  | 'plastic'
-  | 'pan'
+  | 'cookingTemp'
   | 'airfryer'
   | 'microwaveWattage'
-  | 'thawing'
-  | 'powerOutage'
-  | 'ovenTemp'
-  | 'cookingTemp'
   | 'symbol';
 
-let recommendedToolKey: RecommendedToolKey = 'symbol';
+function selectRecommendedTool(slugRaw: unknown, itemNameRaw: unknown, applianceRaw: unknown): RecommendedToolKey {
+  const itemSlugLower = String(slugRaw || '').toLowerCase();
+  const itemNameLower = String(itemNameRaw || '').toLowerCase();
+  const itemMatchText = `${itemSlugLower} ${itemNameLower}`;
+  const itemApplianceLower = String(applianceRaw || '').toLowerCase();
 
-const isMeatOrProteinItem = /\b(chicken|turkey|beef|pork|steaks?|meats?|meatballs?|hamburger|burgers?|ham|lamb|duck|veal|organ|fish|salmon|tuna|cod|tilapia|shrimp|scallops?|lobster|crab|mussels?|clams?|seafood|bacon|sausages?|hot[- ]dogs?|ground|eggs?|casseroles?|lasagna)\b/i.test(itemSlugLower);
-const isCookedLeftoverItem = /\b(cooked|leftover|soup|broth|stew|chili|lasagna|casserole|stir[- ]fry|curry|macaroni[- ]and[- ]cheese|enchiladas|mashed[- ]potatoes|deli[- ]sliced|rotisserie|canned|opened|hummus|pesto|salsa|guacamole|jam|jelly|mayonnaise|ketchup|mustard|sauce|dressing|pickles|kimchi|sauerkraut|olives|capers|marinated|miso|gochujang|tahini|custard|cheesecake|tiramisu|tart|pie|frosting|salami|prosciutto|pepperoni|hot[- ]dogs|anchovy|sardines)\b/i.test(itemSlugLower);
-const isMicrowaveNonFoodItem = /\b(foil|metal|aluminum|fork|spoon|gold[- ]rimmed|silverware|ceramic[- ]mug|ceramic[- ]plate|fine[- ]china|glass[- ]bowl|wine[- ]glass|mason[- ]jar|travel[- ]mug|yeti|hydro[- ]flask|stanley|stainless|paper|cardboard|newspaper|wax[- ]paper|parchment|wood|silicone|muffin[- ]tin|baking[- ]sheet|bundt|instant[- ]pot|hand[- ]warmers|candle|memory[- ]foam|crocs|shoes|sweater)\b/i.test(itemSlugLower);
+  const isMeatOrProteinItem = /\b(chicken|turkey|beef|pork|steaks?|meats?|meatballs?|hamburger|burgers?|ham|lamb|duck|veal|organ|fish|salmon|tuna|cod|tilapia|shrimp|scallops?|lobster|crab|mussels?|clams?|seafood|bacon|sausages?|hot[- ]dogs?|ground|eggs?|casseroles?|lasagna)\b/i.test(itemSlugLower);
+  const isCookedLeftoverItem = /\b(cooked|leftover|soup|broth|stew|chili|lasagna|casserole|stir[- ]fry|curry|macaroni[- ]and[- ]cheese|enchiladas|mashed[- ]potatoes|deli[- ]sliced|rotisserie|canned|opened|hummus|pesto|salsa|guacamole|jam|jelly|mayonnaise|ketchup|mustard|sauce|dressing|pickles|kimchi|sauerkraut|olives|capers|marinated|miso|gochujang|tahini|custard|cheesecake|tiramisu|tart|pie|frosting|salami|prosciutto|pepperoni|hot[- ]dogs|anchovy|sardines)\b/i.test(itemSlugLower);
+  const isMicrowaveNonFoodItem = /\b(foil|metal|aluminum|fork|spoon|gold[- ]rimmed|silverware|ceramic[- ]mug|ceramic[- ]plate|fine[- ]china|glass[- ]bowl|wine[- ]glass|mason[- ]jar|travel[- ]mug|yeti|hydro[- ]flask|stanley|stainless|paper|cardboard|newspaper|wax[- ]paper|parchment|wood|silicone|muffin[- ]tin|baking[- ]sheet|bundt|instant[- ]pot|hand[- ]warmers|candle|memory[- ]foam|crocs|shoes|sweater)\b/i.test(itemSlugLower);
 
-if (/\b(baby[- ]bottles?|sippy[- ]cups?|pacifiers?|teethers?|breast[- ]?milk|baby[- ]food|formula|nipples?|steriliz(?:er|e)|kids[- ]plates?|bamboo[- ]kids|melamine[- ]kids|infant|nursery|biber[oó]n|mamadeira|chupeta|奶瓶|学饮杯|安抚奶嘴|哺乳瓶|おしゃぶり)\b/i.test(itemMatchText)) {
-  recommendedToolKey = 'babyBottle';
-} else if (/\b(cast[- ]iron|carbon[- ]steel|dutch[- ]ovens?|le[- ]creuset|staub|lodge|skillets?|seasoning|rust)\b/i.test(itemSlugLower)) {
-  recommendedToolKey = 'castIron';
-} else if (
-  /\b(induction|moka[- ]pots?|copper|tri[- ]ply|magnetic|all[- ]clad|ferromagnetic|woks?)\b/i.test(itemSlugLower) ||
-  (itemApplianceLower !== 'oven' && /\b(stainless[- ]steel[- ]pans?|steel[- ]pans?)\b/i.test(itemSlugLower))
-) {
-  recommendedToolKey = 'induction';
-} else if (/\b(coffee[- ]pot|coffee[- ]maker|espresso|kettles?|keurig|nespresso|carafes?|ice[- ]makers?|steamers?|descal(?:e|ing))\b/i.test(itemSlugLower)) {
-  recommendedToolKey = 'descaling';
-} else if (
-  /\b(bleach|ammonia|peroxide|cleaners?|soaps?|sponges?|sanitizers?|disinfectants?|drain[- ]cleaners?|lye|caustic|acetone|paint[- ]thinner|gasoline|steel[- ]wool|baking[- ]soda)\b/i.test(itemSlugLower) ||
-  (/\bvinegar\b/i.test(itemSlugLower) && itemApplianceLower !== 'refrigerator' && !/\b(sauce|dressing|vinaigrette|pickle)\b/i.test(itemSlugLower))
-) {
-  recommendedToolKey = 'cleaner';
-} else if (
-  /\b(olive[- ]oil|vegetable[- ]oil|coconut[- ]oil|avocado[- ]oil|cooking[- ]oil|canola[- ]oil|sesame[- ]oil|sunflower[- ]oil|peanut[- ]oil|cooking[- ]spray|ghee|lard|tallow|shortening|grease|oil[- ]soaked)\b/i.test(itemSlugLower) ||
-  (/\bbutter\b/i.test(itemSlugLower) && !/\b(peanut[- ]butter|almond[- ]butter|butter[- ]paper|buttercream|butter[- ]stain)\b/i.test(itemSlugLower))
-) {
-  recommendedToolKey = 'oil';
-} else if (
-  itemApplianceLower === 'dishwasher' &&
-  /\b(glass(?:es|ware)?|crystal|wine[- ]glass(?:es)?|champagne[- ]flutes?|mason[- ]jars?|pyrex|silicone|stasher|owala|yeti|stanley|hydroflask|nalgene|contigo|swell|klean[- ]kanteen|camelbak|thermos|ninja[- ]creami|ninja[- ]blender|nutribullet|vitamix|instant[- ]pot|air[- ]fryer[- ]basket|cuisinart|aluminum|baking[- ]sheet|muffin[- ]tin|bundt|springform|pods?|detergents?|rinse[- ]aid|silverware|pewter|antique|corelle|acrylic|travel[- ]mug|knives|knife|shears)\b/i.test(itemSlugLower)
-) {
-  recommendedToolKey = 'dishwasherDosage';
-} else if (
-  itemApplianceLower !== 'oven' &&
-  /\b(nonstick|non[- ]stick|teflon|ptfe|ceramic[- ]pans?|hexclad|caraway|fry(?:ing)?[- ]pans?)\b/i.test(itemSlugLower)
-) {
-  recommendedToolKey = 'pan';
-} else if (
-  /\b(always[- ]pan)\b/i.test(itemSlugLower) ||
-  (itemApplianceLower === 'oven' && /\b(pyrex|glass|ceramic|stoneware|corningware|pampered[- ]chef|terracotta|china|porcelain|ramekin|non[- ]stick|nonstick|stainless|aluminum|steel[- ]pan|parchment|wax[- ]paper|foil|silicone|rubber|bakeware|baking[- ]sheet|baking[- ]stone|baking[- ]cups|cookie[- ]sheet|cookie[- ]cutters|muffin[- ]tin|bundt|springform|bread[- ]pan|pie[- ]pan|roasting[- ]pan|wire[- ]rack|skewers|twine|handles|paper|cardboard|pizza[- ]box|butcher[- ]block|cutting[- ]board|wooden[- ]spoon|mason[- ]jar|travel[- ]mug|yeti|hydro[- ]flask|stanley|instant[- ]pot|silverware|lids?|pots?|pans?|dishes?|bowls?|mugs?|plates?)\b/i.test(itemSlugLower)) ||
-  (itemApplianceLower !== 'dishwasher' && /\b(pyrex|corningware|stoneware)\b/i.test(itemSlugLower))
-) {
-  recommendedToolKey = 'ovenTemp';
-} else if (/\b(plastics?|tupperware|styrofoam|foam[- ]cup|polystyrene|polypropylene|pet|hdpe|pvc|tritan|ziploc|takeout|bento[- ]box|solo[- ]cup|deli[- ]container|vacuum[- ]seal|compostable[- ]pla|cling|protein[- ]shaker|silicone[- ]storage[- ]bag|silicone[- ]bag|melamine)\b/i.test(itemSlugLower)) {
-  recommendedToolKey = 'plastic';
-} else if (
-  /\b(power[- ]outage|blackout|spoil(?:age|ed)|rot(?:ten)?|sour[- ]milk|bad[- ]meat|danger[- ]zone|warm[- ]fridge|warm[- ]freezer|power[- ]cut|storm|refreez(?:e|ing)|ice[- ]cream[- ]refreezing)\b/i.test(itemSlugLower) ||
-  (itemApplianceLower === 'freezer' && /\b(milk|cream|yogurt|cheese|ice[- ]cream|mayonnaise|hummus|pesto|salsa|guacamole|deli[- ]meat)\b/i.test(itemSlugLower))
-) {
-  recommendedToolKey = 'powerOutage';
-} else if (
-  (itemApplianceLower === 'freezer' || /\bfrozen[- ](meat|raw[- ]chicken)\b/i.test(itemSlugLower) || /\bthaw/i.test(itemSlugLower)) &&
-  isMeatOrProteinItem
-) {
-  recommendedToolKey = 'thawing';
-} else if (itemApplianceLower === 'refrigerator') {
-  recommendedToolKey = isCookedLeftoverItem ? 'leftover' : 'fridgeZone';
-} else if (
-  itemApplianceLower === 'freezer' &&
-  (isCookedLeftoverItem || /\b(rice|pasta|bread|cake|cookies|muffin|pie|brownie|avocado|watermelon|pineapple|apple|banana|orange|strawberry|blueberry|raspberry|blackberry|grape|cantaloupe|honeydew|peach|plum|nectarine|cherry|mango|tomato|cucumber|pepper|spinach|lettuce|broccoli|celery|cabbage|zucchini|carrot|onion|garlic|potato|mushroom|tofu|tempeh|egg|nut|herb|honey|syrup|juice|wine|beer|coffee|tea|soda|kombucha|smoothie|shake|pizza|dough|ginger|lemon|lime|squash|eggplant|asparagus|peas|corn|quinoa|lentils|oatmeal|spaghetti|macaroni|croissant|bagel|tortilla|chocolate|maple|peanut|almond|nutella)\b/i.test(itemSlugLower))
-) {
-  recommendedToolKey = 'leftover';
-} else if ((itemApplianceLower === 'oven' || itemApplianceLower === 'airfryer') && isMeatOrProteinItem) {
-  recommendedToolKey = 'cookingTemp';
-} else if (itemApplianceLower === 'airfryer') {
-  recommendedToolKey = 'airfryer';
-} else if (itemApplianceLower === 'microwave' && !isMicrowaveNonFoodItem) {
-  recommendedToolKey = 'microwaveWattage';
+  if (/\b(baby[- ]bottles?|sippy[- ]cups?|pacifiers?|teethers?|breast[- ]?milk|baby[- ]food|formula|nipples?|steriliz(?:er|e)|kids[- ]plates?|bamboo[- ]kids|melamine[- ]kids|infant|nursery|biber[oó]n|mamadeira|chupeta|奶瓶|学饮杯|安抚奶嘴|哺乳瓶|おしゃぶり)\b/i.test(itemMatchText)) {
+    return 'babyBottle';
+  }
+  if (
+    /\b(kitchen[- ]fire|grease[- ]fire|burning[- ]oil|sparking|oil[- ]soaked|cooking[- ]oil[- ]towels?|grease[- ]stained|motor[- ]oil|wax[- ]stained|candle[- ]wax)\b/i.test(itemSlugLower) ||
+    (itemApplianceLower === 'microwave' && /\b(aluminum[- ]foil|tin[- ]foil|foil|aluminum[- ]pan|metal[- ]spoon|fork[- ]in[- ]microwave|gold[- ]rimmed|gold[- ]silverware|silver[- ]silverware|metal[- ]twist[- ]ties?|steel[- ]wool|hand[- ]warmers?|candles?|paper[- ]bags?|brown[- ]paper[- ]bag|newspaper|cardboard[- ]box|cardboard[- ]pizza[- ]box)\b/i.test(itemSlugLower)) ||
+    ((itemApplianceLower === 'oven' || itemApplianceLower === 'airfryer') && /\b(cooking[- ]spray[- ]aerosol|parchment[- ]paper[- ]unweighted|aluminum[- ]foil[- ]loose|newspaper|cardboard|pizza[- ]box|paper[- ]bags?|paper[- ]towels?|tissue[- ]paper|wax[- ]paper|steel[- ]wool)\b/i.test(itemSlugLower))
+  ) {
+    return 'kitchenFire';
+  }
+  if (/\b(cast[- ]iron|carbon[- ]steel|dutch[- ]ovens?|le[- ]creuset|staub|lodge|skillets?|seasoning|rust)\b/i.test(itemSlugLower)) {
+    return 'castIron';
+  }
+  if (
+    /\b(induction|moka[- ]pots?|copper|tri[- ]ply|magnetic|all[- ]clad|ferromagnetic|woks?)\b/i.test(itemSlugLower) ||
+    (itemApplianceLower !== 'oven' && /\b(stainless[- ]steel[- ]pans?|steel[- ]pans?)\b/i.test(itemSlugLower))
+  ) {
+    return 'induction';
+  }
+  if (/\b(coffee[- ]pot|coffee[- ]maker|espresso|kettles?|keurig|nespresso|carafes?|ice[- ]makers?|steamers?|descal(?:e|ing))\b/i.test(itemSlugLower)) {
+    return 'descaling';
+  }
+  if (
+    /\b(instant[- ]pot|pressure[- ]cooker|bone[- ]broth|vegetable[- ]soup[- ]broth|chili[- ]con[- ]carne|dried[- ]beans?|dry[- ]beans?|cooked[- ]beans[- ]chickpeas|cooked[- ]lentils[- ]dal|lentils?|chickpeas?|split[- ]peas?|steel[- ]cut[- ]oats?)\b/i.test(itemSlugLower) ||
+    (/\bchili\b/i.test(itemSlugLower) && !/\b(paste|sauce|oil|pepper)\b/i.test(itemSlugLower))
+  ) {
+    return 'instantPot';
+  }
+  if (
+    /\b(cutting[- ]boards?|butcher[- ]block|wooden[- ]spoons?|bamboo[- ]spoons?|wooden[- ]utensils?|toasters?|colanders?|strainers?|sponges?|dishcloths?|waffle[- ]makers?|waffle[- ]irons?|waffle[- ]weave[- ]kitchen[- ]towel|microfiber[- ]cleaning[- ]cloths?|shared[- ]fryers?|deep[- ]fryers?|allergen|cheese[- ]grater|garlic[- ]press)\b/i.test(itemSlugLower)
+  ) {
+    return 'foodAllergy';
+  }
+  if (
+    /\b(bleach|ammonia|peroxide|cleaners?|soaps?|sanitizers?|disinfectants?|drain[- ]cleaners?|lye|caustic|acetone|paint[- ]thinner|gasoline|steel[- ]wool)\b/i.test(itemSlugLower)
+  ) {
+    return 'cleaner';
+  }
+  if (
+    /\b(olive[- ]oil|vegetable[- ]oil|coconut[- ]oil|avocado[- ]oil|cooking[- ]oil|canola[- ]oil|sesame[- ]oil|sunflower[- ]oil|peanut[- ]oil|cooking[- ]spray|ghee|lard|tallow|shortening)\b/i.test(itemSlugLower) ||
+    (/\bbutter\b/i.test(itemSlugLower) && !/\b(peanut[- ]butter|almond[- ]butter|butter[- ]paper|buttercream|butter[- ]stain)\b/i.test(itemSlugLower))
+  ) {
+    return 'oil';
+  }
+  if (
+    itemApplianceLower === 'dishwasher' &&
+    /\b(glass(?:es|ware)?|crystal|wine[- ]glass(?:es)?|champagne[- ]flutes?|mason[- ]jars?|pyrex|silicone|stasher|owala|yeti|stanley|hydroflask|nalgene|contigo|swell|klean[- ]kanteen|camelbak|thermos|ninja[- ]creami|ninja[- ]blender|nutribullet|vitamix|air[- ]fryer[- ]basket|cuisinart|aluminum|baking[- ]sheet|muffin[- ]tin|bundt|springform|pods?|detergents?|rinse[- ]aid|silverware|pewter|antique|corelle|acrylic|travel[- ]mug|knives|knife|shears)\b/i.test(itemSlugLower)
+  ) {
+    return 'dishwasherDosage';
+  }
+  if (
+    itemApplianceLower !== 'oven' &&
+    /\b(nonstick|non[- ]stick|teflon|ptfe|ceramic[- ]pans?|hexclad|caraway|fry(?:ing)?[- ]pans?)\b/i.test(itemSlugLower)
+  ) {
+    return 'pan';
+  }
+  if (
+    (itemApplianceLower === 'oven' && /\b(baking[- ]sheets?|cookie[- ]sheets?|sheet[- ]pans?|muffin[- ]tins?|cupcake[- ]pans?|cake[- ]pans?|bread[- ]pans?|loaf[- ]pans?|springform[- ]pans?|bundt[- ]pans?|pie[- ]pans?|pie[- ]dishes?|tart[- ]pans?|pizza[- ]stones?|baking[- ]stones?|broilers?|roasting[- ]pans?|wire[- ]rack|glass[- ]dish|ceramic[- ]dish|casserole[- ]dishes?|glass[- ]baking|silicone[- ]molds?|paper[- ]baking[- ]cups?|foil[- ]cupcake[- ]liners?|cookie[- ]cutters?|frozen[- ]pizza[- ]directly|pizza[- ]dough|cookie[- ]dough|chocolate[- ]chip[- ]cookies|cake|muffin|pie|brownie)\b/i.test(itemSlugLower)) ||
+    (itemApplianceLower !== 'dishwasher' && /\b(baking[- ]sheets?|cookie[- ]sheets?|muffin[- ]tins?|cake[- ]pans?|pie[- ]dishes?|pie[- ]pans?|pizza[- ]stones?|baking[- ]stones?|bundt[- ]pans?|springform[- ]pans?|broilers?)\b/i.test(itemSlugLower))
+  ) {
+    return 'ovenRack';
+  }
+  if (
+    /\b(always[- ]pan)\b/i.test(itemSlugLower) ||
+    (itemApplianceLower === 'oven' && /\b(pyrex|glass|ceramic|stoneware|corningware|pampered[- ]chef|terracotta|china|porcelain|ramekin|non[- ]stick|nonstick|stainless|aluminum|steel[- ]pan|parchment|foil|silicone|rubber|bakeware|skewers|twine|handles|paper|mason[- ]jar|travel[- ]mug|yeti|hydro[- ]flask|stanley|silverware|lids?|pots?|pans?|dishes?|bowls?|mugs?|plates?|butter[- ]paper)\b/i.test(itemSlugLower)) ||
+    (itemApplianceLower !== 'dishwasher' && /\b(pyrex|corningware|stoneware)\b/i.test(itemSlugLower))
+  ) {
+    return 'ovenTemp';
+  }
+  if (/\b(plastics?|tupperware|styrofoam|foam[- ]cup|polystyrene|polypropylene|pet|hdpe|pvc|tritan|ziploc|takeout|bento[- ]box|solo[- ]cup|deli[- ]container|vacuum[- ]seal|compostable[- ]pla|cling|protein[- ]shaker|silicone[- ]storage[- ]bag|silicone[- ]bag|melamine)\b/i.test(itemSlugLower)) {
+    return 'plastic';
+  }
+  if (
+    /\b(power[- ]outage|blackout|spoil(?:age|ed)|rot(?:ten)?|sour[- ]milk|bad[- ]meat|danger[- ]zone|warm[- ]fridge|warm[- ]freezer|power[- ]cut|storm|refreez(?:e|ing)|ice[- ]cream[- ]refreezing)\b/i.test(itemSlugLower) ||
+    (itemApplianceLower === 'freezer' && /\b(milk|cream|yogurt|cheese|ice[- ]cream|mayonnaise|hummus|pesto|salsa|guacamole|deli[- ]meat)\b/i.test(itemSlugLower))
+  ) {
+    return 'powerOutage';
+  }
+  if (
+    (itemApplianceLower === 'freezer' || /\bfrozen[- ](meat|raw[- ]chicken)\b/i.test(itemSlugLower) || /\bthaw/i.test(itemSlugLower)) &&
+    isMeatOrProteinItem
+  ) {
+    return 'thawing';
+  }
+  if (
+    /\b(mold|mould)\b/i.test(itemSlugLower) ||
+    (itemApplianceLower !== 'airfryer' && itemApplianceLower !== 'microwave' &&
+      /\b(cheddar[- ]cheese|parmesan|mozzarella|cream[- ]cheese|cottage[- ]cheese|soft[- ]cheese|hard[- ]cheese|brie|blue[- ]cheese|shredded[- ]cheese|cheese|white[- ]bread|whole[- ]wheat[- ]bread|sourdough[- ]bread|pita[- ]bread|bread|bagels?|tortillas?|croissants?|strawberr(?:y|ies)|blueberr(?:y|ies)|raspberr(?:y|ies)|blackberr(?:y|ies)|berries|jam|jelly|preserves?|yogurt|salami|prosciutto|pepperoni|deli[- ]sliced|deli[- ]meat|deli[- ]slices|hummus)\b/i.test(itemSlugLower) &&
+      !/\b(cheese[- ]grater|macaroni[- ]and[- ]cheese|cheesecake|bread[- ]knife|bread[- ]pan|bread[- ]dough|bread[- ]crumbs|sourdough[- ]starter)\b/i.test(itemSlugLower))
+  ) {
+    return 'moldyFood';
+  }
+  if (
+    itemApplianceLower !== 'microwave' &&
+    /\b(flour|white[- ]rice|brown[- ]rice|dry[- ]rice|spices?|dried[- ]herbs?|herbs[- ]in[- ]oil|honey|maple[- ]syrup|canned|condensed[- ]milk[- ]can|evaporated[- ]milk[- ]can|baking[- ]powder|baking[- ]soda|cornstarch|yeast|dry[- ]pasta|spaghetti|macaroni|oats?|oatmeal|granola|quinoa|coffee[- ]beans?|peanut[- ]butter|almond[- ]butter|nutella|nuts|almonds?|walnuts?|pecans?|peanuts?|cashews?|pistachios?|pumpkin[- ]seeds?|sunflower[- ]seeds?|sesame[- ]seeds?|vinegar|sugar|salt)\b/i.test(itemSlugLower) &&
+    !/\b(cooked|leftover|macaroni[- ]and[- ]cheese|almond[- ]milk|oat[- ]milk|bread[- ]dough|biscuit[- ]dough|hot[- ]sauce[- ]vinegar|salad[- ]dressing|butter[- ]salted|butter[- ]unsalted)\b/i.test(itemSlugLower)
+  ) {
+    return 'pantry';
+  }
+  if (itemApplianceLower === 'refrigerator') {
+    return isCookedLeftoverItem ? 'leftover' : 'fridgeZone';
+  }
+  if (
+    itemApplianceLower === 'freezer' &&
+    (isCookedLeftoverItem || /\b(rice|pasta|bread|cake|cookies|muffin|pie|brownie|avocado|watermelon|pineapple|apple|banana|orange|strawberry|blueberry|raspberry|blackberry|grape|cantaloupe|honeydew|peach|plum|nectarine|cherry|mango|tomato|cucumber|pepper|spinach|lettuce|broccoli|celery|cabbage|zucchini|carrot|onion|garlic|potato|mushroom|tofu|tempeh|egg|nut|herb|honey|syrup|juice|wine|beer|coffee|tea|soda|kombucha|smoothie|shake|pizza|dough|ginger|lemon|lime|squash|eggplant|asparagus|peas|corn|quinoa|lentils|oatmeal|spaghetti|macaroni|croissant|bagel|tortilla|chocolate|maple|peanut|almond|nutella)\b/i.test(itemSlugLower))
+  ) {
+    return 'leftover';
+  }
+  if ((itemApplianceLower === 'oven' || itemApplianceLower === 'airfryer') && isMeatOrProteinItem) {
+    return 'cookingTemp';
+  }
+  if (itemApplianceLower === 'airfryer') {
+    return 'airfryer';
+  }
+  if (itemApplianceLower === 'microwave' && !isMicrowaveNonFoodItem) {
+    return 'microwaveWattage';
+  }
+  return 'symbol';
 }
+
+const recommendedToolKey: RecommendedToolKey = selectRecommendedTool(data.slug, data.item, data.appliance);
 
 const interactiveToolBadge =
   lang === 'es' ? 'Herramienta Interactiva' :
@@ -509,6 +572,102 @@ const toolCatalog: Record<RecommendedToolKey, {
                  lang === 'ja' ? '600W〜1250Wインバーター電子レンジの加熱時間を出力レベル（30%〜100%）別に瞬時換算。途中混ぜ目安・蒸らし時間・USDA 74°C安全基準に対応。' :
                  'Convert package cooking and reheating times between 600W and 1250W Inverter microwaves with power levels (30%–100%), stir-halfway cues, standing time, and USDA 165°F cold-spot safety.',
     cta: lang === 'es' ? 'Convertir Tiempo' : lang === 'pt' ? 'Converter Tempo' : lang === 'zh-cn' ? '换算微波时间' : lang === 'ja' ? 'レンジ時間を換算' : 'Convert Microwave Time'
+  },
+  foodAllergy: {
+    path: '/tools/food-allergy-cross-contact-checker/',
+    icon: '🥜',
+    badge: interactiveToolBadge,
+    title: lang === 'es' ? 'Verificador de Alergias Alimentarias y Contacto Cruzado en Cocina' :
+           lang === 'pt' ? 'Verificador de Alergias Alimentares e Contato Cruzado na Cozinha' :
+           lang === 'zh-cn' ? '厨房食物过敏原与交叉接触安全检查器' :
+           lang === 'ja' ? 'キッチン食物アレルギー＆コンタミネーション防止チェッカー' :
+           'Kitchen Food Allergy & Cross-Contact Safety Checker',
+    description: lang === 'es' ? 'Comprueba si tablas de cortar, cucharas de madera, tostadoras, esponjas, coladores o freidoras compartidas pueden lavarse con seguridad o deben ser exclusivos para alérgenos y gluten.' :
+                 lang === 'pt' ? 'Veja se tábuas de corte, colheres de madeira, torradeiras, esponjas, escorredores ou fritadeiras compartilhadas podem ser higienizados com segurança ou exigem uso exclusivo para alérgenos e glúten.' :
+                 lang === 'zh-cn' ? '快速核查砧板、木勺、烤面包机、海绵、滤网与共用炸锅能否彻底清洗去除 9 大常见过敏原与麸质，还是必须专器专用。' :
+                 lang === 'ja' ? 'まな板・木べら・トースター・スポンジ・ザル・共用フライヤーで9大アレルゲンやグルテンを洗浄除去できるか、専用化が必要かを即判定します。' :
+                 'Check whether shared cutting boards, wooden spoons, toasters, sponges, colanders, or fryers can be safely washed or must be kept dedicated for Top 9 allergens and celiac gluten.',
+    cta: lang === 'es' ? 'Verificar Contacto Cruzado' : lang === 'pt' ? 'Verificar Contato Cruzado' : lang === 'zh-cn' ? '检查过敏原风险' : lang === 'ja' ? '交差接触を確認' : 'Check Cross-Contact'
+  },
+  pantry: {
+    path: '/tools/pantry-dry-goods-shelf-life-checker/',
+    icon: '🫙',
+    badge: interactiveToolBadge,
+    title: lang === 'es' ? 'Buscador de Caducidad y Seguridad de Despensa, Especias y Secos' :
+           lang === 'pt' ? 'Guia de Validade e Segurança para Despensa, Especiarias e Grãos' :
+           lang === 'zh-cn' ? '常备干货、香料调料与罐头保质期及安全速查器' :
+           lang === 'ja' ? '乾物・スパイス・粉類・缶詰の賞味期限＆安全性チェッカー' :
+           'Pantry, Spices & Dry Goods Shelf-Life & Safety Lookup',
+    description: lang === 'es' ? 'Consulta la vida útil USDA/FMI tras la fecha de consumo preferente para harina, arroz, pasta seca, especias, miel, jarabe de arce, conservas, levadura, café, crema de cacahuate y frutos secos.' :
+                 lang === 'pt' ? 'Consulte a validade USDA/FMI após a data preferencial para farinha, arroz, macarrão seco, especiarias, mel, xarope de bordo, enlatados, fermento, café, pasta de amendoim e castanhas.' :
+                 lang === 'zh-cn' ? '依据 USDA 与 FMI 标准查询面粉、大米、干意面、香料、蜂蜜、枫糖浆、罐头、泡打粉、酵母、咖啡豆、花生酱与坚果过最佳赏味期后的安全期限。' :
+                 lang === 'ja' ? '小麦粉・米・乾麺・スパイス・はちみつ・メープルシロップ・缶詰・ベーキングパウダー・イースト・コーヒー・ナッツの賞味期限後の安全目安をUSDA/FMI基準で検索。' :
+                 'Look up USDA & FMI shelf life after "Best By" dates for flour, rice, dry pasta, spices, honey, maple syrup, canned goods, baking powder, yeast, coffee, peanut butter, and nuts.',
+    cta: lang === 'es' ? 'Consultar Despensa' : lang === 'pt' ? 'Consultar Despensa' : lang === 'zh-cn' ? '查询干货保质期' : lang === 'ja' ? '乾物の期限を確認' : 'Check Pantry Shelf Life'
+  },
+  moldyFood: {
+    path: '/tools/moldy-food-safety-checker/',
+    icon: '🧀',
+    badge: interactiveToolBadge,
+    title: lang === 'es' ? 'Verificador USDA de Alimentos con Moho: ¿Recortar o Desechar?' :
+           lang === 'pt' ? 'Verificador USDA de Alimentos Mofados: Cortar ou Jogar Fora?' :
+           lang === 'zh-cn' ? 'USDA 发霉食物安全检查器：切掉还是整份丢弃？' :
+           lang === 'ja' ? 'USDA カビ食品チェッカー：切り落とし可 vs. 丸ごと廃棄' :
+           'USDA Moldy Food Cut-Around vs. Throw-Out Safety Checker',
+    description: lang === 'es' ? 'Consulta las reglas oficiales del USDA FSIS para quesos duros y blandos, pan, bayas, mermelada, yogur, salami, embutidos y hummus: cuándo recortar 2,5 cm o desechar por completo.' :
+                 lang === 'pt' ? 'Consulte as regras oficiais do USDA FSIS para queijos duros e macios, pão, frutas vermelhas, geleia, iogurte, salame, frios e homus: quando cortar 2,5 cm ao redor ou descartar tudo.' :
+                 lang === 'zh-cn' ? '依据美国农业部 USDA FSIS 规范速查硬质与软质奶酪、面包、浆果、果酱、酸奶、萨拉米、熟食冷切肉与鹰嘴豆泥发霉后是可切除 2.5 厘米还是必须整份丢弃。' :
+                 lang === 'ja' ? '硬質・軟質チーズ、パン、ベリー類、ジャム、ヨーグルト、サラミ、ハム、フムスにカビが生えた時、2.5cm切り落とせるか丸ごと廃棄すべきかをUSDA FSIS基準で即判定。' :
+                 'Check official USDA FSIS rules for hard vs. soft cheeses, bread, bagels, berries, jam, yogurt, salami, deli meat, and hummus to see when you can safely cut 1 inch around mold or must discard.',
+    cta: lang === 'es' ? 'Verificar Moho' : lang === 'pt' ? 'Verificar Mofo' : lang === 'zh-cn' ? '排查发霉食物' : lang === 'ja' ? 'カビ安全性を確認' : 'Check Mold Safety'
+  },
+  ovenRack: {
+    path: '/tools/oven-rack-bakeware-heat-adjuster/',
+    icon: '🥧',
+    badge: interactiveToolBadge,
+    title: lang === 'es' ? 'Ajustador de Rejilla del Horno, Convección y Material del Molde' :
+           lang === 'pt' ? 'Ajustador de Grade do Forno, Convecção e Material da Assadeira' :
+           lang === 'zh-cn' ? '烤箱层位、热风对流与烤盘材质温度调节器' :
+           lang === 'ja' ? 'オーブン段位置・コンベクション・焼き型材質 温度アジャスター' :
+           'Oven Rack Position, Convection & Bakeware Heat Adjuster',
+    description: lang === 'es' ? 'Calcula la altura ideal de la rejilla y el ajuste de temperatura (°F/°C) para bandejas oscuras, fuentes de vidrio, moldes de cerámica, piedras de pizza, moldes de muffins y grill.' :
+                 lang === 'pt' ? 'Calcule a altura ideal da grade e o ajuste de temperatura (°F/°C) para assadeiras escuras, travessas de vidro, formas de cerâmica, pedras de pizza, formas de bolo e grill.' :
+                 lang === 'zh-cn' ? '针对深色不粘烤盘、玻璃焗碗、陶瓷派盘、披萨石、玛芬连模、蛋糕模与炙烤模式，精准计算最佳烤箱层位与降温度数（°F/°C）。' :
+                 lang === 'ja' ? '濃色ノンスティック天板・ガラス耐熱皿・陶器パイ皿・ピザストーン・マフィン型・グリル調理に最適なオーブン段位置と温度補正（°F/°C）を算出します。' :
+                 'Calculate exact oven rack position and temperature offsets (°F/°C) for dark nonstick sheets, glass casseroles, ceramic pie dishes, pizza stones, muffin tins, cake pans, and broilers.',
+    cta: lang === 'es' ? 'Ajustar Rejilla y Horno' : lang === 'pt' ? 'Ajustar Grade e Forno' : lang === 'zh-cn' ? '调节层位与烤温' : lang === 'ja' ? '段位置と温度を調整' : 'Adjust Oven Rack & Temp'
+  },
+  instantPot: {
+    path: '/tools/instant-pot-pressure-release-checker/',
+    icon: '🍲',
+    badge: interactiveToolBadge,
+    title: lang === 'es' ? 'Verificador de Llenado y Liberación de Presión para Instant Pot' :
+           lang === 'pt' ? 'Verificador de Limite e Liberação de Pressão para Instant Pot' :
+           lang === 'zh-cn' ? '电压力锅 / Instant Pot 水位红线与泄压安全检查器' :
+           lang === 'ja' ? '電気圧力鍋・Instant Pot 上限線＆減圧チェッカー' :
+           'Instant Pot & Pressure Cooker Fill-Line & Release Checker',
+    description: lang === 'es' ? 'Verifica el límite seguro de llenado (1/2 vs. 2/3), el riesgo de espuma y cuándo usar liberación natural o rápida para caldo de huesos, chili, legumbres secas, lentejas y olla interior.' :
+                 lang === 'pt' ? 'Verifique o limite seguro de enchimento (1/2 vs. 2/3), risco de espuma e liberação natural vs. rápida para caldo de ossos, chili, feijão seco, lentilhas e panela interna.' :
+                 lang === 'zh-cn' ? '一键核查骨汤、辣肉酱、干豆、扁豆与谷物的 1/2 与 2/3 安全水位线、起泡堵塞气阀风险及自然泄压与快速泄压选择。' :
+                 lang === 'ja' ? 'ボーンブロス・チリ・乾燥豆・レンズ豆の1/2・2/3上限線、吹きこぼれ・泡立ちリスク、自然減圧とクイック減圧の安全な使い分けを判定します。' :
+                 'Verify safe 1/2 vs. 2/3 max fill lines, foaming risk, and Natural vs. Quick Pressure Release timing for bone broth, chili, dried beans, lentils, grains, and inner pot safety.',
+    cta: lang === 'es' ? 'Verificar Presión' : lang === 'pt' ? 'Verificar Pressão' : lang === 'zh-cn' ? '核查泄压安全' : lang === 'ja' ? '減圧安全を確認' : 'Check Pressure Safety'
+  },
+  kitchenFire: {
+    path: '/tools/kitchen-fire-emergency-guide/',
+    icon: '🧯',
+    badge: interactiveToolBadge,
+    title: lang === 'es' ? 'Guía de Emergencia: Fuego de Aceite, Eléctrico y Quemaduras en Cocina' :
+           lang === 'pt' ? 'Guia de Emergência: Fogo de Óleo, Elétrico e Queimaduras na Cozinha' :
+           lang === 'zh-cn' ? '厨房油锅起火、电气火灾与烫伤急救应急指南' :
+           lang === 'ja' ? 'キッチン油火災・電気火災・やけど緊急応急ガイド' :
+           'Kitchen Grease Fire, Electrical & Burn Emergency Guide',
+    description: lang === 'es' ? 'Protocolos paso a paso de la NFPA y Cruz Roja para fuego de aceite, chispas de aluminio en microondas, llamas en horno, toallas con grasa en secadora y por qué nunca usar agua.' :
+                 lang === 'pt' ? 'Passos da NFPA e Cruz Vermelha para fogo de óleo, faíscas de papel-alumínio no micro-ondas, chamas no forno, panos com gordura na secadora e por que nunca jogar água.' :
+                 lang === 'zh-cn' ? '基于 NFPA 与红十字会规范提供油锅起火、微波炉锡纸打火、烤箱蹿火及含油毛巾烘干机自燃应急处置步骤，严禁用水扑救油火。' :
+                 lang === 'ja' ? '油火災・電子レンジのアルミ火花・オーブン発火・油付きタオルの乾燥機自然発火へのNFPA/赤十字準拠の応急手順と水掛け厳禁ルールを確認。' :
+                 'Step-by-step NFPA & Red Cross actions for grease fires, sparking foil or metal in microwaves, oven flare-ups, oily-towel dryer fires, and why you must never pour water on burning oil.',
+    cta: lang === 'es' ? 'Abrir Guía de Fuego' : lang === 'pt' ? 'Abrir Guia de Incêndio' : lang === 'zh-cn' ? '查看灭火急救指南' : lang === 'ja' ? '火災応急ガイドを開く' : 'Open Fire Safety Guide'
   },
   symbol: {
     path: '/tools/kitchen-symbol-decoder/',
