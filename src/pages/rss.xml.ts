@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/slow-cooker-food-safety-checker/',
+    title: 'Slow Cooker & Crock-Pot Food Safety Checker: Frozen Meat, Kidney Beans & Power Outage Guide',
+    description:
+      'Interactive USDA FSIS & FDA slow cooker food safety checker: test fill level (1/2 to 2/3), HIGH/LOW/Keep-Warm, and power outage discard rules live, plus look up 16 everyday foods, red kidney bean lectin safety, leftovers, plastic liners, and ceramic stoneware thermal-shock rules.',
+    date: '2026-11-18',
+  },
+  {
     path: '/tools/instant-pot-pressure-release-checker/',
     title: 'Pressure Cooker & Instant Pot Fill-Line & Release Safety Checker',
     description:

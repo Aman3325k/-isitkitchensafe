@@ -1,0 +1,1995 @@
+---
+import rawData from '../data/knife-care-cutting-board-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+import { useTranslatedPath } from '../i18n/utils';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+const translatePath = useTranslatedPath(lang);
+
+const allergyUrl = translatePath('/tools/food-allergy-cross-contact-checker/');
+const dishwasherUrl = translatePath('/tools/dishwasher-detergent-dosage-calculator/');
+const symbolUrl = translatePath('/tools/kitchen-symbol-decoder/');
+const methodologyUrl = translatePath('/methodology/');
+const allToolsUrl = translatePath('/tools/');
+
+type BoardCategoryKey = 'wood' | 'synthetic' | 'composite' | 'unsafe-hard';
+type BladeRatingKey = 'gold' | 'great' | 'caution' | 'unsafe';
+type VerdictKey = 'perfect' | 'good' | 'dulls-fast' | 'blade-killer';
+type HoningStatusKey = 'steel-or-ceramic' | 'ceramic-only' | 'never-rod';
+type DishwasherStatusKey = 'never' | 'check-model' | 'yes' | 'never-cut';
+
+interface BannerRule {
+  icon: string;
+  title: string;
+  body: string;
+}
+
+interface SafetyBannerData {
+  badge: string;
+  headline: string;
+  subline: string;
+  rules: BannerRule[];
+}
+
+interface LocalizedKnife {
+  id: string;
+  icon: string;
+  hrc: string;
+  bevelAngle: string;
+  honingStatus: HoningStatusKey;
+  dishwasherSafe: boolean;
+  rustRisk: string;
+  whetstoneGrit: string;
+  shortName: string;
+  name: string;
+  examples: string;
+  bevelLabel: string;
+  honingBadge: string;
+  honingRule: string;
+  sharpeningRule: string;
+  pullThroughWarning: string;
+  dishwasherRule: string;
+  careRule: string;
+}
+
+interface LocalizedBoard {
+  id: string;
+  icon: string;
+  category: BoardCategoryKey;
+  bladeRating: BladeRatingKey;
+  dishwasherStatus: DishwasherStatusKey;
+  compatByKnife: Record<string, VerdictKey>;
+  shortName: string;
+  name: string;
+  ratingBadge: string;
+  dishwasherBadge: string;
+  summary: string;
+  bladeEffect: string;
+  foodSafetyNote: string;
+  maintenanceRule: string;
+  oilRule: string;
+}
+
+interface VerdictInfo {
+  badge: string;
+  headline: string;
+  advice: string;
+}
+
+interface HoningVsSharpeningData {
+  honingTitle: string;
+  honingSubtitle: string;
+  honingSummary: string;
+  honingFrequency: string;
+  honingTools: string;
+  sharpeningTitle: string;
+  sharpeningSubtitle: string;
+  sharpeningSummary: string;
+  sharpeningFrequency: string;
+  sharpeningTools: string;
+  carbideTitle: string;
+  carbideSubtitle: string;
+  carbideSummary: string;
+  carbideDanger: string;
+}
+
+const safetyBanner: SafetyBannerData =
+  (rawData.safetyBanner as Record<string, SafetyBannerData>)[lang] ||
+  rawData.safetyBanner.en;
+
+const knives: LocalizedKnife[] = rawData.knives.map((k) => {
+  const tr = (k.i18n as Record<string, any>)[lang] || k.i18n.en;
+  return {
+    id: k.id,
+    icon: k.icon,
+    hrc: k.hrc,
+    bevelAngle: k.bevelAngle,
+    honingStatus: k.honingStatus as HoningStatusKey,
+    dishwasherSafe: Boolean(k.dishwasherSafe),
+    rustRisk: k.rustRisk,
+    whetstoneGrit: k.whetstoneGrit,
+    shortName: tr.shortName,
+    name: tr.name,
+    examples: tr.examples,
+    bevelLabel: tr.bevelLabel,
+    honingBadge: tr.honingBadge,
+    honingRule: tr.honingRule,
+    sharpeningRule: tr.sharpeningRule,
+    pullThroughWarning: tr.pullThroughWarning,
+    dishwasherRule: tr.dishwasherRule,
+    careRule: tr.careRule
+  };
+});
+
+const boards: LocalizedBoard[] = rawData.boards.map((b) => {
+  const tr = (b.i18n as Record<string, any>)[lang] || b.i18n.en;
+  return {
+    id: b.id,
+    icon: b.icon,
+    category: b.category as BoardCategoryKey,
+    bladeRating: b.bladeRating as BladeRatingKey,
+    dishwasherStatus: b.dishwasherStatus as DishwasherStatusKey,
+    compatByKnife: b.compatByKnife as Record<string, VerdictKey>,
+    shortName: tr.shortName,
+    name: tr.name,
+    ratingBadge: tr.ratingBadge,
+    dishwasherBadge: tr.dishwasherBadge,
+    summary: tr.summary,
+    bladeEffect: tr.bladeEffect,
+    foodSafetyNote: tr.foodSafetyNote,
+    maintenanceRule: tr.maintenanceRule,
+    oilRule: tr.oilRule
+  };
+});
+
+const verdictMeta: Record<VerdictKey, VerdictInfo> =
+  (rawData.verdictMeta as Record<string, Record<VerdictKey, VerdictInfo>>)[lang] ||
+  (rawData.verdictMeta.en as Record<VerdictKey, VerdictInfo>);
+
+const honingData: HoningVsSharpeningData =
+  (rawData.honingVsSharpening as Record<string, HoningVsSharpeningData>)[lang] ||
+  rawData.honingVsSharpening.en;
+
+const localizedFaqs: Array<{ question: string; answer: string }> =
+  (rawData.faqs as Record<string, Array<{ question: string; answer: string }>>)[lang] ||
+  rawData.faqs.en;
+
+interface UiDict {
+  ariaLabel: string;
+  toolBadge: string;
+  toolTitle: string;
+  toolSub: string;
+  copyBtn: string;
+  copiedBtn: string;
+  printBtn: string;
+  step1Label: string;
+  step1Hint: string;
+  knifeSelectLabel: string;
+  boardSelectLabel: string;
+  dashLiveBadge: string;
+  bevelPillPrefix: string;
+  whetstonePillPrefix: string;
+  knifeDishwasherNever: string;
+  boardEffectHeading: string;
+  honingHeading: string;
+  sharpeningHeading: string;
+  dishwasherHeading: string;
+  knifeLabelPrefix: string;
+  boardLabelPrefix: string;
+  sanitationHeading: string;
+  oilRuleLabel: string;
+  knifeCareLabel: string;
+  step2Label: string;
+  step2Hint: string;
+  modeHoningBtn: string;
+  modeSharpeningBtn: string;
+  modeCarbideBtn: string;
+  activeKnifeAngleNote: string;
+  freqLabel: string;
+  toolsLabel: string;
+  dangerLabel: string;
+  step3Label: string;
+  step3Hint: string;
+  searchPlaceholder: string;
+  searchClearLabel: string;
+  catAll: string;
+  catWood: string;
+  catSynthetic: string;
+  catComposite: string;
+  catUnsafe: string;
+  ratingFilterLabel: string;
+  ratingAll: string;
+  ratingFriendly: string;
+  ratingCaution: string;
+  ratingUnsafe: string;
+  showingPrefix: string;
+  showingSuffix: string;
+  noResultsTitle: string;
+  resetFiltersBtn: string;
+  selectBoardHint: string;
+  printTitle: string;
+  printSub: string;
+  printKnivesHeading: string;
+  printBoardsHeading: string;
+  printColKnife: string;
+  printColHrc: string;
+  printColHoning: string;
+  printColStone: string;
+  printColBoard: string;
+  printColRating: string;
+  printColDishwasher: string;
+  printColMaint: string;
+  copyHeader: string;
+  copyPairingLabel: string;
+  copyVerdictLabel: string;
+  copyBevelLabel: string;
+  copyHoningLabel: string;
+  copySharpeningLabel: string;
+  copyDishwasherLabel: string;
+  copySanitationLabel: string;
+  copyRulesHeader: string;
+  relatedHeading: string;
+  relatedAllergyTag: string;
+  relatedAllergyTitle: string;
+  relatedAllergyDesc: string;
+  relatedDishTag: string;
+  relatedDishTitle: string;
+  relatedDishDesc: string;
+  relatedSymbolTag: string;
+  relatedSymbolTitle: string;
+  relatedSymbolDesc: string;
+  methodologyStripTitle: string;
+  methodologyStripPrefix: string;
+  methodologyLabel: string;
+  symbolQuickLabel: string;
+  allToolsLabel: string;
+  faqTitle: string;
+}
+
+const UI: Record<SupportedLanguage, UiDict> = {
+  en: {
+    ariaLabel: 'Interactive Kitchen Knife Care, Honing vs. Sharpening & Safe Cutting Board Matcher',
+    toolBadge: 'Rockwell HRC Metallurgy · USDA FSIS Board Sanitation · 5 Knives × 8 Boards',
+    toolTitle: 'Kitchen Knife Care, Honing vs. Sharpening & Cutting Board Matcher',
+    toolSub: 'Select your knife steel profile and cutting board material below to check instant metallurgical compatibility, exact 15° vs. 20° bevel rules, safe honing rod vs. whetstone care, dishwasher limits, and USDA raw-meat sanitization.',
+    copyBtn: 'Copy Knife & Board Care Card',
+    copiedBtn: 'Care Card Copied ✓',
+    printBtn: 'Print Kitchen Care Chart',
+    step1Label: '1. Interactive Knife × Cutting Board Compatibility Simulator',
+    step1Hint: 'Pick your blade steel (5 profiles) and cutting surface (8 materials) to update the live compatibility dashboard.',
+    knifeSelectLabel: 'Select Your Knife Steel Profile (5)',
+    boardSelectLabel: 'Select Your Cutting Board Material (8)',
+    dashLiveBadge: 'LIVE COMPATIBILITY & CARE DASHBOARD',
+    bevelPillPrefix: 'Bevel:',
+    whetstonePillPrefix: 'Stone:',
+    knifeDishwasherNever: 'Knife Dishwasher: NEVER',
+    boardEffectHeading: 'Blade-to-Board Effect & Metallurgy',
+    honingHeading: 'Honing Rod & Edge Alignment Rule',
+    sharpeningHeading: 'Whetstone Grit & Pull-Through Warning',
+    dishwasherHeading: 'Dishwasher Safety (Knife & Board)',
+    knifeLabelPrefix: 'Knife:',
+    boardLabelPrefix: 'Board:',
+    sanitationHeading: 'USDA Sanitation, Microplastics & Oil Care',
+    oilRuleLabel: 'Board Conditioning:',
+    knifeCareLabel: 'Blade & Rust Care:',
+    step2Label: '2. Interactive Honing vs. Sharpening Matcher (15° vs. 20°)',
+    step2Hint: 'Compare realigning a rolled edge vs. grinding new steel — and see why V-shaped tungsten-carbide pull-through sharpeners tear off metal.',
+    modeHoningBtn: '🪄 Honing (Realign)',
+    modeSharpeningBtn: '🪨 Sharpening (Whetstone)',
+    modeCarbideBtn: '🚨 Pull-Through Danger',
+    activeKnifeAngleNote: 'Active Knife Rule:',
+    freqLabel: 'Recommended Frequency',
+    toolsLabel: 'Safe Tools',
+    dangerLabel: 'Why It Ruins Blades',
+    step3Label: '3. Filterable 8-Cutting-Board Quick Comparison Grid',
+    step3Hint: 'Search or filter all 8 cutting board materials by type or blade-friendliness. Tap any board card to load it directly into the simulator above.',
+    searchPlaceholder: 'Search maple, hinoki, hasegawa, plastic, microplastic, bamboo, glass, titanium...',
+    searchClearLabel: 'Clear',
+    catAll: 'All Boards (8)',
+    catWood: 'Hardwood & Softwood',
+    catSynthetic: 'Rubber & Plastic',
+    catComposite: 'Bamboo & Composite',
+    catUnsafe: 'Unsafe / Hard',
+    ratingFilterLabel: 'Blade Safety:',
+    ratingAll: 'All',
+    ratingFriendly: 'Blade-Friendly',
+    ratingCaution: 'Caution',
+    ratingUnsafe: 'Blade Killer',
+    showingPrefix: 'Showing',
+    showingSuffix: 'of 8 boards',
+    noResultsTitle: 'No cutting boards match your current search or filters.',
+    resetFiltersBtn: 'Reset Search & Filters',
+    selectBoardHint: 'Click to test in simulator ↑',
+    printTitle: 'KITCHEN KNIFE CARE, HONING & CUTTING BOARD SAFETY CHART (HRC · USDA FSIS)',
+    printSub: 'Never dishwasher knives · Never cut on glass/stone/titanium · Sanitize raw-meat boards (1 tbsp unscented bleach / gal) · Oil wood monthly with food-grade mineral oil.',
+    printKnivesHeading: '5 Knife Steel Profiles — Bevel Angles, Honing & Whetstone Guide',
+    printBoardsHeading: '8 Cutting Board Materials — Blade Safety, Dishwasher & Maintenance',
+    printColKnife: 'Knife Steel Profile',
+    printColHrc: 'HRC / Bevel',
+    printColHoning: 'Honing Rod Rule',
+    printColStone: 'Sharpening / Whetstone',
+    printColBoard: 'Board Material',
+    printColRating: 'Blade Rating',
+    printColDishwasher: 'Dishwasher',
+    printColMaint: 'Sanitation & Care',
+    copyHeader: 'IsItKitchenSafe — Knife Care & Cutting Board Compatibility Card',
+    copyPairingLabel: 'PAIRING:',
+    copyVerdictLabel: 'COMPATIBILITY VERDICT:',
+    copyBevelLabel: 'BEVEL & HRC:',
+    copyHoningLabel: 'HONING RULE:',
+    copySharpeningLabel: 'WHETSTONE / SHARPENING:',
+    copyDishwasherLabel: 'DISHWASHER SAFETY:',
+    copySanitationLabel: 'USDA SANITATION & OIL CARE:',
+    copyRulesHeader: '3 CRITICAL KNIFE & BOARD SAFETY RULES:',
+    relatedHeading: 'Related Cross-Contact, Dishwasher & Kitchen Care Tools',
+    relatedAllergyTag: 'Board Cross-Contact Safety',
+    relatedAllergyTitle: 'Food Allergy Cross-Contact Checker →',
+    relatedAllergyDesc: 'Check porous wood vs. non-porous board cleaning protocols for gluten, peanuts, dairy, and shellfish cross-contact.',
+    relatedDishTag: 'Detergent Chemistry & Care',
+    relatedDishTitle: 'Dishwasher Detergent Dosage Calculator →',
+    relatedDishDesc: 'Protect stainless steel, glassware, and dishwasher-safe boards by dialing in exact detergent dosage for your water hardness.',
+    relatedSymbolTag: 'Icon & Material Guide',
+    relatedSymbolTitle: 'Kitchen Symbol Decoder →',
+    relatedSymbolDesc: 'Decode hand-wash-only, food-safe, and dishwasher care symbols printed on cutting boards, utensils, and cookware.',
+    methodologyStripTitle: 'Grounded in Rockwell HRC Metallurgy, USDA FSIS Cutting Board Guidance & Culinary Standards',
+    methodologyStripPrefix: 'Every bevel angle (15° vs. 20°), honing rod material limit, bleach sanitization ratio (1 tbsp/gal), microplastic replacement rule, and wood-oiling guideline is verified against primary culinary and public-health sources. Read our',
+    methodologyLabel: 'Methodology',
+    symbolQuickLabel: 'Kitchen Symbol Decoder',
+    allToolsLabel: 'All Kitchen Tools →',
+    faqTitle: 'Frequently Asked Questions: Knife Care, Honing & Safe Cutting Boards'
+  },
+  es: {
+    ariaLabel: 'Selector Interactivo de Cuidado de Cuchillos, Chaira vs. Afilado y Tablas de Cortar Seguras',
+    toolBadge: 'Metalurgia HRC · Desinfección USDA FSIS · 5 Cuchillos × 8 Tablas',
+    toolTitle: 'Compatibilidad de Cuchillos, Chaira vs. Afilado y Tablas de Cortar',
+    toolSub: 'Elige tu tipo de acero y material de tabla para ver la compatibilidad metalúrgica al instante, ángulos de 15° vs. 20°, reglas de chaira y piedra al agua, límites del lavavajillas y desinfección USDA.',
+    copyBtn: 'Copiar Ficha de Cuidado',
+    copiedBtn: 'Ficha Copiada ✓',
+    printBtn: 'Imprimir Tabla de Cocina',
+    step1Label: '1. Simulador Interactivo Cuchillo × Tabla de Cortar',
+    step1Hint: 'Selecciona tu cuchillo (5 perfiles) y tu tabla (8 materiales) para actualizar el panel de compatibilidad en vivo.',
+    knifeSelectLabel: 'Selecciona Tu Perfil de Cuchillo (5)',
+    boardSelectLabel: 'Selecciona Tu Material de Tabla (8)',
+    dashLiveBadge: 'PANEL DE COMPATIBILIDAD Y CUIDADO EN VIVO',
+    bevelPillPrefix: 'Bisel:',
+    whetstonePillPrefix: 'Piedra:',
+    knifeDishwasherNever: 'Cuchillo en Lavavajillas: NUNCA',
+    boardEffectHeading: 'Efecto en el Filo y Metalurgia',
+    honingHeading: 'Regla de Chaira y Asentado',
+    sharpeningHeading: 'Grano de Piedra y Alerta de Ranuras',
+    dishwasherHeading: 'Seguridad en Lavavajillas (Cuchillo y Tabla)',
+    knifeLabelPrefix: 'Cuchillo:',
+    boardLabelPrefix: 'Tabla:',
+    sanitationHeading: 'Desinfección USDA, Microplásticos y Aceite',
+    oilRuleLabel: 'Mantenimiento de Tabla:',
+    knifeCareLabel: 'Cuidado del Acero y Óxido:',
+    step2Label: '2. Comparador Interactivo: Chaira vs. Afilado (15° vs. 20°)',
+    step2Hint: 'Compara realinear un filo doblado frente a desbastar acero nuevo y descubre por qué los afiladores de ranura de carburo destrozan las hojas.',
+    modeHoningBtn: '🪄 Asentar (Chaira)',
+    modeSharpeningBtn: '🪨 Afilar (Piedra)',
+    modeCarbideBtn: '🚨 Peligro Carburo',
+    activeKnifeAngleNote: 'Regla para Tu Cuchillo:',
+    freqLabel: 'Frecuencia Recomendada',
+    toolsLabel: 'Herramientas Seguras',
+    dangerLabel: 'Por Qué Arruina los Filos',
+    step3Label: '3. Comparador Filtrable de 8 Materiales de Tablas de Cortar',
+    step3Hint: 'Busca o filtra los 8 materiales por categoría o protección del filo. Pulsa cualquier tarjeta para probarla en el simulador arriba.',
+    searchPlaceholder: 'Buscar arce, hinoki, hasegawa, plástico, microplásticos, bambú, vidrio, titanio...',
+    searchClearLabel: 'Limpiar',
+    catAll: 'Todas las Tablas (8)',
+    catWood: 'Madera Dura y Blanda',
+    catSynthetic: 'Caucho y Plástico',
+    catComposite: 'Bambú y Compuesto',
+    catUnsafe: 'Inseguro / Duro',
+    ratingFilterLabel: 'Seguridad de Filo:',
+    ratingAll: 'Todas',
+    ratingFriendly: 'Protege el Filo',
+    ratingCaution: 'Precaución',
+    ratingUnsafe: 'Destructor de Filos',
+    showingPrefix: 'Mostrando',
+    showingSuffix: 'de 8 tablas',
+    noResultsTitle: 'Ninguna tabla coincide con tu búsqueda o filtros actuales.',
+    resetFiltersBtn: 'Restablecer Filtros',
+    selectBoardHint: 'Pulsa para probar arriba ↑',
+    printTitle: 'TABLA DE CUIDADO DE CUCHILLOS, CHAIRA Y TABLAS DE CORTAR (HRC · USDA FSIS)',
+    printSub: 'Nunca cuchillos en lavavajillas · Nunca cortar en vidrio/piedra/titanio · Desinfectar carne cruda (1 cda cloro / galón) · Aceite mineral mensual en madera.',
+    printKnivesHeading: '5 Perfiles de Cuchillos — Ángulos, Chaira y Piedras',
+    printBoardsHeading: '8 Materiales de Tablas — Filo, Lavavajillas y Mantenimiento',
+    printColKnife: 'Perfil de Cuchillo',
+    printColHrc: 'HRC / Bisel',
+    printColHoning: 'Regla de Chaira',
+    printColStone: 'Afilado / Piedra',
+    printColBoard: 'Material de Tabla',
+    printColRating: 'Protección de Filo',
+    printColDishwasher: 'Lavavajillas',
+    printColMaint: 'Higiene y Cuidado',
+    copyHeader: 'IsItKitchenSafe — Ficha de Cuidado de Cuchillos y Tablas de Cortar',
+    copyPairingLabel: 'COMBINACIÓN:',
+    copyVerdictLabel: 'VEREDICTO:',
+    copyBevelLabel: 'BISEL Y HRC:',
+    copyHoningLabel: 'REGLA DE CHAIRA:',
+    copySharpeningLabel: 'PIEDRA / AFILADO:',
+    copyDishwasherLabel: 'LAVAVAJILLAS:',
+    copySanitationLabel: 'DESINFECCIÓN USDA Y ACEITE:',
+    copyRulesHeader: '3 REGLAS CRÍTICAS DE CUCHILLOS Y TABLAS:',
+    relatedHeading: 'Herramientas Relacionadas de Alergias, Lavavajillas y Símbolos',
+    relatedAllergyTag: 'Seguridad de Contacto Cruzado',
+    relatedAllergyTitle: 'Verificador de Contacto Cruzado de Alergias →',
+    relatedAllergyDesc: 'Comprueba cómo limpiar tablas porosas y no porosas para evitar trazas de gluten, maní, lácteos o mariscos.',
+    relatedDishTag: 'Química de Detergente',
+    relatedDishTitle: 'Calculadora de Detergente de Lavavajillas →',
+    relatedDishDesc: 'Protege acero inoxidable y tablas aptas ajustando la dosis exacta según la dureza de tu agua.',
+    relatedSymbolTag: 'Guía de Símbolos',
+    relatedSymbolTitle: 'Decodificador de Símbolos de Cocina →',
+    relatedSymbolDesc: 'Interpreta los iconos de lavado a mano, uso alimentario y lavavajillas en tablas y utensilios.',
+    methodologyStripTitle: 'Basado en Metalurgia Rockwell HRC, Guías USDA FSIS de Tablas y Estándares Culinarios',
+    methodologyStripPrefix: 'Cada ángulo de bisel (15° vs. 20°), regla de chaira, proporción de desinfección con cloro (1 cda/galón), reemplazo por microplásticos y aceitado mineral está verificado con fuentes primarias. Consulta nuestra',
+    methodologyLabel: 'Metodología',
+    symbolQuickLabel: 'Decodificador de Símbolos',
+    allToolsLabel: 'Todas las Herramientas →',
+    faqTitle: 'Preguntas Frecuentes: Cuidado de Cuchillos, Chaira y Tablas de Cortar'
+  },
+  pt: {
+    ariaLabel: 'Combinador Interativo de Cuidados com Facas, Chaira vs. Afiação e Tábuas de Corte Seguras',
+    toolBadge: 'Metalurgia HRC · Higienização USDA FSIS · 5 Facas × 8 Tábuas',
+    toolTitle: 'Cuidados com Facas, Chaira vs. Afiação e Combinador de Tábuas',
+    toolSub: 'Escolha o perfil de aço da sua faca e o material da tábua para ver compatibilidade metalúrgica imediata, ângulo exato de 15° vs. 20°, regras de chaira e pedra, limites da lava-louças e sanitização USDA.',
+    copyBtn: 'Copiar Ficha de Cuidados',
+    copiedBtn: 'Ficha Copiada ✓',
+    printBtn: 'Imprimir Tabela de Cozinha',
+    step1Label: '1. Simulador Interativo Faca × Tábua de Corte',
+    step1Hint: 'Selecione sua faca (5 perfis) e a superfície de corte (8 materiais) para atualizar o painel em tempo real.',
+    knifeSelectLabel: 'Selecione o Perfil da Sua Faca (5)',
+    boardSelectLabel: 'Selecione o Material da Tábua (8)',
+    dashLiveBadge: 'PAINEL DE COMPATIBILIDADE E CUIDADOS AO VIVO',
+    bevelPillPrefix: 'Ângulo:',
+    whetstonePillPrefix: 'Pedra:',
+    knifeDishwasherNever: 'Faca na Lava-Louças: NUNCA',
+    boardEffectHeading: 'Efeito no Fio e Metalurgia',
+    honingHeading: 'Regra de Chaira e Alinhamento',
+    sharpeningHeading: 'Grão da Pedra e Alerta de Afiador em V',
+    dishwasherHeading: 'Segurança na Lava-Louças (Faca e Tábua)',
+    knifeLabelPrefix: 'Faca:',
+    boardLabelPrefix: 'Tábua:',
+    sanitationHeading: 'Sanitização USDA, Microplásticos e Óleo',
+    oilRuleLabel: 'Hidratação da Tábua:',
+    knifeCareLabel: 'Cuidado com Aço e Ferrugem:',
+    step2Label: '2. Comparador Interativo: Chaira vs. Afiação (15° vs. 20°)',
+    step2Hint: 'Compare alinhar um fio dobrado vs. desbastar aço novo e veja por que afiadores de fenda de carboneto estragam lâminas.',
+    modeHoningBtn: '🪄 Chaira (Alinhar)',
+    modeSharpeningBtn: '🪨 Afiação (Pedra)',
+    modeCarbideBtn: '🚨 Perigo Carboneto',
+    activeKnifeAngleNote: 'Regra da Faca Ativa:',
+    freqLabel: 'Frequência Recomendada',
+    toolsLabel: 'Ferramentas Seguras',
+    dangerLabel: 'Por Que Estraga a Lâmina',
+    step3Label: '3. Grade Comparativa Filtrável de 8 Materiais de Tábuas',
+    step3Hint: 'Busque ou filtre os 8 materiais por tipo ou proteção ao fio. Clique em qualquer tábua para testá-la no simulador acima.',
+    searchPlaceholder: 'Buscar bordo, hinoki, hasegawa, plástico, microplástico, bambu, vidro, titânio...',
+    searchClearLabel: 'Limpar',
+    catAll: 'Todas as Tábuas (8)',
+    catWood: 'Madeira Dura e Macia',
+    catSynthetic: 'Borracha e Plástico',
+    catComposite: 'Bambu e Compósito',
+    catUnsafe: 'Insegura / Rígida',
+    ratingFilterLabel: 'Segurança p/ Fio:',
+    ratingAll: 'Todas',
+    ratingFriendly: 'Segura p/ Fio',
+    ratingCaution: 'Atenção',
+    ratingUnsafe: 'Destruidora de Fio',
+    showingPrefix: 'Exibindo',
+    showingSuffix: 'de 8 tábuas',
+    noResultsTitle: 'Nenhuma tábua corresponde à busca ou filtros atuais.',
+    resetFiltersBtn: 'Limpar Busca e Filtros',
+    selectBoardHint: 'Clique para testar acima ↑',
+    printTitle: 'TABELA DE CUIDADOS COM FACAS, CHAIRA E TÁBUAS DE CORTE (HRC · USDA FSIS)',
+    printSub: 'Nunca facas na lava-louças · Nunca cortar em vidro/pedra/titânio · Sanitizar carne crua (1 col. sopa cloro / galão) · Óleo mineral mensal na madeira.',
+    printKnivesHeading: '5 Perfis de Facas — Ângulos, Chaira e Pedras',
+    printBoardsHeading: '8 Materiais de Tábuas — Fio, Lava-Louças e Manutenção',
+    printColKnife: 'Perfil da Faca',
+    printColHrc: 'HRC / Ângulo',
+    printColHoning: 'Regra da Chaira',
+    printColStone: 'Afiação / Pedra',
+    printColBoard: 'Material da Tábua',
+    printColRating: 'Proteção ao Fio',
+    printColDishwasher: 'Lava-Louças',
+    printColMaint: 'Higiene e Cuidado',
+    copyHeader: 'IsItKitchenSafe — Ficha de Cuidados com Facas e Tábuas de Corte',
+    copyPairingLabel: 'COMBINAÇÃO:',
+    copyVerdictLabel: 'VEREDICTO:',
+    copyBevelLabel: 'ÂNGULO E HRC:',
+    copyHoningLabel: 'REGRA DA CHAIRA:',
+    copySharpeningLabel: 'PEDRA / AFIAÇÃO:',
+    copyDishwasherLabel: 'LAVA-LOUÇAS:',
+    copySanitationLabel: 'SANITIZAÇÃO USDA E ÓLEO:',
+    copyRulesHeader: '3 REGRAS CRÍTICAS DE FACAS E TÁBUAS:',
+    relatedHeading: 'Ferramentas Relacionadas de Alergias, Lava-Louças e Símbolos',
+    relatedAllergyTag: 'Contato Cruzado em Tábuas',
+    relatedAllergyTitle: 'Verificador de Contato Cruzado de Alergias →',
+    relatedAllergyDesc: 'Veja protocolos seguros de limpeza em tábuas porosas e não porosas para glúten, amendoim, leite e frutos do mar.',
+    relatedDishTag: 'Química de Detergente',
+    relatedDishTitle: 'Calculadora de Detergente p/ Lava-Louças →',
+    relatedDishDesc: 'Proteja inox e tábuas laváveis ajustando a dosagem correta para a dureza da água da sua casa.',
+    relatedSymbolTag: 'Guia de Símbolos',
+    relatedSymbolTitle: 'Decodificador de Símbolos de Cozinha →',
+    relatedSymbolDesc: 'Entenda símbolos de lavagem manual, contato alimentar e lava-louças gravados em tábuas e utensílios.',
+    methodologyStripTitle: 'Baseado em Metalurgia Rockwell HRC, Normas USDA FSIS de Tábuas e Padrões Culinários',
+    methodologyStripPrefix: 'Cada ângulo de fio (15° vs. 20°), regra de chaira, diluição de cloro (1 col. sopa/galão), troca por microplásticos e hidratação com óleo mineral segue fontes primárias. Leia nossa',
+    methodologyLabel: 'Metodologia',
+    symbolQuickLabel: 'Decodificador de Símbolos',
+    allToolsLabel: 'Todas as Ferramentas →',
+    faqTitle: 'Perguntas Frequentes: Cuidados com Facas, Chaira e Tábuas Seguras'
+  },
+  'zh-cn': {
+    ariaLabel: '交互式厨刀养护、磨刀棒与开刃对比及安全砧板匹配器',
+    toolBadge: '洛氏硬度 HRC 冶金标准 · USDA FSIS 砧板消毒 · 5 刀型 × 8 砧板',
+    toolTitle: '厨刀养护、拨刃 vs 开刃与安全砧板匹配器',
+    toolSub: '选择您的厨刀钢材与砧板材质，即时查看冶金护刃匹配结论、15° 与 20° 刃角规范、安全磨刀棒/磨刀石目数、洗碗机红线及 USDA 生肉消毒与木板养油指南。',
+    copyBtn: '复制刀板养护卡',
+    copiedBtn: '养护卡已复制 ✓',
+    printBtn: '打印厨房养护表',
+    step1Label: '1. 厨刀 × 砧板材质交互式匹配模拟器',
+    step1Hint: '点选您的刀型钢材（5 类）与砧板材质（8 类），下方实时生成专业护刃与卫生评估。',
+    knifeSelectLabel: '选择您的厨刀钢材类型 (5)',
+    boardSelectLabel: '选择您的砧板材质 (8)',
+    dashLiveBadge: '实时刀板匹配与养护仪表盘',
+    bevelPillPrefix: '刃角：',
+    whetstonePillPrefix: '磨刀石：',
+    knifeDishwasherNever: '厨刀入洗碗机：严禁',
+    boardEffectHeading: '刃口影响与冶金匹配分析',
+    honingHeading: '磨刀棒拨刃规则',
+    sharpeningHeading: '磨刀石目数与拉槽器警告',
+    dishwasherHeading: '洗碗机安全结论（刀与板）',
+    knifeLabelPrefix: '厨刀：',
+    boardLabelPrefix: '砧板：',
+    sanitationHeading: 'USDA 生肉消毒、微塑料与上油维护',
+    oilRuleLabel: '砧板上油养护：',
+    knifeCareLabel: '防锈与刀身保养：',
+    step2Label: '2. 磨刀棒拨刃 vs 磨刀石开刃交互式指南 (15° vs 20°)',
+    step2Hint: '弄清“拨正卷刃”与“磨削新锋”的本质区别，以及为何碳化钨 V 型拉槽磨刀器会撕裂刀口。',
+    modeHoningBtn: '🪄 拨刃 (磨刀棒)',
+    modeSharpeningBtn: '🪨 开刃 (磨刀石)',
+    modeCarbideBtn: '🚨 拉槽磨刀器风险',
+    activeKnifeAngleNote: '当前所选刀型专属规则：',
+    freqLabel: '建议维护频率',
+    toolsLabel: '安全工具选择',
+    dangerLabel: '伤刀核心原理',
+    step3Label: '3. 可筛选 8 大砧板材质速查对比网格',
+    step3Hint: '按类别或护刃等级快速检索全部 8 种常见砧板材质；点击任意卡片即可直接载入上方模拟器测试。',
+    searchPlaceholder: '搜索 枫木、桧木、长谷川、塑料、微塑料、竹板、玻璃、钛板...',
+    searchClearLabel: '清除',
+    catAll: '全部砧板 (8)',
+    catWood: '硬木与软木',
+    catSynthetic: '合成橡胶与塑料',
+    catComposite: '竹板与复合板',
+    catUnsafe: '高危硬质板',
+    ratingFilterLabel: '护刃评级：',
+    ratingAll: '全部',
+    ratingFriendly: '护刃优选',
+    ratingCaution: '需注意',
+    ratingUnsafe: '毁刀杀手',
+    showingPrefix: '当前显示',
+    showingSuffix: '种（共 8 种砧板）',
+    noResultsTitle: '没有符合当前搜索词或筛选条件的砧板材质。',
+    resetFiltersBtn: '重置搜索与筛选',
+    selectBoardHint: '点击载入上方模拟器 ↑',
+    printTitle: '厨刀养护、磨刀棒与安全砧板速查表（洛氏 HRC · USDA FSIS）',
+    printSub: '厨刀严禁进洗碗机 · 严禁在玻璃/石材/钛板切菜 · 生肉板按每加仑水1汤匙无香漂白水消毒 · 木板每月涂食品级白矿油',
+    printKnivesHeading: '5 类厨刀钢材 — 刃角、磨刀棒与磨刀石规范',
+    printBoardsHeading: '8 类砧板材质 — 护刃评级、洗碗机与消毒养护',
+    printColKnife: '厨刀钢材类型',
+    printColHrc: '硬度 / 刃角',
+    printColHoning: '磨刀棒规范',
+    printColStone: '磨刀石 / 开刃',
+    printColBoard: '砧板材质',
+    printColRating: '护刃评级',
+    printColDishwasher: '洗碗机',
+    printColMaint: '消毒与保养',
+    copyHeader: 'IsItKitchenSafe — 厨刀养护与安全砧板匹配卡',
+    copyPairingLabel: '当前搭配：',
+    copyVerdictLabel: '匹配裁定：',
+    copyBevelLabel: '刃角与硬度：',
+    copyHoningLabel: '拨刃规范：',
+    copySharpeningLabel: '开刃/磨刀石：',
+    copyDishwasherLabel: '洗碗机安全：',
+    copySanitationLabel: 'USDA 消毒与养油：',
+    copyRulesHeader: '3 条厨刀与砧板绝对安全铁律：',
+    relatedHeading: '相关交叉接触、洗碗机与厨房标志工具',
+    relatedAllergyTag: '砧板过敏原交叉接触',
+    relatedAllergyTitle: '食物过敏原交叉接触检查器 →',
+    relatedAllergyDesc: '核查多孔木砧板与无孔板在麸质、花生、乳制品与贝类过敏原下的清洁与分板要求。',
+    relatedDishTag: '洗碗剂化学与养护',
+    relatedDishTitle: '洗碗机洗涤剂用量计算器 →',
+    relatedDishDesc: '根据家庭水质硬度精准控制洗碗剂用量，保护可机洗砧板、玻璃器皿与不锈钢餐具。',
+    relatedSymbolTag: '洗护标志指南',
+    relatedSymbolTitle: '厨房器皿标志解码器 →',
+    relatedSymbolDesc: '秒懂印在砧板、厨刀与餐具上的“仅限手洗”、食品接触级与洗碗机安全图标。',
+    methodologyStripTitle: '严格依据洛氏 HRC 刀具冶金、USDA FSIS 砧板卫生规范与专业厨艺标准',
+    methodologyStripPrefix: '所有 15°/20° 刃角规范、磨刀棒材质禁忌、含氯漂白水消毒配比、微塑料淘汰标准与白矿油护理均核验自一手权威文献。查阅我们的',
+    methodologyLabel: '科学方法论',
+    symbolQuickLabel: '厨房标志解码器',
+    allToolsLabel: '全部厨房工具 →',
+    faqTitle: '常见问题：厨刀养护、磨刀棒与安全砧板选择'
+  },
+  ja: {
+    ariaLabel: 'インタラクティブ包丁ケア・ホーニング対研ぎ＆安全まな板マッチャー',
+    toolBadge: 'ロックウェル硬度 HRC · USDA FSIS 衛生基準 · 包丁5種 × まな板8種',
+    toolTitle: '包丁ケア・ホーニング vs 研ぎ＆安全まな板マッチャー',
+    toolSub: '包丁の鋼材（5タイプ）とまな板の素材（8種類）を選ぶだけで、刃持ち相性・15°対20°の刃角・棒研ぎと砥石のルール・食洗機可否・USDA生肉除菌＆オイル手入れを即座に診断します。',
+    copyBtn: 'ケアカードをコピー',
+    copiedBtn: 'コピーしました ✓',
+    printBtn: 'キッチン用一覧表を印刷',
+    step1Label: '1. 包丁 × まな板 相性シミュレーター',
+    step1Hint: '包丁タイプ（5種）とまな板素材（8種）を選ぶと、下の相性＆ケアダッシュボードが即更新されます。',
+    knifeSelectLabel: '包丁の鋼材タイプを選択 (5)',
+    boardSelectLabel: 'まな板の素材を選択 (8)',
+    dashLiveBadge: 'リアルタイム相性＆ケア診断',
+    bevelPillPrefix: '刃角:',
+    whetstonePillPrefix: '砥石:',
+    knifeDishwasherNever: '包丁の食洗機：厳禁',
+    boardEffectHeading: '刃先への影響と相性分析',
+    honingHeading: 'ホーニング棒（刃先直し）ルール',
+    sharpeningHeading: '砥石番手＆簡易シャープナー警告',
+    dishwasherHeading: '食洗機の可否（包丁・まな板）',
+    knifeLabelPrefix: '包丁:',
+    boardLabelPrefix: 'まな板:',
+    sanitationHeading: 'USDA 除菌・マイクロプラスチック・オイル管理',
+    oilRuleLabel: 'まな板の保湿・管理:',
+    knifeCareLabel: '刃・防錆ケア:',
+    step2Label: '2. ホーニング vs 研ぎ（15° vs 20°）インタラクティブ比較',
+    step2Hint: '「倒れた刃を戻す」と「鋼を削って研ぐ」の違いと、超硬V字簡易シャープナーが刃を傷める理由を比較できます。',
+    modeHoningBtn: '🪄 ホーニング（棒）',
+    modeSharpeningBtn: '🪨 研ぎ（砥石）',
+    modeCarbideBtn: '🚨 簡易V字の危険',
+    activeKnifeAngleNote: '選択中の包丁専用ルール:',
+    freqLabel: '推奨メンテナンス頻度',
+    toolsLabel: '安全なツール',
+    dangerLabel: '刃を傷める理由',
+    step3Label: '3. まな板 8素材 クイック比較グリッド（検索＆フィルター）',
+    step3Hint: '素材タイプや刃への優しさで絞り込み可能。カードをクリックすると上のシミュレーターに即反映されます。',
+    searchPlaceholder: 'メープル、ひのき、ハセガワ、プラスチック、竹、ガラス、チタン...',
+    searchClearLabel: 'クリア',
+    catAll: 'すべて (8)',
+    catWood: '広葉樹・軟木',
+    catSynthetic: '合成ゴム・樹脂',
+    catComposite: '竹・コンポジット',
+    catUnsafe: '使用厳禁・硬質',
+    ratingFilterLabel: '刃への安全性:',
+    ratingAll: 'すべて',
+    ratingFriendly: '刃に優しい',
+    ratingCaution: '注意',
+    ratingUnsafe: '刃破壊',
+    showingPrefix: '表示中：',
+    showingSuffix: '/ 8 素材',
+    noResultsTitle: '条件に一致するまな板素材がありません。',
+    resetFiltersBtn: 'フィルターをリセット',
+    selectBoardHint: 'クリックして上で相性診断 ↑',
+    printTitle: '包丁ケア・ホーニング＆まな板安全一覧表（HRC・USDA FSIS）',
+    printSub: '包丁の食洗機厳禁 · ガラス/石/チタン切断厳禁 · 生肉板除菌（水1ガロンに漂白剤大さじ1） · 木板は月1回食品用ミネラルオイル',
+    printKnivesHeading: '包丁 5タイプ — 刃角・ホーニング・砥石ガイド',
+    printBoardsHeading: 'まな板 8素材 — 刃保護・食洗機・衛生メンテナンス',
+    printColKnife: '包丁タイプ',
+    printColHrc: 'HRC / 刃角',
+    printColHoning: 'ホーニング基準',
+    printColStone: '研ぎ / 砥石',
+    printColBoard: 'まな板素材',
+    printColRating: '刃保護評価',
+    printColDishwasher: '食洗機',
+    printColMaint: '除菌・ケア',
+    copyHeader: 'IsItKitchenSafe — 包丁ケア＆まな板相性カード',
+    copyPairingLabel: '組み合わせ：',
+    copyVerdictLabel: '相性判定：',
+    copyBevelLabel: '刃角・硬度：',
+    copyHoningLabel: 'ホーニング規則：',
+    copySharpeningLabel: '砥石・研ぎ：',
+    copyDishwasherLabel: '食洗機可否：',
+    copySanitationLabel: 'USDA 除菌・オイル：',
+    copyRulesHeader: '包丁＆まな板の重要安全ルール 3か条：',
+    relatedHeading: '関連するアレルギー交差接触・食洗機・キッチン記号ツール',
+    relatedAllergyTag: 'まな板のアレルゲン対策',
+    relatedAllergyTitle: '食物アレルギー交差接触チェッカー →',
+    relatedAllergyDesc: '木製・樹脂製まな板におけるグルテン・ピーナッツ・乳製品・甲殻類の安全な洗浄と使い分けを確認。',
+    relatedDishTag: '洗剤ケミストリー',
+    relatedDishTitle: '食洗機洗剤 適量計算ツール →',
+    relatedDishDesc: '水硬度に合わせた適正洗剤量で、食洗機対応まな板やステンレス・ガラス製品の劣化を防止します。',
+    relatedSymbolTag: '表示マーク解説',
+    relatedSymbolTitle: 'キッチン記号・表示デコーダー →',
+    relatedSymbolDesc: 'まな板や調理器具の裏面に記された手洗い専用・食品衛生・食洗機マークの意味を即確認。',
+    methodologyStripTitle: 'ロックウェル HRC 冶金基準・USDA FSIS まな板衛生指針・調理専門基準に準拠',
+    methodologyStripPrefix: '15°/20°の刃角基準、棒研ぎ素材の制限、塩素除菌比率、マイクロプラスチック交換基準、ミネラルオイル管理は一次公的資料に基づき検証しています。詳細は',
+    methodologyLabel: '検証メソドロジー',
+    symbolQuickLabel: 'キッチン記号デコーダー',
+    allToolsLabel: 'すべてのツール →',
+    faqTitle: 'よくある質問：包丁ケア・ホーニング・安全なまな板選び'
+  }
+};
+
+const t = UI[lang] || UI.en;
+
+const defaultKnife = knives[0];
+const defaultBoard = boards[0];
+const defaultVerdict: VerdictKey = defaultBoard.compatByKnife[defaultKnife.id] || 'perfect';
+const defaultVerdictInfo = verdictMeta[defaultVerdict] || verdictMeta.perfect;
+
+function getVerdictDarkPillClass(v: VerdictKey): string {
+  if (v === 'blade-killer') return 'bg-red-500 text-white';
+  if (v === 'dulls-fast') return 'bg-amber-400 text-slate-950';
+  if (v === 'good') return 'bg-sky-400 text-slate-950';
+  return 'bg-emerald-400 text-slate-950';
+}
+
+function getVerdictBorderClass(v: VerdictKey): string {
+  if (v === 'blade-killer') return 'border-red-400';
+  if (v === 'dulls-fast') return 'border-amber-400';
+  if (v === 'good') return 'border-sky-400';
+  return 'border-emerald-400';
+}
+
+function getBoardCardPillClass(rating: BladeRatingKey): string {
+  if (rating === 'unsafe') return 'bg-red-500/15 text-red-800 dark:text-red-200 border-red-500/45';
+  if (rating === 'caution') return 'bg-amber-500/15 text-amber-900 dark:text-amber-200 border-amber-500/45';
+  if (rating === 'great') return 'bg-sky-500/15 text-sky-800 dark:text-sky-200 border-sky-500/40';
+  return 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-200 border-emerald-500/40';
+}
+
+function getHoningPillClass(status: HoningStatusKey): string {
+  if (status === 'never-rod') return 'bg-red-500/20 text-red-100 border-red-400/45';
+  if (status === 'ceramic-only') return 'bg-amber-500/20 text-amber-100 border-amber-400/45';
+  return 'bg-emerald-500/20 text-emerald-100 border-emerald-400/45';
+}
+
+function getCategoryLabel(cat: BoardCategoryKey): string {
+  if (cat === 'wood') return t.catWood;
+  if (cat === 'synthetic') return t.catSynthetic;
+  if (cat === 'composite') return t.catComposite;
+  return t.catUnsafe;
+}
+
+const categoryDefs: Array<{ key: 'all' | BoardCategoryKey; label: string }> = [
+  { key: 'all', label: t.catAll },
+  { key: 'wood', label: t.catWood },
+  { key: 'synthetic', label: t.catSynthetic },
+  { key: 'composite', label: t.catComposite },
+  { key: 'unsafe-hard', label: t.catUnsafe }
+];
+
+const ratingDefs: Array<{ key: 'all' | 'friendly' | 'caution' | 'unsafe'; label: string }> = [
+  { key: 'all', label: t.ratingAll },
+  { key: 'friendly', label: t.ratingFriendly },
+  { key: 'caution', label: t.ratingCaution },
+  { key: 'unsafe', label: t.ratingUnsafe }
+];
+
+const clientPayload = {
+  lang,
+  defaultKnifeId: defaultKnife.id,
+  defaultBoardId: defaultBoard.id,
+  knives,
+  boards,
+  verdictMeta,
+  honingData,
+  safetyRules: safetyBanner.rules,
+  ui: {
+    copyBtn: t.copyBtn,
+    copiedBtn: t.copiedBtn,
+    bevelPillPrefix: t.bevelPillPrefix,
+    whetstonePillPrefix: t.whetstonePillPrefix,
+    showingPrefix: t.showingPrefix,
+    showingSuffix: t.showingSuffix,
+    copyHeader: t.copyHeader,
+    copyPairingLabel: t.copyPairingLabel,
+    copyVerdictLabel: t.copyVerdictLabel,
+    copyBevelLabel: t.copyBevelLabel,
+    copyHoningLabel: t.copyHoningLabel,
+    copySharpeningLabel: t.copySharpeningLabel,
+    copyDishwasherLabel: t.copyDishwasherLabel,
+    copySanitationLabel: t.copySanitationLabel,
+    copyRulesHeader: t.copyRulesHeader,
+    knifeLabelPrefix: t.knifeLabelPrefix,
+    boardLabelPrefix: t.boardLabelPrefix
+  }
+};
+---
+
+<div id="knife-board-matcher-root" class="space-y-12">
+  <!-- Top 3-Rule Critical Knife & Board Safety Banner -->
+  <aside
+    class="p-5 sm:p-6 rounded-2xl bg-error-bg/80 dark:bg-red-950/45 border-2 border-error-border shadow-sm space-y-4"
+    role="alert"
+    aria-label={safetyBanner.badge}
+  >
+    <div class="space-y-1.5 max-w-4xl">
+      <span class="inline-block px-3 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-error-border text-white">
+        ⚠️ {safetyBanner.badge}
+      </span>
+      <h2 class="text-base sm:text-xl font-extrabold text-ink leading-snug">
+        {safetyBanner.headline}
+      </h2>
+      <p class="text-xs sm:text-[13.5px] font-medium text-body leading-relaxed">
+        {safetyBanner.subline}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      {safetyBanner.rules.map((rule) => (
+        <div class="p-3.5 rounded-xl bg-canvas border border-hairline shadow-xs space-y-1">
+          <div class="flex items-start gap-2">
+            <span aria-hidden="true" class="text-lg leading-none mt-0.5 shrink-0">{rule.icon}</span>
+            <h3 class="text-xs sm:text-[13px] font-extrabold text-ink leading-snug">{rule.title}</h3>
+          </div>
+          <p class="text-xs text-body leading-relaxed">{rule.body}</p>
+        </div>
+      ))}
+    </div>
+  </aside>
+
+  <!-- Main Interactive Knife Care & Cutting Board Matcher Card -->
+  <section
+    id="knife-care-cutting-board-matcher"
+    class="bg-canvas border border-hairline rounded-2xl shadow-sm overflow-hidden"
+    aria-label={t.ariaLabel}
+  >
+    <script type="application/json" id="kcbm-payload" set:html={JSON.stringify(clientPayload)} />
+
+    <!-- Header + Step 1 Compatibility Simulator -->
+    <div class="p-5 sm:p-6 border-b border-hairline bg-surface-soft/50 space-y-6">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div class="space-y-1 max-w-2xl">
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-signature-coral text-white">
+            🔪 {t.toolBadge}
+          </span>
+          <h2 class="text-title-md font-bold text-ink">{t.toolTitle}</h2>
+          <p class="text-xs sm:text-[13px] text-muted leading-relaxed">{t.toolSub}</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 print:hidden">
+          <button
+            type="button"
+            id="kcbm-copy-btn"
+            class="min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors cursor-pointer shadow-sm"
+          >
+            <span id="kcbm-copy-label">📋 {t.copyBtn}</span>
+          </button>
+          <button
+            type="button"
+            id="kcbm-print-btn"
+            class="min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-semibold bg-canvas text-ink border border-hairline hover:border-signature-coral transition-colors cursor-pointer"
+          >
+            🖨️ {t.printBtn}
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 1: Knife (5) x Board (8) Selector Matrix -->
+      <div class="space-y-4 print:hidden">
+        <div class="space-y-0.5">
+          <h3 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-ink">
+            {t.step1Label}
+          </h3>
+          <p class="text-xs text-muted">{t.step1Hint}</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <!-- 5 Knife Profiles Selector -->
+          <div class="lg:col-span-5 p-3.5 rounded-xl bg-canvas border border-hairline space-y-2.5">
+            <span class="block text-[11px] font-extrabold uppercase tracking-wider text-signature-coral">
+              🔪 {t.knifeSelectLabel}
+            </span>
+            <div class="space-y-1.5" role="group" aria-label={t.knifeSelectLabel}>
+              {knives.map((k) => {
+                const isDefault = k.id === defaultKnife.id;
+                return (
+                  <button
+                    type="button"
+                    data-kcbm-knife={k.id}
+                    aria-pressed={isDefault ? 'true' : 'false'}
+                    class={`kcbm-knife-btn w-full text-left p-2.5 rounded-xl border transition-all cursor-pointer flex items-start gap-2.5 ${
+                      isDefault
+                        ? 'bg-primary text-on-primary border-primary ring-2 ring-signature-coral/60 shadow-xs'
+                        : 'bg-surface-soft/70 text-ink border-hairline hover:border-signature-coral'
+                    }`}
+                  >
+                    <span aria-hidden="true" class="text-base leading-none mt-0.5 shrink-0">{k.icon}</span>
+                    <span class="min-w-0 flex-1 block">
+                      <span class="flex flex-wrap items-center justify-between gap-1">
+                        <span class="text-xs font-extrabold leading-snug">{k.shortName}</span>
+                        <span
+                          data-kcbm-pill
+                          class={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                            isDefault ? 'bg-white/20 text-white' : 'bg-canvas text-muted border border-hairline'
+                          }`}
+                        >
+                          {k.hrc} · {k.bevelAngle}
+                        </span>
+                      </span>
+                      <span
+                        data-kcbm-sub
+                        class={`block text-[11px] leading-snug mt-0.5 ${isDefault ? 'text-white/85' : 'text-muted'}`}
+                      >
+                        {k.examples}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <!-- 8 Cutting Board Materials Selector -->
+          <div class="lg:col-span-7 p-3.5 rounded-xl bg-canvas border border-hairline space-y-2.5">
+            <span class="block text-[11px] font-extrabold uppercase tracking-wider text-signature-coral">
+              🪵 {t.boardSelectLabel}
+            </span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" role="group" aria-label={t.boardSelectLabel}>
+              {boards.map((b) => {
+                const isDefault = b.id === defaultBoard.id;
+                return (
+                  <button
+                    type="button"
+                    data-kcbm-board={b.id}
+                    aria-pressed={isDefault ? 'true' : 'false'}
+                    class={`kcbm-board-btn w-full text-left p-2.5 rounded-xl border transition-all cursor-pointer flex items-start gap-2 ${
+                      isDefault
+                        ? 'bg-primary text-on-primary border-primary ring-2 ring-signature-coral/60 shadow-xs'
+                        : 'bg-surface-soft/70 text-ink border-hairline hover:border-signature-coral'
+                    }`}
+                  >
+                    <span aria-hidden="true" class="text-base leading-none mt-0.5 shrink-0">{b.icon}</span>
+                    <span class="min-w-0 block">
+                      <span class="block text-xs font-extrabold leading-snug">{b.shortName}</span>
+                      <span
+                        data-kcbm-sub
+                        class={`block text-[10.5px] font-semibold leading-snug mt-0.5 ${
+                          isDefault ? 'text-white/85' : 'text-muted'
+                        }`}
+                      >
+                        {b.dishwasherBadge}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- High-Contrast Dark Live Compatibility & Care Dashboard -->
+      <div
+        id="kcbm-dashboard"
+        aria-live="polite"
+        class={`w-full rounded-2xl bg-surface-dark text-on-dark p-5 sm:p-6 space-y-5 shadow-sm border-l-4 ${getVerdictBorderClass(defaultVerdict)}`}
+      >
+        <div class="space-y-2.5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10.5px] font-extrabold uppercase tracking-wider bg-white/12 text-signature-peach border border-white/15">
+                🧪 {t.dashLiveBadge}
+              </span>
+              <span
+                id="kcbm-verdict-badge"
+                class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider ${getVerdictDarkPillClass(defaultVerdict)}`}
+              >
+                {defaultVerdictInfo.badge}
+              </span>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-1.5">
+              <span
+                id="kcbm-bevel-pill"
+                class="inline-flex items-center px-2 py-0.5 rounded-md border text-[10.5px] font-extrabold uppercase tracking-wider bg-sky-500/20 text-sky-100 border-sky-400/45"
+              >
+                📐 {t.bevelPillPrefix} {defaultKnife.bevelAngle} ({defaultKnife.hrc})
+              </span>
+              <span
+                id="kcbm-stone-pill"
+                class="inline-flex items-center px-2 py-0.5 rounded-md border text-[10.5px] font-extrabold uppercase tracking-wider bg-white/10 text-white/90 border-white/20"
+              >
+                🪨 {t.whetstonePillPrefix} {defaultKnife.whetstoneGrit}
+              </span>
+            </div>
+          </div>
+
+          <h4 id="kcbm-pair-title" class="text-lg sm:text-2xl font-extrabold tracking-tight text-white leading-snug">
+            {defaultKnife.icon} {defaultKnife.shortName} × {defaultBoard.icon} {defaultBoard.shortName}
+          </h4>
+          <p id="kcbm-verdict-headline" class="text-xs sm:text-[14.5px] font-bold text-signature-mint leading-relaxed">
+            {defaultVerdictInfo.headline}
+          </p>
+          <p id="kcbm-verdict-advice" class="text-xs sm:text-[13.5px] text-white/90 leading-relaxed">
+            {defaultVerdictInfo.advice}
+          </p>
+        </div>
+
+        <!-- 4-Card Metallurgical & Sanitation Breakdown -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <!-- Card 1: Blade-to-Board Metallurgy -->
+          <div class="p-4 rounded-xl bg-white/7 border border-white/14 space-y-2">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-[11px] font-extrabold uppercase tracking-wider text-signature-peach">
+                ⚖️ {t.boardEffectHeading}
+              </span>
+              <span
+                id="kcbm-board-rating-pill"
+                class="inline-flex items-center px-2 py-0.5 rounded-md border text-[10px] font-extrabold uppercase tracking-wider bg-white/10 text-white/90 border-white/20"
+              >
+                {defaultBoard.ratingBadge}
+              </span>
+            </div>
+            <p id="kcbm-board-effect" class="text-xs text-white/95 leading-relaxed">
+              {defaultBoard.bladeEffect}
+            </p>
+            <p class="text-[11.5px] text-white/80 leading-relaxed pt-1.5 border-t border-white/10">
+              <strong class="text-white">{t.knifeCareLabel}</strong>{' '}
+              <span id="kcbm-knife-care">{defaultKnife.careRule}</span>
+            </p>
+          </div>
+
+          <!-- Card 2: Honing Rod & Bevel Rule -->
+          <div class="p-4 rounded-xl bg-white/7 border border-white/14 space-y-2">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-200">
+                🪄 {t.honingHeading}
+              </span>
+              <span
+                id="kcbm-honing-badge"
+                class={`inline-flex items-center px-2 py-0.5 rounded-md border text-[10px] font-extrabold uppercase tracking-wider ${getHoningPillClass(defaultKnife.honingStatus)}`}
+              >
+                {defaultKnife.honingBadge}
+              </span>
+            </div>
+            <p id="kcbm-honing-rule" class="text-xs text-white/95 leading-relaxed">
+              {defaultKnife.honingRule}
+            </p>
+            <p class="text-[11.5px] text-amber-200/95 leading-relaxed pt-1.5 border-t border-white/10">
+              <strong class="text-amber-200">🪨 {t.sharpeningHeading}:</strong>{' '}
+              <span id="kcbm-sharpening-rule">{defaultKnife.sharpeningRule}</span>
+            </p>
+          </div>
+
+          <!-- Card 3: Dishwasher Safety (Knife & Board) -->
+          <div class="p-4 rounded-xl bg-red-500/12 border border-red-400/35 space-y-2">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-[11px] font-extrabold uppercase tracking-wider text-red-200">
+                🚫 {t.dishwasherHeading}
+              </span>
+              <span
+                id="kcbm-board-dw-pill"
+                class="inline-flex items-center px-2 py-0.5 rounded-md border text-[10px] font-extrabold uppercase tracking-wider bg-white/10 text-white border-white/20"
+              >
+                {defaultBoard.dishwasherBadge}
+              </span>
+            </div>
+            <p class="text-xs text-white/95 leading-relaxed">
+              <strong class="text-red-200">{t.knifeLabelPrefix}</strong>{' '}
+              <span id="kcbm-knife-dw">{defaultKnife.dishwasherRule}</span>
+            </p>
+            <p class="text-xs text-white/90 leading-relaxed pt-1.5 border-t border-white/12">
+              <strong class="text-white">{t.boardLabelPrefix}</strong>{' '}
+              <span id="kcbm-board-maint">{defaultBoard.maintenanceRule}</span>
+            </p>
+          </div>
+
+          <!-- Card 4: USDA Sanitation, Microplastics & Mineral Oil -->
+          <div class="p-4 rounded-xl bg-emerald-500/12 border border-emerald-400/35 space-y-2">
+            <span class="block text-[11px] font-extrabold uppercase tracking-wider text-emerald-200">
+              🧼 {t.sanitationHeading}
+            </span>
+            <p id="kcbm-board-sanitation" class="text-xs text-white/95 leading-relaxed">
+              {defaultBoard.foodSafetyNote}
+            </p>
+            <p class="text-[11.5px] text-emerald-100/95 leading-relaxed pt-1.5 border-t border-emerald-400/25">
+              <strong class="text-emerald-200">{t.oilRuleLabel}</strong>{' '}
+              <span id="kcbm-board-oil">{defaultBoard.oilRule}</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Interactive Honing vs. Sharpening Matcher -->
+    <div class="p-5 sm:p-6 border-b border-hairline space-y-4 print:hidden">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div class="space-y-1 max-w-2xl">
+          <h3 class="text-base sm:text-lg font-bold text-ink">{t.step2Label}</h3>
+          <p class="text-xs sm:text-[13px] text-muted leading-relaxed">{t.step2Hint}</p>
+        </div>
+
+        <div class="flex flex-wrap gap-1.5" role="group" aria-label={t.step2Label}>
+          <button
+            type="button"
+            data-kcbm-mode="honing"
+            aria-pressed="true"
+            class="kcbm-mode-btn px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer bg-primary text-on-primary border-primary"
+          >
+            {t.modeHoningBtn}
+          </button>
+          <button
+            type="button"
+            data-kcbm-mode="sharpening"
+            aria-pressed="false"
+            class="kcbm-mode-btn px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer bg-surface-soft text-ink border-hairline hover:border-signature-coral"
+          >
+            {t.modeSharpeningBtn}
+          </button>
+          <button
+            type="button"
+            data-kcbm-mode="carbide"
+            aria-pressed="false"
+            class="kcbm-mode-btn px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer bg-surface-soft text-ink border-hairline hover:border-signature-coral"
+          >
+            {t.modeCarbideBtn}
+          </button>
+        </div>
+      </div>
+
+      <!-- Synchronized Active-Knife Spotlight Strip -->
+      <div class="p-4 rounded-xl bg-surface-soft border border-hairline flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div class="space-y-1">
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-signature-coral">
+            {t.activeKnifeAngleNote} <span id="kcbm-hs-knife-name">{defaultKnife.name}</span>
+          </span>
+          <p id="kcbm-hs-active-text" class="text-xs sm:text-[13px] text-body leading-relaxed">
+            {defaultKnife.honingRule}
+          </p>
+        </div>
+        <div class="shrink-0 flex flex-wrap gap-2">
+          <span
+            id="kcbm-hs-bevel-chip"
+            class="px-2.5 py-1 rounded-lg text-xs font-extrabold bg-canvas border border-hairline text-ink"
+          >
+            📐 {defaultKnife.bevelLabel}
+          </span>
+          <span
+            id="kcbm-hs-grit-chip"
+            class="px-2.5 py-1 rounded-lg text-xs font-extrabold bg-canvas border border-hairline text-ink"
+          >
+            🪨 {defaultKnife.whetstoneGrit}
+          </span>
+        </div>
+      </div>
+
+      <!-- 3 Side-by-Side Comparison Cards (Honing vs. Sharpening vs. Carbide Pull-Through Warning) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
+        <div
+          id="kcbm-card-honing"
+          class="p-4 rounded-2xl bg-canvas border-2 border-signature-coral shadow-xs space-y-2.5 transition-all"
+        >
+          <div class="space-y-0.5">
+            <span class="inline-block text-[10.5px] font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+              🪄 {honingData.honingSubtitle}
+            </span>
+            <h4 class="text-sm font-extrabold text-ink">{honingData.honingTitle}</h4>
+          </div>
+          <p class="text-xs text-body leading-relaxed">{honingData.honingSummary}</p>
+          <div class="pt-2 border-t border-hairline/70 space-y-1.5 text-[11.5px]">
+            <p class="text-body"><strong class="text-ink">{t.freqLabel}:</strong> {honingData.honingFrequency}</p>
+            <p class="text-body"><strong class="text-ink">{t.toolsLabel}:</strong> {honingData.honingTools}</p>
+          </div>
+        </div>
+
+        <div
+          id="kcbm-card-sharpening"
+          class="p-4 rounded-2xl bg-surface-soft/65 border border-hairline space-y-2.5 transition-all"
+        >
+          <div class="space-y-0.5">
+            <span class="inline-block text-[10.5px] font-extrabold uppercase tracking-wider text-sky-700 dark:text-sky-300">
+              🪨 {honingData.sharpeningSubtitle}
+            </span>
+            <h4 class="text-sm font-extrabold text-ink">{honingData.sharpeningTitle}</h4>
+          </div>
+          <p class="text-xs text-body leading-relaxed">{honingData.sharpeningSummary}</p>
+          <div class="pt-2 border-t border-hairline/70 space-y-1.5 text-[11.5px]">
+            <p class="text-body"><strong class="text-ink">{t.freqLabel}:</strong> {honingData.sharpeningFrequency}</p>
+            <p class="text-body"><strong class="text-ink">{t.toolsLabel}:</strong> {honingData.sharpeningTools}</p>
+          </div>
+        </div>
+
+        <div
+          id="kcbm-card-carbide"
+          class="p-4 rounded-2xl bg-error-bg/50 dark:bg-red-950/30 border border-error-border/70 space-y-2.5 transition-all"
+        >
+          <div class="space-y-0.5">
+            <span class="inline-block text-[10.5px] font-extrabold uppercase tracking-wider text-error-border dark:text-red-300">
+              🚨 {honingData.carbideSubtitle}
+            </span>
+            <h4 class="text-sm font-extrabold text-ink">{honingData.carbideTitle}</h4>
+          </div>
+          <p class="text-xs text-body leading-relaxed">{honingData.carbideSummary}</p>
+          <div class="pt-2 border-t border-error-border/30 space-y-1.5 text-[11.5px]">
+            <p class="text-body"><strong class="text-ink">{t.dangerLabel}:</strong> {honingData.carbideDanger}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Filterable 8-Board Quick Comparison Grid -->
+    <div class="p-5 sm:p-6 space-y-5 print:hidden">
+      <div class="space-y-1">
+        <h3 class="text-base sm:text-lg font-bold text-ink">{t.step3Label}</h3>
+        <p class="text-xs sm:text-[13px] text-muted leading-relaxed">{t.step3Hint}</p>
+      </div>
+
+      <!-- Search + Category & Rating Filters -->
+      <div class="space-y-3.5">
+        <div class="relative flex-1">
+          <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none" aria-hidden="true">
+            🔎
+          </span>
+          <input
+            type="search"
+            id="kcbm-search"
+            placeholder={t.searchPlaceholder}
+            aria-label={t.searchPlaceholder}
+            class="w-full min-h-[42px] pl-10 pr-20 py-2 rounded-xl bg-surface-soft border border-hairline text-sm text-ink placeholder:text-muted focus:outline-none focus:border-signature-coral focus:ring-2 focus:ring-signature-coral/30"
+          />
+          <button
+            type="button"
+            id="kcbm-search-clear"
+            class="hidden absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-canvas border border-hairline text-muted hover:text-ink cursor-pointer"
+          >
+            {t.searchClearLabel}
+          </button>
+        </div>
+
+        <div class="flex flex-wrap gap-2" role="group" aria-label={t.step3Label}>
+          {categoryDefs.map((cat, idx) => (
+            <button
+              type="button"
+              data-kcbm-cat={cat.key}
+              aria-pressed={idx === 0 ? 'true' : 'false'}
+              class={`kcbm-cat-btn px-3 py-1.5 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
+                idx === 0
+                  ? 'bg-primary text-on-primary border-primary'
+                  : 'bg-surface-soft text-ink border-hairline hover:border-signature-coral'
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+          <div class="flex flex-wrap items-center gap-2" role="group" aria-label={t.ratingFilterLabel}>
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-muted">
+              {t.ratingFilterLabel}
+            </span>
+            {ratingDefs.map((r, idx) => (
+              <button
+                type="button"
+                data-kcbm-rating={r.key}
+                aria-pressed={idx === 0 ? 'true' : 'false'}
+                class={`kcbm-rating-btn px-2.5 py-1 rounded-lg text-[11.5px] font-bold border transition-colors cursor-pointer ${
+                  idx === 0
+                    ? 'bg-signature-coral text-white border-signature-coral'
+                    : 'bg-canvas text-ink border-hairline hover:border-signature-coral'
+                }`}
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
+
+          <span id="kcbm-count" class="text-xs font-semibold text-muted">
+            {t.showingPrefix} {boards.length} {t.showingSuffix}
+          </span>
+        </div>
+      </div>
+
+      <!-- Empty Filter State -->
+      <div
+        id="kcbm-empty"
+        class="hidden p-8 rounded-2xl bg-surface-soft border border-hairline text-center space-y-3"
+      >
+        <p class="text-sm font-semibold text-ink">{t.noResultsTitle}</p>
+        <button
+          type="button"
+          id="kcbm-reset-btn"
+          class="px-4 py-2 rounded-xl text-xs font-bold bg-primary text-on-primary hover:bg-primary-active transition-colors cursor-pointer"
+        >
+          {t.resetFiltersBtn}
+        </button>
+      </div>
+
+      <!-- 8 Clickable Cutting Board Cards Grid -->
+      <div id="kcbm-board-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {boards.map((b, idx) => {
+          const isSelected = idx === 0;
+          return (
+            <button
+              type="button"
+              data-kcbm-grid-board={b.id}
+              data-kcbm-grid-cat={b.category}
+              data-kcbm-grid-rating={b.bladeRating}
+              aria-pressed={isSelected ? 'true' : 'false'}
+              class={`kcbm-grid-card text-left w-full p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-3 ${
+                isSelected
+                  ? 'bg-canvas border-signature-coral ring-2 ring-signature-coral shadow-sm'
+                  : 'bg-surface-soft/65 border-hairline hover:border-signature-coral'
+              }`}
+            >
+              <div class="space-y-2">
+                <div class="flex items-start gap-2">
+                  <span aria-hidden="true" class="text-xl leading-none mt-0.5 shrink-0">{b.icon}</span>
+                  <h4 class="text-sm font-extrabold text-ink leading-snug">{b.shortName}</h4>
+                </div>
+
+                <span
+                  class={`inline-block px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider border ${getBoardCardPillClass(b.bladeRating)}`}
+                >
+                  {b.ratingBadge}
+                </span>
+
+                <p class="text-xs text-body leading-relaxed line-clamp-3">
+                  {b.summary}
+                </p>
+              </div>
+
+              <div class="pt-2 border-t border-hairline/70 space-y-1 text-[11px]">
+                <div class="flex flex-wrap items-center justify-between gap-1 font-bold">
+                  <span class="text-muted">{getCategoryLabel(b.category)}</span>
+                  <span class="text-ink">{b.dishwasherBadge}</span>
+                </div>
+                <span class="block text-[10.5px] font-semibold text-signature-coral">
+                  {t.selectBoardHint}
+                </span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+
+    <!-- Print-Only Complete Kitchen Care Reference Chart -->
+    <div class="hidden print:block p-5 border-t border-hairline space-y-5">
+      <div class="text-center border-b border-hairline pb-2">
+        <h3 class="text-sm font-extrabold uppercase tracking-wider text-ink">{t.printTitle}</h3>
+        <p class="text-[11px] text-muted">{t.printSub}</p>
+      </div>
+
+      <div class="space-y-2">
+        <h4 class="text-xs font-extrabold uppercase tracking-wider text-ink">{t.printKnivesHeading}</h4>
+        <table class="w-full text-left border-collapse text-[10px]">
+          <thead>
+            <tr class="border-b border-hairline">
+              <th class="py-1.5 pr-2 font-extrabold text-ink">{t.printColKnife}</th>
+              <th class="py-1.5 px-2 font-extrabold text-ink">{t.printColHrc}</th>
+              <th class="py-1.5 px-2 font-extrabold text-ink">{t.printColHoning}</th>
+              <th class="py-1.5 pl-2 font-extrabold text-ink">{t.printColStone}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {knives.map((k) => (
+              <tr class="border-b border-hairline/60 break-inside-avoid">
+                <td class="py-1.5 pr-2 font-bold text-ink">{k.shortName}</td>
+                <td class="py-1.5 px-2 text-ink">{k.hrc} · {k.bevelAngle}</td>
+                <td class="py-1.5 px-2 text-body">{k.honingBadge}</td>
+                <td class="py-1.5 pl-2 text-body">{k.sharpeningRule}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="space-y-2">
+        <h4 class="text-xs font-extrabold uppercase tracking-wider text-ink">{t.printBoardsHeading}</h4>
+        <table class="w-full text-left border-collapse text-[10px]">
+          <thead>
+            <tr class="border-b border-hairline">
+              <th class="py-1.5 pr-2 font-extrabold text-ink">{t.printColBoard}</th>
+              <th class="py-1.5 px-2 font-extrabold text-ink">{t.printColRating}</th>
+              <th class="py-1.5 px-2 font-extrabold text-ink">{t.printColDishwasher}</th>
+              <th class="py-1.5 pl-2 font-extrabold text-ink">{t.printColMaint}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {boards.map((b) => (
+              <tr class="border-b border-hairline/60 break-inside-avoid">
+                <td class="py-1.5 pr-2 font-bold text-ink">{b.shortName}</td>
+                <td class="py-1.5 px-2 font-bold text-ink">{b.ratingBadge}</td>
+                <td class="py-1.5 px-2 text-body">{b.dishwasherBadge}</td>
+                <td class="py-1.5 pl-2 text-body">{b.oilRule}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Related Companion Tools (Localized via useTranslatedPath) -->
+  <section class="space-y-4 print:hidden">
+    <h2 class="text-title-md font-semibold text-ink">{t.relatedHeading}</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <a
+        href={allergyUrl}
+        class="p-5 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedAllergyTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedAllergyTitle}
+        </h3>
+        <p class="text-[13px] text-body leading-relaxed">{t.relatedAllergyDesc}</p>
+      </a>
+
+      <a
+        href={dishwasherUrl}
+        class="p-5 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedDishTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedDishTitle}
+        </h3>
+        <p class="text-[13px] text-body leading-relaxed">{t.relatedDishDesc}</p>
+      </a>
+
+      <a
+        href={symbolUrl}
+        class="p-5 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedSymbolTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedSymbolTitle}
+        </h3>
+        <p class="text-[13px] text-body leading-relaxed">{t.relatedSymbolDesc}</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- Methodology & Hub Strip -->
+  <section class="p-6 rounded-2xl bg-surface-soft border border-hairline print:hidden">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-title-sm font-semibold text-ink mb-1">{t.methodologyStripTitle}</h2>
+        <p class="text-[13px] text-muted">
+          {t.methodologyStripPrefix}{' '}
+          <a href={methodologyUrl} class="text-link underline hover:text-link-active">{t.methodologyLabel}</a>.
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a
+          href={symbolUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
+        >
+          {t.symbolQuickLabel}
+        </a>
+        <a
+          href={methodologyUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
+        >
+          {t.methodologyLabel}
+        </a>
+        <a
+          href={allToolsUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors"
+        >
+          {t.allToolsLabel}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Visible 5-Item FAQ Accordion (Matches FAQPage JSON-LD 1:1) -->
+  <section class="print:hidden">
+    <h2 class="text-title-lg font-medium text-ink tracking-tight mb-6">
+      {t.faqTitle}
+    </h2>
+    <div class="space-y-4">
+      {localizedFaqs.map((faq) => (
+        <details class="group p-5 bg-surface-soft border border-hairline rounded-xl" open>
+          <summary class="text-title-sm font-semibold text-ink cursor-pointer list-none flex items-center justify-between gap-3">
+            <span>{faq.question}</span>
+            <span class="text-muted text-sm transition-transform group-open:rotate-180 shrink-0" aria-hidden="true">&#9662;</span>
+          </summary>
+          <p class="text-[14px] text-body leading-relaxed mt-3 pt-3 border-t border-hairline/70">
+            {faq.answer}
+          </p>
+        </details>
+      ))}
+    </div>
+  </section>
+</div>
+
+<script is:inline>
+  (function () {
+    var payloadEl = document.getElementById('kcbm-payload');
+    if (!payloadEl) return;
+
+    var payload;
+    try {
+      payload = JSON.parse(payloadEl.textContent || '{}');
+    } catch (_) {
+      return;
+    }
+
+    var knives = Array.isArray(payload.knives) ? payload.knives : [];
+    var boards = Array.isArray(payload.boards) ? payload.boards : [];
+    var verdictMeta = payload.verdictMeta || {};
+    var safetyRules = Array.isArray(payload.safetyRules) ? payload.safetyRules : [];
+    var ui = payload.ui || {};
+
+    var knifeMap = {};
+    knives.forEach(function (k) {
+      if (k && k.id) knifeMap[k.id] = k;
+    });
+
+    var boardMap = {};
+    boards.forEach(function (b) {
+      if (b && b.id) boardMap[b.id] = b;
+    });
+
+    var state = {
+      knifeId: payload.defaultKnifeId || (knives[0] ? knives[0].id : ''),
+      boardId: payload.defaultBoardId || (boards[0] ? boards[0].id : ''),
+      mode: 'honing',
+      category: 'all',
+      ratingFilter: 'all',
+      query: ''
+    };
+
+    var knifeBtns = Array.from(document.querySelectorAll('.kcbm-knife-btn'));
+    var boardBtns = Array.from(document.querySelectorAll('.kcbm-board-btn'));
+    var modeBtns = Array.from(document.querySelectorAll('.kcbm-mode-btn'));
+    var catBtns = Array.from(document.querySelectorAll('.kcbm-cat-btn'));
+    var ratingBtns = Array.from(document.querySelectorAll('.kcbm-rating-btn'));
+    var gridCards = Array.from(document.querySelectorAll('.kcbm-grid-card'));
+
+    var elDashboard = document.getElementById('kcbm-dashboard');
+    var elVerdictBadge = document.getElementById('kcbm-verdict-badge');
+    var elBevelPill = document.getElementById('kcbm-bevel-pill');
+    var elStonePill = document.getElementById('kcbm-stone-pill');
+    var elPairTitle = document.getElementById('kcbm-pair-title');
+    var elVerdictHeadline = document.getElementById('kcbm-verdict-headline');
+    var elVerdictAdvice = document.getElementById('kcbm-verdict-advice');
+    var elBoardRatingPill = document.getElementById('kcbm-board-rating-pill');
+    var elBoardEffect = document.getElementById('kcbm-board-effect');
+    var elKnifeCare = document.getElementById('kcbm-knife-care');
+    var elHoningBadge = document.getElementById('kcbm-honing-badge');
+    var elHoningRule = document.getElementById('kcbm-honing-rule');
+    var elSharpeningRule = document.getElementById('kcbm-sharpening-rule');
+    var elBoardDwPill = document.getElementById('kcbm-board-dw-pill');
+    var elKnifeDw = document.getElementById('kcbm-knife-dw');
+    var elBoardMaint = document.getElementById('kcbm-board-maint');
+    var elBoardSanitation = document.getElementById('kcbm-board-sanitation');
+    var elBoardOil = document.getElementById('kcbm-board-oil');
+
+    var elHsKnifeName = document.getElementById('kcbm-hs-knife-name');
+    var elHsActiveText = document.getElementById('kcbm-hs-active-text');
+    var elHsBevelChip = document.getElementById('kcbm-hs-bevel-chip');
+    var elHsGritChip = document.getElementById('kcbm-hs-grit-chip');
+    var elCardHoning = document.getElementById('kcbm-card-honing');
+    var elCardSharpening = document.getElementById('kcbm-card-sharpening');
+    var elCardCarbide = document.getElementById('kcbm-card-carbide');
+
+    var elSearch = document.getElementById('kcbm-search');
+    var elSearchClear = document.getElementById('kcbm-search-clear');
+    var elCount = document.getElementById('kcbm-count');
+    var elEmpty = document.getElementById('kcbm-empty');
+    var elResetBtn = document.getElementById('kcbm-reset-btn');
+
+    var copyBtn = document.getElementById('kcbm-copy-btn');
+    var copyLabel = document.getElementById('kcbm-copy-label');
+    var printBtn = document.getElementById('kcbm-print-btn');
+
+    function styleSelectorButtons(btns, attrName, selectedId) {
+      btns.forEach(function (btn) {
+        var active = btn.getAttribute(attrName) === selectedId;
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('ring-2', active);
+        btn.classList.toggle('ring-signature-coral/60', active);
+        btn.classList.toggle('shadow-xs', active);
+        btn.classList.toggle('bg-surface-soft/70', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+
+        var sub = btn.querySelector('[data-kcbm-sub]');
+        if (sub) {
+          sub.classList.toggle('text-white/85', active);
+          sub.classList.toggle('text-muted', !active);
+        }
+
+        var pill = btn.querySelector('[data-kcbm-pill]');
+        if (pill) {
+          pill.classList.toggle('bg-white/20', active);
+          pill.classList.toggle('text-white', active);
+          pill.classList.toggle('bg-canvas', !active);
+          pill.classList.toggle('text-muted', !active);
+          pill.classList.toggle('border', !active);
+          pill.classList.toggle('border-hairline', !active);
+        }
+      });
+    }
+
+    function getVerdictDarkPillClass(v) {
+      var base = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider ';
+      if (v === 'blade-killer') return base + 'bg-red-500 text-white';
+      if (v === 'dulls-fast') return base + 'bg-amber-400 text-slate-950';
+      if (v === 'good') return base + 'bg-sky-400 text-slate-950';
+      return base + 'bg-emerald-400 text-slate-950';
+    }
+
+    function getHoningPillClass(status) {
+      var base = 'inline-flex items-center px-2 py-0.5 rounded-md border text-[10px] font-extrabold uppercase tracking-wider ';
+      if (status === 'never-rod') return base + 'bg-red-500/20 text-red-100 border-red-400/45';
+      if (status === 'ceramic-only') return base + 'bg-amber-500/20 text-amber-100 border-amber-400/45';
+      return base + 'bg-emerald-500/20 text-emerald-100 border-emerald-400/45';
+    }
+
+    function applyDashboardBorder(v) {
+      if (!elDashboard) return;
+      elDashboard.classList.toggle('border-red-400', v === 'blade-killer');
+      elDashboard.classList.toggle('border-amber-400', v === 'dulls-fast');
+      elDashboard.classList.toggle('border-sky-400', v === 'good');
+      elDashboard.classList.toggle('border-emerald-400', v === 'perfect');
+    }
+
+    function renderHoningPanel() {
+      var knife = knifeMap[state.knifeId] || knives[0];
+      if (!knife) return;
+
+      modeBtns.forEach(function (btn) {
+        var active = btn.getAttribute('data-kcbm-mode') === state.mode;
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('bg-surface-soft', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      if (elHsKnifeName) elHsKnifeName.textContent = knife.name || '';
+      if (elHsBevelChip) elHsBevelChip.textContent = '📐 ' + (knife.bevelLabel || '');
+      if (elHsGritChip) elHsGritChip.textContent = '🪨 ' + (knife.whetstoneGrit || '');
+
+      if (elHsActiveText) {
+        if (state.mode === 'sharpening') {
+          elHsActiveText.textContent = knife.sharpeningRule || '';
+        } else if (state.mode === 'carbide') {
+          elHsActiveText.textContent = knife.pullThroughWarning || '';
+        } else {
+          elHsActiveText.textContent = knife.honingRule || '';
+        }
+      }
+
+      if (elCardHoning) {
+        var hActive = state.mode === 'honing';
+        elCardHoning.classList.toggle('border-2', hActive);
+        elCardHoning.classList.toggle('border-signature-coral', hActive);
+        elCardHoning.classList.toggle('bg-canvas', hActive);
+        elCardHoning.classList.toggle('shadow-xs', hActive);
+        elCardHoning.classList.toggle('border', !hActive);
+        elCardHoning.classList.toggle('border-hairline', !hActive);
+        elCardHoning.classList.toggle('bg-surface-soft/65', !hActive);
+      }
+
+      if (elCardSharpening) {
+        var sActive = state.mode === 'sharpening';
+        elCardSharpening.classList.toggle('border-2', sActive);
+        elCardSharpening.classList.toggle('border-signature-coral', sActive);
+        elCardSharpening.classList.toggle('bg-canvas', sActive);
+        elCardSharpening.classList.toggle('shadow-xs', sActive);
+        elCardSharpening.classList.toggle('border', !sActive);
+        elCardSharpening.classList.toggle('border-hairline', !sActive);
+        elCardSharpening.classList.toggle('bg-surface-soft/65', !sActive);
+      }
+
+      if (elCardCarbide) {
+        var cActive = state.mode === 'carbide';
+        elCardCarbide.classList.toggle('ring-2', cActive);
+        elCardCarbide.classList.toggle('ring-error-border', cActive);
+        elCardCarbide.classList.toggle('shadow-xs', cActive);
+      }
+    }
+
+    function renderSimulator() {
+      var knife = knifeMap[state.knifeId] || knives[0];
+      var board = boardMap[state.boardId] || boards[0];
+      if (!knife || !board) return;
+
+      styleSelectorButtons(knifeBtns, 'data-kcbm-knife', knife.id);
+      styleSelectorButtons(boardBtns, 'data-kcbm-board', board.id);
+
+      gridCards.forEach(function (card) {
+        var active = card.getAttribute('data-kcbm-grid-board') === board.id;
+        card.setAttribute('aria-pressed', active ? 'true' : 'false');
+        card.classList.toggle('bg-canvas', active);
+        card.classList.toggle('border-signature-coral', active);
+        card.classList.toggle('ring-2', active);
+        card.classList.toggle('ring-signature-coral', active);
+        card.classList.toggle('shadow-sm', active);
+        card.classList.toggle('bg-surface-soft/65', !active);
+        card.classList.toggle('border-hairline', !active);
+      });
+
+      var compatMap = board.compatByKnife || {};
+      var verdict = compatMap[knife.id] || 'good';
+      var vInfo = verdictMeta[verdict] || verdictMeta.good || { badge: '', headline: '', advice: '' };
+
+      applyDashboardBorder(verdict);
+
+      if (elVerdictBadge) {
+        elVerdictBadge.textContent = vInfo.badge || '';
+        elVerdictBadge.className = getVerdictDarkPillClass(verdict);
+      }
+      if (elBevelPill) {
+        elBevelPill.textContent = '📐 ' + (ui.bevelPillPrefix || 'Bevel:') + ' ' + (knife.bevelAngle || '') + ' (' + (knife.hrc || '') + ')';
+      }
+      if (elStonePill) {
+        elStonePill.textContent = '🪨 ' + (ui.whetstonePillPrefix || 'Stone:') + ' ' + (knife.whetstoneGrit || '');
+      }
+      if (elPairTitle) {
+        elPairTitle.textContent = (knife.icon ? knife.icon + ' ' : '') + (knife.shortName || '') + ' × ' + (board.icon ? board.icon + ' ' : '') + (board.shortName || '');
+      }
+      if (elVerdictHeadline) elVerdictHeadline.textContent = vInfo.headline || '';
+      if (elVerdictAdvice) elVerdictAdvice.textContent = vInfo.advice || '';
+      if (elBoardRatingPill) elBoardRatingPill.textContent = board.ratingBadge || '';
+      if (elBoardEffect) elBoardEffect.textContent = board.bladeEffect || '';
+      if (elKnifeCare) elKnifeCare.textContent = knife.careRule || '';
+      if (elHoningBadge) {
+        elHoningBadge.textContent = knife.honingBadge || '';
+        elHoningBadge.className = getHoningPillClass(knife.honingStatus);
+      }
+      if (elHoningRule) elHoningRule.textContent = knife.honingRule || '';
+      if (elSharpeningRule) elSharpeningRule.textContent = knife.sharpeningRule || '';
+      if (elBoardDwPill) elBoardDwPill.textContent = board.dishwasherBadge || '';
+      if (elKnifeDw) elKnifeDw.textContent = knife.dishwasherRule || '';
+      if (elBoardMaint) elBoardMaint.textContent = board.maintenanceRule || '';
+      if (elBoardSanitation) elBoardSanitation.textContent = board.foodSafetyNote || '';
+      if (elBoardOil) elBoardOil.textContent = board.oilRule || '';
+
+      renderHoningPanel();
+    }
+
+    function applyFilters() {
+      var q = (state.query || '').trim().toLowerCase();
+      var visibleCount = 0;
+
+      catBtns.forEach(function (btn) {
+        var active = btn.getAttribute('data-kcbm-cat') === state.category;
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('bg-surface-soft', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      ratingBtns.forEach(function (btn) {
+        var active = btn.getAttribute('data-kcbm-rating') === state.ratingFilter;
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        btn.classList.toggle('bg-signature-coral', active);
+        btn.classList.toggle('text-white', active);
+        btn.classList.toggle('border-signature-coral', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      if (elSearchClear) {
+        elSearchClear.classList.toggle('hidden', q.length === 0);
+      }
+
+      gridCards.forEach(function (card) {
+        var id = card.getAttribute('data-kcbm-grid-board') || '';
+        var board = boardMap[id];
+        if (!board) return;
+
+        var matchCat = state.category === 'all' || board.category === state.category;
+        var matchRating = true;
+        if (state.ratingFilter === 'friendly') {
+          matchRating = board.bladeRating === 'gold' || board.bladeRating === 'great';
+        } else if (state.ratingFilter === 'caution') {
+          matchRating = board.bladeRating === 'caution';
+        } else if (state.ratingFilter === 'unsafe') {
+          matchRating = board.bladeRating === 'unsafe';
+        }
+
+        var matchQuery = true;
+        if (q.length > 0) {
+          var haystack = (
+            (board.shortName || '') + ' ' +
+            (board.name || '') + ' ' +
+            (board.ratingBadge || '') + ' ' +
+            (board.dishwasherBadge || '') + ' ' +
+            (board.summary || '') + ' ' +
+            (board.bladeEffect || '') + ' ' +
+            (board.foodSafetyNote || '') + ' ' +
+            (board.maintenanceRule || '') + ' ' +
+            (board.oilRule || '')
+          ).toLowerCase();
+          matchQuery = haystack.indexOf(q) !== -1;
+        }
+
+        var show = matchCat && matchRating && matchQuery;
+        card.classList.toggle('hidden', !show);
+        if (show) visibleCount += 1;
+      });
+
+      if (elCount) {
+        elCount.textContent = (ui.showingPrefix || 'Showing') + ' ' + String(visibleCount) + ' ' + (ui.showingSuffix || 'of 8 boards');
+      }
+
+      if (elEmpty) {
+        elEmpty.classList.toggle('hidden', visibleCount > 0);
+      }
+    }
+
+    function buildCopyCard() {
+      var knife = knifeMap[state.knifeId] || knives[0];
+      var board = boardMap[state.boardId] || boards[0];
+      if (!knife || !board) return '';
+
+      var compatMap = board.compatByKnife || {};
+      var verdict = compatMap[knife.id] || 'good';
+      var vInfo = verdictMeta[verdict] || verdictMeta.good || { badge: '', headline: '', advice: '' };
+      var lines = [];
+
+      lines.push(ui.copyHeader || 'IsItKitchenSafe — Knife Care & Cutting Board Compatibility Card');
+      lines.push('');
+      lines.push((ui.copyPairingLabel || 'PAIRING:') + ' ' + knife.name + ' × ' + board.name);
+      lines.push((ui.copyVerdictLabel || 'COMPATIBILITY VERDICT:') + ' [' + (vInfo.badge || '') + '] ' + (vInfo.headline || ''));
+      lines.push((ui.copyBevelLabel || 'BEVEL & HRC:') + ' ' + knife.bevelLabel + ' | ' + knife.hrc);
+      lines.push((ui.copyHoningLabel || 'HONING RULE:') + ' ' + knife.honingBadge + ' — ' + knife.honingRule);
+      lines.push((ui.copySharpeningLabel || 'WHETSTONE / SHARPENING:') + ' ' + knife.whetstoneGrit + ' — ' + knife.sharpeningRule);
+      lines.push((ui.copyDishwasherLabel || 'DISHWASHER SAFETY:') + ' ' + (ui.knifeLabelPrefix || 'Knife:') + ' ' + knife.dishwasherRule + ' | ' + (ui.boardLabelPrefix || 'Board:') + ' ' + board.dishwasherBadge + ' — ' + board.maintenanceRule);
+      lines.push((ui.copySanitationLabel || 'USDA SANITATION & OIL CARE:') + ' ' + board.foodSafetyNote + ' ' + board.oilRule);
+
+      if (safetyRules.length > 0) {
+        lines.push('');
+        lines.push(ui.copyRulesHeader || '3 CRITICAL KNIFE & BOARD SAFETY RULES:');
+        safetyRules.forEach(function (r, idx) {
+          lines.push('  ' + String(idx + 1) + '. ' + r.title + ' — ' + r.body);
+        });
+      }
+
+      return lines.join('\n');
+    }
+
+    knifeBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.getAttribute('data-kcbm-knife');
+        if (id && knifeMap[id]) {
+          state.knifeId = id;
+          renderSimulator();
+        }
+      });
+    });
+
+    boardBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.getAttribute('data-kcbm-board');
+        if (id && boardMap[id]) {
+          state.boardId = id;
+          renderSimulator();
+        }
+      });
+    });
+
+    modeBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var m = btn.getAttribute('data-kcbm-mode');
+        if (m) {
+          state.mode = m;
+          renderHoningPanel();
+        }
+      });
+    });
+
+    catBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var cat = btn.getAttribute('data-kcbm-cat');
+        if (cat) {
+          state.category = cat;
+          applyFilters();
+        }
+      });
+    });
+
+    ratingBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var r = btn.getAttribute('data-kcbm-rating');
+        if (r) {
+          state.ratingFilter = r;
+          applyFilters();
+        }
+      });
+    });
+
+    if (elSearch) {
+      elSearch.addEventListener('input', function () {
+        state.query = elSearch.value || '';
+        applyFilters();
+      });
+    }
+
+    if (elSearchClear) {
+      elSearchClear.addEventListener('click', function () {
+        state.query = '';
+        if (elSearch) elSearch.value = '';
+        applyFilters();
+        if (elSearch) elSearch.focus();
+      });
+    }
+
+    if (elResetBtn) {
+      elResetBtn.addEventListener('click', function () {
+        state.category = 'all';
+        state.ratingFilter = 'all';
+        state.query = '';
+        if (elSearch) elSearch.value = '';
+        applyFilters();
+      });
+    }
+
+    gridCards.forEach(function (card) {
+      card.addEventListener('click', function () {
+        var id = card.getAttribute('data-kcbm-grid-board');
+        if (id && boardMap[id]) {
+          state.boardId = id;
+          renderSimulator();
+          if (elDashboard && elDashboard.getBoundingClientRect) {
+            var rect = elDashboard.getBoundingClientRect();
+            if (rect.top < 16 || rect.top > window.innerHeight) {
+              elDashboard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }
+        }
+      });
+    });
+
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        var text = buildCopyCard();
+        var showCopied = function () {
+          if (copyLabel) copyLabel.textContent = ui.copiedBtn || 'Care Card Copied ✓';
+          window.setTimeout(function () {
+            if (copyLabel) copyLabel.textContent = '📋 ' + (ui.copyBtn || 'Copy Knife & Board Care Card');
+          }, 2200);
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(showCopied).catch(showCopied);
+        } else {
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'absolute';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          try {
+            document.execCommand('copy');
+          } catch (_) {
+            // ignore
+          }
+          document.body.removeChild(ta);
+          showCopied();
+        }
+      });
+    }
+
+    if (printBtn) {
+      printBtn.addEventListener('click', function () {
+        window.print();
+      });
+    }
+
+    renderSimulator();
+    applyFilters();
+  })();
+</script>

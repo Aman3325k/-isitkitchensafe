@@ -229,7 +229,8 @@ const TOOLS_REGISTRY = [
   { slug: 'oven-rack-bakeware-heat-adjuster', name: 'Interactive Oven Rack Position, Convection & Bakeware Material Heat Adjuster', category: 'Consumer Kitchen Safety', component: 'OvenRackBakewareHeatAdjuster.astro', dataFile: 'oven-rack-bakeware-heat-data.json' },
   { slug: 'kitchen-fire-emergency-guide', name: 'Kitchen Grease Fire, Electrical & Burn Emergency First-Response Guide', category: 'Consumer Kitchen Safety', component: 'KitchenFireEmergencyGuide.astro', dataFile: 'kitchen-fire-emergency-guide-data.json' },
   { slug: 'instant-pot-pressure-release-checker', name: 'Pressure Cooker & Instant Pot Fill-Line, Natural vs. Quick Release & Foaming Food Safety Checker', category: 'Consumer Kitchen Safety', component: 'InstantPotPressureReleaseChecker.astro', dataFile: 'instant-pot-pressure-release-data.json' },
-  { slug: 'slow-cooker-food-safety-checker', name: 'Slow Cooker & Crock-Pot Food Safety Checker', category: 'Consumer Kitchen Safety', component: 'SlowCookerFoodSafetyChecker.astro', dataFile: 'slow-cooker-food-safety-data.json' }
+  { slug: 'slow-cooker-food-safety-checker', name: 'Slow Cooker & Crock-Pot Food Safety Checker', category: 'Consumer Kitchen Safety', component: 'SlowCookerFoodSafetyChecker.astro', dataFile: 'slow-cooker-food-safety-data.json' },
+  { slug: 'knife-care-cutting-board-matcher', name: 'Kitchen Knife Care, Honing vs. Sharpening & Safe Cutting Board Matcher', category: 'Consumer Kitchen Safety', component: 'KnifeCareCuttingBoardMatcher.astro', dataFile: 'knife-care-cutting-board-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -549,7 +550,8 @@ function auditDatasets() {
     'oven-rack-bakeware-heat-data.json',
     'kitchen-fire-emergency-guide-data.json',
     'instant-pot-pressure-release-data.json',
-    'slow-cooker-food-safety-data.json'
+    'slow-cooker-food-safety-data.json',
+    'knife-care-cutting-board-data.json'
 ];
 
   const datasetStats = {};

@@ -11,14 +11,14 @@ const { lang = 'en' } = Astro.props;
 const translatePath = useTranslatedPath(lang);
 
 const instantPotUrl = translatePath('/tools/instant-pot-pressure-release-checker/');
-const meatThawingUrl = translatePath('/tools/meat-thawing-calculator/');
 const internalTempUrl = translatePath('/tools/internal-cooking-temp-chart/');
-const powerOutageUrl = translatePath('/tools/power-outage-food-safety-checker/');
+const meatThawingUrl = translatePath('/tools/meat-thawing-calculator/');
+const kitchenFireUrl = translatePath('/tools/kitchen-fire-emergency-guide/');
 const methodologyUrl = translatePath('/methodology/');
 const allToolsUrl = translatePath('/tools/');
 
-type CategoryKey = 'meats-poultry' | 'beans-veggies' | 'leftovers-dairy' | 'crock-liners';
-type VerdictKey = 'safe' | 'caution' | 'unsafe';
+type SafetyStatus = 'safe' | 'caution' | 'danger';
+type CategoryKey = 'beans' | 'poultry' | 'beef' | 'pork' | 'produce' | 'dairy' | 'seafood' | 'grains' | 'soup' | 'leftovers';
 
 interface BannerRule {
   icon: string;
@@ -33,117 +33,126 @@ interface SafetyBannerData {
   rules: BannerRule[];
 }
 
-interface SimFillOption {
+interface LocalizedCookerSize {
   id: string;
   icon: string;
-  status: VerdictKey;
-  gaugePercent: number;
-  shortLabel: string;
-  detail: string;
-  note: string;
+  capacityQt: number;
+  capacityLiters: number;
+  minLiquidCups: number;
+  minLiquidMl: number;
+  servings: string;
+  isDefault: boolean;
+  name: string;
+  shortName: string;
+  desc: string;
 }
 
-interface SimHeatOption {
+interface LocalizedHeatSetting {
   id: string;
   icon: string;
-  status: VerdictKey;
-  tempRange: string;
-  shortLabel: string;
-  detail: string;
-  note: string;
+  tempF: string;
+  tempC: string;
+  hoursMultiplier: number;
+  typicalHours: string;
+  isKeepWarm?: boolean;
+  name: string;
+  shortName: string;
+  badge: string;
+  desc: string;
 }
 
-interface SimOutageOption {
-  id: string;
-  icon: string;
-  status: VerdictKey;
-  shortLabel: string;
-  detail: string;
-  note: string;
-}
-
-interface LocalizedItem {
+interface LocalizedFood {
   id: string;
   icon: string;
   category: CategoryKey;
-  verdict: VerdictKey;
-  hasUsdaTemp: boolean;
-  usdaTemp: string;
-  shortName: string;
+  safetyStatus: SafetyStatus;
+  isKidneyBeanToxin?: boolean;
+  isFrozenBan?: boolean;
+  isDairyLateAdd?: boolean;
+  isSeafoodLateAdd?: boolean;
+  isGrainLateAdd?: boolean;
+  isReheatBan?: boolean;
+  freshOrThawedOnly?: boolean;
+  usdaTargetTemp?: string;
+  timeLow?: string;
+  timeHigh?: string;
   name: string;
-  verdictBadge: string;
-  headline: string;
-  usdaRule: string;
-  safeAlternative: string;
-  tempNote: string;
+  shortName: string;
+  verdict: string;
+  summary: string;
+  recommendation: string;
+  fillRule: string;
 }
 
 const safetyBanner: SafetyBannerData =
   (rawData.safetyBanner as Record<string, SafetyBannerData>)[lang] ||
   rawData.safetyBanner.en;
 
-const fillOptions: SimFillOption[] = rawData.simulator.fillLevels.map((opt) => {
-  const tr = (opt.i18n as Record<string, any>)[lang] || opt.i18n.en;
+const localizedCookerSizes: LocalizedCookerSize[] = rawData.cookerSizes.map((item) => {
+  const tr = (item.i18n as Record<string, any>)[lang] || item.i18n.en;
   return {
-    id: opt.id,
-    icon: opt.icon,
-    status: opt.status as VerdictKey,
-    gaugePercent: opt.gaugePercent,
-    shortLabel: tr.shortLabel,
-    detail: tr.detail,
-    note: tr.note
+    id: item.id,
+    icon: item.icon,
+    capacityQt: item.capacityQt,
+    capacityLiters: item.capacityLiters,
+    minLiquidCups: item.minLiquidCups,
+    minLiquidMl: item.minLiquidMl,
+    servings: item.servings,
+    isDefault: Boolean(item.isDefault),
+    name: tr.name,
+    shortName: tr.shortName,
+    desc: tr.desc
   };
 });
 
-const heatOptions: SimHeatOption[] = rawData.simulator.heatSettings.map((opt) => {
-  const tr = (opt.i18n as Record<string, any>)[lang] || opt.i18n.en;
+const localizedHeatSettings: LocalizedHeatSetting[] = rawData.heatSettings.map((item) => {
+  const tr = (item.i18n as Record<string, any>)[lang] || item.i18n.en;
   return {
-    id: opt.id,
-    icon: opt.icon,
-    status: opt.status as VerdictKey,
-    tempRange: opt.tempRange,
-    shortLabel: tr.shortLabel,
-    detail: tr.detail,
-    note: tr.note
+    id: item.id,
+    icon: item.icon,
+    tempF: item.tempF,
+    tempC: item.tempC,
+    hoursMultiplier: item.hoursMultiplier || 1.0,
+    typicalHours: item.typicalHours,
+    isKeepWarm: Boolean(item.isKeepWarm),
+    name: tr.name,
+    shortName: tr.shortName,
+    badge: tr.badge,
+    desc: tr.desc
   };
 });
 
-const outageOptions: SimOutageOption[] = rawData.simulator.powerOutages.map((opt) => {
-  const tr = (opt.i18n as Record<string, any>)[lang] || opt.i18n.en;
-  return {
-    id: opt.id,
-    icon: opt.icon,
-    status: opt.status as VerdictKey,
-    shortLabel: tr.shortLabel,
-    detail: tr.detail,
-    note: tr.note
-  };
-});
-
-const simVerdicts: Record<string, string> =
-  (rawData.simulator.verdictTemplates as Record<string, Record<string, string>>)[lang] ||
-  rawData.simulator.verdictTemplates.en;
-
-const localizedItems: LocalizedItem[] = rawData.items.map((item) => {
+const localizedFoods: LocalizedFood[] = rawData.foods.map((item) => {
   const tr = (item.i18n as Record<string, any>)[lang] || item.i18n.en;
   return {
     id: item.id,
     icon: item.icon,
     category: item.category as CategoryKey,
-    verdict: item.verdict as VerdictKey,
-    hasUsdaTemp: Boolean(item.hasUsdaTemp),
-    usdaTemp: item.usdaTemp || '',
-    shortName: tr.shortName,
+    safetyStatus: item.safetyStatus as SafetyStatus,
+    isKidneyBeanToxin: Boolean(item.isKidneyBeanToxin),
+    isFrozenBan: Boolean(item.isFrozenBan),
+    isDairyLateAdd: Boolean(item.isDairyLateAdd),
+    isSeafoodLateAdd: Boolean(item.isSeafoodLateAdd),
+    isGrainLateAdd: Boolean(item.isGrainLateAdd),
+    isReheatBan: Boolean(item.isReheatBan),
+    freshOrThawedOnly: Boolean(item.freshOrThawedOnly),
+    usdaTargetTemp: item.usdaTargetTemp || '',
+    timeLow: item.timeLow || '',
+    timeHigh: item.timeHigh || '',
     name: tr.name,
-    verdictBadge: tr.verdictBadge,
-    headline: tr.headline,
-    usdaRule: tr.usdaRule,
-    safeAlternative: tr.safeAlternative,
-    tempNote: tr.tempNote
+    shortName: tr.shortName,
+    verdict: tr.verdict,
+    summary: tr.summary,
+    recommendation: tr.recommendation,
+    fillRule: tr.fillRule
   };
 });
 
-const localizedFaqs: Array<{ question: string; answer: string }> =
+const thermalRules =
+  (rawData.thermalShockRules as Record<string, any>)[lang] ||
+  rawData.thermalShockRules.en;
+
+const localizedFaqs =
   (rawData.faqs as Record<string, Array<{ question: string; answer: string }>>)[lang] ||
   rawData.faqs.en;
 
@@ -155,1765 +164,1351 @@ interface UiDict {
   copyBtn: string;
   copiedBtn: string;
   printBtn: string;
-  simStepLabel: string;
-  simStepHint: string;
-  simFillLabel: string;
-  simHeatLabel: string;
-  simOutageLabel: string;
-  simLiveBadge: string;
-  simGaugeHeading: string;
-  simGaugeEmpty: string;
-  simGaugeHalf: string;
-  simGaugeTwoThirds: string;
-  simGaugeRim: string;
-  simBreakdownFill: string;
-  simBreakdownHeat: string;
-  simBreakdownOutage: string;
-  inspectorStepLabel: string;
+  sizeStepLabel: string;
+  sizeStepHint: string;
+  heatStepLabel: string;
+  heatStepHint: string;
+  stateLabel: string;
+  stateThawed: string;
+  stateFrozen: string;
+  minLiquidLabel: string;
   inspectorBadge: string;
-  usdaRuleHeading: string;
-  safeAltHeading: string;
-  tempCheckHeading: string;
-  handlingBadge: string;
-  itemStepLabel: string;
-  itemStepHint: string;
+  fillGaugeHeading: string;
+  fillOptimalBadge: string;
+  gaugeEmpty: string;
+  gaugeHalf: string;
+  gaugeTwoThirds: string;
+  gaugeRim: string;
+  cookingTimeHeading: string;
+  targetTempHeading: string;
+  keySafetyHeading: string;
+  fillRuleHeading: string;
+  frozenWarningTitle: string;
+  frozenWarningBody: string;
+  kidneyBeanTitle: string;
+  foodStepLabel: string;
+  foodStepHint: string;
   searchPlaceholder: string;
   searchClearLabel: string;
   catAll: string;
   catMeats: string;
   catBeans: string;
-  catLeftovers: string;
-  catCrock: string;
-  verdictFilterLabel: string;
-  verdictAll: string;
-  verdictSafe: string;
-  verdictCaution: string;
-  verdictUnsafe: string;
+  catProduce: string;
+  catLeftoversDairy: string;
   showingCountPrefix: string;
   showingCountSuffix: string;
   noResultsTitle: string;
   resetFiltersBtn: string;
+  thermalShockTitle: string;
+  thermalDo: string;
+  thermalDont: string;
   printTitle: string;
   printSub: string;
-  printColItem: string;
-  printColVerdict: string;
-  printColRule: string;
-  printColSafe: string;
+  printColFood: string;
+  printColStatus: string;
+  printColTime: string;
+  printColTip: string;
   copyHeader: string;
-  copySimSection: string;
-  copySimVerdict: string;
-  copySimFill: string;
-  copySimHeat: string;
-  copySimOutage: string;
-  copyItemSection: string;
-  copyItemVerdict: string;
-  copyItemRule: string;
-  copyItemAlt: string;
-  copyItemTemp: string;
-  copyRulesHeader: string;
   relatedHeading: string;
-  relatedIpTag: string;
-  relatedIpTitle: string;
-  relatedIpDesc: string;
-  relatedThawTag: string;
-  relatedThawTitle: string;
-  relatedThawDesc: string;
+  relatedInstantPotTag: string;
+  relatedInstantPotTitle: string;
+  relatedInstantPotDesc: string;
   relatedTempTag: string;
   relatedTempTitle: string;
   relatedTempDesc: string;
-  relatedPowerTag: string;
-  relatedPowerTitle: string;
-  relatedPowerDesc: string;
+  relatedThawTag: string;
+  relatedThawTitle: string;
+  relatedThawDesc: string;
+  relatedFireTag: string;
+  relatedFireTitle: string;
+  relatedFireDesc: string;
   methodologyStripTitle: string;
   methodologyStripPrefix: string;
   methodologyLabel: string;
-  tempQuickLabel: string;
-  allToolsLabel: string;
   faqTitle: string;
 }
 
 const UI: Record<SupportedLanguage, UiDict> = {
   en: {
-    ariaLabel: 'Interactive Slow Cooker & Crock-Pot Food Safety Checker, Setup Simulator & 16-Item USDA Lookup',
-    toolBadge: 'USDA FSIS · FDA Bad Bug Book · 16 Slow Cooker Items & Live Simulator',
+    ariaLabel: 'Interactive Slow Cooker & Crock-Pot Food Safety Checker',
+    toolBadge: '22 Everyday Foods · 3 Sizes · USDA FSIS & FDA Bad Bug Rules',
     toolTitle: 'Slow Cooker & Crock-Pot Food Safety Checker',
-    toolSub: 'Test your live fill level, heat setting, and power-outage scenario below, then tap any of the 16 everyday foods, liners, or ceramic stoneware scenarios for exact USDA, FDA, and thermal-shock guidance.',
-    copyBtn: 'Copy Slow Cooker Cheat Sheet',
-    copiedBtn: 'Cheat Sheet Copied ✓',
+    toolSub: 'Select your slow cooker size, heat setting, and food below to check cooking times, safe fill levels (1/2 to 2/3), the strict USDA frozen meat ban, red kidney bean toxin warnings, and ceramic thermal shock safety.',
+    copyBtn: 'Copy Slow Cooker Safety Sheet',
+    copiedBtn: 'Safety Sheet Copied ✓',
     printBtn: 'Print Fridge Reference Chart',
-    simStepLabel: '1. Live Slow Cooker Setup & Power Outage Simulator',
-    simStepHint: 'Select your crock fill level, dial setting, and power status to check your real-time USDA safety verdict.',
-    simFillLabel: 'Crock Fill Level',
-    simHeatLabel: 'Heat Setting',
-    simOutageLabel: 'Power Outage Check',
-    simLiveBadge: 'LIVE SETUP SAFETY VERDICT',
-    simGaugeHeading: 'Crock Fill Level vs. USDA Safe Zone (1/2 – 2/3)',
-    simGaugeEmpty: 'Base',
-    simGaugeHalf: '1/2 Min',
-    simGaugeTwoThirds: '2/3 Max',
-    simGaugeRim: 'Rim',
-    simBreakdownFill: 'Fill Level Note',
-    simBreakdownHeat: 'Heat Setting Note',
-    simBreakdownOutage: 'Power Outage Rule',
-    inspectorStepLabel: '2. USDA Slow Cooker Safety Inspector',
-    inspectorBadge: 'USDA SLOW COOKER SAFETY INSPECTOR',
-    usdaRuleHeading: 'USDA / FDA / Manufacturer Rule',
-    safeAltHeading: 'Safe Technique & Best Practice',
-    tempCheckHeading: 'Temperature & Handling Check',
-    handlingBadge: 'HANDLING CHECK',
-    itemStepLabel: '3. Search & Filter 16 Everyday Slow Cooker Foods, Liners & Ceramic Care',
-    itemStepHint: 'Click any card to update the USDA Slow Cooker Safety Inspector above with its exact verdict, safe alternative, and temperature target.',
-    searchPlaceholder: 'Search frozen chicken, kidney beans, leftovers, keep warm, oven, liners...',
+    sizeStepLabel: '1. Select Your Slow Cooker Size (Updates Minimum Liquid)',
+    sizeStepHint: 'Slow cookers require adequate thin liquid (water, broth, wine) to transfer heat safely without scorching.',
+    heatStepLabel: '2. Select Your Heat Setting',
+    heatStepHint: 'Both LOW and HIGH reach ~209°F simmer; HIGH gets there in half the time. WARM is for holding hot cooked food only.',
+    stateLabel: 'Food State:',
+    stateThawed: 'Fresh / Fully Thawed (Safe)',
+    stateFrozen: 'Raw Frozen (USDA Strict Ban)',
+    minLiquidLabel: 'Min Liquid:',
+    inspectorBadge: 'LIVE SLOW COOKER SAFETY INSPECTOR',
+    fillGaugeHeading: 'Optimal Slow Cooker Fill Zone',
+    fillOptimalBadge: '1/2 TO 2/3 FULL (SAFE ZONE)',
+    gaugeEmpty: 'Base',
+    gaugeHalf: '1/2 MIN',
+    gaugeTwoThirds: '2/3 MAX',
+    gaugeRim: 'Rim',
+    cookingTimeHeading: 'Estimated Cooking Time',
+    targetTempHeading: 'USDA Target Internal Temperature',
+    keySafetyHeading: 'Critical Safety & Handling Protocol',
+    fillRuleHeading: 'Fill-Level & Liquid Rule',
+    frozenWarningTitle: 'USDA STRICT BAN: NEVER COOK FROZEN MEAT IN A SLOW COOKER',
+    frozenWarningBody: 'Slow cookers take hours to reach a simmer. Putting frozen meat directly into a slow cooker causes it to linger in the bacterial danger zone (40°F–140°F / 4°C–60°C) for several hours, allowing Salmonella and Campylobacter to multiply rapidly. Always thaw completely in the refrigerator first.',
+    kidneyBeanTitle: 'FDA PHA TOXIN ALERT: MUST PRE-BOIL 10–30 MINUTES',
+    foodStepLabel: '3. Browse or Search 22 Everyday Slow Cooker Foods & Recipes',
+    foodStepHint: 'Click any food card to update the Safety Inspector above with exact times, fill rules, and safety alerts.',
+    searchPlaceholder: 'Search chicken, beef roast, kidney beans, dairy, soup, pork...',
     searchClearLabel: 'Clear',
-    catAll: 'All (16)',
+    catAll: 'All Foods (22)',
     catMeats: 'Meats & Poultry',
-    catBeans: 'Beans & Veggies',
-    catLeftovers: 'Leftovers & Dairy',
-    catCrock: 'Crock & Liners',
-    verdictFilterLabel: 'Verdict:',
-    verdictAll: 'All',
-    verdictSafe: 'Safe',
-    verdictCaution: 'Caution',
-    verdictUnsafe: 'Unsafe / Never',
+    catBeans: 'Beans & Grains',
+    catProduce: 'Produce & Veggies',
+    catLeftoversDairy: 'Dairy, Seafood & Leftovers',
     showingCountPrefix: 'Showing',
-    showingCountSuffix: 'of 16 items',
-    noResultsTitle: 'No slow cooker items match your current search or filters.',
+    showingCountSuffix: 'of 22 foods',
+    noResultsTitle: 'No slow cooker foods match your current search or filters.',
     resetFiltersBtn: 'Reset Search & Filters',
-    printTitle: 'SLOW COOKER & CROCK-POT FOOD SAFETY FRIDGE CHART (USDA FSIS · FDA)',
-    printSub: 'Never cook frozen meat · Never slow-cook raw red kidney beans · Never reheat cold leftovers · Fill 1/2 to 2/3 full.',
-    printColItem: 'Food / Item',
-    printColVerdict: 'Verdict',
-    printColRule: 'Key USDA / FDA Safety Rule',
-    printColSafe: 'Safe Alternative / Target',
+    thermalShockTitle: 'Ceramic Stoneware Thermal Shock Prevention Rules',
+    thermalDo: 'DO THIS (PROTECT CROCK)',
+    thermalDont: 'NEVER DO THIS (CRACKS CROCK)',
+    printTitle: 'SLOW COOKER & CROCK-POT SAFETY FRIDGE CHEAT SHEET (USDA & FDA)',
+    printSub: 'Keep fill between 1/2 and 2/3 · Never put frozen meat directly into slow cooker · Pre-boil kidney beans 15m.',
+    printColFood: 'Food / Ingredient',
+    printColStatus: 'Safety Status',
+    printColTime: 'Time (Low / High)',
+    printColTip: 'Safety Protocol & Recommendation',
     copyHeader: 'IsItKitchenSafe — Slow Cooker & Crock-Pot Food Safety Cheat Sheet',
-    copySimSection: 'LIVE SETUP SIMULATOR VERDICT:',
-    copySimVerdict: 'VERDICT:',
-    copySimFill: 'FILL LEVEL:',
-    copySimHeat: 'HEAT SETTING:',
-    copySimOutage: 'POWER STATUS:',
-    copyItemSection: 'SELECTED ITEM:',
-    copyItemVerdict: 'SAFETY VERDICT:',
-    copyItemRule: 'USDA / FDA RULE:',
-    copyItemAlt: 'SAFE PRACTICE:',
-    copyItemTemp: 'TEMP / HANDLING:',
-    copyRulesHeader: '3 CRITICAL SLOW COOKER SAFETY RULES:',
-    relatedHeading: 'Related Pressure Cooker, Thawing, Temperature & Power Outage Tools',
-    relatedIpTag: 'Frozen Meat Safe Alternative',
-    relatedIpTitle: 'Instant Pot & Pressure Release Checker →',
-    relatedIpDesc: 'Forgot to thaw chicken? Pressure cookers safely cook frozen poultry under 240°F+ steam—check fill lines and release timing.',
-    relatedThawTag: 'Mandatory Pre-Cook Step',
-    relatedThawTitle: 'Meat Thawing Time Calculator →',
-    relatedThawDesc: 'Calculate exact fridge (≤40°F) and cold-water thawing times for roasts, pork shoulder, and whole chickens before slow cooking.',
+    relatedHeading: 'Related Cooking Safety, Thawing & Appliance Tools',
+    relatedInstantPotTag: 'Pressure Cooking Safety',
+    relatedInstantPotTitle: 'Instant Pot Fill-Line & Release Checker →',
+    relatedInstantPotDesc: 'Check exact 1/2 MAX vs. 2/3 MAX fill lines, Natural vs. Quick Release, and foaming valve clog prevention.',
     relatedTempTag: 'USDA Thermometer Guide',
     relatedTempTitle: 'Internal Cooking Temp Chart →',
-    relatedTempDesc: 'Verify mandatory USDA finished temperatures for slow-cooked poultry (165°F), beef/pork roasts (145°F+), and reheated leftovers.',
-    relatedPowerTag: 'Blackout Food Safety',
-    relatedPowerTitle: 'Power Outage Food Safety Checker →',
-    relatedPowerDesc: 'Check fridge, freezer, and cooking discard rules when electricity fails during meal prep or overnight.',
-    methodologyStripTitle: 'Grounded in USDA FSIS "Slow Cookers and Food Safety", FDA Bad Bug Book & Stoneware Manuals',
-    methodologyStripPrefix: 'Every Danger Zone rule (40°F–140°F), red kidney bean phytohaemagglutinin boiling requirement, 2-hour power outage discard protocol, and stoneware thermal-shock limit is verified against primary public-health sources. Read our',
-    methodologyLabel: 'Methodology',
-    tempQuickLabel: 'USDA Temp Chart',
-    allToolsLabel: 'All Kitchen Tools →',
+    relatedTempDesc: 'Verify USDA minimum safe temperatures for slow-cooked chicken (165°F), beef roasts, pork, and casseroles.',
+    relatedThawTag: 'Frozen Meat Safety',
+    relatedThawTitle: 'Meat Thawing Time Calculator →',
+    relatedThawDesc: 'Calculate safe refrigerator and cold-water thawing times to properly prep frozen meat before slow cooking.',
+    relatedFireTag: 'Burn First Aid',
+    relatedFireTitle: 'Kitchen Fire & Burn Emergency Guide →',
+    relatedFireDesc: 'Immediate Red Cross cool-water burn first aid and NFPA emergency steps for steam scalds and kitchen safety.',
+    methodologyStripTitle: 'Grounded in USDA FSIS Slow Cooker Guidelines & FDA Bad Bug Book',
+    methodologyStripPrefix: 'All temperature curves, fill-level limits (1/2 to 2/3), raw kidney bean pre-boiling protocols, and frozen poultry bans follow official USDA FSIS food safety directives and FDA microbiological standards. Read our full',
+    methodologyLabel: 'Methodology & Scientific Standards',
     faqTitle: 'Frequently Asked Questions: Slow Cooker & Crock-Pot Food Safety'
   },
   es: {
-    ariaLabel: 'Verificador Interactivo de Seguridad Alimentaria para Slow Cooker y Crock-Pot, Simulador en Vivo y 16 Casos USDA',
-    toolBadge: 'USDA FSIS · FDA Bad Bug Book · 16 Casos y Simulador en Vivo',
-    toolTitle: 'Verificador de Seguridad para Olla Lenta (Slow Cooker / Crock-Pot)',
-    toolSub: 'Simula tu nivel de llenado, potencia y corte eléctrico en vivo y consulta los 16 alimentos, bolsas y cuidados de cerámica con reglas exactas del USDA y la FDA.',
-    copyBtn: 'Copiar Guía de Slow Cooker',
-    copiedBtn: 'Guía Copiada ✓',
-    printBtn: 'Imprimir Tabla de Nevera',
-    simStepLabel: '1. Simulador en Vivo de Configuración y Corte Eléctrico',
-    simStepHint: 'Elige llenado, temperatura y estado eléctrico para ver tu veredicto USDA al instante.',
-    simFillLabel: 'Nivel de Llenado',
-    simHeatLabel: 'Ajuste de Calor',
-    simOutageLabel: 'Corte de Luz',
-    simLiveBadge: 'VEREDICTO DE SEGURIDAD EN VIVO',
-    simGaugeHeading: 'Llenado de la Olla vs. Zona Segura USDA (1/2 – 2/3)',
-    simGaugeEmpty: 'Base',
-    simGaugeHalf: '1/2 Mín',
-    simGaugeTwoThirds: '2/3 Máx',
-    simGaugeRim: 'Borde',
-    simBreakdownFill: 'Nota de Llenado',
-    simBreakdownHeat: 'Nota de Calor',
-    simBreakdownOutage: 'Regla de Corte Eléctrico',
-    inspectorStepLabel: '2. Inspector USDA de Seguridad en Olla Lenta',
-    inspectorBadge: 'INSPECTOR USDA DE SLOW COOKER',
-    usdaRuleHeading: 'Regla USDA / FDA / Fabricante',
-    safeAltHeading: 'Práctica Segura y Alternativa',
-    tempCheckHeading: 'Temperatura y Manejo',
-    handlingBadge: 'CONTROL DE MANEJO',
-    itemStepLabel: '3. Busca o Filtra 16 Alimentos, Bolsas y Cuidados de Cerámica',
-    itemStepHint: 'Pulsa cualquier tarjeta para actualizar el Inspector USDA arriba con su veredicto y temperatura.',
-    searchPlaceholder: 'Buscar pollo congelado, frijoles rojos, sobras, keep warm, horno, bolsas...',
+    ariaLabel: 'Verificador Interactivo de Seguridad en Ollas de Cocción Lenta y Crock-Pot',
+    toolBadge: '22 Alimentos · 3 Tamaños · Normas USDA FSIS y Bad Bug de la FDA',
+    toolTitle: 'Verificador de Seguridad en Olla Lenta y Crock-Pot',
+    toolSub: 'Selecciona el tamaño de tu olla, potencia y alimento para consultar tiempos de cocción, nivel de llenado seguro (1/2 a 2/3), prohibición de carnes congeladas, advertencia de frijoles rojos y choque térmico.',
+    copyBtn: 'Copiar Ficha de Seguridad',
+    copiedBtn: 'Ficha Copiada ✓',
+    printBtn: 'Imprimir Guía de Refrigerador',
+    sizeStepLabel: '1. Elige el Tamaño de tu Olla Lenta (Ajusta Líquido Mínimo)',
+    sizeStepHint: 'Las ollas lentas necesitan suficiente líquido ligero (agua, caldo, vino) para transmitir el calor de forma segura.',
+    heatStepLabel: '2. Elige la Potencia de Cocción',
+    heatStepHint: 'Tanto BAJO como ALTO alcanzan ~98°C; ALTO lo logra en la mitad de tiempo. MANTENER CALIENTE es solo para conservar comida caliente.',
+    stateLabel: 'Estado del Alimento:',
+    stateThawed: 'Fresco / Totalmente Descongelado (Seguro)',
+    stateFrozen: 'Crudo Congelado (Prohibido por USDA)',
+    minLiquidLabel: 'Líquido Mínimo:',
+    inspectorBadge: 'INSPECTOR DE SEGURIDAD EN TIEMPO REAL',
+    fillGaugeHeading: 'Zona Óptima de Llenado',
+    fillOptimalBadge: '1/2 A 2/3 DE CAPACIDAD (ZONA SEGURA)',
+    gaugeEmpty: 'Base',
+    gaugeHalf: '1/2 MÍN',
+    gaugeTwoThirds: '2/3 MÁX',
+    gaugeRim: 'Borde',
+    cookingTimeHeading: 'Tiempo Estimado de Cocción',
+    targetTempHeading: 'Temperatura Interna USDA Objetivo',
+    keySafetyHeading: 'Protocolo de Seguridad y Manipulación',
+    fillRuleHeading: 'Regla de Llenado y Líquido',
+    frozenWarningTitle: 'PROHIBICIÓN ESTRICTA USDA: NUNCA COCINES CARNE CONGELADA EN OLLA LENTA',
+    frozenWarningBody: 'La olla lenta tarda horas en hervir. Introducir carne congelada la deja atrapada en la zona de peligro bacteriano (4°C–60°C) durante horas, proliferando Salmonella y Campylobacter. Descongela siempre por completo en el refrigerador.',
+    kidneyBeanTitle: 'ALERTA TOXINA PHA (FDA): HERVIR 10–30 MINUTOS ANTES',
+    foodStepLabel: '3. Explora o Busca entre 22 Alimentos y Recetas para Olla Lenta',
+    foodStepHint: 'Haz clic en cualquier alimento para actualizar el Inspector de Seguridad con sus tiempos y pautas.',
+    searchPlaceholder: 'Buscar pollo, asado de res, frijoles, lácteos, sopa, cerdo...',
     searchClearLabel: 'Limpiar',
-    catAll: 'Todos (16)',
+    catAll: 'Todos (22)',
     catMeats: 'Carnes y Aves',
-    catBeans: 'Frijoles y Verduras',
-    catLeftovers: 'Sobras y Lácteos',
-    catCrock: 'Cerámica y Bolsas',
-    verdictFilterLabel: 'Veredicto:',
-    verdictAll: 'Todos',
-    verdictSafe: 'Seguro',
-    verdictCaution: 'Precaución',
-    verdictUnsafe: 'Inseguro / Nunca',
+    catBeans: 'Frijoles y Granos',
+    catProduce: 'Verduras y Tubérculos',
+    catLeftoversDairy: 'Lácteos, Mariscos y Sobras',
     showingCountPrefix: 'Mostrando',
-    showingCountSuffix: 'de 16 casos',
-    noResultsTitle: 'Ningún elemento coincide con tu búsqueda o filtros actuales.',
-    resetFiltersBtn: 'Restablecer Filtros',
-    printTitle: 'TABLA DE NEVERA PARA SLOW COOKER Y CROCK-POT (USDA FSIS · FDA)',
-    printSub: 'Nunca carne congelada · Nunca frijoles rojos crudos · Nunca recalentar sobras frías · Llenar de 1/2 a 2/3.',
-    printColItem: 'Alimento / Caso',
-    printColVerdict: 'Veredicto',
-    printColRule: 'Regla Clave USDA / FDA',
-    printColSafe: 'Práctica Segura / Objetivo',
-    copyHeader: 'IsItKitchenSafe — Guía Rápida de Seguridad para Slow Cooker y Crock-Pot',
-    copySimSection: 'VEREDICTO DEL SIMULADOR EN VIVO:',
-    copySimVerdict: 'VEREDICTO:',
-    copySimFill: 'LLENADO:',
-    copySimHeat: 'CALOR:',
-    copySimOutage: 'ELECTRICIDAD:',
-    copyItemSection: 'ELEMENTO SELECCIONADO:',
-    copyItemVerdict: 'VEREDICTO:',
-    copyItemRule: 'REGLA USDA / FDA:',
-    copyItemAlt: 'PRÁCTICA SEGURA:',
-    copyItemTemp: 'TEMP / MANEJO:',
-    copyRulesHeader: '3 REGLAS CRÍTICAS EN OLLA LENTA:',
-    relatedHeading: 'Herramientas Relacionadas de Presión, Descongelación, Temperaturas y Apagones',
-    relatedIpTag: 'Alternativa Segura p/ Congelados',
-    relatedIpTitle: 'Verificador de Instant Pot y Presión →',
-    relatedIpDesc: '¿Olvidaste descongelar el pollo? La olla a presión sí cocina aves congeladas con seguridad — revisa líneas y válvulas.',
-    relatedThawTag: 'Paso Obligatorio Previo',
-    relatedThawTitle: 'Calculadora de Descongelación de Carne →',
-    relatedThawDesc: 'Calcula tiempos exactos en nevera (≤4 °C) o agua fría para asados y pollos antes de la slow cooker.',
-    relatedTempTag: 'Guía de Termómetro USDA',
+    showingCountSuffix: 'de 22 alimentos',
+    noResultsTitle: 'No hay alimentos que coincidan con tu búsqueda o filtros.',
+    resetFiltersBtn: 'Restablecer Búsqueda y Filtros',
+    thermalShockTitle: 'Reglas para Prevenir el Choque Térmico en la Olla Cerámica',
+    thermalDo: 'HAZ ESTO (PROTEGE LA CERÁMICA)',
+    thermalDont: 'NUNCA HAGAS ESTO (FRACTURA LA CERÁMICA)',
+    printTitle: 'GUÍA RÁPIDA DE SEGURIDAD EN OLLA LENTA (USDA Y FDA)',
+    printSub: 'Llena entre 1/2 y 2/3 · Nunca pongas carne cruda congelada · Hierve frijoles rojos 15 min.',
+    printColFood: 'Alimento / Ingrediente',
+    printColStatus: 'Estado de Seguridad',
+    printColTime: 'Tiempo (Bajo / Alto)',
+    printColTip: 'Protocolo de Seguridad y Consejo',
+    copyHeader: 'IsItKitchenSafe — Ficha de Seguridad en Olla Lenta y Crock-Pot',
+    relatedHeading: 'Herramientas Relacionadas de Cocina y Temperatura',
+    relatedInstantPotTag: 'Ollas a Presión',
+    relatedInstantPotTitle: 'Verificador de Presión Instant Pot →',
+    relatedInstantPotDesc: 'Comprueba límites de llenado (1/2 vs. 2/3), despresurización natural o rápida y espuma.',
+    relatedTempTag: 'Termómetro USDA',
     relatedTempTitle: 'Tabla de Temperaturas Internas →',
-    relatedTempDesc: 'Comprueba temperaturas seguras USDA para aves (74 °C), asados de res/cerdo (≥63 °C) y sobras recalentadas.',
-    relatedPowerTag: 'Seguridad en Apagones',
-    relatedPowerTitle: 'Verificador de Seguridad en Cortes de Luz →',
-    relatedPowerDesc: 'Consulta reglas de descarte para nevera, congelador y comida cocinándose durante un apagón.',
-    methodologyStripTitle: 'Basado en USDA FSIS "Slow Cookers and Food Safety", FDA Bad Bug Book y Manuales de Cerámica',
-    methodologyStripPrefix: 'Todas las reglas de Zona de Peligro (4 °C–60 °C), ebullición contra lectina de frijoles rojos, cortes de luz de 2 h y choque térmico siguen fuentes oficiales. Lee nuestra',
-    methodologyLabel: 'Metodología',
-    tempQuickLabel: 'Tabla USDA',
-    allToolsLabel: 'Todas las Herramientas →',
-    faqTitle: 'Preguntas Frecuentes: Seguridad Alimentaria en Slow Cooker y Crock-Pot'
+    relatedTempDesc: 'Verifica temperaturas seguras para pollo (74°C), cerdo, asados y estofados.',
+    relatedThawTag: 'Descongelación Segura',
+    relatedThawTitle: 'Calculadora de Descongelación →',
+    relatedThawDesc: 'Calcula tiempos seguros en refrigerador o agua fría antes de cocinar.',
+    relatedFireTag: 'Primeros Auxilios',
+    relatedFireTitle: 'Guía de Fuego y Quemaduras →',
+    relatedFireDesc: 'Protocolos de la Cruz Roja para quemaduras por vapor y emergencias.',
+    methodologyStripTitle: 'Basado en Pautas Oficiales USDA FSIS y Manual Bad Bug de la FDA',
+    methodologyStripPrefix: 'Todas las curvas de temperatura, límites de llenado (1/2 a 2/3) y prohibición de carne congelada siguen directivas del USDA. Consulta nuestra',
+    methodologyLabel: 'Metodología Científica',
+    faqTitle: 'Preguntas Frecuentes: Seguridad en Ollas de Cocción Lenta y Crock-Pot'
   },
   pt: {
-    ariaLabel: 'Verificador Interativo de Segurança Alimentar para Slow Cooker e Crock-Pot, Simulador ao Vivo e 16 Itens USDA',
-    toolBadge: 'USDA FSIS · FDA Bad Bug Book · 16 Itens e Simulador ao Vivo',
-    toolTitle: 'Verificador de Segurança para Slow Cooker / Crock-Pot',
-    toolSub: 'Teste ao vivo o volume da cuba, a potência e quedas de energia, depois toque em qualquer um dos 16 alimentos, forros e cuidados de cerâmica para ver as normas exatas do USDA e da FDA.',
-    copyBtn: 'Copiar Cola de Slow Cooker',
-    copiedBtn: 'Cola Copiada ✓',
-    printBtn: 'Imprimir Tabela p/ Geladeira',
-    simStepLabel: '1. Simulador ao Vivo de Configuração e Queda de Energia',
-    simStepHint: 'Selecione volume, temperatura e status elétrico para receber o veredicto USDA imediato.',
-    simFillLabel: 'Nível da Cuba',
-    simHeatLabel: 'Temperatura',
-    simOutageLabel: 'Queda de Energia',
-    simLiveBadge: 'VEREDICTO DE SEGURANÇA AO VIVO',
-    simGaugeHeading: 'Volume da Cuba vs. Faixa Segura USDA (1/2 – 2/3)',
-    simGaugeEmpty: 'Fundo',
-    simGaugeHalf: '1/2 Mín',
-    simGaugeTwoThirds: '2/3 Máx',
-    simGaugeRim: 'Borda',
-    simBreakdownFill: 'Nota de Volume',
-    simBreakdownHeat: 'Nota de Potência',
-    simBreakdownOutage: 'Regra de Energia',
-    inspectorStepLabel: '2. Inspetor USDA de Segurança em Slow Cooker',
-    inspectorBadge: 'INSPETOR USDA DE SLOW COOKER',
-    usdaRuleHeading: 'Regra USDA / FDA / Fabricante',
-    safeAltHeading: 'Prática Segura e Alternativa',
-    tempCheckHeading: 'Temperatura e Manuseio',
-    handlingBadge: 'CHECAGEM DE MANUSEIO',
-    itemStepLabel: '3. Pesquise ou Filtre 16 Alimentos, Forros e Cuidados da Cuba',
-    itemStepHint: 'Clique em qualquer cartão para atualizar o Inspetor USDA acima com veredicto e temperatura.',
-    searchPlaceholder: 'Buscar frango congelado, feijão vermelho, sobras, keep warm, forno, sacos...',
+    ariaLabel: 'Verificador Interativo de Segurança na Panela de Cozimento Lento (Crock-Pot)',
+    toolBadge: '22 Alimentos · 3 Tamanhos · Regras USDA FSIS e Bad Bug da FDA',
+    toolTitle: 'Verificador de Segurança na Panela Lenta (Crock-Pot)',
+    toolSub: 'Selecione o tamanho da panela, potência e alimento para conferir tempos de cozimento, volume seguro (1/2 a 2/3), veto a carnes congeladas, alerta de toxina em feijão e choque térmico.',
+    copyBtn: 'Copiar Ficha de Segurança',
+    copiedBtn: 'Ficha Copiada ✓',
+    printBtn: 'Imprimir Tabela de Geladeira',
+    sizeStepLabel: '1. Escolha o Tamanho da sua Panela Lenta (Ajusta Líquido Mínimo)',
+    sizeStepHint: 'As panelas elétricas lentas exigem líquido fino suficiente (água, caldo, vinho) para conduzir calor com segurança.',
+    heatStepLabel: '2. Escolha a Potência de Aquecimento',
+    heatStepHint: 'Tanto BAIXO quanto ALTO chegam a ~98°C; ALTO atinge o ponto na metade do tempo. MANTER AQUECIDO é apenas para comida quente pronta.',
+    stateLabel: 'Estado do Alimento:',
+    stateThawed: 'Fresco / Totalmente Descongelado (Seguro)',
+    stateFrozen: 'Cru Congelado (Proibido pelo USDA)',
+    minLiquidLabel: 'Líquido Mínimo:',
+    inspectorBadge: 'INSPETOR DE SEGURANÇA EM TEMPO REAL',
+    fillGaugeHeading: 'Zona Segura de Volume',
+    fillOptimalBadge: '1/2 A 2/3 DO RECIPIENTE (ZONA SEGURA)',
+    gaugeEmpty: 'Base',
+    gaugeHalf: '1/2 MÍN',
+    gaugeTwoThirds: '2/3 MÁX',
+    gaugeRim: 'Borda',
+    cookingTimeHeading: 'Tempo Estimado de Cozimento',
+    targetTempHeading: 'Temperatura Interna USDA Recomendada',
+    keySafetyHeading: 'Protocolo Crítico de Segurança',
+    fillRuleHeading: 'Regra de Volume e Líquido',
+    frozenWarningTitle: 'VETO ESTRITO DO USDA: NUNCA COZINHE CARNE CONGELADA NA PANELA LENTA',
+    frozenWarningBody: 'A panela lenta demora horas para esquentar. Colocar carne congelada faz com que ela permaneça na zona de perigo bacteriano (4°C–60°C) por horas, multiplicando Salmonella e Campylobacter. Descongele totalmente na geladeira primeiro.',
+    kidneyBeanTitle: 'ALERTA TOXINA PHA (FDA): FERVA 10–30 MINUTOS ANTES',
+    foodStepLabel: '3. Busque entre 22 Alimentos e Receitas da Panela Lenta',
+    foodStepHint: 'Clique em qualquer alimento para atualizar o Inspetor de Segurança acima com tempos e regras.',
+    searchPlaceholder: 'Buscar frango, acém, feijão, laticínios, sopa, porco...',
     searchClearLabel: 'Limpar',
-    catAll: 'Todos (16)',
+    catAll: 'Todos (22)',
     catMeats: 'Carnes e Aves',
-    catBeans: 'Feijão e Legumes',
-    catLeftovers: 'Sobras e Laticínios',
-    catCrock: 'Cuba e Forros',
-    verdictFilterLabel: 'Veredicto:',
-    verdictAll: 'Todos',
-    verdictSafe: 'Seguro',
-    verdictCaution: 'Atenção',
-    verdictUnsafe: 'Inseguro / Nunca',
+    catBeans: 'Feijões e Grãos',
+    catProduce: 'Legumes e Raízes',
+    catLeftoversDairy: 'Laticínios, Peixes e Sobras',
     showingCountPrefix: 'Exibindo',
-    showingCountSuffix: 'de 16 itens',
-    noResultsTitle: 'Nenhum item corresponde à busca ou filtros atuais.',
+    showingCountSuffix: 'de 22 alimentos',
+    noResultsTitle: 'Nenhum alimento encontrado para os filtros atuais.',
     resetFiltersBtn: 'Limpar Busca e Filtros',
-    printTitle: 'TABELA DE GELADEIRA PARA SLOW COOKER E CROCK-POT (USDA FSIS · FDA)',
-    printSub: 'Nunca carne congelada · Nunca feijão vermelho cru · Nunca reaquecer sobras frias · Encher de 1/2 a 2/3.',
-    printColItem: 'Alimento / Item',
-    printColVerdict: 'Veredicto',
-    printColRule: 'Regra-Chave USDA / FDA',
-    printColSafe: 'Prática Segura / Meta',
-    copyHeader: 'IsItKitchenSafe — Guia Rápido de Segurança para Slow Cooker e Crock-Pot',
-    copySimSection: 'VEREDICTO DO SIMULADOR AO VIVO:',
-    copySimVerdict: 'VEREDICTO:',
-    copySimFill: 'VOLUME:',
-    copySimHeat: 'POTÊNCIA:',
-    copySimOutage: 'ENERGIA:',
-    copyItemSection: 'ITEM SELECIONADO:',
-    copyItemVerdict: 'VEREDICTO:',
-    copyItemRule: 'REGRA USDA / FDA:',
-    copyItemAlt: 'PRÁTICA SEGURA:',
-    copyItemTemp: 'TEMP / MANUSEIO:',
-    copyRulesHeader: '3 REGRAS CRÍTICAS DE SLOW COOKER:',
-    relatedHeading: 'Ferramentas Relacionadas de Pressão, Descongelamento, Temperatura e Apagão',
-    relatedIpTag: 'Alternativa Segura p/ Congelados',
-    relatedIpTitle: 'Verificador de Instant Pot e Pressão →',
-    relatedIpDesc: 'Esqueceu de descongelar o frango? A panela de pressão cozinha aves congeladas com segurança — confira limites e válvulas.',
-    relatedThawTag: 'Etapa Obrigatória Pré-Cozimento',
-    relatedThawTitle: 'Calculadora de Descongelamento de Carnes →',
-    relatedThawDesc: 'Calcule tempos seguros na geladeira (≤4 °C) e água fria antes de ligar a slow cooker.',
-    relatedTempTag: 'Guia de Termômetro USDA',
+    thermalShockTitle: 'Regras contra Choque Térmico na Cuba Cerâmica de Grés',
+    thermalDo: 'FAÇA ISTO (PROTEGE A CUBA)',
+    thermalDont: 'NUNCA FAÇA ISTO (RACHA A CUBA)',
+    printTitle: 'GUIA DE GELADEIRA: SEGURANÇA NA PANELA LENTA (USDA E FDA)',
+    printSub: 'Mantenha entre 1/2 e 2/3 · Nunca coloque carne crua congelada · Ferva feijão vermelho 15m.',
+    printColFood: 'Alimento / Ingrediente',
+    printColStatus: 'Status de Segurança',
+    printColTime: 'Tempo (Baixo / Alto)',
+    printColTip: 'Protocolo de Segurança e Dica',
+    copyHeader: 'IsItKitchenSafe — Ficha de Segurança na Panela Lenta e Crock-Pot',
+    relatedHeading: 'Ferramentas Relacionadas de Culinária e Temperatura',
+    relatedInstantPotTag: 'Panelas de Pressão',
+    relatedInstantPotTitle: 'Verificador de Pressão Instant Pot →',
+    relatedInstantPotDesc: 'Veja marcas de limite (1/2 vs. 2/3), despressurização natural ou rápida e espuma.',
+    relatedTempTag: 'Termômetro USDA',
     relatedTempTitle: 'Tabela de Temperaturas Internas →',
-    relatedTempDesc: 'Confira temperaturas internas USDA para aves (74 °C), assados bovinos/suínos (≥63 °C) e sobras reaquecidas.',
-    relatedPowerTag: 'Segurança em Falta de Luz',
-    relatedPowerTitle: 'Verificador de Segurança em Queda de Energia →',
-    relatedPowerDesc: 'Consulte regras de descarte para geladeira, freezer e panelas quando falta luz em casa.',
-    methodologyStripTitle: 'Baseado em USDA FSIS "Slow Cookers and Food Safety", FDA Bad Bug Book e Manuais de Cerâmica',
-    methodologyStripPrefix: 'Todas as normas de Zona de Perigo (4 °C–60 °C), fervura contra lectina de feijão vermelho, apagão de 2 h e choque térmico seguem fontes oficiais. Leia nossa',
-    methodologyLabel: 'Metodologia',
-    tempQuickLabel: 'Tabela USDA',
-    allToolsLabel: 'Todas as Ferramentas →',
-    faqTitle: 'Perguntas Frequentes: Segurança Alimentar em Slow Cooker e Crock-Pot'
+    relatedTempDesc: 'Verifique temperaturas seguras para frango (74°C), carne bovina e assados.',
+    relatedThawTag: 'Descongelamento',
+    relatedThawTitle: 'Calculadora de Descongelamento →',
+    relatedThawDesc: 'Calcule tempos seguros na geladeira ou água fria antes de cozinhar.',
+    relatedFireTag: 'Primeiros Socorros',
+    relatedFireTitle: 'Guia de Emergência e Queimaduras →',
+    relatedFireDesc: 'Orientações da Cruz Vermelha para queimaduras de vapor e segurança.',
+    methodologyStripTitle: 'Garantido pelas Diretrizes USDA FSIS e Livro Bad Bug da FDA',
+    methodologyStripPrefix: 'Todas as regras de temperatura, volumes de 1/2 a 2/3 e proibição de carnes congeladas seguem padrões do USDA. Conheça nossa',
+    methodologyLabel: 'Metodologia Científica',
+    faqTitle: 'Perguntas Frequentes: Segurança na Panela Elétrica Lenta (Crock-Pot)'
   },
   'zh-cn': {
-    ariaLabel: '交互式慢炖锅 / Crock-Pot 食品安全检查器、实时配置模拟器与 16 项 USDA 指南',
-    toolBadge: 'USDA FSIS · FDA 权威手册 · 16 项场景与实时模拟器',
-    toolTitle: '慢炖锅 / Crock-Pot 食品安全与陶瓷内胆检查器',
-    toolSub: '先用下方实时模拟器测试装量、火候与停电情景，再点击 16 种高频食材、内衬袋与陶瓷护理卡片，即刻获取 USDA 与 FDA 权威结论。',
-    copyBtn: '复制慢炖锅速查表',
-    copiedBtn: '速查表已复制 ✓',
-    printBtn: '打印冰箱参考图',
-    simStepLabel: '1. 慢炖锅配置与停电情景实时模拟器',
-    simStepHint: '切换装量比例、档位设置与停电状况，实时计算 USDA 食品安全裁定。',
-    simFillLabel: '锅内食材装量',
-    simHeatLabel: '火力档位设置',
-    simOutageLabel: '停电状态核查',
-    simLiveBadge: '实时配置安全裁定',
-    simGaugeHeading: '装量高度 vs USDA 安全区间（1/2 – 2/3）',
-    simGaugeEmpty: '锅底',
-    simGaugeHalf: '1/2 下限',
-    simGaugeTwoThirds: '2/3 上限',
-    simGaugeRim: '锅沿',
-    simBreakdownFill: '装量说明',
-    simBreakdownHeat: '档位说明',
-    simBreakdownOutage: '停电规则',
-    inspectorStepLabel: '2. USDA 慢炖锅安全深度检测面板',
-    inspectorBadge: 'USDA 慢炖锅安全检测面板',
-    usdaRuleHeading: 'USDA / FDA / 厂商权威规则',
-    safeAltHeading: '安全替代方案与最佳实践',
-    tempCheckHeading: '温度与操作核查要点',
-    handlingBadge: '操作规范核查',
-    itemStepLabel: '3. 搜索或筛选 16 种常见慢炖食材、内衬袋与陶瓷护理',
-    itemStepHint: '点击任意卡片，上方实时更新详细裁定、科学原理与安全做法。',
-    searchPlaceholder: '搜索 冷冻鸡肉、红腰豆、剩菜、保温档、烤箱、内衬袋...',
-    searchClearLabel: '清除',
-    catAll: '全部 (16)',
-    catMeats: '肉类与禽类',
-    catBeans: '豆类与根茎菜',
-    catLeftovers: '剩菜与乳制品',
-    catCrock: '内胆与内衬袋',
-    verdictFilterLabel: '安全结论：',
-    verdictAll: '全部',
-    verdictSafe: '安全',
-    verdictCaution: '需注意',
-    verdictUnsafe: '不安全 / 禁止',
+    ariaLabel: '慢炖锅与电炖盅食品安全交互检查器 (USDA & FDA)',
+    toolBadge: '22 种日常食材 · 3 种容量 · USDA FSIS 与 FDA 毒素指南',
+    toolTitle: '慢炖锅与电炖盅安全烹饪检查器',
+    toolSub: '选择炖锅容量、加热火候与食材，即时核查烹饪时长、安全装载红线（1/2 至 2/3）、USDA 冷冻肉严禁直接慢炖警示、生红芸豆毒素预煮要求及陶瓷内胆防爆裂操作。',
+    copyBtn: '复制慢炖安全备忘卡',
+    copiedBtn: '备忘卡已复制 ✓',
+    printBtn: '打印冰箱贴参考图',
+    sizeStepLabel: '1. 选择慢炖锅容量规格（自动关联最低清液量）',
+    sizeStepHint: '慢炖锅需要充足的清液（水、高汤、料酒）均匀传热，防止内胆局部干烧焦糊。',
+    heatStepLabel: '2. 选择加热火候档位',
+    heatStepHint: 'LOW 档与 HIGH 档最终都能达到约 98°C 的微沸点；HIGH 档耗时缩短一半。WARM 档仅限保温热熟食。',
+    stateLabel: '食材初始状态：',
+    stateThawed: '新鲜 / 完全解冻（安全合规）',
+    stateFrozen: '生冻肉 / 未解冻（USDA 严格禁令）',
+    minLiquidLabel: '最低清液量：',
+    inspectorBadge: '慢炖安全实时排查台',
+    fillGaugeHeading: '最佳容量安全装载区间',
+    fillOptimalBadge: '1/2 至 2/3 容积（黄金安全温区）',
+    gaugeEmpty: '锅底',
+    gaugeHalf: '1/2 下限',
+    gaugeTwoThirds: '2/3 上限',
+    gaugeRim: '锅沿',
+    cookingTimeHeading: '建议烹饪时长',
+    targetTempHeading: 'USDA 安全中心目标温度',
+    keySafetyHeading: '核心安全操作与处理指南',
+    fillRuleHeading: '容积与加水操作要求',
+    frozenWarningTitle: 'USDA 严正禁令：严禁将冷冻生肉直接投入慢炖锅！',
+    frozenWarningBody: '慢炖锅升温极其缓慢。直接放入生冷冻肉会导致肉块内部在 4°C–60°C 的细菌危险温区滞留数小时，沙门氏菌和弯曲杆菌极易大量繁殖。必须提前在冷藏室完全解冻后再入锅。',
+    kidneyBeanTitle: 'FDA PHA 毒素警报：必须提前沸水大火滚煮 10–30 分钟',
+    foodStepLabel: '3. 检索或浏览 22 种日常慢炖食材与经典食谱',
+    foodStepHint: '点击任意食材卡片，上方安全排查台即时更新精准温控、时间与防毒防爆指南。',
+    searchPlaceholder: '搜索鸡肉、牛腩、红芸豆、乳制品、骨汤、排骨...',
+    searchClearLabel: '清空',
+    catAll: '全食材 (22)',
+    catMeats: '禽肉与牛猪排',
+    catBeans: '豆类与杂粮',
+    catProduce: '根茎果蔬与菌菇',
+    catLeftoversDairy: '乳制品、海鲜与剩菜',
     showingCountPrefix: '当前显示',
-    showingCountSuffix: '项（共 16 项）',
-    noResultsTitle: '没有符合当前搜索词或筛选条件的条目。',
-    resetFiltersBtn: '重置搜索与筛选',
-    printTitle: '慢炖锅 / CROCK-POT 食品安全冰箱速查表（USDA FSIS · FDA）',
-    printSub: '禁煮冻肉 · 禁直接慢炖生红腰豆 · 禁直接复热冷剩菜 · 装量保持 1/2 至 2/3 满',
-    printColItem: '食材 / 场景',
-    printColVerdict: '安全结论',
-    printColRule: 'USDA / FDA 核心规则',
-    printColSafe: '安全做法 / 目标温度',
-    copyHeader: 'IsItKitchenSafe — 慢炖锅 / Crock-Pot 食品安全速查表',
-    copySimSection: '实时配置模拟器结论：',
-    copySimVerdict: '综合裁定：',
-    copySimFill: '装量水平：',
-    copySimHeat: '火力档位：',
-    copySimOutage: '供电状态：',
-    copyItemSection: '当前选中项目：',
-    copyItemVerdict: '安全结论：',
-    copyItemRule: '权威规则：',
-    copyItemAlt: '安全做法：',
-    copyItemTemp: '测温/操作：',
-    copyRulesHeader: '3 条慢炖锅绝对安全铁律：',
-    relatedHeading: '相关电压力锅、解冻、测温与停电食品安全工具',
-    relatedIpTag: '冷冻肉安全替代方案',
-    relatedIpTitle: '电压力锅水位与泄压检查器 →',
-    relatedIpDesc: '忘记解冻鸡肉？电压力锅可凭 115°C+ 高压蒸汽安全煮冻鸡，速查水位线与泄压方式。',
-    relatedThawTag: '慢炖前必备步骤',
-    relatedThawTitle: '肉类安全解冻时间计算器 →',
-    relatedThawDesc: '精准计算牛肩肉、猪肩肉与整鸡在冰箱冷藏（≤4°C）或冷水中的安全解冻时长。',
-    relatedTempTag: 'USDA 探针测温表',
-    relatedTempTitle: '肉类安全中心温度速查表 →',
-    relatedTempDesc: '核验慢炖禽肉（74°C）、牛猪炖块（≥63°C）与剩菜复热的 USDA 权威中心温度。',
-    relatedPowerTag: '断电食物去留判断',
-    relatedPowerTitle: '停电食品安全检查器 →',
-    relatedPowerDesc: '家中突发停电时，一键判断冰箱、冷冻室与烹饪中食物的安全保留或丢弃时限。',
-    methodologyStripTitle: '严格依据 USDA FSIS《慢炖锅与食品安全》、FDA 病原体手册与陶瓷热冲击规范',
-    methodologyStripPrefix: '所有 4°C–60°C 危险温区规则、红腰豆沸煮去毒指南、停电 2 小时丢弃底线与陶瓷热冲击限制均源自官方权威文献。查阅我们的',
-    methodologyLabel: '科学方法论',
-    tempQuickLabel: 'USDA 测温表',
-    allToolsLabel: '全部厨房工具 →',
-    faqTitle: '常见问题：慢炖锅 / Crock-Pot 食品安全与使用禁忌'
+    showingCountSuffix: '种食材（共 22 种）',
+    noResultsTitle: '未找到符合当前搜索或筛选条件的食材。',
+    resetFiltersBtn: '重置搜索与分类',
+    thermalShockTitle: '慢炖锅陶瓷内胆防爆裂防热震核心操作守则',
+    thermalDo: '正确做法（保护陶瓷内胆）',
+    thermalDont: '严禁操作（极易导致内胆爆裂）',
+    printTitle: '慢炖锅与电炖盅安全冰箱贴参考图（USDA & FDA 权威标准）',
+    printSub: '容量控制在 1/2 至 2/3 · 严禁直接慢炖生冻肉 · 红芸豆大火预煮 15 分钟。',
+    printColFood: '食材 / 菜式',
+    printColStatus: '安全评级',
+    printColTime: '建议时间 (Low/High)',
+    printColTip: '核心安全规范与操作技巧',
+    copyHeader: 'IsItKitchenSafe — 慢炖锅与电炖盅食品安全备忘清单',
+    relatedHeading: '相关厨房安全、解冻与温控工具',
+    relatedInstantPotTag: '电压力锅安全',
+    relatedInstantPotTitle: '高压锅水位线与泄压检查器 →',
+    relatedInstantPotDesc: '核查 1/2 MAX 与 2/3 MAX 水位、自然泄压与手动快排及起泡堵阀预防。',
+    relatedTempTag: 'USDA 测温指南',
+    relatedTempTitle: '安全烹饪中心温度速查表 →',
+    relatedTempDesc: '查阅慢炖鸡肉（74°C）、牛腩、猪排与砂锅菜官方最低安全中心温度。',
+    relatedThawTag: '生肉解冻安全',
+    relatedThawTitle: '肉类与火鸡安全解冻时间计算器 →',
+    relatedThawDesc: '精准测算冷藏解冻与冷水解冻时长，确保慢炖前肉质彻底解冻安全。',
+    relatedFireTag: '烫伤急救指南',
+    relatedFireTitle: '厨房火灾与烫伤应急指南 →',
+    relatedFireDesc: '红十字会冷水冲烫伤急救指南与 NFPA 蒸汽烫伤与热液飞溅处置。',
+    methodologyStripTitle: '严谨遵循 USDA FSIS 慢炖规范与 FDA Bad Bug 微生物毒素手册',
+    methodologyStripPrefix: '所有慢炖温控曲线、1/2 至 2/3 装料红线、生红芸豆预煮脱毒要求与冷冻生禽肉禁令均严格遵照美国农业部 USDA FSIS 与 FDA 权威标准。查看我们的完整',
+    methodologyLabel: '科学验证标准与文献',
+    faqTitle: '常见问题解答：慢炖锅与电炖盅食品安全'
   },
   ja: {
-    ariaLabel: 'スロークッカー・Crock-Pot 食品安全チェッカー＆設定シミュレーター（定番16項目）',
-    toolBadge: 'USDA FSIS · FDA 基準 · 16 項目＆リアルタイムシミュレーター',
-    toolTitle: 'スロークッカー・Crock-Pot 食品安全＆陶器ケアチェッカー',
-    toolSub: '容量・加熱モード・停電状況をリアルタイムで診断し、冷凍肉・赤いんげん豆・残り物再加熱・陶器内鍋ケアなど全 16 項目の USDA/FDA 基準を即確認できます。',
-    copyBtn: 'チートシートをコピー',
-    copiedBtn: 'コピーしました ✓',
-    printBtn: '冷蔵庫用一覧表を印刷',
-    simStepLabel: '1. スロークッカー設定＆停電シミュレーター',
-    simStepHint: '具材の量・火力設定・停電状況を選ぶと、USDA 安全判定をリアルタイム表示します。',
-    simFillLabel: '内鍋の充填量',
-    simHeatLabel: '加熱モード',
-    simOutageLabel: '停電チェック',
-    simLiveBadge: 'リアルタイム安全判定',
-    simGaugeHeading: '充填量 vs USDA 安全ゾーン（1/2〜2/3）',
-    simGaugeEmpty: '底面',
-    simGaugeHalf: '1/2 下限',
-    simGaugeTwoThirds: '2/3 上限',
-    simGaugeRim: 'フチ',
-    simBreakdownFill: '充填量のポイント',
-    simBreakdownHeat: '火力設定のポイント',
-    simBreakdownOutage: '停電時のルール',
-    inspectorStepLabel: '2. USDA スロークッカー安全インスペクター',
-    inspectorBadge: 'USDA スロークッカー安全インスペクター',
-    usdaRuleHeading: 'USDA / FDA / メーカー基準',
-    safeAltHeading: '安全な方法・代替策',
-    tempCheckHeading: '温度・取り扱いチェック',
-    handlingBadge: '取り扱い確認',
-    itemStepLabel: '3. 定番 16 食材・ライナー・陶器ケアを検索＆フィルター',
-    itemStepHint: 'カードをクリックすると上の安全インスペクターが詳細判定と温度基準に更新されます。',
-    searchPlaceholder: '冷凍鶏肉、赤いんげん豆、残り物、保温、オーブン、ライナー...',
+    ariaLabel: 'スロークッカー＆クロックポット 食品安全チェッカー（米USDA＆FDA基準）',
+    toolBadge: '定番22食材 · 3サイズ · USDA FSIS＆米FDA食中毒毒素基準',
+    toolTitle: 'スロークッカー＆クロックポット 安全調理チェッカー',
+    toolSub: '鍋のサイズ、加熱設定、食材を選ぶだけで、調理時間、安全な容量（1/2〜2/3）、USDA冷凍肉調理禁止令、赤インゲン豆のレクチン毒素対策、陶器内鍋のヒートショック割れ防止策を即確認できます。',
+    copyBtn: '安全シートをコピー',
+    copiedBtn: 'コピー完了 ✓',
+    printBtn: '冷蔵庫用シートを印刷',
+    sizeStepLabel: '1. スロークッカーのサイズを選択（最低水分量を自動調整）',
+    sizeStepHint: 'スロークッカーは熱を安全に循環させ焦げ付きを防ぐため、十分な水分（水・だし汁・ワイン等）が必要です。',
+    heatStepLabel: '2. 加熱モードを選択',
+    heatStepHint: 'LOWもHIGHも最終的には約98°C（微沸騰）に達します。HIGHは約半分の時間で到達。WARMは温かい料理の保温専用です。',
+    stateLabel: '食材の初期状態：',
+    stateThawed: '冷蔵・完全解凍済み（安全）',
+    stateFrozen: '生の冷凍肉（USDA厳禁）',
+    minLiquidLabel: '最低水分量：',
+    inspectorBadge: 'リアルタイム安全インスペクター',
+    fillGaugeHeading: '最適な食材投入ゾーン',
+    fillOptimalBadge: '鍋の1/2〜2/3（安全ゾーン）',
+    gaugeEmpty: '底',
+    gaugeHalf: '1/2 下限',
+    gaugeTwoThirds: '2/3 上限',
+    gaugeRim: 'フチ',
+    cookingTimeHeading: '目安調理時間',
+    targetTempHeading: 'USDA目標中心温度',
+    keySafetyHeading: '安全調理プロトコル＆重要ルール',
+    fillRuleHeading: '投入量と水分量のルール',
+    frozenWarningTitle: '米USDA厳禁ルール：冷凍肉を直接スロークッカーに入れてはいけません',
+    frozenWarningBody: 'スロークッカーは温まるまでに数時間かかります。凍ったままの肉を入れると、食中毒菌が急激に繁殖する危険温度帯（4°C〜60°C）に何時間も放置され、サルモネラ菌などが増殖します。必ず事前に冷蔵庫で完全解凍してください。',
+    kidneyBeanTitle: '米FDAレクチン警告：事前に10〜30分の強火沸騰が必須',
+    foodStepLabel: '3. スロークッカー定番22食材＆料理を検索',
+    foodStepHint: '食材カードをクリックすると、上のインスペクターが推奨時間・投入量・安全ルールに即座に切り替わります。',
+    searchPlaceholder: '鶏肉、牛すね肉、インゲン豆、乳製品、スープ、豚肉...',
     searchClearLabel: 'クリア',
-    catAll: 'すべて (16)',
+    catAll: '全食材 (22)',
     catMeats: '肉・鶏肉',
-    catBeans: '豆・根菜',
-    catLeftovers: '残り物・乳製品',
-    catCrock: '陶器鍋・ライナー',
-    verdictFilterLabel: '安全判定:',
-    verdictAll: 'すべて',
-    verdictSafe: '安全',
-    verdictCaution: '注意',
-    verdictUnsafe: '危険・禁止',
+    catBeans: '豆類・穀物',
+    catProduce: '野菜・根菜',
+    catLeftoversDairy: '乳製品・魚介・残り物',
     showingCountPrefix: '表示中：',
-    showingCountSuffix: '/ 16 項目',
-    noResultsTitle: '条件に一致するスロークッカー項目がありません。',
-    resetFiltersBtn: 'フィルターをリセット',
-    printTitle: 'スロークッカー・CROCK-POT 食品安全 冷蔵庫一覧表（USDA FSIS・FDA）',
-    printSub: '冷凍肉は厳禁 · 生の赤いんげん豆は厳禁 · 冷めた残り物の再加熱は厳禁 · 1/2〜2/3量を維持',
-    printColItem: '食材・項目',
-    printColVerdict: '判定',
-    printColRule: 'USDA / FDA 主要ルール',
-    printColSafe: '安全な方法・目標温度',
-    copyHeader: 'IsItKitchenSafe — スロークッカー・Crock-Pot 食品安全チートシート',
-    copySimSection: 'シミュレーター判定結果：',
-    copySimVerdict: '総合判定：',
-    copySimFill: '充填量：',
-    copySimHeat: '加熱モード：',
-    copySimOutage: '停電状況：',
-    copyItemSection: '選択中の項目：',
-    copyItemVerdict: '安全判定：',
-    copyItemRule: 'USDA / FDA 基準：',
-    copyItemAlt: '安全な実践法：',
-    copyItemTemp: '温度・取り扱い：',
-    copyRulesHeader: 'スロークッカー絶対安全ルール 3か条：',
-    relatedHeading: '関連する圧力鍋・解凍・中心温度・停電対策ツール',
-    relatedIpTag: '冷凍肉の安全な代替手段',
-    relatedIpTitle: '電気圧力鍋 上限線＆減圧チェッカー →',
-    relatedIpDesc: '鶏肉を解凍し忘れたら圧力鍋へ。高温加圧蒸気で安全に調理する上限線と減圧法を確認できます。',
-    relatedThawTag: '調理前の必須ステップ',
-    relatedThawTitle: '肉の安全解凍時間計算機 →',
-    relatedThawDesc: 'スロークッカー調理前に冷蔵庫（4°C以下）や冷水での安全な解凍時間を正確に算出します。',
-    relatedTempTag: 'USDA 温度計ガイド',
-    relatedTempTitle: '安全中心温度チャート →',
-    relatedTempDesc: 'スロークッカー調理の鶏肉（74°C）、塊肉（63°C以上）、再加熱の安全温度を確認できます。',
-    relatedPowerTag: '停電時の廃棄判断',
-    relatedPowerTitle: '停電時食品安全チェッカー →',
-    relatedPowerDesc: '停電発生時の冷蔵庫・冷凍庫・調理中食品の保存可否と廃棄基準を即確認できます。',
-    methodologyStripTitle: 'USDA FSIS「Slow Cookers and Food Safety」・FDA Bad Bug Book・陶器マニュアル準拠',
-    methodologyStripPrefix: '4°C〜60°C 危険温度帯、赤いんげん豆の沸騰無毒化、2時間停電廃棄基準、陶器熱衝撃ルールはすべて公的基準に基づいています。詳細は',
-    methodologyLabel: '検証メソドロジー',
-    tempQuickLabel: 'USDA 温度表',
-    allToolsLabel: 'すべてのツール →',
-    faqTitle: 'よくある質問：スロークッカー・Crock-Pot の食品安全'
+    showingCountSuffix: '品（全22品）',
+    noResultsTitle: '該当する食材が見つかりませんでした。',
+    resetFiltersBtn: '検索とフィルターをリセット',
+    thermalShockTitle: '陶器製内鍋のヒートショック（熱割れ）防止ルール',
+    thermalDo: '推奨（内鍋を守る）',
+    thermalDont: '厳禁（ヒビ割れ・破損の原因）',
+    printTitle: 'スロークッカー安全早見表（冷蔵庫用・USDA＆FDA基準）',
+    printSub: '容量は鍋の1/2〜2/3 · 冷凍肉の直接調理は厳禁 · 赤インゲン豆は15分沸騰処理。',
+    printColFood: '食材 / 料理',
+    printColStatus: '安全性',
+    printColTime: '時間 (Low/High)',
+    printColTip: '安全プロトコルと調理のコツ',
+    copyHeader: 'IsItKitchenSafe — スロークッカー食品安全チートシート',
+    relatedHeading: '関連するキッチン安全・解凍・温度管理ツール',
+    relatedInstantPotTag: '圧力鍋の安全',
+    relatedInstantPotTitle: 'Instant Pot 上限線＆減圧チェッカー →',
+    relatedInstantPotDesc: '1/2 vs 2/3 上限線、自然減圧 vs 急減圧、泡によるノズル詰まり防止を確認。',
+    relatedTempTag: 'USDA温度計ガイド',
+    relatedTempTitle: '安全な調理中心温度チャート →',
+    relatedTempDesc: '鶏肉（74°C）、煮込み牛肉、豚肉のUSDA公式安全温度を確認。',
+    relatedThawTag: '冷凍肉の解凍',
+    relatedThawTitle: '肉・七面鳥の解凍時間計算ツール →',
+    relatedThawDesc: 'スロークッカーに入れる前に冷蔵庫で安全に解凍する時間を計算。',
+    relatedFireTag: 'やけど応急手当',
+    relatedFireTitle: 'キッチン火災・やけど緊急応急ガイド →',
+    relatedFireDesc: '赤十字準拠のやけど冷水手当と蒸気やけど防止ガイド。',
+    methodologyStripTitle: '米農務省（USDA FSIS）およびFDA公式基準に準拠',
+    methodologyStripPrefix: 'すべての加熱曲線、1/2〜2/3の容量制限、赤インゲン豆の沸騰前処理、冷凍肉の投入禁止令は米USDAおよびFDAの科学基準に基づいています。詳しくは',
+    methodologyLabel: '科学的検証基準と出典',
+    faqTitle: 'よくある質問：スロークッカー＆クロックポットの食品安全'
   }
 };
 
-const t = UI[lang] || UI.en;
-
-const defaultFill = fillOptions.find((f) => f.id === 'ideal') || fillOptions[0];
-const defaultHeat = heatOptions.find((h) => h.id === 'low') || heatOptions[0];
-const defaultOutage = outageOptions.find((o) => o.id === 'none') || outageOptions[0];
-const defaultItem = localizedItems[0];
-
-function getVerdictLabel(verdict: VerdictKey): string {
-  if (verdict === 'unsafe') return t.verdictUnsafe;
-  if (verdict === 'caution') return t.verdictCaution;
-  return t.verdictSafe;
-}
-
-function getVerdictPillDarkClass(verdict: VerdictKey): string {
-  if (verdict === 'unsafe') return 'bg-red-500 text-white';
-  if (verdict === 'caution') return 'bg-amber-400 text-slate-950';
-  return 'bg-emerald-400 text-slate-950';
-}
-
-function getVerdictBorderClass(verdict: VerdictKey): string {
-  if (verdict === 'unsafe') return 'border-red-400';
-  if (verdict === 'caution') return 'border-amber-400';
-  return 'border-emerald-400';
-}
-
-function getVerdictCardPillClass(verdict: VerdictKey): string {
-  if (verdict === 'unsafe') return 'bg-red-500/15 text-red-800 dark:text-red-200 border-red-500/45';
-  if (verdict === 'caution') return 'bg-amber-500/15 text-amber-900 dark:text-amber-200 border-amber-500/45';
-  return 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-200 border-emerald-500/40';
-}
-
-function getCategoryLabel(cat: CategoryKey): string {
-  if (cat === 'meats-poultry') return t.catMeats;
-  if (cat === 'beans-veggies') return t.catBeans;
-  if (cat === 'leftovers-dairy') return t.catLeftovers;
-  return t.catCrock;
-}
-
-const categoryDefs: Array<{ key: 'all' | CategoryKey; label: string }> = [
-  { key: 'all', label: t.catAll },
-  { key: 'meats-poultry', label: t.catMeats },
-  { key: 'beans-veggies', label: t.catBeans },
-  { key: 'leftovers-dairy', label: t.catLeftovers },
-  { key: 'crock-liners', label: t.catCrock }
-];
-
-const verdictDefs: Array<{ key: 'all' | VerdictKey; label: string }> = [
-  { key: 'all', label: t.verdictAll },
-  { key: 'safe', label: t.verdictSafe },
-  { key: 'caution', label: t.verdictCaution },
-  { key: 'unsafe', label: t.verdictUnsafe }
-];
-
-const clientPayload = {
-  lang,
-  defaultFillId: defaultFill.id,
-  defaultHeatId: defaultHeat.id,
-  defaultOutageId: defaultOutage.id,
-  defaultItemId: defaultItem.id,
-  fillOptions,
-  heatOptions,
-  outageOptions,
-  simVerdicts,
-  items: localizedItems,
-  safetyRules: safetyBanner.rules,
-  categories: {
-    'meats-poultry': t.catMeats,
-    'beans-veggies': t.catBeans,
-    'leftovers-dairy': t.catLeftovers,
-    'crock-liners': t.catCrock
-  },
-  ui: {
-    copyBtn: t.copyBtn,
-    copiedBtn: t.copiedBtn,
-    handlingBadge: t.handlingBadge,
-    showingCountPrefix: t.showingCountPrefix,
-    showingCountSuffix: t.showingCountSuffix,
-    copyHeader: t.copyHeader,
-    copySimSection: t.copySimSection,
-    copySimVerdict: t.copySimVerdict,
-    copySimFill: t.copySimFill,
-    copySimHeat: t.copySimHeat,
-    copySimOutage: t.copySimOutage,
-    copyItemSection: t.copyItemSection,
-    copyItemVerdict: t.copyItemVerdict,
-    copyItemRule: t.copyItemRule,
-    copyItemAlt: t.copyItemAlt,
-    copyItemTemp: t.copyItemTemp,
-    copyRulesHeader: t.copyRulesHeader
-  }
-};
+const ui = UI[lang as SupportedLanguage] || UI.en;
+const defaultFood = localizedFoods[0];
+const defaultSize = localizedCookerSizes.find((s) => s.isDefault) || localizedCookerSizes[1];
+const defaultHeat = localizedHeatSettings[0];
 ---
 
-<div id="slow-cooker-checker-root" class="space-y-12">
-  <!-- Top 3-Rule Critical Slow Cooker Safety Banner -->
-  <aside
-    class="p-5 sm:p-6 rounded-2xl bg-error-bg/80 dark:bg-red-950/45 border-2 border-error-border shadow-sm space-y-4"
-    role="alert"
-    aria-label={safetyBanner.badge}
-  >
-    <div class="space-y-1.5 max-w-4xl">
-      <span class="inline-block px-3 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-error-border text-white">
-        ⚠️ {safetyBanner.badge}
+<div
+  id="slow-cooker-checker-root"
+  class="w-full bg-canvas text-ink"
+  role="region"
+  aria-label={ui.ariaLabel}
+  data-lang={lang}
+  data-default-food-id={defaultFood.id}
+  data-default-size-id={defaultSize.id}
+  data-default-heat-id={defaultHeat.id}
+>
+  <!-- TOP 4 GOLDEN SAFETY RULES BANNER -->
+  <section class="mb-10 rounded-3xl border-2 border-hairline/80 bg-surface-soft p-6 md:p-8 shadow-xs">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-700 text-white">
+        <span>⚠️</span>
+        <span>{safetyBanner.badge}</span>
       </span>
-      <h2 class="text-base sm:text-xl font-extrabold text-ink leading-snug">
-        {safetyBanner.headline}
-      </h2>
-      <p class="text-xs sm:text-[13.5px] font-medium text-body leading-relaxed">
-        {safetyBanner.subline}
-      </p>
+      <div class="flex items-center gap-2 print:hidden">
+        <button
+          type="button"
+          id="scc-copy-btn"
+          class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-hairline bg-canvas hover:bg-surface-strong/60 text-xs font-semibold text-ink shadow-2xs transition-colors cursor-pointer"
+        >
+          <span id="scc-copy-icon">📋</span>
+          <span id="scc-copy-text">{ui.copyBtn}</span>
+        </button>
+        <button
+          type="button"
+          id="scc-print-btn"
+          class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-hairline bg-canvas hover:bg-surface-strong/60 text-xs font-semibold text-ink shadow-2xs transition-colors cursor-pointer"
+        >
+          <span>🖨️</span>
+          <span>{ui.printBtn}</span>
+        </button>
+      </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+    <h2 class="text-title-lg md:text-headline-sm font-medium text-ink tracking-tight mb-2">
+      {safetyBanner.headline}
+    </h2>
+    <p class="text-sm md:text-[15px] text-body leading-relaxed max-w-3xl mb-6">
+      {safetyBanner.subline}
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       {safetyBanner.rules.map((rule) => (
-        <div class="p-3.5 rounded-xl bg-canvas border border-hairline shadow-xs space-y-1">
-          <div class="flex items-start gap-2">
-            <span aria-hidden="true" class="text-lg leading-none mt-0.5 shrink-0">{rule.icon}</span>
-            <h3 class="text-xs sm:text-[13px] font-extrabold text-ink leading-snug">{rule.title}</h3>
+        <div class="rounded-2xl border border-hairline bg-canvas p-5 shadow-2xs">
+          <div class="flex items-start gap-3">
+            <span class="text-2xl select-none" aria-hidden="true">{rule.icon}</span>
+            <div>
+              <h3 class="text-sm font-bold text-ink mb-1.5">{rule.title}</h3>
+              <p class="text-xs md:text-[13px] text-body leading-relaxed">{rule.body}</p>
+            </div>
           </div>
-          <p class="text-xs text-body leading-relaxed">{rule.body}</p>
         </div>
       ))}
     </div>
-  </aside>
+  </section>
 
-  <!-- Main Interactive Slow Cooker Safety Checker Card -->
-  <section
-    id="slow-cooker-food-safety-checker"
-    class="bg-canvas border border-hairline rounded-2xl shadow-sm overflow-hidden"
-    aria-label={t.ariaLabel}
-  >
-    <script type="application/json" id="scfs-payload" set:html={JSON.stringify(clientPayload)} />
-
-    <!-- Header + Step 1 Live Setup Simulator -->
-    <div class="p-5 sm:p-6 border-b border-hairline bg-surface-soft/50 space-y-6">
-      <div class="flex flex-wrap items-start justify-between gap-3">
-        <div class="space-y-1 max-w-2xl">
-          <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-signature-coral text-white">
-            🍲 {t.toolBadge}
-          </span>
-          <h2 class="text-title-md font-bold text-ink">{t.toolTitle}</h2>
-          <p class="text-xs sm:text-[13px] text-muted leading-relaxed">{t.toolSub}</p>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-2 print:hidden">
-          <button
-            type="button"
-            id="scfs-copy-btn"
-            class="min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors cursor-pointer shadow-sm"
-          >
-            <span id="scfs-copy-label">📋 {t.copyBtn}</span>
-          </button>
-          <button
-            type="button"
-            id="scfs-print-btn"
-            class="min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-semibold bg-canvas text-ink border border-hairline hover:border-signature-coral transition-colors cursor-pointer"
-          >
-            🖨️ {t.printBtn}
-          </button>
-        </div>
+  <!-- STEP 1: COOKER SIZE SELECTOR -->
+  <section class="mb-8 rounded-3xl border border-hairline bg-canvas p-6 md:p-8 shadow-xs">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-4">
+      <div>
+        <h2 class="text-base md:text-lg font-bold text-ink flex items-center gap-2">
+          <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-ink text-canvas text-xs font-bold">1</span>
+          <span>{ui.sizeStepLabel}</span>
+        </h2>
+        <p class="text-xs text-muted mt-1">{ui.sizeStepHint}</p>
       </div>
-
-      <!-- Step 1: Interactive Live Slow Cooker Setup Simulator -->
-      <div class="space-y-4 print:hidden">
-        <div class="space-y-0.5">
-          <h3 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-ink">
-            {t.simStepLabel}
-          </h3>
-          <p class="text-xs text-muted">{t.simStepHint}</p>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <!-- Fill Level Selector -->
-          <div class="p-3.5 rounded-xl bg-canvas border border-hairline space-y-2">
-            <span class="block text-[11px] font-extrabold uppercase tracking-wider text-signature-coral">
-              📏 {t.simFillLabel}
-            </span>
-            <div class="space-y-1.5" role="group" aria-label={t.simFillLabel}>
-              {fillOptions.map((opt) => {
-                const isDefault = opt.id === defaultFill.id;
-                return (
-                  <button
-                    type="button"
-                    data-scfs-fill={opt.id}
-                    aria-pressed={isDefault ? 'true' : 'false'}
-                    class={`scfs-fill-btn w-full text-left p-2.5 rounded-xl border transition-all cursor-pointer flex items-start gap-2 ${
-                      isDefault
-                        ? 'bg-primary text-on-primary border-primary ring-2 ring-signature-coral/60 shadow-xs'
-                        : 'bg-surface-soft/70 text-ink border-hairline hover:border-signature-coral'
-                    }`}
-                  >
-                    <span aria-hidden="true" class="text-base leading-none mt-0.5 shrink-0">{opt.icon}</span>
-                    <span class="min-w-0 block">
-                      <span class="block text-xs font-extrabold leading-snug">{opt.shortLabel}</span>
-                      <span
-                        data-scfs-sub
-                        class={`block text-[11px] leading-snug mt-0.5 ${isDefault ? 'text-white/85' : 'text-muted'}`}
-                      >
-                        {opt.detail}
-                      </span>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <!-- Heat Setting Selector -->
-          <div class="p-3.5 rounded-xl bg-canvas border border-hairline space-y-2">
-            <span class="block text-[11px] font-extrabold uppercase tracking-wider text-signature-coral">
-              🔥 {t.simHeatLabel}
-            </span>
-            <div class="space-y-1.5" role="group" aria-label={t.simHeatLabel}>
-              {heatOptions.map((opt) => {
-                const isDefault = opt.id === defaultHeat.id;
-                return (
-                  <button
-                    type="button"
-                    data-scfs-heat={opt.id}
-                    aria-pressed={isDefault ? 'true' : 'false'}
-                    class={`scfs-heat-btn w-full text-left p-2.5 rounded-xl border transition-all cursor-pointer flex items-start gap-2 ${
-                      isDefault
-                        ? 'bg-primary text-on-primary border-primary ring-2 ring-signature-coral/60 shadow-xs'
-                        : 'bg-surface-soft/70 text-ink border-hairline hover:border-signature-coral'
-                    }`}
-                  >
-                    <span aria-hidden="true" class="text-base leading-none mt-0.5 shrink-0">{opt.icon}</span>
-                    <span class="min-w-0 block">
-                      <span class="block text-xs font-extrabold leading-snug">{opt.shortLabel}</span>
-                      <span
-                        data-scfs-sub
-                        class={`block text-[11px] leading-snug mt-0.5 ${isDefault ? 'text-white/85' : 'text-muted'}`}
-                      >
-                        {opt.detail}
-                      </span>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <!-- Power Outage Selector -->
-          <div class="p-3.5 rounded-xl bg-canvas border border-hairline space-y-2">
-            <span class="block text-[11px] font-extrabold uppercase tracking-wider text-signature-coral">
-              ⚡ {t.simOutageLabel}
-            </span>
-            <div class="space-y-1.5" role="group" aria-label={t.simOutageLabel}>
-              {outageOptions.map((opt) => {
-                const isDefault = opt.id === defaultOutage.id;
-                return (
-                  <button
-                    type="button"
-                    data-scfs-outage={opt.id}
-                    aria-pressed={isDefault ? 'true' : 'false'}
-                    class={`scfs-outage-btn w-full text-left p-2.5 rounded-xl border transition-all cursor-pointer flex items-start gap-2 ${
-                      isDefault
-                        ? 'bg-primary text-on-primary border-primary ring-2 ring-signature-coral/60 shadow-xs'
-                        : 'bg-surface-soft/70 text-ink border-hairline hover:border-signature-coral'
-                    }`}
-                  >
-                    <span aria-hidden="true" class="text-base leading-none mt-0.5 shrink-0">{opt.icon}</span>
-                    <span class="min-w-0 block">
-                      <span class="block text-xs font-extrabold leading-snug">{opt.shortLabel}</span>
-                      <span
-                        data-scfs-sub
-                        class={`block text-[11px] leading-snug mt-0.5 ${isDefault ? 'text-white/85' : 'text-muted'}`}
-                      >
-                        {opt.detail}
-                      </span>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        <!-- Live Simulator Verdict Output Card -->
-        <div
-          id="scfs-sim-verdict-box"
-          aria-live="polite"
-          class="w-full rounded-2xl bg-surface-dark text-on-dark p-5 sm:p-6 space-y-4 shadow-sm border-l-4 border-emerald-400"
-        >
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <div class="flex flex-wrap items-center gap-2">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10.5px] font-extrabold uppercase tracking-wider bg-white/12 text-signature-peach border border-white/15">
-                🧪 {t.simLiveBadge}
-              </span>
-              <span
-                id="scfs-sim-badge"
-                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-emerald-400 text-slate-950"
-              >
-                {simVerdicts.safeLowBadge}
-              </span>
-            </div>
-            <span
-              id="scfs-sim-temp-pill"
-              class="inline-flex items-center px-2.5 py-0.5 rounded-md border text-[11px] font-extrabold uppercase tracking-wider bg-sky-500/20 text-sky-100 border-sky-400/45"
-            >
-              🌡️ {defaultHeat.tempRange}
-            </span>
-          </div>
-
-          <div class="space-y-1.5">
-            <h4 id="scfs-sim-headline" class="text-lg sm:text-xl font-extrabold tracking-tight text-white leading-snug">
-              {simVerdicts.safeLowHeadline}
-            </h4>
-            <p id="scfs-sim-body" class="text-xs sm:text-[13.5px] text-white/95 leading-relaxed">
-              {simVerdicts.safeLowBody}
-            </p>
-          </div>
-
-          <!-- Visual Crock Fill Gauge -->
-          <div class="p-3.5 rounded-xl bg-white/7 border border-white/14 space-y-2">
-            <div class="flex items-center justify-between gap-2">
-              <span class="text-[11px] font-extrabold uppercase tracking-wider text-signature-peach">
-                📏 {t.simGaugeHeading}
-              </span>
-              <span id="scfs-sim-fill-val" class="text-xs font-extrabold text-emerald-300">
-                {defaultFill.shortLabel}
-              </span>
-            </div>
-            <div class="relative h-4 w-full rounded-full bg-white/12 overflow-hidden border border-white/15">
-              <div
-                id="scfs-sim-gauge-bar"
-                class="h-full rounded-full transition-all duration-300 bg-gradient-to-r from-emerald-500 to-teal-400"
-                style={`width: ${defaultFill.gaugePercent}%;`}
-              />
-              <div class="absolute top-0 bottom-0 left-1/2 w-0.5 bg-white/75" aria-hidden="true" />
-              <div class="absolute top-0 bottom-0 left-[66.66%] w-0.5 bg-white/75" aria-hidden="true" />
-            </div>
-            <div class="flex justify-between text-[10px] font-bold text-white/75">
-              <span>{t.simGaugeEmpty}</span>
-              <span class="text-emerald-200">{t.simGaugeHalf}</span>
-              <span class="text-amber-200">{t.simGaugeTwoThirds}</span>
-              <span class="text-red-300">{t.simGaugeRim}</span>
-            </div>
-          </div>
-
-          <!-- 3-Column Parameter Breakdown -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div class="p-3 rounded-xl bg-white/6 border border-white/12 space-y-1">
-              <span class="block text-[10.5px] font-extrabold uppercase tracking-wider text-white/80">
-                📏 {t.simBreakdownFill}
-              </span>
-              <p id="scfs-sim-note-fill" class="text-xs text-white/90 leading-relaxed">{defaultFill.note}</p>
-            </div>
-            <div class="p-3 rounded-xl bg-white/6 border border-white/12 space-y-1">
-              <span class="block text-[10.5px] font-extrabold uppercase tracking-wider text-white/80">
-                🔥 {t.simBreakdownHeat}
-              </span>
-              <p id="scfs-sim-note-heat" class="text-xs text-white/90 leading-relaxed">{defaultHeat.note}</p>
-            </div>
-            <div class="p-3 rounded-xl bg-white/6 border border-white/12 space-y-1">
-              <span class="block text-[10.5px] font-extrabold uppercase tracking-wider text-white/80">
-                ⚡ {t.simBreakdownOutage}
-              </span>
-              <p id="scfs-sim-note-outage" class="text-xs text-white/90 leading-relaxed">{defaultOutage.note}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 2: High-Contrast Dark USDA Slow Cooker Safety Inspector -->
-      <div class="space-y-2.5">
-        <h3 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-ink print:hidden">
-          {t.inspectorStepLabel}
-        </h3>
-
-        <div
-          id="scfs-inspector"
-          aria-live="polite"
-          class={`w-full rounded-2xl bg-surface-dark text-on-dark p-5 sm:p-6 space-y-5 shadow-sm border-l-4 ${getVerdictBorderClass(defaultItem.verdict)}`}
-        >
-          <div class="space-y-2">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-              <div class="flex flex-wrap items-center gap-2">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10.5px] font-extrabold uppercase tracking-wider bg-white/12 text-signature-peach border border-white/15">
-                  🔍 {t.inspectorBadge}
-                </span>
-                <span
-                  id="scfs-item-verdict-pill"
-                  class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider ${getVerdictPillDarkClass(defaultItem.verdict)}`}
-                >
-                  {defaultItem.verdictBadge}
-                </span>
-              </div>
-              <span
-                id="scfs-item-cat-pill"
-                class="inline-flex items-center px-2.5 py-0.5 rounded-md border text-[11px] font-bold uppercase tracking-wider bg-white/10 text-white/90 border-white/20"
-              >
-                {getCategoryLabel(defaultItem.category)}
-              </span>
-            </div>
-
-            <h4 id="scfs-item-title" class="text-xl sm:text-2xl font-extrabold tracking-tight text-white leading-snug">
-              {defaultItem.icon} {defaultItem.name}
-            </h4>
-            <p id="scfs-item-headline" class="text-xs sm:text-[14px] font-semibold text-signature-mint leading-relaxed">
-              {defaultItem.headline}
-            </p>
-          </div>
-
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
-            <!-- USDA / FDA Rule -->
-            <div class="p-4 rounded-xl bg-white/7 border border-white/14 space-y-2">
-              <span class="block text-[11px] font-extrabold uppercase tracking-wider text-amber-200">
-                ⚖️ {t.usdaRuleHeading}
-              </span>
-              <p id="scfs-item-rule" class="text-xs text-white/95 leading-relaxed">
-                {defaultItem.usdaRule}
-              </p>
-            </div>
-
-            <!-- Safe Practice / Alternative -->
-            <div class="p-4 rounded-xl bg-emerald-500/12 border border-emerald-400/35 space-y-2">
-              <span class="block text-[11px] font-extrabold uppercase tracking-wider text-emerald-200">
-                ✅ {t.safeAltHeading}
-              </span>
-              <p id="scfs-item-alt" class="text-xs text-white/95 leading-relaxed">
-                {defaultItem.safeAlternative}
-              </p>
-            </div>
-
-            <!-- Temp / Handling Checkpoint -->
-            <div
-              id="scfs-item-temp-card"
-              class={`p-4 rounded-xl border space-y-2 ${
-                defaultItem.hasUsdaTemp
-                  ? 'bg-sky-500/14 border-sky-400/45'
-                  : 'bg-white/7 border-white/14'
-              }`}
-            >
-              <div class="flex flex-wrap items-center justify-between gap-2">
-                <span class="text-[11px] font-extrabold uppercase tracking-wider text-sky-200">
-                  🌡️ {t.tempCheckHeading}
-                </span>
-                <span
-                  id="scfs-item-temp-pill"
-                  class={`inline-flex items-center px-2 py-0.5 rounded-md border text-[10px] font-extrabold uppercase tracking-wider ${
-                    defaultItem.hasUsdaTemp
-                      ? 'bg-sky-400 text-slate-950 border-sky-300'
-                      : 'bg-white/10 text-white/85 border-white/20'
-                  }`}
-                >
-                  {defaultItem.hasUsdaTemp ? defaultItem.usdaTemp : t.handlingBadge}
-                </span>
-              </div>
-              <p id="scfs-item-temp-note" class="text-xs text-white/95 leading-relaxed">
-                {defaultItem.tempNote}
-              </p>
-            </div>
-          </div>
-        </div>
+      <div class="text-xs font-mono px-3 py-1.5 rounded-xl bg-surface-soft border border-hairline text-ink inline-flex items-center gap-2 self-start md:self-auto">
+        <span class="text-muted">{ui.minLiquidLabel}</span>
+        <strong id="scc-liquid-display" class="text-signature-coral font-bold">
+          {defaultSize.minLiquidCups} cup ({defaultSize.minLiquidMl} mL)
+        </strong>
       </div>
     </div>
 
-    <!-- Step 3: Search + Category Filter + Verdict Filter + 16 Clickable Cards -->
-    <div class="p-5 sm:p-6 space-y-5 print:hidden">
-      <div class="space-y-1">
-        <h3 class="text-base sm:text-lg font-bold text-ink">{t.itemStepLabel}</h3>
-        <p class="text-xs sm:text-[13px] text-muted leading-relaxed">{t.itemStepHint}</p>
-      </div>
-
-      <!-- Search Bar & Filter Controls -->
-      <div class="space-y-3.5">
-        <div class="relative flex-1">
-          <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none" aria-hidden="true">
-            🔎
-          </span>
-          <input
-            type="search"
-            id="scfs-search"
-            placeholder={t.searchPlaceholder}
-            aria-label={t.searchPlaceholder}
-            class="w-full min-h-[42px] pl-10 pr-20 py-2 rounded-xl bg-surface-soft border border-hairline text-sm text-ink placeholder:text-muted focus:outline-none focus:border-signature-coral focus:ring-2 focus:ring-signature-coral/30"
-          />
-          <button
-            type="button"
-            id="scfs-search-clear"
-            class="hidden absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-canvas border border-hairline text-muted hover:text-ink cursor-pointer"
-          >
-            {t.searchClearLabel}
-          </button>
-        </div>
-
-        <!-- Category Filter Pills -->
-        <div class="flex flex-wrap gap-2" role="group" aria-label={t.itemStepLabel}>
-          {categoryDefs.map((cat, idx) => (
-            <button
-              type="button"
-              data-scfs-cat={cat.key}
-              aria-pressed={idx === 0 ? 'true' : 'false'}
-              class={`scfs-cat-btn px-3 py-1.5 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
-                idx === 0
-                  ? 'bg-primary text-on-primary border-primary'
-                  : 'bg-surface-soft text-ink border-hairline hover:border-signature-coral'
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
-
-        <!-- Verdict Filter Pills + Live Count -->
-        <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
-          <div class="flex flex-wrap items-center gap-2" role="group" aria-label={t.verdictFilterLabel}>
-            <span class="text-[11px] font-extrabold uppercase tracking-wider text-muted">
-              {t.verdictFilterLabel}
-            </span>
-            {verdictDefs.map((v, idx) => (
-              <button
-                type="button"
-                data-scfs-verdict={v.key}
-                aria-pressed={idx === 0 ? 'true' : 'false'}
-                class={`scfs-verdict-btn px-2.5 py-1 rounded-lg text-[11.5px] font-bold border transition-colors cursor-pointer ${
-                  idx === 0
-                    ? 'bg-signature-coral text-white border-signature-coral'
-                    : 'bg-canvas text-ink border-hairline hover:border-signature-coral'
-                }`}
-              >
-                {v.label}
-              </button>
-            ))}
-          </div>
-
-          <span id="scfs-count" class="text-xs font-semibold text-muted">
-            {t.showingCountPrefix} {localizedItems.length} {t.showingCountSuffix}
-          </span>
-        </div>
-      </div>
-
-      <!-- Empty Search State -->
-      <div
-        id="scfs-empty"
-        class="hidden p-8 rounded-2xl bg-surface-soft border border-hairline text-center space-y-3"
-      >
-        <p class="text-sm font-semibold text-ink">{t.noResultsTitle}</p>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+      {localizedCookerSizes.map((size) => (
         <button
           type="button"
-          id="scfs-reset-btn"
-          class="px-4 py-2 rounded-xl text-xs font-bold bg-primary text-on-primary hover:bg-primary-active transition-colors cursor-pointer"
+          class={`scc-size-btn text-left p-4 rounded-2xl border-2 transition-all cursor-pointer ${
+            size.isDefault
+              ? 'border-ink bg-surface-soft shadow-xs'
+              : 'border-hairline bg-canvas hover:border-ink/40 hover:bg-surface-soft/40'
+          }`}
+          data-size-id={size.id}
+          data-min-cups={size.minLiquidCups}
+          data-min-ml={size.minLiquidMl}
+          data-capacity-qt={size.capacityQt}
+          data-size-name={size.name}
         >
-          {t.resetFiltersBtn}
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <span class="text-xl" aria-hidden="true">{size.icon}</span>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded-md bg-canvas border border-hairline text-muted">
+              {size.servings} servings
+            </span>
+          </div>
+          <h3 class="text-sm font-bold text-ink mb-1">{size.name}</h3>
+          <p class="text-xs text-muted leading-relaxed">{size.desc}</p>
+        </button>
+      ))}
+    </div>
+  </section>
+
+  <!-- STEP 2: HEAT SETTING & FROZEN STATE TOGGLE -->
+  <section class="mb-8 rounded-3xl border border-hairline bg-canvas p-6 md:p-8 shadow-xs">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
+      <div>
+        <h2 class="text-base md:text-lg font-bold text-ink flex items-center gap-2">
+          <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-ink text-canvas text-xs font-bold">2</span>
+          <span>{ui.heatStepLabel}</span>
+        </h2>
+        <p class="text-xs text-muted mt-1">{ui.heatStepHint}</p>
+      </div>
+
+      <!-- State Toggle: Thawed vs Frozen -->
+      <div class="flex items-center gap-2 bg-surface-soft p-1.5 rounded-2xl border border-hairline self-start md:self-auto">
+        <span class="text-xs font-semibold text-muted px-2">{ui.stateLabel}</span>
+        <button
+          type="button"
+          id="scc-state-thawed"
+          class="scc-state-btn px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer bg-emerald-700 text-white border-emerald-700 shadow-xs"
+          data-state="thawed"
+        >
+          ✓ {ui.stateThawed}
+        </button>
+        <button
+          type="button"
+          id="scc-state-frozen"
+          class="scc-state-btn px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer bg-canvas text-red-700 border-hairline hover:bg-red-50 hover:border-red-400"
+          data-state="frozen"
+        >
+          ⚠️ {ui.stateFrozen}
         </button>
       </div>
-
-      <!-- 16 Clickable Slow Cooker Food / Ceramic Cards Grid -->
-      <div id="scfs-item-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {localizedItems.map((item, idx) => {
-          const isSelected = idx === 0;
-          return (
-            <button
-              type="button"
-              data-scfs-item={item.id}
-              data-scfs-item-cat={item.category}
-              data-scfs-item-verdict={item.verdict}
-              aria-pressed={isSelected ? 'true' : 'false'}
-              class={`scfs-item-card text-left w-full p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-3 ${
-                isSelected
-                  ? 'bg-canvas border-signature-coral ring-2 ring-signature-coral shadow-sm'
-                  : 'bg-surface-soft/65 border-hairline hover:border-signature-coral'
-              }`}
-            >
-              <div class="space-y-2">
-                <div class="flex items-start justify-between gap-2">
-                  <div class="flex items-start gap-2 min-w-0">
-                    <span aria-hidden="true" class="text-xl leading-none mt-0.5 shrink-0">{item.icon}</span>
-                    <h4 class="text-sm font-extrabold text-ink leading-snug">{item.shortName}</h4>
-                  </div>
-                </div>
-
-                <span
-                  class={`inline-block px-2 py-0.5 rounded-md text-[10.5px] font-extrabold uppercase tracking-wider border ${getVerdictCardPillClass(item.verdict)}`}
-                >
-                  {item.verdictBadge}
-                </span>
-
-                <p class="text-xs text-body leading-relaxed line-clamp-2">
-                  {item.headline}
-                </p>
-              </div>
-
-              <div class="pt-2 border-t border-hairline/70 flex flex-wrap items-center justify-between gap-2 text-[11px] font-bold">
-                <span class="text-muted">{getCategoryLabel(item.category)}</span>
-                {item.hasUsdaTemp ? (
-                  <span class="text-sky-700 dark:text-sky-300">
-                    🌡️ {item.usdaTemp}
-                  </span>
-                ) : (
-                  <span class="text-signature-coral">
-                    {getVerdictLabel(item.verdict)}
-                  </span>
-                )}
-              </div>
-            </button>
-          );
-        })}
-      </div>
     </div>
 
-    <!-- Print-Only Complete 16-Item Fridge Reference Chart -->
-    <div class="hidden print:block p-5 border-t border-hairline space-y-4">
-      <div class="text-center border-b border-hairline pb-2">
-        <h3 class="text-sm font-extrabold uppercase tracking-wider text-ink">{t.printTitle}</h3>
-        <p class="text-[11px] text-muted">{t.printSub}</p>
-      </div>
-
-      <table class="w-full text-left border-collapse text-[10.5px]">
-        <thead>
-          <tr class="border-b border-hairline">
-            <th class="py-1.5 pr-2 font-extrabold text-ink">{t.printColItem}</th>
-            <th class="py-1.5 px-2 font-extrabold text-ink">{t.printColVerdict}</th>
-            <th class="py-1.5 px-2 font-extrabold text-ink">{t.printColRule}</th>
-            <th class="py-1.5 pl-2 font-extrabold text-ink">{t.printColSafe}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {localizedItems.map((item) => (
-            <tr class="border-b border-hairline/60 break-inside-avoid">
-              <td class="py-1.5 pr-2 font-bold text-ink">{item.shortName}</td>
-              <td class="py-1.5 px-2 font-extrabold text-ink">{item.verdictBadge}</td>
-              <td class="py-1.5 px-2 text-body">{item.headline}</td>
-              <td class="py-1.5 pl-2 text-body">{item.safeAlternative}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <!-- Heat Settings Buttons -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+      {localizedHeatSettings.map((heat, idx) => (
+        <button
+          type="button"
+          class={`scc-heat-btn text-left p-4 rounded-2xl border-2 transition-all cursor-pointer ${
+            idx === 0
+              ? 'border-ink bg-surface-soft shadow-xs'
+              : 'border-hairline bg-canvas hover:border-ink/40 hover:bg-surface-soft/40'
+          }`}
+          data-heat-id={heat.id}
+          data-heat-name={heat.name}
+          data-temp-f={heat.tempF}
+          data-temp-c={heat.tempC}
+          data-multiplier={heat.hoursMultiplier}
+          data-is-warm={heat.isKeepWarm ? 'true' : 'false'}
+        >
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <span class="text-lg" aria-hidden="true">{heat.icon}</span>
+            <span class={`text-[11px] font-bold px-2 py-0.5 rounded-md ${
+              heat.isKeepWarm ? 'bg-red-100 text-red-800' : 'bg-canvas border border-hairline text-ink'
+            }`}>
+              {heat.badge}
+            </span>
+          </div>
+          <h3 class="text-sm font-bold text-ink mb-1">{heat.name}</h3>
+          <p class="text-xs text-muted leading-relaxed">{heat.desc}</p>
+        </button>
+      ))}
     </div>
   </section>
 
-  <!-- Related Companion Tools (4-Card Localized Grid) -->
-  <section class="space-y-4 print:hidden">
-    <h2 class="text-title-md font-semibold text-ink">{t.relatedHeading}</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <a
-        href={instantPotUrl}
-        class="p-5 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
-      >
-        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
-          {t.relatedIpTag}
-        </span>
-        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
-          {t.relatedIpTitle}
-        </h3>
-        <p class="text-[13px] text-body leading-relaxed">{t.relatedIpDesc}</p>
-      </a>
-
-      <a
-        href={meatThawingUrl}
-        class="p-5 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
-      >
-        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
-          {t.relatedThawTag}
-        </span>
-        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
-          {t.relatedThawTitle}
-        </h3>
-        <p class="text-[13px] text-body leading-relaxed">{t.relatedThawDesc}</p>
-      </a>
-
-      <a
-        href={internalTempUrl}
-        class="p-5 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
-      >
-        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
-          {t.relatedTempTag}
-        </span>
-        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
-          {t.relatedTempTitle}
-        </h3>
-        <p class="text-[13px] text-body leading-relaxed">{t.relatedTempDesc}</p>
-      </a>
-
-      <a
-        href={powerOutageUrl}
-        class="p-5 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
-      >
-        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
-          {t.relatedPowerTag}
-        </span>
-        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
-          {t.relatedPowerTitle}
-        </h3>
-        <p class="text-[13px] text-body leading-relaxed">{t.relatedPowerDesc}</p>
-      </a>
-    </div>
-  </section>
-
-  <!-- Methodology & Hub Strip -->
-  <section class="p-6 rounded-2xl bg-surface-soft border border-hairline print:hidden">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+  <!-- FROZEN STRICT BAN ALERT (DYNAMICALLY SHOWN IF FROZEN SELECTED) -->
+  <div
+    id="scc-frozen-alert"
+    class="hidden mb-8 rounded-3xl border-2 border-red-600 bg-red-50 dark:bg-red-950/40 p-6 md:p-8 text-red-950 dark:text-red-100 shadow-md animate-pulse"
+    role="alert"
+  >
+    <div class="flex items-start gap-4">
+      <span class="text-3xl select-none" aria-hidden="true">🚫</span>
       <div>
-        <h2 class="text-title-sm font-semibold text-ink mb-1">{t.methodologyStripTitle}</h2>
-        <p class="text-[13px] text-muted">
-          {t.methodologyStripPrefix}{' '}
-          <a href={methodologyUrl} class="text-link underline hover:text-link-active">{t.methodologyLabel}</a>.
+        <h3 class="text-base md:text-lg font-bold text-red-700 dark:text-red-300 mb-2">
+          {ui.frozenWarningTitle}
+        </h3>
+        <p class="text-sm leading-relaxed mb-4">
+          {ui.frozenWarningBody}
         </p>
+        <div class="flex flex-wrap items-center gap-3">
+          <a
+            href={meatThawingUrl}
+            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-700 hover:bg-red-800 text-white text-xs font-bold transition-colors shadow-xs"
+          >
+            <span>❄️</span>
+            <span>{ui.relatedThawTitle}</span>
+          </a>
+          <button
+            type="button"
+            id="scc-switch-to-thawed"
+            class="px-4 py-2 rounded-xl border border-red-300 dark:border-red-700 bg-white dark:bg-red-900/60 text-red-800 dark:text-red-100 text-xs font-semibold hover:bg-red-100 transition-colors cursor-pointer"
+          >
+            Switch back to Thawed (Recommended)
+          </button>
+        </div>
       </div>
-      <div class="flex flex-wrap gap-2">
-        <a
-          href={internalTempUrl}
-          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
-        >
-          {t.tempQuickLabel}
-        </a>
-        <a
-          href={methodologyUrl}
-          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
-        >
-          {t.methodologyLabel}
-        </a>
-        <a
-          href={allToolsUrl}
-          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors"
-        >
-          {t.allToolsLabel}
-        </a>
+    </div>
+  </div>
+
+  <!-- LIVE SLOW COOKER SAFETY INSPECTOR CARD -->
+  <section
+    id="scc-inspector"
+    class="mb-10 rounded-3xl border-2 border-ink/80 bg-surface-soft p-6 md:p-8 shadow-md"
+    aria-live="polite"
+  >
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-hairline/80">
+      <div class="flex items-center gap-2">
+        <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-ink text-canvas">
+          {ui.inspectorBadge}
+        </span>
+        <span id="scc-active-food-badge" class="text-xs font-bold text-muted">
+          {defaultFood.name}
+        </span>
+      </div>
+      <div id="scc-active-verdict-badge" class="px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wide bg-emerald-700 text-white">
+        {defaultFood.verdict}
+      </div>
+    </div>
+
+    <!-- Inspector Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Left Column: Visual Fill Gauge -->
+      <div class="rounded-2xl border border-hairline bg-canvas p-5 shadow-2xs flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-muted">
+              {ui.fillGaugeHeading}
+            </h3>
+            <span class="text-xs font-mono font-bold text-emerald-700">1/2–2/3</span>
+          </div>
+          <p id="scc-gauge-fill-text" class="text-xs text-body mb-4">
+            {defaultFood.fillRule}
+          </p>
+
+          <!-- Graphic Gauge Bar -->
+          <div class="space-y-1.5 my-3">
+            <div class="h-6 w-full rounded-xl bg-surface-strong/60 overflow-hidden flex border border-hairline relative">
+              <div class="w-1/2 bg-amber-400/80 border-r border-hairline/80 flex items-center justify-center text-[10px] font-bold text-amber-950">
+                1/2 MIN
+              </div>
+              <div class="w-1/6 bg-emerald-500/80 border-r border-hairline/80 flex items-center justify-center text-[10px] font-bold text-white">
+                SAFE
+              </div>
+              <div class="w-1/3 bg-red-400/80 flex items-center justify-center text-[10px] font-bold text-red-950">
+                OVERFILL
+              </div>
+            </div>
+            <div class="flex items-center justify-between text-[10px] text-muted font-mono px-1">
+              <span>0% ({ui.gaugeEmpty})</span>
+              <span>50% ({ui.gaugeHalf})</span>
+              <span>66% ({ui.gaugeTwoThirds})</span>
+              <span>100% ({ui.gaugeRim})</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-hairline/60 text-xs">
+          <span class="text-muted">{ui.fillRuleHeading}:</span>
+          <p id="scc-inspector-fill-rule" class="font-medium text-ink mt-0.5">
+            {defaultFood.fillRule}
+          </p>
+        </div>
+      </div>
+
+      <!-- Middle Column: Time & Temperature -->
+      <div class="rounded-2xl border border-hairline bg-canvas p-5 shadow-2xs flex flex-col justify-between">
+        <div>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-muted mb-2">
+            {ui.cookingTimeHeading}
+          </h3>
+          <div class="flex items-baseline gap-2 mb-4">
+            <span id="scc-inspector-time" class="text-2xl md:text-3xl font-extrabold text-ink font-mono">
+              {defaultFood.timeLow || '7–8 Hours'}
+            </span>
+            <span id="scc-inspector-heat-tag" class="text-xs font-bold text-muted">
+              on LOW
+            </span>
+          </div>
+
+          <h3 class="text-xs font-bold uppercase tracking-wider text-muted mb-1">
+            {ui.targetTempHeading}
+          </h3>
+          <p id="scc-inspector-target-temp" class="text-sm font-semibold text-emerald-700 dark:text-emerald-400 mb-3">
+            {defaultFood.usdaTargetTemp || 'USDA FSIS 145°F–165°F (63°C–74°C)'}
+          </p>
+        </div>
+
+        <div class="pt-3 border-t border-hairline/60 text-xs flex items-center justify-between">
+          <span class="text-muted">Selected Cooker Size:</span>
+          <strong id="scc-inspector-pot-size" class="text-ink font-mono">
+            {defaultSize.name}
+          </strong>
+        </div>
+      </div>
+
+      <!-- Right Column: Safety Protocol & Recommendations -->
+      <div class="rounded-2xl border border-hairline bg-canvas p-5 shadow-2xs flex flex-col justify-between">
+        <div>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-muted mb-2">
+            {ui.keySafetyHeading}
+          </h3>
+          <p id="scc-inspector-summary" class="text-xs md:text-[13px] text-body leading-relaxed mb-3">
+            {defaultFood.summary}
+          </p>
+        </div>
+
+        <div class="mt-2 pt-3 border-t border-hairline/60">
+          <span class="text-xs font-bold text-ink">Action Recommendation:</span>
+          <p id="scc-inspector-recommendation" class="text-xs text-signature-coral font-medium mt-1">
+            {defaultFood.recommendation}
+          </p>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Visible 5-Item FAQ Accordion (Matches FAQPage JSON-LD 1:1) -->
-  <section class="print:hidden">
-    <h2 class="text-title-lg font-medium text-ink tracking-tight mb-6">
-      {t.faqTitle}
+  <!-- STEP 3: FOODS DIRECTORY & SEARCH -->
+  <section class="mb-12 rounded-3xl border border-hairline bg-canvas p-6 md:p-8 shadow-xs">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6">
+      <div>
+        <h2 class="text-base md:text-lg font-bold text-ink flex items-center gap-2">
+          <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-ink text-canvas text-xs font-bold">3</span>
+          <span>{ui.foodStepLabel}</span>
+        </h2>
+        <p class="text-xs text-muted mt-1">{ui.foodStepHint}</p>
+      </div>
+
+      <!-- Live Search Bar -->
+      <div class="relative w-full md:w-72">
+        <input
+          type="text"
+          id="scc-search-input"
+          class="w-full pl-9 pr-8 py-2 rounded-xl text-xs bg-surface-soft border border-hairline focus:border-ink focus:outline-none transition-colors"
+          placeholder={ui.searchPlaceholder}
+          aria-label="Search slow cooker foods"
+        />
+        <span class="absolute left-3 top-2.5 text-xs text-muted pointer-events-none">🔍</span>
+        <button
+          type="button"
+          id="scc-search-clear"
+          class="hidden absolute right-2.5 top-2 text-xs text-muted hover:text-ink cursor-pointer p-0.5"
+          aria-label={ui.searchClearLabel}
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- Category Filter Pills -->
+    <div class="flex flex-wrap items-center gap-2 mb-6 border-b border-hairline/60 pb-4">
+      <button
+        type="button"
+        class="scc-cat-btn px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer bg-ink text-canvas border-ink"
+        data-cat="all"
+      >
+        {ui.catAll}
+      </button>
+      <button
+        type="button"
+        class="scc-cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer bg-canvas text-ink border-hairline hover:bg-surface-soft"
+        data-cat="meats"
+      >
+        {ui.catMeats}
+      </button>
+      <button
+        type="button"
+        class="scc-cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer bg-canvas text-ink border-hairline hover:bg-surface-soft"
+        data-cat="beans"
+      >
+        {ui.catBeans}
+      </button>
+      <button
+        type="button"
+        class="scc-cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer bg-canvas text-ink border-hairline hover:bg-surface-soft"
+        data-cat="produce"
+      >
+        {ui.catProduce}
+      </button>
+      <button
+        type="button"
+        class="scc-cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer bg-canvas text-ink border-hairline hover:bg-surface-soft"
+        data-cat="leftovers-dairy"
+      >
+        {ui.catLeftoversDairy}
+      </button>
+    </div>
+
+    <!-- Food Cards Grid -->
+    <div id="scc-foods-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+      {localizedFoods.map((food, idx) => (
+        <button
+          type="button"
+          class={`scc-food-card text-left p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
+            idx === 0
+              ? 'border-ink bg-surface-soft shadow-xs'
+              : 'border-hairline bg-canvas hover:border-ink/40 hover:bg-surface-soft/40'
+          }`}
+          data-food-id={food.id}
+          data-food-name={food.name}
+          data-category={food.category}
+          data-status={food.safetyStatus}
+          data-verdict={food.verdict}
+          data-time-low={food.timeLow}
+          data-time-high={food.timeHigh}
+          data-usda-temp={food.usdaTargetTemp}
+          data-summary={food.summary}
+          data-recommendation={food.recommendation}
+          data-fill-rule={food.fillRule}
+          data-is-kidney-bean={food.isKidneyBeanToxin ? 'true' : 'false'}
+          data-is-frozen-ban={food.isFrozenBan ? 'true' : 'false'}
+          data-is-dairy={food.isDairyLateAdd ? 'true' : 'false'}
+          data-is-reheat-ban={food.isReheatBan ? 'true' : 'false'}
+        >
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <span class="text-xl" aria-hidden="true">{food.icon}</span>
+              <span class={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider ${
+                food.safetyStatus === 'safe'
+                  ? 'bg-emerald-100 text-emerald-800'
+                  : food.safetyStatus === 'caution'
+                  ? 'bg-amber-100 text-amber-800'
+                  : 'bg-red-100 text-red-800'
+              }`}>
+                {food.safetyStatus}
+              </span>
+            </div>
+            <h3 class="text-sm font-bold text-ink mb-1.5">{food.name}</h3>
+            <p class="text-xs text-body line-clamp-2 leading-relaxed mb-3">
+              {food.summary}
+            </p>
+          </div>
+
+          <div class="pt-2.5 border-t border-hairline/60 flex items-center justify-between text-[11px] font-mono text-muted">
+            <span>{food.timeLow ? 'Low: ' + food.timeLow.split(' ')[1] : 'Timing'}</span>
+            <span class="font-bold text-ink">Inspect &rarr;</span>
+          </div>
+        </button>
+      ))}
+    </div>
+
+    <!-- Empty State -->
+    <div id="scc-empty-state" class="hidden py-12 text-center">
+      <span class="text-4xl mb-3 block" aria-hidden="true">🍲</span>
+      <h3 class="text-sm font-bold text-ink mb-1">{ui.noResultsTitle}</h3>
+      <button
+        type="button"
+        id="scc-reset-filters-btn"
+        class="mt-3 px-4 py-2 rounded-xl bg-ink text-canvas text-xs font-semibold hover:opacity-90 cursor-pointer"
+      >
+        {ui.resetFiltersBtn}
+      </button>
+    </div>
+  </section>
+
+  <!-- CERAMIC STONEWARE THERMAL SHOCK RULES SECTION -->
+  <section class="mb-12 rounded-3xl border border-hairline bg-surface-soft p-6 md:p-8 shadow-xs">
+    <div class="flex items-center gap-2 mb-4">
+      <span class="text-2xl" aria-hidden="true">🛡️</span>
+      <h2 class="text-title-lg md:text-headline-sm font-medium text-ink tracking-tight">
+        {thermalRules.title}
+      </h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {thermalRules.rules.map((rule: any) => (
+        <div class="rounded-2xl border border-hairline bg-canvas p-5 shadow-2xs flex flex-col justify-between">
+          <div class="mb-3">
+            <span class="inline-block text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded mb-1">
+              ✓ {ui.thermalDo}
+            </span>
+            <p class="text-xs md:text-[13px] text-body leading-relaxed">{rule.do}</p>
+          </div>
+          <div class="pt-3 border-t border-hairline/60">
+            <span class="inline-block text-[10px] font-bold uppercase tracking-wider text-red-700 bg-red-50 dark:bg-red-950/60 px-2 py-0.5 rounded mb-1">
+              ✕ {ui.thermalDont}
+            </span>
+            <p class="text-xs md:text-[13px] text-body leading-relaxed">{rule.dont}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- PRINT-ONLY REFERENCE TABLE -->
+  <div class="hidden print:block mb-8">
+    <div class="border-b-2 border-black pb-3 mb-4">
+      <h2 class="text-lg font-bold">{ui.printTitle}</h2>
+      <p class="text-xs text-gray-600">{ui.printSub}</p>
+    </div>
+    <table class="w-full text-xs text-left border-collapse border border-gray-400">
+      <thead>
+        <tr class="bg-gray-100">
+          <th class="border border-gray-400 p-2">{ui.printColFood}</th>
+          <th class="border border-gray-400 p-2">{ui.printColStatus}</th>
+          <th class="border border-gray-400 p-2">{ui.printColTime}</th>
+          <th class="border border-gray-400 p-2">{ui.printColTip}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {localizedFoods.map((f) => (
+          <tr>
+            <td class="border border-gray-400 p-2 font-bold">{f.name}</td>
+            <td class="border border-gray-400 p-2 uppercase">{f.safetyStatus}</td>
+            <td class="border border-gray-400 p-2">{f.timeLow || f.timeHigh}</td>
+            <td class="border border-gray-400 p-2">{f.recommendation}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FREQUENTLY ASKED QUESTIONS ACCORDION -->
+  <section class="mb-12 rounded-3xl border border-hairline bg-canvas p-6 md:p-8 shadow-xs">
+    <h2 class="text-title-lg md:text-headline-sm font-medium text-ink tracking-tight mb-6">
+      {ui.faqTitle}
     </h2>
-    <div class="space-y-4">
-      {localizedFaqs.map((faq) => (
-        <details class="group p-5 bg-surface-soft border border-hairline rounded-xl" open>
-          <summary class="text-title-sm font-semibold text-ink cursor-pointer list-none flex items-center justify-between gap-3">
+    <div class="space-y-3">
+      {localizedFaqs.map((faq, idx) => (
+        <details class="group rounded-2xl border border-hairline bg-surface-soft/60 open:bg-surface-soft p-4 transition-colors">
+          <summary class="flex items-center justify-between gap-3 text-sm font-bold text-ink cursor-pointer list-none select-none">
             <span>{faq.question}</span>
-            <span class="text-muted text-sm transition-transform group-open:rotate-180 shrink-0" aria-hidden="true">&#9662;</span>
+            <span class="text-xs text-muted group-open:rotate-180 transition-transform font-mono">▼</span>
           </summary>
-          <p class="text-[14px] text-body leading-relaxed mt-3 pt-3 border-t border-hairline/70">
+          <p class="mt-3 text-xs md:text-[13px] text-body leading-relaxed border-t border-hairline/60 pt-3">
             {faq.answer}
           </p>
         </details>
       ))}
     </div>
   </section>
+
+  <!-- METHODOLOGY STRIP -->
+  <section class="mb-12 rounded-2xl border border-hairline bg-surface-soft p-5 text-xs text-muted leading-relaxed">
+    <h3 class="font-bold text-ink mb-1">{ui.methodologyStripTitle}</h3>
+    <p>
+      {ui.methodologyStripPrefix}{' '}
+      <a href={methodologyUrl} class="underline hover:text-ink font-semibold">
+        {ui.methodologyLabel} &rarr;
+      </a>
+    </p>
+  </section>
+
+  <!-- RELATED TOOLS CROSS-LINKING STRIP -->
+  <section class="rounded-3xl border border-hairline bg-canvas p-6 md:p-8 shadow-xs">
+    <h2 class="text-sm font-bold uppercase tracking-wider text-muted mb-4">
+      {ui.relatedHeading}
+    </h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <a
+        href={instantPotUrl}
+        class="p-4 rounded-2xl border border-hairline bg-surface-soft hover:bg-surface-strong/60 transition-colors flex flex-col justify-between"
+      >
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-cyan-700 mb-1 block">
+            {ui.relatedInstantPotTag}
+          </span>
+          <h3 class="text-xs font-bold text-ink mb-1">{ui.relatedInstantPotTitle}</h3>
+          <p class="text-[11px] text-muted leading-relaxed">{ui.relatedInstantPotDesc}</p>
+        </div>
+      </a>
+      <a
+        href={internalTempUrl}
+        class="p-4 rounded-2xl border border-hairline bg-surface-soft hover:bg-surface-strong/60 transition-colors flex flex-col justify-between"
+      >
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 mb-1 block">
+            {ui.relatedTempTag}
+          </span>
+          <h3 class="text-xs font-bold text-ink mb-1">{ui.relatedTempTitle}</h3>
+          <p class="text-[11px] text-muted leading-relaxed">{ui.relatedTempDesc}</p>
+        </div>
+      </a>
+      <a
+        href={meatThawingUrl}
+        class="p-4 rounded-2xl border border-hairline bg-surface-soft hover:bg-surface-strong/60 transition-colors flex flex-col justify-between"
+      >
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-blue-700 mb-1 block">
+            {ui.relatedThawTag}
+          </span>
+          <h3 class="text-xs font-bold text-ink mb-1">{ui.relatedThawTitle}</h3>
+          <p class="text-[11px] text-muted leading-relaxed">{ui.relatedThawDesc}</p>
+        </div>
+      </a>
+      <a
+        href={kitchenFireUrl}
+        class="p-4 rounded-2xl border border-hairline bg-surface-soft hover:bg-surface-strong/60 transition-colors flex flex-col justify-between"
+      >
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-red-700 mb-1 block">
+            {ui.relatedFireTag}
+          </span>
+          <h3 class="text-xs font-bold text-ink mb-1">{ui.relatedFireTitle}</h3>
+          <p class="text-[11px] text-muted leading-relaxed">{ui.relatedFireDesc}</p>
+        </div>
+      </a>
+    </div>
+  </section>
 </div>
 
 <script is:inline>
-  (function () {
-    var payloadEl = document.getElementById('scfs-payload');
-    if (!payloadEl) return;
+(function() {
+  const root = document.getElementById('slow-cooker-checker-root');
+  if (!root) return;
 
-    var payload;
-    try {
-      payload = JSON.parse(payloadEl.textContent || '{}');
-    } catch (_) {
-      return;
+  const copyBtn = document.getElementById('scc-copy-btn');
+  const copyText = document.getElementById('scc-copy-text');
+  const printBtn = document.getElementById('scc-print-btn');
+  const liquidDisplay = document.getElementById('scc-liquid-display');
+  const frozenAlert = document.getElementById('scc-frozen-alert');
+  const switchToThawedBtn = document.getElementById('scc-switch-to-thawed');
+
+  // Inspector Elements
+  const activeFoodBadge = document.getElementById('scc-active-food-badge');
+  const activeVerdictBadge = document.getElementById('scc-active-verdict-badge');
+  const gaugeFillText = document.getElementById('scc-gauge-fill-text');
+  const inspectorFillRule = document.getElementById('scc-inspector-fill-rule');
+  const inspectorTime = document.getElementById('scc-inspector-time');
+  const inspectorHeatTag = document.getElementById('scc-inspector-heat-tag');
+  const inspectorTargetTemp = document.getElementById('scc-inspector-target-temp');
+  const inspectorPotSize = document.getElementById('scc-inspector-pot-size');
+  const inspectorSummary = document.getElementById('scc-inspector-summary');
+  const inspectorRecommendation = document.getElementById('scc-inspector-recommendation');
+
+  // State buttons & search
+  const stateThawedBtn = document.getElementById('scc-state-thawed');
+  const stateFrozenBtn = document.getElementById('scc-state-frozen');
+  const searchInput = document.getElementById('scc-search-input');
+  const searchClearBtn = document.getElementById('scc-search-clear');
+  const emptyState = document.getElementById('scc-empty-state');
+  const resetFiltersBtn = document.getElementById('scc-reset-filters-btn');
+
+  const sizeBtns = Array.from(root.querySelectorAll('.scc-size-btn'));
+  const heatBtns = Array.from(root.querySelectorAll('.scc-heat-btn'));
+  const foodCards = Array.from(root.querySelectorAll('.scc-food-card'));
+  const catBtns = Array.from(root.querySelectorAll('.scc-cat-btn'));
+
+  let currentSize = sizeBtns.find(b => b.dataset.sizeId === root.dataset.defaultSizeId) || sizeBtns[1] || sizeBtns[0];
+  let currentHeat = heatBtns.find(b => b.dataset.heatId === root.dataset.defaultHeatId) || heatBtns[0];
+  let currentFood = foodCards.find(c => c.dataset.foodId === root.dataset.defaultFoodId) || foodCards[0];
+  let isFrozen = false;
+  let currentCat = 'all';
+
+  function updateInspector() {
+    if (!currentFood) return;
+
+    const foodName = currentFood.dataset.foodName || '';
+    const isKidneyBean = currentFood.dataset.isKidneyBean === 'true';
+    const isFrozenBan = currentFood.dataset.isFrozenBan === 'true';
+    const isDairy = currentFood.dataset.isDairy === 'true';
+    const isReheatBan = currentFood.dataset.isReheatBan === 'true';
+
+    // Update active badges
+    if (activeFoodBadge) activeFoodBadge.textContent = foodName;
+
+    // Determine verdict
+    let verdictText = currentFood.dataset.verdict || 'SAFE';
+    let verdictClass = 'bg-emerald-700 text-white';
+
+    if (isFrozen) {
+      verdictText = 'DANGER — USDA STRICT FROZEN BAN';
+      verdictClass = 'bg-red-700 text-white';
+    } else if (isKidneyBean) {
+      verdictText = 'DANGER WITHOUT PRE-BOIL';
+      verdictClass = 'bg-red-700 text-white';
+    } else if (isReheatBan) {
+      verdictText = 'UNSAFE IN SLOW COOKER — REHEAT ON STOVE';
+      verdictClass = 'bg-red-700 text-white';
+    } else if (isDairy) {
+      verdictText = 'CAUTION — ADD IN FINAL 30 MIN';
+      verdictClass = 'bg-amber-600 text-white';
     }
 
-    var fillOptions = Array.isArray(payload.fillOptions) ? payload.fillOptions : [];
-    var heatOptions = Array.isArray(payload.heatOptions) ? payload.heatOptions : [];
-    var outageOptions = Array.isArray(payload.outageOptions) ? payload.outageOptions : [];
-    var simVerdicts = payload.simVerdicts || {};
-    var items = Array.isArray(payload.items) ? payload.items : [];
-    var safetyRules = Array.isArray(payload.safetyRules) ? payload.safetyRules : [];
-    var categories = payload.categories || {};
-    var ui = payload.ui || {};
+    if (activeVerdictBadge) {
+      activeVerdictBadge.textContent = verdictText;
+      activeVerdictBadge.className = 'px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wide ' + verdictClass;
+    }
 
-    var fillMap = {};
-    fillOptions.forEach(function (f) {
-      if (f && f.id) fillMap[f.id] = f;
+    // Time calculations
+    const isHigh = currentHeat && currentHeat.dataset.heatId === 'high';
+    const isWarm = currentHeat && currentHeat.dataset.heatId === 'warm';
+    let timeDisplay = currentFood.dataset.timeLow || '7–8 Hours';
+
+    if (isWarm) {
+      timeDisplay = 'Max 2–4 Hours (Hot Food Only)';
+      if (inspectorHeatTag) inspectorHeatTag.textContent = 'on WARM';
+    } else if (isHigh) {
+      timeDisplay = currentFood.dataset.timeHigh || '3–4 Hours';
+      if (inspectorHeatTag) inspectorHeatTag.textContent = 'on HIGH';
+    } else {
+      if (inspectorHeatTag) inspectorHeatTag.textContent = 'on LOW';
+    }
+
+    if (inspectorTime) inspectorTime.textContent = timeDisplay;
+    if (inspectorTargetTemp) inspectorTargetTemp.textContent = currentFood.dataset.usdaTemp || 'USDA FSIS Safe Simmer';
+    if (inspectorPotSize && currentSize) inspectorPotSize.textContent = currentSize.dataset.sizeName || '';
+
+    // Fill rule
+    const fillRule = currentFood.dataset.fillRule || 'Between 1/2 and 2/3 full';
+    if (gaugeFillText) gaugeFillText.textContent = fillRule;
+    if (inspectorFillRule) inspectorFillRule.textContent = fillRule;
+
+    // Safety summary & recommendation
+    if (inspectorSummary) {
+      if (isFrozen) {
+        inspectorSummary.textContent = 'USDA FSIS Warning: Putting frozen meat or poultry directly into a slow cooker causes it to remain in the 40°F–140°F (4°C–60°C) bacterial danger zone for hours. Always thaw in the refrigerator first.';
+      } else {
+        inspectorSummary.textContent = currentFood.dataset.summary || '';
+      }
+    }
+
+    if (inspectorRecommendation) {
+      if (isFrozen) {
+        inspectorRecommendation.textContent = 'Action: Thaw completely in the refrigerator before placing in the slow cooker!';
+      } else {
+        inspectorRecommendation.textContent = currentFood.dataset.recommendation || '';
+      }
+    }
+  }
+
+  // Size button click
+  sizeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      sizeBtns.forEach(b => {
+        b.classList.remove('border-ink', 'bg-surface-soft', 'shadow-xs');
+        b.classList.add('border-hairline', 'bg-canvas');
+      });
+      btn.classList.add('border-ink', 'bg-surface-soft', 'shadow-xs');
+      btn.classList.remove('border-hairline', 'bg-canvas');
+      currentSize = btn;
+
+      const cups = btn.dataset.minCups;
+      const ml = btn.dataset.minMl;
+      if (liquidDisplay) {
+        liquidDisplay.textContent = cups + ' cup (' + ml + ' mL)';
+      }
+      updateInspector();
+    });
+  });
+
+  // Heat button click
+  heatBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      heatBtns.forEach(b => {
+        b.classList.remove('border-ink', 'bg-surface-soft', 'shadow-xs');
+        b.classList.add('border-hairline', 'bg-canvas');
+      });
+      btn.classList.add('border-ink', 'bg-surface-soft', 'shadow-xs');
+      btn.classList.remove('border-hairline', 'bg-canvas');
+      currentHeat = btn;
+      updateInspector();
+    });
+  });
+
+  // State toggle
+  if (stateThawedBtn && stateFrozenBtn) {
+    stateThawedBtn.addEventListener('click', () => {
+      isFrozen = false;
+      stateThawedBtn.className = 'scc-state-btn px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer bg-emerald-700 text-white border-emerald-700 shadow-xs';
+      stateFrozenBtn.className = 'scc-state-btn px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer bg-canvas text-red-700 border-hairline hover:bg-red-50 hover:border-red-400';
+      if (frozenAlert) frozenAlert.classList.add('hidden');
+      updateInspector();
     });
 
-    var heatMap = {};
-    heatOptions.forEach(function (h) {
-      if (h && h.id) heatMap[h.id] = h;
+    stateFrozenBtn.addEventListener('click', () => {
+      isFrozen = true;
+      stateFrozenBtn.className = 'scc-state-btn px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer bg-red-700 text-white border-red-700 shadow-xs';
+      stateThawedBtn.className = 'scc-state-btn px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer bg-canvas text-emerald-700 border-hairline hover:bg-emerald-50 hover:border-emerald-400';
+      if (frozenAlert) frozenAlert.classList.remove('hidden');
+      updateInspector();
+    });
+  }
+
+  if (switchToThawedBtn && stateThawedBtn) {
+    switchToThawedBtn.addEventListener('click', () => {
+      stateThawedBtn.click();
+    });
+  }
+
+  // Food cards click
+  foodCards.forEach(card => {
+    card.addEventListener('click', () => {
+      foodCards.forEach(c => {
+        c.classList.remove('border-ink', 'bg-surface-soft', 'shadow-xs');
+        c.classList.add('border-hairline', 'bg-canvas');
+      });
+      card.classList.add('border-ink', 'bg-surface-soft', 'shadow-xs');
+      card.classList.remove('border-hairline', 'bg-canvas');
+      currentFood = card;
+      updateInspector();
+
+      // Scroll smoothly to inspector if mobile
+      if (window.innerWidth < 768) {
+        const inspector = document.getElementById('scc-inspector');
+        if (inspector) inspector.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    });
+  });
+
+  // Category filter
+  catBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      catBtns.forEach(b => {
+        b.classList.remove('bg-ink', 'text-canvas', 'border-ink');
+        b.classList.add('bg-canvas', 'text-ink', 'border-hairline');
+      });
+      btn.classList.add('bg-ink', 'text-canvas', 'border-ink');
+      btn.classList.remove('bg-canvas', 'text-ink', 'border-hairline');
+      currentCat = btn.dataset.cat || 'all';
+      filterFoods();
+    });
+  });
+
+  // Search filter
+  function filterFoods() {
+    const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+    if (searchClearBtn) {
+      if (query.length > 0) searchClearBtn.classList.remove('hidden');
+      else searchClearBtn.classList.add('hidden');
+    }
+
+    let visibleCount = 0;
+    foodCards.forEach(card => {
+      const foodName = (card.dataset.foodName || '').toLowerCase();
+      const summary = (card.dataset.summary || '').toLowerCase();
+      const cat = card.dataset.category || '';
+
+      let matchesCat = true;
+      if (currentCat === 'meats') {
+        matchesCat = cat === 'poultry' || cat === 'beef' || cat === 'pork';
+      } else if (currentCat === 'beans') {
+        matchesCat = cat === 'beans' || cat === 'grains';
+      } else if (currentCat === 'produce') {
+        matchesCat = cat === 'produce' || cat === 'soup';
+      } else if (currentCat === 'leftovers-dairy') {
+        matchesCat = cat === 'dairy' || cat === 'seafood' || cat === 'leftovers';
+      }
+
+      const matchesQuery = query.length === 0 || foodName.includes(query) || summary.includes(query);
+
+      if (matchesCat && matchesQuery) {
+        card.classList.remove('hidden');
+        visibleCount++;
+      } else {
+        card.classList.add('hidden');
+      }
     });
 
-    var outageMap = {};
-    outageOptions.forEach(function (o) {
-      if (o && o.id) outageMap[o.id] = o;
+    if (emptyState) {
+      if (visibleCount === 0) emptyState.classList.remove('hidden');
+      else emptyState.classList.add('hidden');
+    }
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', filterFoods);
+  }
+
+  if (searchClearBtn && searchInput) {
+    searchClearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      filterFoods();
+      searchInput.focus();
     });
+  }
 
-    var itemMap = {};
-    items.forEach(function (it) {
-      if (it && it.id) itemMap[it.id] = it;
+  if (resetFiltersBtn) {
+    resetFiltersBtn.addEventListener('click', () => {
+      if (searchInput) searchInput.value = '';
+      if (catBtns[0]) catBtns[0].click();
+      filterFoods();
     });
+  }
 
-    var state = {
-      fillId: payload.defaultFillId || 'ideal',
-      heatId: payload.defaultHeatId || 'low',
-      outageId: payload.defaultOutageId || 'none',
-      itemId: payload.defaultItemId || (items[0] ? items[0].id : ''),
-      category: 'all',
-      verdictFilter: 'all',
-      query: ''
-    };
+  // Copy Cheat Sheet
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      if (!currentFood) return;
+      const text = [
+        '--- ISITKITCHENSAFE SLOW COOKER SAFETY CHEAT SHEET ---',
+        'FOOD: ' + (currentFood.dataset.foodName || ''),
+        'SAFETY VERDICT: ' + (currentFood.dataset.verdict || ''),
+        'COOKING TIME (LOW): ' + (currentFood.dataset.timeLow || '7–8h'),
+        'COOKING TIME (HIGH): ' + (currentFood.dataset.timeHigh || '3–4h'),
+        'FILL-LEVEL LIMIT: ' + (currentFood.dataset.fillRule || '1/2 to 2/3 full'),
+        'MINIMUM THIN LIQUID: ' + (liquidDisplay ? liquidDisplay.textContent : '1 cup'),
+        'SAFETY RECOMMENDATION: ' + (currentFood.dataset.recommendation || ''),
+        '',
+        'CRITICAL RULES:',
+        '1. Never cook raw frozen meat directly in a slow cooker (USDA FSIS).',
+        '2. Boil red kidney beans 10–30 min at 212°F before slow cooking (FDA PHA toxin alert).',
+        '3. Protect ceramic crock from thermal shock (never add ice-cold liquid to hot crock).'
+      ].join('\n');
 
-    var fillBtns = Array.from(document.querySelectorAll('.scfs-fill-btn'));
-    var heatBtns = Array.from(document.querySelectorAll('.scfs-heat-btn'));
-    var outageBtns = Array.from(document.querySelectorAll('.scfs-outage-btn'));
-    var catBtns = Array.from(document.querySelectorAll('.scfs-cat-btn'));
-    var verdictBtns = Array.from(document.querySelectorAll('.scfs-verdict-btn'));
-    var itemCards = Array.from(document.querySelectorAll('.scfs-item-card'));
-
-    var elSimBox = document.getElementById('scfs-sim-verdict-box');
-    var elSimBadge = document.getElementById('scfs-sim-badge');
-    var elSimTempPill = document.getElementById('scfs-sim-temp-pill');
-    var elSimHeadline = document.getElementById('scfs-sim-headline');
-    var elSimBody = document.getElementById('scfs-sim-body');
-    var elSimFillVal = document.getElementById('scfs-sim-fill-val');
-    var elSimGaugeBar = document.getElementById('scfs-sim-gauge-bar');
-    var elSimNoteFill = document.getElementById('scfs-sim-note-fill');
-    var elSimNoteHeat = document.getElementById('scfs-sim-note-heat');
-    var elSimNoteOutage = document.getElementById('scfs-sim-note-outage');
-
-    var elInspector = document.getElementById('scfs-inspector');
-    var elItemVerdictPill = document.getElementById('scfs-item-verdict-pill');
-    var elItemCatPill = document.getElementById('scfs-item-cat-pill');
-    var elItemTitle = document.getElementById('scfs-item-title');
-    var elItemHeadline = document.getElementById('scfs-item-headline');
-    var elItemRule = document.getElementById('scfs-item-rule');
-    var elItemAlt = document.getElementById('scfs-item-alt');
-    var elItemTempCard = document.getElementById('scfs-item-temp-card');
-    var elItemTempPill = document.getElementById('scfs-item-temp-pill');
-    var elItemTempNote = document.getElementById('scfs-item-temp-note');
-
-    var elSearch = document.getElementById('scfs-search');
-    var elSearchClear = document.getElementById('scfs-search-clear');
-    var elCount = document.getElementById('scfs-count');
-    var elEmpty = document.getElementById('scfs-empty');
-    var elResetBtn = document.getElementById('scfs-reset-btn');
-
-    var copyBtn = document.getElementById('scfs-copy-btn');
-    var copyLabel = document.getElementById('scfs-copy-label');
-    var printBtn = document.getElementById('scfs-print-btn');
-
-    function styleSelectorButtons(btns, attrName, selectedId) {
-      btns.forEach(function (btn) {
-        var active = btn.getAttribute(attrName) === selectedId;
-        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
-        btn.classList.toggle('bg-primary', active);
-        btn.classList.toggle('text-on-primary', active);
-        btn.classList.toggle('border-primary', active);
-        btn.classList.toggle('ring-2', active);
-        btn.classList.toggle('ring-signature-coral/60', active);
-        btn.classList.toggle('shadow-xs', active);
-        btn.classList.toggle('bg-surface-soft/70', !active);
-        btn.classList.toggle('text-ink', !active);
-        btn.classList.toggle('border-hairline', !active);
-
-        var sub = btn.querySelector('[data-scfs-sub]');
-        if (sub) {
-          sub.classList.toggle('text-white/85', active);
-          sub.classList.toggle('text-muted', !active);
-        }
-      });
-    }
-
-    function computeSimulatorOutcome() {
-      if (state.outageId === 'unmonitored-or-over-2h') {
-        return {
-          level: 'unsafe',
-          badge: simVerdicts.outageDiscardBadge || 'USDA MANDATORY DISCARD',
-          headline: simVerdicts.outageDiscardHeadline || '',
-          body: simVerdicts.outageDiscardBody || ''
-        };
-      }
-      if (state.fillId === 'overfilled') {
-        return {
-          level: 'unsafe',
-          badge: simVerdicts.overfilledBadge || 'UNSAFE — OVERFILLED',
-          headline: simVerdicts.overfilledHeadline || '',
-          body: simVerdicts.overfilledBody || ''
-        };
-      }
-      if (state.outageId === 'under-2h-home') {
-        return {
-          level: 'caution',
-          badge: simVerdicts.outageUnder2hBadge || 'ACTION REQUIRED',
-          headline: simVerdicts.outageUnder2hHeadline || '',
-          body: simVerdicts.outageUnder2hBody || ''
-        };
-      }
-      if (state.heatId === 'keep-warm') {
-        return {
-          level: 'caution',
-          badge: simVerdicts.keepWarmBadge || 'CAUTION — KEEP-WARM ONLY',
-          headline: simVerdicts.keepWarmHeadline || '',
-          body: simVerdicts.keepWarmBody || ''
-        };
-      }
-      if (state.fillId === 'under-half') {
-        return {
-          level: 'caution',
-          badge: simVerdicts.underHalfBadge || 'CAUTION — UNDERFILLED',
-          headline: simVerdicts.underHalfHeadline || '',
-          body: simVerdicts.underHalfBody || ''
-        };
-      }
-      if (state.heatId === 'high') {
-        return {
-          level: 'safe',
-          badge: simVerdicts.safeHighBadge || 'OPTIMAL USDA SAFE SETUP (HIGH)',
-          headline: simVerdicts.safeHighHeadline || '',
-          body: simVerdicts.safeHighBody || ''
-        };
-      }
-      return {
-        level: 'safe',
-        badge: simVerdicts.safeLowBadge || 'USDA SAFE SETUP (LOW)',
-        headline: simVerdicts.safeLowHeadline || '',
-        body: simVerdicts.safeLowBody || ''
-      };
-    }
-
-    function getDarkPillClass(level) {
-      var base = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider ';
-      if (level === 'unsafe') return base + 'bg-red-500 text-white';
-      if (level === 'caution') return base + 'bg-amber-400 text-slate-950';
-      return base + 'bg-emerald-400 text-slate-950';
-    }
-
-    function applyBorderLevel(el, level) {
-      if (!el) return;
-      el.classList.toggle('border-red-400', level === 'unsafe');
-      el.classList.toggle('border-amber-400', level === 'caution');
-      el.classList.toggle('border-emerald-400', level === 'safe');
-    }
-
-    function renderSimulator() {
-      var fill = fillMap[state.fillId] || fillOptions[0];
-      var heat = heatMap[state.heatId] || heatOptions[0];
-      var outage = outageMap[state.outageId] || outageOptions[0];
-      if (!fill || !heat || !outage) return;
-
-      styleSelectorButtons(fillBtns, 'data-scfs-fill', fill.id);
-      styleSelectorButtons(heatBtns, 'data-scfs-heat', heat.id);
-      styleSelectorButtons(outageBtns, 'data-scfs-outage', outage.id);
-
-      var outcome = computeSimulatorOutcome();
-
-      applyBorderLevel(elSimBox, outcome.level);
-      if (elSimBadge) {
-        elSimBadge.textContent = outcome.badge;
-        elSimBadge.className = getDarkPillClass(outcome.level);
-      }
-      if (elSimTempPill) {
-        elSimTempPill.textContent = '🌡️ ' + (heat.tempRange || '');
-      }
-      if (elSimHeadline) elSimHeadline.textContent = outcome.headline;
-      if (elSimBody) elSimBody.textContent = outcome.body;
-
-      if (elSimFillVal) {
-        elSimFillVal.textContent = fill.shortLabel || '';
-        elSimFillVal.className = 'text-xs font-extrabold ' + (
-          fill.status === 'unsafe'
-            ? 'text-red-300'
-            : (fill.status === 'caution' ? 'text-amber-300' : 'text-emerald-300')
-        );
-      }
-      if (elSimGaugeBar) {
-        elSimGaugeBar.style.width = String(fill.gaugePercent || 60) + '%';
-        elSimGaugeBar.className = 'h-full rounded-full transition-all duration-300 ' + (
-          fill.status === 'unsafe'
-            ? 'bg-gradient-to-r from-red-500 to-error-border'
-            : (fill.status === 'caution'
-              ? 'bg-gradient-to-r from-amber-500 to-yellow-400'
-              : 'bg-gradient-to-r from-emerald-500 to-teal-400')
-        );
-      }
-
-      if (elSimNoteFill) elSimNoteFill.textContent = fill.note || '';
-      if (elSimNoteHeat) elSimNoteHeat.textContent = heat.note || '';
-      if (elSimNoteOutage) elSimNoteOutage.textContent = outage.note || '';
-    }
-
-    function renderInspector() {
-      var item = itemMap[state.itemId] || items[0];
-      if (!item) return;
-
-      itemCards.forEach(function (card) {
-        var active = card.getAttribute('data-scfs-item') === item.id;
-        card.setAttribute('aria-pressed', active ? 'true' : 'false');
-        card.classList.toggle('bg-canvas', active);
-        card.classList.toggle('border-signature-coral', active);
-        card.classList.toggle('ring-2', active);
-        card.classList.toggle('ring-signature-coral', active);
-        card.classList.toggle('shadow-sm', active);
-        card.classList.toggle('bg-surface-soft/65', !active);
-        card.classList.toggle('border-hairline', !active);
-      });
-
-      applyBorderLevel(elInspector, item.verdict);
-
-      if (elItemVerdictPill) {
-        elItemVerdictPill.textContent = item.verdictBadge || '';
-        elItemVerdictPill.className = getDarkPillClass(item.verdict);
-      }
-      if (elItemCatPill) {
-        elItemCatPill.textContent = categories[item.category] || item.category || '';
-      }
-      if (elItemTitle) {
-        elItemTitle.textContent = (item.icon ? item.icon + ' ' : '') + (item.name || '');
-      }
-      if (elItemHeadline) elItemHeadline.textContent = item.headline || '';
-      if (elItemRule) elItemRule.textContent = item.usdaRule || '';
-      if (elItemAlt) elItemAlt.textContent = item.safeAlternative || '';
-
-      if (elItemTempCard) {
-        elItemTempCard.className = 'p-4 rounded-xl border space-y-2 ' + (
-          item.hasUsdaTemp
-            ? 'bg-sky-500/14 border-sky-400/45'
-            : 'bg-white/7 border-white/14'
-        );
-      }
-      if (elItemTempPill) {
-        elItemTempPill.textContent = item.hasUsdaTemp && item.usdaTemp
-          ? item.usdaTemp
-          : (ui.handlingBadge || 'HANDLING CHECK');
-        elItemTempPill.className = 'inline-flex items-center px-2 py-0.5 rounded-md border text-[10px] font-extrabold uppercase tracking-wider ' + (
-          item.hasUsdaTemp
-            ? 'bg-sky-400 text-slate-950 border-sky-300'
-            : 'bg-white/10 text-white/85 border-white/20'
-        );
-      }
-      if (elItemTempNote) elItemTempNote.textContent = item.tempNote || '';
-    }
-
-    function applyFilters() {
-      var q = (state.query || '').trim().toLowerCase();
-      var visibleCount = 0;
-
-      catBtns.forEach(function (btn) {
-        var active = btn.getAttribute('data-scfs-cat') === state.category;
-        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
-        btn.classList.toggle('bg-primary', active);
-        btn.classList.toggle('text-on-primary', active);
-        btn.classList.toggle('border-primary', active);
-        btn.classList.toggle('bg-surface-soft', !active);
-        btn.classList.toggle('text-ink', !active);
-        btn.classList.toggle('border-hairline', !active);
-      });
-
-      verdictBtns.forEach(function (btn) {
-        var active = btn.getAttribute('data-scfs-verdict') === state.verdictFilter;
-        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
-        btn.classList.toggle('bg-signature-coral', active);
-        btn.classList.toggle('text-white', active);
-        btn.classList.toggle('border-signature-coral', active);
-        btn.classList.toggle('bg-canvas', !active);
-        btn.classList.toggle('text-ink', !active);
-        btn.classList.toggle('border-hairline', !active);
-      });
-
-      if (elSearchClear) {
-        elSearchClear.classList.toggle('hidden', q.length === 0);
-      }
-
-      itemCards.forEach(function (card) {
-        var id = card.getAttribute('data-scfs-item') || '';
-        var item = itemMap[id];
-        if (!item) return;
-
-        var matchCat = state.category === 'all' || item.category === state.category;
-        var matchVerdict = state.verdictFilter === 'all' || item.verdict === state.verdictFilter;
-        var matchQuery = true;
-
-        if (q.length > 0) {
-          var haystack = (
-            (item.shortName || '') + ' ' +
-            (item.name || '') + ' ' +
-            (item.verdictBadge || '') + ' ' +
-            (item.headline || '') + ' ' +
-            (item.usdaRule || '') + ' ' +
-            (item.safeAlternative || '') + ' ' +
-            (item.tempNote || '')
-          ).toLowerCase();
-          matchQuery = haystack.indexOf(q) !== -1;
-        }
-
-        var show = matchCat && matchVerdict && matchQuery;
-        card.classList.toggle('hidden', !show);
-        if (show) visibleCount += 1;
-      });
-
-      if (elCount) {
-        elCount.textContent = (ui.showingCountPrefix || 'Showing') + ' ' + String(visibleCount) + ' ' + (ui.showingCountSuffix || 'of 16 items');
-      }
-
-      if (elEmpty) {
-        elEmpty.classList.toggle('hidden', visibleCount > 0);
-      }
-    }
-
-    function buildCopySummary() {
-      var fill = fillMap[state.fillId] || fillOptions[0];
-      var heat = heatMap[state.heatId] || heatOptions[0];
-      var outage = outageMap[state.outageId] || outageOptions[0];
-      var outcome = computeSimulatorOutcome();
-      var item = itemMap[state.itemId] || items[0];
-      var lines = [];
-
-      lines.push(ui.copyHeader || 'IsItKitchenSafe — Slow Cooker & Crock-Pot Food Safety Cheat Sheet');
-      lines.push('');
-      lines.push(ui.copySimSection || 'LIVE SETUP SIMULATOR VERDICT:');
-      lines.push((ui.copySimVerdict || 'VERDICT:') + ' [' + outcome.badge + '] ' + outcome.headline);
-      if (fill) lines.push((ui.copySimFill || 'FILL LEVEL:') + ' ' + fill.shortLabel + ' — ' + fill.note);
-      if (heat) lines.push((ui.copySimHeat || 'HEAT SETTING:') + ' ' + heat.shortLabel + ' (' + heat.tempRange + ') — ' + heat.note);
-      if (outage) lines.push((ui.copySimOutage || 'POWER STATUS:') + ' ' + outage.shortLabel + ' — ' + outage.note);
-
-      if (item) {
-        lines.push('');
-        lines.push((ui.copyItemSection || 'SELECTED ITEM:') + ' ' + item.name);
-        lines.push((ui.copyItemVerdict || 'SAFETY VERDICT:') + ' ' + item.verdictBadge + ' — ' + item.headline);
-        lines.push((ui.copyItemRule || 'USDA / FDA RULE:') + ' ' + item.usdaRule);
-        lines.push((ui.copyItemAlt || 'SAFE PRACTICE:') + ' ' + item.safeAlternative);
-        lines.push((ui.copyItemTemp || 'TEMP / HANDLING:') + ' ' + item.tempNote);
-      }
-
-      if (safetyRules.length > 0) {
-        lines.push('');
-        lines.push(ui.copyRulesHeader || '3 CRITICAL SLOW COOKER SAFETY RULES:');
-        safetyRules.forEach(function (r, idx) {
-          lines.push('  ' + String(idx + 1) + '. ' + r.title + ' — ' + r.body);
-        });
-      }
-
-      return lines.join('\n');
-    }
-
-    fillBtns.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var id = btn.getAttribute('data-scfs-fill');
-        if (id && fillMap[id]) {
-          state.fillId = id;
-          renderSimulator();
-        }
+      navigator.clipboard.writeText(text).then(() => {
+        if (copyText) copyText.textContent = 'Copied ✓';
+        setTimeout(() => {
+          if (copyText) copyText.textContent = 'Copy Slow Cooker Safety Sheet';
+        }, 2000);
       });
     });
+  }
 
-    heatBtns.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var id = btn.getAttribute('data-scfs-heat');
-        if (id && heatMap[id]) {
-          state.heatId = id;
-          renderSimulator();
-        }
-      });
+  // Print
+  if (printBtn) {
+    printBtn.addEventListener('click', () => {
+      window.print();
     });
+  }
 
-    outageBtns.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var id = btn.getAttribute('data-scfs-outage');
-        if (id && outageMap[id]) {
-          state.outageId = id;
-          renderSimulator();
-        }
-      });
-    });
-
-    catBtns.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var cat = btn.getAttribute('data-scfs-cat');
-        if (cat) {
-          state.category = cat;
-          applyFilters();
-        }
-      });
-    });
-
-    verdictBtns.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var v = btn.getAttribute('data-scfs-verdict');
-        if (v) {
-          state.verdictFilter = v;
-          applyFilters();
-        }
-      });
-    });
-
-    if (elSearch) {
-      elSearch.addEventListener('input', function () {
-        state.query = elSearch.value || '';
-        applyFilters();
-      });
-    }
-
-    if (elSearchClear) {
-      elSearchClear.addEventListener('click', function () {
-        state.query = '';
-        if (elSearch) elSearch.value = '';
-        applyFilters();
-        if (elSearch) elSearch.focus();
-      });
-    }
-
-    if (elResetBtn) {
-      elResetBtn.addEventListener('click', function () {
-        state.category = 'all';
-        state.verdictFilter = 'all';
-        state.query = '';
-        if (elSearch) elSearch.value = '';
-        applyFilters();
-      });
-    }
-
-    itemCards.forEach(function (card) {
-      card.addEventListener('click', function () {
-        var id = card.getAttribute('data-scfs-item');
-        if (id && itemMap[id]) {
-          state.itemId = id;
-          renderInspector();
-          if (elInspector && elInspector.getBoundingClientRect) {
-            var rect = elInspector.getBoundingClientRect();
-            if (rect.top < 16) {
-              elInspector.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-          }
-        }
-      });
-    });
-
-    if (copyBtn) {
-      copyBtn.addEventListener('click', function () {
-        var text = buildCopySummary();
-        var showCopied = function () {
-          if (copyLabel) copyLabel.textContent = ui.copiedBtn || 'Cheat Sheet Copied ✓';
-          window.setTimeout(function () {
-            if (copyLabel) copyLabel.textContent = '📋 ' + (ui.copyBtn || 'Copy Slow Cooker Cheat Sheet');
-          }, 2200);
-        };
-
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(text).then(showCopied).catch(showCopied);
-        } else {
-          var ta = document.createElement('textarea');
-          ta.value = text;
-          ta.setAttribute('readonly', '');
-          ta.style.position = 'absolute';
-          ta.style.left = '-9999px';
-          document.body.appendChild(ta);
-          ta.select();
-          try {
-            document.execCommand('copy');
-          } catch (_) {
-            // ignore
-          }
-          document.body.removeChild(ta);
-          showCopied();
-        }
-      });
-    }
-
-    if (printBtn) {
-      printBtn.addEventListener('click', function () {
-        window.print();
-      });
-    }
-
-    renderSimulator();
-    renderInspector();
-    applyFilters();
-  })();
+  // Initialize
+  updateInspector();
+})();
 </script>

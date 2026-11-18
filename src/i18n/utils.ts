@@ -231,6 +231,7 @@ const SPECIAL_PAGES = [
   'tools/kitchen-fire-emergency-guide',
   'tools/instant-pot-pressure-release-checker',
   'tools/slow-cooker-food-safety-checker',
+  'tools/knife-care-cutting-board-matcher',
   'methodology',
   'saved'
 ];

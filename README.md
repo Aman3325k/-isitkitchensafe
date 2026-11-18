@@ -4,7 +4,7 @@ A static kitchen safety reference platform and interactive consumer tool suite a
 
 ## Overview
 
-IsItKitchenSafe delivers **11,022+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **199 interactive tools** (including **48 Google-indexed Everyday Consumer Kitchen Safety Tools**), **38 evergreen guides × 5 languages = 190 localized articles**, **73 comparisons × 5 languages = 365 localized pages**, **1,301 item pages per language (6,505 localized reference pages)**, **WCAG 2.1 AA accessibility**, and transparent E-E-A-T verification standards.
+IsItKitchenSafe delivers **11,057+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **200 interactive tools** (**1,000 localized tool pages**, including **49 Google-indexed Everyday Consumer Kitchen Safety Tools**), **38 evergreen guides × 5 languages = 190 localized articles**, **73 comparisons × 5 languages = 365 localized pages**, **1,307 item pages per language (6,535 localized reference pages)**, **WCAG 2.1 AA accessibility**, and transparent E-E-A-T verification standards.
 
 ## Tech Stack
 - **Framework**: Astro.js (MPA static generation)
@@ -14,8 +14,9 @@ IsItKitchenSafe delivers **11,022+ static pages** across **11 verticals** and **
 
 ## Consumer Growth, E-E-A-T & Retention Architecture
 
-### Everyday Consumer Kitchen Safety Tools (48 Google-Indexed Tools)
-All 199 interactive tools are split cleanly between everyday consumer utilities and specialized commercial/lab simulators (**81 Home Kitchen Safety** + **118 Commercial & Industrial Engineering Lab**). **48 high-utility consumer tools** are explicitly allowlisted for search indexing in [`src/data/consumer-tools-allowlist.json`](src/data/consumer-tools-allowlist.json) across all 5 languages, including:
+### Everyday Consumer Kitchen Safety Tools (49 Google-Indexed Tools)
+All 200 interactive tools are split cleanly between everyday consumer utilities and specialized commercial/lab simulators (**82 Home Kitchen Safety** + **118 Commercial & Industrial Engineering Lab** = **1,000 localized tool pages** across 5 languages). **49 high-utility consumer tools** are explicitly allowlisted for search indexing in [`src/data/consumer-tools-allowlist.json`](src/data/consumer-tools-allowlist.json) across all 5 languages, including:
+- **Slow Cooker & Crock-Pot Food Safety Checker** (`slow-cooker-food-safety-checker`)
 - **Pressure Cooker & Instant Pot Fill-Line & Release Safety Checker** (`instant-pot-pressure-release-checker`)
 - **Kitchen Grease Fire, Electrical & Burn Emergency First-Response Guide** (`kitchen-fire-emergency-guide`)
 - **Oven Rack Position, Convection & Bakeware Material Heat Adjuster** (`oven-rack-bakeware-heat-adjuster`)
@@ -100,24 +101,24 @@ npm run ops:indexnow
 # Run targeted audits
 npm run ops:seo        # Structured data (JSON-LD FAQPage, BreadcrumbList) & canonicals
 npm run ops:cwv        # Core Web Vitals bundle budgets & asset geometry
-node scripts/autonomous-growth-engine.cjs --tools      # 199 tools × 5 languages audit
+node scripts/autonomous-growth-engine.cjs --tools      # 200 tools × 5 languages audit
 node scripts/autonomous-growth-engine.cjs --redirects  # Cloudflare Pages 2k ceiling monitor
 node scripts/autonomous-growth-engine.cjs --datasets   # Multilingual data assets audit
 
 # Run all-day autonomous background daemon (default 30m heartbeat)
 npm run ops:daemon
 
-# Run full master cycle (audits + 11,022+-page static build + link verification)
+# Run full master cycle (audits + 11,057+-page static build + link verification)
 npm run ops:engine
 ```
 
 ## Scale & Metrics
-- **11,022+ Static Pages** across 11 verticals and 5 languages (EN, ES, PT, ZH-CN, JA)
-- **199 Interactive Tools** across 5 languages (100% 5-language parity: 81 Home Kitchen Safety + 118 Commercial Engineering), including **48 Google-indexed Consumer Utilities** (`src/data/consumer-tools-allowlist.json`)
+- **11,057+ Static Pages** across 11 verticals and 5 languages (EN, ES, PT, ZH-CN, JA)
+- **200 Interactive Tools** across 5 languages (**1,000 Localized Tool Pages**; 100% 5-language parity: **82 Home Kitchen Safety** + **118 Commercial Engineering**), including **49 Google-indexed Consumer Utilities** (`src/data/consumer-tools-allowlist.json`)
 - **38 Evergreen Guides × 5 Languages = 190 Articles** with 100% slug parity + **73 Comparisons × 5 Languages = 365 Pages**
-- **1,301 Items per Language (6,505 Localized Reference Pages)** with 100% slug parity including modern kitchenware (Le Creuset, Yeti Rambler, HexClad, Caraway, Owala FreeSip, Ninja Creami, Always Pan, Stasher, Instant Pot)
+- **1,307 Items per Language (6,535 Localized Reference Pages)** with 100% slug parity including modern kitchenware (Le Creuset, Yeti Rambler, HexClad, Caraway, Owala FreeSip, Ninja Creami, Always Pan, Stasher, Instant Pot)
 - **WCAG 2.1 AA Accessibility** (`:focus-visible`, `prefers-reduced-motion`, ARIA landmarks) + **Live Instant Search** across `/tools/`, `/blog/`, `/how-long/`, `/refreeze/`, `/compare/`, `/material/`, and `/what-happens/`
-- **1,320,878+ Audited Links / 0 Broken Links** (100% internal href resolution verified)
+- **1,325,164+ Audited Links / 0 Broken Links** (100% internal href resolution verified)
 - **Verified XML Sitemaps & Real-Time Indexing** (`sitemap-index.xml`, `sitemap-0.xml`, `scripts/ping-indexnow.cjs`)
 - **Cloudflare Edge Middleware & Dynamic OG/Pinterest Cards** (`functions/_redirects-map.js`, `functions/api/og.svg.js`)
 - **100% JSON-LD Schema Compliance** across consumer tools, comparisons, guides, and reference pages
