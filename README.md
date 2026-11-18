@@ -4,7 +4,7 @@ A static kitchen safety reference platform and interactive consumer tool suite a
 
 ## Overview
 
-IsItKitchenSafe delivers **10,712+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **185 interactive tools** (including **34 Google-indexed Everyday Consumer Kitchen Safety Tools**), **23 evergreen blog guides × 5 languages (115 localized articles)**, **55 high-intent brand comparisons × 5 languages**, **WCAG 2.1 AA accessibility**, and transparent E-E-A-T verification standards.
+IsItKitchenSafe delivers **10,742+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **186 interactive tools** (including **35 Google-indexed Everyday Consumer Kitchen Safety Tools**), **23 evergreen blog guides × 5 languages (115 localized articles)**, **63 high-intent brand comparisons × 5 languages (315 localized pages)**, **WCAG 2.1 AA accessibility**, and transparent E-E-A-T verification standards.
 
 ## Tech Stack
 - **Framework**: Astro.js (MPA static generation)
@@ -14,8 +14,9 @@ IsItKitchenSafe delivers **10,712+ static pages** across **11 verticals** and **
 
 ## Consumer Growth, E-E-A-T & Retention Architecture
 
-### Everyday Consumer Kitchen Safety Tools (34 Google-Indexed Tools)
-All 185 interactive tools are split cleanly between everyday consumer utilities and specialized commercial/lab simulators. **34 high-utility consumer tools** are explicitly allowlisted for search indexing in [`src/data/consumer-tools-allowlist.json`](src/data/consumer-tools-allowlist.json) across all 5 languages, including:
+### Everyday Consumer Kitchen Safety Tools (35 Google-Indexed Tools)
+All 186 interactive tools are split cleanly between everyday consumer utilities and specialized commercial/lab simulators. **35 high-utility consumer tools** are explicitly allowlisted for search indexing in [`src/data/consumer-tools-allowlist.json`](src/data/consumer-tools-allowlist.json) across all 5 languages, including:
+- **Fridge & Freezer Power Outage Food Safety Checker** (`power-outage-food-safety-checker`)
 - **Microwave Wattage Time Converter (600W–1250W)** (`microwave-wattage-converter`)
 - **Kitchen Bottom Symbol Decoder** (`kitchen-symbol-decoder`)
 - **USDA Leftover Shelf-Life Countdown Calculator** (`leftover-shelf-life-calculator`)
@@ -31,7 +32,7 @@ All 185 interactive tools are split cleanly between everyday consumer utilities 
 
 ### Content & Comparison Verticals
 - **23 Evergreen Multilingual Blog Guides** (**23 × 5 languages = 115 localized articles**) with **100% 5-language slug parity** across EN, ES, PT, ZH-CN, and JA.
-- **55 High-Intent Brand & Material Comparisons** (`/compare/`, **55 × 5 languages = 275 localized pages**), covering popular cookware, drinkware, and kitchen material matchups across 5 languages.
+- **63 High-Intent Brand & Material Comparisons** (`/compare/`, **63 × 5 languages = 315 localized pages**), covering popular cookware, drinkware, and kitchen material matchups across 5 languages.
 - **Original SVG Visual Safety Diagrams** embedded across all **7 appliance hubs** (Dishwasher, Microwave, Freezer, Oven, Dryer, Air Fryer, Refrigerator).
 
 ### E-E-A-T, Discovery, Accessibility & Retention Features
@@ -86,21 +87,21 @@ npm run ops:indexnow
 # Run targeted audits
 npm run ops:seo        # Structured data (JSON-LD FAQPage, BreadcrumbList) & canonicals
 npm run ops:cwv        # Core Web Vitals bundle budgets & asset geometry
-node scripts/autonomous-growth-engine.cjs --tools      # 185 tools × 5 languages audit
+node scripts/autonomous-growth-engine.cjs --tools      # 186 tools × 5 languages audit
 node scripts/autonomous-growth-engine.cjs --redirects  # Cloudflare Pages 2k ceiling monitor
 node scripts/autonomous-growth-engine.cjs --datasets   # Multilingual data assets audit
 
 # Run all-day autonomous background daemon (default 30m heartbeat)
 npm run ops:daemon
 
-# Run full master cycle (audits + 10,712+-page static build + link verification)
+# Run full master cycle (audits + 10,742+-page static build + link verification)
 npm run ops:engine
 ```
 
 ## Scale & Metrics
-- **10,712+ Static Pages** across 11 verticals and 5 languages (EN, ES, PT, ZH-CN, JA)
-- **185 Interactive Tools** with 100% 5-language parity, including **34 Google-indexed Everyday Consumer Utilities** (`src/data/consumer-tools-allowlist.json`)
-- **23 Evergreen Guides × 5 Languages (115 Articles)** with 100% slug parity + **55 High-Intent Brand Comparisons × 5 Languages**
+- **10,742+ Static Pages** across 11 verticals and 5 languages (EN, ES, PT, ZH-CN, JA)
+- **186 Interactive Tools** with 100% 5-language parity, including **35 Google-indexed Everyday Consumer Utilities** (`src/data/consumer-tools-allowlist.json`)
+- **23 Evergreen Guides × 5 Languages (115 Articles)** with 100% slug parity + **63 High-Intent Brand Comparisons × 5 Languages (315 Pages)**
 - **WCAG 2.1 AA Accessibility** (`:focus-visible`, `prefers-reduced-motion`, ARIA landmarks) + **Live Instant Search** across `/tools/`, `/blog/`, `/how-long/`, `/refreeze/`, `/compare/`, `/material/`, and `/what-happens/`
 - **0 Broken Links** (1,000,000+ internal hrefs audited with 100% resolution)
 - **Verified XML Sitemaps & Real-Time Indexing** (`sitemap-index.xml`, `sitemap-0.xml`, `scripts/ping-indexnow.cjs`)

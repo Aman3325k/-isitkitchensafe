@@ -93,6 +93,20 @@ const curatedTools: Array<{
     date: '2026-11-18',
   },
   {
+    path: '/tools/power-outage-food-safety-checker/',
+    title: 'Fridge & Freezer Power Outage Food Safety Checker (USDA & CDC)',
+    description:
+      'Check which refrigerator and freezer foods to keep, cook, refreeze, or discard after a blackout. Instant USDA FSIS & CDC 4-hour fridge, 24h/48h freezer, and 40°F thermometer triage across 22 food categories.',
+    date: '2026-11-18',
+  },
+  {
+    path: '/tools/baby-bottle-safety-checker/',
+    title: 'Baby Bottle, Sippy Cup & Kids Kitchenware Safety Checker (AAP, FDA & CDC)',
+    description:
+      'Check microwave, dishwasher, steam/boil sterilizer, UV-C, and freezer safety for 14 nursery and pediatric materials: #5 PP, glass, silicone, PPSU, melamine plates, stainless straw cups, and breast milk bags with AAP scald alerts.',
+    date: '2026-11-18',
+  },
+  {
     path: '/tools/cleaner-mixing-danger-checker/',
     title: 'Kitchen Cleaner Mixing Danger Checker: Bleach, Vinegar, Ammonia & Peroxide',
     description:

@@ -217,6 +217,7 @@ const SPECIAL_PAGES = [
   'tools/cleaner-mixing-danger-checker',
   'tools/microwave-wattage-converter',
   'tools/power-outage-food-safety-checker',
+  'tools/baby-bottle-safety-checker',
   'methodology',
   'saved'
 ];

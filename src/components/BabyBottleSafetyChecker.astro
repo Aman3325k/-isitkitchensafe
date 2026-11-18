@@ -1,0 +1,1568 @@
+---
+import rawData from '../data/baby-bottle-safety-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+import { useTranslatedPath } from '../i18n/utils';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+const translatePath = useTranslatedPath(lang);
+
+const plasticCodeUrl = translatePath('/tools/plastic-code-checker/');
+const symbolDecoderUrl = translatePath('/tools/kitchen-symbol-decoder/');
+const powerOutageUrl = translatePath('/tools/power-outage-food-safety-checker/');
+const methodologyUrl = translatePath('/methodology/');
+const allToolsUrl = translatePath('/tools/');
+
+type ApplianceId = 'microwave' | 'dishwasher' | 'steam-boil' | 'uv-sterilizer' | 'freezer';
+type CategoryId = 'all' | 'bottles' | 'plates' | 'cups' | 'pacifiers';
+type VerdictLevel = 'safe' | 'caution' | 'unsafe';
+
+interface LocalizedAppliance {
+  id: ApplianceId;
+  icon: string;
+  label: string;
+  sub: string;
+}
+
+interface LocalizedItem {
+  id: string;
+  icon: string;
+  category: Exclude<CategoryId, 'all'>;
+  milkContainer: boolean;
+  maxTempF: number;
+  maxTempC: number;
+  verdicts: Record<ApplianceId, VerdictLevel>;
+  name: string;
+  examples: string;
+  maxTemp: string;
+  riskAlert: string;
+  parentCareTip: string;
+  applianceNotes: Record<ApplianceId, string>;
+}
+
+const localizedAppliances: LocalizedAppliance[] = rawData.appliances.map((a) => {
+  const tr = (a.i18n as Record<string, any>)[lang] || a.i18n.en;
+  return {
+    id: a.id as ApplianceId,
+    icon: a.icon,
+    label: tr.label,
+    sub: tr.sub
+  };
+});
+
+const localizedItems: LocalizedItem[] = rawData.items.map((item) => {
+  const tr = (item.i18n as Record<string, any>)[lang] || item.i18n.en;
+  return {
+    id: item.id,
+    icon: item.icon,
+    category: item.category as Exclude<CategoryId, 'all'>,
+    milkContainer: Boolean(item.milkContainer),
+    maxTempF: item.maxTempF,
+    maxTempC: item.maxTempC,
+    verdicts: item.verdicts as Record<ApplianceId, VerdictLevel>,
+    name: tr.name,
+    examples: tr.examples,
+    maxTemp: tr.maxTemp,
+    riskAlert: tr.riskAlert,
+    parentCareTip: tr.parentCareTip,
+    applianceNotes: tr.applianceNotes as Record<ApplianceId, string>
+  };
+});
+
+const localizedMilkAlert =
+  (rawData.milkAlert as Record<string, {
+    badge: string;
+    title: string;
+    summary: string;
+    stepsTitle: string;
+    steps: string[];
+    overrideVerdict: string;
+    overrideReason: string;
+  }>)[lang] || rawData.milkAlert.en;
+
+const localizedFaqs: Array<{ question: string; answer: string }> =
+  (rawData.faqs as Record<string, Array<{ question: string; answer: string }>>)[lang] ||
+  rawData.faqs.en;
+
+interface UiDict {
+  ariaLabel: string;
+  step1Title: string;
+  itemSelectLabel: string;
+  quickPicksLabel: string;
+  step2Title: string;
+  milkToggleTitle: string;
+  milkToggleSub: string;
+  milkToggleNo: string;
+  milkToggleYes: string;
+  verdictBadge: string;
+  verdictSafe: string;
+  verdictCaution: string;
+  verdictUnsafe: string;
+  maxTempLabel: string;
+  matrixMiniTitle: string;
+  riskAlertTitle: string;
+  parentTipTitle: string;
+  copySummaryBtn: string;
+  copiedSummaryBtn: string;
+  printChartBtn: string;
+  resetBtn: string;
+  matrixTitle: string;
+  matrixSub: string;
+  searchPlaceholder: string;
+  catAll: string;
+  catBottles: string;
+  catPlates: string;
+  catCups: string;
+  catPacifiers: string;
+  inspectBtn: string;
+  selectedBadge: string;
+  noResultsMsg: string;
+  goldenRulesTitle: string;
+  goldenRulesSub: string;
+  rule1Title: string;
+  rule1Body: string;
+  rule2Title: string;
+  rule2Body: string;
+  rule3Title: string;
+  rule3Body: string;
+  relatedHeading: string;
+  relatedPlasticTag: string;
+  relatedPlasticTitle: string;
+  relatedPlasticDesc: string;
+  relatedSymbolTag: string;
+  relatedSymbolTitle: string;
+  relatedSymbolDesc: string;
+  relatedOutageTag: string;
+  relatedOutageTitle: string;
+  relatedOutageDesc: string;
+  methodologyStripTitle: string;
+  methodologyStripPrefix: string;
+  methodologyLabel: string;
+  plasticCheckerLabel: string;
+  allToolsLabel: string;
+  faqTitle: string;
+  copyHeader: string;
+  copyItemLine: string;
+  copyTaskLine: string;
+  copyVerdictLine: string;
+  copyMaxTempLine: string;
+  copyAlertLine: string;
+  copyTipLine: string;
+  copyMatrixHeader: string;
+  copyMilkReminder: string;
+}
+
+const UI: Record<SupportedLanguage, UiDict> = {
+  en: {
+    ariaLabel: 'Baby Bottle, Sippy Cup and Kids Kitchenware Safety Checker',
+    step1Title: '1. Select Baby / Kids Item or Material',
+    itemSelectLabel: 'Choose bottle, cup, plate, pacifier, or storage item',
+    quickPicksLabel: 'Quick picks:',
+    step2Title: '2. Select Kitchen Task or Sterilizer',
+    milkToggleTitle: 'Heating Breast Milk or Formula?',
+    milkToggleSub: 'Check AAP & CDC hotspot rules and safe warming steps',
+    milkToggleNo: 'No',
+    milkToggleYes: 'Yes — Milk / Formula',
+    verdictBadge: 'AAP · FDA · CDC Nursery Safety Verdict',
+    verdictSafe: 'SAFE',
+    verdictCaution: 'CAUTION',
+    verdictUnsafe: 'UNSAFE',
+    maxTempLabel: 'Max Safe Temp / Limit',
+    matrixMiniTitle: 'All 5 Appliances for This Item (click to switch):',
+    riskAlertTitle: 'Key Chemical, Microplastic, Thermal or Mold Alert',
+    parentTipTitle: 'Best Parent Care Tip',
+    copySummaryBtn: 'Copy Parent Care Summary',
+    copiedSummaryBtn: 'Summary Copied ✓',
+    printChartBtn: 'Print Nursery Safety Chart',
+    resetBtn: 'Reset',
+    matrixTitle: 'All 14 Baby & Kids Kitchenware Safety Cards',
+    matrixSub: 'Click any item below to inspect full guidance, or filter by category and keyword.',
+    searchPlaceholder: 'Search baby item (e.g., glass, Avent, silicone, melamine, bamboo, latex, straw)...',
+    catAll: 'All',
+    catBottles: 'Bottles & Nipples',
+    catPlates: 'Plates & Bowls',
+    catCups: 'Cups & Bento',
+    catPacifiers: 'Pacifiers & Storage',
+    inspectBtn: 'Inspect',
+    selectedBadge: 'Selected',
+    noResultsMsg: 'No baby or kids kitchenware matches your filter. Try clearing the search or choosing "All".',
+    goldenRulesTitle: '3 Parent-Tested Nursery Kitchen Safety Essentials',
+    goldenRulesSub: 'Quick daily habits aligned with AAP, FDA, and CDC infant feeding guidance.',
+    rule1Title: 'Warm Water Bath — Never Microwave Milk',
+    rule1Body: 'Microwaving breast milk or formula creates invisible scalding pockets even inside glass bottles. Always use a warm-water bowl or bottle warmer and wrist-test drops.',
+    rule2Title: 'Eliminate Silicone Soapy Taste Safely',
+    rule2Body: 'Use fragrance-free, dye-free detergents for all silicone bottles and suction plates. Strip stubborn soap taste by baking clean empty plates at 350°F (175°C) for 20 min.',
+    rule3Title: 'Disassemble Straw Valves & Pull-Test Latex',
+    rule3Body: 'Remove silicone straw valves and lid gaskets daily to prevent hidden black mold. Tug-test pacifiers and bottle nipples daily and replace latex every 4–6 weeks.',
+    relatedHeading: 'Related Family & Material Safety Tools',
+    relatedPlasticTag: 'Resin Code Lookup (#1–#7)',
+    relatedPlasticTitle: 'Plastic Recycling Code Safety Checker →',
+    relatedPlasticDesc: 'Verify microwave, dishwasher, and heat-leaching ratings for #5 PP, #2 HDPE, #7 Tritan, and food containers.',
+    relatedSymbolTag: 'Bottom-of-Dish Icons',
+    relatedSymbolTitle: 'Kitchen Appliance Symbol Decoder →',
+    relatedSymbolDesc: 'Decode dishwasher top-rack, microwave waves, freezer snowflakes, and food-safe fork/glass stamps.',
+    relatedOutageTag: 'Breast Milk & Formula Outage Guide',
+    relatedOutageTitle: 'Power Outage Food Safety Checker →',
+    relatedOutageDesc: 'Check exact CDC/USDA safe storage windows for refrigerated and frozen breast milk, formula, and groceries.',
+    methodologyStripTitle: 'Grounded in AAP, FDA, CDC & EFSA/BfR Infant Feeding Standards',
+    methodologyStripPrefix: 'Every material threshold and warming rule is verified against pediatric and food-contact safety authorities. Review our sources in',
+    methodologyLabel: 'Methodology',
+    plasticCheckerLabel: 'Plastic Code Checker',
+    allToolsLabel: 'All Kitchen Tools →',
+    faqTitle: 'Frequently Asked Questions: Baby Bottle & Kids Kitchenware Safety',
+    copyHeader: 'IsItKitchenSafe — Baby Bottle & Kids Kitchenware Safety Summary (AAP/FDA/CDC)',
+    copyItemLine: 'Item',
+    copyTaskLine: 'Task / Appliance',
+    copyVerdictLine: 'Verdict',
+    copyMaxTempLine: 'Max Temp / Limit',
+    copyAlertLine: 'Safety Alert',
+    copyTipLine: 'Parent Care Tip',
+    copyMatrixHeader: '5-Appliance Summary:',
+    copyMilkReminder: 'AAP/CDC Reminder: NEVER microwave breast milk or infant formula—warm in a warm water bath and wrist-test.'
+  },
+  es: {
+    ariaLabel: 'Verificador de Seguridad de Biberones, Vasos y Vajilla Infantil',
+    step1Title: '1. Selecciona el Artículo o Material Infantil',
+    itemSelectLabel: 'Elige biberón, vaso, plato, chupete o bolsa de almacenamiento',
+    quickPicksLabel: 'Accesos rápidos:',
+    step2Title: '2. Selecciona la Tarea o Electrodoméstico',
+    milkToggleTitle: '¿Calientas Leche Materna o Fórmula?',
+    milkToggleSub: 'Activa la alerta AAP/CDC contra microondas y pasos seguros',
+    milkToggleNo: 'No',
+    milkToggleYes: 'Sí — Leche / Fórmula',
+    verdictBadge: 'Veredicto de Seguridad Infantil AAP · FDA · CDC',
+    verdictSafe: 'SEGURO',
+    verdictCaution: 'PRECAUCIÓN',
+    verdictUnsafe: 'NO SEGURO',
+    maxTempLabel: 'Temp. Máx. / Límite',
+    matrixMiniTitle: 'Los 5 Métodos para Este Artículo (clic para cambiar):',
+    riskAlertTitle: 'Alerta Química, Microplásticos, Térmica o de Moho',
+    parentTipTitle: 'Mejor Consejo de Cuidado para Padres',
+    copySummaryBtn: 'Copiar Resumen para Padres',
+    copiedSummaryBtn: 'Resumen Copiado ✓',
+    printChartBtn: 'Imprimir Tabla de Seguridad',
+    resetBtn: 'Restablecer',
+    matrixTitle: 'Los 14 Artículos Infantiles de Cocina (Matriz Completa)',
+    matrixSub: 'Haz clic en cualquier tarjeta para inspeccionar detalles o filtra por categoría.',
+    searchPlaceholder: 'Buscar artículo (ej. vidrio, Avent, silicona, melamina, bambú, látex, pajita)...',
+    catAll: 'Todos',
+    catBottles: 'Biberones y Tetinas',
+    catPlates: 'Platos y Cuencos',
+    catCups: 'Vasos y Loncheras',
+    catPacifiers: 'Chupetes y Bolsas',
+    inspectBtn: 'Inspeccionar',
+    selectedBadge: 'Seleccionado',
+    noResultsMsg: 'Ningún artículo coincide con el filtro actual. Borra la búsqueda o elige "Todos".',
+    goldenRulesTitle: '3 Reglas Esenciales de Seguridad en la Cocina del Bebé',
+    goldenRulesSub: 'Hábitos diarios avalados por la AAP, FDA y los CDC.',
+    rule1Title: 'Baño de Agua Tibia — Nunca Microondas para Leche',
+    rule1Body: 'Calentar leche materna o fórmula en microondas crea puntos hirvientes invisibles incluso en vidrio. Entibia siempre en agua tibia y prueba en la muñeca.',
+    rule2Title: 'Elimina el Sabor a Jabón de la Silicona',
+    rule2Body: 'Usa detergente sin fragancia en biberones y platos de silicona. Si ya tiene sabor jabonoso, hornea el plato limpio vacío a 175°C durante 20 min.',
+    rule3Title: 'Desmonta Válvulas y Revisa el Látex a Diario',
+    rule3Body: 'Separa pajitas, válvulas y empaques cada día para evitar moho negro. Haz prueba de tirón diario y reemplaza el látex cada 4–6 semanas.',
+    relatedHeading: 'Herramientas Relacionadas de Seguridad Familiar y Materiales',
+    relatedPlasticTag: 'Códigos de Plástico (#1–#7)',
+    relatedPlasticTitle: 'Verificador de Códigos de Plástico →',
+    relatedPlasticDesc: 'Consulta si los envases #5 PP, #2 HDPE y #7 Tritan son aptos para microondas y lavavajillas.',
+    relatedSymbolTag: 'Iconos en la Base',
+    relatedSymbolTitle: 'Decodificador de Símbolos de Cocina →',
+    relatedSymbolDesc: 'Identifica símbolos de bandeja superior, microondas, congelador y apto para alimentos.',
+    relatedOutageTag: 'Leche Materna en Apagones',
+    relatedOutageTitle: 'Seguridad Alimentaria en Cortes de Luz →',
+    relatedOutageDesc: 'Verifica plazos oficiales CDC/USDA para leche materna, fórmula y alimentos tras un apagón.',
+    methodologyStripTitle: 'Basado en Normas Pediátricas AAP, FDA, CDC y EFSA/BfR',
+    methodologyStripPrefix: 'Cada límite térmico y recomendación está auditado frente a autoridades sanitarias. Consulta nuestras fuentes en',
+    methodologyLabel: 'Metodología',
+    plasticCheckerLabel: 'Códigos de Plástico',
+    allToolsLabel: 'Todas las Herramientas →',
+    faqTitle: 'Preguntas Frecuentes: Seguridad de Biberones y Vajilla Infantil',
+    copyHeader: 'IsItKitchenSafe — Resumen de Seguridad de Biberones y Vajilla Infantil (AAP/FDA/CDC)',
+    copyItemLine: 'Artículo',
+    copyTaskLine: 'Método / Electrodoméstico',
+    copyVerdictLine: 'Veredicto',
+    copyMaxTempLine: 'Temp. Máxima / Límite',
+    copyAlertLine: 'Alerta de Seguridad',
+    copyTipLine: 'Consejo de Cuidado',
+    copyMatrixHeader: 'Resumen de los 5 Métodos:',
+    copyMilkReminder: 'Recordatorio AAP/CDC: NUNCA calientes leche materna ni fórmula en microondas; usa baño de agua tibia y prueba en la muñeca.'
+  },
+  pt: {
+    ariaLabel: 'Verificador de Segurança de Mamadeiras, Copos e Louça Infantil',
+    step1Title: '1. Selecione o Item ou Material Infantil',
+    itemSelectLabel: 'Escolha mamadeira, copo, prato, chupeta ou saco de leite',
+    quickPicksLabel: 'Atalhos:',
+    step2Title: '2. Selecione a Tarefa ou Eletrodoméstico',
+    milkToggleTitle: 'Aquecendo Leite Materno ou Fórmula?',
+    milkToggleSub: 'Ative o alerta AAP/CDC contra micro-ondas e passos seguros',
+    milkToggleNo: 'Não',
+    milkToggleYes: 'Sim — Leite / Fórmula',
+    verdictBadge: 'Veredito de Segurança Infantil AAP · FDA · CDC',
+    verdictSafe: 'SEGURO',
+    verdictCaution: 'CUIDADO',
+    verdictUnsafe: 'NÃO SEGURO',
+    maxTempLabel: 'Temp. Máx. / Limite',
+    matrixMiniTitle: 'Todos os 5 Métodos para Este Item (clique para alternar):',
+    riskAlertTitle: 'Alerta Químico, Microplásticos, Térmico ou de Mofo',
+    parentTipTitle: 'Melhor Dica de Cuidado para Pais',
+    copySummaryBtn: 'Copiar Resumo para Pais',
+    copiedSummaryBtn: 'Resumo Copiado ✓',
+    printChartBtn: 'Imprimir Tabela do Berçário',
+    resetBtn: 'Redefinir',
+    matrixTitle: 'Todos os 14 Itens Infantis de Cozinha (Matriz Completa)',
+    matrixSub: 'Clique em qualquer cartão para ver detalhes completos ou filtre por categoria.',
+    searchPlaceholder: 'Buscar item (ex.: vidro, Avent, silicone, melamina, bambu, látex, canudo)...',
+    catAll: 'Todos',
+    catBottles: 'Mamadeiras e Bicos',
+    catPlates: 'Pratos e Tigelas',
+    catCups: 'Copos e Lancheiras',
+    catPacifiers: 'Chupetas e Sacos',
+    inspectBtn: 'Inspecionar',
+    selectedBadge: 'Selecionado',
+    noResultsMsg: 'Nenhum item corresponde ao filtro atual. Limpe a busca ou clique em "Todos".',
+    goldenRulesTitle: '3 Regras Essenciais de Segurança na Cozinha do Bebê',
+    goldenRulesSub: 'Hábitos diários baseados nas diretrizes da AAP, FDA e CDC.',
+    rule1Title: 'Banho-Maria Morno — Nunca Micro-ondas para Leite',
+    rule1Body: 'O micro-ondas gera pontos escaldantes invisíveis mesmo em mamadeiras de vidro. Aqueça sempre em água morna e teste no pulso.',
+    rule2Title: 'Elimine o Gosto de Sabão do Silicone',
+    rule2Body: 'Use detergente sem fragrância em silicone. Para tirar gosto impregnado, leve o prato limpo vazio ao forno a 175°C por 20 minutos.',
+    rule3Title: 'Desmonte Válvulas e Teste o Látex Todo Dia',
+    rule3Body: 'Retire canudos, válvulas e anéis de vedação diariamente para evitar mofo preto. Puxe chupetas todo dia e troque látex a cada 4–6 semanas.',
+    relatedHeading: 'Ferramentas Relacionadas de Segurança Familiar e Materiais',
+    relatedPlasticTag: 'Códigos de Plástico (#1–#7)',
+    relatedPlasticTitle: 'Verificador de Códigos de Plástico →',
+    relatedPlasticDesc: 'Confira se potes #5 PP, #2 HDPE e #7 Tritan podem ir ao micro-ondas e à lava-louças.',
+    relatedSymbolTag: 'Ícones no Fundo da Louça',
+    relatedSymbolTitle: 'Decodificador de Símbolos de Cozinha →',
+    relatedSymbolDesc: 'Entenda símbolos de cesto superior, micro-ondas, freezer e contato com alimentos.',
+    relatedOutageTag: 'Leite Materno Sem Energia',
+    relatedOutageTitle: 'Segurança Alimentar em Falta de Luz →',
+    relatedOutageDesc: 'Veja prazos seguros CDC/USDA para leite materno, fórmula e alimentos após queda de energia.',
+    methodologyStripTitle: 'Baseado nos Padrões AAP, FDA, CDC e EFSA/BfR para Alimentação Infantil',
+    methodologyStripPrefix: 'Cada limite térmico e alerta segue referências pediátricas oficiais. Conheça nossas fontes em',
+    methodologyLabel: 'Metodologia',
+    plasticCheckerLabel: 'Códigos de Plástico',
+    allToolsLabel: 'Todas as Ferramentas →',
+    faqTitle: 'Perguntas Frequentes: Segurança de Mamadeiras e Louça Infantil',
+    copyHeader: 'IsItKitchenSafe — Resumo de Segurança de Mamadeiras e Louça Infantil (AAP/FDA/CDC)',
+    copyItemLine: 'Item',
+    copyTaskLine: 'Método / Aparelho',
+    copyVerdictLine: 'Veredito',
+    copyMaxTempLine: 'Temp. Máx. / Limite',
+    copyAlertLine: 'Alerta de Segurança',
+    copyTipLine: 'Dica de Cuidado',
+    copyMatrixHeader: 'Resumo dos 5 Métodos:',
+    copyMilkReminder: 'Lembrete AAP/CDC: NUNCA aqueça leite materno ou fórmula no micro-ondas — use banho-maria morno e teste no pulso.'
+  },
+  'zh-cn': {
+    ariaLabel: '奶瓶、学饮杯与儿童餐具安全查询工具',
+    step1Title: '1. 选择奶瓶、水杯或儿童餐具材质',
+    itemSelectLabel: '选择要检测的母婴用品或材质',
+    quickPicksLabel: '常见速查：',
+    step2Title: '2. 选择使用方式或消毒电器',
+    milkToggleTitle: '正在加热母乳或配方奶？',
+    milkToggleSub: '开启查看 AAP / CDC 禁微波预警与安全暖奶步骤',
+    milkToggleNo: '否',
+    milkToggleYes: '是 — 加热母乳/配方奶',
+    verdictBadge: 'AAP · FDA · CDC 母婴喂养安全判定',
+    verdictSafe: '安全可用',
+    verdictCaution: '谨慎使用',
+    verdictUnsafe: '不安全/禁用',
+    maxTempLabel: '安全耐温 / 使用上限',
+    matrixMiniTitle: '该材质 5 大电器兼容性一览（点击切换）：',
+    riskAlertTitle: '化学析出 / 微塑料 / 霉菌 / 热冲击预警',
+    parentTipTitle: '儿科级家长养护建议',
+    copySummaryBtn: '复制家长养护清单',
+    copiedSummaryBtn: '清单已复制 ✓',
+    printChartBtn: '打印育儿安全对照表',
+    resetBtn: '重置',
+    matrixTitle: '全部 14 类常见母婴奶瓶与儿童餐具安全矩阵',
+    matrixSub: '点击下方任意卡片即可在顶部查看详情，或按分类与关键词快速筛选。',
+    searchPlaceholder: '搜索用品或品牌（如：玻璃、PP、PPSU、硅胶、密胺、竹纤维、乳胶、吸管杯）...',
+    catAll: '全部',
+    catBottles: '奶瓶与奶嘴',
+    catPlates: '餐盘与饭碗',
+    catCups: '水杯与便当盒',
+    catPacifiers: '安抚奶嘴与储奶',
+    inspectBtn: '查看详情',
+    selectedBadge: '当前选中',
+    noResultsMsg: '未找到匹配的母婴用品或材质，请清空搜索词或点击“全部”。',
+    goldenRulesTitle: '新手爸妈必看：3 条核心育儿厨房安全准则',
+    goldenRulesSub: '源自美国儿科学会 (AAP)、FDA 与 CDC 婴幼儿喂养指南。',
+    rule1Title: '坚持温水浴暖奶 — 严禁微波炉热奶',
+    rule1Body: '即便用玻璃奶瓶，微波炉热母乳或配方奶也会产生隐蔽烫伤热点并破坏抗体，务必采用温水浴或恒温暖奶器并在手腕试温。',
+    rule2Title: '彻底告别硅胶餐具“肥皂味”',
+    rule2Body: '所有硅胶奶瓶与吸盘餐盘请用无香洗洁精清洗；若已串味，将洗净擦干的空餐盘放入烤箱 175°C 烘烤 20 分钟即可去除。',
+    rule3Title: '每日拆洗吸管阀 + 定期更换乳胶',
+    rule3Body: '学饮杯硅胶吸管阀与胶圈需每日全拆刷洗防黑霉；每日轻拉检查奶嘴裂痕，天然乳胶安抚奶嘴每 4–6 周必须更换。',
+    relatedHeading: '相关母婴材质与食品安全工具',
+    relatedPlasticTag: '塑料三角码查询 (#1–#7)',
+    relatedPlasticTitle: '塑料回收代码安全检测器 →',
+    relatedPlasticDesc: '速查 #5 PP、#2 HDPE、#7 Tritan 等塑料材质的微波、洗碗机与耐热析出等级。',
+    relatedSymbolTag: '餐具底部图标识别',
+    relatedSymbolTitle: '厨房电器与餐具图标解码器 →',
+    relatedSymbolDesc: '一眼读懂洗碗机上层架、微波波浪线、冷冻雪花及食品接触安全杯叉标志。',
+    relatedOutageTag: '停电母乳与配方奶应急',
+    relatedOutageTitle: '停电冰箱食品安全排查器 →',
+    relatedOutageDesc: '核对停电后冷藏与冷冻母乳、配方奶及家庭食材的 CDC/USDA 保留与丢弃时窗。',
+    methodologyStripTitle: '严格遵循 AAP、FDA、CDC 与欧盟 EFSA/BfR 母婴食安标准',
+    methodologyStripPrefix: '所有耐温阈值、微塑料提示与暖奶规程均核对权威儿科与食品接触法规，详见',
+    methodologyLabel: '评估方法论',
+    plasticCheckerLabel: '塑料代码检测器',
+    allToolsLabel: '全部实用工具 →',
+    faqTitle: '奶瓶与儿童餐具安全常见问题解答',
+    copyHeader: 'IsItKitchenSafe — 奶瓶与儿童餐具安全养护清单 (AAP/FDA/CDC)',
+    copyItemLine: '检测物品',
+    copyTaskLine: '使用方式/电器',
+    copyVerdictLine: '安全结论',
+    copyMaxTempLine: '耐温/使用上限',
+    copyAlertLine: '风险预警',
+    copyTipLine: '家长养护建议',
+    copyMatrixHeader: '5 项方式兼容速览：',
+    copyMilkReminder: 'AAP/CDC 提醒：严禁使用微波炉加热母乳或配方奶，请采用温水浴回温并在手腕内侧试温。'
+  },
+  ja: {
+    ariaLabel: '哺乳瓶・マグ・子ども用食器の安全チェッカー',
+    step1Title: '1. 哺乳瓶・ベビー食器・素材を選択',
+    itemSelectLabel: 'チェックする哺乳瓶・マグ・食器・おしゃぶりを選択',
+    quickPicksLabel: 'よく検索されるアイテム：',
+    step2Title: '2. 家電・消毒・保存方法を選択',
+    milkToggleTitle: '母乳や粉ミルクを温めていますか？',
+    milkToggleSub: 'AAP・CDCの電子レンジ禁止ルールと安全な湯煎手順を表示',
+    milkToggleNo: 'いいえ',
+    milkToggleYes: 'はい（母乳・ミルク）',
+    verdictBadge: 'AAP・FDA・CDC 乳幼児キッチン安全判定',
+    verdictSafe: '安全',
+    verdictCaution: '注意',
+    verdictUnsafe: '不可・危険',
+    maxTempLabel: '耐熱目安・使用上限',
+    matrixMiniTitle: 'この素材の5家電・消毒対応一覧（クリックで切替）：',
+    riskAlertTitle: '化学溶出・マイクロプラスチック・カビ・熱衝撃アラート',
+    parentTipTitle: 'おすすめのお手入れ・安全ポイント',
+    copySummaryBtn: 'お手入れまとめをコピー',
+    copiedSummaryBtn: 'コピーしました ✓',
+    printChartBtn: '安全一覧表を印刷',
+    resetBtn: 'リセット',
+    matrixTitle: '全14種 哺乳瓶・ベビー＆キッズ食器 安全マトリクス',
+    matrixSub: '各カードをクリックすると上部で詳細を確認できます。カテゴリー・キーワード検索も可能です。',
+    searchPlaceholder: 'アイテム検索（例：ガラス、PP、PPSU、シリコン、メラミン、竹繊維、天然ゴム、ストロー）...',
+    catAll: 'すべて',
+    catBottles: '哺乳瓶・乳首',
+    catPlates: 'プレート・食器',
+    catCups: 'マグ・お弁当箱',
+    catPacifiers: 'おしゃぶり・保存',
+    inspectBtn: '詳細を見る',
+    selectedBadge: '選択中',
+    noResultsMsg: '条件に一致するベビー食器がありません。検索をクリアするか「すべて」を選んでください。',
+    goldenRulesTitle: '保護者が押さえるべき3大ベビーキッチン安全ルール',
+    goldenRulesSub: 'AAP・FDA・CDCの乳幼児授乳・食器ガイドラインに基づく毎日の習慣。',
+    rule1Title: 'ミルクは必ず湯煎 — 電子レンジ厳禁',
+    rule1Body: '耐熱ガラス瓶でも電子レンジ加熱は内部に熱いムラを作り口内火傷と抗体破壊を招きます。ぬるま湯での湯煎後に手首で温度確認を。',
+    rule2Title: 'シリコンの石けん味を安全にリセット',
+    rule2Body: 'シリコン製品は無香料洗剤が基本。洗剤臭が移ったプレートは洗って乾かし、175°Cのオーブンで20分空焼きすると脱臭できます。',
+    rule3Title: 'ストロー弁の毎日分解＆天然ゴム定期交換',
+    rule3Body: '黒カビ防止のためストローの弁とパッキンは毎日分解洗浄を。乳首・おしゃぶりは毎日引っ張り点検し天然ゴムは4〜6週で交換してください。',
+    relatedHeading: '関連する素材安全・家庭向けツール',
+    relatedPlasticTag: 'プラ識別マーク判定（#1〜#7）',
+    relatedPlasticTitle: 'プラスチック番号安全チェッカー →',
+    relatedPlasticDesc: '#5 PP・#2 HDPE・#7 トライタンの電子レンジ・食洗機耐熱と溶出リスクを確認。',
+    relatedSymbolTag: '食器底面のマーク解読',
+    relatedSymbolTitle: 'キッチン家電・食器記号デコーダー →',
+    relatedSymbolDesc: '食洗機上段マーク・電子レンジ波線・冷凍雪印・食品接触マークの意味を即検索。',
+    relatedOutageTag: '停電時の母乳・ミルク管理',
+    relatedOutageTitle: '停電時の冷蔵庫・冷凍庫 食品判定 →',
+    relatedOutageDesc: '停電後の冷蔵・冷凍母乳や粉ミルク、食材のCDC・USDA安全目安時間を判定。',
+    methodologyStripTitle: 'AAP・FDA・CDC・欧州EFSA/BfRの乳幼児安全基準に準拠',
+    methodologyStripPrefix: 'すべての耐熱上限・溶出リスク・授乳安全基準は公的小児科および食品安全機関の一次情報に基づきます。詳細は',
+    methodologyLabel: '検証メソドロジー',
+    plasticCheckerLabel: 'プラ番号チェッカー',
+    allToolsLabel: '全ツール一覧 →',
+    faqTitle: '哺乳瓶・子ども用食器の安全性に関するよくある質問',
+    copyHeader: 'IsItKitchenSafe — 哺乳瓶・ベビー食器 安全お手入れサマリー (AAP/FDA/CDC)',
+    copyItemLine: '対象アイテム',
+    copyTaskLine: '家電・方法',
+    copyVerdictLine: '判定',
+    copyMaxTempLine: '耐熱・上限',
+    copyAlertLine: '安全アラート',
+    copyTipLine: 'お手入れポイント',
+    copyMatrixHeader: '5方法の対応一覧：',
+    copyMilkReminder: 'AAP/CDC注意：母乳・粉ミルクは絶対に電子レンジで温めず、ぬるま湯での湯煎後に手首で温度確認してください。'
+  }
+};
+
+const t = UI[lang] || UI.en;
+
+const quickPickIds = [
+  'pp-baby-bottles',
+  'borosilicate-glass-bottles',
+  'silicone-suction-plates',
+  'melamine-kids-plates',
+  'latex-pacifiers-teethers',
+  'breast-milk-storage-bags'
+];
+
+const quickPicks = quickPickIds
+  .map((id) => localizedItems.find((i) => i.id === id))
+  .filter((x): x is LocalizedItem => Boolean(x));
+
+const defaultItem = localizedItems[0]; // Polypropylene (#5 PP) Baby Bottles
+const defaultAppliance: ApplianceId = 'microwave';
+const defaultVerdict: VerdictLevel = defaultItem.verdicts[defaultAppliance];
+const defaultNote = defaultItem.applianceNotes[defaultAppliance];
+
+const catCounts = {
+  all: localizedItems.length,
+  bottles: localizedItems.filter((i) => i.category === 'bottles').length,
+  plates: localizedItems.filter((i) => i.category === 'plates').length,
+  cups: localizedItems.filter((i) => i.category === 'cups').length,
+  pacifiers: localizedItems.filter((i) => i.category === 'pacifiers').length
+};
+
+const clientPayload = {
+  lang,
+  appliances: localizedAppliances,
+  items: localizedItems,
+  milkAlert: localizedMilkAlert,
+  ui: t
+};
+
+function getVerdictLabel(verdict: VerdictLevel): string {
+  if (verdict === 'safe') return t.verdictSafe;
+  if (verdict === 'caution') return t.verdictCaution;
+  return t.verdictUnsafe;
+}
+
+function getVerdictPillClass(verdict: VerdictLevel): string {
+  if (verdict === 'safe') return 'badge-yes';
+  if (verdict === 'caution') return 'badge-depends';
+  return 'badge-no';
+}
+
+function getVerdictCardClasses(verdict: VerdictLevel): string {
+  if (verdict === 'safe') return 'border-success-border/60 bg-canvas';
+  if (verdict === 'caution') return 'border-warning-border/80 bg-warning-bg/35 dark:bg-amber-950/20';
+  return 'border-error-border/70 bg-error-bg/45 dark:bg-red-950/20';
+}
+
+function getMiniDotClass(verdict: VerdictLevel): string {
+  if (verdict === 'safe') return 'bg-success-border/20 text-ink border-success-border/60';
+  if (verdict === 'caution') return 'bg-warning-bg/80 dark:bg-amber-950/40 text-ink border-warning-border/70';
+  return 'bg-error-bg/80 dark:bg-red-950/40 text-ink border-error-border/70';
+}
+
+function getMiniStatusChar(verdict: VerdictLevel): string {
+  if (verdict === 'safe') return '✓';
+  if (verdict === 'caution') return '!';
+  return '✕';
+}
+---
+
+<div id="baby-bottle-checker-root" class="space-y-12">
+  <!-- Main Interactive Checker Card -->
+  <section
+    id="baby-bottle-safety-checker"
+    class="bg-canvas border border-hairline rounded-2xl shadow-sm overflow-hidden"
+    aria-label={t.ariaLabel}
+  >
+    <script type="application/json" id="bbsc-payload" set:html={JSON.stringify(clientPayload)} />
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-hairline">
+      <!-- Left Column: Material/Item Selector, Appliance Matrix & Milk Warming Toggle -->
+      <div class="lg:col-span-6 p-5 sm:p-6 space-y-6 print:hidden">
+        <!-- Step 1: Select Material / Item -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <label for="bbsc-item-select" class="text-title-sm font-semibold text-ink">
+              {t.step1Title}
+            </label>
+          </div>
+
+          <select
+            id="bbsc-item-select"
+            aria-label={t.itemSelectLabel}
+            class="w-full min-h-[46px] px-3.5 py-2.5 rounded-xl bg-surface-soft border border-hairline text-ink text-sm font-semibold focus:outline-none focus:border-info-border cursor-pointer"
+          >
+            {localizedItems.map((item) => (
+              <option value={item.id} selected={item.id === defaultItem.id}>
+                {item.icon} {item.name}
+              </option>
+            ))}
+          </select>
+
+          <div class="space-y-1.5">
+            <span class="block text-[11px] font-semibold uppercase tracking-wider text-muted">
+              {t.quickPicksLabel}
+            </span>
+            <div class="flex flex-wrap gap-1.5">
+              {quickPicks.map((item) => (
+                <button
+                  type="button"
+                  data-bbsc-quick={item.id}
+                  class={`bbsc-quick-btn min-h-[34px] px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                    item.id === defaultItem.id
+                      ? 'bg-signature-coral text-white border-signature-coral shadow-sm'
+                      : 'bg-canvas text-ink border-hairline hover:border-signature-coral'
+                  }`}
+                >
+                  {item.icon} {item.name.split('(')[0].trim()}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Select Kitchen Task / Appliance -->
+        <div class="space-y-3">
+          <h2 class="text-title-sm font-semibold text-ink">{t.step2Title}</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" role="radiogroup" aria-label={t.step2Title}>
+            {localizedAppliances.map((app) => {
+              const isSelected = app.id === defaultAppliance;
+              return (
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected ? 'true' : 'false'}
+                  data-bbsc-appliance={app.id}
+                  class={`bbsc-app-btn min-h-[62px] p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-primary text-on-primary border-primary shadow-sm'
+                      : 'bg-canvas text-ink border-hairline hover:border-border-strong'
+                  }`}
+                >
+                  <span class="block text-sm font-bold leading-snug">
+                    {app.icon} {app.label}
+                  </span>
+                  <span class="block text-[11px] opacity-80 mt-0.5 leading-tight">{app.sub}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <!-- Special Toggle: Heating Breast Milk or Formula? -->
+        <div class="p-4 rounded-xl bg-error-bg/45 dark:bg-red-950/25 border border-error-border/70 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <span class="block text-xs sm:text-sm font-bold text-ink">
+                🍼 {t.milkToggleTitle}
+              </span>
+              <span class="block text-[11.5px] text-body mt-0.5">
+                {t.milkToggleSub}
+              </span>
+            </div>
+            <div
+              class="inline-flex rounded-lg border border-hairline bg-canvas p-0.5 shrink-0"
+              role="radiogroup"
+              aria-label={t.milkToggleTitle}
+            >
+              <button
+                type="button"
+                role="radio"
+                aria-checked="true"
+                data-bbsc-milk="off"
+                class="bbsc-milk-btn px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer bg-primary text-on-primary"
+              >
+                {t.milkToggleNo}
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked="false"
+                data-bbsc-milk="on"
+                class="bbsc-milk-btn px-3 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer text-ink hover:bg-surface-soft"
+              >
+                {t.milkToggleYes}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Live Nursery Safety Verdict Dashboard -->
+      <div class="lg:col-span-6 p-5 sm:p-6 bg-surface-soft/50 flex flex-col justify-between space-y-4">
+        <div class="space-y-4">
+          <!-- High-Contrast Live Verdict Banner -->
+          <div
+            id="bbsc-verdict-banner"
+            aria-live="polite"
+            class="rounded-2xl bg-surface-dark text-on-dark p-5 sm:p-6 space-y-4 shadow-sm border-l-4 border-error-border"
+          >
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-signature-peach">
+                {t.verdictBadge}
+              </span>
+              <span
+                id="bbsc-verdict-pill"
+                class={getVerdictPillClass(defaultVerdict)}
+              >
+                {getVerdictLabel(defaultVerdict)}
+              </span>
+            </div>
+
+            <div class="space-y-1.5">
+              <div class="flex items-start gap-2.5">
+                <span id="bbsc-banner-icon" aria-hidden="true" class="text-2xl shrink-0 leading-none mt-0.5">
+                  🚫
+                </span>
+                <div class="min-w-0">
+                  <h2 id="bbsc-banner-title" class="text-lg sm:text-xl font-extrabold tracking-tight text-white leading-snug">
+                    {defaultItem.name}
+                  </h2>
+                  <p id="bbsc-banner-task" class="text-xs font-semibold text-signature-yellow mt-0.5">
+                    {localizedAppliances[0].icon} {localizedAppliances[0].label} — {localizedAppliances[0].sub}
+                  </p>
+                  <p id="bbsc-verdict-note" class="text-xs sm:text-[13px] text-white/90 leading-relaxed mt-2">
+                    {defaultNote}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Max Safe Temperature Strip -->
+            <div class="p-3 rounded-xl bg-white/5 border border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <span class="text-white/75 font-medium">🌡️ {t.maxTempLabel}:</span>
+              <span id="bbsc-max-temp" class="font-mono font-bold text-signature-mint">
+                {defaultItem.maxTemp}
+              </span>
+            </div>
+
+            <!-- 5-Appliance Mini Matrix for Selected Item -->
+            <div class="space-y-2">
+              <span class="block text-[11px] font-medium text-white/75">{t.matrixMiniTitle}</span>
+              <div class="grid grid-cols-5 gap-1.5">
+                {localizedAppliances.map((app) => {
+                  const v = defaultItem.verdicts[app.id];
+                  return (
+                    <button
+                      type="button"
+                      data-bbsc-mini-app={app.id}
+                      class={`bbsc-mini-btn p-2 rounded-xl border text-center transition-all cursor-pointer ${
+                        app.id === defaultAppliance
+                          ? 'bg-white/20 border-white/60 ring-1 ring-white/50'
+                          : 'bg-white/5 border-white/15 hover:bg-white/10'
+                      }`}
+                    >
+                      <span aria-hidden="true" class="block text-sm leading-none">{app.icon}</span>
+                      <span class="block text-[10px] font-semibold text-white/90 truncate mt-1">
+                        {app.label}
+                      </span>
+                      <span
+                        data-bbsc-mini-status={app.id}
+                        class={`inline-block mt-1 px-1.5 py-0.5 rounded text-[9.5px] font-extrabold ${
+                          v === 'safe'
+                            ? 'bg-emerald-500/25 text-emerald-200'
+                            : v === 'caution'
+                              ? 'bg-amber-500/25 text-amber-200'
+                              : 'bg-red-500/30 text-red-200'
+                        }`}
+                      >
+                        {getVerdictLabel(v)}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <!-- Chemical / Microplastic / Mold Alert & Parent Care Tip -->
+          <div class="grid grid-cols-1 gap-3">
+            <div class="p-4 rounded-xl bg-warning-bg/55 dark:bg-amber-950/25 border border-warning-border/75 space-y-1">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-ink flex items-center gap-1.5">
+                <span aria-hidden="true">⚠️</span> {t.riskAlertTitle}
+              </h3>
+              <p id="bbsc-risk-alert" class="text-xs sm:text-[13px] text-body leading-relaxed">
+                {defaultItem.riskAlert}
+              </p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-canvas border border-hairline space-y-1">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-ink flex items-center gap-1.5">
+                <span aria-hidden="true">💡</span> {t.parentTipTitle}
+              </h3>
+              <p id="bbsc-care-tip" class="text-xs sm:text-[13px] text-body leading-relaxed">
+                {defaultItem.parentCareTip}
+              </p>
+            </div>
+          </div>
+
+          <!-- Action Buttons: Copy / Print / Reset -->
+          <div class="flex flex-wrap items-center gap-2.5 print:hidden">
+            <button
+              type="button"
+              id="bbsc-copy-btn"
+              class="min-h-[44px] flex-1 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors cursor-pointer shadow-sm"
+            >
+              <span id="bbsc-copy-label">📋 {t.copySummaryBtn}</span>
+            </button>
+            <button
+              type="button"
+              id="bbsc-print-btn"
+              class="min-h-[44px] px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-canvas text-ink border border-hairline hover:border-signature-coral transition-colors cursor-pointer"
+            >
+              🖨️ {t.printChartBtn}
+            </button>
+            <button
+              type="button"
+              id="bbsc-reset-btn"
+              class="min-h-[44px] px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-canvas text-muted border border-hairline hover:border-border-strong hover:text-ink transition-colors cursor-pointer"
+            >
+              {t.resetBtn}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dedicated Breast Milk & Formula Warming Safety Alert Panel (Revealed when Toggle is ON) -->
+    <div
+      id="bbsc-milk-alert-panel"
+      class="hidden border-t-2 border-error-border bg-error-bg/60 dark:bg-red-950/35 p-5 sm:p-6 space-y-4"
+      role="region"
+      aria-label={localizedMilkAlert.title}
+    >
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div class="space-y-1.5 max-w-3xl">
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-error-border text-white">
+            🚨 {localizedMilkAlert.badge}
+          </span>
+          <h2 class="text-title-md font-extrabold text-ink leading-snug">
+            {localizedMilkAlert.title}
+          </h2>
+          <p class="text-xs sm:text-sm text-body leading-relaxed">
+            {localizedMilkAlert.summary}
+          </p>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-xl bg-canvas border border-error-border/50 space-y-2.5">
+        <h3 class="text-xs sm:text-sm font-bold text-ink">{localizedMilkAlert.stepsTitle}</h3>
+        <ol class="space-y-2 text-xs sm:text-[13px] text-body list-decimal list-inside">
+          {localizedMilkAlert.steps.map((step) => (
+            <li class="leading-relaxed">{step}</li>
+          ))}
+        </ol>
+      </div>
+    </div>
+
+    <!-- Search, Category Filter Pills & 14 Interactive Baby/Kids Kitchenware Cards -->
+    <div class="border-t border-hairline p-5 sm:p-6 space-y-5">
+      <div>
+        <h2 class="text-title-md font-semibold text-ink">{t.matrixTitle}</h2>
+        <p class="text-xs text-muted mt-0.5">{t.matrixSub}</p>
+      </div>
+
+      <!-- Search + Category Pills -->
+      <div class="flex flex-col lg:flex-row lg:items-center gap-3 print:hidden">
+        <div class="relative flex-1">
+          <span aria-hidden="true" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">🔎</span>
+          <input
+            type="search"
+            id="bbsc-search-input"
+            placeholder={t.searchPlaceholder}
+            aria-label={t.searchPlaceholder}
+            class="w-full h-11 pl-10 pr-4 rounded-xl bg-surface-soft border border-hairline text-ink text-sm focus:outline-none focus:border-info-border"
+          />
+        </div>
+
+        <div class="flex flex-wrap gap-1.5" role="group" aria-label="Filter by Category">
+          <button
+            type="button"
+            aria-pressed="true"
+            data-bbsc-cat="all"
+            class="bbsc-cat-btn min-h-[38px] px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-primary text-on-primary border-primary"
+          >
+            {t.catAll} ({catCounts.all})
+          </button>
+          <button
+            type="button"
+            aria-pressed="false"
+            data-bbsc-cat="bottles"
+            class="bbsc-cat-btn min-h-[38px] px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-signature-coral"
+          >
+            🍼 {t.catBottles} ({catCounts.bottles})
+          </button>
+          <button
+            type="button"
+            aria-pressed="false"
+            data-bbsc-cat="plates"
+            class="bbsc-cat-btn min-h-[38px] px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-signature-coral"
+          >
+            🍽️ {t.catPlates} ({catCounts.plates})
+          </button>
+          <button
+            type="button"
+            aria-pressed="false"
+            data-bbsc-cat="cups"
+            class="bbsc-cat-btn min-h-[38px] px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-signature-coral"
+          >
+            🥤 {t.catCups} ({catCounts.cups})
+          </button>
+          <button
+            type="button"
+            aria-pressed="false"
+            data-bbsc-cat="pacifiers"
+            class="bbsc-cat-btn min-h-[38px] px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-signature-coral"
+          >
+            🧸 {t.catPacifiers} ({catCounts.pacifiers})
+          </button>
+        </div>
+      </div>
+
+      <!-- Empty Search State -->
+      <div id="bbsc-empty-state" class="hidden p-8 rounded-xl bg-surface-soft border border-hairline text-center text-sm text-muted">
+        {t.noResultsMsg}
+      </div>
+
+      <!-- 14 Color-Coded Interactive Item Cards (all SSR-rendered for SEO & instant paint) -->
+      <div id="bbsc-item-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+        {localizedItems.map((item) => {
+          const v = item.verdicts[defaultAppliance];
+          const isSelected = item.id === defaultItem.id;
+          return (
+            <article
+              data-bbsc-card={item.id}
+              data-bbsc-category={item.category}
+              class={`bbsc-item-card p-4 rounded-xl border transition-all flex flex-col justify-between gap-3 cursor-pointer ${getVerdictCardClasses(v)} ${
+                isSelected ? 'ring-2 ring-signature-coral' : 'hover:border-border-strong'
+              }`}
+            >
+              <div class="space-y-2">
+                <div class="flex items-start justify-between gap-2.5">
+                  <div class="flex items-start gap-2.5 min-w-0">
+                    <span aria-hidden="true" class="text-xl shrink-0 leading-none mt-0.5">{item.icon}</span>
+                    <div class="min-w-0">
+                      <h3 class="text-sm font-bold text-ink leading-snug">
+                        {item.name}
+                      </h3>
+                      <p class="text-[11.5px] text-muted leading-snug mt-0.5">
+                        {item.examples}
+                      </p>
+                    </div>
+                  </div>
+                  <span
+                    data-bbsc-card-pill
+                    class={`shrink-0 ${getVerdictPillClass(v)}`}
+                  >
+                    {getVerdictLabel(v)}
+                  </span>
+                </div>
+
+                <p data-bbsc-card-note class="text-xs text-body leading-relaxed pt-1.5 border-t border-hairline/60">
+                  {item.applianceNotes[defaultAppliance]}
+                </p>
+              </div>
+
+              <div class="space-y-2 pt-1">
+                <!-- 5-Appliance Compact Row -->
+                <div class="flex flex-wrap gap-1">
+                  {localizedAppliances.map((app) => {
+                    const av = item.verdicts[app.id];
+                    return (
+                      <span
+                        title={`${app.label}: ${getVerdictLabel(av)}`}
+                        class={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border text-[10.5px] font-semibold ${getMiniDotClass(av)}`}
+                      >
+                        <span aria-hidden="true">{app.icon}</span>
+                        <span>{getMiniStatusChar(av)}</span>
+                      </span>
+                    );
+                  })}
+                </div>
+
+                <div class="flex items-center justify-between gap-2 text-[11px]">
+                  <span class="px-2 py-0.5 rounded bg-surface-soft border border-hairline text-muted font-mono font-medium truncate">
+                    🌡️ {item.maxTemp}
+                  </span>
+                  <button
+                    type="button"
+                    data-bbsc-select-btn={item.id}
+                    class="bbsc-card-select-btn shrink-0 px-2.5 py-1 rounded-lg font-bold text-ink bg-surface-soft border border-hairline hover:border-signature-coral transition-colors cursor-pointer print:hidden"
+                  >
+                    {isSelected ? t.selectedBadge : t.inspectBtn}
+                  </button>
+                </div>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </div>
+
+    <!-- 3-Card Nursery Kitchen Safety Essentials Strip -->
+    <div class="border-t border-hairline p-5 sm:p-6 bg-surface-soft/50 space-y-4">
+      <div>
+        <h2 class="text-title-md font-semibold text-ink">{t.goldenRulesTitle}</h2>
+        <p class="text-xs text-muted mt-0.5">{t.goldenRulesSub}</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <article class="p-4 rounded-xl border bg-error-bg/55 dark:bg-red-950/25 border-error-border/70 space-y-1.5">
+          <div class="flex items-center gap-2">
+            <span aria-hidden="true" class="text-lg">🚫</span>
+            <h3 class="text-xs sm:text-sm font-bold text-ink leading-snug">{t.rule1Title}</h3>
+          </div>
+          <p class="text-xs text-body leading-relaxed">{t.rule1Body}</p>
+        </article>
+        <article class="p-4 rounded-xl border bg-warning-bg/65 dark:bg-amber-950/25 border-warning-border/70 space-y-1.5">
+          <div class="flex items-center gap-2">
+            <span aria-hidden="true" class="text-lg">🧼</span>
+            <h3 class="text-xs sm:text-sm font-bold text-ink leading-snug">{t.rule2Title}</h3>
+          </div>
+          <p class="text-xs text-body leading-relaxed">{t.rule2Body}</p>
+        </article>
+        <article class="p-4 rounded-xl border bg-canvas border-hairline space-y-1.5">
+          <div class="flex items-center gap-2">
+            <span aria-hidden="true" class="text-lg">🔍</span>
+            <h3 class="text-xs sm:text-sm font-bold text-ink leading-snug">{t.rule3Title}</h3>
+          </div>
+          <p class="text-xs text-body leading-relaxed">{t.rule3Body}</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Related Verified Companion Tools -->
+  <section class="space-y-4 print:hidden">
+    <h2 class="text-title-md font-semibold text-ink">{t.relatedHeading}</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <a
+        href={plasticCodeUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedPlasticTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedPlasticTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedPlasticDesc}</p>
+      </a>
+
+      <a
+        href={symbolDecoderUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedSymbolTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedSymbolTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedSymbolDesc}</p>
+      </a>
+
+      <a
+        href={powerOutageUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedOutageTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedOutageTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedOutageDesc}</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- Methodology & Reference Hub Strip -->
+  <section class="p-6 rounded-2xl bg-surface-soft border border-hairline print:hidden">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-title-sm font-semibold text-ink mb-1">{t.methodologyStripTitle}</h2>
+        <p class="text-[13px] text-muted">
+          {t.methodologyStripPrefix}{' '}
+          <a href={methodologyUrl} class="text-link underline hover:text-link-active">{t.methodologyLabel}</a>.
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a
+          href={plasticCodeUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
+        >
+          {t.plasticCheckerLabel}
+        </a>
+        <a
+          href={methodologyUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
+        >
+          {t.methodologyLabel}
+        </a>
+        <a
+          href={allToolsUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors"
+        >
+          {t.allToolsLabel}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Visible FAQ Accordion (Matches JSON-LD 1:1) -->
+  <section class="print:hidden">
+    <h2 class="text-title-lg font-medium text-ink tracking-tight mb-6">
+      {t.faqTitle}
+    </h2>
+    <div class="space-y-4">
+      {localizedFaqs.map((faq) => (
+        <details class="group p-5 bg-surface-soft border border-hairline rounded-xl" open>
+          <summary class="text-title-sm font-semibold text-ink cursor-pointer list-none flex items-center justify-between gap-3">
+            <span>{faq.question}</span>
+            <span class="text-muted text-sm transition-transform group-open:rotate-180 shrink-0" aria-hidden="true">&#9662;</span>
+          </summary>
+          <p class="text-[14px] text-body leading-relaxed mt-3 pt-3 border-t border-hairline/70">
+            {faq.answer}
+          </p>
+        </details>
+      ))}
+    </div>
+  </section>
+</div>
+
+<script is:inline>
+  (function () {
+    const payloadEl = document.getElementById('bbsc-payload');
+    if (!payloadEl) return;
+
+    let payload;
+    try {
+      payload = JSON.parse(payloadEl.textContent || '{}');
+    } catch (_) {
+      return;
+    }
+
+    const items = payload.items || [];
+    const appliances = payload.appliances || [];
+    const milkAlert = payload.milkAlert || {};
+    const ui = payload.ui || {};
+
+    if (!items.length || !appliances.length) return;
+
+    const itemById = new Map(items.map(function (it) { return [it.id, it]; }));
+    const appById = new Map(appliances.map(function (ap) { return [ap.id, ap]; }));
+
+    // Controls
+    const itemSelect = document.getElementById('bbsc-item-select');
+    const quickBtns = Array.from(document.querySelectorAll('.bbsc-quick-btn'));
+    const appBtns = Array.from(document.querySelectorAll('.bbsc-app-btn'));
+    const miniBtns = Array.from(document.querySelectorAll('.bbsc-mini-btn'));
+    const milkBtns = Array.from(document.querySelectorAll('.bbsc-milk-btn'));
+    const catBtns = Array.from(document.querySelectorAll('.bbsc-cat-btn'));
+    const cardEls = Array.from(document.querySelectorAll('.bbsc-item-card'));
+    const searchInput = document.getElementById('bbsc-search-input');
+
+    // Dashboard outputs
+    const checkerSection = document.getElementById('baby-bottle-safety-checker');
+    const verdictBanner = document.getElementById('bbsc-verdict-banner');
+    const verdictPill = document.getElementById('bbsc-verdict-pill');
+    const bannerIcon = document.getElementById('bbsc-banner-icon');
+    const bannerTitle = document.getElementById('bbsc-banner-title');
+    const bannerTask = document.getElementById('bbsc-banner-task');
+    const verdictNote = document.getElementById('bbsc-verdict-note');
+    const maxTempEl = document.getElementById('bbsc-max-temp');
+    const riskAlertEl = document.getElementById('bbsc-risk-alert');
+    const careTipEl = document.getElementById('bbsc-care-tip');
+    const milkAlertPanel = document.getElementById('bbsc-milk-alert-panel');
+    const emptyStateEl = document.getElementById('bbsc-empty-state');
+
+    // Action buttons
+    const copyBtn = document.getElementById('bbsc-copy-btn');
+    const copyLabel = document.getElementById('bbsc-copy-label');
+    const printBtn = document.getElementById('bbsc-print-btn');
+    const resetBtn = document.getElementById('bbsc-reset-btn');
+
+    const state = {
+      itemId: items[0].id,
+      applianceId: 'microwave',
+      heatingMilk: false,
+      category: 'all',
+      query: ''
+    };
+
+    let lastSummaryText = '';
+
+    function getVerdictLabel(v) {
+      if (v === 'safe') return ui.verdictSafe || 'SAFE';
+      if (v === 'caution') return ui.verdictCaution || 'CAUTION';
+      return ui.verdictUnsafe || 'UNSAFE';
+    }
+
+    function getVerdictPillClass(v) {
+      if (v === 'safe') return 'badge-yes';
+      if (v === 'caution') return 'badge-depends';
+      return 'badge-no';
+    }
+
+    function getVerdictIcon(v) {
+      if (v === 'safe') return '✅';
+      if (v === 'caution') return '⚠️';
+      return '🚫';
+    }
+
+    function getEffectiveVerdict(item, applianceId) {
+      const baseVerdict = (item.verdicts && item.verdicts[applianceId]) || 'caution';
+      const baseNote = (item.applianceNotes && item.applianceNotes[applianceId]) || '';
+
+      if (state.heatingMilk && applianceId === 'microwave') {
+        return {
+          verdict: 'unsafe',
+          pillLabel: milkAlert.overrideVerdict || getVerdictLabel('unsafe'),
+          note: milkAlert.overrideReason || baseNote
+        };
+      }
+
+      return {
+        verdict: baseVerdict,
+        pillLabel: getVerdictLabel(baseVerdict),
+        note: baseNote
+      };
+    }
+
+    function applyControlStyles() {
+      if (itemSelect && itemSelect.value !== state.itemId) {
+        itemSelect.value = state.itemId;
+      }
+
+      quickBtns.forEach(function (btn) {
+        const active = btn.getAttribute('data-bbsc-quick') === state.itemId;
+        btn.classList.toggle('bg-signature-coral', active);
+        btn.classList.toggle('text-white', active);
+        btn.classList.toggle('border-signature-coral', active);
+        btn.classList.toggle('shadow-sm', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      appBtns.forEach(function (btn) {
+        const active = btn.getAttribute('data-bbsc-appliance') === state.applianceId;
+        btn.setAttribute('aria-checked', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('shadow-sm', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      milkBtns.forEach(function (btn) {
+        const isOn = btn.getAttribute('data-bbsc-milk') === 'on';
+        const active = isOn === state.heatingMilk;
+        btn.setAttribute('aria-checked', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active && !isOn);
+        btn.classList.toggle('bg-error-border', active && isOn);
+        btn.classList.toggle('text-on-primary', active && !isOn);
+        btn.classList.toggle('text-white', active && isOn);
+        btn.classList.toggle('text-ink', !active);
+      });
+
+      if (milkAlertPanel) {
+        milkAlertPanel.classList.toggle('hidden', !state.heatingMilk);
+      }
+
+      catBtns.forEach(function (btn) {
+        const active = btn.getAttribute('data-bbsc-cat') === state.category;
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+    }
+
+    function updateCardClasses(cardEl, verdict, isSelected) {
+      cardEl.classList.remove(
+        'border-success-border/60',
+        'bg-canvas',
+        'border-warning-border/80',
+        'bg-warning-bg/35',
+        'dark:bg-amber-950/20',
+        'border-error-border/70',
+        'bg-error-bg/45',
+        'dark:bg-red-950/20',
+        'ring-2',
+        'ring-signature-coral',
+        'hover:border-border-strong'
+      );
+
+      if (verdict === 'safe') {
+        cardEl.classList.add('border-success-border/60', 'bg-canvas');
+      } else if (verdict === 'caution') {
+        cardEl.classList.add('border-warning-border/80', 'bg-warning-bg/35', 'dark:bg-amber-950/20');
+      } else {
+        cardEl.classList.add('border-error-border/70', 'bg-error-bg/45', 'dark:bg-red-950/20');
+      }
+
+      if (isSelected) {
+        cardEl.classList.add('ring-2', 'ring-signature-coral');
+      } else {
+        cardEl.classList.add('hover:border-border-strong');
+      }
+    }
+
+    function render() {
+      applyControlStyles();
+
+      const activeItem = itemById.get(state.itemId) || items[0];
+      const activeApp = appById.get(state.applianceId) || appliances[0];
+      const eff = getEffectiveVerdict(activeItem, activeApp.id);
+
+      // Update live dashboard
+      if (bannerIcon) bannerIcon.textContent = getVerdictIcon(eff.verdict);
+      if (bannerTitle) bannerTitle.textContent = activeItem.name;
+      if (bannerTask) bannerTask.textContent = activeApp.icon + ' ' + activeApp.label + ' — ' + activeApp.sub;
+      if (verdictNote) verdictNote.textContent = eff.note;
+      if (maxTempEl) maxTempEl.textContent = activeItem.maxTemp;
+      if (riskAlertEl) riskAlertEl.textContent = activeItem.riskAlert;
+      if (careTipEl) careTipEl.textContent = activeItem.parentCareTip;
+
+      if (verdictPill) {
+        verdictPill.className = getVerdictPillClass(eff.verdict);
+        verdictPill.textContent = eff.pillLabel;
+      }
+
+      if (verdictBanner) {
+        verdictBanner.classList.remove('border-success-border', 'border-warning-border', 'border-error-border');
+        verdictBanner.classList.add(
+          eff.verdict === 'safe'
+            ? 'border-success-border'
+            : eff.verdict === 'caution'
+              ? 'border-warning-border'
+              : 'border-error-border'
+        );
+      }
+
+      // Update 5-appliance mini buttons inside dashboard
+      miniBtns.forEach(function (btn) {
+        const aid = btn.getAttribute('data-bbsc-mini-app') || '';
+        const isCurrent = aid === state.applianceId;
+        btn.classList.toggle('bg-white/20', isCurrent);
+        btn.classList.toggle('border-white/60', isCurrent);
+        btn.classList.toggle('ring-1', isCurrent);
+        btn.classList.toggle('ring-white/50', isCurrent);
+        btn.classList.toggle('bg-white/5', !isCurrent);
+        btn.classList.toggle('border-white/15', !isCurrent);
+
+        const statusEl = btn.querySelector('[data-bbsc-mini-status]');
+        if (statusEl) {
+          const mv = getEffectiveVerdict(activeItem, aid).verdict;
+          statusEl.textContent = getVerdictLabel(mv);
+          statusEl.className =
+            'inline-block mt-1 px-1.5 py-0.5 rounded text-[9.5px] font-extrabold ' +
+            (mv === 'safe'
+              ? 'bg-emerald-500/25 text-emerald-200'
+              : mv === 'caution'
+                ? 'bg-amber-500/25 text-amber-200'
+                : 'bg-red-500/30 text-red-200');
+        }
+      });
+
+      // Update all 14 item cards
+      const queryLower = state.query.trim().toLowerCase();
+      let visibleCount = 0;
+
+      cardEls.forEach(function (cardEl) {
+        const cid = cardEl.getAttribute('data-bbsc-card') || '';
+        const item = itemById.get(cid);
+        if (!item) return;
+
+        const cardEff = getEffectiveVerdict(item, state.applianceId);
+        const isSelected = cid === state.itemId;
+        updateCardClasses(cardEl, cardEff.verdict, isSelected);
+
+        const pillEl = cardEl.querySelector('[data-bbsc-card-pill]');
+        if (pillEl) {
+          pillEl.className = 'shrink-0 ' + getVerdictPillClass(cardEff.verdict);
+          pillEl.textContent = getVerdictLabel(cardEff.verdict);
+        }
+
+        const noteEl = cardEl.querySelector('[data-bbsc-card-note]');
+        if (noteEl) {
+          noteEl.textContent = cardEff.note;
+        }
+
+        const selBtn = cardEl.querySelector('.bbsc-card-select-btn');
+        if (selBtn) {
+          selBtn.textContent = isSelected ? (ui.selectedBadge || 'Selected') : (ui.inspectBtn || 'Inspect');
+          selBtn.classList.toggle('bg-signature-coral', isSelected);
+          selBtn.classList.toggle('text-white', isSelected);
+          selBtn.classList.toggle('border-signature-coral', isSelected);
+          selBtn.classList.toggle('bg-surface-soft', !isSelected);
+          selBtn.classList.toggle('text-ink', !isSelected);
+          selBtn.classList.toggle('border-hairline', !isSelected);
+        }
+
+        const matchesCat = state.category === 'all' || item.category === state.category;
+        const matchesQuery =
+          queryLower.length === 0 ||
+          item.name.toLowerCase().indexOf(queryLower) !== -1 ||
+          item.examples.toLowerCase().indexOf(queryLower) !== -1 ||
+          item.riskAlert.toLowerCase().indexOf(queryLower) !== -1 ||
+          item.parentCareTip.toLowerCase().indexOf(queryLower) !== -1;
+
+        const show = matchesCat && matchesQuery;
+        cardEl.classList.toggle('hidden', !show);
+        if (show) visibleCount += 1;
+      });
+
+      if (emptyStateEl) {
+        emptyStateEl.classList.toggle('hidden', visibleCount > 0);
+      }
+
+      // Build plain-text Parent Care Summary
+      const matrixLines = appliances.map(function (ap) {
+        const av = getEffectiveVerdict(activeItem, ap.id).verdict;
+        return '  - ' + ap.label + ': ' + getVerdictLabel(av);
+      });
+
+      const summaryLines = [
+        ui.copyHeader || 'Baby Bottle & Kids Kitchenware Safety Summary',
+        (ui.copyItemLine || 'Item') + ': ' + activeItem.name,
+        (ui.copyTaskLine || 'Task') + ': ' + activeApp.label + ' (' + activeApp.sub + ')',
+        (ui.copyVerdictLine || 'Verdict') + ': ' + eff.pillLabel + ' — ' + eff.note,
+        (ui.copyMaxTempLine || 'Max Temp') + ': ' + activeItem.maxTemp,
+        '',
+        (ui.copyAlertLine || 'Safety Alert') + ': ' + activeItem.riskAlert,
+        (ui.copyTipLine || 'Parent Care Tip') + ': ' + activeItem.parentCareTip,
+        '',
+        ui.copyMatrixHeader || '5-Appliance Summary:',
+        matrixLines.join('\n'),
+        '',
+        ui.copyMilkReminder || 'AAP/CDC Reminder: NEVER microwave breast milk or infant formula.'
+      ];
+
+      lastSummaryText = summaryLines.join('\n');
+    }
+
+    // Event bindings
+    if (itemSelect) {
+      itemSelect.addEventListener('change', function () {
+        if (itemById.has(itemSelect.value)) {
+          state.itemId = itemSelect.value;
+          render();
+        }
+      });
+    }
+
+    quickBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const id = btn.getAttribute('data-bbsc-quick');
+        if (id && itemById.has(id)) {
+          state.itemId = id;
+          render();
+        }
+      });
+    });
+
+    appBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const aid = btn.getAttribute('data-bbsc-appliance');
+        if (aid && appById.has(aid)) {
+          state.applianceId = aid;
+          render();
+        }
+      });
+    });
+
+    miniBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const aid = btn.getAttribute('data-bbsc-mini-app');
+        if (aid && appById.has(aid)) {
+          state.applianceId = aid;
+          render();
+        }
+      });
+    });
+
+    milkBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.heatingMilk = btn.getAttribute('data-bbsc-milk') === 'on';
+        render();
+      });
+    });
+
+    catBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.category = btn.getAttribute('data-bbsc-cat') || 'all';
+        render();
+      });
+    });
+
+    if (searchInput) {
+      searchInput.addEventListener('input', function () {
+        state.query = searchInput.value || '';
+        render();
+      });
+    }
+
+    cardEls.forEach(function (cardEl) {
+      cardEl.addEventListener('click', function () {
+        const cid = cardEl.getAttribute('data-bbsc-card');
+        if (cid && itemById.has(cid)) {
+          state.itemId = cid;
+          render();
+          if (checkerSection && typeof checkerSection.scrollIntoView === 'function') {
+            checkerSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
+      });
+    });
+
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        const showCopied = function () {
+          if (copyLabel) copyLabel.textContent = ui.copiedSummaryBtn || 'Summary Copied ✓';
+          window.setTimeout(function () {
+            if (copyLabel) copyLabel.textContent = '📋 ' + (ui.copySummaryBtn || 'Copy Parent Care Summary');
+          }, 2200);
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(lastSummaryText).then(showCopied).catch(showCopied);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = lastSummaryText;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'absolute';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          try {
+            document.execCommand('copy');
+          } catch (_) {
+            // ignore
+          }
+          document.body.removeChild(ta);
+          showCopied();
+        }
+      });
+    }
+
+    if (printBtn) {
+      printBtn.addEventListener('click', function () {
+        window.print();
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function () {
+        state.itemId = items[0].id;
+        state.applianceId = 'microwave';
+        state.heatingMilk = false;
+        state.category = 'all';
+        state.query = '';
+        if (searchInput) searchInput.value = '';
+        render();
+      });
+    }
+
+    render();
+  })();
+</script>
