@@ -29,7 +29,7 @@ import whatHappensEs from '../../data/what-happens.es.json';
 import whatHappensPt from '../../data/what-happens.pt.json';
 import whatHappensZh from '../../data/what-happens.zh-cn.json';
 import whatHappensJa from '../../data/what-happens.ja.json';
-import { getDirectoryUrl, getApplianceUrl } from '../../i18n/utils';
+import { getDirectoryUrl, getApplianceUrl, useTranslatedPath } from '../../i18n/utils';
 import { CATEGORIES, CATEGORY_LOCALIZATIONS } from '../../utils/materialCategories';
 import type { SupportedLanguage } from '../../i18n/ui';
 
@@ -48,36 +48,160 @@ interface Props {
   availableLocales: SupportedLanguage[];
 }
 
-const { lang, availableLocales } = Astro.props;
+interface ConsumerToolItem {
+  slug: string;
+  name: string;
+  desc: string;
+  category: string;
+  keywords: string;
+}
 
-const contentByLang = {
+interface QuickChip {
+  label: string;
+  query: string;
+}
+
+interface SitemapLocaleContent {
+  numLocale: string;
+  title: string;
+  description: string;
+  eyebrow: string;
+  home: string;
+  sitemap: string;
+  h1: string;
+  intro: string;
+  kpiTotal: string;
+  kpiTools: string;
+  kpiAppliances: string;
+  kpiReference: string;
+  filterLabel: string;
+  filterPlaceholder: string;
+  filterClear: string;
+  filterPopular: string;
+  msgAll: string;
+  msgMatch: string;
+  msgEmpty: string;
+  emptyTitle: string;
+  emptyDesc: string;
+  emptyReset: string;
+  navAriaLabel: string;
+  pillCalculators: string;
+  pillAppliances: string;
+  pillGuides: string;
+  pillComparisons: string;
+  pillDirectories: string;
+  pillTrust: string;
+  calcEyebrow: string;
+  calcTitle: string;
+  calcSub: string;
+  calcViewAll: string;
+  calcCardLabel: string;
+  secAppliances: string;
+  secAppliancesSub: string;
+  secGuides: string;
+  secMaterials: string;
+  materialsIndex: string;
+  scratchedNonstickLabel: string;
+  blogTitle: string;
+  blogIndex: string;
+  compareTitle: string;
+  compareSub: string;
+  compareIndex: string;
+  secDirectories: string;
+  shelfLifeTitle: string;
+  refreezeTitle: string;
+  washingTitle: string;
+  whatHappensTitle: string;
+  viewAll: string;
+  secTrust: string;
+  trustCoreTitle: string;
+  trustEditorialTitle: string;
+  trustPolicyTitle: string;
+  homeLink: string;
+  toolsHubLink: string;
+  savedLink: string;
+  rssLink: string;
+  methodologyLink: string;
+  aboutLink: string;
+  contactLink: string;
+  disclaimerLink: string;
+  privacyLink: string;
+  termsLink: string;
+  appNames: Record<string, string>;
+  chips: QuickChip[];
+  tools: ConsumerToolItem[];
+}
+
+const { lang, availableLocales } = Astro.props;
+const translatePath = useTranslatedPath(lang);
+
+const contentByLang: Record<'es' | 'pt' | 'zh-cn' | 'ja', SitemapLocaleContent> = {
   es: {
-    title: "Mapa del Sitio HTML | ¿Es Seguro en la Cocina?",
-    description: "Índice HTML completo de guías de seguridad en la cocina, directrices por electrodoméstico, centros de materiales y referencias de seguridad.",
+    numLocale: 'es-ES',
+    title: "Mapa del Sitio HTML y Directorio de Seguridad en la Cocina | ¿Es Seguro en la Cocina?",
+    description: "Explora y filtra al instante nuestro índice completo: calculadoras cotidianas de seguridad alimentaria, guías por electrodoméstico, vida útil, recongelación, comparaciones y políticas editoriales.",
+    eyebrow: "Índice Completo del Directorio",
     home: "Inicio",
     sitemap: "Mapa del Sitio",
     h1: "Mapa del Sitio HTML",
-    intro: "Explore nuestra colección completa de pautas de seguridad para electrodomésticos, centros de materiales, guías de conservación y congelación, y artículos de referencia.",
-    secCore: "Secciones Principales",
-    secCoreTitle: "Páginas Básicas",
-    homeLink: "Página de Inicio",
-    aboutLink: "Sobre Nosotros",
-    contactLink: "Contacto y Soporte",
-    privacyLink: "Política de Privacidad",
-    termsLink: "Términos y Condiciones",
+    intro: "Busca o explora todas nuestras calculadoras domésticas, guías de seguridad por electrodoméstico, centros de materiales, tablas de vida útil, reglas de recongelación y artículos editoriales.",
+    kpiTotal: "Enlaces Indexados",
+    kpiTools: "Calculadoras de Cocina",
+    kpiAppliances: "Guías de Electrodomésticos",
+    kpiReference: "Guías y Referencias",
+    filterLabel: "Filtro Instantáneo del Mapa del Sitio",
+    filterPlaceholder: "Filtra por artículo, marca o tema (ej.: pyrex, freidora de aire, moho, hierro fundido, lejía, stanley, nevera)...",
+    filterClear: "Limpiar",
+    filterPopular: "Filtros populares:",
+    msgAll: "Mostrando los {total} enlaces indexados en {sections} secciones.",
+    msgMatch: "Mostrando {matched} enlaces coincidentes (de {total}) en {sections} secciones.",
+    msgEmpty: 'No se encontraron enlaces para "{query}". Prueba con otro artículo, material o electrodoméstico.',
+    emptyTitle: "No se encontraron enlaces coincidentes",
+    emptyDesc: 'Prueba una palabra clave más corta como "pyrex", "freidora", "moho", "hierro fundido", "lejía", "stanley" o "refrigerador".',
+    emptyReset: "Restablecer Filtro",
+    navAriaLabel: "Secciones del mapa del sitio",
+    pillCalculators: "Calculadoras",
+    pillAppliances: "Electrodomésticos",
+    pillGuides: "Guías y Materiales",
+    pillComparisons: "Comparaciones",
+    pillDirectories: "Vida Útil y Recongelado",
+    pillTrust: "Confianza y Políticas",
+    calcEyebrow: "Herramientas Destacadas",
+    calcTitle: "Calculadoras y Utilidades Cotidianas de Seguridad en la Cocina",
+    calcSub: "Calculadoras domésticas gratuitas basadas en estándares oficiales de USDA, FDA, CDC y fabricantes de utensilios.",
+    calcViewAll: "Ver Todas las Herramientas →",
+    calcCardLabel: "Calculadoras Verificadas para el Hogar",
+    secAppliances: "Guías de Referencia por Electrodoméstico",
+    secAppliancesSub: "Veredictos de seguridad artículo por artículo en 7 electrodomésticos del hogar.",
+    secGuides: "Guías Perennes y Centros de Materiales",
     secMaterials: "Seguridad por Material",
-    materialsIndex: "Índice de Materiales",
-    secAppliances: "Guías de Electrodomésticos",
-    viewAll: "Ver todo",
-    secDirectories: "Directorios de Seguridad",
+    materialsIndex: "Ver materiales",
+    scratchedNonstickLabel: "Guía de Seguridad: Sartenes Antiadherentes Rayadas",
+    blogTitle: "Artículos Perennes de Seguridad en la Cocina",
+    blogIndex: "Índice del Blog",
+    compareTitle: "Comparaciones de Seguridad Lado a Lado",
+    compareSub: "Comparativas directas de utensilios, electrodomésticos y materiales de cocina.",
+    compareIndex: "Ver todas las comparaciones",
+    secDirectories: "Directorios de Vida Útil, Recongelación y Cuidado",
     shelfLifeTitle: "Vida Útil y Almacenamiento",
     refreezeTitle: "Seguridad al Recongelar",
-    washingTitle: "Lavadora",
+    washingTitle: "Lavadora y Lavandería",
     whatHappensTitle: "Escenarios de Emergencia",
-    blogTitle: "Blog de Seguridad en la Cocina",
-    blogIndex: "Artículos del Blog",
-    compareTitle: "Comparaciones de Seguridad",
-    compareIndex: "Comparaciones",
+    viewAll: "Ver todo",
+    secTrust: "Confianza, Metodología y Políticas del Sitio",
+    trustCoreTitle: "Centro Principal y Guardados",
+    trustEditorialTitle: "Confianza Editorial y Metodología",
+    trustPolicyTitle: "Políticas Legales y de Seguridad",
+    homeLink: "Página de Inicio",
+    toolsHubLink: "Directorio Completo de Herramientas",
+    savedLink: "Mis Guías Guardadas",
+    rssLink: "Feed RSS (XML)",
+    methodologyLink: "Metodología Editorial y Estándares de Verificación",
+    aboutLink: "Sobre Nosotros",
+    contactLink: "Contacto y Soporte",
+    disclaimerLink: "Aviso Legal y de Seguridad",
+    privacyLink: "Política de Privacidad",
+    termsLink: "Términos y Condiciones",
     appNames: {
       dishwasher: "Lavavajillas",
       microwave: "Microondas",
@@ -86,35 +210,107 @@ const contentByLang = {
       dryer: "Secadora",
       airfryer: "Freidora de Aire",
       refrigerator: "Refrigerador"
-    } as Record<string, string>
+    },
+    chips: [
+      { label: 'Pyrex', query: 'pyrex' },
+      { label: 'Freidora de Aire', query: 'air fryer' },
+      { label: 'Moho', query: 'moho' },
+      { label: 'Hierro Fundido', query: 'hierro fundido' },
+      { label: 'Lejía / Cloro', query: 'bleach' },
+      { label: 'Stanley', query: 'stanley' },
+      { label: 'Refrigerador', query: 'refrigerador' }
+    ],
+    tools: [
+      { slug: 'kitchen-symbol-decoder', name: 'Decodificador de Símbolos de Cocina', desc: 'Identifica íconos de lavavajillas, microondas, horno y congelador en la base de recipientes.', category: 'Utensilios y Etiquetas', keywords: 'simbolos iconos pyrex tupperware lavavajillas microondas symbol decoder' },
+      { slug: 'leftover-shelf-life-calculator', name: 'Calculadora de Vida Útil de Sobras', desc: 'Calcula cuántos días duran tus sobras en refrigerador y congelador según USDA.', category: 'Seguridad Alimentaria', keywords: 'sobras nevera refrigerador vida util caducidad leftover fridge' },
+      { slug: 'meat-thawing-calculator', name: 'Calculadora de Descongelación de Carnes', desc: 'Tiempos seguros de descongelación en nevera y agua fría por peso para pollo, res y pavo.', category: 'Seguridad Alimentaria', keywords: 'carne pavo pollo descongelar congelador meat thaw defrost' },
+      { slug: 'plastic-code-checker', name: 'Verificador de Códigos de Plástico (#1–#7)', desc: 'Comprueba si los plásticos PET, HDPE, PVC, LDPE, PP y PS son aptos para calor.', category: 'Utensilios y Etiquetas', keywords: 'plastico codigo reciclaje bpa microondas lavavajillas plastic code' },
+      { slug: 'air-fryer-oven-converter', name: 'Conversor de Freidora de Aire y Horno', desc: 'Convierte temperatura y tiempo de horno tradicional a freidora de aire y convección.', category: 'Conversiones', keywords: 'freidora de aire horno conveccion temperatura tiempo air fryer oven converter' },
+      { slug: 'cookware-oven-temp-lookup', name: 'Temperatura Máxima de Utensilios en Horno', desc: 'Consulta el límite seguro de horno para Pyrex, Le Creuset, Lodge y 24 marcas.', category: 'Utensilios y Etiquetas', keywords: 'pyrex le creuset lodge corningware stanley horno temperatura maxima cookware oven' },
+      { slug: 'internal-cooking-temp-chart', name: 'Tabla de Temperaturas Internas Seguras', desc: 'Temperaturas mínimas USDA y reposo para pollo, carne molida, cerdo, res y pescado.', category: 'Seguridad Alimentaria', keywords: 'temperatura interna termometro carne pollo cerdo pescado usda cooking temp' },
+      { slug: 'appliance-descaling-calculator', name: 'Calculadora de Descalcificación de Electrodomésticos', desc: 'Proporciones exactas de vinagre o ácido cítrico para cafeteras, hervidores y espresso.', category: 'Limpieza y Cuidado', keywords: 'descalcificar vinagre acido citrico cafetera hervidor keurig descaling' },
+      { slug: 'cleaner-mixing-danger-checker', name: 'Verificador de Mezclas Peligrosas de Limpieza', desc: 'Comprueba reacciones tóxicas antes de mezclar lejía (cloro), vinagre o amoníaco.', category: 'Limpieza y Cuidado', keywords: 'lejia cloro vinagre amoniaco agua oxigenada mezclar limpiadores bleach cleaner mixing' },
+      { slug: 'microwave-wattage-converter', name: 'Conversor de Potencia de Microondas', desc: 'Ajusta el tiempo de cocción entre microondas de 600W, 700W, 900W, 1000W y 1250W.', category: 'Conversiones', keywords: 'microondas potencia vatios tiempo conversor microwave wattage' },
+      { slug: 'power-outage-food-safety-checker', name: 'Seguridad Alimentaria en Apagones', desc: 'Decide qué conservar o desechar del refrigerador y congelador tras un corte de luz.', category: 'Seguridad Alimentaria', keywords: 'apagon corte luz nevera refrigerador congelador alimentos power outage fridge' },
+      { slug: 'baby-bottle-safety-checker', name: 'Verificador de Biberones y Vajilla Infantil', desc: 'Guía AAP/FDA/CDC sobre esterilización, microondas y lavavajillas para biberones y vasos.', category: 'Seguridad Alimentaria', keywords: 'biberon vaso bebe esterilizar microondas lavavajillas baby bottle' },
+      { slug: 'cooking-oil-smoke-point-finder', name: 'Buscador de Punto de Humo de Aceites', desc: 'Compara puntos de humo y temperaturas seguras de fritura en 28 aceites de cocina.', category: 'Conversiones', keywords: 'aceite oliva aguacate punto de humo freir cooking oil smoke point' },
+      { slug: 'cast-iron-seasoning-troubleshooter', name: 'Solucionador de Curado de Hierro Fundido', desc: 'Resuelve óxido, superficie pegajosa, curado descascarado y lavado con jabón.', category: 'Limpieza y Cuidado', keywords: 'hierro fundido sarten oxido curado acero carbono jabon cast iron seasoning' },
+      { slug: 'fridge-organization-zone-planner', name: 'Planificador de Zonas del Refrigerador', desc: 'Mapa USDA por estante para carne cruda, lácteos, huevos, verduras y condimentos.', category: 'Seguridad Alimentaria', keywords: 'nevera refrigerador organizar estantes zonas temperatura fridge zone planner' },
+      { slug: 'kitchen-safety-iq-quiz', name: 'Quiz de Seguridad en la Cocina', desc: 'Pon a prueba tus conocimientos frente a los mitos cotidianos de cocina en 2 minutos.', category: 'Seguridad Alimentaria', keywords: 'quiz prueba mitos seguridad cocina kitchen safety quiz' },
+      { slug: 'induction-cookware-compatibility-checker', name: 'Verificador de Utensilios para Inducción', desc: 'Comprueba compatibilidad con inducción y la prueba del imán en 3 segundos.', category: 'Utensilios y Etiquetas', keywords: 'induccion placa iman acero hierro fundido cobre aluminio induction cookware' },
+      { slug: 'dishwasher-detergent-dosage-calculator', name: 'Calculadora de Detergente para Lavavajillas', desc: 'Dosificación ideal de polvo, gel, pastilla y abrillantador según dureza del agua.', category: 'Limpieza y Cuidado', keywords: 'lavavajillas detergente pastilla gel agua dura abrillantador dishwasher detergent' },
+      { slug: 'food-allergy-cross-contact-checker', name: 'Verificador de Contacto Cruzado por Alergias', desc: 'Métodos seguros de limpieza y superficies para evitar trazas de gluten, maní y lácteos.', category: 'Seguridad Alimentaria', keywords: 'alergia contacto cruzado gluten mani lacteos tabla cortar allergy cross contact' },
+      { slug: 'pantry-dry-goods-shelf-life-checker', name: 'Vida Útil de Despensa y Productos Secos', desc: 'Consulta la frescura de especias, harina, levadura, aceites, arroz y conservas.', category: 'Seguridad Alimentaria', keywords: 'despensa especias harina polvo hornear arroz latas pantry dry goods' },
+      { slug: 'moldy-food-safety-checker', name: 'Verificador de Alimentos con Moho', desc: 'Reglas USDA sobre cuándo puedes cortar el moho (quesos duros) o desechar todo.', category: 'Seguridad Alimentaria', keywords: 'moho hongos queso pan fruta mermelada tirar cortar mold moldy food' },
+      { slug: 'oven-rack-bakeware-heat-adjuster', name: 'Ajustador de Rejilla y Moldes de Horno', desc: 'Ajusta temperatura y altura de rejilla para moldes Pyrex de vidrio, oscuros y cerámica.', category: 'Conversiones', keywords: 'horno rejilla molde pyrex vidrio antiadherente oscuro ceramica oven rack bakeware' }
+    ]
   },
   pt: {
-    title: "Mapa do Site HTML | É Seguro na Cozinha?",
-    description: "Índice HTML completo de guias de segurança na cozinha, diretrizes por eletrodoméstico, centros de materiais e referências de segurança.",
+    numLocale: 'pt-BR',
+    title: "Mapa do Site HTML e Diretório de Segurança na Cozinha | É Seguro na Cozinha?",
+    description: "Explore e filtre instantaneamente nosso índice completo: calculadoras domésticas de segurança alimentar, guias por eletrodoméstico, validade, recongelamento, comparações e políticas editoriais.",
+    eyebrow: "Índice Completo do Diretório",
     home: "Início",
     sitemap: "Mapa do Site",
     h1: "Mapa do Site HTML",
-    intro: "Explore nossa coleção completa de diretrizes de segurança para eletrodomésticos, centros de materiais, guias de conservação e congelamento, e artigos de referência.",
-    secCore: "Seções Principais",
-    secCoreTitle: "Páginas Básicas",
-    homeLink: "Página Inicial",
-    aboutLink: "Sobre Nós",
-    contactLink: "Contato e Suporte",
-    privacyLink: "Política de Privacidade",
-    termsLink: "Termos e Condições",
+    intro: "Pesquise ou navegue por todas as calculadoras de cozinha, guias de segurança por eletrodoméstico, centros de materiais, tabelas de validade, regras de recongelamento e artigos editoriais.",
+    kpiTotal: "Links Indexados",
+    kpiTools: "Calculadoras de Cozinha",
+    kpiAppliances: "Guias de Eletrodomésticos",
+    kpiReference: "Guias e Referências",
+    filterLabel: "Filtro Instantâneo do Mapa do Site",
+    filterPlaceholder: "Filtre por item, marca ou tema (ex.: pyrex, air fryer, mofo, ferro fundido, água sanitária, stanley, geladeira)...",
+    filterClear: "Limpar",
+    filterPopular: "Filtros populares:",
+    msgAll: "Exibindo todos os {total} links indexados em {sections} seções.",
+    msgMatch: "Exibindo {matched} links correspondentes (de {total}) em {sections} seções.",
+    msgEmpty: 'Nenhum link encontrado para "{query}". Tente outro item, material ou eletrodoméstico.',
+    emptyTitle: "Nenhum link correspondente encontrado",
+    emptyDesc: 'Tente uma palavra-chave mais curta como "pyrex", "air fryer", "mofo", "ferro fundido", "água sanitária", "stanley" ou "geladeira".',
+    emptyReset: "Limpar Filtro",
+    navAriaLabel: "Seções do mapa do site",
+    pillCalculators: "Calculadoras",
+    pillAppliances: "Eletrodomésticos",
+    pillGuides: "Guias e Materiais",
+    pillComparisons: "Comparações",
+    pillDirectories: "Validade e Recongelamento",
+    pillTrust: "Confiança e Políticas",
+    calcEyebrow: "Ferramentas em Destaque",
+    calcTitle: "Calculadoras e Utilitários Cotidianos de Segurança na Cozinha",
+    calcSub: "Calculadoras domésticas gratuitas baseadas em normas oficiais do USDA, FDA, CDC e fabricantes de utensílios.",
+    calcViewAll: "Ver Todas as Ferramentas →",
+    calcCardLabel: "Calculadoras Verificadas para o Dia a Dia",
+    secAppliances: "Guias de Referência por Eletrodoméstico",
+    secAppliancesSub: "Vereditos de segurança item por item em 7 eletrodomésticos domésticos.",
+    secGuides: "Guias Perenes e Centros de Materiais",
     secMaterials: "Segurança por Material",
-    materialsIndex: "Índice de Materiais",
-    secAppliances: "Guias de Eletrodomésticos",
-    viewAll: "Ver tudo",
-    secDirectories: "Diretórios de Segurança",
+    materialsIndex: "Ver materiais",
+    scratchedNonstickLabel: "Guia de Segurança: Panelas Antiaderentes Riscadas",
+    blogTitle: "Artigos Perenes de Segurança na Cozinha",
+    blogIndex: "Índice do Blog",
+    compareTitle: "Comparações de Segurança Lado a Lado",
+    compareSub: "Comparativos diretos de panelas, eletrodomésticos e materiais de cozinha.",
+    compareIndex: "Ver todas as comparações",
+    secDirectories: "Diretórios de Validade, Recongelamento e Cuidados",
     shelfLifeTitle: "Validade e Armazenamento",
     refreezeTitle: "Segurança ao Recongelar",
     washingTitle: "Máquina de Lavar",
     whatHappensTitle: "Cenários de Emergência",
-    blogTitle: "Blog de Segurança na Cozinha",
-    blogIndex: "Artigos do Blog",
-    compareTitle: "Comparações de Segurança",
-    compareIndex: "Comparações",
+    viewAll: "Ver tudo",
+    secTrust: "Confiança, Metodologia e Políticas do Site",
+    trustCoreTitle: "Central Principal e Salvos",
+    trustEditorialTitle: "Confiança Editorial e Metodologia",
+    trustPolicyTitle: "Políticas Legais e de Segurança",
+    homeLink: "Página Inicial",
+    toolsHubLink: "Central Completa de Ferramentas",
+    savedLink: "Meus Guias Salvos",
+    rssLink: "Feed RSS (XML)",
+    methodologyLink: "Metodologia Editorial e Padrões de Verificação",
+    aboutLink: "Sobre Nós",
+    contactLink: "Contato e Suporte",
+    disclaimerLink: "Aviso Legal e de Segurança",
+    privacyLink: "Política de Privacidade",
+    termsLink: "Termos e Condições",
     appNames: {
       dishwasher: "Lava-Louças",
       microwave: "Micro-ondas",
@@ -123,72 +319,107 @@ const contentByLang = {
       dryer: "Secadora",
       airfryer: "Fritadeira sem Óleo",
       refrigerator: "Geladeira"
-    } as Record<string, string>
-  },
-  ja: {
-    title: "HTMLサイトマップ | キッチン安全チェッカー",
-    description: "キッチン安全チェッカーの全ガイド、家電別使用基準、素材別ハブ、および安全リファレンスの完全なHTMLインデックスです。",
-    home: "ホーム",
-    sitemap: "サイトマップ",
-    h1: "HTML サイトマップ",
-    intro: "当サイトが提供するすべての家電別安全ガイド、素材別安全性ハブ、食品保存・冷凍期間ガイドライン、およびキッチンの安全に関する全記事を網羅しています。",
-    secCore: "主要セクション",
-    secCoreTitle: "基本ページ",
-    homeLink: "トップページ",
-    aboutLink: "運営者情報・理念",
-    contactLink: "お問い合わせ",
-    privacyLink: "プライバシーポリシー",
-    termsLink: "利用規約",
-    secMaterials: "素材別安全性ハブ",
-    materialsIndex: "素材別ハブ一覧",
-    secAppliances: "家電別安全ガイド一覧",
-    viewAll: "すべて見る",
-    secDirectories: "各種安全ディレクトリ",
-    shelfLifeTitle: "賞味期限・保存期間ガイド",
-    refreezeTitle: "再冷凍安全性ガイド",
-    washingTitle: "洗濯機・ランドリー安全性",
-    whatHappensTitle: "誤使用時のリスク・非常時シナリオ",
-    blogTitle: "キッチン安全ブログ",
-    blogIndex: "ブログ記事一覧",
-    compareTitle: "キッチン用品の安全性比較",
-    compareIndex: "比較一覧",
-    appNames: {
-      dishwasher: "食洗機",
-      microwave: "電子レンジ",
-      freezer: "冷凍庫",
-      oven: "オーブン",
-      dryer: "乾燥機",
-      airfryer: "ノンフライヤー",
-      refrigerator: "冷蔵庫"
-    } as Record<string, string>
+    },
+    chips: [
+      { label: 'Pyrex', query: 'pyrex' },
+      { label: 'Air Fryer', query: 'air fryer' },
+      { label: 'Mofo', query: 'mofo' },
+      { label: 'Ferro Fundido', query: 'ferro fundido' },
+      { label: 'Água Sanitária', query: 'bleach' },
+      { label: 'Stanley', query: 'stanley' },
+      { label: 'Geladeira', query: 'geladeira' }
+    ],
+    tools: [
+      { slug: 'kitchen-symbol-decoder', name: 'Decodificador de Símbolos de Cozinha', desc: 'Identifique ícones de lava-louças, micro-ondas, forno e freezer no fundo dos potes.', category: 'Utensílios e Rótulos', keywords: 'simbolos icones pyrex tupperware lava loucas microondas symbol decoder' },
+      { slug: 'leftover-shelf-life-calculator', name: 'Calculadora de Validade de Sobras', desc: 'Calcule quantos dias as sobras duram na geladeira e freezer segundo o USDA.', category: 'Segurança Alimentar', keywords: 'sobras geladeira freezer validade vencimento leftover fridge' },
+      { slug: 'meat-thawing-calculator', name: 'Calculadora de Descongelamento de Carnes', desc: 'Tempos seguros de descongelamento na geladeira e água fria por peso para aves e carnes.', category: 'Segurança Alimentar', keywords: 'carne peru frango descongelar freezer geladeira meat thaw defrost' },
+      { slug: 'plastic-code-checker', name: 'Verificador de Códigos de Plástico (#1–#7)', desc: 'Verifique se plásticos PET, HDPE, PVC, LDPE, PP e PS resistem ao micro-ondas e calor.', category: 'Utensílios e Rótulos', keywords: 'plastico codigo reciclagem bpa microondas lava loucas plastic code' },
+      { slug: 'air-fryer-oven-converter', name: 'Conversor de Air Fryer e Forno', desc: 'Converta receitas de forno convencional para air fryer, convecção e Gas Mark.', category: 'Conversões', keywords: 'air fryer fritadeira forno conveccao temperatura tempo air fryer oven converter' },
+      { slug: 'cookware-oven-temp-lookup', name: 'Temperatura Máxima de Panelas no Forno', desc: 'Consulte o limite seguro de forno para Pyrex, Le Creuset, Lodge e 24 marcas.', category: 'Utensílios e Rótulos', keywords: 'pyrex le creuset lodge corningware stanley forno temperatura maxima cookware oven' },
+      { slug: 'internal-cooking-temp-chart', name: 'Tabela de Temperaturas Internas Seguras', desc: 'Temperaturas mínimas USDA e descanso para frango, carne moída, porco, boi e peixe.', category: 'Segurança Alimentar', keywords: 'temperatura interna termometro carne frango porco peixe usda cooking temp' },
+      { slug: 'appliance-descaling-calculator', name: 'Calculadora de Descalcificação de Aparelhos', desc: 'Proporções exatas de vinagre ou ácido cítrico para cafeteiras, chaleiras e espresso.', category: 'Limpeza e Cuidados', keywords: 'descalcificar vinagre acido citrico cafeteira chaleira keurig descaling' },
+      { slug: 'cleaner-mixing-danger-checker', name: 'Verificador de Misturas Perigosas de Limpeza', desc: 'Cheque reações tóxicas antes de misturar água sanitária, vinagre ou amônia.', category: 'Limpeza e Cuidados', keywords: 'agua sanitaria cloro vinagre amonia agua oxigenada misturar limpeza bleach cleaner mixing' },
+      { slug: 'microwave-wattage-converter', name: 'Conversor de Potência de Micro-ondas', desc: 'Ajuste o tempo de preparo entre micro-ondas de 600W, 700W, 900W, 1000W e 1250W.', category: 'Conversões', keywords: 'microondas potencia watts tempo conversor microwave wattage' },
+      { slug: 'power-outage-food-safety-checker', name: 'Segurança Alimentar em Queda de Energia', desc: 'Decida o que manter ou descartar na geladeira e freezer após um apagão.', category: 'Segurança Alimentar', keywords: 'falta de luz apagon energia geladeira freezer alimentos power outage fridge' },
+      { slug: 'baby-bottle-safety-checker', name: 'Verificador de Mamadeiras e Copos Infantis', desc: 'Orientações AAP/FDA/CDC sobre esterilização, micro-ondas e lava-louças para bebês.', category: 'Segurança Alimentar', keywords: 'mamadeira copo bebe esterilizar microondas lava loucas baby bottle' },
+      { slug: 'cooking-oil-smoke-point-finder', name: 'Guia de Ponto de Fumaça de Óleos', desc: 'Compare pontos de fumaça e temperaturas seguras de fritura em 28 óleos culinários.', category: 'Conversões', keywords: 'oleo azeite abacate ponto de fumaca fritar cooking oil smoke point' },
+      { slug: 'cast-iron-seasoning-troubleshooter', name: 'Solucionador de Cura de Ferro Fundido', desc: 'Resolva ferrugem, óleo grudento, cura descascando e limpeza com sabão.', category: 'Limpeza e Cuidados', keywords: 'ferro fundido panela ferrugem cura aco carbono sabao cast iron seasoning' },
+      { slug: 'fridge-organization-zone-planner', name: 'Planejador de Zonas da Geladeira', desc: 'Mapa USDA por prateleira para carne crua, laticínios, ovos, hortaliças e molhos.', category: 'Segurança Alimentar', keywords: 'geladeira organizar prateleiras zonas temperatura fridge zone planner' },
+      { slug: 'kitchen-safety-iq-quiz', name: 'Quiz de Segurança na Cozinha', desc: 'Teste seus conhecimentos contra mitos comuns de cozinha em apenas 2 minutos.', category: 'Segurança Alimentar', keywords: 'quiz teste mitos seguranca cozinha kitchen safety quiz' },
+      { slug: 'induction-cookware-compatibility-checker', name: 'Verificador de Panelas para Indução', desc: 'Verifique compatibilidade com cooktop de indução e o teste do ímã em 3 segundos.', category: 'Utensílios e Rótulos', keywords: 'inducao cooktop ima inox ferro fundido cobre aluminio induction cookware' },
+      { slug: 'dishwasher-detergent-dosage-calculator', name: 'Calculadora de Detergente para Lava-Louças', desc: 'Dosagem ideal de pó, gel, tablete e secante conforme a dureza da água.', category: 'Limpeza e Cuidados', keywords: 'lava loucas detergente tablete gel agua dura secante dishwasher detergent' },
+      { slug: 'food-allergy-cross-contact-checker', name: 'Verificador de Contaminação Cruzada por Alergias', desc: 'Métodos seguros de higienização para evitar traços de glúten, amendoim e leite.', category: 'Segurança Alimentar', keywords: 'alergia contaminacao cruzada gluten amendoim leite tabua corte allergy cross contact' },
+      { slug: 'pantry-dry-goods-shelf-life-checker', name: 'Validade de Despensa e Alimentos Secos', desc: 'Consulte a durabilidade de temperos, farinha, fermento, arroz, óleos e enlatados.', category: 'Segurança Alimentar', keywords: 'despensa temperos farinha fermento arroz enlatados pantry dry goods' },
+      { slug: 'moldy-food-safety-checker', name: 'Verificador de Alimentos com Mofo', desc: 'Regras USDA sobre quando é seguro cortar o mofo (queijos duros) ou jogar fora.', category: 'Segurança Alimentar', keywords: 'mofo bolor queijo pao fruta geleia descartar cortar mold moldy food' },
+      { slug: 'oven-rack-bakeware-heat-adjuster', name: 'Ajustador de Grade e Assadeiras no Forno', desc: 'Ajuste temperatura e altura da grade para vidro Pyrex, formas escuras e cerâmica.', category: 'Conversões', keywords: 'forno grade assadeira pyrex vidro escuro ceramica oven rack bakeware' }
+    ]
   },
   'zh-cn': {
-    title: "HTML 网站地图 | 厨房安全指南",
-    description: "查阅厨房安全指南的完整内容索引，涵盖全品类家电兼容性指南、材质安全专区及厨房应急参考手册。",
+    numLocale: 'zh-CN',
+    title: "HTML 网站地图与厨房安全全站索引 | 厨房安全指南",
+    description: "即时筛选和浏览厨房安全指南完整目录：日常家用安全计算器、家电兼容性查询、食材保鲜期限、再冷冻指南、用品对比与编辑审核标准。",
+    eyebrow: "全站内容目录索引",
     home: "首页",
     sitemap: "网站地图",
     h1: "HTML 网站地图",
-    intro: "浏览我们收录的完整厨房家电安全指南、材质专区分类索引、保鲜与冷冻储存准则，以及实用的厨房安全科普文章。",
-    secCore: "核心专区",
-    secCoreTitle: "基础页面",
-    homeLink: "网站首页",
-    aboutLink: "关于我们",
-    contactLink: "联系我们",
-    privacyLink: "隐私政策",
-    termsLink: "使用条款",
+    intro: "实时筛选或浏览所有日常家用厨房安全计算器、各品类家电兼容性指南、材质安全专区、保鲜与再冷冻数据库，以及编辑审核与站点政策页面。",
+    kpiTotal: "全站索引链接",
+    kpiTools: "家用安全计算器",
+    kpiAppliances: "家电安全指南",
+    kpiReference: "科普与专题目录",
+    filterLabel: "网站地图实时筛选",
+    filterPlaceholder: "输入物品、品牌或关键词即时筛选（例如：pyrex、空气炸锅、发霉、铸铁锅、漂白剂、stanley、冰箱）...",
+    filterClear: "清空",
+    filterPopular: "热门筛选：",
+    msgAll: "当前显示全部 {total} 条索引链接（共 {sections} 个分区）。",
+    msgMatch: "已筛选出 {matched} 条匹配链接（共 {total} 条），分布在 {sections} 个分区。",
+    msgEmpty: '未找到与“{query}”匹配的页面。请尝试更换物品、材质或家电关键词。',
+    emptyTitle: "未找到匹配的目录页面",
+    emptyDesc: "建议尝试更简短的关键词，例如“空气炸锅”、“铸铁”、“发霉”、“漂白”、“冰箱”、“pyrex”或“stanley”。",
+    emptyReset: "重置筛选条件",
+    navAriaLabel: "网站地图快速跳转",
+    pillCalculators: "家用计算器",
+    pillAppliances: "核心家电指南",
+    pillGuides: "常青科普与材质",
+    pillComparisons: "对比评测",
+    pillDirectories: "保鲜与再冷冻",
+    pillTrust: "信任与政策",
+    calcEyebrow: "实用工具精选",
+    calcTitle: "日常家用厨房安全计算器与实用工具",
+    calcSub: "基于 USDA、FDA、CDC 及主流厨具品牌官方标准的免费家庭厨房安全工具。",
+    calcViewAll: "浏览全部交互工具 →",
+    calcCardLabel: "精选家用厨房计算器",
+    secAppliances: "核心家电安全参考指南",
+    secAppliancesSub: "涵盖 7 大常见家用电器的逐项兼容性与安全结论。",
+    secGuides: "常青安全指南与材质专区",
     secMaterials: "材质安全专区",
     materialsIndex: "材质专区总览",
-    secAppliances: "家电安全指南导航",
-    viewAll: "查看全部",
-    secDirectories: "安全分类专区",
-    shelfLifeTitle: "食材保存期限与保质期指南",
-    refreezeTitle: "食材解冻后再冷冻安全性",
-    washingTitle: "洗衣机洗涤与日常护理指南",
-    whatHappensTitle: "误用后果与应急处理场景",
-    blogTitle: "厨房安全科普博客",
+    scratchedNonstickLabel: "不粘锅刮花安全性深度指南",
+    blogTitle: "厨房安全常青科普文章",
     blogIndex: "博客文章总览",
     compareTitle: "厨房用品安全性对比",
-    compareIndex: "对比文章总览",
+    compareSub: "锅具、容器与厨房材质的安全性横向对比。",
+    compareIndex: "查看全部对比",
+    secDirectories: "食材保鲜、再冷冻与应急处理目录",
+    shelfLifeTitle: "食材保鲜与保存期限",
+    refreezeTitle: "解冻后再冷冻安全性",
+    washingTitle: "洗衣机洗涤与护理",
+    whatHappensTitle: "误用后果与应急场景",
+    viewAll: "查看全部",
+    secTrust: "编辑方法论、信任与站点政策",
+    trustCoreTitle: "核心入口与个人收藏",
+    trustEditorialTitle: "编辑审核与方法论",
+    trustPolicyTitle: "法律声明与隐私政策",
+    homeLink: "网站首页",
+    toolsHubLink: "全部交互工具中心",
+    savedLink: "我的已保存安全指南",
+    rssLink: "RSS 订阅源 (XML)",
+    methodologyLink: "编辑方法论与审核标准",
+    aboutLink: "关于我们",
+    contactLink: "联系与支持",
+    disclaimerLink: "安全与免责声明",
+    privacyLink: "隐私政策",
+    termsLink: "使用条款",
     appNames: {
       dishwasher: "洗碗机",
       microwave: "微波炉",
@@ -197,11 +428,153 @@ const contentByLang = {
       dryer: "烘干机",
       airfryer: "空气炸锅",
       refrigerator: "冰箱"
-    } as Record<string, string>
+    },
+    chips: [
+      { label: 'Pyrex 耐热玻璃', query: 'pyrex' },
+      { label: '空气炸锅', query: '空气炸锅' },
+      { label: '发霉食物', query: '发霉' },
+      { label: '铸铁锅', query: '铸铁' },
+      { label: '漂白剂混用', query: 'bleach' },
+      { label: 'Stanley 保温杯', query: 'stanley' },
+      { label: '冰箱冷藏', query: '冰箱' }
+    ],
+    tools: [
+      { slug: 'kitchen-symbol-decoder', name: '餐具底部安全符号解码器', desc: '识别容器底部的洗碗机、微波炉、烤箱、冷冻及食品接触安全图标。', category: '厨具与标识', keywords: '符号 图标 pyrex 乐扣 洗碗机 微波炉 symbol decoder' },
+      { slug: 'leftover-shelf-life-calculator', name: '剩菜冰箱保鲜倒计时计算器', desc: '依据 USDA 标准测算熟肉、米饭、意面与外卖在冷藏/冷冻中的安全天数。', category: '食品安全', keywords: '剩菜 冰箱 冷藏 保质期 倒计时 leftover fridge shelf life' },
+      { slug: 'meat-thawing-calculator', name: '肉类与火鸡安全解冻计算器', desc: '按重量精准计算禽肉、牛肉和猪肉在冰箱冷藏及冷水中的安全解冻时长。', category: '食品安全', keywords: '肉类 鸡肉 牛肉 火鸡 解冻 冷藏 meat thaw defrost' },
+      { slug: 'plastic-code-checker', name: '塑料回收编码 (#1–#7) 安全检测器', desc: '查询 PET、HDPE、PVC、LDPE、PP、PS 塑料能否进微波炉或洗碗机。', category: '厨具与标识', keywords: '塑料 编码 回收 微波炉 洗碗机 bpa plastic code' },
+      { slug: 'air-fryer-oven-converter', name: '空气炸锅与烤箱温时换算器', desc: '将传统烤箱食谱一键换算为空气炸锅、风炉及燃气刻度温度与时间。', category: '烹饪换算', keywords: '空气炸锅 烤箱 温度 时间 换算 air fryer oven converter' },
+      { slug: 'cookware-oven-temp-lookup', name: '厨具烤盘安全入炉温度查询', desc: '查询 Pyrex、Le Creuset、Lodge 等 24 个常见厨具品牌与材质的最高耐热温度。', category: '厨具与标识', keywords: 'pyrex le creuset lodge corningware stanley 烤箱 最高温度 耐热 cookware oven' },
+      { slug: 'internal-cooking-temp-chart', name: 'USDA 食材安全中心温度查询表', desc: '查询鸡肉、牛排、肉末、猪肉及鱼类的最低安全中心温度与静置时间。', category: '食品安全', keywords: '中心温度 温度计 鸡肉 牛排 猪肉 鱼肉 usda cooking temp' },
+      { slug: 'appliance-descaling-calculator', name: '咖啡机与电水壶除垢配比计算器', desc: '精确计算白醋或柠檬酸除垢比例，适用于美式咖啡机、意式机与电热水壶。', category: '清洁与养护', keywords: '除垢 水垢 白醋 柠檬酸 咖啡机 电水壶 keurig descaling' },
+      { slug: 'cleaner-mixing-danger-checker', name: '清洁剂混用危险检测器', desc: '检测漂白剂（84消毒液）、白醋、氨水与双氧水混用时的有毒气体风险。', category: '清洁与养护', keywords: '漂白剂 84 消毒液 醋 氨水 洁厕灵 混用 有毒 氯气 bleach cleaner mixing' },
+      { slug: 'microwave-wattage-converter', name: '微波炉功率加热时间换算器', desc: '在 600W、700W、900W、1000W 与 1250W 微波炉之间精准换算加热时间。', category: '烹饪换算', keywords: '微波炉 功率 瓦数 时间 换算 microwave wattage' },
+      { slug: 'power-outage-food-safety-checker', name: '停电冰箱食品安全判断器', desc: '依据 USDA/CDC 标准判断停电后冷藏室与冷冻室食材应保留还是丢弃。', category: '食品安全', keywords: '停电 断电 冰箱 冷冻 食物 变质 power outage fridge' },
+      { slug: 'baby-bottle-safety-checker', name: '婴儿奶瓶与儿童餐具安全检测', desc: 'AAP/FDA/CDC 权威指导：奶瓶和学饮杯的消毒、微波加热与洗碗机清洗安全。', category: '食品安全', keywords: '奶瓶 婴儿 儿童 餐具 消毒 微波炉 洗碗机 baby bottle' },
+      { slug: 'cooking-oil-smoke-point-finder', name: '食用油烟点与安全油温查询器', desc: '对比 28 种常用食用油与黄油的烟点及煎炒油炸适用温度。', category: '烹饪换算', keywords: '食用油 烟点 橄榄油 牛油果油 花生油 煎炸 cooking oil smoke point' },
+      { slug: 'cast-iron-seasoning-troubleshooter', name: '铸铁锅与碳钢锅开锅生锈排查器', desc: '解决铸铁锅生锈、发粘、油膜脱落以及能否使用洗洁精清洗等常见问题。', category: '清洁与养护', keywords: '铸铁锅 碳钢锅 生锈 开锅 养锅 洗洁精 lodge cast iron seasoning' },
+      { slug: 'fridge-organization-zone-planner', name: '冰箱分区摆放安全规划器', desc: '依据 USDA 温区规则规划生肉、乳制品、鸡蛋、蔬果与调味品的最佳层架。', category: '食品安全', keywords: '冰箱 分区 收纳 温度 生肉 鸡蛋 交叉污染 fridge zone planner' },
+      { slug: 'kitchen-safety-iq-quiz', name: '厨房安全常识小测验', desc: '2 分钟趣味自测，识别日常生活中最容易踩坑的锅具与食品安全误区。', category: '食品安全', keywords: '测验 问答 常识 误区 厨房安全 kitchen safety quiz' },
+      { slug: 'induction-cookware-compatibility-checker', name: '电磁炉锅具兼容性检测器', desc: '结合 3 秒磁铁测试快速判断不锈钢、铸铁、铜锅与铝锅能否用于电磁炉。', category: '厨具与标识', keywords: '电磁炉 锅具 磁铁 不锈钢 铸铁 铝锅 induction cookware' },
+      { slug: 'dishwasher-detergent-dosage-calculator', name: '洗碗机洗涤剂与软水剂量计算器', desc: '根据水质硬度匹配洗碗粉、洗碗块、洗碗凝胶与漂洗剂用量，防止玻璃发白。', category: '清洁与养护', keywords: '洗碗机 洗碗粉 洗碗块 漂洗剂 硬水 玻璃发白 dishwasher detergent' },
+      { slug: 'food-allergy-cross-contact-checker', name: '食物过敏原交叉接触防护检查', desc: '核查针对花生、麸质与乳制品过敏原的安全清洁方式与厨具表面选择。', category: '食品安全', keywords: '过敏 过敏原 交叉接触 麸质 花生 乳制品 砧板 allergy cross contact' },
+      { slug: 'pantry-dry-goods-shelf-life-checker', name: '干货、香料与储藏室保质期查询', desc: '查询香料、面粉、泡打粉、大米、食用油及罐头的最佳风味与安全期限。', category: '食品安全', keywords: '干货 香料 面粉 泡打粉 大米 罐头 保质期 pantry dry goods' },
+      { slug: 'moldy-food-safety-checker', name: '发霉食物切除还是丢弃判断器', desc: '依据 USDA 标准判断硬质奶酪、面包、果酱与蔬果长霉后能否切除食用。', category: '食品安全', keywords: '发霉 霉菌 奶酪 面包 水果 果酱 丢弃 切除 mold moldy food' },
+      { slug: 'oven-rack-bakeware-heat-adjuster', name: '烤箱层架与烤盘材质温控调节器', desc: '针对 Pyrex 玻璃烤盘、深色不粘烤盘、陶瓷与铝盘自动调整烘烤温度与层架。', category: '烹饪换算', keywords: '烤箱 层架 烤盘 pyrex 玻璃 深色 不粘 陶瓷 oven rack bakeware' }
+    ]
+  },
+  ja: {
+    numLocale: 'ja-JP',
+    title: "HTMLサイトマップ・キッチン安全全ページ一覧 | キッチン安全チェッカー",
+    description: "家庭用キッチン安全計算ツール、家電別使用ガイド、食品保存期間・再冷凍データベース、安全性比較、編集基準まで全ページをリアルタイム検索・閲覧できます。",
+    eyebrow: "全コンテンツ完全ディレクトリ",
+    home: "ホーム",
+    sitemap: "サイトマップ",
+    h1: "HTML サイトマップ",
+    intro: "家庭用キッチン安全計算ツール、家電別安全ガイド、素材別ハブ、食品の保存・再冷凍基準、比較記事、運営・検証基準をリアルタイムで絞り込み検索できます。",
+    kpiTotal: "総インデックス数",
+    kpiTools: "家庭用計算ツール",
+    kpiAppliances: "家電別安全ガイド",
+    kpiReference: "保存・比較・解説",
+    filterLabel: "サイトマップ即時フィルター",
+    filterPlaceholder: "アイテム・ブランド・キーワードで絞り込み（例：pyrex、ノンフライヤー、カビ、鋳鉄、漂白剤、stanley、冷蔵庫）...",
+    filterClear: "クリア",
+    filterPopular: "人気の絞り込み：",
+    msgAll: "全 {sections} セクション・{total} 件のインデックスリンクを表示中。",
+    msgMatch: "{sections} セクション内で {matched} 件（全 {total} 件中）が一致しました。",
+    msgEmpty: "「{query}」に一致するページが見つかりませんでした。別の語句や家電名をお試しください。",
+    emptyTitle: "一致するページが見つかりませんでした",
+    emptyDesc: "「pyrex」「ノンフライヤー」「カビ」「鋳鉄」「漂白剤」「stanley」「冷蔵庫」など短めの語句でお試しください。",
+    emptyReset: "フィルターをリセット",
+    navAriaLabel: "サイトマップのセクション移動",
+    pillCalculators: "家庭用計算ツール",
+    pillAppliances: "主要家電ガイド",
+    pillGuides: "素材・解説記事",
+    pillComparisons: "安全性比較",
+    pillDirectories: "保存・再冷凍ガイド",
+    pillTrust: "信頼性・ポリシー",
+    calcEyebrow: "家庭用ツール特集",
+    calcTitle: "毎日のキッチン安全計算ツール＆ユーティリティ",
+    calcSub: "USDA・FDA・CDCおよび調理器具メーカー基準に基づく無料の家庭用安全チェッカー。",
+    calcViewAll: "全ツール一覧を見る →",
+    calcCardLabel: "検証済みの家庭用キッチンツール",
+    secAppliances: "家電別安全リファレンスガイド",
+    secAppliancesSub: "7つの主要家電におけるアイテム別の使用可否と安全基準一覧。",
+    secGuides: "常設ガイド＆素材別安全性ハブ",
+    secMaterials: "素材別安全性ハブ",
+    materialsIndex: "素材ハブ一覧",
+    scratchedNonstickLabel: "傷ついたフッ素樹脂（テフロン）加工フライパンの安全性ガイド",
+    blogTitle: "キッチン安全・常設解説記事",
+    blogIndex: "ブログ一覧",
+    compareTitle: "キッチン用品の安全性比較",
+    compareSub: "調理器具・家電・素材の安全性を項目別に徹底比較。",
+    compareIndex: "比較一覧を見る",
+    secDirectories: "保存期間・再冷凍・ケア安全ディレクトリ",
+    shelfLifeTitle: "賞味期限・保存期間ガイド",
+    refreezeTitle: "再冷凍安全性ガイド",
+    washingTitle: "洗濯機・ランドリー安全",
+    whatHappensTitle: "誤使用リスク・緊急シナリオ",
+    viewAll: "すべて見る",
+    secTrust: "信頼性・検証手法・サイトポリシー",
+    trustCoreTitle: "主要ハブ＆保存済みガイド",
+    trustEditorialTitle: "編集基準と検証手法",
+    trustPolicyTitle: "法的表記・免責・プライバシー",
+    homeLink: "トップページ",
+    toolsHubLink: "インタラクティブツール総合ハブ",
+    savedLink: "保存済みの安全ガイド",
+    rssLink: "RSS フィード (XML)",
+    methodologyLink: "編集手法・安全検証スタンダード",
+    aboutLink: "運営者情報・理念",
+    contactLink: "お問い合わせ",
+    disclaimerLink: "安全・医療に関する免責事項",
+    privacyLink: "プライバシーポリシー",
+    termsLink: "利用規約",
+    appNames: {
+      dishwasher: "食洗機",
+      microwave: "電子レンジ",
+      freezer: "冷凍庫",
+      oven: "オーブン",
+      dryer: "乾燥機",
+      airfryer: "ノンフライヤー",
+      refrigerator: "冷蔵庫"
+    },
+    chips: [
+      { label: 'Pyrex', query: 'pyrex' },
+      { label: 'ノンフライヤー', query: 'ノンフライヤー' },
+      { label: 'カビ', query: 'カビ' },
+      { label: '鋳鉄', query: '鋳鉄' },
+      { label: '漂白剤', query: 'bleach' },
+      { label: 'Stanley', query: 'stanley' },
+      { label: '冷蔵庫', query: '冷蔵庫' }
+    ],
+    tools: [
+      { slug: 'kitchen-symbol-decoder', name: '食器・容器底面マーク解読ツール', desc: '容器底面の食洗機・電子レンジ・オーブン・冷凍対応アイコンの意味を瞬時に判定。', category: '調理器具・表示', keywords: 'マーク 記号 アイコン pyrex 食洗機 電子レンジ symbol decoder' },
+      { slug: 'leftover-shelf-life-calculator', name: '作り置き・残り物保存期間計算ツール', desc: 'USDA基準で調理済み肉・ご飯・パスタの冷蔵・冷凍保存日数をカウントダウン計算。', category: '食品衛生', keywords: '残り物 作り置き 冷蔵庫 保存期間 消費期限 leftover fridge shelf life' },
+      { slug: 'meat-thawing-calculator', name: '肉・鶏肉の安全解凍時間計算ツール', desc: '重量から冷蔵解凍・冷水解凍の安全な所要時間を自動計算。', category: '食品衛生', keywords: '肉 鶏肉 牛肉 ターキー 解凍 冷蔵庫 meat thaw defrost' },
+      { slug: 'plastic-code-checker', name: 'プラスチック識別番号 (#1–#7) 安全チェッカー', desc: 'PET・HDPE・PVC・LDPE・PP・PSの電子レンジおよび食洗機対応をチェック。', category: '調理器具・表示', keywords: 'プラスチック 番号 リサイクル bpa 電子レンジ 食洗機 plastic code' },
+      { slug: 'air-fryer-oven-converter', name: 'ノンフライヤー・オーブン温度時間換算', desc: '通常オーブンのレシピをノンフライヤー・コンベクション設定へ自動変換。', category: '調理換算', keywords: 'ノンフライヤー エアフライヤー オーブン 温度 時間 換算 air fryer oven converter' },
+      { slug: 'cookware-oven-temp-lookup', name: '調理器具・耐熱皿オーブン上限温度検索', desc: 'Pyrex・Le Creuset・Lodgeなど主要24ブランドのオーブン耐熱上限を確認。', category: '調理器具・表示', keywords: 'pyrex le creuset lodge corningware stanley オーブン 耐熱温度 上限 cookware oven' },
+      { slug: 'internal-cooking-temp-chart', name: 'USDA 安全中心温度・加熱目安表', desc: '鶏肉・牛肉・ひき肉・豚肉・魚介類の安全な中心温度と休ませ時間を一覧検索。', category: '食品衛生', keywords: '中心温度 温度計 鶏肉 ステーキ 豚肉 魚 usda cooking temp' },
+      { slug: 'appliance-descaling-calculator', name: 'コーヒーメーカー・ケトル水垢除去計算', desc: 'クエン酸や酢の最適な希釈比率をコーヒーメーカー・電気ケトル・エスプレッソ別に算出。', category: '洗浄・ケア', keywords: '水垢 カルキ クエン酸 酢 コーヒーメーカー ケトル keurig descaling' },
+      { slug: 'cleaner-mixing-danger-checker', name: '洗剤「混ぜるな危険」反応チェッカー', desc: '塩素系漂白剤・酢・クエン酸・アンモニアなどの危険な化学反応を事前確認。', category: '洗浄・ケア', keywords: '漂白剤 塩素 クエン酸 酢 アンモニア 混ぜるな危険 有毒ガス bleach cleaner mixing' },
+      { slug: 'microwave-wattage-converter', name: '電子レンジワット数加熱時間変換ツール', desc: '600W・700W・900W・1000W・1250W間の加熱時間を正確に換算。', category: '調理換算', keywords: '電子レンジ ワット数 時間 変換 温め microwave wattage' },
+      { slug: 'power-outage-food-safety-checker', name: '停電時の冷蔵庫・冷凍庫食品判定ツール', desc: '停電後の経過時間から冷蔵・冷凍食品を食べてよいかUSDA/CDC基準で判定。', category: '食品衛生', keywords: '停電 冷蔵庫 冷凍庫 食材 廃棄 安全 power outage fridge' },
+      { slug: 'baby-bottle-safety-checker', name: '哺乳瓶・ベビー食器安全チェッカー', desc: 'AAP/FDA/CDC基準に基づく哺乳瓶・マグの消毒・電子レンジ・食洗機ガイド。', category: '食品衛生', keywords: '哺乳瓶 ベビー 赤ちゃん 消毒 電子レンジ 食洗機 baby bottle' },
+      { slug: 'cooking-oil-smoke-point-finder', name: '食用油の発煙点・揚げ物適温検索', desc: 'オリーブ油・アボカド油・バターなど28種の食用油の発煙点と加熱適性を比較。', category: '調理換算', keywords: '食用油 発煙点 オリーブオイル アボカド油 揚げ物 cooking oil smoke point' },
+      { slug: 'cast-iron-seasoning-troubleshooter', name: '鋳鉄スキレット・鉄フライパン手入れ診断', desc: 'サビ・ベタつき・油膜剥がれ・洗剤使用の疑問を原因別に解決。', category: '洗浄・ケア', keywords: '鋳鉄 スキレット 鉄フライパン サビ シーズニング 洗剤 lodge cast iron seasoning' },
+      { slug: 'fridge-organization-zone-planner', name: '冷蔵庫の安全な棚別収納ゾーニング', desc: '生肉・乳製品・卵・野菜の交差汚染を防ぐUSDA推奨の棚配置マップ。', category: '食品衛生', keywords: '冷蔵庫 収納 棚 温度 生肉 卵 交差汚染 fridge zone planner' },
+      { slug: 'kitchen-safety-iq-quiz', name: 'キッチン安全常識クイズ', desc: '2分で日常の調理器具・食品保存の思い込みをチェックできる実践クイズ。', category: '食品衛生', keywords: 'クイズ 常識 テスト 誤解 キッチン安全 kitchen safety quiz' },
+      { slug: 'induction-cookware-compatibility-checker', name: 'IH対応調理器具・3秒磁石チェック', desc: 'ステンレス・鋳鉄・銅・アルミ鍋のIHクッキングヒーター対応を素早く確認。', category: '調理器具・表示', keywords: 'ih 調理器具 磁石 ステンレス 鋳鉄 銅 アルミ induction cookware' },
+      { slug: 'dishwasher-detergent-dosage-calculator', name: '食洗機洗剤・リンス剤適量計算ツール', desc: '水硬度に合わせた粉末・ジェル・タブレット洗剤量でグラスの白濁を防止。', category: '洗浄・ケア', keywords: '食洗機 洗剤 タブレット ジェル リンス 硬水 グラス白濁 dishwasher detergent' },
+      { slug: 'food-allergy-cross-contact-checker', name: '食物アレルギー交差接触チェックツール', desc: 'ピーナッツ・グルテン・乳製品などのアレルゲン残留を防ぐ洗浄方法と器具選び。', category: '食品衛生', keywords: 'アレルギー アレルゲン 交差接触 グルテン ピーナッツ 乳製品 まな板 allergy cross contact' },
+      { slug: 'pantry-dry-goods-shelf-life-checker', name: '乾物・スパイス・常温食品保存目安検索', desc: '香辛料・小麦粉・ベーキングパウダー・米・缶詰の品質と安全期限を確認。', category: '食品衛生', keywords: '乾物 スパイス 小麦粉 ベーキングパウダー 米 缶詰 常温保存 pantry dry goods' },
+      { slug: 'moldy-food-safety-checker', name: 'カビが生えた食品の安全判定チェッカー', desc: '硬質チーズは切り取って可・パンやジャムは即廃棄などUSDA基準で即判定。', category: '食品衛生', keywords: 'カビ チーズ パン 果物 ジャム 切り取る 廃棄 mold moldy food' },
+      { slug: 'oven-rack-bakeware-heat-adjuster', name: 'オーブン段位置・焼き型材質温度調整', desc: 'Pyrexガラス・黒色ノンスティック・陶器・アルミ型に応じた温度と段位置を補正。', category: '調理換算', keywords: 'オーブン 段 焼き型 pyrex ガラス 黒色 ノンスティック 陶器 oven rack bakeware' }
+    ]
   }
 };
 
-const content = (contentByLang as Record<string, any>)[lang] || contentByLang.es;
+const content = contentByLang[lang as 'es' | 'pt' | 'zh-cn' | 'ja'] || contentByLang.es;
 
 const currentItems = lang === 'es' ? itemsEs : lang === 'pt' ? itemsPt : lang === 'ja' ? itemsJa : itemsZh;
 const currentBlog = lang === 'es' ? blogEs : lang === 'pt' ? blogPt : lang === 'ja' ? blogJa : blogZh;
@@ -211,105 +584,274 @@ const currentRefreeze = lang === 'es' ? refreezeEs : lang === 'pt' ? refreezePt 
 const currentWashingMachine = lang === 'es' ? washingMachineEs : lang === 'pt' ? washingMachinePt : lang === 'ja' ? washingMachineJa : washingMachineZh;
 const currentWhatHappens = lang === 'es' ? whatHappensEs : lang === 'pt' ? whatHappensPt : lang === 'ja' ? whatHappensJa : whatHappensZh;
 
-const appliances = ['dishwasher', 'microwave', 'freezer', 'oven', 'dryer', 'airfryer', 'refrigerator'];
+const appliances = ['dishwasher', 'microwave', 'freezer', 'oven', 'dryer', 'airfryer', 'refrigerator'] as const;
 const groupedItems = appliances.reduce((acc, app) => {
-  acc[app] = currentItems.filter(i => i.appliance === app);
+  acc[app] = currentItems.filter((i) => i.appliance === app);
   return acc;
 }, {} as Record<string, typeof currentItems>);
+
+const trustCoreLinks = [
+  { label: content.homeLink, href: translatePath('/'), keywords: 'home inicio index' },
+  { label: content.toolsHubLink, href: getDirectoryUrl('tools', lang), keywords: 'tools calculators herramientas ferramentas' },
+  { label: content.savedLink, href: translatePath('/saved/'), keywords: 'saved bookmarks guardados salvos' },
+  { label: content.rssLink, href: '/rss.xml', keywords: 'rss feed xml' }
+];
+
+const trustEditorialLinks = [
+  { label: content.methodologyLink, href: translatePath('/methodology/'), keywords: 'methodology metodologia usda fda' },
+  { label: content.aboutLink, href: translatePath('/about/'), keywords: 'about nosotros nos' },
+  { label: content.contactLink, href: translatePath('/contact/'), keywords: 'contact contacto contato support' }
+];
+
+const trustPolicyLinks = [
+  { label: content.disclaimerLink, href: translatePath('/disclaimer/'), keywords: 'disclaimer legal safety' },
+  { label: content.privacyLink, href: translatePath('/privacy/'), keywords: 'privacy privacidad privacidade' },
+  { label: content.termsLink, href: translatePath('/terms/'), keywords: 'terms terminos termos' }
+];
+
+// Live dynamic counts
+const totalTools = content.tools.length;
+const totalAppliances = currentItems.length;
+const totalMaterials = CATEGORIES.length + 1;
+const totalBlog = currentBlog.length;
+const totalComparisons = currentComparisons.length;
+const totalDirectories = currentHowLong.length + currentRefreeze.length + currentWashingMachine.length + currentWhatHappens.length;
+const totalTrust = trustCoreLinks.length + trustEditorialLinks.length + trustPolicyLinks.length;
+const totalIndexedLinks = totalTools + totalAppliances + totalMaterials + totalBlog + totalComparisons + totalDirectories + totalTrust;
+const initialStatusText = content.msgAll
+  .replace('{total}', String(totalIndexedLinks))
+  .replace('{sections}', '6');
 ---
 
-<Layout title={content.title} description={content.description} excludeArticleSchema={true} availableLocales={availableLocales} lang={lang}>
-  <section class="max-w-[1280px] mx-auto px-6 py-12">
+<Layout
+  title={content.title}
+  description={content.description}
+  excludeArticleSchema={true}
+  availableLocales={availableLocales}
+  lang={lang}
+>
+  <section class="max-w-[1280px] mx-auto px-6 py-10 md:py-12">
     <!-- Breadcrumbs -->
-    <Breadcrumbs 
+    <Breadcrumbs
       items={[
-        { label: content.home, href: `/${lang}/` },
+        { label: content.home, href: translatePath('/') },
         { label: content.sitemap }
       ]}
     />
 
-    <!-- Header -->
-    <header class="max-w-[800px] mb-12">
+    <!-- Hero Header -->
+    <header class="max-w-[900px] mb-8">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-soft border border-hairline text-xs font-semibold uppercase tracking-wider text-muted mb-4">
+        <span class="w-2 h-2 rounded-full bg-success" aria-hidden="true"></span>
+        {content.eyebrow}
+      </div>
       <h1 class="text-4xl md:text-5xl font-bold text-ink tracking-tight mb-4">
         {content.h1}
       </h1>
-      <p class="text-body-md text-muted text-lg leading-relaxed">
+      <p class="text-body text-base md:text-lg leading-relaxed mb-6">
         {content.intro}
       </p>
+
+      <!-- Live KPI Summary Strip -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="p-3.5 rounded-xl bg-surface-soft border border-hairline">
+          <div class="text-2xl font-bold text-ink tabular-nums">{totalIndexedLinks.toLocaleString(content.numLocale)}</div>
+          <div class="text-xs font-medium text-muted mt-0.5">{content.kpiTotal}</div>
+        </div>
+        <div class="p-3.5 rounded-xl bg-surface-soft border border-hairline">
+          <div class="text-2xl font-bold text-ink tabular-nums">{totalTools}</div>
+          <div class="text-xs font-medium text-muted mt-0.5">{content.kpiTools}</div>
+        </div>
+        <div class="p-3.5 rounded-xl bg-surface-soft border border-hairline">
+          <div class="text-2xl font-bold text-ink tabular-nums">{totalAppliances.toLocaleString(content.numLocale)}</div>
+          <div class="text-xs font-medium text-muted mt-0.5">{content.kpiAppliances}</div>
+        </div>
+        <div class="p-3.5 rounded-xl bg-surface-soft border border-hairline">
+          <div class="text-2xl font-bold text-ink tabular-nums">{(totalDirectories + totalComparisons + totalBlog + totalMaterials).toLocaleString(content.numLocale)}</div>
+          <div class="text-xs font-medium text-muted mt-0.5">{content.kpiReference}</div>
+        </div>
+      </div>
     </header>
 
-    <!-- Core Pages & Material Hubs -->
-    <section class="border-t border-hairline pt-8 mb-12">
-      <h2 class="text-2xl font-bold text-ink mb-6">{content.secCore}</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        <div class="p-6 bg-surface-soft border border-hairline rounded-lg">
-          <h3 class="text-title-sm text-ink font-bold mb-3">{content.secCoreTitle}</h3>
-          <ul class="flex flex-col gap-2.5 text-[13px]">
-            <li><a href={`/${lang}/`} class="text-link hover:underline font-medium">{content.homeLink}</a></li>
-            <li><a href={`/${lang}/about/`} class="text-link hover:underline">{content.aboutLink}</a></li>
-            <li><a href={`/${lang}/contact/`} class="text-link hover:underline">{content.contactLink}</a></li>
-            <li><a href={`/${lang}/privacy/`} class="text-link hover:underline">{content.privacyLink}</a></li>
-            <li><a href={`/${lang}/terms/`} class="text-link hover:underline">{content.termsLink}</a></li>
-          </ul>
+    <!-- Live Instant Sitemap Filter Bar -->
+    <div
+      id="sitemap-filter-bar"
+      class="no-print mb-6 p-5 md:p-6 rounded-2xl bg-surface-soft border border-hairline shadow-xs"
+      data-msg-all={content.msgAll}
+      data-msg-match={content.msgMatch}
+      data-msg-empty={content.msgEmpty}
+    >
+      <div class="flex flex-col gap-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <label for="sitemap-filter-input" class="text-sm font-bold text-ink">
+            {content.filterLabel}
+          </label>
+          <p id="sitemap-filter-status" aria-live="polite" class="text-xs font-medium text-muted">
+            {initialStatusText}
+          </p>
         </div>
 
-        <div class="p-6 bg-surface-soft border border-hairline rounded-lg">
-          <h3 class="text-title-sm text-ink font-bold mb-3">{content.secMaterials}</h3>
-          <ul class="flex flex-col gap-2.5 text-[13px]">
-            <li><a href={`/${lang}/material/`} class="text-link hover:underline font-medium">{content.materialsIndex}</a></li>
-            {CATEGORIES.map(cat => {
-              const loc = CATEGORY_LOCALIZATIONS[cat.id]?.[lang];
-              const name = loc?.displayName || cat.displayName;
-              return (
-                <li>
-                  <a href={`/${lang}/material/${cat.id}/`} class="text-link hover:underline">
-                    {name}
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
+        <div class="relative flex items-center">
+          <svg
+            class="w-5 h-5 text-muted absolute left-3.5 pointer-events-none"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </svg>
+          <input
+            id="sitemap-filter-input"
+            type="search"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder={content.filterPlaceholder}
+            class="w-full pl-11 pr-24 py-3 rounded-xl bg-canvas border border-hairline text-ink placeholder:text-muted text-sm md:text-base focus:outline-none focus:border-link transition-colors"
+          />
+          <button
+            id="sitemap-filter-clear"
+            type="button"
+            class="hidden absolute right-2.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-surface-strong text-ink hover:opacity-85 transition-opacity cursor-pointer"
+          >
+            {content.filterClear}
+          </button>
         </div>
 
-        <div class="p-6 bg-surface-soft border border-hairline rounded-lg">
-          <h3 class="text-title-sm text-ink font-bold mb-3">{content.blogTitle}</h3>
-          <ul class="flex flex-col gap-2.5 text-[13px]">
-            <li><a href={getDirectoryUrl('blog', lang)} class="text-link hover:underline font-medium">{content.blogIndex}</a></li>
-            {currentBlog.map(post => (
-              <li><a href={`/${lang}/blog/${post.slug}/`} class="text-link hover:underline line-clamp-1">{post.title}</a></li>
-            ))}
-          </ul>
+        <!-- Quick Filter Suggestion Chips -->
+        <div class="flex flex-wrap items-center gap-2 pt-1">
+          <span class="text-xs font-medium text-muted mr-1">{content.filterPopular}</span>
+          {content.chips.map((chip) => (
+            <button
+              type="button"
+              data-filter-chip={chip.query}
+              aria-pressed="false"
+              class="px-2.5 py-1 rounded-full text-xs font-medium bg-canvas border border-hairline text-ink hover:border-link hover:text-link aria-[pressed=true]:bg-primary aria-[pressed=true]:text-on-primary aria-[pressed=true]:border-primary transition-colors cursor-pointer"
+            >
+              {chip.label}
+            </button>
+          ))}
         </div>
+      </div>
+    </div>
 
-        <div class="p-6 bg-surface-soft border border-hairline rounded-lg">
-          <h3 class="text-title-sm text-ink font-bold mb-3">{content.compareTitle}</h3>
-          <ul class="flex flex-col gap-2.5 text-[13px] max-h-[300px] overflow-y-auto pr-1">
-            <li><a href={getDirectoryUrl('compare', lang)} class="text-link hover:underline font-medium">{content.compareIndex}</a></li>
-            {currentComparisons.map(c => (
-              <li><a href={`/${lang}/compare/${c.slug}/`} class="text-link hover:underline line-clamp-1">{c.item1} vs {c.item2}</a></li>
-            ))}
-          </ul>
+    <!-- Quick-Jump Section Anchor Pills -->
+    <nav aria-label={content.navAriaLabel} class="no-print mb-10 flex flex-wrap gap-2.5">
+      <a href="#section-calculators" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-link hover:text-link transition-colors">
+        <span>{content.pillCalculators}</span>
+        <span class="px-1.5 py-0.5 rounded-full bg-surface-soft text-muted text-[11px] tabular-nums">{totalTools}</span>
+      </a>
+      <a href="#section-appliances" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-link hover:text-link transition-colors">
+        <span>{content.pillAppliances}</span>
+        <span class="px-1.5 py-0.5 rounded-full bg-surface-soft text-muted text-[11px] tabular-nums">{totalAppliances}</span>
+      </a>
+      <a href="#section-guides" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-link hover:text-link transition-colors">
+        <span>{content.pillGuides}</span>
+        <span class="px-1.5 py-0.5 rounded-full bg-surface-soft text-muted text-[11px] tabular-nums">{totalBlog + totalMaterials}</span>
+      </a>
+      <a href="#section-comparisons" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-link hover:text-link transition-colors">
+        <span>{content.pillComparisons}</span>
+        <span class="px-1.5 py-0.5 rounded-full bg-surface-soft text-muted text-[11px] tabular-nums">{totalComparisons}</span>
+      </a>
+      <a href="#section-directories" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-link hover:text-link transition-colors">
+        <span>{content.pillDirectories}</span>
+        <span class="px-1.5 py-0.5 rounded-full bg-surface-soft text-muted text-[11px] tabular-nums">{totalDirectories}</span>
+      </a>
+      <a href="#section-trust" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-link hover:text-link transition-colors">
+        <span>{content.pillTrust}</span>
+        <span class="px-1.5 py-0.5 rounded-full bg-surface-soft text-muted text-[11px] tabular-nums">{totalTrust}</span>
+      </a>
+    </nav>
+
+    <!-- Empty Filter State -->
+    <div id="sitemap-empty-state" class="hidden mb-10 p-8 rounded-2xl bg-surface-soft border border-hairline text-center">
+      <p class="text-lg font-bold text-ink mb-2">{content.emptyTitle}</p>
+      <p class="text-sm text-muted mb-4">{content.emptyDesc}</p>
+      <button
+        id="sitemap-empty-reset"
+        type="button"
+        class="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-on-primary hover:opacity-90 transition-opacity cursor-pointer"
+      >
+        {content.emptyReset}
+      </button>
+    </div>
+
+    <!-- 1. Everyday Consumer Kitchen Safety Calculators & Utilities -->
+    <section id="section-calculators" data-sitemap-section class="border-t border-hairline pt-8 mb-12 scroll-mt-24">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
+        <div>
+          <span class="inline-block text-xs font-bold uppercase tracking-wider text-link mb-1">{content.calcEyebrow}</span>
+          <h2 class="text-2xl md:text-3xl font-bold text-ink">
+            {content.calcTitle}
+          </h2>
+          <p class="text-sm text-muted mt-1">{content.calcSub}</p>
         </div>
+        <a href={getDirectoryUrl('tools', lang)} class="text-sm font-semibold text-link hover:underline shrink-0">
+          {content.calcViewAll}
+        </a>
+      </div>
+
+      <div data-sitemap-card class="rounded-2xl bg-surface-soft/60 border border-hairline p-4 md:p-5">
+        <div class="flex items-center justify-between mb-4 pb-2.5 border-b border-hairline">
+          <span class="text-xs font-bold uppercase tracking-wider text-muted">{content.calcCardLabel}</span>
+          <span data-card-count data-orig-count={String(totalTools)} class="text-xs font-semibold px-2 py-0.5 rounded-full bg-canvas border border-hairline text-ink tabular-nums">
+            {totalTools}
+          </span>
+        </div>
+        <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+          {content.tools.map((tool) => (
+            <li
+              data-sitemap-item
+              data-search={`${tool.name} ${tool.desc} ${tool.category} ${tool.slug.replace(/-/g, ' ')} ${tool.keywords}`.toLowerCase()}
+              class="rounded-xl bg-canvas border border-hairline hover:border-link transition-colors"
+            >
+              <a href={translatePath(`/tools/${tool.slug}/`)} class="flex flex-col h-full p-4 group">
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-muted mb-1">
+                  {tool.category}
+                </span>
+                <span class="text-sm font-bold text-ink group-hover:text-link transition-colors mb-1.5">
+                  {tool.name}
+                </span>
+                <span class="text-xs text-muted leading-relaxed">
+                  {tool.desc}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
 
-    <!-- Appliance Sections -->
-    <section class="border-t border-hairline pt-8 mb-12">
-      <h2 class="text-2xl font-bold text-ink mb-6">{content.secAppliances}</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-        {appliances.map(app => {
+    <!-- 2. Core Appliance Reference Guides -->
+    <section id="section-appliances" data-sitemap-section class="border-t border-hairline pt-8 mb-12 scroll-mt-24">
+      <div class="mb-6">
+        <h2 class="text-2xl md:text-3xl font-bold text-ink">{content.secAppliances}</h2>
+        <p class="text-sm text-muted mt-1">{content.secAppliancesSub}</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {appliances.map((app) => {
           const appName = content.appNames[app] || app;
           const items = groupedItems[app] || [];
+          const extraAppTerms = app === 'refrigerator' ? 'fridge refrigerator' : app === 'airfryer' ? 'air fryer airfryer' : app;
           return (
-            <div class="border border-hairline rounded-lg p-5">
-              <h3 class="text-title-md font-bold text-ink mb-3 pb-2 border-b border-hairline flex justify-between items-center">
+            <div data-sitemap-card class="border border-hairline rounded-xl p-5 bg-canvas">
+              <h3 class="text-title-sm font-bold text-ink mb-3 pb-2.5 border-b border-hairline flex justify-between items-center gap-2">
                 <span>{appName}</span>
-                <a href={getApplianceUrl(app, lang)} class="text-xs text-link hover:underline">{content.viewAll} ({items.length})</a>
+                <a href={getApplianceUrl(app, lang)} class="text-xs font-semibold text-link hover:underline shrink-0">
+                  {content.viewAll} (<span data-card-count data-orig-count={String(items.length)}>{items.length}</span>)
+                </a>
               </h3>
-              <ul class="flex flex-col gap-2 text-[13px] max-h-[250px] overflow-y-auto pr-1">
-                {items.map(item => (
-                  <li>
-                    <a href={`/${lang}/${app}/${item.slug}/`} class="text-muted hover:text-link block truncate">
+              <ul class="flex flex-col gap-2 text-[13px] max-h-[280px] overflow-y-auto pr-1">
+                {items.map((item) => (
+                  <li
+                    data-sitemap-item
+                    data-search={`${item.item} ${appName} ${extraAppTerms} ${item.slug.replace(/-/g, ' ')}`.toLowerCase()}
+                  >
+                    <a href={translatePath(`/${app}/${item.slug}/`)} class="text-muted hover:text-link block truncate py-0.5">
                       {item.item}
                     </a>
                   </li>
@@ -321,20 +863,115 @@ const groupedItems = appliances.reduce((acc, app) => {
       </div>
     </section>
 
-    <!-- Other Safety Directories -->
-    <section class="border-t border-hairline pt-8 mb-12">
-      <h2 class="text-2xl font-bold text-ink mb-6">{content.secDirectories}</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        <!-- Shelf Life -->
-        <div class="border border-hairline rounded-lg p-5">
-          <h3 class="text-title-md font-bold text-ink mb-3 pb-2 border-b border-hairline flex justify-between items-center">
-            <span>{content.shelfLifeTitle}</span>
-            <a href={getDirectoryUrl('how-long', lang)} class="text-xs text-link hover:underline">{content.viewAll} ({currentHowLong.length})</a>
+    <!-- 3. Evergreen Guides & Material Safety Hubs -->
+    <section id="section-guides" data-sitemap-section class="border-t border-hairline pt-8 mb-12 scroll-mt-24">
+      <h2 class="text-2xl md:text-3xl font-bold text-ink mb-6">{content.secGuides}</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Material Safety Hubs -->
+        <div data-sitemap-card class="lg:col-span-5 p-6 bg-surface-soft border border-hairline rounded-xl">
+          <h3 class="text-title-sm text-ink font-bold mb-3 pb-2.5 border-b border-hairline flex justify-between items-center gap-2">
+            <span>{content.secMaterials}</span>
+            <a href={getDirectoryUrl('material', lang)} class="text-xs font-semibold text-link hover:underline shrink-0">
+              {content.materialsIndex} (<span data-card-count data-orig-count={String(totalMaterials)}>{totalMaterials}</span>)
+            </a>
           </h3>
-          <ul class="flex flex-col gap-2 text-[13px] max-h-[250px] overflow-y-auto pr-1">
-            {currentHowLong.map(item => (
-              <li>
-                <a href={`/${lang}/how-long/${item.slug}/`} class="text-muted hover:text-link block truncate">
+          <ul class="flex flex-col gap-2.5 text-[13px]">
+            {CATEGORIES.map((cat) => {
+              const loc = CATEGORY_LOCALIZATIONS[cat.id]?.[lang];
+              const name = loc?.displayName || cat.displayName;
+              const desc = loc?.description || cat.description;
+              return (
+                <li
+                  data-sitemap-item
+                  data-search={`${name} ${cat.displayName} ${cat.id.replace(/-/g, ' ')} ${desc}`.toLowerCase()}
+                >
+                  <a href={translatePath(`/material/${cat.id}/`)} class="text-link hover:underline font-medium">
+                    {name}
+                  </a>
+                </li>
+              );
+            })}
+            <li
+              data-sitemap-item
+              data-search={`${content.scratchedNonstickLabel} scratched nonstick cookware teflon ptfe pfas`.toLowerCase()}
+            >
+              <a href={translatePath('/material/scratched-nonstick-cookware/')} class="text-link hover:underline font-medium">
+                {content.scratchedNonstickLabel}
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Evergreen Kitchen Safety Blog -->
+        <div data-sitemap-card class="lg:col-span-7 p-6 bg-surface-soft border border-hairline rounded-xl">
+          <h3 class="text-title-sm text-ink font-bold mb-3 pb-2.5 border-b border-hairline flex justify-between items-center gap-2">
+            <span>{content.blogTitle}</span>
+            <a href={getDirectoryUrl('blog', lang)} class="text-xs font-semibold text-link hover:underline shrink-0">
+              {content.blogIndex} (<span data-card-count data-orig-count={String(totalBlog)}>{totalBlog}</span>)
+            </a>
+          </h3>
+          <ul class="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-2 text-[13px] max-h-[300px] overflow-y-auto pr-1">
+            {currentBlog.map((post) => (
+              <li
+                data-sitemap-item
+                data-search={`${post.title} ${post.slug.replace(/-/g, ' ')} blog`.toLowerCase()}
+              >
+                <a href={translatePath(`/blog/${post.slug}/`)} class="text-muted hover:text-link block truncate py-0.5">
+                  {post.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Side-by-Side Safety Comparisons -->
+    <section id="section-comparisons" data-sitemap-section class="border-t border-hairline pt-8 mb-12 scroll-mt-24">
+      <div data-sitemap-card class="p-6 bg-surface-soft border border-hairline rounded-xl">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-hairline">
+          <div>
+            <h2 class="text-2xl font-bold text-ink">{content.compareTitle}</h2>
+            <p class="text-xs text-muted mt-0.5">{content.compareSub}</p>
+          </div>
+          <a href={getDirectoryUrl('compare', lang)} class="text-xs font-semibold text-link hover:underline shrink-0">
+            {content.compareIndex} (<span data-card-count data-orig-count={String(totalComparisons)}>{totalComparisons}</span>)
+          </a>
+        </div>
+        <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2 text-[13px] max-h-[320px] overflow-y-auto pr-1">
+          {currentComparisons.map((c) => (
+            <li
+              data-sitemap-item
+              data-search={`${c.item1} vs ${c.item2} ${c.slug.replace(/-/g, ' ')} compare`.toLowerCase()}
+            >
+              <a href={translatePath(`/compare/${c.slug}/`)} class="text-muted hover:text-link block truncate py-0.5">
+                {c.item1} vs {c.item2}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- 5. Shelf-Life, Refreezing & Care Directories -->
+    <section id="section-directories" data-sitemap-section class="border-t border-hairline pt-8 mb-12 scroll-mt-24">
+      <h2 class="text-2xl md:text-3xl font-bold text-ink mb-6">{content.secDirectories}</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <!-- Shelf Life -->
+        <div data-sitemap-card class="border border-hairline rounded-xl p-5 bg-canvas">
+          <h3 class="text-title-sm font-bold text-ink mb-3 pb-2.5 border-b border-hairline flex justify-between items-center gap-2">
+            <span>{content.shelfLifeTitle}</span>
+            <a href={getDirectoryUrl('how-long', lang)} class="text-xs font-semibold text-link hover:underline shrink-0">
+              {content.viewAll} (<span data-card-count data-orig-count={String(currentHowLong.length)}>{currentHowLong.length}</span>)
+            </a>
+          </h3>
+          <ul class="flex flex-col gap-2 text-[13px] max-h-[280px] overflow-y-auto pr-1">
+            {currentHowLong.map((item) => (
+              <li
+                data-sitemap-item
+                data-search={`${item.item} ${content.shelfLifeTitle} how long shelf life fridge ${item.slug.replace(/-/g, ' ')}`.toLowerCase()}
+              >
+                <a href={translatePath(`/how-long/${item.slug}/`)} class="text-muted hover:text-link block truncate py-0.5">
                   {item.item}
                 </a>
               </li>
@@ -343,15 +980,20 @@ const groupedItems = appliances.reduce((acc, app) => {
         </div>
 
         <!-- Refreeze -->
-        <div class="border border-hairline rounded-lg p-5">
-          <h3 class="text-title-md font-bold text-ink mb-3 pb-2 border-b border-hairline flex justify-between items-center">
+        <div data-sitemap-card class="border border-hairline rounded-xl p-5 bg-canvas">
+          <h3 class="text-title-sm font-bold text-ink mb-3 pb-2.5 border-b border-hairline flex justify-between items-center gap-2">
             <span>{content.refreezeTitle}</span>
-            <a href={getDirectoryUrl('refreeze', lang)} class="text-xs text-link hover:underline">{content.viewAll} ({currentRefreeze.length})</a>
+            <a href={getDirectoryUrl('refreeze', lang)} class="text-xs font-semibold text-link hover:underline shrink-0">
+              {content.viewAll} (<span data-card-count data-orig-count={String(currentRefreeze.length)}>{currentRefreeze.length}</span>)
+            </a>
           </h3>
-          <ul class="flex flex-col gap-2 text-[13px] max-h-[250px] overflow-y-auto pr-1">
-            {currentRefreeze.map(item => (
-              <li>
-                <a href={`/${lang}/refreeze/${item.slug}/`} class="text-muted hover:text-link block truncate">
+          <ul class="flex flex-col gap-2 text-[13px] max-h-[280px] overflow-y-auto pr-1">
+            {currentRefreeze.map((item) => (
+              <li
+                data-sitemap-item
+                data-search={`${item.item} ${content.refreezeTitle} refreeze freezer ${item.slug.replace(/-/g, ' ')}`.toLowerCase()}
+              >
+                <a href={translatePath(`/refreeze/${item.slug}/`)} class="text-muted hover:text-link block truncate py-0.5">
                   {item.item}
                 </a>
               </li>
@@ -360,15 +1002,20 @@ const groupedItems = appliances.reduce((acc, app) => {
         </div>
 
         <!-- Washing Machine -->
-        <div class="border border-hairline rounded-lg p-5">
-          <h3 class="text-title-md font-bold text-ink mb-3 pb-2 border-b border-hairline flex justify-between items-center">
+        <div data-sitemap-card class="border border-hairline rounded-xl p-5 bg-canvas">
+          <h3 class="text-title-sm font-bold text-ink mb-3 pb-2.5 border-b border-hairline flex justify-between items-center gap-2">
             <span>{content.washingTitle}</span>
-            <a href={getDirectoryUrl('washing-machine', lang)} class="text-xs text-link hover:underline">{content.viewAll} ({currentWashingMachine.length})</a>
+            <a href={getDirectoryUrl('washing-machine', lang)} class="text-xs font-semibold text-link hover:underline shrink-0">
+              {content.viewAll} (<span data-card-count data-orig-count={String(currentWashingMachine.length)}>{currentWashingMachine.length}</span>)
+            </a>
           </h3>
-          <ul class="flex flex-col gap-2 text-[13px] max-h-[250px] overflow-y-auto pr-1">
-            {currentWashingMachine.map(item => (
-              <li>
-                <a href={`/${lang}/washing-machine/${item.slug}/`} class="text-muted hover:text-link block truncate">
+          <ul class="flex flex-col gap-2 text-[13px] max-h-[280px] overflow-y-auto pr-1">
+            {currentWashingMachine.map((item) => (
+              <li
+                data-sitemap-item
+                data-search={`${item.item} ${content.washingTitle} washing machine laundry ${item.slug.replace(/-/g, ' ')}`.toLowerCase()}
+              >
+                <a href={translatePath(`/washing-machine/${item.slug}/`)} class="text-muted hover:text-link block truncate py-0.5">
                   {item.item}
                 </a>
               </li>
@@ -377,15 +1024,20 @@ const groupedItems = appliances.reduce((acc, app) => {
         </div>
 
         <!-- What Happens -->
-        <div class="border border-hairline rounded-lg p-5">
-          <h3 class="text-title-md font-bold text-ink mb-3 pb-2 border-b border-hairline flex justify-between items-center">
+        <div data-sitemap-card class="border border-hairline rounded-xl p-5 bg-canvas">
+          <h3 class="text-title-sm font-bold text-ink mb-3 pb-2.5 border-b border-hairline flex justify-between items-center gap-2">
             <span>{content.whatHappensTitle}</span>
-            <a href={getDirectoryUrl('what-happens', lang)} class="text-xs text-link hover:underline">{content.viewAll} ({currentWhatHappens.length})</a>
+            <a href={getDirectoryUrl('what-happens', lang)} class="text-xs font-semibold text-link hover:underline shrink-0">
+              {content.viewAll} (<span data-card-count data-orig-count={String(currentWhatHappens.length)}>{currentWhatHappens.length}</span>)
+            </a>
           </h3>
-          <ul class="flex flex-col gap-2 text-[13px] max-h-[250px] overflow-y-auto pr-1">
-            {currentWhatHappens.map(item => (
-              <li>
-                <a href={`/${lang}/what-happens/${item.slug}/`} class="text-muted hover:text-link block truncate">
+          <ul class="flex flex-col gap-2 text-[13px] max-h-[280px] overflow-y-auto pr-1">
+            {currentWhatHappens.map((item) => (
+              <li
+                data-sitemap-item
+                data-search={`${item.item} ${content.whatHappensTitle} what happens hazard ${item.slug.replace(/-/g, ' ')}`.toLowerCase()}
+              >
+                <a href={translatePath(`/what-happens/${item.slug}/`)} class="text-muted hover:text-link block truncate py-0.5">
                   {item.item}
                 </a>
               </li>
@@ -394,5 +1046,244 @@ const groupedItems = appliances.reduce((acc, app) => {
         </div>
       </div>
     </section>
+
+    <!-- 6. Trust, Editorial Standards & Site Policies -->
+    <section id="section-trust" data-sitemap-section class="border-t border-hairline pt-8 mb-6 scroll-mt-24">
+      <h2 class="text-2xl md:text-3xl font-bold text-ink mb-6">{content.secTrust}</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div data-sitemap-card class="p-6 bg-surface-soft border border-hairline rounded-xl">
+          <h3 class="text-title-sm text-ink font-bold mb-3 pb-2 border-b border-hairline flex justify-between items-center">
+            <span>{content.trustCoreTitle}</span>
+            <span data-card-count data-orig-count={String(trustCoreLinks.length)} class="text-xs font-semibold text-muted">{trustCoreLinks.length}</span>
+          </h3>
+          <ul class="flex flex-col gap-2.5 text-[13px]">
+            {trustCoreLinks.map((link) => (
+              <li data-sitemap-item data-search={`${link.label} ${link.keywords}`.toLowerCase()}>
+                <a href={link.href} class="text-link hover:underline font-medium">{link.label}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div data-sitemap-card class="p-6 bg-surface-soft border border-hairline rounded-xl">
+          <h3 class="text-title-sm text-ink font-bold mb-3 pb-2 border-b border-hairline flex justify-between items-center">
+            <span>{content.trustEditorialTitle}</span>
+            <span data-card-count data-orig-count={String(trustEditorialLinks.length)} class="text-xs font-semibold text-muted">{trustEditorialLinks.length}</span>
+          </h3>
+          <ul class="flex flex-col gap-2.5 text-[13px]">
+            {trustEditorialLinks.map((link) => (
+              <li data-sitemap-item data-search={`${link.label} ${link.keywords}`.toLowerCase()}>
+                <a href={link.href} class="text-link hover:underline font-medium">{link.label}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div data-sitemap-card class="p-6 bg-surface-soft border border-hairline rounded-xl">
+          <h3 class="text-title-sm text-ink font-bold mb-3 pb-2 border-b border-hairline flex justify-between items-center">
+            <span>{content.trustPolicyTitle}</span>
+            <span data-card-count data-orig-count={String(trustPolicyLinks.length)} class="text-xs font-semibold text-muted">{trustPolicyLinks.length}</span>
+          </h3>
+          <ul class="flex flex-col gap-2.5 text-[13px]">
+            {trustPolicyLinks.map((link) => (
+              <li data-sitemap-item data-search={`${link.label} ${link.keywords}`.toLowerCase()}>
+                <a href={link.href} class="text-link hover:underline font-medium">{link.label}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
   </section>
+
+  <script is:inline>
+    (function () {
+      function initSitemapFilter() {
+        var root = document.getElementById('sitemap-filter-bar');
+        var input = document.getElementById('sitemap-filter-input');
+        var clearBtn = document.getElementById('sitemap-filter-clear');
+        var statusEl = document.getElementById('sitemap-filter-status');
+        var emptyEl = document.getElementById('sitemap-empty-state');
+        var emptyResetBtn = document.getElementById('sitemap-empty-reset');
+        if (!root || !input || !statusEl) return;
+        if (root.getAttribute('data-bound') === '1') return;
+        root.setAttribute('data-bound', '1');
+
+        var items = Array.prototype.slice.call(document.querySelectorAll('[data-sitemap-item]'));
+        var cards = Array.prototype.slice.call(document.querySelectorAll('[data-sitemap-card]'));
+        var sections = Array.prototype.slice.call(document.querySelectorAll('[data-sitemap-section]'));
+        var chips = Array.prototype.slice.call(document.querySelectorAll('[data-filter-chip]'));
+        var totalItems = items.length;
+
+        var msgAll = root.getAttribute('data-msg-all') || 'Showing all {total} indexed links across {sections} sections.';
+        var msgMatch = root.getAttribute('data-msg-match') || 'Showing {matched} matching links (of {total}) across {sections} sections.';
+        var msgEmpty = root.getAttribute('data-msg-empty') || 'No matching links found for "{query}".';
+
+        var itemData = items.map(function (el) {
+          var hay = (el.getAttribute('data-search') || el.textContent || '').toLowerCase();
+          return { el: el, hay: hay };
+        });
+
+        var cardData = cards.map(function (card) {
+          var cardItems = Array.prototype.slice.call(card.querySelectorAll('[data-sitemap-item]'));
+          var countEl = card.querySelector('[data-card-count]');
+          var origCount = countEl ? (countEl.getAttribute('data-orig-count') || countEl.textContent || '') : '';
+          return { el: card, items: cardItems, countEl: countEl, origCount: origCount };
+        });
+
+        var sectionData = sections.map(function (sec) {
+          var secItems = Array.prototype.slice.call(sec.querySelectorAll('[data-sitemap-item]'));
+          return { el: sec, items: secItems };
+        });
+
+        function formatMsg(tpl, matched, total, secCount, query) {
+          return tpl
+            .replace('{matched}', String(matched))
+            .replace('{total}', String(total))
+            .replace('{sections}', String(secCount))
+            .replace('{query}', query);
+        }
+
+        function applyFilter() {
+          var raw = (input.value || '').trim();
+          var q = raw.toLowerCase();
+          var tokens = q ? q.split(/\s+/).filter(Boolean) : [];
+          var hasQuery = tokens.length > 0;
+
+          if (clearBtn) {
+            if (hasQuery) {
+              clearBtn.classList.remove('hidden');
+            } else {
+              clearBtn.classList.add('hidden');
+            }
+          }
+
+          for (var c = 0; c < chips.length; c++) {
+            var chipVal = (chips[c].getAttribute('data-filter-chip') || '').toLowerCase();
+            chips[c].setAttribute('aria-pressed', hasQuery && chipVal === q ? 'true' : 'false');
+          }
+
+          var matchedCount = 0;
+          for (var i = 0; i < itemData.length; i++) {
+            var entry = itemData[i];
+            var ok = true;
+            if (hasQuery) {
+              for (var t = 0; t < tokens.length; t++) {
+                if (entry.hay.indexOf(tokens[t]) === -1) {
+                  ok = false;
+                  break;
+                }
+              }
+            }
+            if (ok) {
+              matchedCount++;
+              entry.el.classList.remove('hidden');
+            } else {
+              entry.el.classList.add('hidden');
+            }
+          }
+
+          for (var j = 0; j < cardData.length; j++) {
+            var card = cardData[j];
+            var visInCard = 0;
+            for (var k = 0; k < card.items.length; k++) {
+              if (!card.items[k].classList.contains('hidden')) {
+                visInCard++;
+              }
+            }
+            if (hasQuery && visInCard === 0) {
+              card.el.classList.add('hidden');
+            } else {
+              card.el.classList.remove('hidden');
+            }
+            if (card.countEl) {
+              card.countEl.textContent = hasQuery ? (String(visInCard) + ' / ' + card.origCount) : card.origCount;
+            }
+          }
+
+          var visibleSections = 0;
+          for (var s = 0; s < sectionData.length; s++) {
+            var sec = sectionData[s];
+            var visInSec = 0;
+            for (var m = 0; m < sec.items.length; m++) {
+              if (!sec.items[m].classList.contains('hidden')) {
+                visInSec++;
+              }
+            }
+            if (hasQuery && visInSec === 0) {
+              sec.el.classList.add('hidden');
+            } else {
+              sec.el.classList.remove('hidden');
+              visibleSections++;
+            }
+          }
+
+          if (!hasQuery) {
+            statusEl.textContent = formatMsg(msgAll, totalItems, totalItems, sections.length, '');
+          } else if (matchedCount === 0) {
+            statusEl.textContent = formatMsg(msgEmpty, 0, totalItems, 0, raw);
+          } else {
+            statusEl.textContent = formatMsg(msgMatch, matchedCount, totalItems, visibleSections, raw);
+          }
+
+          if (emptyEl) {
+            if (hasQuery && matchedCount === 0) {
+              emptyEl.classList.remove('hidden');
+            } else {
+              emptyEl.classList.add('hidden');
+            }
+          }
+        }
+
+        var debounceTimer = null;
+        input.addEventListener('input', function () {
+          if (debounceTimer) clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(applyFilter, 60);
+        });
+
+        input.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape') {
+            input.value = '';
+            applyFilter();
+          }
+        });
+
+        if (clearBtn) {
+          clearBtn.addEventListener('click', function () {
+            input.value = '';
+            applyFilter();
+            input.focus();
+          });
+        }
+
+        if (emptyResetBtn) {
+          emptyResetBtn.addEventListener('click', function () {
+            input.value = '';
+            applyFilter();
+            input.focus();
+          });
+        }
+
+        for (var b = 0; b < chips.length; b++) {
+          (function (btn) {
+            btn.addEventListener('click', function () {
+              var val = btn.getAttribute('data-filter-chip') || '';
+              if ((input.value || '').trim().toLowerCase() === val.toLowerCase()) {
+                input.value = '';
+              } else {
+                input.value = val;
+              }
+              applyFilter();
+              input.focus();
+            });
+          })(chips[b]);
+        }
+
+        applyFilter();
+      }
+
+      initSitemapFilter();
+      document.addEventListener('astro:page-load', initSitemapFilter);
+    })();
+  </script>
 </Layout>

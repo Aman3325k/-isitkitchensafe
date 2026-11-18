@@ -1,0 +1,1591 @@
+---
+import rawData from '../data/kitchen-fire-emergency-guide-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+import { useTranslatedPath } from '../i18n/utils';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+const translatePath = useTranslatedPath(lang);
+
+const oilSmokePointUrl = translatePath('/tools/cooking-oil-smoke-point-finder/');
+const cleanerMixingUrl = translatePath('/tools/cleaner-mixing-danger-checker/');
+const ovenRackUrl = translatePath('/tools/oven-rack-bakeware-heat-adjuster/');
+const methodologyUrl = translatePath('/methodology/');
+const allToolsUrl = translatePath('/tools/');
+
+type RatingLevel = 'safe' | 'caution' | 'deadly';
+
+interface EmergencyNumber {
+  region: string;
+  code: string;
+}
+
+interface BannerTrigger {
+  icon: string;
+  title: string;
+  body: string;
+}
+
+interface EmergencyBannerData {
+  badge: string;
+  headline: string;
+  subline: string;
+  numbers: EmergencyNumber[];
+  triggers: BannerTrigger[];
+}
+
+interface PassStep {
+  letter: string;
+  word: string;
+  detail: string;
+}
+
+interface PassData {
+  badge: string;
+  title: string;
+  subtitle: string;
+  steps: PassStep[];
+}
+
+interface LocalizedScenario {
+  id: string;
+  icon: string;
+  severity: string;
+  showPass: boolean;
+  sourceTag: string;
+  recommendedToolIds: string[];
+  shortName: string;
+  name: string;
+  urgencyTag: string;
+  summary: string;
+  doSteps: string[];
+  neverDo: string[];
+  rationale: string;
+  evacuateTrigger: string;
+}
+
+interface LocalizedTool {
+  id: string;
+  icon: string;
+  verdictLevel: string;
+  ratings: {
+    grease: RatingLevel;
+    electrical: RatingLevel;
+    oven: RatingLevel;
+    paper: RatingLevel;
+  };
+  shortName: string;
+  name: string;
+  verdictBadge: string;
+  distanceRule: string;
+  bestUse: string;
+  criticalWarning: string;
+  cleanupNote: string;
+  fireNotes: {
+    grease: string;
+    electrical: string;
+    oven: string;
+    paper: string;
+  };
+}
+
+const emergencyBanner: EmergencyBannerData =
+  (rawData.emergencyBanner as Record<string, EmergencyBannerData>)[lang] ||
+  rawData.emergencyBanner.en;
+
+const passTechnique: PassData =
+  (rawData.passTechnique as Record<string, PassData>)[lang] ||
+  rawData.passTechnique.en;
+
+const localizedScenarios: LocalizedScenario[] = rawData.scenarios.map((item) => {
+  const tr = (item.i18n as Record<string, any>)[lang] || item.i18n.en;
+  return {
+    id: item.id,
+    icon: item.icon,
+    severity: item.severity,
+    showPass: item.showPass,
+    sourceTag: item.sourceTag,
+    recommendedToolIds: item.recommendedToolIds,
+    shortName: tr.shortName,
+    name: tr.name,
+    urgencyTag: tr.urgencyTag,
+    summary: tr.summary,
+    doSteps: tr.doSteps,
+    neverDo: tr.neverDo,
+    rationale: tr.rationale,
+    evacuateTrigger: tr.evacuateTrigger
+  };
+});
+
+const localizedTools: LocalizedTool[] = rawData.tools.map((item) => {
+  const tr = (item.i18n as Record<string, any>)[lang] || item.i18n.en;
+  return {
+    id: item.id,
+    icon: item.icon,
+    verdictLevel: item.verdictLevel,
+    ratings: item.ratings as LocalizedTool['ratings'],
+    shortName: tr.shortName,
+    name: tr.name,
+    verdictBadge: tr.verdictBadge,
+    distanceRule: tr.distanceRule,
+    bestUse: tr.bestUse,
+    criticalWarning: tr.criticalWarning,
+    cleanupNote: tr.cleanupNote,
+    fireNotes: tr.fireNotes
+  };
+});
+
+const localizedFaqs: Array<{ question: string; answer: string }> =
+  (rawData.faqs as Record<string, Array<{ question: string; answer: string }>>)[lang] ||
+  rawData.faqs.en;
+
+interface UiDict {
+  ariaLabel: string;
+  triageBadge: string;
+  triageTitle: string;
+  triageSub: string;
+  copyBtn: string;
+  copiedBtn: string;
+  printBtn: string;
+  scenarioStepLabel: string;
+  scenarioStepHint: string;
+  doHeading: string;
+  doBadge: string;
+  neverHeading: string;
+  neverBadge: string;
+  evacuateHeading: string;
+  rationaleHeading: string;
+  recommendedToolsLabel: string;
+  noFireToolNote: string;
+  passApplicableTag: string;
+  passAlwaysNote: string;
+  matcherBadge: string;
+  matcherHeading: string;
+  matcherSub: string;
+  fireTypeGrease: string;
+  fireTypeElectrical: string;
+  fireTypeOven: string;
+  fireTypePaper: string;
+  ratingSafe: string;
+  ratingCaution: string;
+  ratingDeadly: string;
+  distanceRuleLabel: string;
+  bestUseLabel: string;
+  criticalWarningLabel: string;
+  cleanupLabel: string;
+  matrixHeading: string;
+  printPosterTitle: string;
+  printPosterSub: string;
+  copyHeader: string;
+  copyEmergencyLine: string;
+  copyScenarioLine: string;
+  copyDoHeader: string;
+  copyNeverHeader: string;
+  copyEvacuateLine: string;
+  copyToolHeader: string;
+  copyPassHeader: string;
+  relatedHeading: string;
+  relatedOilTag: string;
+  relatedOilTitle: string;
+  relatedOilDesc: string;
+  relatedCleanerTag: string;
+  relatedCleanerTitle: string;
+  relatedCleanerDesc: string;
+  relatedOvenTag: string;
+  relatedOvenTitle: string;
+  relatedOvenDesc: string;
+  methodologyStripTitle: string;
+  methodologyStripPrefix: string;
+  methodologyLabel: string;
+  oilQuickLabel: string;
+  allToolsLabel: string;
+  faqTitle: string;
+}
+
+const UI: Record<SupportedLanguage, UiDict> = {
+  en: {
+    ariaLabel: 'Interactive Kitchen Fire, Electrical, Gas Leak & Burn Emergency First-Response Guide',
+    triageBadge: '6-Scenario Kitchen Emergency Triage',
+    triageTitle: 'Instant DO vs. NEVER DO Emergency Action Dashboard',
+    triageSub: 'Select the kitchen emergency below to view immediate NFPA, USFA/FEMA, and American Red Cross first-response steps and lethal mistakes to avoid.',
+    copyBtn: 'Copy Emergency Reference Card',
+    copiedBtn: 'Reference Card Copied ✓',
+    printBtn: 'Print Fridge Safety Poster',
+    scenarioStepLabel: '1. Select the Kitchen Emergency (6 Scenarios)',
+    scenarioStepHint: 'Tap any scenario to switch the live DO vs. NEVER DO protocol immediately.',
+    doHeading: 'DO IMMEDIATELY (Safe First Response)',
+    doBadge: 'FOLLOW IN ORDER',
+    neverHeading: 'NEVER DO (Lethal Mistakes)',
+    neverBadge: 'LIFE-THREATENING',
+    evacuateHeading: 'WHEN TO EVACUATE / CALL EMERGENCY SERVICES',
+    rationaleHeading: 'Fire Science & Official Guidance',
+    recommendedToolsLabel: 'Inspect Compatible Tools Below:',
+    noFireToolNote: 'No extinguisher applies here — follow immediate evacuation or cool-water first aid strictly.',
+    passApplicableTag: 'EXTINGUISHER P.A.S.S. APPLICABLE',
+    passAlwaysNote: 'Remember P.A.S.S. only for small contained fires with a clear exit behind you.',
+    matcherBadge: '6 Home Fire Tools Rated Across 4 Fire Types',
+    matcherHeading: '2. Interactive Fire Extinguisher & Kitchen Tool Matcher',
+    matcherSub: 'Click any fire extinguisher or kitchen suppression tool to see exact SAFE vs. CAUTION vs. DEADLY ratings across Grease, Electrical, Oven, and Paper/Trash fires.',
+    fireTypeGrease: 'Grease / Oil Pan Fire',
+    fireTypeElectrical: 'Electrical / Appliance',
+    fireTypeOven: 'Closed Oven / Microwave',
+    fireTypePaper: 'Paper / Wood / Trash',
+    ratingSafe: 'SAFE',
+    ratingCaution: 'CAUTION',
+    ratingDeadly: 'DEADLY / NO',
+    distanceRuleLabel: 'Stand-Back Distance & Deployment Rule',
+    bestUseLabel: 'Best Kitchen Role',
+    criticalWarningLabel: 'Critical Limitation / Hazard',
+    cleanupLabel: 'Aftermath & Cleanup',
+    matrixHeading: 'Fire-Type Compatibility Breakdown',
+    printPosterTitle: 'KITCHEN EMERGENCY FRIDGE SAFETY POSTER (NFPA · USFA · RED CROSS)',
+    printPosterSub: 'Post inside a pantry door or on the refrigerator — never above the stove.',
+    copyHeader: 'IsItKitchenSafe — Kitchen Fire, Gas & Burn Emergency Reference Card',
+    copyEmergencyLine: 'EMERGENCY: If fire spreads or smoke fills the room, EVACUATE & CALL 911 / 112 / 119 / 193!',
+    copyScenarioLine: 'ACTIVE SCENARIO:',
+    copyDoHeader: 'DO IMMEDIATELY:',
+    copyNeverHeader: 'NEVER DO (LETHAL MISTAKES):',
+    copyEvacuateLine: 'EVACUATE / MEDICAL TRIGGER:',
+    copyToolHeader: 'SELECTED EXTINGUISHER / TOOL:',
+    copyPassHeader: 'P.A.S.S. EXTINGUISHER TECHNIQUE:',
+    relatedHeading: 'Related Kitchen Fire Prevention & Chemical Safety Tools',
+    relatedOilTag: 'Prevent Grease Fires',
+    relatedOilTitle: 'Cooking Oil Smoke Point Finder →',
+    relatedOilDesc: 'Compare smoke points and flash hazards across 35+ cooking oils before deep-frying or high-heat searing.',
+    relatedCleanerTag: 'Toxic Gas Prevention',
+    relatedCleanerTitle: 'Cleaner Mixing Danger Checker →',
+    relatedCleanerDesc: 'Check which household cleaners create deadly chlorine, chloramine, or chloroform gas when mixed.',
+    relatedOvenTag: 'Oven & Broiler Safety',
+    relatedOvenTitle: 'Oven Rack & Bakeware Heat Adjuster →',
+    relatedOvenDesc: 'Avoid broiler fires, glass thermal-shock shatters, and parchment ignition with exact bakeware heat limits.',
+    methodologyStripTitle: 'Grounded in NFPA, USFA/FEMA & American Red Cross Emergency Standards',
+    methodologyStripPrefix: 'All emergency protocols, Class A/B/C/K extinguisher rules, gas leak zero-spark procedures, and cool-water burn first aid align with National Fire Protection Association, U.S. Fire Administration, and American Red Cross guidance. Read our',
+    methodologyLabel: 'Methodology',
+    oilQuickLabel: 'Oil Smoke Points',
+    allToolsLabel: 'All Kitchen Tools →',
+    faqTitle: 'Frequently Asked Questions: Kitchen Grease Fires, Extinguishers & Burn First Aid'
+  },
+  es: {
+    ariaLabel: 'Guía Interactiva de Emergencia para Fuego de Aceite, Eléctrico, Fuga de Gas y Quemaduras',
+    triageBadge: 'Triaje de 6 Emergencias de Cocina',
+    triageTitle: 'Panel de Acción Inmediata: QUÉ HACER vs. NUNCA HACER',
+    triageSub: 'Selecciona la emergencia abajo para ver pasos inmediatos basados en NFPA, USFA/FEMA y la Cruz Roja Americana, junto con errores mortales que debes evitar.',
+    copyBtn: 'Copiar Tarjeta de Emergencia',
+    copiedBtn: 'Tarjeta Copiada ✓',
+    printBtn: 'Imprimir Póster para Nevera',
+    scenarioStepLabel: '1. Selecciona la Emergencia en Cocina (6 Escenarios)',
+    scenarioStepHint: 'Toca cualquier escenario para cambiar al instante el protocolo QUÉ HACER vs. NUNCA HACER.',
+    doHeading: 'HACER DE INMEDIATO (Respuesta Segura)',
+    doBadge: 'SEGUIR EN ORDEN',
+    neverHeading: 'NUNCA HACER (Errores Mortales)',
+    neverBadge: 'PELIGRO DE MUERTE',
+    evacuateHeading: 'CUÁNDO EVACUAR / LLAMAR A EMERGENCIAS',
+    rationaleHeading: 'Ciencia del Fuego y Guía Oficial',
+    recommendedToolsLabel: 'Revisar Herramientas Compatibles Abajo:',
+    noFireToolNote: 'Aquí no aplica ningún extintor: sigue estrictamente la evacuación inmediata o primeros auxilios con agua fresca.',
+    passApplicableTag: 'TÉCNICA DE EXTINTOR P.A.S.S. APLICABLE',
+    passAlwaysNote: 'Usa P.A.S.S. solo en fuegos pequeños y contenidos teniendo la salida detrás de ti.',
+    matcherBadge: '6 Herramientas Evaluadas en 4 Tipos de Fuego',
+    matcherHeading: '2. Comparador Interactivo de Extintores y Herramientas de Cocina',
+    matcherSub: 'Pulsa cualquier extintor o herramienta para ver su calificación exacta SEGURO vs. PRECAUCIÓN vs. MORTAL en fuegos de Aceite, Eléctrico, Horno y Papel.',
+    fireTypeGrease: 'Aceite / Grasa en Sartén',
+    fireTypeElectrical: 'Eléctrico / Aparato',
+    fireTypeOven: 'Horno / Microondas Cerrado',
+    fireTypePaper: 'Papel / Madera / Basura',
+    ratingSafe: 'SEGURO',
+    ratingCaution: 'PRECAUCIÓN',
+    ratingDeadly: 'MORTAL / NO',
+    distanceRuleLabel: 'Distancia Segura y Regla de Uso',
+    bestUseLabel: 'Mejor Función en Cocina',
+    criticalWarningLabel: 'Limitación Crítica / Peligro',
+    cleanupLabel: 'Limpieza Posterior',
+    matrixHeading: 'Compatibilidad por Tipo de Incendio',
+    printPosterTitle: 'PÓSTER DE EMERGENCIA EN COCINA PARA NEVERA (NFPA · USFA · CRUZ ROJA)',
+    printPosterSub: 'Colócalo en la puerta de la despensa o nevera — nunca encima de la estufa.',
+    copyHeader: 'IsItKitchenSafe — Tarjeta de Emergencia: Fuego, Gas y Quemaduras',
+    copyEmergencyLine: 'EMERGENCIA: Si el fuego se propaga o hay humo denso, ¡EVACUA Y LLAMA AL 911 / 112 / 119 / 193!',
+    copyScenarioLine: 'ESCENARIO ACTIVO:',
+    copyDoHeader: 'HACER DE INMEDIATO:',
+    copyNeverHeader: 'NUNCA HACER (ERRORES MORTALES):',
+    copyEvacuateLine: 'CUÁNDO EVACUAR / URGENCIAS:',
+    copyToolHeader: 'EXTINTOR / HERRAMIENTA SELECCIONADA:',
+    copyPassHeader: 'TÉCNICA P.A.S.S. DE EXTINTOR:',
+    relatedHeading: 'Herramientas Relacionadas de Prevención de Incendios y Seguridad',
+    relatedOilTag: 'Evita Fuegos de Aceite',
+    relatedOilTitle: 'Buscador de Punto de Humo de Aceites →',
+    relatedOilDesc: 'Compara el punto de humo de más de 35 aceites antes de freír o sellar a fuego alto.',
+    relatedCleanerTag: 'Prevención de Gases Tóxicos',
+    relatedCleanerTitle: 'Verificador de Mezclas de Limpiadores →',
+    relatedCleanerDesc: 'Comprueba qué productos liberan gas cloro, cloramina o cloroformo letal al mezclarse.',
+    relatedOvenTag: 'Seguridad de Horno y Grill',
+    relatedOvenTitle: 'Ajustador de Rejilla de Horno y Moldes →',
+    relatedOvenDesc: 'Evita incendios de grill, estallidos de vidrio por choque térmico e ignición de papel.',
+    methodologyStripTitle: 'Basado en Estándares NFPA, USFA/FEMA y Cruz Roja Americana',
+    methodologyStripPrefix: 'Todos los protocolos de emergencia, extintores Clase A/B/C/K, fugas de gas sin chispas y primeros auxilios en quemaduras siguen guías de NFPA, USFA y Cruz Roja Americana. Lee nuestra',
+    methodologyLabel: 'Metodología',
+    oilQuickLabel: 'Puntos de Humo',
+    allToolsLabel: 'Todas las Herramientas →',
+    faqTitle: 'Preguntas Frecuentes: Fuegos de Aceite, Extintores y Quemaduras'
+  },
+  pt: {
+    ariaLabel: 'Guia Interativo de Emergência para Fogo de Óleo, Elétrico, Vazamento de Gás e Queimaduras',
+    triageBadge: 'Triagem de 6 Emergências na Cozinha',
+    triageTitle: 'Painel de Ação Imediata: O QUE FAZER vs. NUNCA FAZER',
+    triageSub: 'Selecione a emergência abaixo para ver os passos imediatos segundo NFPA, USFA/FEMA e Cruz Vermelha Americana, além dos erros fatais que você deve evitar.',
+    copyBtn: 'Copiar Cartão de Emergência',
+    copiedBtn: 'Cartão Copiado ✓',
+    printBtn: 'Imprimir Pôster p/ Geladeira',
+    scenarioStepLabel: '1. Selecione a Emergência na Cozinha (6 Cenários)',
+    scenarioStepHint: 'Clique em qualquer cenário para alternar instantaneamente o protocolo O QUE FAZER vs. NUNCA FAZER.',
+    doHeading: 'FAÇA IMEDIATAMENTE (Resposta Segura)',
+    doBadge: 'SIGA EM ORDEM',
+    neverHeading: 'NUNCA FAÇA (Erros Fatais)',
+    neverBadge: 'RISCO DE MORTE',
+    evacuateHeading: 'QUANDO EVACUAR / ACIONAR EMERGÊNCIA',
+    rationaleHeading: 'Ciência do Fogo e Base Oficial',
+    recommendedToolsLabel: 'Ver Ferramentas Compatíveis Abaixo:',
+    noFireToolNote: 'Nenhum extintor se aplica aqui — siga rigorosamente a evacuação imediata ou água corrente fresca.',
+    passApplicableTag: 'TÉCNICA P.A.S.S. DE EXTINTOR APLICÁVEL',
+    passAlwaysNote: 'Use P.A.S.S. apenas em focos pequenos e contidos com saída livre atrás de você.',
+    matcherBadge: '6 Ferramentas Avaliadas em 4 Tipos de Fogo',
+    matcherHeading: '2. Comparador Interativo de Extintores e Ferramentas de Cozinha',
+    matcherSub: 'Clique em qualquer extintor ou item doméstico para ver a classificação exata SEGURO vs. ATENÇÃO vs. MORTAL em fogo de Óleo, Elétrico, Forno e Papel.',
+    fireTypeGrease: 'Óleo / Gordura na Panela',
+    fireTypeElectrical: 'Elétrico / Eletrodoméstico',
+    fireTypeOven: 'Forno / Micro-ondas Fechado',
+    fireTypePaper: 'Papel / Madeira / Lixo',
+    ratingSafe: 'SEGURO',
+    ratingCaution: 'ATENÇÃO',
+    ratingDeadly: 'MORTAL / NÃO',
+    distanceRuleLabel: 'Distância Segura e Regra de Uso',
+    bestUseLabel: 'Melhor Papel na Cozinha',
+    criticalWarningLabel: 'Limitação Crítica / Perigo',
+    cleanupLabel: 'Limpeza Após o Uso',
+    matrixHeading: 'Compatibilidade por Tipo de Incêndio',
+    printPosterTitle: 'PÔSTER DE EMERGÊNCIA NA COZINHA PARA GELADEIRA (NFPA · USFA · CRUZ VERMELHA)',
+    printPosterSub: 'Fixe na geladeira ou porta da despensa — nunca acima do fogão.',
+    copyHeader: 'IsItKitchenSafe — Cartão de Emergência: Fogo, Gás e Queimaduras',
+    copyEmergencyLine: 'EMERGÊNCIA: Se o fogo espalhar ou a fumaça encher o local, EVACUE E LIGUE 193 / 112 / 911 / 119!',
+    copyScenarioLine: 'CENÁRIO ATIVO:',
+    copyDoHeader: 'FAÇA IMEDIATAMENTE:',
+    copyNeverHeader: 'NUNCA FAÇA (ERROS FATAIS):',
+    copyEvacuateLine: 'QUANDO EVACUAR / SOCORRO:',
+    copyToolHeader: 'EXTINTOR / FERRAMENTA SELECIONADA:',
+    copyPassHeader: 'TÉCNICA P.A.S.S. DO EXTINTOR:',
+    relatedHeading: 'Ferramentas Relacionadas de Prevenção e Segurança na Cozinha',
+    relatedOilTag: 'Previna Fogo de Óleo',
+    relatedOilTitle: 'Tabela de Ponto de Fumaça de Óleos →',
+    relatedOilDesc: 'Compare o ponto de fumaça de mais de 35 óleos antes de fritar ou selar em fogo alto.',
+    relatedCleanerTag: 'Prevenção de Gases Tóxicos',
+    relatedCleanerTitle: 'Verificador de Misturas de Limpeza →',
+    relatedCleanerDesc: 'Descubra quais produtos formam gás cloro, cloramina ou clorofórmio mortal ao misturar.',
+    relatedOvenTag: 'Segurança de Forno e Grill',
+    relatedOvenTitle: 'Ajustador de Grade do Forno e Assadeiras →',
+    relatedOvenDesc: 'Evite fogo no broiler, estilhaçamento de vidro por choque térmico e queima de papel.',
+    methodologyStripTitle: 'Baseado em Padrões NFPA, USFA/FEMA e Cruz Vermelha Americana',
+    methodologyStripPrefix: 'Todos os protocolos de emergência, regras de extintores Classe A/B/C/K, vazamentos de gás sem faísca e primeiros socorros em queimaduras seguem NFPA, USFA e Cruz Vermelha Americana. Leia nossa',
+    methodologyLabel: 'Metodologia',
+    oilQuickLabel: 'Pontos de Fumaça',
+    allToolsLabel: 'Todas as Ferramentas →',
+    faqTitle: 'Perguntas Frequentes: Fogo de Óleo, Extintores e Queimaduras'
+  },
+  'zh-cn': {
+    ariaLabel: '交互式厨房油锅起火、电气火灾、燃气泄漏与烫伤急救应急指南',
+    triageBadge: '6 大厨房突发险情快速分诊',
+    triageTitle: '实时应急处置面板：立即这么做 vs 绝对不能做',
+    triageSub: '选择下方厨房突发状况，即刻查看基于 NFPA、USFA/FEMA 与美国红十字会标准的第一时间处置步骤与致命误区。',
+    copyBtn: '复制应急速查卡',
+    copiedBtn: '应急卡已复制 ✓',
+    printBtn: '打印冰箱安全海报',
+    scenarioStepLabel: '1. 选择厨房突发险情（6 大高频场景）',
+    scenarioStepHint: '点击任意险情，立即切换高对比度“立即这么做 vs 绝对不能做”行动指南。',
+    doHeading: '立即这么做（安全急救步骤）',
+    doBadge: '按顺序执行',
+    neverHeading: '绝对不能做（致命误区）',
+    neverBadge: '高危致死',
+    evacuateHeading: '何时必须立刻撤离 / 拨打救援电话',
+    rationaleHeading: '火灾科学与官方依据',
+    recommendedToolsLabel: '下方查看适用灭火器材：',
+    noFireToolNote: '此险情不使用灭火器——请严格遵循立即撤离或流动凉水冲洗急救！',
+    passApplicableTag: '适用 P.A.S.S. 灭火器操作法',
+    passAlwaysNote: '仅在火势极小、未蔓延且身后逃生通道畅通时才使用灭火器。',
+    matcherBadge: '6 种家用灭火工具 × 4 类厨房火情评测',
+    matcherHeading: '2. 交互式厨房灭火器与应急工具匹配器',
+    matcherSub: '点击任意灭火器或厨房工具，查看其在油锅火、电气火、烤箱火、纸木垃圾火中的准确“安全 / 谨慎 / 致命禁用”评级。',
+    fireTypeGrease: '热油 / 油脂锅火',
+    fireTypeElectrical: '电器 / 插座带电火',
+    fireTypeOven: '密闭烤箱 / 微波炉火',
+    fireTypePaper: '纸张 / 木材 / 垃圾火',
+    ratingSafe: '安全适用',
+    ratingCaution: '谨慎限用',
+    ratingDeadly: '致命禁用',
+    distanceRuleLabel: '安全站位距离与操作规范',
+    bestUseLabel: '厨房最佳定位',
+    criticalWarningLabel: '核心风险与限制',
+    cleanupLabel: '事后清理说明',
+    matrixHeading: '4 类火灾兼容性详解',
+    printPosterTitle: '家庭厨房应急冰箱贴安全海报（NFPA · USFA · 美国红十字会）',
+    printPosterSub: '建议张贴在冰箱门或储物柜内侧——切勿贴在燃气灶正上方。',
+    copyHeader: 'IsItKitchenSafe — 厨房起火、燃气泄漏与烫伤应急速查卡',
+    copyEmergencyLine: '紧急提示：若火势蔓延或浓烟弥漫，立即撤离并到室外拨打 119 / 911 / 112 / 193！',
+    copyScenarioLine: '当前险情：',
+    copyDoHeader: '立即这么做：',
+    copyNeverHeader: '绝对不能做（致命误区）：',
+    copyEvacuateLine: '撤离 / 急救触发条件：',
+    copyToolHeader: '所选灭火工具：',
+    copyPassHeader: 'P.A.S.S. 灭火器四步法：',
+    relatedHeading: '相关厨房防火与化学品安全工具',
+    relatedOilTag: '预防油锅自燃',
+    relatedOilTitle: '食用油烟点速查与用油指南 →',
+    relatedOilDesc: '煎炸爆炒前速查 35+ 种食用油烟点与高温起火风险。',
+    relatedCleanerTag: '防止毒气中毒',
+    relatedCleanerTitle: '清洁剂混用危险检测器 →',
+    relatedCleanerDesc: '快速排查哪些家用清洁剂混用会产生致命氯气、氯胺或氯仿。',
+    relatedOvenTag: '烤箱炙烤安全',
+    relatedOvenTitle: '烤箱层位与烤盘耐温调节器 →',
+    relatedOvenDesc: '避免炙烤起火、玻璃热冲击炸裂与烘焙纸引燃。',
+    methodologyStripTitle: '严格遵循 NFPA、USFA/FEMA 与美国红十字会官方急救规范',
+    methodologyStripPrefix: '所有厨房灭火原则、A/B/C/K 类灭火器评级、燃气泄漏零火花撤离及凉水烫伤急救均参照 NFPA、USFA 与美国红十字会权威指南。查阅我们的',
+    methodologyLabel: '科学方法论',
+    oilQuickLabel: '食用油烟点',
+    allToolsLabel: '全部厨房工具 →',
+    faqTitle: '常见问题：油锅起火、灭火器选购与烫伤急救'
+  },
+  ja: {
+    ariaLabel: 'キッチン油火災・電気火災・ガス漏れ・やけど緊急応急処置インタラクティブガイド',
+    triageBadge: '6つのキッチン緊急事態トリアージ',
+    triageTitle: '即応アクションボード：今すぐすべきこと vs 絶対NG行動',
+    triageSub: '下の緊急事態を選ぶと、NFPA・USFA/FEMA・米国赤十字基準に基づく初動対応と命に関わるNG行動を即表示します。',
+    copyBtn: '緊急リファレンスをコピー',
+    copiedBtn: 'コピーしました ✓',
+    printBtn: '冷蔵庫用安全ポスターを印刷',
+    scenarioStepLabel: '1. キッチン緊急事態を選択（6シナリオ）',
+    scenarioStepHint: 'シナリオを選ぶと「今すぐすべきこと vs 絶対NG」ボードが即座に切り替わります。',
+    doHeading: '今すぐすべきこと（安全な初動）',
+    doBadge: '順番に実行',
+    neverHeading: '絶対にしてはいけないこと（致命的NG）',
+    neverBadge: '命の危険',
+    evacuateHeading: '即時避難・緊急通報の判断基準',
+    rationaleHeading: '火災科学・公的基準の根拠',
+    recommendedToolsLabel: '下の適合消火具を確認：',
+    noFireToolNote: 'この事態では消火器は不要です。即時避難または流水冷却の応急処置を厳守してください。',
+    passApplicableTag: '消火器 P.A.S.S. 手順 対象',
+    passAlwaysNote: '背後に安全な避難口がある小さな初期火災でのみ消火器を使用してください。',
+    matcherBadge: '家庭用消火具6種 × 火災4タイプ適合判定',
+    matcherHeading: '2. 消火器・キッチン消火具 インタラクティブ適合マッチャー',
+    matcherSub: '消火器や身近な道具をクリックすると、油火災・電気火災・オーブン火災・紙ゴミ火災に対する「安全／注意／致命的NG」判定を確認できます。',
+    fireTypeGrease: '油・フライパン火災',
+    fireTypeElectrical: '電気・家電火災',
+    fireTypeOven: '密閉オーブン・レンジ火災',
+    fireTypePaper: '紙・木材・ゴミ火災',
+    ratingSafe: '安全・有効',
+    ratingCaution: '注意・条件付',
+    ratingDeadly: '致命的NG',
+    distanceRuleLabel: '安全距離と正しい使用ルール',
+    bestUseLabel: 'キッチンでの最適役割',
+    criticalWarningLabel: '重大な制限・危険性',
+    cleanupLabel: '消火後の清掃',
+    matrixHeading: '火災タイプ別の適合判定',
+    printPosterTitle: 'キッチン緊急対応 冷蔵庫ポスター（NFPA · USFA · 米国赤十字基準）',
+    printPosterSub: '冷蔵庫やパントリー扉の内側に掲示してください（コンロ真上は厳禁）。',
+    copyHeader: 'IsItKitchenSafe — キッチン火災・ガス漏れ・やけど緊急ガイド',
+    copyEmergencyLine: '緊急警告：火が広がる・煙が充満する場合は直ちに避難し、屋外から119 / 911 / 112 / 193へ通報！',
+    copyScenarioLine: '選択シナリオ：',
+    copyDoHeader: '今すぐすべきこと：',
+    copyNeverHeader: '絶対にしてはいけないこと（致命的NG）：',
+    copyEvacuateLine: '避難・救急通報基準：',
+    copyToolHeader: '選択した消火具：',
+    copyPassHeader: '消火器 P.A.S.S. 4ステップ：',
+    relatedHeading: '関連するキッチン防火・化学安全ツール',
+    relatedOilTag: '油火災の予防',
+    relatedOilTitle: '食用油の発煙点ファインダー →',
+    relatedOilDesc: '揚げ物や強火調理の前に35種以上の食用油の発煙点と発火リスクを確認できます。',
+    relatedCleanerTag: '有毒ガス事故の予防',
+    relatedCleanerTitle: '洗剤混ぜるな危険チェッカー →',
+    relatedCleanerDesc: '混ぜると塩素ガス・クロラミン・クロロホルムが発生する危険な洗剤の組み合わせを即判定。',
+    relatedOvenTag: 'オーブン・グリル安全',
+    relatedOvenTitle: 'オーブン段位置・焼き型耐熱アジャスター →',
+    relatedOvenDesc: 'グリル発火、耐熱ガラスの熱衝撃破裂、クッキングシート発火を未然に防ぎます。',
+    methodologyStripTitle: 'NFPA・USFA/FEMA・米国赤十字の公的緊急ガイドライン準拠',
+    methodologyStripPrefix: 'すべての初期消火手順、クラスA/B/C/K消火器判定、ガス漏れ無火花避難、流水やけど応急手当はNFPA・USFA・米国赤十字基準に基づいています。詳しくは',
+    methodologyLabel: '検証メソドロジー',
+    oilQuickLabel: '食用油の発煙点',
+    allToolsLabel: 'すべてのツール →',
+    faqTitle: 'よくある質問：油火災・家庭用消火器・やけど応急処置'
+  }
+};
+
+const t = UI[lang] || UI.en;
+
+const defaultScenario = localizedScenarios[0];
+const defaultTool = localizedTools[0];
+
+const toolMapById: Record<string, LocalizedTool> = {};
+localizedTools.forEach((item) => {
+  toolMapById[item.id] = item;
+});
+
+function getRatingBadgeClasses(rating: RatingLevel): string {
+  if (rating === 'safe') {
+    return 'bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 border-emerald-500/40';
+  }
+  if (rating === 'caution') {
+    return 'bg-amber-500/20 text-amber-900 dark:text-amber-200 border-amber-500/45';
+  }
+  return 'bg-red-500/20 text-red-800 dark:text-red-200 border-red-500/50';
+}
+
+function getRatingLabel(rating: RatingLevel): string {
+  if (rating === 'safe') return t.ratingSafe;
+  if (rating === 'caution') return t.ratingCaution;
+  return t.ratingDeadly;
+}
+
+function getRatingCardClasses(rating: RatingLevel): string {
+  if (rating === 'safe') {
+    return 'bg-emerald-500/8 border-emerald-500/35';
+  }
+  if (rating === 'caution') {
+    return 'bg-amber-500/8 border-amber-500/40';
+  }
+  return 'bg-red-500/10 border-red-500/45';
+}
+
+function getToolVerdictPillClasses(level: string): string {
+  if (level === 'best') return 'bg-emerald-500/20 text-emerald-200 border-emerald-400/40';
+  if (level === 'good') return 'bg-amber-500/20 text-amber-200 border-amber-400/40';
+  return 'bg-red-500/25 text-red-100 border-red-400/55';
+}
+
+const fireTypeDefs: Array<{ key: 'grease' | 'electrical' | 'oven' | 'paper'; icon: string; label: string }> = [
+  { key: 'grease', icon: '🍳', label: t.fireTypeGrease },
+  { key: 'electrical', icon: '🔌', label: t.fireTypeElectrical },
+  { key: 'oven', icon: '🚪', label: t.fireTypeOven },
+  { key: 'paper', icon: '📄', label: t.fireTypePaper }
+];
+
+const clientPayload = {
+  lang,
+  defaultScenarioId: defaultScenario.id,
+  defaultToolId: defaultTool.id,
+  scenarios: localizedScenarios,
+  tools: localizedTools,
+  passSteps: passTechnique.steps,
+  ui: {
+    copyBtn: t.copyBtn,
+    copiedBtn: t.copiedBtn,
+    ratingSafe: t.ratingSafe,
+    ratingCaution: t.ratingCaution,
+    ratingDeadly: t.ratingDeadly,
+    noFireToolNote: t.noFireToolNote,
+    passApplicableTag: t.passApplicableTag,
+    passAlwaysNote: t.passAlwaysNote,
+    fireTypeGrease: t.fireTypeGrease,
+    fireTypeElectrical: t.fireTypeElectrical,
+    fireTypeOven: t.fireTypeOven,
+    fireTypePaper: t.fireTypePaper,
+    copyHeader: t.copyHeader,
+    copyEmergencyLine: t.copyEmergencyLine,
+    copyScenarioLine: t.copyScenarioLine,
+    copyDoHeader: t.copyDoHeader,
+    copyNeverHeader: t.copyNeverHeader,
+    copyEvacuateLine: t.copyEvacuateLine,
+    copyToolHeader: t.copyToolHeader,
+    copyPassHeader: t.copyPassHeader
+  }
+};
+---
+
+<div id="kitchen-fire-emergency-root" class="space-y-12">
+  <!-- Top High-Contrast Evacuate First / Emergency 911-112-119-193 Banner -->
+  <aside
+    class="p-5 sm:p-6 rounded-2xl bg-error-bg/80 dark:bg-red-950/45 border-2 border-error-border shadow-sm space-y-4"
+    role="alert"
+    aria-label={emergencyBanner.badge}
+  >
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div class="space-y-1.5 max-w-3xl">
+        <span class="inline-block px-3 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-error-border text-white">
+          🚨 {emergencyBanner.badge}
+        </span>
+        <h2 class="text-base sm:text-xl font-extrabold text-ink leading-snug">
+          {emergencyBanner.headline}
+        </h2>
+        <p class="text-xs sm:text-[13.5px] font-medium text-body leading-relaxed">
+          {emergencyBanner.subline}
+        </p>
+      </div>
+
+      <div class="flex flex-wrap gap-2 shrink-0">
+        {emergencyBanner.numbers.map((num) => (
+          <div class="px-3 py-1.5 rounded-xl bg-surface-dark text-on-dark border border-white/15 text-center min-w-[78px]">
+            <span class="block text-[10px] font-bold uppercase tracking-wider text-white/75 leading-tight">
+              {num.region}
+            </span>
+            <span class="block text-base font-extrabold tracking-tight text-signature-peach">
+              {num.code}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      {emergencyBanner.triggers.map((trig) => (
+        <div class="p-3.5 rounded-xl bg-canvas border border-hairline shadow-xs space-y-1">
+          <div class="flex items-start gap-2">
+            <span aria-hidden="true" class="text-lg leading-none mt-0.5 shrink-0">{trig.icon}</span>
+            <h3 class="text-xs sm:text-[13px] font-extrabold text-ink leading-snug">{trig.title}</h3>
+          </div>
+          <p class="text-xs text-body leading-relaxed">{trig.body}</p>
+        </div>
+      ))}
+    </div>
+  </aside>
+
+  <!-- Main Interactive Emergency Triage & Extinguisher Matcher Card -->
+  <section
+    id="kitchen-fire-emergency-guide"
+    class="bg-canvas border border-hairline rounded-2xl shadow-sm overflow-hidden"
+    aria-label={t.ariaLabel}
+  >
+    <script type="application/json" id="kfeg-payload" set:html={JSON.stringify(clientPayload)} />
+
+    <!-- Header & Utility Action Buttons -->
+    <div class="p-5 sm:p-6 border-b border-hairline bg-surface-soft/50 space-y-5">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div class="space-y-1 max-w-2xl">
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-signature-coral text-white">
+            🚒 {t.triageBadge}
+          </span>
+          <h2 class="text-title-md font-bold text-ink">{t.triageTitle}</h2>
+          <p class="text-xs sm:text-[13px] text-muted leading-relaxed">{t.triageSub}</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 print:hidden">
+          <button
+            type="button"
+            id="kfeg-copy-btn"
+            class="min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors cursor-pointer shadow-sm"
+          >
+            <span id="kfeg-copy-label">📋 {t.copyBtn}</span>
+          </button>
+          <button
+            type="button"
+            id="kfeg-print-btn"
+            class="min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-semibold bg-canvas text-ink border border-hairline hover:border-signature-coral transition-colors cursor-pointer"
+          >
+            🖨️ {t.printBtn}
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 1: 6-Scenario Emergency Triage Selector -->
+      <div class="space-y-2.5 print:hidden">
+        <div class="space-y-0.5">
+          <h3 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-ink">
+            {t.scenarioStepLabel}
+          </h3>
+          <p class="text-xs text-muted">{t.scenarioStepHint}</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5" role="group" aria-label={t.scenarioStepLabel}>
+          {localizedScenarios.map((sc, idx) => (
+            <button
+              type="button"
+              data-kfeg-scenario={sc.id}
+              aria-pressed={idx === 0 ? 'true' : 'false'}
+              class={`kfeg-scenario-btn text-left p-3.5 rounded-xl border transition-all cursor-pointer flex items-start gap-2.5 ${
+                idx === 0
+                  ? 'bg-primary text-on-primary border-primary ring-2 ring-signature-coral/60 shadow-sm'
+                  : 'bg-canvas text-ink border-hairline hover:border-signature-coral'
+              }`}
+            >
+              <span aria-hidden="true" class="text-xl leading-none mt-0.5 shrink-0">{sc.icon}</span>
+              <span class="min-w-0 block">
+                <span class="block text-xs sm:text-[13px] font-extrabold leading-snug">{sc.shortName}</span>
+                <span
+                  data-kfeg-scenario-sub
+                  class={`block text-[10.5px] font-bold uppercase tracking-wider mt-0.5 ${
+                    idx === 0 ? 'text-white/80' : 'text-muted'
+                  }`}
+                >
+                  {sc.urgencyTag}
+                </span>
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <!-- High-Contrast Live DO vs. NEVER DO Action Dashboard -->
+      <div
+        id="kfeg-dashboard"
+        aria-live="polite"
+        class="w-full rounded-2xl bg-surface-dark text-on-dark p-5 sm:p-6 space-y-5 shadow-sm border-l-4 border-error-border"
+      >
+        <!-- Active Scenario Status Header -->
+        <div class="space-y-2">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <span
+                id="kfeg-urgency-pill"
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-error-border text-white"
+              >
+                {defaultScenario.urgencyTag}
+              </span>
+              <span
+                id="kfeg-source-pill"
+                class="inline-flex items-center px-2.5 py-0.5 rounded-md border text-[11px] font-bold bg-white/10 text-signature-mint border-white/20"
+              >
+                {defaultScenario.sourceTag}
+              </span>
+            </div>
+            <span
+              id="kfeg-pass-badge"
+              class="inline-flex items-center px-2.5 py-0.5 rounded-md border text-[10.5px] font-extrabold uppercase tracking-wider bg-amber-500/20 text-amber-200 border-amber-400/40"
+            >
+              🧯 {t.passApplicableTag}
+            </span>
+          </div>
+
+          <h3 id="kfeg-scenario-title" class="text-xl sm:text-2xl font-extrabold tracking-tight text-white leading-snug">
+            {defaultScenario.icon} {defaultScenario.name}
+          </h3>
+          <p id="kfeg-scenario-summary" class="text-xs sm:text-[13.5px] text-white/85 leading-relaxed">
+            {defaultScenario.summary}
+          </p>
+        </div>
+
+        <!-- Split DO vs. NEVER DO Columns -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <!-- DO IMMEDIATELY (Emerald / Green) -->
+          <div class="p-4 sm:p-5 rounded-xl bg-emerald-500/12 border-2 border-emerald-400/45 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-emerald-400/30">
+              <h4 class="text-sm font-extrabold uppercase tracking-wide text-emerald-200">
+                ✅ {t.doHeading}
+              </h4>
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500 text-slate-950">
+                {t.doBadge}
+              </span>
+            </div>
+            <ol id="kfeg-do-list" class="space-y-2.5">
+              {defaultScenario.doSteps.map((step, i) => (
+                <li class="flex items-start gap-2.5 text-xs sm:text-[13.5px] text-white/95 leading-relaxed">
+                  <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500 text-slate-950 text-xs font-extrabold shrink-0 mt-0.5">
+                    {i + 1}
+                  </span>
+                  <span>{step}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <!-- NEVER DO (Coral / Red) -->
+          <div class="p-4 sm:p-5 rounded-xl bg-red-500/14 border-2 border-red-400/55 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-red-400/35">
+              <h4 class="text-sm font-extrabold uppercase tracking-wide text-red-200">
+                🚫 {t.neverHeading}
+              </h4>
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-error-border text-white">
+                {t.neverBadge}
+              </span>
+            </div>
+            <ul id="kfeg-never-list" class="space-y-2.5">
+              {defaultScenario.neverDo.map((mistake) => (
+                <li class="flex items-start gap-2.5 text-xs sm:text-[13.5px] text-white/95 leading-relaxed">
+                  <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-error-border text-white text-xs font-extrabold shrink-0 mt-0.5">
+                    ✕
+                  </span>
+                  <span>{mistake}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <!-- Evacuate Trigger + Official Rationale Strip -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
+          <div class="lg:col-span-6 p-4 rounded-xl bg-amber-500/15 border border-amber-400/50 space-y-1.5">
+            <span class="block text-[11px] font-extrabold uppercase tracking-wider text-amber-200">
+              🚨 {t.evacuateHeading}
+            </span>
+            <p id="kfeg-evacuate-text" class="text-xs sm:text-[13px] font-semibold text-white leading-relaxed">
+              {defaultScenario.evacuateTrigger}
+            </p>
+          </div>
+
+          <div class="lg:col-span-6 p-4 rounded-xl bg-white/6 border border-white/14 space-y-1.5">
+            <span class="block text-[11px] font-extrabold uppercase tracking-wider text-signature-mint">
+              🧪 {t.rationaleHeading}
+            </span>
+            <p id="kfeg-rationale-text" class="text-xs sm:text-[13px] text-white/90 leading-relaxed">
+              {defaultScenario.rationale}
+            </p>
+          </div>
+        </div>
+
+        <!-- Recommended Tools Quick-Inspect Bar -->
+        <div class="p-3.5 rounded-xl bg-white/6 border border-white/12 flex flex-wrap items-center gap-2 print:hidden">
+          <span class="text-[11px] font-extrabold uppercase tracking-wider text-signature-peach mr-1">
+            🧰 {t.recommendedToolsLabel}
+          </span>
+          <div id="kfeg-rec-tools" class="flex flex-wrap items-center gap-2">
+            {defaultScenario.recommendedToolIds.map((toolId) => {
+              const matchedTool = toolMapById[toolId];
+              return matchedTool ? (
+                <button
+                  type="button"
+                  data-kfeg-jump-tool={matchedTool.id}
+                  class="px-2.5 py-1 rounded-lg text-[11.5px] font-bold bg-white/12 hover:bg-signature-coral text-white border border-white/20 transition-colors cursor-pointer"
+                >
+                  {matchedTool.icon} {matchedTool.shortName} ↓
+                </button>
+              ) : null;
+            })}
+          </div>
+        </div>
+
+        <!-- P.A.S.S. Fire Extinguisher Technique Strip -->
+        <div
+          id="kfeg-pass-panel"
+          class="p-4 sm:p-5 rounded-xl bg-white/6 border border-amber-400/40 space-y-3"
+        >
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <span class="inline-block text-[10.5px] font-extrabold uppercase tracking-wider text-amber-200">
+                🧯 {passTechnique.badge}
+              </span>
+              <h4 class="text-sm sm:text-base font-extrabold text-white">{passTechnique.title}</h4>
+            </div>
+          </div>
+          <p class="text-xs text-white/85 leading-relaxed">{passTechnique.subtitle}</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+            {passTechnique.steps.map((step) => (
+              <div class="p-3 rounded-xl bg-white/8 border border-white/14 space-y-1">
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-signature-coral text-white text-sm font-extrabold shrink-0">
+                    {step.letter}
+                  </span>
+                  <span class="text-xs sm:text-[13px] font-extrabold text-white">{step.word}</span>
+                </div>
+                <p class="text-[11.5px] text-white/85 leading-relaxed">{step.detail}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PART 2: Interactive Fire Extinguisher & Kitchen Tool Matcher -->
+    <div id="kfeg-matcher-section" class="p-5 sm:p-6 space-y-6">
+      <div class="space-y-1">
+        <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-primary text-on-primary">
+          🧯 {t.matcherBadge}
+        </span>
+        <h3 class="text-base sm:text-lg font-bold text-ink">{t.matcherHeading}</h3>
+        <p class="text-xs sm:text-[13px] text-muted leading-relaxed">{t.matcherSub}</p>
+      </div>
+
+      <!-- 6 Clickable Home Fire Tool Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 print:hidden" role="group" aria-label={t.matcherHeading}>
+        {localizedTools.map((tool, idx) => (
+          <button
+            type="button"
+            data-kfeg-tool={tool.id}
+            aria-pressed={idx === 0 ? 'true' : 'false'}
+            class={`kfeg-tool-card text-left w-full p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${
+              idx === 0
+                ? 'bg-canvas border-signature-coral ring-2 ring-signature-coral shadow-sm'
+                : 'bg-surface-soft/65 border-hairline hover:border-signature-coral'
+            }`}
+          >
+            <div class="space-y-1.5">
+              <div class="flex items-start gap-2.5">
+                <span aria-hidden="true" class="text-xl leading-none mt-0.5 shrink-0">{tool.icon}</span>
+                <div class="min-w-0">
+                  <h4 class="text-sm font-extrabold text-ink leading-snug">{tool.shortName}</h4>
+                  <span
+                    class={`inline-block mt-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider border ${
+                      tool.verdictLevel === 'deadly'
+                        ? 'bg-red-500/15 text-red-800 dark:text-red-200 border-red-500/40'
+                        : tool.verdictLevel === 'best'
+                          ? 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-200 border-emerald-500/40'
+                          : 'bg-amber-500/15 text-amber-900 dark:text-amber-200 border-amber-500/40'
+                    }`}
+                  >
+                    {tool.verdictBadge}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Compact 4-Fire Mini Status Dots -->
+            <div class="pt-2 border-t border-hairline/70 grid grid-cols-2 gap-1.5 text-[10.5px] font-bold">
+              {fireTypeDefs.map((ft) => {
+                const r = tool.ratings[ft.key];
+                const dotColor =
+                  r === 'safe'
+                    ? 'text-emerald-700 dark:text-emerald-300'
+                    : r === 'caution'
+                      ? 'text-amber-800 dark:text-amber-300'
+                      : 'text-red-700 dark:text-red-300';
+                const mark = r === 'safe' ? '✓' : r === 'caution' ? '!' : '✕';
+                return (
+                  <span class={`truncate ${dotColor}`}>
+                    {mark} {ft.label}
+                  </span>
+                );
+              })}
+            </div>
+          </button>
+        ))}
+      </div>
+
+      <!-- Active Tool Live Compatibility Breakdown Panel -->
+      <div
+        id="kfeg-tool-panel"
+        aria-live="polite"
+        class="rounded-2xl bg-surface-soft border border-hairline p-5 sm:p-6 space-y-5"
+      >
+        <!-- Tool Header Banner -->
+        <div class="rounded-xl bg-surface-dark text-on-dark p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3">
+          <div class="space-y-1">
+            <span
+              id="kfeg-tool-verdict-pill"
+              class={`inline-flex items-center px-2.5 py-0.5 rounded-md border text-[10.5px] font-extrabold uppercase tracking-wider ${getToolVerdictPillClasses(defaultTool.verdictLevel)}`}
+            >
+              {defaultTool.verdictBadge}
+            </span>
+            <h4 id="kfeg-tool-title" class="text-base sm:text-lg font-extrabold text-white leading-snug">
+              {defaultTool.icon} {defaultTool.name}
+            </h4>
+          </div>
+          <div class="p-3 rounded-xl bg-white/8 border border-white/15 max-w-md">
+            <span class="block text-[10px] font-extrabold uppercase tracking-wider text-signature-peach">
+              📏 {t.distanceRuleLabel}
+            </span>
+            <p id="kfeg-tool-distance" class="text-xs font-semibold text-white/95 leading-relaxed mt-0.5">
+              {defaultTool.distanceRule}
+            </p>
+          </div>
+        </div>
+
+        <!-- 4 Fire Types Rating Cards -->
+        <div class="space-y-2.5">
+          <h5 class="text-xs font-extrabold uppercase tracking-wider text-ink">
+            🎯 {t.matrixHeading}
+          </h5>
+          <div id="kfeg-tool-matrix" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {fireTypeDefs.map((ft) => {
+              const rating = defaultTool.ratings[ft.key];
+              const note = defaultTool.fireNotes[ft.key];
+              return (
+                <div class={`p-4 rounded-xl border space-y-2 ${getRatingCardClasses(rating)}`}>
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs sm:text-[13px] font-extrabold text-ink">
+                      {ft.icon} {ft.label}
+                    </span>
+                    <span
+                      class={`inline-flex items-center px-2.5 py-0.5 rounded-full border text-[10.5px] font-extrabold uppercase tracking-wider ${getRatingBadgeClasses(rating)}`}
+                    >
+                      {getRatingLabel(rating)}
+                    </span>
+                  </div>
+                  <p class="text-xs text-body leading-relaxed">{note}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <!-- Best Use / Critical Warning / Cleanup Trio -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div class="p-4 rounded-xl bg-canvas border border-hairline space-y-1">
+            <span class="block text-[11px] font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+              ✅ {t.bestUseLabel}
+            </span>
+            <p id="kfeg-tool-best" class="text-xs text-body leading-relaxed">
+              {defaultTool.bestUse}
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-error-bg/50 dark:bg-red-950/35 border border-error-border/65 space-y-1">
+            <span class="block text-[11px] font-extrabold uppercase tracking-wider text-error-border dark:text-red-300">
+              ⚠️ {t.criticalWarningLabel}
+            </span>
+            <p id="kfeg-tool-warning" class="text-xs font-semibold text-ink leading-relaxed">
+              {defaultTool.criticalWarning}
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-canvas border border-hairline space-y-1">
+            <span class="block text-[11px] font-extrabold uppercase tracking-wider text-ink">
+              🧹 {t.cleanupLabel}
+            </span>
+            <p id="kfeg-tool-cleanup" class="text-xs text-body leading-relaxed">
+              {defaultTool.cleanupNote}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Print-Only Complete 6-Scenario Fridge Safety Poster Summary -->
+    <div class="hidden print:block p-5 border-t border-hairline space-y-4">
+      <div class="text-center border-b border-hairline pb-2">
+        <h3 class="text-sm font-extrabold uppercase tracking-wider text-ink">{t.printPosterTitle}</h3>
+        <p class="text-[11px] text-muted">{t.printPosterSub}</p>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        {localizedScenarios.map((sc) => (
+          <div class="p-3 rounded-lg border border-hairline space-y-1.5 break-inside-avoid">
+            <h4 class="text-xs font-extrabold text-ink">
+              {sc.icon} {sc.shortName}
+            </h4>
+            <p class="text-[11px] text-ink">
+              <strong>✅</strong> {sc.doSteps[0]} {sc.doSteps[1] || ''}
+            </p>
+            <p class="text-[11px] text-ink">
+              <strong>🚫</strong> {sc.neverDo[0]}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Related Companion Tools -->
+  <section class="space-y-4 print:hidden">
+    <h2 class="text-title-md font-semibold text-ink">{t.relatedHeading}</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <a
+        href={oilSmokePointUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedOilTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedOilTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedOilDesc}</p>
+      </a>
+
+      <a
+        href={cleanerMixingUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedCleanerTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedCleanerTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedCleanerDesc}</p>
+      </a>
+
+      <a
+        href={ovenRackUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedOvenTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedOvenTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedOvenDesc}</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- Methodology & Hub Strip -->
+  <section class="p-6 rounded-2xl bg-surface-soft border border-hairline print:hidden">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-title-sm font-semibold text-ink mb-1">{t.methodologyStripTitle}</h2>
+        <p class="text-[13px] text-muted">
+          {t.methodologyStripPrefix}{' '}
+          <a href={methodologyUrl} class="text-link underline hover:text-link-active">{t.methodologyLabel}</a>.
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a
+          href={oilSmokePointUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
+        >
+          {t.oilQuickLabel}
+        </a>
+        <a
+          href={methodologyUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
+        >
+          {t.methodologyLabel}
+        </a>
+        <a
+          href={allToolsUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors"
+        >
+          {t.allToolsLabel}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Visible FAQ Accordion (Matches JSON-LD 1:1) -->
+  <section class="print:hidden">
+    <h2 class="text-title-lg font-medium text-ink tracking-tight mb-6">
+      {t.faqTitle}
+    </h2>
+    <div class="space-y-4">
+      {localizedFaqs.map((faq) => (
+        <details class="group p-5 bg-surface-soft border border-hairline rounded-xl" open>
+          <summary class="text-title-sm font-semibold text-ink cursor-pointer list-none flex items-center justify-between gap-3">
+            <span>{faq.question}</span>
+            <span class="text-muted text-sm transition-transform group-open:rotate-180 shrink-0" aria-hidden="true">&#9662;</span>
+          </summary>
+          <p class="text-[14px] text-body leading-relaxed mt-3 pt-3 border-t border-hairline/70">
+            {faq.answer}
+          </p>
+        </details>
+      ))}
+    </div>
+  </section>
+</div>
+
+<script is:inline>
+  (function () {
+    var payloadEl = document.getElementById('kfeg-payload');
+    if (!payloadEl) return;
+
+    var payload;
+    try {
+      payload = JSON.parse(payloadEl.textContent || '{}');
+    } catch (_) {
+      return;
+    }
+
+    var scenarios = Array.isArray(payload.scenarios) ? payload.scenarios : [];
+    var tools = Array.isArray(payload.tools) ? payload.tools : [];
+    var passSteps = Array.isArray(payload.passSteps) ? payload.passSteps : [];
+    var ui = payload.ui || {};
+
+    var scenarioMap = {};
+    scenarios.forEach(function (sc) {
+      if (sc && sc.id) scenarioMap[sc.id] = sc;
+    });
+
+    var toolMap = {};
+    tools.forEach(function (tl) {
+      if (tl && tl.id) toolMap[tl.id] = tl;
+    });
+
+    var state = {
+      scenarioId: payload.defaultScenarioId || (scenarios[0] ? scenarios[0].id : ''),
+      toolId: payload.defaultToolId || (tools[0] ? tools[0].id : '')
+    };
+
+    var fireTypes = [
+      { key: 'grease', icon: '🍳', label: ui.fireTypeGrease || 'Grease / Oil Pan Fire' },
+      { key: 'electrical', icon: '🔌', label: ui.fireTypeElectrical || 'Electrical / Appliance' },
+      { key: 'oven', icon: '🚪', label: ui.fireTypeOven || 'Closed Oven / Microwave' },
+      { key: 'paper', icon: '📄', label: ui.fireTypePaper || 'Paper / Wood / Trash' }
+    ];
+
+    // DOM References
+    var scenarioBtns = Array.from(document.querySelectorAll('.kfeg-scenario-btn'));
+    var toolCards = Array.from(document.querySelectorAll('.kfeg-tool-card'));
+
+    var elDashboard = document.getElementById('kfeg-dashboard');
+    var elUrgencyPill = document.getElementById('kfeg-urgency-pill');
+    var elSourcePill = document.getElementById('kfeg-source-pill');
+    var elPassBadge = document.getElementById('kfeg-pass-badge');
+    var elScenarioTitle = document.getElementById('kfeg-scenario-title');
+    var elScenarioSummary = document.getElementById('kfeg-scenario-summary');
+    var elDoList = document.getElementById('kfeg-do-list');
+    var elNeverList = document.getElementById('kfeg-never-list');
+    var elEvacuateText = document.getElementById('kfeg-evacuate-text');
+    var elRationaleText = document.getElementById('kfeg-rationale-text');
+    var elRecTools = document.getElementById('kfeg-rec-tools');
+    var elPassPanel = document.getElementById('kfeg-pass-panel');
+
+    var elMatcherSection = document.getElementById('kfeg-matcher-section');
+    var elToolVerdictPill = document.getElementById('kfeg-tool-verdict-pill');
+    var elToolTitle = document.getElementById('kfeg-tool-title');
+    var elToolDistance = document.getElementById('kfeg-tool-distance');
+    var elToolMatrix = document.getElementById('kfeg-tool-matrix');
+    var elToolBest = document.getElementById('kfeg-tool-best');
+    var elToolWarning = document.getElementById('kfeg-tool-warning');
+    var elToolCleanup = document.getElementById('kfeg-tool-cleanup');
+
+    var copyBtn = document.getElementById('kfeg-copy-btn');
+    var copyLabel = document.getElementById('kfeg-copy-label');
+    var printBtn = document.getElementById('kfeg-print-btn');
+
+    function clearChildren(node) {
+      if (!node) return;
+      while (node.firstChild) {
+        node.removeChild(node.firstChild);
+      }
+    }
+
+    function getRatingLabel(rating) {
+      if (rating === 'safe') return ui.ratingSafe || 'SAFE';
+      if (rating === 'caution') return ui.ratingCaution || 'CAUTION';
+      return ui.ratingDeadly || 'DEADLY / NO';
+    }
+
+    function getRatingBadgeClass(rating) {
+      if (rating === 'safe') {
+        return 'inline-flex items-center px-2.5 py-0.5 rounded-full border text-[10.5px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 border-emerald-500/40';
+      }
+      if (rating === 'caution') {
+        return 'inline-flex items-center px-2.5 py-0.5 rounded-full border text-[10.5px] font-extrabold uppercase tracking-wider bg-amber-500/20 text-amber-900 dark:text-amber-200 border-amber-500/45';
+      }
+      return 'inline-flex items-center px-2.5 py-0.5 rounded-full border text-[10.5px] font-extrabold uppercase tracking-wider bg-red-500/20 text-red-800 dark:text-red-200 border-red-500/50';
+    }
+
+    function getRatingCardClass(rating) {
+      if (rating === 'safe') return 'p-4 rounded-xl border space-y-2 bg-emerald-500/8 border-emerald-500/35';
+      if (rating === 'caution') return 'p-4 rounded-xl border space-y-2 bg-amber-500/8 border-amber-500/40';
+      return 'p-4 rounded-xl border space-y-2 bg-red-500/10 border-red-500/45';
+    }
+
+    function getVerdictPillClass(level) {
+      var base = 'inline-flex items-center px-2.5 py-0.5 rounded-md border text-[10.5px] font-extrabold uppercase tracking-wider ';
+      if (level === 'best') return base + 'bg-emerald-500/20 text-emerald-200 border-emerald-400/40';
+      if (level === 'good') return base + 'bg-amber-500/20 text-amber-200 border-amber-400/40';
+      return base + 'bg-red-500/25 text-red-100 border-red-400/55';
+    }
+
+    function renderScenario() {
+      var sc = scenarioMap[state.scenarioId] || scenarios[0];
+      if (!sc) return;
+
+      // Update selector buttons
+      scenarioBtns.forEach(function (btn) {
+        var active = btn.getAttribute('data-kfeg-scenario') === sc.id;
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('ring-2', active);
+        btn.classList.toggle('ring-signature-coral/60', active);
+        btn.classList.toggle('shadow-sm', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+
+        var sub = btn.querySelector('[data-kfeg-scenario-sub]');
+        if (sub) {
+          sub.classList.toggle('text-white/80', active);
+          sub.classList.toggle('text-muted', !active);
+        }
+      });
+
+      // Dashboard left accent border
+      if (elDashboard) {
+        elDashboard.classList.remove('border-error-border', 'border-amber-400', 'border-sky-400');
+        if (sc.severity === 'medical') {
+          elDashboard.classList.add('border-sky-400');
+        } else if (sc.severity === 'high') {
+          elDashboard.classList.add('border-amber-400');
+        } else {
+          elDashboard.classList.add('border-error-border');
+        }
+      }
+
+      if (elUrgencyPill) {
+        elUrgencyPill.textContent = sc.urgencyTag || '';
+        elUrgencyPill.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider ' + (
+          sc.severity === 'medical'
+            ? 'bg-sky-500 text-slate-950'
+            : sc.severity === 'high'
+              ? 'bg-amber-500 text-slate-950'
+              : 'bg-error-border text-white'
+        );
+      }
+
+      if (elSourcePill) elSourcePill.textContent = sc.sourceTag || '';
+      if (elScenarioTitle) elScenarioTitle.textContent = (sc.icon ? sc.icon + ' ' : '') + (sc.name || '');
+      if (elScenarioSummary) elScenarioSummary.textContent = sc.summary || '';
+      if (elEvacuateText) elEvacuateText.textContent = sc.evacuateTrigger || '';
+      if (elRationaleText) elRationaleText.textContent = sc.rationale || '';
+
+      if (elPassBadge) {
+        if (sc.showPass) {
+          elPassBadge.textContent = '🧯 ' + (ui.passApplicableTag || 'P.A.S.S. APPLICABLE');
+          elPassBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-md border text-[10.5px] font-extrabold uppercase tracking-wider bg-amber-500/20 text-amber-200 border-amber-400/40';
+        } else {
+          elPassBadge.textContent = 'ℹ️ ' + (ui.passAlwaysNote || 'P.A.S.S. FOR SMALL FIRES ONLY');
+          elPassBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-md border text-[10.5px] font-bold bg-white/8 text-white/80 border-white/15';
+        }
+      }
+
+      if (elPassPanel) {
+        elPassPanel.classList.toggle('border-amber-400/50', Boolean(sc.showPass));
+        elPassPanel.classList.toggle('border-white/12', !sc.showPass);
+      }
+
+      // Render numbered DO steps
+      clearChildren(elDoList);
+      if (elDoList && Array.isArray(sc.doSteps)) {
+        sc.doSteps.forEach(function (step, idx) {
+          var li = document.createElement('li');
+          li.className = 'flex items-start gap-2.5 text-xs sm:text-[13.5px] text-white/95 leading-relaxed';
+
+          var badge = document.createElement('span');
+          badge.className = 'inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500 text-slate-950 text-xs font-extrabold shrink-0 mt-0.5';
+          badge.textContent = String(idx + 1);
+
+          var textSpan = document.createElement('span');
+          textSpan.textContent = step;
+
+          li.appendChild(badge);
+          li.appendChild(textSpan);
+          elDoList.appendChild(li);
+        });
+      }
+
+      // Render NEVER DO lethal mistakes
+      clearChildren(elNeverList);
+      if (elNeverList && Array.isArray(sc.neverDo)) {
+        sc.neverDo.forEach(function (mistake) {
+          var li = document.createElement('li');
+          li.className = 'flex items-start gap-2.5 text-xs sm:text-[13.5px] text-white/95 leading-relaxed';
+
+          var badge = document.createElement('span');
+          badge.className = 'inline-flex items-center justify-center w-6 h-6 rounded-full bg-error-border text-white text-xs font-extrabold shrink-0 mt-0.5';
+          badge.textContent = '✕';
+
+          var textSpan = document.createElement('span');
+          textSpan.textContent = mistake;
+
+          li.appendChild(badge);
+          li.appendChild(textSpan);
+          elNeverList.appendChild(li);
+        });
+      }
+
+      // Render recommended tool jump buttons
+      clearChildren(elRecTools);
+      if (elRecTools) {
+        var recIds = Array.isArray(sc.recommendedToolIds) ? sc.recommendedToolIds : [];
+        if (recIds.length === 0) {
+          var noteSpan = document.createElement('span');
+          noteSpan.className = 'text-xs text-white/80 font-medium';
+          noteSpan.textContent = ui.noFireToolNote || 'Follow immediate evacuation or cool-water first aid strictly.';
+          elRecTools.appendChild(noteSpan);
+        } else {
+          recIds.forEach(function (tId) {
+            var matched = toolMap[tId];
+            if (!matched) return;
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.setAttribute('data-kfeg-jump-tool', matched.id);
+            btn.className = 'px-2.5 py-1 rounded-lg text-[11.5px] font-bold bg-white/12 hover:bg-signature-coral text-white border border-white/20 transition-colors cursor-pointer';
+            btn.textContent = matched.icon + ' ' + matched.shortName + ' ↓';
+            btn.addEventListener('click', function () {
+              state.toolId = matched.id;
+              renderTool();
+              if (elMatcherSection && elMatcherSection.scrollIntoView) {
+                elMatcherSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            });
+            elRecTools.appendChild(btn);
+          });
+        }
+      }
+    }
+
+    function renderTool() {
+      var tl = toolMap[state.toolId] || tools[0];
+      if (!tl) return;
+
+      // Update tool selection cards
+      toolCards.forEach(function (card) {
+        var active = card.getAttribute('data-kfeg-tool') === tl.id;
+        card.setAttribute('aria-pressed', active ? 'true' : 'false');
+        card.classList.toggle('bg-canvas', active);
+        card.classList.toggle('border-signature-coral', active);
+        card.classList.toggle('ring-2', active);
+        card.classList.toggle('ring-signature-coral', active);
+        card.classList.toggle('shadow-sm', active);
+        card.classList.toggle('bg-surface-soft/65', !active);
+        card.classList.toggle('border-hairline', !active);
+      });
+
+      if (elToolVerdictPill) {
+        elToolVerdictPill.textContent = tl.verdictBadge || '';
+        elToolVerdictPill.className = getVerdictPillClass(tl.verdictLevel);
+      }
+      if (elToolTitle) elToolTitle.textContent = (tl.icon ? tl.icon + ' ' : '') + (tl.name || '');
+      if (elToolDistance) elToolDistance.textContent = tl.distanceRule || '';
+      if (elToolBest) elToolBest.textContent = tl.bestUse || '';
+      if (elToolWarning) elToolWarning.textContent = tl.criticalWarning || '';
+      if (elToolCleanup) elToolCleanup.textContent = tl.cleanupNote || '';
+
+      // Render 4 fire-type compatibility cards
+      clearChildren(elToolMatrix);
+      if (elToolMatrix && tl.ratings && tl.fireNotes) {
+        fireTypes.forEach(function (ft) {
+          var rating = tl.ratings[ft.key] || 'caution';
+          var note = tl.fireNotes[ft.key] || '';
+
+          var card = document.createElement('div');
+          card.className = getRatingCardClass(rating);
+
+          var topRow = document.createElement('div');
+          topRow.className = 'flex items-center justify-between gap-2';
+
+          var nameSpan = document.createElement('span');
+          nameSpan.className = 'text-xs sm:text-[13px] font-extrabold text-ink';
+          nameSpan.textContent = ft.icon + ' ' + ft.label;
+
+          var badgeSpan = document.createElement('span');
+          badgeSpan.className = getRatingBadgeClass(rating);
+          badgeSpan.textContent = getRatingLabel(rating);
+
+          topRow.appendChild(nameSpan);
+          topRow.appendChild(badgeSpan);
+
+          var bodyP = document.createElement('p');
+          bodyP.className = 'text-xs text-body leading-relaxed';
+          bodyP.textContent = note;
+
+          card.appendChild(topRow);
+          card.appendChild(bodyP);
+          elToolMatrix.appendChild(card);
+        });
+      }
+    }
+
+    function buildCopySummary() {
+      var sc = scenarioMap[state.scenarioId] || scenarios[0];
+      var tl = toolMap[state.toolId] || tools[0];
+      var lines = [];
+
+      lines.push(ui.copyHeader || 'IsItKitchenSafe — Kitchen Fire & Burn Emergency Card');
+      lines.push(ui.copyEmergencyLine || 'IF FIRE SPREADS: EVACUATE & CALL 911 / 112 / 119 / 193!');
+      lines.push('');
+
+      if (sc) {
+        lines.push((ui.copyScenarioLine || 'ACTIVE SCENARIO:') + ' ' + sc.name + ' [' + sc.sourceTag + ']');
+        lines.push('');
+        lines.push(ui.copyDoHeader || 'DO IMMEDIATELY:');
+        (sc.doSteps || []).forEach(function (step, i) {
+          lines.push('  ' + (i + 1) + '. ' + step);
+        });
+        lines.push('');
+        lines.push(ui.copyNeverHeader || 'NEVER DO:');
+        (sc.neverDo || []).forEach(function (mistake) {
+          lines.push('  - ' + mistake);
+        });
+        lines.push('');
+        lines.push((ui.copyEvacuateLine || 'EVACUATE:') + ' ' + (sc.evacuateTrigger || ''));
+      }
+
+      if (tl) {
+        lines.push('');
+        lines.push((ui.copyToolHeader || 'SELECTED TOOL:') + ' ' + tl.name + ' (' + tl.verdictBadge + ')');
+        lines.push('  ' + (tl.distanceRule || ''));
+        fireTypes.forEach(function (ft) {
+          var r = tl.ratings ? tl.ratings[ft.key] : '';
+          lines.push('  * ' + ft.label + ': [' + getRatingLabel(r) + '] ' + (tl.fireNotes ? tl.fireNotes[ft.key] : ''));
+        });
+      }
+
+      if (passSteps.length > 0) {
+        lines.push('');
+        lines.push(ui.copyPassHeader || 'P.A.S.S. EXTINGUISHER TECHNIQUE:');
+        passSteps.forEach(function (st) {
+          lines.push('  ' + st.letter + ' - ' + st.word + ': ' + st.detail);
+        });
+      }
+
+      return lines.join('\n');
+    }
+
+    // Bind Scenario Buttons
+    scenarioBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.getAttribute('data-kfeg-scenario');
+        if (id && scenarioMap[id]) {
+          state.scenarioId = id;
+          renderScenario();
+        }
+      });
+    });
+
+    // Bind Tool Cards
+    toolCards.forEach(function (card) {
+      card.addEventListener('click', function () {
+        var id = card.getAttribute('data-kfeg-tool');
+        if (id && toolMap[id]) {
+          state.toolId = id;
+          renderTool();
+        }
+      });
+    });
+
+    // Bind Initial Jump Tool Buttons
+    Array.from(document.querySelectorAll('[data-kfeg-jump-tool]')).forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var tId = btn.getAttribute('data-kfeg-jump-tool');
+        if (tId && toolMap[tId]) {
+          state.toolId = tId;
+          renderTool();
+          if (elMatcherSection && elMatcherSection.scrollIntoView) {
+            elMatcherSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
+      });
+    });
+
+    // Bind Copy Button
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        var text = buildCopySummary();
+        var showCopied = function () {
+          if (copyLabel) copyLabel.textContent = ui.copiedBtn || 'Reference Card Copied ✓';
+          window.setTimeout(function () {
+            if (copyLabel) copyLabel.textContent = '📋 ' + (ui.copyBtn || 'Copy Emergency Reference Card');
+          }, 2200);
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(showCopied).catch(showCopied);
+        } else {
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'absolute';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          try {
+            document.execCommand('copy');
+          } catch (_) {
+            // ignore
+          }
+          document.body.removeChild(ta);
+          showCopied();
+        }
+      });
+    }
+
+    // Bind Print Button
+    if (printBtn) {
+      printBtn.addEventListener('click', function () {
+        window.print();
+      });
+    }
+
+    renderScenario();
+    renderTool();
+  })();
+</script>

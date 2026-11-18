@@ -8,134 +8,586 @@ import refreezeData from '../data/refreeze.json';
 import whatHappensData from '../data/what-happens.json';
 import blogData from '../data/blog.json';
 import comparisonsData from '../data/comparisons.json';
-import { getDirectoryUrl } from '../i18n/utils';
+import { getDirectoryUrl, getApplianceUrl, useTranslatedPath } from '../i18n/utils';
+import { CATEGORIES } from '../utils/materialCategories';
 
-const pageTitle = "HTML Sitemap | IsItKitchenSafe";
-const pageDescription = "Explore the complete list of kitchen safety guides, appliance directions, shelf-life databases, and blog articles on the official IsItKitchenSafe sitemap.";
+const lang = 'en' as const;
+const translatePath = useTranslatedPath(lang);
+
+const pageTitle = "HTML Sitemap & Complete Kitchen Safety Directory | IsItKitchenSafe";
+const pageDescription = "Browse and live-filter our complete kitchen safety directory: everyday consumer calculators, appliance safety guides, food shelf-life databases, refreeze indexes, side-by-side comparisons, and editorial policies.";
 
 // Helper to format appliance names
-function formatAppliance(app: string) {
+function formatAppliance(app: string): string {
   if (app === 'airfryer') return 'Air Fryer';
   return app.charAt(0).toUpperCase() + app.slice(1);
 }
 
-// Group appliance items
-const appliances = ['dishwasher', 'microwave', 'freezer', 'oven', 'dryer', 'airfryer', 'refrigerator'];
+// Group appliance items dynamically
+const appliances = ['dishwasher', 'microwave', 'freezer', 'oven', 'dryer', 'airfryer', 'refrigerator'] as const;
 const groupedApplianceItems = appliances.reduce((acc, app) => {
-  acc[app] = itemsData.filter(item => item.appliance === app);
+  acc[app] = itemsData.filter((item) => item.appliance === app);
   return acc;
 }, {} as Record<string, typeof itemsData>);
+
+interface ConsumerToolItem {
+  slug: string;
+  name: string;
+  desc: string;
+  category: string;
+  keywords: string;
+}
+
+const consumerTools: ConsumerToolItem[] = [
+  {
+    slug: 'kitchen-symbol-decoder',
+    name: 'Kitchen Bottom Symbol Decoder',
+    desc: 'Identify dishwasher, microwave, oven, freezer, and food-safe icons stamped under containers.',
+    category: 'Cookware & Labels',
+    keywords: 'symbol icon bottom pyrex tupperware dishwasher microwave safe label'
+  },
+  {
+    slug: 'leftover-shelf-life-calculator',
+    name: 'Leftover Shelf-Life Calculator',
+    desc: 'USDA fridge and freezer countdown calculator for cooked meats, rice, pasta, and takeout.',
+    category: 'Food Safety',
+    keywords: 'leftover fridge refrigerator shelf life usda expiry cooked food storage'
+  },
+  {
+    slug: 'meat-thawing-calculator',
+    name: 'Meat & Turkey Thawing Calculator',
+    desc: 'Calculate safe refrigerator and cold-water defrost times by weight for poultry, beef, and pork.',
+    category: 'Food Safety',
+    keywords: 'meat turkey chicken beef thaw defrost fridge cold water usda'
+  },
+  {
+    slug: 'plastic-code-checker',
+    name: 'Plastic Code (#1–#7) Safety Checker',
+    desc: 'Check resin codes PET, HDPE, PVC, LDPE, PP, PS, and Other for microwave and dishwasher safety.',
+    category: 'Cookware & Labels',
+    keywords: 'plastic recycling code resin bpa microwave dishwasher container tupperware'
+  },
+  {
+    slug: 'air-fryer-oven-converter',
+    name: 'Air Fryer & Oven Time/Temp Converter',
+    desc: 'Convert conventional oven recipes to air fryer, convection, and Gas Mark settings instantly.',
+    category: 'Conversions',
+    keywords: 'air fryer oven convection temperature time gas mark converter'
+  },
+  {
+    slug: 'cookware-oven-temp-lookup',
+    name: 'Cookware Oven Temp Lookup',
+    desc: 'Verify maximum safe oven temperatures for Pyrex, Le Creuset, Lodge, CorningWare, and 24 brands.',
+    category: 'Cookware & Labels',
+    keywords: 'pyrex le creuset lodge corningware stanley cookware bakeware oven max temp'
+  },
+  {
+    slug: 'internal-cooking-temp-chart',
+    name: 'Safe Internal Cooking Temp Chart',
+    desc: 'USDA minimum internal temperatures and rest times for poultry, steaks, ground meat, and fish.',
+    category: 'Food Safety',
+    keywords: 'internal temperature thermometer meat chicken steak pork fish usda doneness'
+  },
+  {
+    slug: 'appliance-descaling-calculator',
+    name: 'Appliance Descaling Calculator',
+    desc: 'Exact vinegar or citric acid ratios for Keurig, Nespresso, drip coffee makers, and electric kettles.',
+    category: 'Cleaning & Care',
+    keywords: 'descale vinegar citric acid coffee maker kettle espresso keurig limescale'
+  },
+  {
+    slug: 'cleaner-mixing-danger-checker',
+    name: 'Cleaner Mixing Danger Checker',
+    desc: 'Check hazardous chemical reactions before combining bleach, vinegar, ammonia, or baking soda.',
+    category: 'Cleaning & Care',
+    keywords: 'bleach vinegar ammonia hydrogen peroxide cleaner mixing toxic chlorine gas'
+  },
+  {
+    slug: 'microwave-wattage-converter',
+    name: 'Microwave Wattage Time Converter',
+    desc: 'Adjust cooking times accurately between 600W, 700W, 900W, 1000W, 1100W, and 1250W microwaves.',
+    category: 'Conversions',
+    keywords: 'microwave wattage time converter reheating power defrost'
+  },
+  {
+    slug: 'power-outage-food-safety-checker',
+    name: 'Power Outage Food Safety Checker',
+    desc: 'Decide what to keep or discard in your fridge and freezer after a blackout using USDA/CDC rules.',
+    category: 'Food Safety',
+    keywords: 'power outage blackout fridge refrigerator freezer spoiled food safety usda cdc'
+  },
+  {
+    slug: 'baby-bottle-safety-checker',
+    name: 'Baby Bottle & Kids Kitchenware Checker',
+    desc: 'AAP, FDA, and CDC guidance on sterilizing, microwaving, and dishwashing baby bottles and sippy cups.',
+    category: 'Food Safety',
+    keywords: 'baby bottle sippy cup breastmilk formula sterilize dishwasher plastic silicone'
+  },
+  {
+    slug: 'cooking-oil-smoke-point-finder',
+    name: 'Cooking Oil Smoke Point Finder',
+    desc: 'Compare smoke points and safe frying temperatures across 28 everyday culinary oils and fats.',
+    category: 'Conversions',
+    keywords: 'cooking oil smoke point olive avocado canola butter frying high heat'
+  },
+  {
+    slug: 'cast-iron-seasoning-troubleshooter',
+    name: 'Cast Iron Seasoning Troubleshooter',
+    desc: 'Diagnose rust, sticky residue, flaking seasoning, and soap myths on cast iron and carbon steel.',
+    category: 'Cleaning & Care',
+    keywords: 'cast iron skillet carbon steel rust seasoning soap lodge dishwasher care'
+  },
+  {
+    slug: 'fridge-organization-zone-planner',
+    name: 'Fridge Organization Zone Planner',
+    desc: 'USDA shelf-by-shelf temperature map for raw meat, dairy, eggs, produce, and condiments.',
+    category: 'Food Safety',
+    keywords: 'fridge refrigerator shelf zone temperature raw meat dairy cross contamination'
+  },
+  {
+    slug: 'kitchen-safety-iq-quiz',
+    name: 'Kitchen Safety IQ Quiz',
+    desc: 'Test your instincts on everyday cookware, appliance, and food-storage myths in 2 minutes.',
+    category: 'Food Safety',
+    keywords: 'quiz test kitchen safety myths cookware appliance food handling'
+  },
+  {
+    slug: 'induction-cookware-compatibility-checker',
+    name: 'Induction Cookware Compatibility Checker',
+    desc: 'Check stainless, cast iron, copper, aluminum, and enamel pans with the 3-second magnet test.',
+    category: 'Cookware & Labels',
+    keywords: 'induction cooktop magnet test stainless cast iron copper aluminum pans'
+  },
+  {
+    slug: 'dishwasher-detergent-dosage-calculator',
+    name: 'Dishwasher Detergent Dosage Calculator',
+    desc: 'Dial in powder, gel, pod, and rinse-aid dosage for soft or hard water to stop cloudy glass.',
+    category: 'Cleaning & Care',
+    keywords: 'dishwasher detergent pod gel rinse aid hard water etching cloudy glass'
+  },
+  {
+    slug: 'food-allergy-cross-contact-checker',
+    name: 'Food Allergy Cross-Contact Checker',
+    desc: 'Verify safe cleaning methods and cookware surfaces to prevent peanut, gluten, and dairy transfer.',
+    category: 'Food Safety',
+    keywords: 'allergy allergen cross contact gluten peanut dairy cutting board cleaning'
+  },
+  {
+    slug: 'pantry-dry-goods-shelf-life-checker',
+    name: 'Pantry & Dry Goods Shelf-Life Checker',
+    desc: 'Check freshness and safety timelines for spices, flour, baking powder, oils, rice, and canned food.',
+    category: 'Food Safety',
+    keywords: 'pantry dry goods spices flour baking powder canned food rice expiration'
+  },
+  {
+    slug: 'moldy-food-safety-checker',
+    name: 'Moldy Food Cut-Around vs. Toss Checker',
+    desc: 'USDA rules on when you can safely trim mold from hard cheese or produce vs. discard immediately.',
+    category: 'Food Safety',
+    keywords: 'mold moldy food cheese bread fruit jam usda cut around throw out'
+  },
+  {
+    slug: 'oven-rack-bakeware-heat-adjuster',
+    name: 'Oven Rack & Bakeware Heat Adjuster',
+    desc: 'Adjust oven temperature and rack position for Pyrex glass, dark nonstick, ceramic, and aluminum pans.',
+    category: 'Conversions',
+    keywords: 'oven rack bakeware pyrex glass dark nonstick pan temperature baking adjuster'
+  }
+];
+
+const quickFilterChips = [
+  { label: 'Pyrex', query: 'pyrex' },
+  { label: 'Air Fryer', query: 'air fryer' },
+  { label: 'Mold', query: 'mold' },
+  { label: 'Cast Iron', query: 'cast iron' },
+  { label: 'Bleach', query: 'bleach' },
+  { label: 'Stanley', query: 'stanley' },
+  { label: 'Fridge', query: 'fridge' }
+];
+
+const trustCoreLinks = [
+  { label: 'Homepage', href: translatePath('/'), keywords: 'home main index kitchen safety' },
+  { label: 'All Interactive Kitchen Safety Tools', href: getDirectoryUrl('tools', lang), keywords: 'tools calculators utilities interactive' },
+  { label: 'Saved Kitchen Safety Guides', href: translatePath('/saved/'), keywords: 'saved bookmarks favorites personal list' },
+  { label: 'RSS Feed (XML)', href: '/rss.xml', keywords: 'rss feed xml syndication updates' }
+];
+
+const trustEditorialLinks = [
+  { label: 'Editorial Methodology & Testing Standards', href: translatePath('/methodology/'), keywords: 'methodology testing standards usda fda sources verification' },
+  { label: 'About IsItKitchenSafe', href: translatePath('/about/'), keywords: 'about us team mission editors' },
+  { label: 'Contact & Support', href: translatePath('/contact/'), keywords: 'contact support email feedback request item' }
+];
+
+const trustPolicyLinks = [
+  { label: 'Safety & Medical Disclaimer', href: translatePath('/disclaimer/'), keywords: 'disclaimer safety legal notice' },
+  { label: 'Privacy Policy', href: translatePath('/privacy/'), keywords: 'privacy policy cookies data protection' },
+  { label: 'Terms & Conditions', href: translatePath('/terms/'), keywords: 'terms conditions usage agreement' }
+];
+
+// Live dynamic counts
+const totalTools = consumerTools.length;
+const totalAppliances = itemsData.length;
+const totalMaterials = CATEGORIES.length + 1; // 8 material hubs + scratched-nonstick evergreen guide
+const totalBlog = blogData.length;
+const totalComparisons = comparisonsData.length;
+const totalDirectories = howLongData.length + refreezeData.length + washingMachineData.length + whatHappensData.length;
+const totalTrust = trustCoreLinks.length + trustEditorialLinks.length + trustPolicyLinks.length;
+const totalIndexedLinks = totalTools + totalAppliances + totalMaterials + totalBlog + totalComparisons + totalDirectories + totalTrust;
 ---
 
-<Layout title={pageTitle} description={pageDescription} availableLocales={['en', 'es', 'pt', 'zh-cn', 'ja']}>
-  <section class="max-w-[1280px] mx-auto px-6 py-12">
+<Layout
+  title={pageTitle}
+  description={pageDescription}
+  excludeArticleSchema={true}
+  availableLocales={['en', 'es', 'pt', 'zh-cn', 'ja']}
+  lang={lang}
+>
+  <section class="max-w-[1280px] mx-auto px-6 py-10 md:py-12">
     <!-- Breadcrumbs -->
-    <Breadcrumbs 
+    <Breadcrumbs
       items={[
-        { label: 'Home', href: '/' },
-        { label: 'Sitemap' }
+        { label: 'Home', href: translatePath('/') },
+        { label: 'HTML Sitemap' }
       ]}
     />
 
-    <!-- Header -->
-    <header class="max-w-[800px] mb-12">
+    <!-- Hero Header -->
+    <header class="max-w-[900px] mb-8">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-soft border border-hairline text-xs font-semibold uppercase tracking-wider text-muted mb-4">
+        <span class="w-2 h-2 rounded-full bg-success" aria-hidden="true"></span>
+        Complete Directory Index
+      </div>
       <h1 class="text-4xl md:text-5xl font-bold text-ink tracking-tight mb-4">
         HTML Sitemap
       </h1>
-      <p class="text-body-md text-muted text-lg leading-relaxed">
-        Browse our entire collection of appliance safety guidelines, shelf-life indexes, refreeze directions, and expert kitchen safety articles.
+      <p class="text-body text-base md:text-lg leading-relaxed mb-6">
+        Search or browse every consumer calculator, appliance safety check, material hub, shelf-life chart, refreeze rule, and editorial guide on IsItKitchenSafe.
       </p>
+
+      <!-- Live KPI Summary Strip -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="p-3.5 rounded-xl bg-surface-soft border border-hairline">
+          <div class="text-2xl font-bold text-ink tabular-nums">{totalIndexedLinks.toLocaleString('en-US')}</div>
+          <div class="text-xs font-medium text-muted mt-0.5">Total Indexed Links</div>
+        </div>
+        <div class="p-3.5 rounded-xl bg-surface-soft border border-hairline">
+          <div class="text-2xl font-bold text-ink tabular-nums">{totalTools}</div>
+          <div class="text-xs font-medium text-muted mt-0.5">Consumer Calculators</div>
+        </div>
+        <div class="p-3.5 rounded-xl bg-surface-soft border border-hairline">
+          <div class="text-2xl font-bold text-ink tabular-nums">{totalAppliances.toLocaleString('en-US')}</div>
+          <div class="text-xs font-medium text-muted mt-0.5">Appliance Safety Guides</div>
+        </div>
+        <div class="p-3.5 rounded-xl bg-surface-soft border border-hairline">
+          <div class="text-2xl font-bold text-ink tabular-nums">{(totalDirectories + totalComparisons + totalBlog + totalMaterials).toLocaleString('en-US')}</div>
+          <div class="text-xs font-medium text-muted mt-0.5">Reference &amp; Food Guides</div>
+        </div>
+      </div>
     </header>
 
-    <!-- Core Pages -->
-    <section class="border-t border-hairline pt-8 mb-12">
-      <h2 class="text-2xl font-bold text-ink mb-6">Main Sections</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        <div class="p-6 bg-surface-soft border border-hairline rounded-lg">
-          <h3 class="text-title-sm text-ink font-bold mb-3">Core Pages</h3>
-          <ul class="flex flex-col gap-2.5 text-[13px]">
-            <li><a href="/" class="text-link hover:underline font-medium">Homepage</a></li>
-            <li><a href="/about/" class="text-link hover:underline">About Us</a></li>
-            <li><a href="/contact/" class="text-link hover:underline">Contact Support</a></li>
-            <li><a href="/privacy/" class="text-link hover:underline">Privacy Policy</a></li>
-          </ul>
+    <!-- Live Instant Sitemap Filter Bar -->
+    <div
+      id="sitemap-filter-bar"
+      class="no-print mb-6 p-5 md:p-6 rounded-2xl bg-surface-soft border border-hairline shadow-xs"
+      data-msg-all="Showing all {total} indexed directory links across {sections} sections."
+      data-msg-match="Showing {matched} matching links (of {total}) across {sections} sections."
+      data-msg-empty='No matching links found for "{query}". Try another item, material, or appliance.'
+    >
+      <div class="flex flex-col gap-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <label for="sitemap-filter-input" class="text-sm font-bold text-ink">
+            Instant Sitemap Filter
+          </label>
+          <p id="sitemap-filter-status" aria-live="polite" class="text-xs font-medium text-muted">
+            Showing all {totalIndexedLinks} indexed directory links across 6 sections.
+          </p>
         </div>
 
-        <div class="p-6 bg-surface-soft border border-hairline rounded-lg">
-          <h3 class="text-title-sm text-ink font-bold mb-3">Material Safety Hubs</h3>
-          <ul class="flex flex-col gap-2.5 text-[13px]">
-            <li><a href={getDirectoryUrl('material', 'en')} class="text-link hover:underline font-medium">Material Directories</a></li>
-            <li><a href="/material/metal/" class="text-link hover:underline">Metal Cookware & Utensils</a></li>
-            <li><a href="/material/plastic/" class="text-link hover:underline">Polymers & Plastics</a></li>
-            <li><a href="/material/glass-ceramic/" class="text-link hover:underline">Glass & Ceramics</a></li>
-            <li><a href="/material/fabric/" class="text-link hover:underline">Fabrics & Textiles</a></li>
-            <li><a href="/material/footwear/" class="text-link hover:underline">Footwear & Shoes</a></li>
-            <li><a href="/material/silicone/" class="text-link hover:underline">Food-Grade Silicone</a></li>
-            <li><a href="/material/wood-paper/" class="text-link hover:underline">Wood & Paper Products</a></li>
-            <li><a href="/material/appliance-components/" class="text-link hover:underline">Appliance Components</a></li>
-          </ul>
+        <div class="relative flex items-center">
+          <svg
+            class="w-5 h-5 text-muted absolute left-3.5 pointer-events-none"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </svg>
+          <input
+            id="sitemap-filter-input"
+            type="search"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="Filter directory by item, brand, or topic (e.g., pyrex, air fryer, mold, cast iron, bleach, stanley, fridge)..."
+            class="w-full pl-11 pr-24 py-3 rounded-xl bg-canvas border border-hairline text-ink placeholder:text-muted text-sm md:text-base focus:outline-none focus:border-link transition-colors"
+          />
+          <button
+            id="sitemap-filter-clear"
+            type="button"
+            class="hidden absolute right-2.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-surface-strong text-ink hover:opacity-85 transition-opacity cursor-pointer"
+          >
+            Clear
+          </button>
         </div>
 
-        <div class="p-6 bg-surface-soft border border-hairline rounded-lg">
-          <h3 class="text-title-sm text-ink font-bold mb-3">Kitchen Safety Blog</h3>
-          <ul class="flex flex-col gap-2.5 text-[13px]">
-            <li><a href="/blog/" class="text-link hover:underline font-medium">Blog Index</a></li>
-            {blogData.map(post => (
-              <li><a href={`/blog/${post.slug}/`} class="text-link hover:underline line-clamp-1">{post.title}</a></li>
-            ))}
-          </ul>
+        <!-- Quick Filter Suggestion Chips -->
+        <div class="flex flex-wrap items-center gap-2 pt-1">
+          <span class="text-xs font-medium text-muted mr-1">Popular filters:</span>
+          {quickFilterChips.map((chip) => (
+            <button
+              type="button"
+              data-filter-chip={chip.query}
+              aria-pressed="false"
+              class="px-2.5 py-1 rounded-full text-xs font-medium bg-canvas border border-hairline text-ink hover:border-link hover:text-link aria-[pressed=true]:bg-primary aria-[pressed=true]:text-on-primary aria-[pressed=true]:border-primary transition-colors cursor-pointer"
+            >
+              {chip.label}
+            </button>
+          ))}
         </div>
+      </div>
+    </div>
 
-        <div class="p-6 bg-surface-soft border border-hairline rounded-lg">
-          <h3 class="text-title-sm text-ink font-bold mb-3">Safety Comparisons</h3>
-          <ul class="flex flex-col gap-2.5 text-[13px] max-h-[300px] overflow-y-auto pr-1">
-            <li><a href={getDirectoryUrl('compare', 'en')} class="text-link hover:underline font-medium">Comparisons Index</a></li>
-            {comparisonsData.map(c => (
-              <li><a href={`/compare/${c.slug}/`} class="text-link hover:underline line-clamp-1">{c.item1} vs {c.item2}</a></li>
-            ))}
-          </ul>
+    <!-- Quick-Jump Section Anchor Pills -->
+    <nav aria-label="Sitemap sections" class="no-print mb-10 flex flex-wrap gap-2.5">
+      <a href="#section-calculators" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-link hover:text-link transition-colors">
+        <span>Consumer Calculators</span>
+        <span class="px-1.5 py-0.5 rounded-full bg-surface-soft text-muted text-[11px] tabular-nums">{totalTools}</span>
+      </a>
+      <a href="#section-appliances" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-link hover:text-link transition-colors">
+        <span>Core Appliances</span>
+        <span class="px-1.5 py-0.5 rounded-full bg-surface-soft text-muted text-[11px] tabular-nums">{totalAppliances}</span>
+      </a>
+      <a href="#section-guides" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-link hover:text-link transition-colors">
+        <span>Evergreen Guides</span>
+        <span class="px-1.5 py-0.5 rounded-full bg-surface-soft text-muted text-[11px] tabular-nums">{totalBlog + totalMaterials}</span>
+      </a>
+      <a href="#section-comparisons" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-link hover:text-link transition-colors">
+        <span>Side-by-Side Comparisons</span>
+        <span class="px-1.5 py-0.5 rounded-full bg-surface-soft text-muted text-[11px] tabular-nums">{totalComparisons}</span>
+      </a>
+      <a href="#section-directories" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-link hover:text-link transition-colors">
+        <span>Shelf-Life &amp; Refreezing</span>
+        <span class="px-1.5 py-0.5 rounded-full bg-surface-soft text-muted text-[11px] tabular-nums">{totalDirectories}</span>
+      </a>
+      <a href="#section-trust" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-link hover:text-link transition-colors">
+        <span>Trust &amp; Policies</span>
+        <span class="px-1.5 py-0.5 rounded-full bg-surface-soft text-muted text-[11px] tabular-nums">{totalTrust}</span>
+      </a>
+    </nav>
+
+    <!-- Empty Filter State -->
+    <div id="sitemap-empty-state" class="hidden mb-10 p-8 rounded-2xl bg-surface-soft border border-hairline text-center">
+      <p class="text-lg font-bold text-ink mb-2">No matching directory links found</p>
+      <p class="text-sm text-muted mb-4">
+        Try a shorter keyword like &ldquo;pyrex&rdquo;, &ldquo;air fryer&rdquo;, &ldquo;mold&rdquo;, &ldquo;cast iron&rdquo;, &ldquo;bleach&rdquo;, &ldquo;stanley&rdquo;, or &ldquo;fridge&rdquo;.
+      </p>
+      <button
+        id="sitemap-empty-reset"
+        type="button"
+        class="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-on-primary hover:opacity-90 transition-opacity cursor-pointer"
+      >
+        Reset Sitemap Filter
+      </button>
+    </div>
+
+    <!-- 1. Everyday Consumer Kitchen Safety Calculators & Utilities -->
+    <section id="section-calculators" data-sitemap-section class="border-t border-hairline pt-8 mb-12 scroll-mt-24">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
+        <div>
+          <span class="inline-block text-xs font-bold uppercase tracking-wider text-link mb-1">Interactive Spotlight</span>
+          <h2 class="text-2xl md:text-3xl font-bold text-ink">
+            Everyday Consumer Kitchen Safety Calculators &amp; Utilities
+          </h2>
+          <p class="text-sm text-muted mt-1">
+            Free, evidence-based home calculators built around USDA, FDA, CDC, and cookware manufacturer standards.
+          </p>
         </div>
+        <a href={getDirectoryUrl('tools', lang)} class="text-sm font-semibold text-link hover:underline shrink-0">
+          Browse All Tools Hub &rarr;
+        </a>
+      </div>
+
+      <div data-sitemap-card class="rounded-2xl bg-surface-soft/60 border border-hairline p-4 md:p-5">
+        <div class="flex items-center justify-between mb-4 pb-2.5 border-b border-hairline">
+          <span class="text-xs font-bold uppercase tracking-wider text-muted">Verified Everyday Calculators</span>
+          <span data-card-count data-orig-count={String(totalTools)} class="text-xs font-semibold px-2 py-0.5 rounded-full bg-canvas border border-hairline text-ink tabular-nums">
+            {totalTools}
+          </span>
+        </div>
+        <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+          {consumerTools.map((tool) => (
+            <li
+              data-sitemap-item
+              data-search={`${tool.name} ${tool.desc} ${tool.category} ${tool.slug.replace(/-/g, ' ')} ${tool.keywords}`.toLowerCase()}
+              class="rounded-xl bg-canvas border border-hairline hover:border-link transition-colors"
+            >
+              <a href={translatePath(`/tools/${tool.slug}/`)} class="flex flex-col h-full p-4 group">
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-muted mb-1">
+                  {tool.category}
+                </span>
+                <span class="text-sm font-bold text-ink group-hover:text-link transition-colors mb-1.5">
+                  {tool.name}
+                </span>
+                <span class="text-xs text-muted leading-relaxed">
+                  {tool.desc}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
 
-    <!-- Appliance Sections -->
-    <section class="border-t border-hairline pt-8 mb-12">
-      <h2 class="text-2xl font-bold text-ink mb-6">Appliance Reference Guides</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-        {appliances.map(app => (
-          <div class="border border-hairline rounded-lg p-5">
-            <h3 class="text-title-md font-bold text-ink mb-3 pb-2 border-b border-hairline flex justify-between items-center">
-              <span>{formatAppliance(app)} Guides</span>
-              <a href={`/${app}/`} class="text-xs text-link hover:underline">View All ({groupedApplianceItems[app].length})</a>
-            </h3>
-            <ul class="flex flex-col gap-2 text-[13px] max-h-[250px] overflow-y-auto pr-1">
-              {groupedApplianceItems[app].map(item => (
-                <li>
-                  <a href={`/${app}/${item.slug}/`} class="text-muted hover:text-link block truncate">
-                    Can You Put {item.item} in the {formatAppliance(app)}?
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+    <!-- 2. Core Appliance Reference Guides -->
+    <section id="section-appliances" data-sitemap-section class="border-t border-hairline pt-8 mb-12 scroll-mt-24">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-6">
+        <div>
+          <h2 class="text-2xl md:text-3xl font-bold text-ink">Core Appliance Reference Guides</h2>
+          <p class="text-sm text-muted mt-1">
+            {totalAppliances.toLocaleString('en-US')} item-by-item safety verdicts across {appliances.length} household appliances.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {appliances.map((app) => {
+          const items = groupedApplianceItems[app] || [];
+          const appLabel = formatAppliance(app);
+          const extraAppTerms = app === 'refrigerator' ? 'fridge refrigerator' : app === 'airfryer' ? 'air fryer airfryer' : app;
+          return (
+            <div data-sitemap-card class="border border-hairline rounded-xl p-5 bg-canvas">
+              <h3 class="text-title-sm font-bold text-ink mb-3 pb-2.5 border-b border-hairline flex justify-between items-center gap-2">
+                <span>{appLabel} Guides</span>
+                <a href={getApplianceUrl(app, lang)} class="text-xs font-semibold text-link hover:underline shrink-0">
+                  View All (<span data-card-count data-orig-count={String(items.length)}>{items.length}</span>)
+                </a>
+              </h3>
+              <ul class="flex flex-col gap-2 text-[13px] max-h-[280px] overflow-y-auto pr-1">
+                {items.map((item) => (
+                  <li
+                    data-sitemap-item
+                    data-search={`can you put ${item.item} in the ${appLabel} ${extraAppTerms} ${item.slug.replace(/-/g, ' ')}`.toLowerCase()}
+                  >
+                    <a href={translatePath(`/${app}/${item.slug}/`)} class="text-muted hover:text-link block truncate py-0.5">
+                      Can You Put {item.item} in the {appLabel}?
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })}
       </div>
     </section>
 
-    <!-- Other Safety Directories -->
-    <section class="border-t border-hairline pt-8 mb-12">
-      <h2 class="text-2xl font-bold text-ink mb-6">Safety Directories</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        <!-- Shelf Life -->
-        <div class="border border-hairline rounded-lg p-5">
-          <h3 class="text-title-md font-bold text-ink mb-3 pb-2 border-b border-hairline flex justify-between items-center">
-            <span>Shelf Life Guides</span>
-            <a href={getDirectoryUrl('how-long', 'en')} class="text-xs text-link hover:underline">View All ({howLongData.length})</a>
+    <!-- 3. Evergreen Guides & Material Safety Hubs -->
+    <section id="section-guides" data-sitemap-section class="border-t border-hairline pt-8 mb-12 scroll-mt-24">
+      <h2 class="text-2xl md:text-3xl font-bold text-ink mb-6">Evergreen Guides &amp; Material Safety Hubs</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Material Safety Hubs -->
+        <div data-sitemap-card class="lg:col-span-5 p-6 bg-surface-soft border border-hairline rounded-xl">
+          <h3 class="text-title-sm text-ink font-bold mb-3 pb-2.5 border-b border-hairline flex justify-between items-center gap-2">
+            <span>Material Safety Hubs</span>
+            <a href={getDirectoryUrl('material', lang)} class="text-xs font-semibold text-link hover:underline shrink-0">
+              All Materials (<span data-card-count data-orig-count={String(totalMaterials)}>{totalMaterials}</span>)
+            </a>
           </h3>
-          <ul class="flex flex-col gap-2 text-[13px] max-h-[250px] overflow-y-auto pr-1">
-            {howLongData.map(item => (
-              <li>
-                <a href={`/how-long/${item.slug}/`} class="text-muted hover:text-link block truncate">
+          <ul class="flex flex-col gap-2.5 text-[13px]">
+            {CATEGORIES.map((cat) => (
+              <li
+                data-sitemap-item
+                data-search={`${cat.displayName} ${cat.id.replace(/-/g, ' ')} material safety hub ${cat.description}`.toLowerCase()}
+              >
+                <a href={translatePath(`/material/${cat.id}/`)} class="text-link hover:underline font-medium">
+                  {cat.displayName}
+                </a>
+              </li>
+            ))}
+            <li
+              data-sitemap-item
+              data-search="scratched nonstick cookware teflon ptfe pfas safety guide material pan"
+            >
+              <a href={translatePath('/material/scratched-nonstick-cookware/')} class="text-link hover:underline font-medium">
+                Scratched Nonstick Cookware Safety Guide
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Evergreen Kitchen Safety Blog -->
+        <div data-sitemap-card class="lg:col-span-7 p-6 bg-surface-soft border border-hairline rounded-xl">
+          <h3 class="text-title-sm text-ink font-bold mb-3 pb-2.5 border-b border-hairline flex justify-between items-center gap-2">
+            <span>Kitchen Safety Evergreen Articles</span>
+            <a href={getDirectoryUrl('blog', lang)} class="text-xs font-semibold text-link hover:underline shrink-0">
+              Blog Index (<span data-card-count data-orig-count={String(totalBlog)}>{totalBlog}</span>)
+            </a>
+          </h3>
+          <ul class="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-2 text-[13px] max-h-[300px] overflow-y-auto pr-1">
+            {blogData.map((post) => (
+              <li
+                data-sitemap-item
+                data-search={`${post.title} ${post.slug.replace(/-/g, ' ')} blog guide article`.toLowerCase()}
+              >
+                <a href={translatePath(`/blog/${post.slug}/`)} class="text-muted hover:text-link block truncate py-0.5">
+                  {post.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Side-by-Side Safety Comparisons -->
+    <section id="section-comparisons" data-sitemap-section class="border-t border-hairline pt-8 mb-12 scroll-mt-24">
+      <div data-sitemap-card class="p-6 bg-surface-soft border border-hairline rounded-xl">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-hairline">
+          <div>
+            <h2 class="text-2xl font-bold text-ink">Side-by-Side Safety Comparisons</h2>
+            <p class="text-xs text-muted mt-0.5">Direct cookware, appliance, and kitchen material matchups.</p>
+          </div>
+          <a href={getDirectoryUrl('compare', lang)} class="text-xs font-semibold text-link hover:underline shrink-0">
+            View All Comparisons (<span data-card-count data-orig-count={String(totalComparisons)}>{totalComparisons}</span>)
+          </a>
+        </div>
+        <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2 text-[13px] max-h-[320px] overflow-y-auto pr-1">
+          {comparisonsData.map((c) => (
+            <li
+              data-sitemap-item
+              data-search={`${c.item1} vs ${c.item2} ${c.slug.replace(/-/g, ' ')} compare comparison`.toLowerCase()}
+            >
+              <a href={translatePath(`/compare/${c.slug}/`)} class="text-muted hover:text-link block truncate py-0.5">
+                {c.item1} vs {c.item2}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- 5. Shelf-Life, Refreezing & Care Directories -->
+    <section id="section-directories" data-sitemap-section class="border-t border-hairline pt-8 mb-12 scroll-mt-24">
+      <h2 class="text-2xl md:text-3xl font-bold text-ink mb-6">Shelf-Life, Refreezing &amp; Safety Directories</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <!-- Shelf Life -->
+        <div data-sitemap-card class="border border-hairline rounded-xl p-5 bg-canvas">
+          <h3 class="text-title-sm font-bold text-ink mb-3 pb-2.5 border-b border-hairline flex justify-between items-center gap-2">
+            <span>Shelf Life Guides</span>
+            <a href={getDirectoryUrl('how-long', lang)} class="text-xs font-semibold text-link hover:underline shrink-0">
+              View All (<span data-card-count data-orig-count={String(howLongData.length)}>{howLongData.length}</span>)
+            </a>
+          </h3>
+          <ul class="flex flex-col gap-2 text-[13px] max-h-[280px] overflow-y-auto pr-1">
+            {howLongData.map((item) => (
+              <li
+                data-sitemap-item
+                data-search={`how long can you keep ${item.item} shelf life fridge freezer storage ${item.slug.replace(/-/g, ' ')}`.toLowerCase()}
+              >
+                <a href={translatePath(`/how-long/${item.slug}/`)} class="text-muted hover:text-link block truncate py-0.5">
                   How Long Can You Keep {item.item}?
                 </a>
               </li>
@@ -143,33 +595,21 @@ const groupedApplianceItems = appliances.reduce((acc, app) => {
           </ul>
         </div>
 
-        <!-- Washing Machine -->
-        <div class="border border-hairline rounded-lg p-5">
-          <h3 class="text-title-md font-bold text-ink mb-3 pb-2 border-b border-hairline flex justify-between items-center">
-            <span>Washing Machine</span>
-            <a href={getDirectoryUrl('washing-machine', 'en')} class="text-xs text-link hover:underline">View All ({washingMachineData.length})</a>
-          </h3>
-          <ul class="flex flex-col gap-2 text-[13px] max-h-[250px] overflow-y-auto pr-1">
-            {washingMachineData.map(item => (
-              <li>
-                <a href={`/washing-machine/${item.slug}/`} class="text-muted hover:text-link block truncate">
-                  Can You Wash {item.item}?
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-
         <!-- Refreeze Safety -->
-        <div class="border border-hairline rounded-lg p-5">
-          <h3 class="text-title-md font-bold text-ink mb-3 pb-2 border-b border-hairline flex justify-between items-center">
+        <div data-sitemap-card class="border border-hairline rounded-xl p-5 bg-canvas">
+          <h3 class="text-title-sm font-bold text-ink mb-3 pb-2.5 border-b border-hairline flex justify-between items-center gap-2">
             <span>Refreeze Safety</span>
-            <a href={getDirectoryUrl('refreeze', 'en')} class="text-xs text-link hover:underline">View All ({refreezeData.length})</a>
+            <a href={getDirectoryUrl('refreeze', lang)} class="text-xs font-semibold text-link hover:underline shrink-0">
+              View All (<span data-card-count data-orig-count={String(refreezeData.length)}>{refreezeData.length}</span>)
+            </a>
           </h3>
-          <ul class="flex flex-col gap-2 text-[13px] max-h-[250px] overflow-y-auto pr-1">
-            {refreezeData.map(item => (
-              <li>
-                <a href={`/refreeze/${item.slug}/`} class="text-muted hover:text-link block truncate">
+          <ul class="flex flex-col gap-2 text-[13px] max-h-[280px] overflow-y-auto pr-1">
+            {refreezeData.map((item) => (
+              <li
+                data-sitemap-item
+                data-search={`can you refreeze ${item.item} thaw freezer safety ${item.slug.replace(/-/g, ' ')}`.toLowerCase()}
+              >
+                <a href={translatePath(`/refreeze/${item.slug}/`)} class="text-muted hover:text-link block truncate py-0.5">
                   Can You Refreeze {item.item}?
                 </a>
               </li>
@@ -177,16 +617,43 @@ const groupedApplianceItems = appliances.reduce((acc, app) => {
           </ul>
         </div>
 
-        <!-- What Happens If -->
-        <div class="border border-hairline rounded-lg p-5">
-          <h3 class="text-title-md font-bold text-ink mb-3 pb-2 border-b border-hairline flex justify-between items-center">
-            <span>What Happens If</span>
-            <a href={getDirectoryUrl('what-happens', 'en')} class="text-xs text-link hover:underline">View All ({whatHappensData.length})</a>
+        <!-- Washing Machine -->
+        <div data-sitemap-card class="border border-hairline rounded-xl p-5 bg-canvas">
+          <h3 class="text-title-sm font-bold text-ink mb-3 pb-2.5 border-b border-hairline flex justify-between items-center gap-2">
+            <span>Washing Machine</span>
+            <a href={getDirectoryUrl('washing-machine', lang)} class="text-xs font-semibold text-link hover:underline shrink-0">
+              View All (<span data-card-count data-orig-count={String(washingMachineData.length)}>{washingMachineData.length}</span>)
+            </a>
           </h3>
-          <ul class="flex flex-col gap-2 text-[13px] max-h-[250px] overflow-y-auto pr-1">
-            {whatHappensData.map(item => (
-              <li>
-                <a href={`/what-happens/${item.slug}/`} class="text-muted hover:text-link block truncate">
+          <ul class="flex flex-col gap-2 text-[13px] max-h-[280px] overflow-y-auto pr-1">
+            {washingMachineData.map((item) => (
+              <li
+                data-sitemap-item
+                data-search={`can you wash ${item.item} washing machine laundry ${item.slug.replace(/-/g, ' ')}`.toLowerCase()}
+              >
+                <a href={translatePath(`/washing-machine/${item.slug}/`)} class="text-muted hover:text-link block truncate py-0.5">
+                  Can You Wash {item.item}?
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <!-- What Happens If -->
+        <div data-sitemap-card class="border border-hairline rounded-xl p-5 bg-canvas">
+          <h3 class="text-title-sm font-bold text-ink mb-3 pb-2.5 border-b border-hairline flex justify-between items-center gap-2">
+            <span>What Happens If</span>
+            <a href={getDirectoryUrl('what-happens', lang)} class="text-xs font-semibold text-link hover:underline shrink-0">
+              View All (<span data-card-count data-orig-count={String(whatHappensData.length)}>{whatHappensData.length}</span>)
+            </a>
+          </h3>
+          <ul class="flex flex-col gap-2 text-[13px] max-h-[280px] overflow-y-auto pr-1">
+            {whatHappensData.map((item) => (
+              <li
+                data-sitemap-item
+                data-search={`what happens if you ${item.item} hazard accident emergency ${item.slug.replace(/-/g, ' ')}`.toLowerCase()}
+              >
+                <a href={translatePath(`/what-happens/${item.slug}/`)} class="text-muted hover:text-link block truncate py-0.5">
                   What Happens If You {item.item}?
                 </a>
               </li>
@@ -195,5 +662,244 @@ const groupedApplianceItems = appliances.reduce((acc, app) => {
         </div>
       </div>
     </section>
+
+    <!-- 6. Trust, Editorial Standards & Policies -->
+    <section id="section-trust" data-sitemap-section class="border-t border-hairline pt-8 mb-6 scroll-mt-24">
+      <h2 class="text-2xl md:text-3xl font-bold text-ink mb-6">Trust, Methodology &amp; Site Policies</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div data-sitemap-card class="p-6 bg-surface-soft border border-hairline rounded-xl">
+          <h3 class="text-title-sm text-ink font-bold mb-3 pb-2 border-b border-hairline flex justify-between items-center">
+            <span>Core Hub &amp; Workspace</span>
+            <span data-card-count data-orig-count={String(trustCoreLinks.length)} class="text-xs font-semibold text-muted">{trustCoreLinks.length}</span>
+          </h3>
+          <ul class="flex flex-col gap-2.5 text-[13px]">
+            {trustCoreLinks.map((link) => (
+              <li data-sitemap-item data-search={`${link.label} ${link.keywords}`.toLowerCase()}>
+                <a href={link.href} class="text-link hover:underline font-medium">{link.label}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div data-sitemap-card class="p-6 bg-surface-soft border border-hairline rounded-xl">
+          <h3 class="text-title-sm text-ink font-bold mb-3 pb-2 border-b border-hairline flex justify-between items-center">
+            <span>Editorial Trust &amp; Review</span>
+            <span data-card-count data-orig-count={String(trustEditorialLinks.length)} class="text-xs font-semibold text-muted">{trustEditorialLinks.length}</span>
+          </h3>
+          <ul class="flex flex-col gap-2.5 text-[13px]">
+            {trustEditorialLinks.map((link) => (
+              <li data-sitemap-item data-search={`${link.label} ${link.keywords}`.toLowerCase()}>
+                <a href={link.href} class="text-link hover:underline font-medium">{link.label}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div data-sitemap-card class="p-6 bg-surface-soft border border-hairline rounded-xl">
+          <h3 class="text-title-sm text-ink font-bold mb-3 pb-2 border-b border-hairline flex justify-between items-center">
+            <span>Legal &amp; Safety Policies</span>
+            <span data-card-count data-orig-count={String(trustPolicyLinks.length)} class="text-xs font-semibold text-muted">{trustPolicyLinks.length}</span>
+          </h3>
+          <ul class="flex flex-col gap-2.5 text-[13px]">
+            {trustPolicyLinks.map((link) => (
+              <li data-sitemap-item data-search={`${link.label} ${link.keywords}`.toLowerCase()}>
+                <a href={link.href} class="text-link hover:underline font-medium">{link.label}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
   </section>
+
+  <script is:inline>
+    (function () {
+      function initSitemapFilter() {
+        var root = document.getElementById('sitemap-filter-bar');
+        var input = document.getElementById('sitemap-filter-input');
+        var clearBtn = document.getElementById('sitemap-filter-clear');
+        var statusEl = document.getElementById('sitemap-filter-status');
+        var emptyEl = document.getElementById('sitemap-empty-state');
+        var emptyResetBtn = document.getElementById('sitemap-empty-reset');
+        if (!root || !input || !statusEl) return;
+        if (root.getAttribute('data-bound') === '1') return;
+        root.setAttribute('data-bound', '1');
+
+        var items = Array.prototype.slice.call(document.querySelectorAll('[data-sitemap-item]'));
+        var cards = Array.prototype.slice.call(document.querySelectorAll('[data-sitemap-card]'));
+        var sections = Array.prototype.slice.call(document.querySelectorAll('[data-sitemap-section]'));
+        var chips = Array.prototype.slice.call(document.querySelectorAll('[data-filter-chip]'));
+        var totalItems = items.length;
+
+        var msgAll = root.getAttribute('data-msg-all') || 'Showing all {total} indexed links across {sections} sections.';
+        var msgMatch = root.getAttribute('data-msg-match') || 'Showing {matched} matching links (of {total}) across {sections} sections.';
+        var msgEmpty = root.getAttribute('data-msg-empty') || 'No matching links found for "{query}".';
+
+        var itemData = items.map(function (el) {
+          var hay = (el.getAttribute('data-search') || el.textContent || '').toLowerCase();
+          return { el: el, hay: hay };
+        });
+
+        var cardData = cards.map(function (card) {
+          var cardItems = Array.prototype.slice.call(card.querySelectorAll('[data-sitemap-item]'));
+          var countEl = card.querySelector('[data-card-count]');
+          var origCount = countEl ? (countEl.getAttribute('data-orig-count') || countEl.textContent || '') : '';
+          return { el: card, items: cardItems, countEl: countEl, origCount: origCount };
+        });
+
+        var sectionData = sections.map(function (sec) {
+          var secItems = Array.prototype.slice.call(sec.querySelectorAll('[data-sitemap-item]'));
+          return { el: sec, items: secItems };
+        });
+
+        function formatMsg(tpl, matched, total, secCount, query) {
+          return tpl
+            .replace('{matched}', String(matched))
+            .replace('{total}', String(total))
+            .replace('{sections}', String(secCount))
+            .replace('{query}', query);
+        }
+
+        function applyFilter() {
+          var raw = (input.value || '').trim();
+          var q = raw.toLowerCase();
+          var tokens = q ? q.split(/\s+/).filter(Boolean) : [];
+          var hasQuery = tokens.length > 0;
+
+          if (clearBtn) {
+            if (hasQuery) {
+              clearBtn.classList.remove('hidden');
+            } else {
+              clearBtn.classList.add('hidden');
+            }
+          }
+
+          for (var c = 0; c < chips.length; c++) {
+            var chipVal = (chips[c].getAttribute('data-filter-chip') || '').toLowerCase();
+            chips[c].setAttribute('aria-pressed', hasQuery && chipVal === q ? 'true' : 'false');
+          }
+
+          var matchedCount = 0;
+          for (var i = 0; i < itemData.length; i++) {
+            var entry = itemData[i];
+            var ok = true;
+            if (hasQuery) {
+              for (var t = 0; t < tokens.length; t++) {
+                if (entry.hay.indexOf(tokens[t]) === -1) {
+                  ok = false;
+                  break;
+                }
+              }
+            }
+            if (ok) {
+              matchedCount++;
+              entry.el.classList.remove('hidden');
+            } else {
+              entry.el.classList.add('hidden');
+            }
+          }
+
+          for (var j = 0; j < cardData.length; j++) {
+            var card = cardData[j];
+            var visInCard = 0;
+            for (var k = 0; k < card.items.length; k++) {
+              if (!card.items[k].classList.contains('hidden')) {
+                visInCard++;
+              }
+            }
+            if (hasQuery && visInCard === 0) {
+              card.el.classList.add('hidden');
+            } else {
+              card.el.classList.remove('hidden');
+            }
+            if (card.countEl) {
+              card.countEl.textContent = hasQuery ? (String(visInCard) + ' / ' + card.origCount) : card.origCount;
+            }
+          }
+
+          var visibleSections = 0;
+          for (var s = 0; s < sectionData.length; s++) {
+            var sec = sectionData[s];
+            var visInSec = 0;
+            for (var m = 0; m < sec.items.length; m++) {
+              if (!sec.items[m].classList.contains('hidden')) {
+                visInSec++;
+              }
+            }
+            if (hasQuery && visInSec === 0) {
+              sec.el.classList.add('hidden');
+            } else {
+              sec.el.classList.remove('hidden');
+              visibleSections++;
+            }
+          }
+
+          if (!hasQuery) {
+            statusEl.textContent = formatMsg(msgAll, totalItems, totalItems, sections.length, '');
+          } else if (matchedCount === 0) {
+            statusEl.textContent = formatMsg(msgEmpty, 0, totalItems, 0, raw);
+          } else {
+            statusEl.textContent = formatMsg(msgMatch, matchedCount, totalItems, visibleSections, raw);
+          }
+
+          if (emptyEl) {
+            if (hasQuery && matchedCount === 0) {
+              emptyEl.classList.remove('hidden');
+            } else {
+              emptyEl.classList.add('hidden');
+            }
+          }
+        }
+
+        var debounceTimer = null;
+        input.addEventListener('input', function () {
+          if (debounceTimer) clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(applyFilter, 60);
+        });
+
+        input.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape') {
+            input.value = '';
+            applyFilter();
+          }
+        });
+
+        if (clearBtn) {
+          clearBtn.addEventListener('click', function () {
+            input.value = '';
+            applyFilter();
+            input.focus();
+          });
+        }
+
+        if (emptyResetBtn) {
+          emptyResetBtn.addEventListener('click', function () {
+            input.value = '';
+            applyFilter();
+            input.focus();
+          });
+        }
+
+        for (var b = 0; b < chips.length; b++) {
+          (function (btn) {
+            btn.addEventListener('click', function () {
+              var val = btn.getAttribute('data-filter-chip') || '';
+              if ((input.value || '').trim().toLowerCase() === val.toLowerCase()) {
+                input.value = '';
+              } else {
+                input.value = val;
+              }
+              applyFilter();
+              input.focus();
+            });
+          })(chips[b]);
+        }
+
+        applyFilter();
+      }
+
+      initSitemapFilter();
+      document.addEventListener('astro:page-load', initSitemapFilter);
+    })();
+  </script>
 </Layout>

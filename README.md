@@ -4,7 +4,7 @@ A static kitchen safety reference platform and interactive consumer tool suite a
 
 ## Overview
 
-IsItKitchenSafe delivers **10,957+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **197 interactive tools** (including **46 Google-indexed Everyday Consumer Kitchen Safety Tools**), **35 evergreen guides × 5 languages = 175 localized articles**, **68 comparisons × 5 languages = 340 localized pages**, **1,301 item pages per language (6,505 localized reference pages)**, **WCAG 2.1 AA accessibility**, and transparent E-E-A-T verification standards.
+IsItKitchenSafe delivers **10,972+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **197 interactive tools** (including **46 Google-indexed Everyday Consumer Kitchen Safety Tools**), **35 evergreen guides × 5 languages = 175 localized articles**, **68 comparisons × 5 languages = 340 localized pages**, **1,301 item pages per language (6,505 localized reference pages)**, **WCAG 2.1 AA accessibility**, and transparent E-E-A-T verification standards.
 
 ## Tech Stack
 - **Framework**: Astro.js (MPA static generation)
@@ -98,24 +98,24 @@ npm run ops:indexnow
 # Run targeted audits
 npm run ops:seo        # Structured data (JSON-LD FAQPage, BreadcrumbList) & canonicals
 npm run ops:cwv        # Core Web Vitals bundle budgets & asset geometry
-node scripts/autonomous-growth-engine.cjs --tools      # 196 tools × 5 languages audit
+node scripts/autonomous-growth-engine.cjs --tools      # 197 tools × 5 languages audit
 node scripts/autonomous-growth-engine.cjs --redirects  # Cloudflare Pages 2k ceiling monitor
 node scripts/autonomous-growth-engine.cjs --datasets   # Multilingual data assets audit
 
 # Run all-day autonomous background daemon (default 30m heartbeat)
 npm run ops:daemon
 
-# Run full master cycle (audits + 10,937+-page static build + link verification)
+# Run full master cycle (audits + 10,972+-page static build + link verification)
 npm run ops:engine
 ```
 
 ## Scale & Metrics
-- **10,957+ Static Pages** across 11 verticals and 5 languages (EN, ES, PT, ZH-CN, JA)
+- **10,972+ Static Pages** across 11 verticals and 5 languages (EN, ES, PT, ZH-CN, JA)
 - **197 Interactive Tools** across 5 languages (100% 5-language parity: 79 Home Kitchen Safety + 118 Commercial Engineering), including **46 Google-indexed Consumer Utilities** (`src/data/consumer-tools-allowlist.json`)
 - **35 Evergreen Guides × 5 Languages = 175 Articles** with 100% slug parity + **68 Comparisons × 5 Languages = 340 Pages**
 - **1,301 Items per Language (6,505 Localized Reference Pages)** with 100% slug parity including modern kitchenware (Le Creuset, Yeti Rambler, HexClad, Caraway, Owala FreeSip, Ninja Creami, Always Pan, Stasher, Instant Pot)
 - **WCAG 2.1 AA Accessibility** (`:focus-visible`, `prefers-reduced-motion`, ARIA landmarks) + **Live Instant Search** across `/tools/`, `/blog/`, `/how-long/`, `/refreeze/`, `/compare/`, `/material/`, and `/what-happens/`
-- **1,309,849+ Audited Links / 0 Broken Links** (100% internal href resolution verified)
+- **1,314,186+ Audited Links / 0 Broken Links** (100% internal href resolution verified)
 - **Verified XML Sitemaps & Real-Time Indexing** (`sitemap-index.xml`, `sitemap-0.xml`, `scripts/ping-indexnow.cjs`)
 - **Cloudflare Edge Middleware & Dynamic OG/Pinterest Cards** (`functions/_redirects-map.js`, `functions/api/og.svg.js`)
 - **100% JSON-LD Schema Compliance** across consumer tools, comparisons, guides, and reference pages

@@ -228,6 +228,7 @@ const SPECIAL_PAGES = [
   'tools/pantry-dry-goods-shelf-life-checker',
   'tools/moldy-food-safety-checker',
   'tools/oven-rack-bakeware-heat-adjuster',
+  'tools/kitchen-fire-emergency-guide',
   'methodology',
   'saved'
 ];

@@ -226,7 +226,8 @@ const TOOLS_REGISTRY = [
   { slug: 'food-allergy-cross-contact-checker', name: 'Kitchen Food Allergy & Cross-Contact Cleaning/Cookware Safety Checker', category: 'Consumer Kitchen Safety', component: 'FoodAllergyCrossContactChecker.astro', dataFile: 'food-allergy-cross-contact-data.json' },
   { slug: 'pantry-dry-goods-shelf-life-checker', name: 'Pantry, Spices & Dry Goods Shelf-Life & Safety Lookup', category: 'Consumer Kitchen Safety', component: 'PantryDryGoodsShelfLifeChecker.astro', dataFile: 'pantry-dry-goods-shelf-life-data.json' },
   { slug: 'moldy-food-safety-checker', name: 'USDA Moldy Food Cut-Around vs. Throw-Out Safety Checker', category: 'Consumer Kitchen Safety', component: 'MoldyFoodSafetyChecker.astro', dataFile: 'moldy-food-safety-data.json' },
-  { slug: 'oven-rack-bakeware-heat-adjuster', name: 'Interactive Oven Rack Position, Convection & Bakeware Material Heat Adjuster', category: 'Consumer Kitchen Safety', component: 'OvenRackBakewareHeatAdjuster.astro', dataFile: 'oven-rack-bakeware-heat-data.json' }
+  { slug: 'oven-rack-bakeware-heat-adjuster', name: 'Interactive Oven Rack Position, Convection & Bakeware Material Heat Adjuster', category: 'Consumer Kitchen Safety', component: 'OvenRackBakewareHeatAdjuster.astro', dataFile: 'oven-rack-bakeware-heat-data.json' },
+  { slug: 'kitchen-fire-emergency-guide', name: 'Kitchen Grease Fire, Electrical & Burn Emergency First-Response Guide', category: 'Consumer Kitchen Safety', component: 'KitchenFireEmergencyGuide.astro', dataFile: 'kitchen-fire-emergency-guide-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -543,7 +544,8 @@ function auditDatasets() {
     'food-allergy-cross-contact-data.json',
     'pantry-dry-goods-shelf-life-data.json',
     'moldy-food-safety-data.json',
-    'oven-rack-bakeware-heat-data.json'
+    'oven-rack-bakeware-heat-data.json',
+    'kitchen-fire-emergency-guide-data.json'
 ];
 
   const datasetStats = {};
