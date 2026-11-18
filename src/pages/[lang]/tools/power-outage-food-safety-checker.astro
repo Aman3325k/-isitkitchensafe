@@ -1,0 +1,162 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import PowerOutageFoodSafetyChecker from '../../../components/PowerOutageFoodSafetyChecker.astro';
+import rawData from '../../../data/power-outage-food-safety-data.json';
+import type { SupportedLanguage } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+
+interface LocalePageContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  heroSub: string;
+  breadcrumbs: Array<{ label: string; href?: string }>;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocalePageContent> = {
+  es: {
+    pageTitle: "Verificador de Seguridad Alimentaria por Corte de Luz (Nevera y Congelador) | IsItKitchenSafe",
+    pageDescription: "Comprueba qué alimentos de la nevera y el congelador conservar, cocinar, recongelar o desechar tras un apagón. Reglas USDA FSIS y CDC (4h nevera, 24h/48h congelador y 4°C) en 22 categorías.",
+    badge: "Triaje Alimentario de Emergencia USDA FSIS y CDC",
+    h1: "Verificador de Seguridad Alimentaria por Corte de Luz (Nevera y Congelador)",
+    heroSub: "Descubre al instante qué alimentos puedes conservar, cocinar de inmediato, recongelar (revisando cristales de hielo) o desechar tras un apagón eléctrico. Basado en los límites oficiales del USDA y los CDC: 4 horas en nevera cerrada, 24 h / 48 h en congelador y regla de Zona de Peligro de 4°C (40°F) en 22 categorías.",
+    breadcrumbs: [
+      { label: "Inicio", href: "/es/" },
+      { label: "Herramientas", href: "/es/tools/" },
+      { label: "Seguridad Alimentaria en Apagones" }
+    ]
+  },
+  pt: {
+    pageTitle: "Verificador de Segurança Alimentar em Falta de Energia (Geladeira e Freezer) | IsItKitchenSafe",
+    pageDescription: "Descubra quais alimentos da geladeira e freezer manter, cozinhar, recongelar ou descartar após queda de luz. Padrões USDA FSIS e CDC (4h geladeira, 24h/48h freezer e 4°C) em 22 categorias.",
+    badge: "Triagem de Emergência Alimentar USDA FSIS & CDC",
+    h1: "Verificador de Segurança Alimentar em Falta de Energia (Geladeira e Freezer)",
+    heroSub: "Verifique na hora quais alimentos manter, cozinhar imediatamente, recongelar (teste de cristais de gelo) ou descartar após falta de luz. Baseado nas regras oficiais do USDA e CDC: 4 horas na geladeira fechada, 24 h / 48 h no freezer e Zona de Perigo acima de 4°C (40°F) em 22 categorias.",
+    breadcrumbs: [
+      { label: "Início", href: "/pt/" },
+      { label: "Ferramentas", href: "/pt/tools/" },
+      { label: "Segurança Alimentar em Falta de Luz" }
+    ]
+  },
+  'zh-cn': {
+    pageTitle: "停电冰箱与冷冻室食品安全排查器 (USDA & CDC 标准) | IsItKitchenSafe",
+    pageDescription: "停电后冰箱里的肉、奶、蛋、剩菜和冷冻食品还能吃吗？按 USDA FSIS 与 CDC 规范（冷藏 4 小时、冷冻 24/48 小时及 4°C 危险温区）一键评估 22 类食材保留、烹饪、复冻或丢弃清单。",
+    badge: "USDA FSIS & CDC 停电应急食品安全排查",
+    h1: "停电冰箱与冷冻室食品安全排查器",
+    heroSub: "一键判定停电后冷藏室与冷冻室各类食物应当安全保留、立即烹饪、检查冰晶复冻还是果断丢弃。严格依据美国农业部 USDA 与疾控中心 CDC 标准：冷藏关门 4 小时、冷冻半满 24 小时 / 满载 48 小时及 4°C (40°F) 危险温区规则，覆盖 22 类家庭常见食材。",
+    breadcrumbs: [
+      { label: "首页", href: "/zh-cn/" },
+      { label: "实用工具", href: "/zh-cn/tools/" },
+      { label: "停电冰箱食品安全排查器" }
+    ]
+  },
+  ja: {
+    pageTitle: "停電時の冷蔵庫・冷凍庫 食品廃棄判定チェッカー（USDA・CDC基準） | IsItKitchenSafe",
+    pageDescription: "停電後の冷蔵庫・冷凍庫の食品を残すか捨てるかを即判定。USDA FSIS・CDC公式基準（冷蔵4時間・冷凍24/48時間・4°C危険温度帯・氷の結晶チェック）で22カテゴリーを網羅。",
+    badge: "USDA FSIS・CDC 停電時緊急食品トリアージ",
+    h1: "停電時の冷蔵庫・冷凍庫 食品廃棄判定チェッカー",
+    heroSub: "停電後に冷蔵庫・冷凍庫の食材を「保持OK」「今すぐ加熱」「氷結晶確認（再冷凍可否）」「廃棄」の4段階で即判定。米国農務省（USDA FSIS）およびCDCの公式基準（閉扉冷蔵4時間・冷凍24時間／48時間・4°C／40°F危険温度帯ルール）に基づき22の日常食品カテゴリーに対応します。",
+    breadcrumbs: [
+      { label: "ホーム", href: "/ja/" },
+      { label: "ツール", href: "/ja/tools/" },
+      { label: "停電時の食品廃棄判定チェッカー" }
+    ]
+  }
+};
+
+const c = CONTENT[lang as Exclude<SupportedLanguage, 'en'>] || CONTENT.es;
+const faqs = (rawData.faqs as Record<string, Array<{ question: string; answer: string }>>)[lang] || rawData.faqs.en;
+const localizedUrl = `https://isitkitchensafe.com/${lang}/tools/power-outage-food-safety-checker/`;
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": c.h1,
+  "url": localizedUrl,
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript.",
+  "description": c.pageDescription,
+  "inLanguage": lang === 'zh-cn' ? 'zh-CN' : lang,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IsItKitchenSafe",
+    "url": "https://isitkitchensafe.com"
+  }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map((faq) => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+};
+---
+
+<Layout
+  title={c.pageTitle}
+  description={c.pageDescription}
+  faqs={faqs}
+  excludeFaqSchema={true}
+  availableLocales={availableLocales}
+  lang={lang}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(webAppSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+  </Fragment>
+
+  <!-- Breadcrumbs -->
+  <div class="bg-surface-soft border-b border-hairline py-1 print:hidden">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <Breadcrumbs items={c.breadcrumbs} className="mb-0" />
+    </div>
+  </div>
+
+  <div class="max-w-[1140px] mx-auto px-6 py-10 md:py-14">
+    <!-- Hero Header -->
+    <header class="mb-10 text-center max-w-3xl mx-auto">
+      <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-signature-coral text-white mb-3">
+        {c.badge}
+      </span>
+      <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-4">
+        {c.h1}
+      </h1>
+      <p class="text-body text-[15px] md:text-[16px] leading-relaxed">
+        {c.heroSub}
+      </p>
+    </header>
+
+    <!-- Main Interactive Checker, Related Links & 5 Visible FAQs -->
+    <PowerOutageFoodSafetyChecker lang={lang} />
+  </div>
+</Layout>

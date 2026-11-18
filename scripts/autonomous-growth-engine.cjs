@@ -214,7 +214,8 @@ const TOOLS_REGISTRY = [
   { slug: 'internal-cooking-temp-chart', name: 'USDA Safe Internal Cooking Temperature Chart & Doneness Lookup', category: 'Consumer Kitchen Safety', component: 'InternalCookingTempChart.astro', dataFile: 'internal-cooking-temp-data.json' },
   { slug: 'appliance-descaling-calculator', name: 'Coffee Maker, Electric Kettle & Espresso Descaling Ratio Calculator', category: 'Consumer Kitchen Safety', component: 'ApplianceDescalingCalculator.astro', dataFile: 'appliance-descaling-calculator-data.json' },
   { slug: 'cleaner-mixing-danger-checker', name: 'Kitchen Cleaner Mixing Danger Checker & Chemical Reaction Guide', category: 'Consumer Kitchen Safety', component: 'CleanerMixingDangerChecker.astro', dataFile: 'cleaner-mixing-danger-checker-data.json' },
-  { slug: 'microwave-wattage-converter', name: 'Microwave Wattage Time Converter (600W-1250W)', category: 'Consumer Kitchen Safety', component: 'MicrowaveWattageConverter.astro', dataFile: 'microwave-wattage-converter-data.json' }
+  { slug: 'microwave-wattage-converter', name: 'Microwave Wattage Time Converter (600W-1250W)', category: 'Consumer Kitchen Safety', component: 'MicrowaveWattageConverter.astro', dataFile: 'microwave-wattage-converter-data.json' },
+  { slug: 'power-outage-food-safety-checker', name: 'Fridge & Freezer Power Outage Food Safety Checker', category: 'Consumer Kitchen Safety', component: 'PowerOutageFoodSafetyChecker.astro', dataFile: 'power-outage-food-safety-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -519,7 +520,8 @@ function auditDatasets() {
     'internal-cooking-temp-data.json',
     'appliance-descaling-calculator-data.json',
     'cleaner-mixing-danger-checker-data.json',
-    'microwave-wattage-converter-data.json'
+    'microwave-wattage-converter-data.json',
+    'power-outage-food-safety-data.json'
 ];
 
   const datasetStats = {};

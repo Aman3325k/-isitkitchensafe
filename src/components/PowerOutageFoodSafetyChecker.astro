@@ -1,0 +1,2076 @@
+---
+import rawData from '../data/power-outage-food-safety-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+import { useTranslatedPath } from '../i18n/utils';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+const translatePath = useTranslatedPath(lang);
+
+const leftoverUrl = translatePath('/tools/leftover-shelf-life-calculator/');
+const thawingUrl = translatePath('/tools/meat-thawing-calculator/');
+const refreezeUrl = translatePath('/refreeze/');
+const methodologyUrl = translatePath('/methodology/');
+const allToolsUrl = translatePath('/tools/');
+
+type CompartmentMode = 'fridge' | 'freezer-full' | 'freezer-half';
+type RoomTempMode = 'normal' | 'heatwave';
+type VerdictType = 'keep' | 'cook' | 'check-ice' | 'discard';
+
+interface LocalizedFood {
+  id: string;
+  icon: string;
+  compartments: string[];
+  ruleType: string;
+  name: string;
+  examples: string;
+  keepNote: string;
+  cookNote: string;
+  checkIceNote: string;
+  discardNote: string;
+}
+
+const localizedFoods: LocalizedFood[] = rawData.foods.map((f) => {
+  const tr = (f.i18n as Record<string, any>)[lang] || f.i18n.en;
+  return {
+    id: f.id,
+    icon: f.icon,
+    compartments: f.compartments,
+    ruleType: f.ruleType,
+    name: tr.name,
+    examples: tr.examples,
+    keepNote: tr.keepNote,
+    cookNote: tr.cookNote,
+    checkIceNote: tr.checkIceNote,
+    discardNote: tr.discardNote
+  };
+});
+
+const localizedFaqs: Array<{ question: string; answer: string }> =
+  (rawData.faqs as Record<string, Array<{ question: string; answer: string }>>)[lang] ||
+  rawData.faqs.en;
+
+interface UiDict {
+  ariaLabel: string;
+  step1Title: string;
+  modeFridge: string;
+  modeFridgeSub: string;
+  modeFreezerFull: string;
+  modeFreezerFullSub: string;
+  modeFreezerHalf: string;
+  modeFreezerHalfSub: string;
+  step2Title: string;
+  hoursLabel: string;
+  hoursUnit: string;
+  step3Title: string;
+  doorQuestion: string;
+  doorClosedLabel: string;
+  doorOpenedLabel: string;
+  roomTempLabel: string;
+  roomNormalLabel: string;
+  roomHeatwaveLabel: string;
+  thermometerTitle: string;
+  noThermometerBtn: string;
+  useThermometerBtn: string;
+  tempInputLabel: string;
+  tempHintSafe: string;
+  verdictBadge: string;
+  bannerSafeTitle: string;
+  bannerSafeSub: string;
+  bannerLimitTitle: string;
+  bannerLimitSub: string;
+  bannerCheckIceTitle: string;
+  bannerCheckIceSub: string;
+  bannerDangerTitle: string;
+  bannerDangerSub: string;
+  bannerThermoSafeTitle: string;
+  bannerThermoSafeSub: string;
+  bannerThermoDangerTitle: string;
+  bannerThermoDangerSub: string;
+  windowProgressLabel: string;
+  safeWindowLabel: string;
+  statKeep: string;
+  statCook: string;
+  statCheckIce: string;
+  statDiscard: string;
+  copyChecklistBtn: string;
+  copiedChecklistBtn: string;
+  printChecklistBtn: string;
+  resetBtn: string;
+  foodListTitle: string;
+  searchPlaceholder: string;
+  scopeCurrentLabel: string;
+  scopeAllLabel: string;
+  filterAll: string;
+  filterKeep: string;
+  filterCook: string;
+  filterCheckIce: string;
+  filterDiscard: string;
+  verdictKeep: string;
+  verdictCook: string;
+  verdictCheckIce: string;
+  verdictDiscard: string;
+  compBadgeFridge: string;
+  compBadgeFreezer: string;
+  compBadgeBoth: string;
+  checkItemAria: string;
+  checkedBadge: string;
+  noResultsMsg: string;
+  emergencyStripTitle: string;
+  emergencyStripSub: string;
+  rule1Title: string;
+  rule1Body: string;
+  rule2Title: string;
+  rule2Body: string;
+  rule3Title: string;
+  rule3Body: string;
+  relatedHeading: string;
+  relatedLeftoverTag: string;
+  relatedLeftoverTitle: string;
+  relatedLeftoverDesc: string;
+  relatedThawTag: string;
+  relatedThawTitle: string;
+  relatedThawDesc: string;
+  relatedRefreezeTag: string;
+  relatedRefreezeTitle: string;
+  relatedRefreezeDesc: string;
+  methodologyStripTitle: string;
+  methodologyStripPrefix: string;
+  methodologyLabel: string;
+  refreezeHubLabel: string;
+  allToolsLabel: string;
+  faqTitle: string;
+  copyHeader: string;
+  copyConditionLine: string;
+  copyDiscardSection: string;
+  copyCheckSection: string;
+  copyCookSection: string;
+  copyKeepSection: string;
+  copyNone: string;
+  copyDoorYes: string;
+  copyDoorNo: string;
+  copyThermoNone: string;
+}
+
+const UI: Record<SupportedLanguage, UiDict> = {
+  en: {
+    ariaLabel: 'Fridge and Freezer Power Outage Food Safety Checker',
+    step1Title: '1. Select Appliance Compartment',
+    modeFridge: 'Refrigerator',
+    modeFridgeSub: 'Stays ≤40°F ~4 hrs closed',
+    modeFreezerFull: 'Freezer (Full)',
+    modeFreezerFullSub: 'Stays frozen ~48 hrs closed',
+    modeFreezerHalf: 'Freezer (Half-Full)',
+    modeFreezerHalfSub: 'Stays frozen ~24 hrs closed',
+    step2Title: '2. Hours Without Power',
+    hoursLabel: 'Outage Duration',
+    hoursUnit: 'hrs',
+    step3Title: '3. Door Activity, Room Temp & Thermometer',
+    doorQuestion: 'Was the door opened during the outage?',
+    doorClosedLabel: 'No — Kept Closed',
+    doorOpenedLabel: 'Yes — Opened',
+    roomTempLabel: 'Kitchen / Room Temperature',
+    roomNormalLabel: 'Normal (<90°F / 32°C)',
+    roomHeatwaveLabel: 'Heatwave (≥90°F / 32°C)',
+    thermometerTitle: 'Optional Internal Food Temperature',
+    noThermometerBtn: "Don't Have Thermometer",
+    useThermometerBtn: 'Enter Thermometer Temp',
+    tempInputLabel: 'Measured Food Temp',
+    tempHintSafe: 'USDA rule: ≤40°F (4°C) is safe to keep, cook, or refreeze (except melted ice cream).',
+    verdictBadge: 'Live USDA FSIS & CDC Triage Verdict',
+    bannerSafeTitle: 'Within Safe Closed Window',
+    bannerSafeSub: 'Keep doors shut. Perishables remain safe while within the USDA closed-door window.',
+    bannerLimitTitle: 'At USDA Safe Window Limit — Act Now',
+    bannerLimitSub: 'Verify internal temps ≤40°F (4°C), cook borderline raw items immediately, or transfer to a cooler with ice.',
+    bannerCheckIceTitle: 'Check Packages for Ice Crystals',
+    bannerCheckIceSub: 'Freezer items are safe to refreeze or cook ONLY if ice crystals remain or temp verifies ≤40°F (4°C).',
+    bannerDangerTitle: 'Danger Zone Exceeded — Discard Perishables',
+    bannerDangerSub: 'Without a thermometer confirming ≤40°F (4°C), USDA requires discarding perishable items past the safe window.',
+    bannerThermoSafeTitle: 'Thermometer Verified Safe (≤40°F / 4°C)',
+    bannerThermoSafeSub: 'Measured temperature is at or below 40°F (4°C). Perishables are safe to keep, cook, or refreeze (discard melted ice cream).',
+    bannerThermoDangerTitle: 'Thermometer In Danger Zone (>40°F / 4°C)',
+    bannerThermoDangerSub: 'Food has warmed above 40°F (4°C). Discard perishables held >2 hrs (>1 hr in ≥90°F heatwave).',
+    windowProgressLabel: 'Outage Elapsed vs. Effective Safe Window',
+    safeWindowLabel: 'Effective safe window',
+    statKeep: 'Keep',
+    statCook: 'Cook / Use Now',
+    statCheckIce: 'Check Ice',
+    statDiscard: 'Discard',
+    copyChecklistBtn: 'Copy Discard Checklist',
+    copiedChecklistBtn: 'Checklist Copied ✓',
+    printChecklistBtn: 'Print Checklist',
+    resetBtn: 'Reset',
+    foodListTitle: 'Food-by-Food USDA Outage Verdict (22 Categories)',
+    searchPlaceholder: 'Search food (e.g., milk, chicken, eggs, mayo, ice cream, rice)...',
+    scopeCurrentLabel: 'Active Compartment',
+    scopeAllLabel: 'Show All 22 Foods',
+    filterAll: 'All',
+    filterKeep: 'Keep',
+    filterCook: 'Cook Now',
+    filterCheckIce: 'Check Ice Crystals',
+    filterDiscard: 'Discard',
+    verdictKeep: 'SAFE TO KEEP',
+    verdictCook: 'COOK / USE NOW',
+    verdictCheckIce: 'CHECK ICE CRYSTALS',
+    verdictDiscard: 'DISCARD',
+    compBadgeFridge: 'Fridge',
+    compBadgeFreezer: 'Freezer',
+    compBadgeBoth: 'Fridge & Freezer',
+    checkItemAria: 'Mark item checked',
+    checkedBadge: 'Checked',
+    noResultsMsg: 'No foods match your current filter. Try clearing the search or selecting "All".',
+    emergencyStripTitle: 'Essential CDC & USDA Power Outage Food Safety Rules',
+    emergencyStripSub: 'Follow these three evidence-based emergency protocols whenever electricity goes out.',
+    rule1Title: 'Never Taste, Smell, or Eyeball Safety',
+    rule1Body: 'Salmonella, E. coli, Listeria, and heat-stable Bacillus cereus / Staph toxins do not alter odor, flavor, or appearance. When in doubt, throw it out.',
+    rule2Title: 'The Frozen Cup & Coin Trick',
+    rule2Body: 'Before storms or travel, freeze a cup of water and place a coin on top. If you return and the coin sank to the bottom, your freezer fully thawed and refroze.',
+    rule3Title: 'Keep Doors Closed & Pack a Cooler',
+    rule3Body: 'For outages longer than 4 hours, transfer meat, dairy, eggs, and baby formula into an insulated cooler with ice or gel packs maintaining ≤40°F (4°C).',
+    relatedHeading: 'Related Food Storage & Temperature Tools',
+    relatedLeftoverTag: 'Fridge Storage Guide',
+    relatedLeftoverTitle: 'Leftover Shelf Life Calculator →',
+    relatedLeftoverDesc: 'Check exact USDA refrigerator and freezer storage days for cooked meats, soups, rice, and takeout.',
+    relatedThawTag: 'Safe Defrosting Timers',
+    relatedThawTitle: 'Meat Thawing Time Calculator →',
+    relatedThawDesc: 'Calculate safe fridge and cold-water defrost hours for steaks, chicken, and whole turkeys.',
+    relatedRefreezeTag: 'USDA Refreezing Directory',
+    relatedRefreezeTitle: 'Can You Refreeze It? Guide →',
+    relatedRefreezeDesc: 'Item-by-item verdicts on refreezing raw meat, seafood, dairy, bread, and cooked meals safely.',
+    methodologyStripTitle: 'Built on USDA FSIS, CDC & FoodSafety.gov Emergency Standards',
+    methodologyStripPrefix: 'Every threshold and food rule is audited against official public-health food safety tables. Read our citation protocol in',
+    methodologyLabel: 'Methodology',
+    refreezeHubLabel: 'Refreezing Safety Guide',
+    allToolsLabel: 'All Kitchen Tools →',
+    faqTitle: 'Frequently Asked Questions: Power Outage Food Safety',
+    copyHeader: 'IsItKitchenSafe — Power Outage Food Safety Checklist (USDA/CDC)',
+    copyConditionLine: 'Conditions',
+    copyDiscardSection: 'DISCARD (DO NOT EAT):',
+    copyCheckSection: 'CHECK ICE CRYSTALS / VERIFY ≤40°F (4°C):',
+    copyCookSection: 'COOK OR USE IMMEDIATELY:',
+    copyKeepSection: 'SAFE TO KEEP:',
+    copyNone: 'None',
+    copyDoorYes: 'Door opened',
+    copyDoorNo: 'Door kept closed',
+    copyThermoNone: 'No thermometer'
+  },
+  es: {
+    ariaLabel: 'Verificador de Seguridad Alimentaria por Corte de Luz en Nevera y Congelador',
+    step1Title: '1. Selecciona el Compartimento',
+    modeFridge: 'Nevera / Refrigerador',
+    modeFridgeSub: '≤4°C unas 4 h cerrada',
+    modeFreezerFull: 'Congelador (Lleno)',
+    modeFreezerFullSub: 'Congelado ~48 h cerrado',
+    modeFreezerHalf: 'Congelador (Medio Lleno)',
+    modeFreezerHalfSub: 'Congelado ~24 h cerrado',
+    step2Title: '2. Horas Sin Electricidad',
+    hoursLabel: 'Duración del Apagón',
+    hoursUnit: 'h',
+    step3Title: '3. Apertura de Puerta, Temperatura Ambiente y Termómetro',
+    doorQuestion: '¿Se abrió la puerta durante el apagón?',
+    doorClosedLabel: 'No — Se mantuvo cerrada',
+    doorOpenedLabel: 'Sí — Se abrió',
+    roomTempLabel: 'Temperatura de la Cocina',
+    roomNormalLabel: 'Normal (<32°C / 90°F)',
+    roomHeatwaveLabel: 'Ola de Calor (≥32°C / 90°F)',
+    thermometerTitle: 'Temperatura Interna Opcional del Alimento',
+    noThermometerBtn: 'No tengo termómetro',
+    useThermometerBtn: 'Ingresar temperatura',
+    tempInputLabel: 'Temp. medida del alimento',
+    tempHintSafe: 'Regla USDA: ≤4°C (40°F) es seguro para conservar, cocinar o recongelar (salvo helado derretido).',
+    verdictBadge: 'Veredicto en Vivo USDA FSIS y CDC',
+    bannerSafeTitle: 'Dentro del Margen Seguro Cerrado',
+    bannerSafeSub: 'Mantén las puertas cerradas. Los perecederos siguen seguros dentro del plazo USDA.',
+    bannerLimitTitle: 'En el Límite Seguro USDA — Actúa Ahora',
+    bannerLimitSub: 'Verifica temperaturas ≤4°C (40°F), cocina carnes crudas de inmediato o pasa alimentos a una nevera portátil con hielo.',
+    bannerCheckIceTitle: 'Revisa Cristales de Hielo en los Paquetes',
+    bannerCheckIceSub: 'Los congelados se pueden recongelar o cocinar SOLO si conservan cristales de hielo o miden ≤4°C (40°F).',
+    bannerDangerTitle: 'Zona de Peligro Superada — Desecha Perecederos',
+    bannerDangerSub: 'Sin un termómetro que confirme ≤4°C (40°F), el USDA exige desechar los alimentos perecederos.',
+    bannerThermoSafeTitle: 'Verificado Seguro por Termómetro (≤4°C / 40°F)',
+    bannerThermoSafeSub: 'La temperatura medida es ≤4°C (40°F). Los perecederos son seguros para conservar, cocinar o recongelar (desecha helado derretido).',
+    bannerThermoDangerTitle: 'Termómetro en Zona de Peligro (>4°C / 40°F)',
+    bannerThermoDangerSub: 'El alimento superó los 4°C. Desecha perecederos mantenidos >2 h (>1 h en ola de calor ≥32°C).',
+    windowProgressLabel: 'Horas sin luz vs. Ventana segura efectiva',
+    safeWindowLabel: 'Ventana segura efectiva',
+    statKeep: 'Conservar',
+    statCook: 'Cocinar Ya',
+    statCheckIce: 'Revisar Hielo',
+    statDiscard: 'Desechar',
+    copyChecklistBtn: 'Copiar Lista de Descarte',
+    copiedChecklistBtn: 'Lista Copiada ✓',
+    printChecklistBtn: 'Imprimir Lista',
+    resetBtn: 'Restablecer',
+    foodListTitle: 'Veredicto USDA Alimento por Alimento (22 Categorías)',
+    searchPlaceholder: 'Buscar alimento (ej. leche, pollo, huevos, mayonesa, helado, arroz)...',
+    scopeCurrentLabel: 'Compartimento Activo',
+    scopeAllLabel: 'Ver los 22 Alimentos',
+    filterAll: 'Todos',
+    filterKeep: 'Conservar',
+    filterCook: 'Cocinar Ya',
+    filterCheckIce: 'Revisar Cristales',
+    filterDiscard: 'Desechar',
+    verdictKeep: 'SEGURO CONSERVAR',
+    verdictCook: 'COCINAR / USAR YA',
+    verdictCheckIce: 'REVISAR CRISTALES',
+    verdictDiscard: 'DESECHAR',
+    compBadgeFridge: 'Nevera',
+    compBadgeFreezer: 'Congelador',
+    compBadgeBoth: 'Nevera y Congelador',
+    checkItemAria: 'Marcar alimento revisado',
+    checkedBadge: 'Revisado',
+    noResultsMsg: 'Ningún alimento coincide con el filtro actual. Borra la búsqueda o elige "Todos".',
+    emergencyStripTitle: 'Reglas Esenciales de los CDC y USDA en Apagones',
+    emergencyStripSub: 'Aplica estos tres protocolos de emergencia cada vez que se corte la electricidad.',
+    rule1Title: 'Nunca Pruebes ni Huelas para Comprobar',
+    rule1Body: 'Salmonella, E. coli, Listeria y toxinas termorresistentes no cambian el olor ni el sabor. Ante la duda, deséchalo.',
+    rule2Title: 'Truco del Vaso Congelado y la Moneda',
+    rule2Body: 'Antes de tormentas o viajes, congela un vaso de agua y pon una moneda encima. Si al volver está en el fondo, el congelador se descongeló por completo.',
+    rule3Title: 'Puertas Cerradas y Nevera Portátil',
+    rule3Body: 'En apagones mayores a 4 horas, traslada carnes, lácteos, huevos y fórmula a una hielera con hielo o acumuladores a ≤4°C.',
+    relatedHeading: 'Herramientas Relacionadas de Conservación y Temperatura',
+    relatedLeftoverTag: 'Guía de Conservación',
+    relatedLeftoverTitle: 'Calculadora de Duración de Sobras →',
+    relatedLeftoverDesc: 'Consulta los días exactos de nevera y congelador para carnes cocidas, sopas, arroz y sobras.',
+    relatedThawTag: 'Tiempos Seguros de Descongelado',
+    relatedThawTitle: 'Calculadora de Descongelado de Carne →',
+    relatedThawDesc: 'Calcula horas seguras en nevera y agua fría para filetes, pollo y pavo entero.',
+    relatedRefreezeTag: 'Directorio USDA de Recongelado',
+    relatedRefreezeTitle: '¿Se Puede Volver a Congelar? →',
+    relatedRefreezeDesc: 'Veredictos alimento por alimento para recongelar carnes, pescados, lácteos y panes sin riesgos.',
+    methodologyStripTitle: 'Basado en Normas de Emergencia del USDA FSIS, CDC y FoodSafety.gov',
+    methodologyStripPrefix: 'Cada umbral y regla está auditado según tablas oficiales de salud pública. Consulta nuestros criterios en',
+    methodologyLabel: 'Metodología',
+    refreezeHubLabel: 'Guía de Recongelado',
+    allToolsLabel: 'Todas las Herramientas →',
+    faqTitle: 'Preguntas Frecuentes: Seguridad Alimentaria en Apagones',
+    copyHeader: 'IsItKitchenSafe — Lista de Seguridad Alimentaria por Apagón (USDA/CDC)',
+    copyConditionLine: 'Condiciones',
+    copyDiscardSection: 'DESECHAR (NO COMER):',
+    copyCheckSection: 'REVISAR CRISTALES DE HIELO / VERIFICAR ≤4°C:',
+    copyCookSection: 'COCINAR O USAR DE INMEDIATO:',
+    copyKeepSection: 'SEGURO CONSERVAR:',
+    copyNone: 'Ninguno',
+    copyDoorYes: 'Puerta abierta',
+    copyDoorNo: 'Puerta cerrada',
+    copyThermoNone: 'Sin termómetro'
+  },
+  pt: {
+    ariaLabel: 'Verificador de Segurança Alimentar em Falta de Energia na Geladeira e Freezer',
+    step1Title: '1. Selecione o Compartimento',
+    modeFridge: 'Geladeira',
+    modeFridgeSub: '≤4°C por ~4 h fechada',
+    modeFreezerFull: 'Freezer (Cheio)',
+    modeFreezerFullSub: 'Congelado ~48 h fechado',
+    modeFreezerHalf: 'Freezer (Meio Cheio)',
+    modeFreezerHalfSub: 'Congelado ~24 h fechado',
+    step2Title: '2. Horas Sem Energia',
+    hoursLabel: 'Duração da Falta de Luz',
+    hoursUnit: 'h',
+    step3Title: '3. Abertura de Porta, Temperatura Ambiente e Termômetro',
+    doorQuestion: 'A porta foi aberta durante a queda de energia?',
+    doorClosedLabel: 'Não — Mantida Fechada',
+    doorOpenedLabel: 'Sim — Foi Aberta',
+    roomTempLabel: 'Temperatura da Cozinha',
+    roomNormalLabel: 'Normal (<32°C / 90°F)',
+    roomHeatwaveLabel: 'Calor Intenso (≥32°C / 90°F)',
+    thermometerTitle: 'Temperatura Interna Opcional do Alimento',
+    noThermometerBtn: 'Não Tenho Termômetro',
+    useThermometerBtn: 'Inserir Temperatura',
+    tempInputLabel: 'Temp. medida do alimento',
+    tempHintSafe: 'Regra USDA: ≤4°C (40°F) é seguro para manter, cozinhar ou recongelar (exceto sorvete derretido).',
+    verdictBadge: 'Triagem em Tempo Real USDA FSIS & CDC',
+    bannerSafeTitle: 'Dentro da Janela Segura Fechada',
+    bannerSafeSub: 'Mantenha as portas fechadas. Perecíveis seguem seguros dentro do prazo USDA.',
+    bannerLimitTitle: 'No Limite Seguro USDA — Aja Agora',
+    bannerLimitSub: 'Confirme temperaturas ≤4°C (40°F), cozinhe carnes cruas agora ou transfira para caixa térmica com gelo.',
+    bannerCheckIceTitle: 'Verifique Cristais de Gelo nas Embalagens',
+    bannerCheckIceSub: 'Congelados podem ser recongelados ou cozidos APENAS se tiverem cristais de gelo ou medirem ≤4°C (40°F).',
+    bannerDangerTitle: 'Zona de Perigo Ultrapassada — Descarte Perecíveis',
+    bannerDangerSub: 'Sem um termômetro confirmando ≤4°C (40°F), o USDA recomenda descartar os alimentos perecíveis.',
+    bannerThermoSafeTitle: 'Confirmado Seguro no Termômetro (≤4°C / 40°F)',
+    bannerThermoSafeSub: 'A temperatura está em ≤4°C (40°F). Perecíveis são seguros para manter, cozinhar ou recongelar (descarte sorvete derretido).',
+    bannerThermoDangerTitle: 'Termômetro na Zona de Perigo (>4°C / 40°F)',
+    bannerThermoDangerSub: 'O alimento passou de 4°C. Descarte perecíveis mantidos >2 h (>1 h em calor ≥32°C).',
+    windowProgressLabel: 'Horas sem luz vs. Janela segura efetiva',
+    safeWindowLabel: 'Janela segura efetiva',
+    statKeep: 'Manter',
+    statCook: 'Cozinhar Já',
+    statCheckIce: 'Checar Gelo',
+    statDiscard: 'Descartar',
+    copyChecklistBtn: 'Copiar Lista de Descarte',
+    copiedChecklistBtn: 'Lista Copiada ✓',
+    printChecklistBtn: 'Imprimir Lista',
+    resetBtn: 'Redefinir',
+    foodListTitle: 'Veredito USDA Alimento por Alimento (22 Categorias)',
+    searchPlaceholder: 'Buscar alimento (ex.: leite, frango, ovos, maionese, sorvete, arroz)...',
+    scopeCurrentLabel: 'Compartimento Ativo',
+    scopeAllLabel: 'Mostrar Todos os 22',
+    filterAll: 'Todos',
+    filterKeep: 'Manter',
+    filterCook: 'Cozinhar Já',
+    filterCheckIce: 'Checar Cristais',
+    filterDiscard: 'Descartar',
+    verdictKeep: 'SEGURO MANTER',
+    verdictCook: 'COZINHAR / USAR JÁ',
+    verdictCheckIce: 'CHECAR CRISTAIS',
+    verdictDiscard: 'DESCARTAR',
+    compBadgeFridge: 'Geladeira',
+    compBadgeFreezer: 'Freezer',
+    compBadgeBoth: 'Geladeira e Freezer',
+    checkItemAria: 'Marcar item conferido',
+    checkedBadge: 'Conferido',
+    noResultsMsg: 'Nenhum alimento corresponde ao filtro atual. Limpe a busca ou clique em "Todos".',
+    emergencyStripTitle: 'Regras Essenciais do CDC e USDA em Quedas de Energia',
+    emergencyStripSub: 'Siga estes três protocolos baseados em evidências sempre que faltar luz.',
+    rule1Title: 'Nunca Prove ou Cheire para Testar',
+    rule1Body: 'Salmonella, E. coli, Listeria e toxinas termorresistentes não alteram cheiro, cor ou sabor. Na dúvida, descarte.',
+    rule2Title: 'Truque do Copo Congelado e da Moeda',
+    rule2Body: 'Antes de tempestades ou viagens, congele um copo com água e coloque uma moeda em cima. Se ela afundar até o fundo, o freezer descongelou todo.',
+    rule3Title: 'Portas Fechadas e Caixa Térmica',
+    rule3Body: 'Se a queda passar de 4 horas, transfira carnes, laticínios, ovos e fórmulas para um cooler com gelo mantendo ≤4°C.',
+    relatedHeading: 'Ferramentas Relacionadas de Conservação e Temperatura',
+    relatedLeftoverTag: 'Validade na Geladeira',
+    relatedLeftoverTitle: 'Calculadora de Validade de Sobras →',
+    relatedLeftoverDesc: 'Veja quantos dias carnes cozidas, sopas, arroz e marmitas duram na geladeira e no freezer.',
+    relatedThawTag: 'Descongelamento Seguro',
+    relatedThawTitle: 'Calculadora de Descongelamento de Carnes →',
+    relatedThawDesc: 'Calcule o tempo seguro na geladeira e em água fria para bifes, frango e peru.',
+    relatedRefreezeTag: 'Guia USDA de Recongelamento',
+    relatedRefreezeTitle: 'Pode Recongelar? Guia Completo →',
+    relatedRefreezeDesc: 'Vereditos item a item para recongelar carnes, frutos do mar, laticínios e pães com segurança.',
+    methodologyStripTitle: 'Baseado nos Padrões de Emergência USDA FSIS, CDC e FoodSafety.gov',
+    methodologyStripPrefix: 'Cada limite e recomendação é auditado segundo tabelas oficiais de saúde pública. Conheça nossos critérios em',
+    methodologyLabel: 'Metodologia',
+    refreezeHubLabel: 'Guia de Recongelamento',
+    allToolsLabel: 'Todas as Ferramentas →',
+    faqTitle: 'Perguntas Frequentes: Segurança Alimentar em Falta de Energia',
+    copyHeader: 'IsItKitchenSafe — Checklist de Alimentos em Falta de Energia (USDA/CDC)',
+    copyConditionLine: 'Condições',
+    copyDiscardSection: 'DESCARTAR (NÃO COMER):',
+    copyCheckSection: 'CHECAR CRISTAIS DE GELO / CONFIRMAR ≤4°C:',
+    copyCookSection: 'COZINHAR OU USAR IMEDIATAMENTE:',
+    copyKeepSection: 'SEGURO MANTER:',
+    copyNone: 'Nenhum',
+    copyDoorYes: 'Porta aberta',
+    copyDoorNo: 'Porta mantida fechada',
+    copyThermoNone: 'Sem termômetro'
+  },
+  'zh-cn': {
+    ariaLabel: '停电冰箱与冷冻室食品安全评估排查器',
+    step1Title: '1. 选择冰箱间室',
+    modeFridge: '冷藏室',
+    modeFridgeSub: '关门约保冷 ≤4°C 4 小时',
+    modeFreezerFull: '冷冻室（满载）',
+    modeFreezerFullSub: '关门约保持冰冻 48 小时',
+    modeFreezerHalf: '冷冻室（半满）',
+    modeFreezerHalfSub: '关门约保持冰冻 24 小时',
+    step2Title: '2. 停电持续小时数',
+    hoursLabel: '已停电时长',
+    hoursUnit: '小时',
+    step3Title: '3. 开门情况、室内温度与食品温度计',
+    doorQuestion: '停电期间是否打开过冰箱门？',
+    doorClosedLabel: '否 — 始终紧闭',
+    doorOpenedLabel: '是 — 开过门',
+    roomTempLabel: '厨房 / 室内环境温度',
+    roomNormalLabel: '常温 (<32°C / 90°F)',
+    roomHeatwaveLabel: '高温热浪 (≥32°C / 90°F)',
+    thermometerTitle: '可选：实测食物内部温度',
+    noThermometerBtn: '没有温度计',
+    useThermometerBtn: '输入实测温度',
+    tempInputLabel: '实测食物温度',
+    tempHintSafe: 'USDA 标准：实测 ≤4°C (40°F) 可安全保留、烹饪或复冻（融化冰淇淋除外）。',
+    verdictBadge: 'USDA FSIS & CDC 停电实时判定',
+    bannerSafeTitle: '仍在关门安全保冷时窗内',
+    bannerSafeSub: '请继续紧闭冰箱门。在 USDA 安全时窗内，易腐食材仍可放心保留。',
+    bannerLimitTitle: '已达 USDA 安全保冷临界点 — 请立即处理',
+    bannerLimitSub: '请核查食物温度 ≤4°C (40°F)，立即烹熟临界生食，或转移至放满冰袋的保温箱。',
+    bannerCheckIceTitle: '请逐袋检查是否仍有冰晶',
+    bannerCheckIceSub: '冷冻食品仅在仍含明显冰晶或实测温度 ≤4°C (40°F) 时，才可安全复冻或烹饪。',
+    bannerDangerTitle: '已超出危险温区安全上限 — 易腐食物必须丢弃',
+    bannerDangerSub: '若没有温度计证实仍 ≤4°C (40°F)，按 USDA 规范必须果断丢弃易腐食材。',
+    bannerThermoSafeTitle: '温度计实测安全 (≤4°C / 40°F)',
+    bannerThermoSafeSub: '实测温度未超过 4°C (40°F)，易腐食材可安全保留、烹饪或复冻（融化冰淇淋需丢弃）。',
+    bannerThermoDangerTitle: '温度计警报：已进入危险温区 (>4°C / 40°F)',
+    bannerThermoDangerSub: '食物已升温至 4°C 以上，超出 2 小时（高温 ≥32°C 超 1 小时）的易腐食材必须丢弃。',
+    windowProgressLabel: '已停电时长 vs. 当前有效安全时窗',
+    safeWindowLabel: '有效安全时窗',
+    statKeep: '可保留',
+    statCook: '立即烹饪/食用',
+    statCheckIce: '检查冰晶',
+    statDiscard: '必须丢弃',
+    copyChecklistBtn: '复制停电丢弃清单',
+    copiedChecklistBtn: '清单已复制 ✓',
+    printChecklistBtn: '打印清单',
+    resetBtn: '重置',
+    foodListTitle: 'USDA 停电 22 类常见食物逐项判定',
+    searchPlaceholder: '搜索食物（如：牛奶、鸡肉、鸡蛋、蛋黄酱、冰淇淋、米饭）...',
+    scopeCurrentLabel: '当前间室',
+    scopeAllLabel: '显示全部 22 类',
+    filterAll: '全部',
+    filterKeep: '可保留',
+    filterCook: '立即烹饪',
+    filterCheckIce: '检查冰晶',
+    filterDiscard: '必须丢弃',
+    verdictKeep: '安全保留',
+    verdictCook: '立即烹饪/食用',
+    verdictCheckIce: '检查冰晶',
+    verdictDiscard: '必须丢弃',
+    compBadgeFridge: '冷藏室',
+    compBadgeFreezer: '冷冻室',
+    compBadgeBoth: '冷藏与冷冻',
+    checkItemAria: '勾选已排查项',
+    checkedBadge: '已排查',
+    noResultsMsg: '当前筛选条件下没有匹配的食物，请清空搜索或选择“全部”。',
+    emergencyStripTitle: 'CDC 与 USDA 停电必读三大食品安全法则',
+    emergencyStripSub: '遭遇台风、暴雪或线路故障停电时，请严格遵循以下科学规程。',
+    rule1Title: '绝不靠“闻一闻、尝一口”判断好坏',
+    rule1Body: '沙门氏菌、大肠杆菌、李斯特菌及耐热蜡样芽孢杆菌毒素不会改变食物气味或外观。心存疑虑，果断丢弃。',
+    rule2Title: '冻水杯与硬币防坑法',
+    rule2Body: '台风或远行前在冷冻室冻一杯水并在冰面放一枚硬币。回家若发现硬币沉底，说明中途曾彻底化冻又重新结冰。',
+    rule3Title: '紧闭门体 + 冰袋保温箱转移',
+    rule3Body: '若停电预计超过 4 小时，尽快将肉类、奶制品、鸡蛋与婴儿奶转入放满冰块/干冰的保温箱并维持 ≤4°C。',
+    relatedHeading: '相关冷藏保鲜与食品安全工具',
+    relatedLeftoverTag: '剩菜保存期限',
+    relatedLeftoverTitle: '剩菜冰箱保质期计算器 →',
+    relatedLeftoverDesc: '速查熟肉、浓汤、米饭和外卖在冷藏室与冷冻室的 USDA 准确保存天数。',
+    relatedThawTag: '安全解冻定时',
+    relatedThawTitle: '肉类安全解冻时间计算器 →',
+    relatedThawDesc: '精准计算牛排、鸡胸肉与整只火鸡在冷藏室与冷水中的安全解冻时长。',
+    relatedRefreezeTag: 'USDA 复冻安全指南',
+    relatedRefreezeTitle: '食物解冻后能否二次冷冻指南 →',
+    relatedRefreezeDesc: '逐项核查生肉、海鲜、乳制品、面包与熟食能否安全重新冷冻。',
+    methodologyStripTitle: '严格遵循 USDA FSIS、CDC 与 FoodSafety.gov 应急标准',
+    methodologyStripPrefix: '所有温控与弃置阈值均核对官方公共卫生食品安全图表，详见我们的',
+    methodologyLabel: '评估方法论',
+    refreezeHubLabel: '二次冷冻指南',
+    allToolsLabel: '全部实用工具 →',
+    faqTitle: '停电冰箱食品安全常见问题解答',
+    copyHeader: 'IsItKitchenSafe — 停电冰箱食物安全排查清单 (USDA/CDC)',
+    copyConditionLine: '当前条件',
+    copyDiscardSection: '必须丢弃（切勿食用）：',
+    copyCheckSection: '检查冰晶 / 核实 ≤4°C：',
+    copyCookSection: '立即烹饪或尽快食用：',
+    copyKeepSection: '可安全保留：',
+    copyNone: '无',
+    copyDoorYes: '停电期间开过门',
+    copyDoorNo: '始终紧闭门体',
+    copyThermoNone: '未测温'
+  },
+  ja: {
+    ariaLabel: '停電時の冷蔵庫・冷凍庫 食品廃棄判定チェッカー',
+    step1Title: '1. 対象コンパートメントを選択',
+    modeFridge: '冷蔵庫',
+    modeFridgeSub: '閉扉で4°C以下 約4時間',
+    modeFreezerFull: '冷凍庫（満杯）',
+    modeFreezerFullSub: '閉扉で凍結維持 約48時間',
+    modeFreezerHalf: '冷凍庫（半分）',
+    modeFreezerHalfSub: '閉扉で凍結維持 約24時間',
+    step2Title: '2. 停電の経過時間',
+    hoursLabel: '停電時間',
+    hoursUnit: '時間',
+    step3Title: '3. 扉の開閉・室温・食品用温度計',
+    doorQuestion: '停電中に扉を開けましたか？',
+    doorClosedLabel: 'いいえ（閉じたまま）',
+    doorOpenedLabel: 'はい（開けた）',
+    roomTempLabel: 'キッチン・室温',
+    roomNormalLabel: '通常 (<32°C / 90°F)',
+    roomHeatwaveLabel: '猛暑 (≥32°C / 90°F)',
+    thermometerTitle: '任意：食品の内部温度測定',
+    noThermometerBtn: '温度計なし',
+    useThermometerBtn: '実測温度を入力',
+    tempInputLabel: '実測した食品温度',
+    tempHintSafe: 'USDA基準：4°C（40°F）以下なら保持・加熱・再冷凍可（溶けたアイスは除く）。',
+    verdictBadge: 'USDA FSIS & CDC リアルタイム判定',
+    bannerSafeTitle: '閉扉の安全目安時間内です',
+    bannerSafeSub: '扉は閉じたまま維持してください。USDAの安全目安内であれば生鮮品も保持できます。',
+    bannerLimitTitle: 'USDA安全目安の限界付近 — 今すぐ対応を',
+    bannerLimitSub: '温度計で4°C以下を確認するか、生鮮品を直ちに加熱調理・保冷剤入りクーラーへ移してください。',
+    bannerCheckIceTitle: '食品の「氷の結晶」を確認してください',
+    bannerCheckIceSub: '冷凍品は氷の結晶が残っているか、4°C（40°F）以下の場合のみ安全に再冷凍・加熱できます。',
+    bannerDangerTitle: '危険温度帯を超過 — 要冷蔵品は廃棄してください',
+    bannerDangerSub: '温度計で4°C以下を確認できない場合、安全目安を超えた要冷蔵食品はUSDA基準により廃棄が必要です。',
+    bannerThermoSafeTitle: '温度計で安全確認済み（4°C / 40°F以下）',
+    bannerThermoSafeSub: '測定温度は4°C以下です。要冷蔵品は保持・加熱・再冷凍が可能です（溶けたアイスは廃棄）。',
+    bannerThermoDangerTitle: '警告：温度計が危険温度帯（4°C超）',
+    bannerThermoDangerSub: '食品が4°Cを超えています。2時間超（室温32°C以上は1時間超）放置された生鮮品は廃棄してください。',
+    windowProgressLabel: '停電時間 vs 有効な安全目安時間',
+    safeWindowLabel: '有効な安全目安',
+    statKeep: '保持可',
+    statCook: '今すぐ加熱',
+    statCheckIce: '氷結晶確認',
+    statDiscard: '廃棄',
+    copyChecklistBtn: '廃棄チェックリストをコピー',
+    copiedChecklistBtn: 'コピーしました ✓',
+    printChecklistBtn: 'リストを印刷',
+    resetBtn: 'リセット',
+    foodListTitle: '食品別 USDA停電安全判定（22カテゴリー）',
+    searchPlaceholder: '食品を検索（例：牛乳、鶏肉、卵、マヨネーズ、アイス、ご飯）...',
+    scopeCurrentLabel: '選択中の庫内',
+    scopeAllLabel: '全22食品を表示',
+    filterAll: 'すべて',
+    filterKeep: '保持可',
+    filterCook: '今すぐ加熱',
+    filterCheckIce: '氷結晶確認',
+    filterDiscard: '廃棄',
+    verdictKeep: '保持OK',
+    verdictCook: '今すぐ加熱・消費',
+    verdictCheckIce: '氷結晶を確認',
+    verdictDiscard: '廃棄する',
+    compBadgeFridge: '冷蔵',
+    compBadgeFreezer: '冷凍',
+    compBadgeBoth: '冷蔵＆冷凍',
+    checkItemAria: '確認済みにチェック',
+    checkedBadge: '確認済',
+    noResultsMsg: '条件に一致する食品がありません。検索をクリアするか「すべて」を選択してください。',
+    emergencyStripTitle: '停電時に守るべき CDC・USDA 3大食品安全ルール',
+    emergencyStripSub: '台風・地震・停電発生時は以下の科学的基準で判断してください。',
+    rule1Title: '匂い・見た目・味見で絶対に判断しない',
+    rule1Body: 'サルモネラ菌、腸管出血性大腸菌、リステリア菌や耐熱性毒素は匂いや味を変えません。「迷ったら捨てる」が鉄則です。',
+    rule2Title: '凍らせたコップと硬貨のチェック法',
+    rule2Body: '台風前や長期外出前に水を凍らせたコップの上に硬貨を置きます。帰宅時に硬貨が底へ沈んでいれば一度完全解凍した証拠です。',
+    rule3Title: '扉を閉め続け、4時間超はクーラーへ',
+    rule3Body: '4時間以上の停電が予想される場合、肉・乳製品・卵・粉ミルクは氷や保冷剤で4°C以下を保てるクーラーボックスへ移してください。',
+    relatedHeading: '関連する食品保存・温度管理ツール',
+    relatedLeftoverTag: '冷蔵保存ガイド',
+    relatedLeftoverTitle: '作り置き・残り物日持ち計算機 →',
+    relatedLeftoverDesc: '調理済みの肉、スープ、ご飯、テイクアウトの冷蔵・冷凍保存日数をUSDA基準で検索。',
+    relatedThawTag: '安全な解凍タイマー',
+    relatedThawTitle: 'お肉の安全解凍時間計算機 →',
+    relatedThawDesc: 'ステーキ、鶏肉、七面鳥の冷蔵庫解凍・流水解凍にかかる安全時間を算出。',
+    relatedRefreezeTag: 'USDA 再冷凍ガイド',
+    relatedRefreezeTitle: '再冷凍できる？食品別判定一覧 →',
+    relatedRefreezeDesc: '生肉、魚介、乳製品、パン、調理済み料理の再冷凍可否を一覧で確認できます。',
+    methodologyStripTitle: 'USDA FSIS・CDC・FoodSafety.gov 緊急食品安全基準準拠',
+    methodologyStripPrefix: 'すべての温度・時間基準は公的機関の公式データに基づき検証されています。詳細は',
+    methodologyLabel: '検証メソドロジー',
+    refreezeHubLabel: '再冷凍安全ガイド',
+    allToolsLabel: '全ツール一覧 →',
+    faqTitle: '停電時の食品安全に関するよくある質問',
+    copyHeader: 'IsItKitchenSafe — 停電時 食品廃棄・安全チェックリスト (USDA/CDC)',
+    copyConditionLine: '判定条件',
+    copyDiscardSection: '廃棄する（食べないこと）：',
+    copyCheckSection: '氷の結晶を確認 / 4°C以下を確認：',
+    copyCookSection: '今すぐ加熱調理・消費：',
+    copyKeepSection: '安全に保持可能：',
+    copyNone: 'なし',
+    copyDoorYes: '扉を開けた',
+    copyDoorNo: '扉を閉じたまま',
+    copyThermoNone: '温度計なし'
+  }
+};
+
+const t = UI[lang] || UI.en;
+const presetHours = [1, 2, 4, 6, 12, 24, 48, 72];
+
+// Default SSR state: Refrigerator, 6 hours closed, normal room temp, no thermometer
+const defaultMode: CompartmentMode = 'fridge';
+const defaultHours = 6;
+const defaultDoorOpened = false;
+const defaultRoomTemp: RoomTempMode = 'normal';
+const defaultTempUnit: 'F' | 'C' = lang === 'en' ? 'F' : 'C';
+const defaultTempVal = defaultTempUnit === 'F' ? 45 : 7;
+
+function getSafeWindowHours(mode: CompartmentMode, doorOpened: boolean, roomTemp: RoomTempMode): number {
+  const isHeat = roomTemp === 'heatwave';
+  if (mode === 'fridge') {
+    if (isHeat) return doorOpened ? 1 : 2;
+    return doorOpened ? 2 : 4;
+  }
+  if (mode === 'freezer-full') {
+    if (isHeat) return doorOpened ? 24 : 36;
+    return doorOpened ? 36 : 48;
+  }
+  if (isHeat) return doorOpened ? 12 : 18;
+  return doorOpened ? 18 : 24;
+}
+
+function evaluateFoodSSR(food: LocalizedFood): VerdictType {
+  const safeWindow = getSafeWindowHours(defaultMode, defaultDoorOpened, defaultRoomTemp);
+  const rt = food.ruleType;
+  if (rt === 'shelf-stable' || rt === 'shelf-stable-juice' || rt === 'shelf-stable-frozen') return 'keep';
+  if (rt === 'mayo-condiment') return defaultHours > safeWindow + 8 ? 'discard' : 'keep';
+  if (rt === 'frozen-ice-cream') return defaultHours <= 1 ? 'check-ice' : 'discard';
+  if (rt === 'frozen-perishable' || rt === 'frozen-veg') return 'keep';
+  if (defaultHours < safeWindow) return 'keep';
+  if (defaultHours === safeWindow) return rt === 'perishable-cookable' ? 'cook' : 'keep';
+  return 'discard';
+}
+
+const initialFoodStates = localizedFoods.map((food) => {
+  const verdict = evaluateFoodSSR(food);
+  const note =
+    verdict === 'keep'
+      ? food.keepNote
+      : verdict === 'cook'
+        ? food.cookNote
+        : verdict === 'check-ice'
+          ? food.checkIceNote
+          : food.discardNote;
+  const inDefaultComp = food.compartments.includes('fridge');
+  return { ...food, verdict, note, inDefaultComp };
+});
+
+const initialActiveFoods = initialFoodStates.filter((f) => f.inDefaultComp);
+const initialCounts = {
+  all: initialActiveFoods.length,
+  keep: initialActiveFoods.filter((f) => f.verdict === 'keep').length,
+  cook: initialActiveFoods.filter((f) => f.verdict === 'cook').length,
+  checkIce: initialActiveFoods.filter((f) => f.verdict === 'check-ice').length,
+  discard: initialActiveFoods.filter((f) => f.verdict === 'discard').length
+};
+
+const clientPayload = {
+  lang,
+  defaultTempUnit,
+  foods: localizedFoods,
+  ui: t
+};
+
+function getVerdictCardClasses(verdict: VerdictType): string {
+  if (verdict === 'keep') {
+    return 'border-success-border/60 bg-canvas';
+  }
+  if (verdict === 'cook') {
+    return 'border-warning-border/80 bg-warning-bg/35 dark:bg-amber-950/20';
+  }
+  if (verdict === 'check-ice') {
+    return 'border-info-border/70 bg-blue-50/40 dark:bg-blue-950/20';
+  }
+  return 'border-error-border/70 bg-error-bg/45 dark:bg-red-950/20';
+}
+
+function getVerdictPillClasses(verdict: VerdictType): string {
+  if (verdict === 'keep') return 'badge-yes';
+  if (verdict === 'cook') return 'badge-depends';
+  if (verdict === 'check-ice') return 'badge-time';
+  return 'badge-no';
+}
+
+function getVerdictLabel(verdict: VerdictType): string {
+  if (verdict === 'keep') return t.verdictKeep;
+  if (verdict === 'cook') return t.verdictCook;
+  if (verdict === 'check-ice') return t.verdictCheckIce;
+  return t.verdictDiscard;
+}
+
+function getCompBadgeLabel(compartments: string[]): string {
+  if (compartments.includes('fridge') && compartments.includes('freezer')) return t.compBadgeBoth;
+  if (compartments.includes('freezer')) return t.compBadgeFreezer;
+  return t.compBadgeFridge;
+}
+---
+
+<div id="power-outage-checker-root" class="space-y-12">
+  <!-- Main Interactive Checker Card -->
+  <section
+    id="power-outage-food-safety-checker"
+    class="bg-canvas border border-hairline rounded-2xl shadow-sm overflow-hidden"
+    aria-label={t.ariaLabel}
+  >
+    <script type="application/json" id="pofs-payload" set:html={JSON.stringify(clientPayload)} />
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-hairline">
+      <!-- Left Column: Interactive Outage Controls -->
+      <div class="lg:col-span-6 p-5 sm:p-6 space-y-6 print:hidden">
+        <!-- Step 1: Compartment Mode -->
+        <div class="space-y-3">
+          <h2 class="text-title-sm font-semibold text-ink">{t.step1Title}</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2" role="radiogroup" aria-label={t.step1Title}>
+            <button
+              type="button"
+              role="radio"
+              aria-checked="true"
+              data-pofs-mode="fridge"
+              class="pofs-mode-btn min-h-[68px] p-3 rounded-xl border text-left transition-all cursor-pointer bg-primary text-on-primary border-primary shadow-sm"
+            >
+              <span class="block text-sm font-bold leading-snug">🧊 {t.modeFridge}</span>
+              <span class="block text-[11px] opacity-85 mt-0.5 leading-tight">{t.modeFridgeSub}</span>
+            </button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked="false"
+              data-pofs-mode="freezer-full"
+              class="pofs-mode-btn min-h-[68px] p-3 rounded-xl border text-left transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-border-strong"
+            >
+              <span class="block text-sm font-bold leading-snug">❄️ {t.modeFreezerFull}</span>
+              <span class="block text-[11px] opacity-80 mt-0.5 leading-tight">{t.modeFreezerFullSub}</span>
+            </button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked="false"
+              data-pofs-mode="freezer-half"
+              class="pofs-mode-btn min-h-[68px] p-3 rounded-xl border text-left transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-border-strong"
+            >
+              <span class="block text-sm font-bold leading-snug">🧊 {t.modeFreezerHalf}</span>
+              <span class="block text-[11px] opacity-80 mt-0.5 leading-tight">{t.modeFreezerHalfSub}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 2: Hours Without Power Slider + Quick Presets -->
+        <div class="p-4 rounded-xl bg-surface-soft border border-hairline space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <label for="pofs-hours-slider" class="text-xs sm:text-sm font-semibold text-ink">
+              {t.step2Title}
+            </label>
+            <span
+              id="pofs-hours-display"
+              class="px-3 py-1 rounded-full text-sm font-mono font-extrabold bg-signature-coral text-white"
+            >
+              {defaultHours} {t.hoursUnit}
+            </span>
+          </div>
+
+          <input
+            type="range"
+            id="pofs-hours-slider"
+            min="0"
+            max="72"
+            step="1"
+            value={defaultHours}
+            aria-label={t.hoursLabel}
+            class="w-full h-2.5 rounded-lg accent-[#aa2d00] cursor-pointer"
+          />
+
+          <div class="flex flex-wrap gap-1.5 pt-1" role="group" aria-label={t.hoursLabel}>
+            {presetHours.map((h) => (
+              <button
+                type="button"
+                data-pofs-hour-preset={h}
+                class={`pofs-hour-btn min-h-[34px] px-2.5 py-1 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
+                  h === defaultHours
+                    ? 'bg-signature-coral text-white border-signature-coral shadow-sm'
+                    : 'bg-canvas text-ink border-hairline hover:border-signature-coral'
+                }`}
+              >
+                {h}h
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <!-- Step 3: Door Opened, Room Temp, Optional Thermometer -->
+        <div class="space-y-3">
+          <h2 class="text-title-sm font-semibold text-ink">{t.step3Title}</h2>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <!-- Door Opened Toggle -->
+            <div class="p-3.5 rounded-xl bg-surface-soft border border-hairline space-y-2">
+              <span class="block text-xs font-semibold text-ink">{t.doorQuestion}</span>
+              <div class="grid grid-cols-2 gap-1.5" role="radiogroup" aria-label={t.doorQuestion}>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked="true"
+                  data-pofs-door="closed"
+                  class="pofs-door-btn min-h-[40px] px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer bg-primary text-on-primary border-primary shadow-sm"
+                >
+                  {t.doorClosedLabel}
+                </button>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked="false"
+                  data-pofs-door="opened"
+                  class="pofs-door-btn min-h-[40px] px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-border-strong"
+                >
+                  {t.doorOpenedLabel}
+                </button>
+              </div>
+            </div>
+
+            <!-- Room Temp Selector -->
+            <div class="p-3.5 rounded-xl bg-surface-soft border border-hairline space-y-2">
+              <span class="block text-xs font-semibold text-ink">{t.roomTempLabel}</span>
+              <div class="grid grid-cols-2 gap-1.5" role="radiogroup" aria-label={t.roomTempLabel}>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked="true"
+                  data-pofs-room="normal"
+                  class="pofs-room-btn min-h-[40px] px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer bg-primary text-on-primary border-primary shadow-sm"
+                >
+                  {t.roomNormalLabel}
+                </button>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked="false"
+                  data-pofs-room="heatwave"
+                  class="pofs-room-btn min-h-[40px] px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-border-strong"
+                >
+                  {t.roomHeatwaveLabel}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Optional Internal Food Thermometer -->
+          <div class="p-4 rounded-xl bg-surface-soft border border-hairline space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-xs font-semibold text-ink">🌡️ {t.thermometerTitle}</span>
+              <div class="inline-flex rounded-lg border border-hairline bg-canvas p-0.5" role="radiogroup" aria-label={t.thermometerTitle}>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked="true"
+                  data-pofs-thermo-mode="off"
+                  class="pofs-thermo-mode-btn px-2.5 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer bg-primary text-on-primary"
+                >
+                  {t.noThermometerBtn}
+                </button>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked="false"
+                  data-pofs-thermo-mode="on"
+                  class="pofs-thermo-mode-btn px-2.5 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer text-ink hover:bg-surface-soft"
+                >
+                  {t.useThermometerBtn}
+                </button>
+              </div>
+            </div>
+
+            <div id="pofs-thermo-panel" class="hidden pt-1 space-y-2">
+              <div class="flex flex-wrap items-center gap-2">
+                <label for="pofs-temp-input" class="text-xs font-medium text-body shrink-0">
+                  {t.tempInputLabel}:
+                </label>
+                <input
+                  type="number"
+                  id="pofs-temp-input"
+                  min="-20"
+                  max="120"
+                  step="1"
+                  value={defaultTempVal}
+                  class="w-24 h-10 px-3 rounded-lg bg-canvas border border-hairline text-ink font-mono font-bold text-sm focus:outline-none focus:border-info-border"
+                />
+                <div class="inline-flex rounded-lg border border-hairline bg-canvas p-0.5" role="radiogroup" aria-label="Temperature Unit">
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={defaultTempUnit === 'F' ? 'true' : 'false'}
+                    data-pofs-unit="F"
+                    class={`pofs-unit-btn px-3 py-1.5 rounded-md text-xs font-bold cursor-pointer transition-all ${
+                      defaultTempUnit === 'F' ? 'bg-signature-coral text-white' : 'text-ink hover:bg-surface-soft'
+                    }`}
+                  >
+                    °F
+                  </button>
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={defaultTempUnit === 'C' ? 'true' : 'false'}
+                    data-pofs-unit="C"
+                    class={`pofs-unit-btn px-3 py-1.5 rounded-md text-xs font-bold cursor-pointer transition-all ${
+                      defaultTempUnit === 'C' ? 'bg-signature-coral text-white' : 'text-ink hover:bg-surface-soft'
+                    }`}
+                  >
+                    °C
+                  </button>
+                </div>
+              </div>
+              <p class="text-[11.5px] text-muted leading-snug">{t.tempHintSafe}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Live Summary Verdict Dashboard -->
+      <div class="lg:col-span-6 p-5 sm:p-6 bg-surface-soft/50 flex flex-col justify-between space-y-5">
+        <div class="space-y-4">
+          <!-- High-Contrast Live Verdict Banner -->
+          <div
+            id="pofs-verdict-banner"
+            aria-live="polite"
+            class="rounded-2xl bg-surface-dark text-on-dark p-5 sm:p-6 space-y-4 shadow-sm border-l-4 border-error-border"
+          >
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-signature-peach">
+                {t.verdictBadge}
+              </span>
+              <span
+                id="pofs-condition-pill"
+                class="px-2.5 py-1 rounded-full text-[11px] font-mono font-semibold bg-white/10 text-white/95"
+              >
+                {t.modeFridge} · {defaultHours}{t.hoursUnit} · {t.doorClosedLabel}
+              </span>
+            </div>
+
+            <div class="space-y-1.5">
+              <div class="flex items-start gap-2.5">
+                <span id="pofs-banner-icon" aria-hidden="true" class="text-2xl shrink-0 leading-none mt-0.5">🚨</span>
+                <div>
+                  <h2 id="pofs-banner-title" class="text-xl sm:text-2xl font-extrabold tracking-tight text-white leading-snug">
+                    {t.bannerDangerTitle}
+                  </h2>
+                  <p id="pofs-banner-sub" class="text-xs sm:text-[13px] text-white/85 leading-relaxed mt-1">
+                    {t.bannerDangerSub}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Safe Window Progress Gauge -->
+            <div class="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-2">
+              <div class="flex items-center justify-between gap-2 text-[11px] font-medium text-white/80">
+                <span>{t.windowProgressLabel}</span>
+                <span id="pofs-window-ratio" class="font-mono font-bold text-white">
+                  {defaultHours}h / 4h ({t.safeWindowLabel}: 4h)
+                </span>
+              </div>
+              <div class="w-full h-2.5 rounded-full bg-white/15 overflow-hidden">
+                <div
+                  id="pofs-window-bar"
+                  class="h-full rounded-full bg-error-border transition-all duration-300"
+                  style="width: 100%;"
+                />
+              </div>
+            </div>
+
+            <!-- 4 Live Item Count Tiles -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div class="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+                <div id="pofs-count-keep" class="text-2xl font-extrabold font-mono text-signature-mint">
+                  {initialCounts.keep}
+                </div>
+                <div class="text-[11px] text-white/75 font-semibold mt-0.5">{t.statKeep}</div>
+              </div>
+              <div class="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+                <div id="pofs-count-cook" class="text-2xl font-extrabold font-mono text-signature-yellow">
+                  {initialCounts.cook}
+                </div>
+                <div class="text-[11px] text-white/75 font-semibold mt-0.5">{t.statCook}</div>
+              </div>
+              <div class="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+                <div id="pofs-count-check" class="text-2xl font-extrabold font-mono text-info-border">
+                  {initialCounts.checkIce}
+                </div>
+                <div class="text-[11px] text-white/75 font-semibold mt-0.5">{t.statCheckIce}</div>
+              </div>
+              <div class="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+                <div id="pofs-count-discard" class="text-2xl font-extrabold font-mono text-error-border">
+                  {initialCounts.discard}
+                </div>
+                <div class="text-[11px] text-white/75 font-semibold mt-0.5">{t.statDiscard}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons: Copy / Print Outage Discard Checklist & Reset -->
+          <div class="flex flex-wrap items-center gap-2.5 print:hidden">
+            <button
+              type="button"
+              id="pofs-copy-btn"
+              class="min-h-[44px] flex-1 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors cursor-pointer shadow-sm"
+            >
+              <span id="pofs-copy-label">📋 {t.copyChecklistBtn}</span>
+            </button>
+            <button
+              type="button"
+              id="pofs-print-btn"
+              class="min-h-[44px] px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-canvas text-ink border border-hairline hover:border-signature-coral transition-colors cursor-pointer"
+            >
+              🖨️ {t.printChecklistBtn}
+            </button>
+            <button
+              type="button"
+              id="pofs-reset-btn"
+              class="min-h-[44px] px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-canvas text-muted border border-hairline hover:border-border-strong hover:text-ink transition-colors cursor-pointer"
+            >
+              {t.resetBtn}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search, Scope & Filter Bar + 22 Interactive Food Cards -->
+    <div class="border-t border-hairline p-5 sm:p-6 space-y-5">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div>
+          <h2 class="text-title-md font-semibold text-ink">{t.foodListTitle}</h2>
+        </div>
+        <div class="inline-flex rounded-lg border border-hairline bg-surface-soft p-0.5 self-start print:hidden" role="radiogroup" aria-label="Food Scope">
+          <button
+            type="button"
+            role="radio"
+            aria-checked="true"
+            data-pofs-scope="current"
+            class="pofs-scope-btn px-3 py-1.5 rounded-md text-xs font-bold cursor-pointer transition-all bg-primary text-on-primary"
+          >
+            {t.scopeCurrentLabel}
+          </button>
+          <button
+            type="button"
+            role="radio"
+            aria-checked="false"
+            data-pofs-scope="all"
+            class="pofs-scope-btn px-3 py-1.5 rounded-md text-xs font-bold cursor-pointer transition-all text-ink hover:bg-canvas"
+          >
+            {t.scopeAllLabel}
+          </button>
+        </div>
+      </div>
+
+      <!-- Search + Category Filter Pills -->
+      <div class="flex flex-col lg:flex-row lg:items-center gap-3 print:hidden">
+        <div class="relative flex-1">
+          <span aria-hidden="true" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">🔎</span>
+          <input
+            type="search"
+            id="pofs-search-input"
+            placeholder={t.searchPlaceholder}
+            aria-label={t.searchPlaceholder}
+            class="w-full h-11 pl-10 pr-4 rounded-xl bg-surface-soft border border-hairline text-ink text-sm focus:outline-none focus:border-info-border"
+          />
+        </div>
+
+        <div class="flex flex-wrap gap-1.5" role="group" aria-label="Filter by Verdict">
+          <button
+            type="button"
+            aria-pressed="true"
+            data-pofs-filter="all"
+            class="pofs-filter-btn min-h-[38px] px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-primary text-on-primary border-primary"
+          >
+            {t.filterAll} (<span id="pofs-pill-all">{initialCounts.all}</span>)
+          </button>
+          <button
+            type="button"
+            aria-pressed="false"
+            data-pofs-filter="keep"
+            class="pofs-filter-btn min-h-[38px] px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-success-border"
+          >
+            {t.filterKeep} (<span id="pofs-pill-keep">{initialCounts.keep}</span>)
+          </button>
+          <button
+            type="button"
+            aria-pressed="false"
+            data-pofs-filter="discard"
+            class="pofs-filter-btn min-h-[38px] px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-error-border"
+          >
+            {t.filterDiscard} (<span id="pofs-pill-discard">{initialCounts.discard}</span>)
+          </button>
+          <button
+            type="button"
+            aria-pressed="false"
+            data-pofs-filter="check-ice"
+            class="pofs-filter-btn min-h-[38px] px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-info-border"
+          >
+            {t.filterCheckIce} (<span id="pofs-pill-check">{initialCounts.checkIce}</span>)
+          </button>
+          <button
+            type="button"
+            aria-pressed="false"
+            data-pofs-filter="cook"
+            class="pofs-filter-btn min-h-[38px] px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-warning-border"
+          >
+            {t.filterCook} (<span id="pofs-pill-cook">{initialCounts.cook}</span>)
+          </button>
+        </div>
+      </div>
+
+      <!-- Empty Search State -->
+      <div id="pofs-empty-state" class="hidden p-8 rounded-xl bg-surface-soft border border-hairline text-center text-sm text-muted">
+        {t.noResultsMsg}
+      </div>
+
+      <!-- 22 Color-Coded Interactive Food Cards (all SSR-rendered for full SEO & instant paint) -->
+      <div id="pofs-food-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+        {initialFoodStates.map((food) => (
+          <article
+            data-pofs-card={food.id}
+            data-pofs-verdict={food.verdict}
+            class={`pofs-food-card p-4 rounded-xl border transition-all flex flex-col justify-between gap-3 ${getVerdictCardClasses(food.verdict)} ${
+              food.inDefaultComp ? '' : 'hidden'
+            }`}
+          >
+            <div class="space-y-2">
+              <div class="flex items-start justify-between gap-2.5">
+                <div class="flex items-start gap-2.5 min-w-0">
+                  <span aria-hidden="true" class="text-xl shrink-0 leading-none mt-0.5">{food.icon}</span>
+                  <div class="min-w-0">
+                    <h3 class="pofs-card-title text-sm font-bold text-ink leading-snug">
+                      {food.name}
+                    </h3>
+                    <p class="text-[11.5px] text-muted leading-snug mt-0.5">
+                      {food.examples}
+                    </p>
+                  </div>
+                </div>
+                <span
+                  data-pofs-card-pill
+                  class={`shrink-0 ${getVerdictPillClasses(food.verdict)}`}
+                >
+                  {getVerdictLabel(food.verdict)}
+                </span>
+              </div>
+
+              <p data-pofs-card-note class="text-xs text-body leading-relaxed pt-1 border-t border-hairline/60">
+                {food.note}
+              </p>
+            </div>
+
+            <div class="flex items-center justify-between gap-2 pt-1 text-[11px]">
+              <span class="px-2 py-0.5 rounded bg-surface-soft border border-hairline text-muted font-medium">
+                {getCompBadgeLabel(food.compartments)}
+              </span>
+              <label class="inline-flex items-center gap-1.5 text-muted hover:text-ink cursor-pointer select-none print:hidden">
+                <input
+                  type="checkbox"
+                  data-pofs-check={food.id}
+                  aria-label={`${t.checkItemAria}: ${food.name}`}
+                  class="pofs-item-checkbox w-4 h-4 rounded accent-[#181d26] cursor-pointer"
+                />
+                <span class="font-medium">{t.checkedBadge}</span>
+              </label>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+
+    <!-- Emergency USDA & CDC 3-Card Safety Strip -->
+    <div class="border-t border-hairline p-5 sm:p-6 bg-surface-soft/50 space-y-4">
+      <div>
+        <h2 class="text-title-md font-semibold text-ink">{t.emergencyStripTitle}</h2>
+        <p class="text-xs text-muted mt-0.5">{t.emergencyStripSub}</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <article class="p-4 rounded-xl border bg-error-bg/55 dark:bg-red-950/25 border-error-border/70 space-y-1.5">
+          <div class="flex items-center gap-2">
+            <span aria-hidden="true" class="text-lg">🚫</span>
+            <h3 class="text-xs sm:text-sm font-bold text-ink leading-snug">{t.rule1Title}</h3>
+          </div>
+          <p class="text-xs text-body leading-relaxed">{t.rule1Body}</p>
+        </article>
+        <article class="p-4 rounded-xl border bg-warning-bg/65 dark:bg-amber-950/25 border-warning-border/70 space-y-1.5">
+          <div class="flex items-center gap-2">
+            <span aria-hidden="true" class="text-lg">🪙</span>
+            <h3 class="text-xs sm:text-sm font-bold text-ink leading-snug">{t.rule2Title}</h3>
+          </div>
+          <p class="text-xs text-body leading-relaxed">{t.rule2Body}</p>
+        </article>
+        <article class="p-4 rounded-xl border bg-canvas border-hairline space-y-1.5">
+          <div class="flex items-center gap-2">
+            <span aria-hidden="true" class="text-lg">🧊</span>
+            <h3 class="text-xs sm:text-sm font-bold text-ink leading-snug">{t.rule3Title}</h3>
+          </div>
+          <p class="text-xs text-body leading-relaxed">{t.rule3Body}</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Related Verified Companion Tools -->
+  <section class="space-y-4 print:hidden">
+    <h2 class="text-title-md font-semibold text-ink">{t.relatedHeading}</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <a
+        href={leftoverUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedLeftoverTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedLeftoverTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedLeftoverDesc}</p>
+      </a>
+
+      <a
+        href={thawingUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedThawTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedThawTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedThawDesc}</p>
+      </a>
+
+      <a
+        href={refreezeUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedRefreezeTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedRefreezeTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedRefreezeDesc}</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- Methodology & Reference Hub Strip -->
+  <section class="p-6 rounded-2xl bg-surface-soft border border-hairline print:hidden">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-title-sm font-semibold text-ink mb-1">{t.methodologyStripTitle}</h2>
+        <p class="text-[13px] text-muted">
+          {t.methodologyStripPrefix}{' '}
+          <a href={methodologyUrl} class="text-link underline hover:text-link-active">{t.methodologyLabel}</a>.
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a
+          href={refreezeUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
+        >
+          {t.refreezeHubLabel}
+        </a>
+        <a
+          href={methodologyUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
+        >
+          {t.methodologyLabel}
+        </a>
+        <a
+          href={allToolsUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors"
+        >
+          {t.allToolsLabel}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Visible FAQ Accordion (Matches JSON-LD 1:1) -->
+  <section class="print:hidden">
+    <h2 class="text-title-lg font-medium text-ink tracking-tight mb-6">
+      {t.faqTitle}
+    </h2>
+    <div class="space-y-4">
+      {localizedFaqs.map((faq) => (
+        <details class="group p-5 bg-surface-soft border border-hairline rounded-xl" open>
+          <summary class="text-title-sm font-semibold text-ink cursor-pointer list-none flex items-center justify-between gap-3">
+            <span>{faq.question}</span>
+            <span class="text-muted text-sm transition-transform group-open:rotate-180 shrink-0" aria-hidden="true">&#9662;</span>
+          </summary>
+          <p class="text-[14px] text-body leading-relaxed mt-3 pt-3 border-t border-hairline/70">
+            {faq.answer}
+          </p>
+        </details>
+      ))}
+    </div>
+  </section>
+</div>
+
+<script is:inline>
+  (function () {
+    const payloadEl = document.getElementById('pofs-payload');
+    if (!payloadEl) return;
+
+    let payload;
+    try {
+      payload = JSON.parse(payloadEl.textContent || '{}');
+    } catch (_) {
+      return;
+    }
+
+    const foods = payload.foods || [];
+    const ui = payload.ui || {};
+    const foodById = new Map(foods.map((f) => [f.id, f]));
+
+    // Controls
+    const modeBtns = Array.from(document.querySelectorAll('.pofs-mode-btn'));
+    const hourBtns = Array.from(document.querySelectorAll('.pofs-hour-btn'));
+    const doorBtns = Array.from(document.querySelectorAll('.pofs-door-btn'));
+    const roomBtns = Array.from(document.querySelectorAll('.pofs-room-btn'));
+    const thermoModeBtns = Array.from(document.querySelectorAll('.pofs-thermo-mode-btn'));
+    const unitBtns = Array.from(document.querySelectorAll('.pofs-unit-btn'));
+    const scopeBtns = Array.from(document.querySelectorAll('.pofs-scope-btn'));
+    const filterBtns = Array.from(document.querySelectorAll('.pofs-filter-btn'));
+    const cardEls = Array.from(document.querySelectorAll('.pofs-food-card'));
+    const checkboxEls = Array.from(document.querySelectorAll('.pofs-item-checkbox'));
+
+    const hoursSlider = document.getElementById('pofs-hours-slider');
+    const hoursDisplay = document.getElementById('pofs-hours-display');
+    const thermoPanel = document.getElementById('pofs-thermo-panel');
+    const tempInput = document.getElementById('pofs-temp-input');
+    const searchInput = document.getElementById('pofs-search-input');
+
+    // Dashboard elements
+    const verdictBanner = document.getElementById('pofs-verdict-banner');
+    const conditionPill = document.getElementById('pofs-condition-pill');
+    const bannerIcon = document.getElementById('pofs-banner-icon');
+    const bannerTitle = document.getElementById('pofs-banner-title');
+    const bannerSub = document.getElementById('pofs-banner-sub');
+    const windowRatio = document.getElementById('pofs-window-ratio');
+    const windowBar = document.getElementById('pofs-window-bar');
+
+    const countKeepEl = document.getElementById('pofs-count-keep');
+    const countCookEl = document.getElementById('pofs-count-cook');
+    const countCheckEl = document.getElementById('pofs-count-check');
+    const countDiscardEl = document.getElementById('pofs-count-discard');
+
+    const pillAllEl = document.getElementById('pofs-pill-all');
+    const pillKeepEl = document.getElementById('pofs-pill-keep');
+    const pillCookEl = document.getElementById('pofs-pill-cook');
+    const pillCheckEl = document.getElementById('pofs-pill-check');
+    const pillDiscardEl = document.getElementById('pofs-pill-discard');
+    const emptyStateEl = document.getElementById('pofs-empty-state');
+
+    const copyBtn = document.getElementById('pofs-copy-btn');
+    const copyLabel = document.getElementById('pofs-copy-label');
+    const printBtn = document.getElementById('pofs-print-btn');
+    const resetBtn = document.getElementById('pofs-reset-btn');
+
+    const state = {
+      mode: 'fridge',
+      hours: 6,
+      doorOpened: false,
+      roomTemp: 'normal',
+      useThermometer: false,
+      tempUnit: payload.defaultTempUnit || 'F',
+      tempValue: (payload.defaultTempUnit || 'F') === 'F' ? 45 : 7,
+      scope: 'current',
+      filter: 'all',
+      query: '',
+      checkedIds: new Set()
+    };
+
+    let lastChecklistText = '';
+
+    function getSafeWindowHours(mode, doorOpened, roomTemp) {
+      const isHeat = roomTemp === 'heatwave';
+      if (mode === 'fridge') {
+        if (isHeat) return doorOpened ? 1 : 2;
+        return doorOpened ? 2 : 4;
+      }
+      if (mode === 'freezer-full') {
+        if (isHeat) return doorOpened ? 24 : 36;
+        return doorOpened ? 36 : 48;
+      }
+      if (isHeat) return doorOpened ? 12 : 18;
+      return doorOpened ? 18 : 24;
+    }
+
+    function toTempF(val, unit) {
+      return unit === 'C' ? (val * 9) / 5 + 32 : val;
+    }
+
+    function evaluateFood(food) {
+      const isFreezer = state.mode !== 'fridge';
+      const safeWindow = getSafeWindowHours(state.mode, state.doorOpened, state.roomTemp);
+      const dangerLimit = state.roomTemp === 'heatwave' ? 1 : 2;
+      const rt = food.ruleType;
+
+      if (rt === 'shelf-stable' || rt === 'shelf-stable-juice' || rt === 'shelf-stable-frozen') {
+        return 'keep';
+      }
+
+      if (rt === 'mayo-condiment') {
+        if (state.useThermometer) {
+          const tempF = toTempF(state.tempValue, state.tempUnit);
+          if (tempF <= 50) return 'keep';
+          return state.hours > 8 ? 'discard' : 'keep';
+        }
+        return state.hours > safeWindow + 8 ? 'discard' : 'keep';
+      }
+
+      if (state.useThermometer) {
+        const tempF = toTempF(state.tempValue, state.tempUnit);
+
+        if (rt === 'frozen-ice-cream') {
+          return tempF <= 20 ? 'keep' : 'discard';
+        }
+
+        if (rt === 'infant-strict') {
+          if (isFreezer) {
+            if (tempF <= 28) return 'keep';
+            if (tempF <= 40) return 'cook';
+            return state.hours <= dangerLimit ? 'cook' : 'discard';
+          }
+          if (tempF <= 40) return 'keep';
+          return state.hours <= dangerLimit ? 'cook' : 'discard';
+        }
+
+        if (isFreezer || rt === 'frozen-perishable' || rt === 'frozen-veg') {
+          if (tempF <= 32) return 'keep';
+          if (tempF <= 40) return 'cook';
+          if (rt === 'frozen-veg') {
+            return state.hours <= 6 ? 'cook' : 'discard';
+          }
+          return state.hours <= dangerLimit ? 'cook' : 'discard';
+        }
+
+        if (tempF <= 40) return 'keep';
+        return state.hours <= dangerLimit ? 'cook' : 'discard';
+      }
+
+      if (isFreezer || rt === 'frozen-perishable' || rt === 'frozen-veg' || rt === 'frozen-ice-cream') {
+        if (rt === 'frozen-ice-cream') {
+          if (state.mode === 'fridge') return state.hours <= 1 ? 'check-ice' : 'discard';
+          if (state.hours <= Math.round(safeWindow * 0.35)) return 'keep';
+          if (state.hours <= Math.round(safeWindow * 0.5)) return 'check-ice';
+          return 'discard';
+        }
+
+        const effWindow = state.mode === 'fridge' ? (state.roomTemp === 'heatwave' ? 12 : 24) : safeWindow;
+        if (state.hours <= Math.round(effWindow * 0.5)) return 'keep';
+        if (state.hours <= effWindow) return 'check-ice';
+        if (rt === 'frozen-veg' && state.hours <= effWindow + 6) return 'check-ice';
+        if (state.hours <= effWindow + 4) return 'check-ice';
+        return 'discard';
+      }
+
+      if (state.hours < safeWindow) return 'keep';
+      if (state.hours === safeWindow) {
+        return rt === 'perishable-cookable' ? 'cook' : 'keep';
+      }
+      return 'discard';
+    }
+
+    function getModeLabel(mode) {
+      if (mode === 'freezer-full') return ui.modeFreezerFull || 'Freezer (Full)';
+      if (mode === 'freezer-half') return ui.modeFreezerHalf || 'Freezer (Half-Full)';
+      return ui.modeFridge || 'Refrigerator';
+    }
+
+    function getNoteForVerdict(food, verdict) {
+      if (verdict === 'keep') return food.keepNote;
+      if (verdict === 'cook') return food.cookNote;
+      if (verdict === 'check-ice') return food.checkIceNote;
+      return food.discardNote;
+    }
+
+    function getPillText(verdict) {
+      if (verdict === 'keep') return ui.verdictKeep || 'SAFE TO KEEP';
+      if (verdict === 'cook') return ui.verdictCook || 'COOK / USE NOW';
+      if (verdict === 'check-ice') return ui.verdictCheckIce || 'CHECK ICE CRYSTALS';
+      return ui.verdictDiscard || 'DISCARD';
+    }
+
+    function applyButtonStyles() {
+      modeBtns.forEach((btn) => {
+        const active = btn.getAttribute('data-pofs-mode') === state.mode;
+        btn.setAttribute('aria-checked', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('shadow-sm', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      hourBtns.forEach((btn) => {
+        const h = parseInt(btn.getAttribute('data-pofs-hour-preset') || '-1', 10);
+        const active = h === state.hours;
+        btn.classList.toggle('bg-signature-coral', active);
+        btn.classList.toggle('text-white', active);
+        btn.classList.toggle('border-signature-coral', active);
+        btn.classList.toggle('shadow-sm', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      doorBtns.forEach((btn) => {
+        const isOpenedBtn = btn.getAttribute('data-pofs-door') === 'opened';
+        const active = isOpenedBtn === state.doorOpened;
+        btn.setAttribute('aria-checked', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('shadow-sm', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      roomBtns.forEach((btn) => {
+        const active = btn.getAttribute('data-pofs-room') === state.roomTemp;
+        btn.setAttribute('aria-checked', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('shadow-sm', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      thermoModeBtns.forEach((btn) => {
+        const isOn = btn.getAttribute('data-pofs-thermo-mode') === 'on';
+        const active = isOn === state.useThermometer;
+        btn.setAttribute('aria-checked', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('text-ink', !active);
+      });
+
+      if (thermoPanel) {
+        thermoPanel.classList.toggle('hidden', !state.useThermometer);
+      }
+
+      unitBtns.forEach((btn) => {
+        const active = btn.getAttribute('data-pofs-unit') === state.tempUnit;
+        btn.setAttribute('aria-checked', active ? 'true' : 'false');
+        btn.classList.toggle('bg-signature-coral', active);
+        btn.classList.toggle('text-white', active);
+        btn.classList.toggle('text-ink', !active);
+      });
+
+      scopeBtns.forEach((btn) => {
+        const active = btn.getAttribute('data-pofs-scope') === state.scope;
+        btn.setAttribute('aria-checked', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('text-ink', !active);
+      });
+
+      filterBtns.forEach((btn) => {
+        const active = btn.getAttribute('data-pofs-filter') === state.filter;
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+    }
+
+    function updateCardVisuals(cardEl, verdict, noteText, isChecked) {
+      cardEl.setAttribute('data-pofs-verdict', verdict);
+      cardEl.classList.remove(
+        'border-success-border/60',
+        'bg-canvas',
+        'border-warning-border/80',
+        'bg-warning-bg/35',
+        'dark:bg-amber-950/20',
+        'border-info-border/70',
+        'bg-blue-50/40',
+        'dark:bg-blue-950/20',
+        'border-error-border/70',
+        'bg-error-bg/45',
+        'dark:bg-red-950/20',
+        'opacity-60'
+      );
+
+      if (verdict === 'keep') {
+        cardEl.classList.add('border-success-border/60', 'bg-canvas');
+      } else if (verdict === 'cook') {
+        cardEl.classList.add('border-warning-border/80', 'bg-warning-bg/35', 'dark:bg-amber-950/20');
+      } else if (verdict === 'check-ice') {
+        cardEl.classList.add('border-info-border/70', 'bg-blue-50/40', 'dark:bg-blue-950/20');
+      } else {
+        cardEl.classList.add('border-error-border/70', 'bg-error-bg/45', 'dark:bg-red-950/20');
+      }
+
+      if (isChecked) {
+        cardEl.classList.add('opacity-60');
+      }
+
+      const titleEl = cardEl.querySelector('.pofs-card-title');
+      if (titleEl) {
+        titleEl.classList.toggle('line-through', isChecked);
+      }
+
+      const pillEl = cardEl.querySelector('[data-pofs-card-pill]');
+      if (pillEl) {
+        pillEl.className = 'shrink-0 ' + (
+          verdict === 'keep'
+            ? 'badge-yes'
+            : verdict === 'cook'
+              ? 'badge-depends'
+              : verdict === 'check-ice'
+                ? 'badge-time'
+                : 'badge-no'
+        );
+        pillEl.textContent = getPillText(verdict);
+      }
+
+      const noteEl = cardEl.querySelector('[data-pofs-card-note]');
+      if (noteEl) {
+        noteEl.textContent = noteText;
+      }
+    }
+
+    function render() {
+      applyButtonStyles();
+
+      if (hoursSlider) hoursSlider.value = String(state.hours);
+      if (hoursDisplay) hoursDisplay.textContent = state.hours + ' ' + (ui.hoursUnit || 'hrs');
+
+      const safeWindow = getSafeWindowHours(state.mode, state.doorOpened, state.roomTemp);
+      const isFreezer = state.mode !== 'fridge';
+      const targetCompKey = isFreezer ? 'freezer' : 'fridge';
+      const queryLower = state.query.trim().toLowerCase();
+
+      const counts = { all: 0, keep: 0, cook: 0, checkIce: 0, discard: 0 };
+      const buckets = { keep: [], cook: [], checkIce: [], discard: [] };
+      let visibleCount = 0;
+
+      cardEls.forEach((cardEl) => {
+        const fid = cardEl.getAttribute('data-pofs-card') || '';
+        const food = foodById.get(fid);
+        if (!food) return;
+
+        const verdict = evaluateFood(food);
+        const noteText = getNoteForVerdict(food, verdict);
+        const isChecked = state.checkedIds.has(fid);
+        updateCardVisuals(cardEl, verdict, noteText, isChecked);
+
+        const inCompartment = food.compartments.includes(targetCompKey);
+        const inScope = state.scope === 'all' || queryLower.length > 0 || inCompartment;
+
+        if (inScope) {
+          counts.all += 1;
+          if (verdict === 'keep') {
+            counts.keep += 1;
+            buckets.keep.push(food.name);
+          } else if (verdict === 'cook') {
+            counts.cook += 1;
+            buckets.cook.push(food.name);
+          } else if (verdict === 'check-ice') {
+            counts.checkIce += 1;
+            buckets.checkIce.push(food.name);
+          } else {
+            counts.discard += 1;
+            buckets.discard.push(food.name);
+          }
+        }
+
+        const matchesFilter = state.filter === 'all' || state.filter === verdict;
+        const matchesQuery =
+          queryLower.length === 0 ||
+          food.name.toLowerCase().includes(queryLower) ||
+          food.examples.toLowerCase().includes(queryLower) ||
+          noteText.toLowerCase().includes(queryLower);
+
+        const showCard = inScope && matchesFilter && matchesQuery;
+        cardEl.classList.toggle('hidden', !showCard);
+        if (showCard) visibleCount += 1;
+      });
+
+      if (emptyStateEl) {
+        emptyStateEl.classList.toggle('hidden', visibleCount > 0);
+      }
+
+      // Update counts
+      if (countKeepEl) countKeepEl.textContent = String(counts.keep);
+      if (countCookEl) countCookEl.textContent = String(counts.cook);
+      if (countCheckEl) countCheckEl.textContent = String(counts.checkIce);
+      if (countDiscardEl) countDiscardEl.textContent = String(counts.discard);
+
+      if (pillAllEl) pillAllEl.textContent = String(counts.all);
+      if (pillKeepEl) pillKeepEl.textContent = String(counts.keep);
+      if (pillCookEl) pillCookEl.textContent = String(counts.cook);
+      if (pillCheckEl) pillCheckEl.textContent = String(counts.checkIce);
+      if (pillDiscardEl) pillDiscardEl.textContent = String(counts.discard);
+
+      // Condition pill text
+      if (conditionPill) {
+        const doorText = state.doorOpened ? (ui.copyDoorYes || 'Door opened') : (ui.copyDoorNo || 'Door closed');
+        const thermoTag = state.useThermometer ? ' · ' + state.tempValue + '°' + state.tempUnit : '';
+        conditionPill.textContent = getModeLabel(state.mode) + ' · ' + state.hours + (ui.hoursUnit || 'h') + ' · ' + doorText + thermoTag;
+      }
+
+      // Progress gauge
+      const pct = Math.min(100, Math.round((state.hours / Math.max(1, safeWindow)) * 100));
+      if (windowRatio) {
+        windowRatio.textContent =
+          state.hours + 'h / ' + safeWindow + 'h (' + (ui.safeWindowLabel || 'Safe window') + ': ' + safeWindow + 'h)';
+      }
+
+      // Banner state (color, icon, headline, progress bar color)
+      let tone = 'safe';
+      let bIcon = '✅';
+      let bTitle = ui.bannerSafeTitle;
+      let bSub = ui.bannerSafeSub;
+
+      if (state.useThermometer) {
+        const tempF = toTempF(state.tempValue, state.tempUnit);
+        if (tempF <= 40) {
+          tone = 'safe';
+          bIcon = '✅';
+          bTitle = ui.bannerThermoSafeTitle;
+          bSub = ui.bannerThermoSafeSub;
+        } else {
+          tone = 'danger';
+          bIcon = '🚨';
+          bTitle = ui.bannerThermoDangerTitle;
+          bSub = ui.bannerThermoDangerSub;
+        }
+      } else if (isFreezer) {
+        if (state.hours <= Math.round(safeWindow * 0.5)) {
+          tone = 'safe';
+          bIcon = '❄️';
+          bTitle = ui.bannerSafeTitle;
+          bSub = ui.bannerSafeSub;
+        } else if (state.hours <= safeWindow + 4) {
+          tone = 'info';
+          bIcon = '🧊';
+          bTitle = ui.bannerCheckIceTitle;
+          bSub = ui.bannerCheckIceSub;
+        } else {
+          tone = 'danger';
+          bIcon = '🚨';
+          bTitle = ui.bannerDangerTitle;
+          bSub = ui.bannerDangerSub;
+        }
+      } else {
+        if (state.hours < safeWindow) {
+          tone = 'safe';
+          bIcon = '✅';
+          bTitle = ui.bannerSafeTitle;
+          bSub = ui.bannerSafeSub;
+        } else if (state.hours === safeWindow) {
+          tone = 'warn';
+          bIcon = '⚠️';
+          bTitle = ui.bannerLimitTitle;
+          bSub = ui.bannerLimitSub;
+        } else {
+          tone = 'danger';
+          bIcon = '🚨';
+          bTitle = ui.bannerDangerTitle;
+          bSub = ui.bannerDangerSub;
+        }
+      }
+
+      if (bannerIcon) bannerIcon.textContent = bIcon;
+      if (bannerTitle) bannerTitle.textContent = bTitle || '';
+      if (bannerSub) bannerSub.textContent = bSub || '';
+
+      if (verdictBanner) {
+        verdictBanner.classList.remove('border-success-border', 'border-warning-border', 'border-info-border', 'border-error-border');
+        verdictBanner.classList.add(
+          tone === 'safe'
+            ? 'border-success-border'
+            : tone === 'warn'
+              ? 'border-warning-border'
+              : tone === 'info'
+                ? 'border-info-border'
+                : 'border-error-border'
+        );
+      }
+
+      if (windowBar) {
+        windowBar.style.width = pct + '%';
+        windowBar.classList.remove('bg-success-border', 'bg-warning-border', 'bg-info-border', 'bg-error-border');
+        windowBar.classList.add(
+          tone === 'safe'
+            ? 'bg-success-border'
+            : tone === 'warn'
+              ? 'bg-warning-border'
+              : tone === 'info'
+                ? 'bg-info-border'
+                : 'bg-error-border'
+        );
+      }
+
+      // Build plain-text Outage Discard Checklist (zero HTML tags)
+      const doorCopy = state.doorOpened ? (ui.copyDoorYes || 'Door opened') : (ui.copyDoorNo || 'Door closed');
+      const roomCopy = state.roomTemp === 'heatwave' ? (ui.roomHeatwaveLabel || 'Heatwave >=90F') : (ui.roomNormalLabel || 'Normal <90F');
+      const thermoCopy = state.useThermometer ? state.tempValue + '°' + state.tempUnit : (ui.copyThermoNone || 'No thermometer');
+
+      const lines = [
+        ui.copyHeader || 'Power Outage Food Safety Checklist',
+        (ui.copyConditionLine || 'Conditions') + ': ' + getModeLabel(state.mode) + ' | ' + state.hours + 'h | ' + doorCopy + ' | ' + roomCopy + ' | ' + thermoCopy,
+        '',
+        ui.copyDiscardSection || 'DISCARD:',
+        buckets.discard.length > 0 ? buckets.discard.map((n) => '  [ ] ' + n).join('\n') : '  - ' + (ui.copyNone || 'None')
+      ];
+
+      if (buckets.checkIce.length > 0) {
+        lines.push('', ui.copyCheckSection || 'CHECK ICE CRYSTALS:', buckets.checkIce.map((n) => '  [ ] ' + n).join('\n'));
+      }
+      if (buckets.cook.length > 0) {
+        lines.push('', ui.copyCookSection || 'COOK / USE NOW:', buckets.cook.map((n) => '  [ ] ' + n).join('\n'));
+      }
+      lines.push(
+        '',
+        ui.copyKeepSection || 'SAFE TO KEEP:',
+        buckets.keep.length > 0 ? buckets.keep.map((n) => '  [x] ' + n).join('\n') : '  - ' + (ui.copyNone || 'None')
+      );
+
+      lastChecklistText = lines.join('\n');
+    }
+
+    // Event bindings
+    modeBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const m = btn.getAttribute('data-pofs-mode');
+        if (m) {
+          state.mode = m;
+          state.filter = 'all';
+          render();
+        }
+      });
+    });
+
+    if (hoursSlider) {
+      hoursSlider.addEventListener('input', () => {
+        const v = parseInt(hoursSlider.value || '0', 10);
+        if (!isNaN(v)) {
+          state.hours = Math.max(0, Math.min(72, v));
+          render();
+        }
+      });
+    }
+
+    hourBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const h = parseInt(btn.getAttribute('data-pofs-hour-preset') || '0', 10);
+        if (!isNaN(h)) {
+          state.hours = h;
+          render();
+        }
+      });
+    });
+
+    doorBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.doorOpened = btn.getAttribute('data-pofs-door') === 'opened';
+        render();
+      });
+    });
+
+    roomBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.roomTemp = btn.getAttribute('data-pofs-room') === 'heatwave' ? 'heatwave' : 'normal';
+        render();
+      });
+    });
+
+    thermoModeBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.useThermometer = btn.getAttribute('data-pofs-thermo-mode') === 'on';
+        render();
+      });
+    });
+
+    if (tempInput) {
+      tempInput.addEventListener('input', () => {
+        const parsed = parseFloat(tempInput.value);
+        if (!isNaN(parsed)) {
+          state.tempValue = parsed;
+          render();
+        }
+      });
+    }
+
+    unitBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const nextUnit = btn.getAttribute('data-pofs-unit') === 'C' ? 'C' : 'F';
+        if (nextUnit !== state.tempUnit) {
+          if (nextUnit === 'C') {
+            state.tempValue = Math.round(((state.tempValue - 32) * 5) / 9);
+          } else {
+            state.tempValue = Math.round((state.tempValue * 9) / 5 + 32);
+          }
+          state.tempUnit = nextUnit;
+          if (tempInput) tempInput.value = String(state.tempValue);
+          render();
+        }
+      });
+    });
+
+    scopeBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.scope = btn.getAttribute('data-pofs-scope') === 'all' ? 'all' : 'current';
+        render();
+      });
+    });
+
+    filterBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.filter = btn.getAttribute('data-pofs-filter') || 'all';
+        render();
+      });
+    });
+
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        state.query = searchInput.value || '';
+        render();
+      });
+    }
+
+    checkboxEls.forEach((cb) => {
+      cb.addEventListener('change', () => {
+        const fid = cb.getAttribute('data-pofs-check') || '';
+        if (cb.checked) {
+          state.checkedIds.add(fid);
+        } else {
+          state.checkedIds.delete(fid);
+        }
+        render();
+      });
+    });
+
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        const showCopied = () => {
+          if (copyLabel) copyLabel.textContent = ui.copiedChecklistBtn || 'Checklist Copied ✓';
+          window.setTimeout(() => {
+            if (copyLabel) copyLabel.textContent = '📋 ' + (ui.copyChecklistBtn || 'Copy Discard Checklist');
+          }, 2200);
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(lastChecklistText).then(showCopied).catch(showCopied);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = lastChecklistText;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'absolute';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          try {
+            document.execCommand('copy');
+          } catch (_) {
+            // ignore
+          }
+          document.body.removeChild(ta);
+          showCopied();
+        }
+      });
+    }
+
+    if (printBtn) {
+      printBtn.addEventListener('click', () => {
+        window.print();
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        state.mode = 'fridge';
+        state.hours = 6;
+        state.doorOpened = false;
+        state.roomTemp = 'normal';
+        state.useThermometer = false;
+        state.tempUnit = payload.defaultTempUnit || 'F';
+        state.tempValue = state.tempUnit === 'F' ? 45 : 7;
+        state.scope = 'current';
+        state.filter = 'all';
+        state.query = '';
+        state.checkedIds.clear();
+        if (tempInput) tempInput.value = String(state.tempValue);
+        if (searchInput) searchInput.value = '';
+        checkboxEls.forEach((cb) => {
+          cb.checked = false;
+        });
+        render();
+      });
+    }
+
+    render();
+  })();
+</script>

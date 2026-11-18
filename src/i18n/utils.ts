@@ -216,6 +216,7 @@ const SPECIAL_PAGES = [
   'tools/appliance-descaling-calculator',
   'tools/cleaner-mixing-danger-checker',
   'tools/microwave-wattage-converter',
+  'tools/power-outage-food-safety-checker',
   'methodology',
   'saved'
 ];
