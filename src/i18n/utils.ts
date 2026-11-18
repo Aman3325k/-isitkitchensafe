@@ -227,6 +227,7 @@ const SPECIAL_PAGES = [
   'tools/food-allergy-cross-contact-checker',
   'tools/pantry-dry-goods-shelf-life-checker',
   'tools/moldy-food-safety-checker',
+  'tools/oven-rack-bakeware-heat-adjuster',
   'methodology',
   'saved'
 ];

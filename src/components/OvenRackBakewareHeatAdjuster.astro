@@ -1,0 +1,2363 @@
+---
+import rawData from '../data/oven-rack-bakeware-heat-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+import { useTranslatedPath } from '../i18n/utils';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+const translatePath = useTranslatedPath(lang);
+
+const cookwareLookupUrl = translatePath('/tools/cookware-oven-temp-lookup/');
+const airFryerUrl = translatePath('/tools/air-fryer-oven-converter/');
+const internalTempUrl = translatePath('/tools/internal-cooking-temp-chart/');
+const methodologyUrl = translatePath('/methodology/');
+const allToolsUrl = translatePath('/tools/');
+
+type ThermalShockRisk = 'none' | 'low' | 'moderate' | 'high' | 'extreme';
+
+interface SafetyRule {
+  icon: string;
+  title: string;
+  body: string;
+}
+
+interface LocalizedMaterial {
+  id: string;
+  icon: string;
+  tempDeltaF: number;
+  timeDeltaMin: number;
+  cautionTempF: number;
+  maxSafeTempF: number;
+  broilerSafe: boolean;
+  thermalShockRisk: ThermalShockRisk;
+  browningLevel: string;
+  name: string;
+  shortName: string;
+  examples: string;
+  tempRuleBadge: string;
+  browningProfile: string;
+  scienceNote: string;
+  safetyNote: string;
+  careTip: string;
+}
+
+interface LocalizedRack {
+  id: string;
+  slotNumber: number;
+  heatZoneColor: string;
+  broilerZone: boolean;
+  name: string;
+  shortName: string;
+  zoneBadge: string;
+  bestFor: string;
+  airflowNote: string;
+  warning: string;
+}
+
+interface LocalizedDish {
+  id: string;
+  icon: string;
+  rackId: string;
+  baseTempF: number;
+  baseTimeMin: number;
+  broiler: boolean;
+  recommendedMaterialId: string;
+  name: string;
+  tip: string;
+}
+
+const safetyBanner =
+  (rawData.safetyBanner as Record<string, { badge: string; headline: string; rules: SafetyRule[] }>)[lang] ||
+  rawData.safetyBanner.en;
+
+const localizedMaterials: LocalizedMaterial[] = rawData.materials.map((item) => {
+  const tr = (item.i18n as Record<string, any>)[lang] || item.i18n.en;
+  return {
+    id: item.id,
+    icon: item.icon,
+    tempDeltaF: item.tempDeltaF,
+    timeDeltaMin: item.timeDeltaMin,
+    cautionTempF: item.cautionTempF,
+    maxSafeTempF: item.maxSafeTempF,
+    broilerSafe: item.broilerSafe,
+    thermalShockRisk: item.thermalShockRisk as ThermalShockRisk,
+    browningLevel: item.browningLevel,
+    name: tr.name,
+    shortName: tr.shortName,
+    examples: tr.examples,
+    tempRuleBadge: tr.tempRuleBadge,
+    browningProfile: tr.browningProfile,
+    scienceNote: tr.scienceNote,
+    safetyNote: tr.safetyNote,
+    careTip: tr.careTip
+  };
+});
+
+const localizedRacks: LocalizedRack[] = rawData.racks.map((item) => {
+  const tr = (item.i18n as Record<string, any>)[lang] || item.i18n.en;
+  return {
+    id: item.id,
+    slotNumber: item.slotNumber,
+    heatZoneColor: item.heatZoneColor,
+    broilerZone: item.broilerZone,
+    name: tr.name,
+    shortName: tr.shortName,
+    zoneBadge: tr.zoneBadge,
+    bestFor: tr.bestFor,
+    airflowNote: tr.airflowNote,
+    warning: tr.warning
+  };
+});
+
+const localizedDishes: LocalizedDish[] = rawData.dishes.map((item) => {
+  const tr = (item.i18n as Record<string, any>)[lang] || item.i18n.en;
+  return {
+    id: item.id,
+    icon: item.icon,
+    rackId: item.rackId,
+    baseTempF: item.baseTempF,
+    baseTimeMin: item.baseTimeMin,
+    broiler: item.broiler,
+    recommendedMaterialId: item.recommendedMaterialId,
+    name: tr.name,
+    tip: tr.tip
+  };
+});
+
+const localizedFaqs: Array<{ question: string; answer: string }> =
+  (rawData.faqs as Record<string, Array<{ question: string; answer: string }>>)[lang] ||
+  rawData.faqs.en;
+
+interface UiDict {
+  ariaLabel: string;
+  dashboardBadge: string;
+  dashboardTitle: string;
+  dashboardSub: string;
+  copyBtn: string;
+  copiedBtn: string;
+  printBtn: string;
+  resetBtn: string;
+  presetsLabel: string;
+  presetsHint: string;
+  inputsHeading: string;
+  recipeTempLabel: string;
+  recipeTimeLabel: string;
+  minutesUnit: string;
+  ovenModeLabel: string;
+  modeConventional: string;
+  modeConvection: string;
+  broilerToggleLabel: string;
+  broilerOff: string;
+  broilerOn: string;
+  materialHeading: string;
+  materialSub: string;
+  broilerSafeYes: string;
+  broilerSafeNo: string;
+  maxTempPrefix: string;
+  rackDiagramHeading: string;
+  rackDiagramSub: string;
+  topBroilerElement: string;
+  ovenFloorWarning: string;
+  slotPrefix: string;
+  activeRackTag: string;
+  recommendedRackTag: string;
+  unsafeBroilTag: string;
+  rackBestForLabel: string;
+  rackAirflowLabel: string;
+  rackWarningLabel: string;
+  outTempLabel: string;
+  outTimeLabel: string;
+  outRackLabel: string;
+  outRecipePrefix: string;
+  outCheckEarlySuffix: string;
+  outBroilHeadline: string;
+  outBroilSub: string;
+  outBroilTimeSub: string;
+  outNoTempChange: string;
+  outSiliconeTimeNote: string;
+  outConvectionTimeNote: string;
+  outEarlyCheckNote: string;
+  outStandardTimeNote: string;
+  statusSafeBadge: string;
+  statusCautionBadge: string;
+  statusDangerBadge: string;
+  alertBroilerTitle: string;
+  alertBroilerBodyPrefix: string;
+  alertBroilerBodySuffix: string;
+  alertMaxTempTitle: string;
+  alertMaxTempBodyPrefix: string;
+  alertMaxTempBodyMid: string;
+  alertMaxTempBodySuffix: string;
+  alertCautionTempTitle: string;
+  alertCautionTempBodyPrefix: string;
+  alertCautionTempBodySuffix: string;
+  alertThermalExtremeTitle: string;
+  alertThermalExtremeBody: string;
+  alertThermalHighTitle: string;
+  alertThermalHighBody: string;
+  alertDoubleDropTitle: string;
+  alertDoubleDropBody: string;
+  alertBottomFoilTitle: string;
+  alertBottomFoilBody: string;
+  alertCustardTitle: string;
+  alertCustardBody: string;
+  matScienceLabel: string;
+  matBrowningLabel: string;
+  matSafetyLabel: string;
+  dishTipLabel: string;
+  copyHeader: string;
+  copyDishLine: string;
+  copyMaterialLine: string;
+  copyModeLine: string;
+  copyTempLine: string;
+  copyTimeLine: string;
+  copyRackLine: string;
+  copyAlertsLine: string;
+  copySafeLine: string;
+  relatedHeading: string;
+  relatedCookwareTag: string;
+  relatedCookwareTitle: string;
+  relatedCookwareDesc: string;
+  relatedAirFryerTag: string;
+  relatedAirFryerTitle: string;
+  relatedAirFryerDesc: string;
+  relatedInternalTag: string;
+  relatedInternalTitle: string;
+  relatedInternalDesc: string;
+  methodologyStripTitle: string;
+  methodologyStripPrefix: string;
+  methodologyLabel: string;
+  internalQuickLabel: string;
+  allToolsLabel: string;
+  faqTitle: string;
+}
+
+const UI: Record<SupportedLanguage, UiDict> = {
+  en: {
+    ariaLabel: 'Interactive Oven Rack Position, Convection & Bakeware Material Heat Adjuster',
+    dashboardBadge: 'Culinary Thermodynamics & Bakeware Safety Engine',
+    dashboardTitle: 'Live Adjusted Oven Settings & Rack Safety Dashboard',
+    dashboardSub: 'Pick a dish preset or enter your recipe temperature and time, choose your bakeware material, and toggle Convection or Broiler mode for instant safe adjustments.',
+    copyBtn: 'Copy Adjusted Settings',
+    copiedBtn: 'Settings Copied ✓',
+    printBtn: 'Print Oven Cheat Sheet',
+    resetBtn: 'Reset',
+    presetsLabel: '1. Quick Dish Presets (Auto-Selects Ideal Rack, Temp & Time)',
+    presetsHint: 'Select a dish to load its baseline recipe temperature, time, and optimal rack slot — then customize your pan material below.',
+    inputsHeading: '2. Recipe Temperature, Time & Oven Heat Mode',
+    recipeTempLabel: 'Recipe Temperature',
+    recipeTimeLabel: 'Recipe Bake Time',
+    minutesUnit: 'min',
+    ovenModeLabel: 'Oven Fan Mode',
+    modeConventional: 'Standard Conventional',
+    modeConvection: 'Convection / Fan Bake',
+    broilerToggleLabel: 'Top Broiler Mode',
+    broilerOff: 'Broiler OFF (Bake / Roast)',
+    broilerOn: 'Broiler ON (500–550°F Top Heat)',
+    materialHeading: '3. Choose Your Bakeware Material (6 Thermal Profiles)',
+    materialSub: 'Different pans reflect, absorb, transmit, or insulate radiant heat — changing both browning speed and max safe oven temperature.',
+    broilerSafeYes: 'Broiler Safe (Uncoated)',
+    broilerSafeNo: 'NEVER Broil',
+    maxTempPrefix: 'Max',
+    rackDiagramHeading: '4. Interactive 5-Rack Oven Cavity Schematic',
+    rackDiagramSub: 'Click any oven rack slot to inspect its heat zone, airflow physics, and pan safety limits.',
+    topBroilerElement: 'TOP BROILER ELEMENT · 500–550°F+ (260–290°C+)',
+    ovenFloorWarning: 'OVEN FLOOR — NEVER PLACE ALUMINUM FOIL OR PANS DIRECTLY HERE',
+    slotPrefix: 'Slot',
+    activeRackTag: 'SELECTED RACK',
+    recommendedRackTag: 'IDEAL FOR DISH',
+    unsafeBroilTag: 'UNSAFE PAN HERE',
+    rackBestForLabel: 'Best Foods for This Rack',
+    rackAirflowLabel: 'Oven Cavity Heat & Airflow Physics',
+    rackWarningLabel: 'Rack Safety Rule',
+    outTempLabel: 'Adjusted Oven Temp',
+    outTimeLabel: 'Check-Early Time Window',
+    outRackLabel: 'Active Rack Position',
+    outRecipePrefix: 'Recipe baseline:',
+    outCheckEarlySuffix: 'check early',
+    outBroilHeadline: 'HIGH BROIL',
+    outBroilSub: '~500–550°F (260–290°C) radiant top heat',
+    outBroilTimeSub: 'Watch continuously — sear turns to char fast',
+    outNoTempChange: '0°F (0°C) baseline',
+    outSiliconeTimeNote: 'Silicone insulates: add +3–5 min bake time',
+    outConvectionTimeNote: 'Convection fan speeds heat transfer (-15–20%)',
+    outEarlyCheckNote: 'Fast browning pan: start checking early',
+    outStandardTimeNote: 'Check 1–2 min before end for carryover heat',
+    statusSafeBadge: 'SAFE OVEN CONFIGURATION',
+    statusCautionBadge: 'CAUTION — CHECK LIMITS',
+    statusDangerBadge: 'HAZARD — DO NOT HEAT THIS COMBO',
+    alertBroilerTitle: 'UNSAFE FOR BROILER — SHATTER / FIRE / FUME RISK!',
+    alertBroilerBodyPrefix: 'cannot be used under the broiler or on the Top Broil Rack (500–550°F+).',
+    alertBroilerBodySuffix: 'Switch to Bright Uncoated Aluminum or Cast Iron / Carbon Steel immediately.',
+    alertMaxTempTitle: 'MAX BAKEWARE TEMP EXCEEDED!',
+    alertMaxTempBodyPrefix: 'Target oven temperature',
+    alertMaxTempBodyMid: 'exceeds the safe limit for',
+    alertMaxTempBodySuffix: 'Lower temperature or switch to Cast Iron, Carbon Steel, or Uncoated Aluminum.',
+    alertCautionTempTitle: 'APPROACHING MAX BAKEWARE TEMP LIMIT',
+    alertCautionTempBodyPrefix: 'Oven temperature is near the upper limit for',
+    alertCautionTempBodySuffix: 'Verify your manufacturer bottom stamp before preheating.',
+    alertThermalExtremeTitle: 'EXTREME THERMAL SHOCK SHATTER WARNING (GLASS / PYREX)',
+    alertThermalExtremeBody: 'Only place in a fully preheated oven. Never add cold liquid to hot glass, and never set hot glass on wet counters, cold granite, or a damp towel — always use a dry wooden board or dry cotton towel.',
+    alertThermalHighTitle: 'HIGH THERMAL SHOCK CAUTION (CERAMIC / STONEWARE)',
+    alertThermalHighBody: 'Let refrigerated ceramic warm 15–20 min before baking, avoid sudden cold liquids, and never transfer directly from freezer to hot oven.',
+    alertDoubleDropTitle: 'SMART DOUBLE-DROP CAP ACTIVE (-35°F / -20°C MAX)',
+    alertDoubleDropBody: 'Combining this pan with Convection Fan normally stacks to -40°F to -50°F, which stalls leavening and oven spring. Total temp drop is capped at -35°F (-20°C) and remaining adjustment shifts to checking 20–25% earlier.',
+    alertBottomFoilTitle: 'BOTTOM RACK SAFETY: NEVER LINE THE OVEN FLOOR WITH FOIL',
+    alertBottomFoilBody: 'Always keep pans on the lowest wire rack (Slot 1), never directly on the enamel oven floor. Foil on the floor blocks vents and permanently fuses to porcelain enamel.',
+    alertCustardTitle: 'BAKING TIP: CONVENTIONAL MODE RECOMMENDED FOR CUSTARDS',
+    alertCustardBody: 'Delicate cheesecakes and custards bake more evenly without surface cracks in Standard Conventional mode (fan off) inside a water bath.',
+    matScienceLabel: 'Bakeware Thermal Physics',
+    matBrowningLabel: 'Browning Profile',
+    matSafetyLabel: 'Manufacturer Safety & Care Limit',
+    dishTipLabel: 'Selected Dish Pro Tip',
+    copyHeader: 'IsItKitchenSafe — Adjusted Oven, Rack & Bakeware Settings',
+    copyDishLine: 'Dish Preset:',
+    copyMaterialLine: 'Bakeware Material:',
+    copyModeLine: 'Heat Mode:',
+    copyTempLine: 'Adjusted Oven Temp:',
+    copyTimeLine: 'Check-Early Time Window:',
+    copyRackLine: 'Oven Rack Position:',
+    copyAlertsLine: 'ACTIVE SAFETY ALERTS:',
+    copySafeLine: 'Safety Status: All bakeware & temperature limits look safe.',
+    relatedHeading: 'Related Oven, Cookware & Food Temperature Tools',
+    relatedCookwareTag: 'Oven-Safe Limits',
+    relatedCookwareTitle: 'Cookware Oven Temp Lookup →',
+    relatedCookwareDesc: 'Check exact max oven temperatures for Pyrex, Le Creuset, HexClad, All-Clad, silicone mats, parchment paper, and lid knobs.',
+    relatedAirFryerTag: 'Convection Conversion',
+    relatedAirFryerTitle: 'Air Fryer to Oven Converter →',
+    relatedAirFryerDesc: 'Convert standard oven recipes to countertop air fryer time & temperature (and back) with crispiness adjustments.',
+    relatedInternalTag: 'USDA Safe Doneness',
+    relatedInternalTitle: 'Internal Cooking Temp Chart →',
+    relatedInternalDesc: 'Verify exact USDA minimum safe internal temperatures (145°F, 160°F, 165°F) for roast chicken, turkey, salmon, steak, and casseroles.',
+    methodologyStripTitle: 'Grounded in Culinary Thermodynamics & Manufacturer Bakeware Specifications',
+    methodologyStripPrefix: 'All -25°F pan rules, convection caps, broiler exclusions, and thermal shock limits align with Pyrex/Corning, Nordic Ware, Silpat, Lodge, and King Arthur Baking guidance. Read our',
+    methodologyLabel: 'Methodology',
+    internalQuickLabel: 'Internal Temp Chart',
+    allToolsLabel: 'All Kitchen Tools →',
+    faqTitle: 'Frequently Asked Questions: Oven Racks, Convection & Bakeware Safety'
+  },
+  es: {
+    ariaLabel: 'Ajustador Interactivo de Rejilla del Horno, Convección y Material del Molde',
+    dashboardBadge: 'Motor de Termodinámica Culinaria y Seguridad de Moldes',
+    dashboardTitle: 'Panel de Ajuste en Vivo: Temperatura, Tiempo y Seguridad de Rejilla',
+    dashboardSub: 'Elige un plato predefinido o ingresa la temperatura y tiempo de tu receta, selecciona el material de tu molde y activa Convección o Grill/Broiler para obtener ajustes seguros al instante.',
+    copyBtn: 'Copiar Ajustes del Horno',
+    copiedBtn: 'Ajustes Copiados ✓',
+    printBtn: 'Imprimir Guía Rápida de Horno',
+    resetBtn: 'Restablecer',
+    presetsLabel: '1. Platos Rápidos (Selecciona Rejilla, Temperatura y Tiempo Ideales)',
+    presetsHint: 'Pulsa un plato para cargar su temperatura base, tiempo y altura óptima — luego personaliza tu molde abajo.',
+    inputsHeading: '2. Temperatura, Tiempo y Modo de Calor del Horno',
+    recipeTempLabel: 'Temperatura de la Receta',
+    recipeTimeLabel: 'Tiempo de Horneado',
+    minutesUnit: 'min',
+    ovenModeLabel: 'Modo de Ventilador',
+    modeConventional: 'Horno Convencional',
+    modeConvection: 'Convección / Ventilador',
+    broilerToggleLabel: 'Modo Grill / Broiler Superior',
+    broilerOff: 'Grill APAGADO (Hornear / Asar)',
+    broilerOn: 'Grill ENCENDIDO (260–290 °C Arriba)',
+    materialHeading: '3. Elige el Material de tu Molde o Bandeja (6 Perfiles Térmicos)',
+    materialSub: 'Cada material refleja, absorbe, transmite o aísla el calor radiante, cambiando el dorado y la temperatura máxima segura.',
+    broilerSafeYes: 'Apto Grill (Sin Recubrir)',
+    broilerSafeNo: 'NUNCA Grill/Broiler',
+    maxTempPrefix: 'Máx',
+    rackDiagramHeading: '4. Esquema Interactivo de las 5 Rejillas del Horno',
+    rackDiagramSub: 'Haz clic en cualquier nivel para inspeccionar su zona térmica, flujo de aire y advertencias de seguridad.',
+    topBroilerElement: 'RESISTENCIA GRILL / BROILER · 260–290 °C+ (500–550 °F+)',
+    ovenFloorWarning: 'PISO DEL HORNO — NUNCA PONGAS PAPEL ALUMINIO NI MOLDES AQUÍ',
+    slotPrefix: 'Nivel',
+    activeRackTag: 'REJILLA ACTIVA',
+    recommendedRackTag: 'IDEAL PARA ESTE PLATO',
+    unsafeBroilTag: 'MOLDE INSEGURO AQUÍ',
+    rackBestForLabel: 'Mejores Alimentos para Esta Rejilla',
+    rackAirflowLabel: 'Física Térmica y Flujo de Aire',
+    rackWarningLabel: 'Regla de Seguridad de Nivel',
+    outTempLabel: 'Temperatura Ajustada',
+    outTimeLabel: 'Ventana de Revisión',
+    outRackLabel: 'Posición de Rejilla',
+    outRecipePrefix: 'Base receta:',
+    outCheckEarlySuffix: 'revisar antes',
+    outBroilHeadline: 'GRILL ALTO',
+    outBroilSub: '~260–290 °C (500–550 °F) calor radiante superior',
+    outBroilTimeSub: 'Vigila continuamente — se quema en segundos',
+    outNoTempChange: '0 °C (0 °F) sin cambio',
+    outSiliconeTimeNote: 'Silicona aislante: sumar +3–5 min de horneado',
+    outConvectionTimeNote: 'Convección acelera la cocción (-15–20 %)',
+    outEarlyCheckNote: 'Molde de dorado rápido: revisa antes',
+    outStandardTimeNote: 'Revisa 1–2 min antes por calor residual',
+    statusSafeBadge: 'CONFIGURACIÓN SEGURA',
+    statusCautionBadge: 'PRECAUCIÓN — REVISA LÍMITES',
+    statusDangerBadge: 'PELIGRO — COMBINACIÓN INSEGURA',
+    alertBroilerTitle: '¡NO APTO PARA GRILL/BROILER — RIESGO DE ESTALLIDO, FUEGO O VAPORES!',
+    alertBroilerBodyPrefix: 'no puede usarse bajo el grill ni en la rejilla superior (260–290 °C+).',
+    alertBroilerBodySuffix: 'Cambia de inmediato a Aluminio Brillante sin recubrimiento o Hierro Fundido / Acero al Carbono.',
+    alertMaxTempTitle: '¡TEMPERATURA MÁXIMA DEL MOLDE SUPERADA!',
+    alertMaxTempBodyPrefix: 'La temperatura objetivo',
+    alertMaxTempBodyMid: 'supera el límite seguro de',
+    alertMaxTempBodySuffix: 'Baja la temperatura o cambia a Hierro Fundido, Acero al Carbono o Aluminio sin recubrimiento.',
+    alertCautionTempTitle: 'CERCA DEL LÍMITE MÁXIMO DEL MOLDE',
+    alertCautionTempBodyPrefix: 'La temperatura está cerca del tope máximo para',
+    alertCautionTempBodySuffix: 'Confirma el sello del fabricante en la base del molde antes de precalentar.',
+    alertThermalExtremeTitle: 'ALERTA EXTREMA DE CHOQUE TÉRMICO (VIDRIO / PYREX)',
+    alertThermalExtremeBody: 'Introduce el molde solo con el horno ya precalentado. Nunca agregues líquidos fríos al vidrio caliente ni lo apoyes en granito frío o paños húmedos; usa madera seca.',
+    alertThermalHighTitle: 'PRECAUCIÓN DE CHOQUE TÉRMICO (CERÁMICA / GRES)',
+    alertThermalHighBody: 'Deja templar 15–20 min la cerámica fría del refrigerador antes de hornear y evita líquidos helados o pasar del congelador al horno caliente.',
+    alertDoubleDropTitle: 'LÍMITE INTELIGENTE ACTIVO (-20 °C / -35 °F MÁX.)',
+    alertDoubleDropBody: 'Combinar este molde con Convección sumaría -25 a -30 °C, lo que frena el levado. Limitamos la bajada total a -20 °C (-35 °F) y desplazamos el resto a revisar 20–25 % antes.',
+    alertBottomFoilTitle: 'SEGURIDAD REJILLA INFERIOR: NUNCA ALUMINIO EN EL PISO DEL HORNO',
+    alertBottomFoilBody: 'Coloca moldes siempre sobre la rejilla metálica inferior (Nivel 1), nunca directo en el piso esmaltado. El aluminio bloquea ventilación y se funde en el esmalte.',
+    alertCustardTitle: 'CONSEJO DE HORNEADO: USA MODO CONVENCIONAL PARA FLANES Y CHEESECAKE',
+    alertCustardBody: 'Los cheesecakes y flanes al baño María quedan más cremosos y sin grietas en modo convencional (sin ventilador).',
+    matScienceLabel: 'Termodinámica del Molde',
+    matBrowningLabel: 'Perfil de Dorado',
+    matSafetyLabel: 'Límite del Fabricante y Cuidado',
+    dishTipLabel: 'Consejo del Plato Seleccionado',
+    copyHeader: 'IsItKitchenSafe — Ajustes de Horno, Rejilla y Molde',
+    copyDishLine: 'Plato:',
+    copyMaterialLine: 'Material del Molde:',
+    copyModeLine: 'Modo de Calor:',
+    copyTempLine: 'Temperatura Ajustada:',
+    copyTimeLine: 'Ventana de Tiempo:',
+    copyRackLine: 'Posición de Rejilla:',
+    copyAlertsLine: 'ALERTAS DE SEGURIDAD ACTIVAS:',
+    copySafeLine: 'Estado de Seguridad: Todos los límites térmicos y del molde son seguros.',
+    relatedHeading: 'Herramientas Relacionadas de Horno, Utensilios y Temperaturas',
+    relatedCookwareTag: 'Límites de Horno',
+    relatedCookwareTitle: 'Buscador de Temp. Máxima de Utensilios →',
+    relatedCookwareDesc: 'Consulta temperaturas máximas seguras para Pyrex, Le Creuset, HexClad, All-Clad, silicona, papel de horno y tapas.',
+    relatedAirFryerTag: 'Conversión Convección',
+    relatedAirFryerTitle: 'Convertidor de Horno a Air Fryer →',
+    relatedAirFryerDesc: 'Convierte tiempos y temperaturas entre horno tradicional y freidora de aire en segundos.',
+    relatedInternalTag: 'Cocción Segura USDA',
+    relatedInternalTitle: 'Tabla de Temperaturas Internas →',
+    relatedInternalDesc: 'Verifica las temperaturas internas mínimas USDA (63 °C, 71 °C, 74 °C) para pollo, pavo, salmón, carnes y cazuelas.',
+    methodologyStripTitle: 'Basado en Termodinámica Culinaria y Especificaciones de Fabricantes',
+    methodologyStripPrefix: 'Todas las reglas de -15 °C, límites de convección, exclusiones de grill y choque térmico siguen guías de Pyrex/Corning, Nordic Ware, Silpat, Lodge y King Arthur Baking. Lee nuestra',
+    methodologyLabel: 'Metodología',
+    internalQuickLabel: 'Tabla de Temperaturas',
+    allToolsLabel: 'Todas las Herramientas →',
+    faqTitle: 'Preguntas Frecuentes: Rejillas del Horno, Convección y Seguridad de Moldes'
+  },
+  pt: {
+    ariaLabel: 'Ajustador Interativo de Grade do Forno, Convecção e Material da Assadeira',
+    dashboardBadge: 'Motor de Termodinâmica Culinária e Segurança de Assadeiras',
+    dashboardTitle: 'Painel de Ajuste ao Vivo: Temperatura, Tempo e Segurança da Grade',
+    dashboardSub: 'Escolha um prato ou informe a temperatura e tempo da receita, selecione o material da assadeira e ative Convecção ou Grill/Broiler para ver os ajustes seguros na hora.',
+    copyBtn: 'Copiar Ajustes do Forno',
+    copiedBtn: 'Ajustes Copiados ✓',
+    printBtn: 'Imprimir Guia Rápido do Forno',
+    resetBtn: 'Redefinir',
+    presetsLabel: '1. Pratos Rápidos (Define Grade, Temperatura e Tempo Ideais)',
+    presetsHint: 'Clique em um prato para carregar temperatura base, tempo e altura ideal — depois escolha o material da forma abaixo.',
+    inputsHeading: '2. Temperatura, Tempo e Modo de Calor do Forno',
+    recipeTempLabel: 'Temperatura da Receita',
+    recipeTimeLabel: 'Tempo de Forno',
+    minutesUnit: 'min',
+    ovenModeLabel: 'Modo de Ventilação',
+    modeConventional: 'Forno Convencional',
+    modeConvection: 'Convecção / Ventilador',
+    broilerToggleLabel: 'Modo Grill / Broiler Superior',
+    broilerOff: 'Grill DESLIGADO (Assar)',
+    broilerOn: 'Grill LIGADO (260–290 °C Topo)',
+    materialHeading: '3. Escolha o Material da Assadeira (6 Perfis Térmicos)',
+    materialSub: 'Cada material reflete, absorve, transmite ou isola calor radiante — alterando o douramento e o limite máximo seguro.',
+    broilerSafeYes: 'Seguro no Grill (Sem Revest.)',
+    broilerSafeNo: 'NUNCA Grill/Broiler',
+    maxTempPrefix: 'Máx',
+    rackDiagramHeading: '4. Esquema Interativo das 5 Grades do Forno',
+    rackDiagramSub: 'Clique em qualquer altura da grade para ver sua zona de calor, fluxo de ar e alertas de segurança.',
+    topBroilerElement: 'RESISTÊNCIA GRILL / BROILER · 260–290 °C+ (500–550 °F+)',
+    ovenFloorWarning: 'CHÃO DO FORNO — NUNCA COLOQUE PAPEL-ALUMÍNIO OU FORMAS AQUI',
+    slotPrefix: 'Nível',
+    activeRackTag: 'GRADE SELECIONADA',
+    recommendedRackTag: 'IDEAL PARA O PRATO',
+    unsafeBroilTag: 'FORMA INSEGURA AQUI',
+    rackBestForLabel: 'Melhores Preparos para Esta Grade',
+    rackAirflowLabel: 'Física de Calor e Circulação de Ar',
+    rackWarningLabel: 'Regra de Segurança da Posição',
+    outTempLabel: 'Temperatura Ajustada',
+    outTimeLabel: 'Janela de Checagem',
+    outRackLabel: 'Posição da Grade',
+    outRecipePrefix: 'Base receita:',
+    outCheckEarlySuffix: 'checar antes',
+    outBroilHeadline: 'GRILL ALTO',
+    outBroilSub: '~260–290 °C (500–550 °F) calor radiante superior',
+    outBroilTimeSub: 'Vigie sem parar — doura e queima em segundos',
+    outNoTempChange: '0 °C (0 °F) padrão',
+    outSiliconeTimeNote: 'Silicone isola calor: somar +3–5 min de forno',
+    outConvectionTimeNote: 'Convecção acelera o preparo (-15–20%)',
+    outEarlyCheckNote: 'Assadeira doura rápido: cheque mais cedo',
+    outStandardTimeNote: 'Cheque 1–2 min antes pelo calor residual',
+    statusSafeBadge: 'CONFIGURAÇÃO SEGURA',
+    statusCautionBadge: 'ATENÇÃO — VERIFIQUE LIMITES',
+    statusDangerBadge: 'PERIGO — NÃO AQUEÇA ESSA COMBINAÇÃO',
+    alertBroilerTitle: 'INSEGURO NO GRILL/BROILER — RISCO DE ESTILHAÇO, FOGO OU GASES!',
+    alertBroilerBodyPrefix: 'não pode ser usado sob o grill nem na grade superior (260–290 °C+).',
+    alertBroilerBodySuffix: 'Troque imediatamente para Alumínio Brilhante sem revestimento ou Ferro Fundido / Aço Carbono.',
+    alertMaxTempTitle: 'TEMPERATURA MÁXIMA DA ASSADEIRA EXCEDIDA!',
+    alertMaxTempBodyPrefix: 'A temperatura ajustada',
+    alertMaxTempBodyMid: 'ultrapassa o limite seguro de',
+    alertMaxTempBodySuffix: 'Reduza a temperatura ou troque para Ferro Fundido, Aço Carbono ou Alumínio sem revestimento.',
+    alertCautionTempTitle: 'PRÓXIMO DO LIMITE MÁXIMO DA ASSADEIRA',
+    alertCautionTempBodyPrefix: 'A temperatura está perto do limite máximo para',
+    alertCautionTempBodySuffix: 'Confirme a gravação do fabricante no fundo da peça antes de pré-aquecer.',
+    alertThermalExtremeTitle: 'ALERTA EXTREMO DE CHOQUE TÉRMICO (VIDRO / PYREX)',
+    alertThermalExtremeBody: 'Use somente em forno já pré-aquecido. Nunca despeje líquido frio em vidro quente nem apoie sobre pia molhada ou granito gelado — use tábua de madeira seca.',
+    alertThermalHighTitle: 'ATENÇÃO A CHOQUE TÉRMICO (CERÂMICA / GRÉS)',
+    alertThermalHighBody: 'Deixe cerâmica gelada descansar 15–20 min fora da geladeira antes de assar e jamais passe direto do freezer ao forno quente.',
+    alertDoubleDropTitle: 'LIMITE INTELIGENTE ATIVO (-20 °C / -35 °F MÁX.)',
+    alertDoubleDropBody: 'Somar esta assadeira com Convecção derrubaria 25–30 °C, prejudicando o crescimento da massa. Limitamos a queda total a -20 °C (-35 °F) e antecipamos a checagem em 20–25%.',
+    alertBottomFoilTitle: 'SEGURANÇA NA GRADE INFERIOR: NUNCA ALUMÍNIO NO CHÃO DO FORNO',
+    alertBottomFoilBody: 'Mantenha formas sempre na grade metálica inferior (Nível 1), nunca no chão esmaltado. Papel-alumínio no piso bloqueia ventilação e derrete no esmalte.',
+    alertCustardTitle: 'DICA DE CONFEITARIA: PREFIRA MODO CONVENCIONAL PARA PUDINS E CHEESECAKE',
+    alertCustardBody: 'Cheesecakes e pudins em banho-maria assam mais lisos e sem rachaduras no modo convencional (ventilador desligado).',
+    matScienceLabel: 'Termodinâmica da Assadeira',
+    matBrowningLabel: 'Perfil de Douramento',
+    matSafetyLabel: 'Limite do Fabricante e Cuidados',
+    dishTipLabel: 'Dica do Prato Selecionado',
+    copyHeader: 'IsItKitchenSafe — Ajustes de Forno, Grade e Assadeira',
+    copyDishLine: 'Prato:',
+    copyMaterialLine: 'Material da Assadeira:',
+    copyModeLine: 'Modo de Calor:',
+    copyTempLine: 'Temperatura Ajustada:',
+    copyTimeLine: 'Janela de Tempo:',
+    copyRackLine: 'Posição da Grade:',
+    copyAlertsLine: 'ALERTAS DE SEGURANÇA ATIVOS:',
+    copySafeLine: 'Status de Segurança: Todos os limites térmicos e do material estão seguros.',
+    relatedHeading: 'Ferramentas Relacionadas de Forno, Panelas e Temperaturas',
+    relatedCookwareTag: 'Limites no Forno',
+    relatedCookwareTitle: 'Tabela de Temp. Máxima de Panelas →',
+    relatedCookwareDesc: 'Confira temperaturas máximas seguras para Pyrex, Le Creuset, HexClad, All-Clad, silicone, papel-manteiga e tampas.',
+    relatedAirFryerTag: 'Conversão Convecção',
+    relatedAirFryerTitle: 'Conversor Air Fryer ↔ Forno →',
+    relatedAirFryerDesc: 'Converta receitas de forno tradicional para air fryer (e vice-versa) com ajuste automático de tempo e temperatura.',
+    relatedInternalTag: 'Ponto Seguro USDA',
+    relatedInternalTitle: 'Tabela de Temperaturas Internas →',
+    relatedInternalDesc: 'Confirme as temperaturas internas mínimas seguras (63 °C, 71 °C, 74 °C) para frango, peru, salmão, carnes e lasanhas.',
+    methodologyStripTitle: 'Baseado em Termodinâmica Culinária e Especificações de Fabricantes',
+    methodologyStripPrefix: 'Todas as regras de -15 °C, limites de convecção, restrições de broiler e choque térmico seguem padrões de Pyrex/Corning, Nordic Ware, Silpat, Lodge e King Arthur Baking. Veja nossa',
+    methodologyLabel: 'Metodologia',
+    internalQuickLabel: 'Temperaturas Internas',
+    allToolsLabel: 'Todas as Ferramentas →',
+    faqTitle: 'Perguntas Frequentes: Grades do Forno, Convecção e Segurança de Assadeiras'
+  },
+  'zh-cn': {
+    ariaLabel: '交互式烤箱层位、热风对流与烤盘材质温度调节器',
+    dashboardBadge: '烘焙热力学与烤具安全计算引擎',
+    dashboardTitle: '实时烤箱调温、时间与层位安全仪表盘',
+    dashboardSub: '选择常见菜品预设或输入原食谱温时间，指定烤盘材质并切换热风对流或上火炙烤，即刻获得安全精准的炉温与烤架层位方案。',
+    copyBtn: '复制调整后参数',
+    copiedBtn: '参数已复制 ✓',
+    printBtn: '打印烤箱速查表',
+    resetBtn: '重置',
+    presetsLabel: '1. 10 款热门菜品预设（自动匹配理想层位、温度与时间）',
+    presetsHint: '点击菜品载入基准炉温、烘烤时间与推荐层位，然后在下方自由切换烤盘材质与热风模式。',
+    inputsHeading: '2. 原食谱温度、烘烤时间与加热模式',
+    recipeTempLabel: '原食谱温度',
+    recipeTimeLabel: '原食谱时间',
+    minutesUnit: '分钟',
+    ovenModeLabel: '热风循环模式',
+    modeConventional: '普通上下火',
+    modeConvection: '热风对流（Convection）',
+    broilerToggleLabel: '上火炙烤（Broil）模式',
+    broilerOff: '炙烤关闭（常规烘焙 / 烤制）',
+    broilerOn: '炙烤开启（顶部 260–290°C 强辐射）',
+    materialHeading: '3. 选择您的烤盘 / 模具材质（6 种热学特性）',
+    materialSub: '不同材质对红外辐射热的反射、吸收、穿透与隔热差异巨大，直接决定上色速度与耐温红线。',
+    broilerSafeYes: '可炙烤（无涂层）',
+    broilerSafeNo: '严禁炙烤',
+    maxTempPrefix: '上限',
+    rackDiagramHeading: '4. 交互式 5 层烤箱内腔层位示意图',
+    rackDiagramSub: '点击任意烤架槽位，查看该层热区特性、空气循环原理及烤具安全警告。',
+    topBroilerElement: '顶部炙烤发热管 · 260–290°C+（500–550°F+）',
+    ovenFloorWarning: '烤箱内腔底板 — 严禁直接铺锡纸或直接放烤盘',
+    slotPrefix: '第',
+    activeRackTag: '当前选中层位',
+    recommendedRackTag: '菜品推荐层位',
+    unsafeBroilTag: '此材质严禁放顶层',
+    rackBestForLabel: '该层位最适合的料理',
+    rackAirflowLabel: '内腔热传递与气流原理',
+    rackWarningLabel: '层位安全提醒',
+    outTempLabel: '调整后烤箱温度',
+    outTimeLabel: '建议提前检查时间窗',
+    outRackLabel: '当前推荐烤架层位',
+    outRecipePrefix: '原食谱基准：',
+    outCheckEarlySuffix: '提前检查',
+    outBroilHeadline: '高温炙烤 BROIL',
+    outBroilSub: '约 260–290°C（500–550°F）顶部强辐射热',
+    outBroilTimeSub: '全程紧盯 — 焦香变焦糊仅在数十秒间',
+    outNoTempChange: '0°C（0°F）无需调温',
+    outSiliconeTimeNote: '硅胶隔热：延长 +3–5 分钟确保烤透',
+    outConvectionTimeNote: '热风加速传热：提前 15–20% 检查',
+    outEarlyCheckNote: '快上色材质：务必提前检查边缘熟度',
+    outStandardTimeNote: '结束前 1–2 分钟检查，计入出炉余温',
+    statusSafeBadge: '烤箱配置安全',
+    statusCautionBadge: '注意 — 临近材质上限',
+    statusDangerBadge: '高危警报 — 严禁以此组合加热',
+    alertBroilerTitle: '严禁用于炙烤（BROIL）— 爆裂 / 起火 / 毒烟风险！',
+    alertBroilerBodyPrefix: '绝对不能用于上火炙烤或放在最上层炙烤位（260–290°C+）。',
+    alertBroilerBodySuffix: '请立即更换为无涂层光亮铝盘或铸铁 / 碳钢烤具。',
+    alertMaxTempTitle: '已超出烤盘耐温上限！',
+    alertMaxTempBodyPrefix: '当前目标温度',
+    alertMaxTempBodyMid: '已超过该材质的安全上限：',
+    alertMaxTempBodySuffix: '请降低温度，或改用铸铁、碳钢或无涂层金属烤盘。',
+    alertCautionTempTitle: '接近烤盘最高耐温红线',
+    alertCautionTempBodyPrefix: '当前炉温已接近以下材质上限：',
+    alertCautionTempBodySuffix: '预热前请核对烤盘底部厂商耐温刻印。',
+    alertThermalExtremeTitle: '极高热冲击爆裂警告（玻璃 / PYREX）',
+    alertThermalExtremeBody: '仅限烤箱完全预热后入炉！切勿向热玻璃倒入冷水/冷汤，严禁把热玻璃放在湿台面、冰冷大理石或湿毛巾上——务必垫干燥木板或干毛巾。',
+    alertThermalHighTitle: '高热冲击警示（陶瓷 / 炻瓷）',
+    alertThermalHighBody: '冷藏陶瓷需室温回温 15–20 分钟再入炉，避免冷热剧烈交替，严禁从冷冻室直入高温烤箱。',
+    alertDoubleDropTitle: '智能防过度降温保护已启用（总降幅封顶 -20°C / -35°F）',
+    alertDoubleDropBody: '该烤盘与热风模式叠加原需降 25–30°C，降幅过大会导致泡打粉/面糊发不起来。系统已智能封顶降温 -20°C（-35°F），其余热量差改为提前 20–25% 检查熟度。',
+    alertBottomFoilTitle: '最下层安全提示：切勿在烤箱底板铺锡纸',
+    alertBottomFoilBody: '烤盘必须放在最低层金属烤架（第 1 层）上，严禁直接接触搪瓷底板。底板铺锡纸会堵死散热孔并永久熔粘在搪瓷表面。',
+    alertCustardTitle: '烘焙建议：芝士蛋糕与布丁优先用普通上下火',
+    alertCustardBody: '水浴烘烤娇嫩的芝士蛋糕与蛋奶布丁时，关闭热风对流（普通上下火）能显著减少表面开裂。',
+    matScienceLabel: '烤盘热学原理',
+    matBrowningLabel: '上色与焦化特性',
+    matSafetyLabel: '厂商安全上限与保养',
+    dishTipLabel: '当前菜品实操要点',
+    copyHeader: 'IsItKitchenSafe — 烤箱层位、热风与烤盘调温方案',
+    copyDishLine: '菜品预设：',
+    copyMaterialLine: '烤盘材质：',
+    copyModeLine: '加热模式：',
+    copyTempLine: '调整后温度：',
+    copyTimeLine: '检查时间窗：',
+    copyRackLine: '推荐烤架层位：',
+    copyAlertsLine: '当前安全警报：',
+    copySafeLine: '安全状态：烤具材质与温度均处于安全区间。',
+    relatedHeading: '相关烤箱、厨具耐温与食品安全工具',
+    relatedCookwareTag: '厨具耐温红线',
+    relatedCookwareTitle: '厨具进烤箱最高温度速查 →',
+    relatedCookwareDesc: '速查 Pyrex、Le Creuset、HexClad、All-Clad、硅胶垫、烘焙纸与锅盖顶珠的耐热温度上限。',
+    relatedAirFryerTag: '热风换算器',
+    relatedAirFryerTitle: '空气炸锅 ↔ 烤箱温时换算器 →',
+    relatedAirFryerDesc: '一键将传统烤箱食谱精准换算为空气炸锅温度与时间（支持双向换算）。',
+    relatedInternalTag: 'USDA 安全熟度',
+    relatedInternalTitle: '肉类与料理安全中心温度表 →',
+    relatedInternalDesc: '核对烤鸡、火鸡、三文鱼、牛排及焗菜的 USDA 最低安全内部温度（63°C / 71°C / 74°C）。',
+    methodologyStripTitle: '严格遵循烹饪热力学与一线烤具厂商安全规范',
+    methodologyStripPrefix: '所有 -15°C 调温法则、热风叠加封顶、炙烤禁令及热冲击规范均参照 Pyrex/Corning、Nordic Ware、Silpat、Lodge 与 King Arthur Baking 官方标准。查阅我们的',
+    methodologyLabel: '科学方法论',
+    internalQuickLabel: '中心温度表',
+    allToolsLabel: '全部厨房工具 →',
+    faqTitle: '常见问题：烤箱层位、热风对流与烤盘材质安全'
+  },
+  ja: {
+    ariaLabel: 'オーブン段位置・コンベクション・焼き型材質 温度＆安全アジャスター',
+    dashboardBadge: '調理熱力学＆焼き型安全エンジン',
+    dashboardTitle: 'リアルタイム調整：オーブン温度・時間＆段位置安全ダッシュボード',
+    dashboardSub: '料理プリセットを選ぶかレシピ温度・時間を入力し、焼き型の材質とコンベクション／グリル機能を切り替えるだけで安全な最適設定を即計算します。',
+    copyBtn: '調整済み設定をコピー',
+    copiedBtn: '設定をコピーしました ✓',
+    printBtn: 'オーブン早見表を印刷',
+    resetBtn: 'リセット',
+    presetsLabel: '1. 定番料理プリセット（最適な段位置・基準温度・時間を自動設定）',
+    presetsHint: '料理を選ぶと理想の段位置・温度・時間を読み込みます。その後、下でお使いの焼き型材質を選んでください。',
+    inputsHeading: '2. レシピ基準温度・焼き時間・加熱モード',
+    recipeTempLabel: 'レシピの基準温度',
+    recipeTimeLabel: 'レシピの焼き時間',
+    minutesUnit: '分',
+    ovenModeLabel: 'オーブンファン設定',
+    modeConventional: '通常オーブン（静止加熱）',
+    modeConvection: 'コンベクション（熱風ファン）',
+    broilerToggleLabel: '上火グリル（ブロイル）',
+    broilerOff: 'グリル OFF（通常焼成）',
+    broilerOn: 'グリル ON（260〜290℃ 強上火）',
+    materialHeading: '3. 焼き型・天板の材質を選択（6つの熱特性プロファイル）',
+    materialSub: '材質ごとに赤外線輻射熱の反射・吸収・透過・断熱が大きく異なり、焼き色と耐熱上限が変わります。',
+    broilerSafeYes: 'グリル可（無塗装）',
+    broilerSafeNo: 'グリル厳禁',
+    maxTempPrefix: '上限',
+    rackDiagramHeading: '4. 5段オーブン庫内 インタラクティブ模式図',
+    rackDiagramSub: '各段をクリックすると熱ゾーン特性、対流の仕組み、安全上の注意点を確認できます。',
+    topBroilerElement: '上部グリルヒーター · 260〜290℃+（500〜550°F+）',
+    ovenFloorWarning: '庫内底面 — アルミホイル直敷き・型の直置き厳禁',
+    slotPrefix: '段',
+    activeRackTag: '選択中の段',
+    recommendedRackTag: '料理に最適',
+    unsafeBroilTag: 'この型は最上段厳禁',
+    rackBestForLabel: 'この段に最適な料理',
+    rackAirflowLabel: '庫内の熱伝達とエアフロー',
+    rackWarningLabel: '安全上の注意ルール',
+    outTempLabel: '調整後のオーブン温度',
+    outTimeLabel: '早め確認の時間目安',
+    outRackLabel: '推奨オーブン段位置',
+    outRecipePrefix: 'レシピ基準：',
+    outCheckEarlySuffix: '早めに確認',
+    outBroilHeadline: '強グリル BROIL',
+    outBroilSub: '約260〜290℃（500〜550°F）の上火輻射熱',
+    outBroilTimeSub: '目を離さず監視 — 数十秒で焦げます',
+    outNoTempChange: '0℃（0°F）変更なし',
+    outSiliconeTimeNote: 'シリコンは断熱性あり：+3〜5分追加',
+    outConvectionTimeNote: '熱風で加熱加速（-15〜20%早めに確認）',
+    outEarlyCheckNote: '焼き色が早い材質：早めにチェック',
+    outStandardTimeNote: '余熱を考慮し終了1〜2分前に確認',
+    statusSafeBadge: '安全なオーブン設定',
+    statusCautionBadge: '注意 — 耐熱上限に接近',
+    statusDangerBadge: '危険 — この組み合わせは使用不可',
+    alertBroilerTitle: 'グリル（ブロイル）使用厳禁 — 破裂・発火・有害ガスリスク！',
+    alertBroilerBodyPrefix: 'は上火グリル機能や最上段（260〜290℃+）で使用できません。',
+    alertBroilerBodySuffix: '直ちに無塗装の光沢アルミ、鋳鉄、またはカーボンスチールに変更してください。',
+    alertMaxTempTitle: '焼き型の耐熱上限を超過しています！',
+    alertMaxTempBodyPrefix: '設定温度',
+    alertMaxTempBodyMid: 'は次の材質の安全上限を超えています：',
+    alertMaxTempBodySuffix: '温度を下げるか、鋳鉄・カーボンスチール・無塗装アルミへ切り替えてください。',
+    alertCautionTempTitle: '焼き型の耐熱上限に近づいています',
+    alertCautionTempBodyPrefix: '設定温度が次の材質の上限付近です：',
+    alertCautionTempBodySuffix: '予熱前に底面のメーカー耐熱表示を必ず確認してください。',
+    alertThermalExtremeTitle: '極度の熱衝撃・破裂警告（ガラス / PYREX）',
+    alertThermalExtremeBody: '必ず予熱完了後のオーブンに入れてください。熱いガラスに冷たい液体を注いだり、濡れた調理台や冷たい大理石の上に直置きしないでください。乾いた木製ボードの上に置いてください。',
+    alertThermalHighTitle: '熱衝撃注意（陶器・ストーンウェア）',
+    alertThermalHighBody: '冷蔵庫から出した陶器皿は15〜20分常温に戻してから焼き、冷凍庫から高温オーブンへの直行を避けてください。',
+    alertDoubleDropTitle: '過度な温度低下を自動抑制（合計 -20℃ / -35°F 上限）',
+    alertDoubleDropBody: 'この型とコンベクションを単純合算すると-25〜30℃下がり過ぎて膨らみが悪くなります。合計下げ幅を-20℃（-35°F）までに抑え、残りは20〜25%早めの焼き確認で調整します。',
+    alertBottomFoilTitle: '最下段の安全注意：庫内底面にアルミホイルを敷かないでください',
+    alertBottomFoilBody: '必ず一番下の金属網（段1）の上に型を置き、ホーロー底面への直置きやホイル直敷きは避けてください（排気遮断・溶着防止）。',
+    alertCustardTitle: '製菓のコツ：チーズケーキ・プリンは通常オーブン推奨',
+    alertCustardBody: '湯煎焼きのチーズケーキやカスタードは、熱風ファンを切った通常オーブンの方がひび割れを防ぎ滑らかに仕上がります。',
+    matScienceLabel: '焼き型の熱力学特性',
+    matBrowningLabel: '焼き色プロファイル',
+    matSafetyLabel: 'メーカー安全上限＆お手入れ',
+    dishTipLabel: '選択料理のプロのコツ',
+    copyHeader: 'IsItKitchenSafe — オーブン段位置・コンベクション・焼き型調整設定',
+    copyDishLine: '料理プリセット：',
+    copyMaterialLine: '焼き型材質：',
+    copyModeLine: '加熱モード：',
+    copyTempLine: '調整後オーブン温度：',
+    copyTimeLine: '焼き加減チェック目安：',
+    copyRackLine: 'オーブン段位置：',
+    copyAlertsLine: '安全アラート：',
+    copySafeLine: '安全ステータス：材質・温度・段位置すべて安全範囲内です。',
+    relatedHeading: '関連するオーブン・調理器具・食品温度ツール',
+    relatedCookwareTag: '器具の耐熱上限',
+    relatedCookwareTitle: '調理器具オーブン耐熱温度検索 →',
+    relatedCookwareDesc: 'Pyrex、ル・クルーゼ、HexClad、All-Clad、シリコンマット、クッキングシート、蓋ツマミの耐熱上限を確認。',
+    relatedAirFryerTag: '熱風換算ツール',
+    relatedAirFryerTitle: 'エアフライヤー ↔ オーブン換算機 →',
+    relatedAirFryerDesc: '通常オーブンレシピをエアフライヤーの温度・時間へ（および逆方向へ）瞬時に換算。',
+    relatedInternalTag: 'USDA 安全加熱温度',
+    relatedInternalTitle: '食品別・安全中心温度チャート →',
+    relatedInternalDesc: '丸鶏・七面鳥・サーモン・ステーキ・グラタンのUSDA最低安全中心温度（63℃ / 71℃ / 74℃）を確認。',
+    methodologyStripTitle: '調理熱力学および主要メーカー安全基準に基づく設計',
+    methodologyStripPrefix: 'すべての-15℃調整ルール、コンベクション上限、グリル制限、熱衝撃ガイドはPyrex/Corning、Nordic Ware、Silpat、Lodge、King Arthur Bakingの公式指針に準拠しています。詳細は',
+    methodologyLabel: '検証メソドロジー',
+    internalQuickLabel: '中心温度チャート',
+    allToolsLabel: 'すべてのツールを見る →',
+    faqTitle: 'よくある質問：オーブン段位置・コンベクション・焼き型の安全性'
+  }
+};
+
+const t = UI[lang] || UI.en;
+const defaultUnit: 'F' | 'C' = lang === 'en' ? 'F' : 'C';
+const defaultDish = localizedDishes[0];
+const defaultMaterial = localizedMaterials[0];
+const defaultRack = localizedRacks.find((r) => r.id === defaultDish.rackId) || localizedRacks[2];
+
+function fToC(f: number): number {
+  return Math.round(((f - 32) * 5) / 9);
+}
+
+const initialInputTemp = defaultUnit === 'F' ? defaultDish.baseTempF : fToC(defaultDish.baseTempF);
+const initialTempC = fToC(defaultDish.baseTempF);
+const initialCheckLow = Math.max(3, defaultDish.baseTimeMin - 1);
+
+function getZoneBadgeClasses(color: string): string {
+  if (color === 'red') return 'bg-red-500/20 text-red-200 border-red-400/40';
+  if (color === 'amber') return 'bg-amber-500/20 text-amber-200 border-amber-400/40';
+  if (color === 'emerald') return 'bg-emerald-500/20 text-emerald-200 border-emerald-400/40';
+  if (color === 'sky') return 'bg-sky-500/20 text-sky-200 border-sky-400/40';
+  return 'bg-orange-500/20 text-orange-200 border-orange-400/40';
+}
+
+const clientPayload = {
+  lang,
+  defaultUnit,
+  defaultDishId: defaultDish.id,
+  defaultMaterialId: defaultMaterial.id,
+  materials: localizedMaterials,
+  racks: localizedRacks,
+  dishes: localizedDishes,
+  ui: {
+    copyBtn: t.copyBtn,
+    copiedBtn: t.copiedBtn,
+    minutesUnit: t.minutesUnit,
+    modeConventional: t.modeConventional,
+    modeConvection: t.modeConvection,
+    broilerOff: t.broilerOff,
+    broilerOn: t.broilerOn,
+    slotPrefix: t.slotPrefix,
+    activeRackTag: t.activeRackTag,
+    recommendedRackTag: t.recommendedRackTag,
+    unsafeBroilTag: t.unsafeBroilTag,
+    outRecipePrefix: t.outRecipePrefix,
+    outCheckEarlySuffix: t.outCheckEarlySuffix,
+    outBroilHeadline: t.outBroilHeadline,
+    outBroilSub: t.outBroilSub,
+    outBroilTimeSub: t.outBroilTimeSub,
+    outNoTempChange: t.outNoTempChange,
+    outSiliconeTimeNote: t.outSiliconeTimeNote,
+    outConvectionTimeNote: t.outConvectionTimeNote,
+    outEarlyCheckNote: t.outEarlyCheckNote,
+    outStandardTimeNote: t.outStandardTimeNote,
+    statusSafeBadge: t.statusSafeBadge,
+    statusCautionBadge: t.statusCautionBadge,
+    statusDangerBadge: t.statusDangerBadge,
+    alertBroilerTitle: t.alertBroilerTitle,
+    alertBroilerBodyPrefix: t.alertBroilerBodyPrefix,
+    alertBroilerBodySuffix: t.alertBroilerBodySuffix,
+    alertMaxTempTitle: t.alertMaxTempTitle,
+    alertMaxTempBodyPrefix: t.alertMaxTempBodyPrefix,
+    alertMaxTempBodyMid: t.alertMaxTempBodyMid,
+    alertMaxTempBodySuffix: t.alertMaxTempBodySuffix,
+    alertCautionTempTitle: t.alertCautionTempTitle,
+    alertCautionTempBodyPrefix: t.alertCautionTempBodyPrefix,
+    alertCautionTempBodySuffix: t.alertCautionTempBodySuffix,
+    alertThermalExtremeTitle: t.alertThermalExtremeTitle,
+    alertThermalExtremeBody: t.alertThermalExtremeBody,
+    alertThermalHighTitle: t.alertThermalHighTitle,
+    alertThermalHighBody: t.alertThermalHighBody,
+    alertDoubleDropTitle: t.alertDoubleDropTitle,
+    alertDoubleDropBody: t.alertDoubleDropBody,
+    alertBottomFoilTitle: t.alertBottomFoilTitle,
+    alertBottomFoilBody: t.alertBottomFoilBody,
+    alertCustardTitle: t.alertCustardTitle,
+    alertCustardBody: t.alertCustardBody,
+    matBrowningLabel: t.matBrowningLabel,
+    copyHeader: t.copyHeader,
+    copyDishLine: t.copyDishLine,
+    copyMaterialLine: t.copyMaterialLine,
+    copyModeLine: t.copyModeLine,
+    copyTempLine: t.copyTempLine,
+    copyTimeLine: t.copyTimeLine,
+    copyRackLine: t.copyRackLine,
+    copyAlertsLine: t.copyAlertsLine,
+    copySafeLine: t.copySafeLine
+  }
+};
+---
+
+<div id="oven-rack-adjuster-root" class="space-y-12">
+  <!-- Critical Oven & Bakeware Safety Rules Banner -->
+  <aside
+    class="p-5 sm:p-6 rounded-2xl bg-error-bg/65 dark:bg-red-950/35 border-2 border-error-border/80 shadow-sm space-y-4"
+    role="note"
+    aria-label={safetyBanner.badge}
+  >
+    <div class="space-y-1">
+      <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-error-border text-white">
+        ⚠️ {safetyBanner.badge}
+      </span>
+      <h2 class="text-base sm:text-lg font-extrabold text-ink leading-snug">
+        {safetyBanner.headline}
+      </h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      {safetyBanner.rules.map((rule) => (
+        <div class="p-3.5 rounded-xl bg-canvas border border-hairline shadow-xs space-y-1.5">
+          <div class="flex items-start gap-2">
+            <span aria-hidden="true" class="text-lg leading-none mt-0.5 shrink-0">{rule.icon}</span>
+            <h3 class="text-xs sm:text-[13px] font-extrabold text-ink leading-snug">{rule.title}</h3>
+          </div>
+          <p class="text-xs text-body leading-relaxed">{rule.body}</p>
+        </div>
+      ))}
+    </div>
+  </aside>
+
+  <!-- Main Interactive Oven Rack & Bakeware Heat Adjuster Card -->
+  <section
+    id="oven-rack-bakeware-heat-adjuster"
+    class="bg-canvas border border-hairline rounded-2xl shadow-sm overflow-hidden"
+    aria-label={t.ariaLabel}
+  >
+    <script type="application/json" id="orbha-payload" set:html={JSON.stringify(clientPayload)} />
+
+    <!-- PART 1: Header Actions + High-Contrast Dark Live Output Dashboard -->
+    <div class="p-5 sm:p-6 border-b border-hairline bg-surface-soft/50 space-y-5">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div class="space-y-1 max-w-2xl">
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-signature-coral text-white">
+            🔥 {t.dashboardBadge}
+          </span>
+          <h2 class="text-title-md font-bold text-ink">{t.dashboardTitle}</h2>
+          <p class="text-xs sm:text-[13px] text-muted leading-relaxed">{t.dashboardSub}</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 print:hidden">
+          <button
+            type="button"
+            id="orbha-copy-btn"
+            class="min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors cursor-pointer shadow-sm"
+          >
+            <span id="orbha-copy-label">📋 {t.copyBtn}</span>
+          </button>
+          <button
+            type="button"
+            id="orbha-print-btn"
+            class="min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-semibold bg-canvas text-ink border border-hairline hover:border-signature-coral transition-colors cursor-pointer"
+          >
+            🖨️ {t.printBtn}
+          </button>
+          <button
+            type="button"
+            id="orbha-reset-btn"
+            class="min-h-[40px] px-3 py-2 rounded-xl text-xs font-semibold bg-canvas text-muted border border-hairline hover:border-border-strong hover:text-ink transition-colors cursor-pointer"
+          >
+            {t.resetBtn}
+          </button>
+        </div>
+      </div>
+
+      <!-- High-Contrast Dark Output Dashboard -->
+      <div
+        id="orbha-dashboard"
+        aria-live="polite"
+        class="w-full rounded-2xl bg-surface-dark text-on-dark p-5 sm:p-6 space-y-5 shadow-sm border-l-4 border-success-border"
+      >
+        <!-- Status Row -->
+        <div class="flex flex-wrap items-center justify-between gap-2.5">
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="orbha-status-pill" class="badge-yes">
+              {t.statusSafeBadge}
+            </span>
+            <span
+              id="orbha-active-combo-badge"
+              class="inline-flex items-center px-2.5 py-0.5 rounded-md border text-[11px] font-bold bg-white/10 text-white/90 border-white/20"
+            >
+              {defaultDish.icon} {defaultDish.name} · {defaultMaterial.icon} {defaultMaterial.shortName}
+            </span>
+          </div>
+          <span
+            id="orbha-mode-pill"
+            class="inline-flex items-center px-2.5 py-0.5 rounded-md border text-[11px] font-bold bg-white/10 text-signature-mint border-white/20"
+          >
+            {t.modeConventional}
+          </span>
+        </div>
+
+        <!-- Dynamic Active Safety Alerts Stack -->
+        <div id="orbha-alerts-container" class="space-y-2.5 hidden" role="status"></div>
+
+        <!-- 3 Live Output Metric Tiles -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+          <!-- Adjusted Temp -->
+          <div class="p-4 rounded-xl bg-white/6 border border-white/12 space-y-1.5">
+            <span class="block text-[10.5px] font-bold uppercase tracking-wider text-signature-peach">
+              🌡️ {t.outTempLabel}
+            </span>
+            <div class="flex items-baseline flex-wrap gap-2">
+              <p id="orbha-out-temp-main" class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+                {defaultDish.baseTempF}°F / {initialTempC}°C
+              </p>
+            </div>
+            <p id="orbha-out-temp-delta" class="text-xs font-bold text-signature-mint">
+              {t.outNoTempChange}
+            </p>
+            <p id="orbha-out-temp-sub" class="text-[11.5px] text-white/75">
+              {t.outRecipePrefix} {defaultDish.baseTempF}°F ({initialTempC}°C)
+            </p>
+          </div>
+
+          <!-- Check-Early Time Window -->
+          <div class="p-4 rounded-xl bg-white/6 border border-white/12 space-y-1.5">
+            <span class="block text-[10.5px] font-bold uppercase tracking-wider text-signature-mint">
+              ⏱️ {t.outTimeLabel}
+            </span>
+            <p id="orbha-out-time-main" class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+              {initialCheckLow}–{defaultDish.baseTimeMin} {t.minutesUnit}
+            </p>
+            <p id="orbha-out-time-note" class="text-xs font-semibold text-white/90">
+              {t.outStandardTimeNote}
+            </p>
+            <p id="orbha-out-time-sub" class="text-[11.5px] text-white/75">
+              {t.outRecipePrefix} {defaultDish.baseTimeMin} {t.minutesUnit}
+            </p>
+          </div>
+
+          <!-- Recommended Rack Position -->
+          <div class="p-4 rounded-xl bg-white/6 border border-white/12 space-y-1.5">
+            <span class="block text-[10.5px] font-bold uppercase tracking-wider text-sky-300">
+              📐 {t.outRackLabel}
+            </span>
+            <p id="orbha-out-rack-main" class="text-lg sm:text-xl font-extrabold tracking-tight text-white leading-snug">
+              {defaultRack.shortName}
+            </p>
+            <span
+              id="orbha-out-rack-zone"
+              class={`inline-flex items-center px-2 py-0.5 rounded-md border text-[10.5px] font-bold ${getZoneBadgeClasses(defaultRack.heatZoneColor)}`}
+            >
+              {defaultRack.zoneBadge}
+            </span>
+            <p id="orbha-out-rack-slot" class="text-[11.5px] text-white/75">
+              {t.slotPrefix} {defaultRack.slotNumber} / 5
+            </p>
+          </div>
+        </div>
+
+        <!-- Material Thermal Science + Dish Pro Tip Strip -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
+          <div class="lg:col-span-7 p-4 rounded-xl bg-white/6 border border-white/12 space-y-2">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-[10.5px] font-bold uppercase tracking-wider text-signature-peach">
+                🧪 {t.matScienceLabel}: <span id="orbha-mat-title" class="text-white">{defaultMaterial.name}</span>
+              </span>
+              <span
+                id="orbha-mat-rule-pill"
+                class="px-2 py-0.5 rounded-md text-[10.5px] font-bold bg-white/10 text-signature-mint border border-white/15"
+              >
+                {defaultMaterial.tempRuleBadge}
+              </span>
+            </div>
+            <p id="orbha-mat-browning" class="text-xs font-bold text-white/95">
+              {t.matBrowningLabel}: {defaultMaterial.browningProfile}
+            </p>
+            <p id="orbha-mat-science" class="text-xs text-white/85 leading-relaxed">
+              {defaultMaterial.scienceNote}
+            </p>
+          </div>
+
+          <div class="lg:col-span-5 p-4 rounded-xl bg-white/6 border border-white/12 space-y-2.5">
+            <div>
+              <span class="block text-[10.5px] font-bold uppercase tracking-wider text-amber-200">
+                🛡️ {t.matSafetyLabel}
+              </span>
+              <p id="orbha-mat-safety" class="text-xs text-white/90 leading-relaxed mt-1">
+                {defaultMaterial.safetyNote}
+              </p>
+            </div>
+            <div class="pt-2 border-t border-white/12">
+              <span class="block text-[10.5px] font-bold uppercase tracking-wider text-signature-mint">
+                💡 {t.dishTipLabel}
+              </span>
+              <p id="orbha-dish-tip" class="text-xs text-white/90 leading-relaxed mt-1">
+                {defaultDish.tip}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PART 2: Interactive Controls (Presets, Temp/Time/Fan/Broiler, 6 Bakeware Cards, 5-Rack Oven Schematic) -->
+    <div class="p-5 sm:p-6 space-y-8">
+      <!-- Step 1: 10 Popular Dish Presets -->
+      <div class="space-y-3 print:hidden">
+        <div class="space-y-0.5">
+          <h3 class="text-sm sm:text-[15px] font-bold text-ink">{t.presetsLabel}</h3>
+          <p class="text-xs text-muted">{t.presetsHint}</p>
+        </div>
+        <div class="flex flex-wrap gap-2" role="group" aria-label={t.presetsLabel}>
+          {localizedDishes.map((dish, idx) => (
+            <button
+              type="button"
+              data-orbha-dish={dish.id}
+              aria-pressed={idx === 0 ? 'true' : 'false'}
+              class={`orbha-dish-btn min-h-[38px] px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1.5 ${
+                idx === 0
+                  ? 'bg-primary text-on-primary border-primary shadow-sm'
+                  : 'bg-surface-soft text-ink border-hairline hover:border-signature-coral'
+              }`}
+            >
+              <span aria-hidden="true">{dish.icon}</span>
+              <span>{dish.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <!-- Step 2: Recipe Temp, Time, Convection & Broiler Controls -->
+      <div class="space-y-3.5 pt-2 border-t border-hairline print:hidden">
+        <h3 class="text-sm sm:text-[15px] font-bold text-ink">{t.inputsHeading}</h3>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Recipe Temperature + °F / °C Toggle -->
+          <div class="p-4 rounded-xl bg-surface-soft border border-hairline space-y-2.5">
+            <div class="flex items-center justify-between gap-2">
+              <label for="orbha-temp-input" class="text-xs font-bold text-ink">
+                {t.recipeTempLabel}
+              </label>
+              <div class="inline-flex rounded-lg border border-hairline bg-canvas p-0.5" role="group" aria-label="Temperature unit">
+                <button
+                  type="button"
+                  data-orbha-unit="F"
+                  aria-pressed={defaultUnit === 'F' ? 'true' : 'false'}
+                  class={`orbha-unit-btn px-2 py-0.5 rounded-md text-[11px] font-extrabold cursor-pointer transition-colors ${
+                    defaultUnit === 'F' ? 'bg-primary text-on-primary' : 'text-muted hover:text-ink'
+                  }`}
+                >
+                  °F
+                </button>
+                <button
+                  type="button"
+                  data-orbha-unit="C"
+                  aria-pressed={defaultUnit === 'C' ? 'true' : 'false'}
+                  class={`orbha-unit-btn px-2 py-0.5 rounded-md text-[11px] font-extrabold cursor-pointer transition-colors ${
+                    defaultUnit === 'C' ? 'bg-primary text-on-primary' : 'text-muted hover:text-ink'
+                  }`}
+                >
+                  °C
+                </button>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <input
+                id="orbha-temp-input"
+                type="number"
+                min={defaultUnit === 'F' ? 200 : 95}
+                max={defaultUnit === 'F' ? 525 : 275}
+                step={5}
+                value={initialInputTemp}
+                class="w-full min-h-[42px] px-3 py-1.5 rounded-xl bg-canvas border border-hairline text-base font-extrabold text-ink focus:outline-none focus:border-signature-coral focus:ring-2 focus:ring-signature-coral/25"
+              />
+              <span id="orbha-temp-unit-suffix" class="text-sm font-extrabold text-muted shrink-0">
+                °{defaultUnit}
+              </span>
+            </div>
+            <input
+              id="orbha-temp-slider"
+              type="range"
+              min="200"
+              max="525"
+              step="5"
+              value={defaultDish.baseTempF}
+              aria-label={t.recipeTempLabel}
+              class="w-full accent-signature-coral cursor-pointer"
+            />
+          </div>
+
+          <!-- Recipe Bake Time (5–240 min) -->
+          <div class="p-4 rounded-xl bg-surface-soft border border-hairline space-y-2.5">
+            <label for="orbha-time-input" class="block text-xs font-bold text-ink">
+              {t.recipeTimeLabel}
+            </label>
+            <div class="flex items-center gap-2">
+              <input
+                id="orbha-time-input"
+                type="number"
+                min="5"
+                max="240"
+                step="1"
+                value={defaultDish.baseTimeMin}
+                class="w-full min-h-[42px] px-3 py-1.5 rounded-xl bg-canvas border border-hairline text-base font-extrabold text-ink focus:outline-none focus:border-signature-coral focus:ring-2 focus:ring-signature-coral/25"
+              />
+              <span class="text-xs font-bold text-muted shrink-0">{t.minutesUnit}</span>
+            </div>
+            <input
+              id="orbha-time-slider"
+              type="range"
+              min="5"
+              max="240"
+              step="1"
+              value={defaultDish.baseTimeMin}
+              aria-label={t.recipeTimeLabel}
+              class="w-full accent-signature-coral cursor-pointer"
+            />
+          </div>
+
+          <!-- Convection Fan Mode Toggle -->
+          <div class="p-4 rounded-xl bg-surface-soft border border-hairline space-y-2.5">
+            <span class="block text-xs font-bold text-ink">{t.ovenModeLabel}</span>
+            <div class="grid grid-cols-1 gap-2" role="group" aria-label={t.ovenModeLabel}>
+              <button
+                type="button"
+                id="orbha-conv-off-btn"
+                aria-pressed="true"
+                class="min-h-[38px] px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer text-left bg-primary text-on-primary border-primary shadow-sm"
+              >
+                🔥 {t.modeConventional}
+              </button>
+              <button
+                type="button"
+                id="orbha-conv-on-btn"
+                aria-pressed="false"
+                class="min-h-[38px] px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer text-left bg-canvas text-ink border-hairline hover:border-signature-coral"
+              >
+                🌀 {t.modeConvection}
+              </button>
+            </div>
+          </div>
+
+          <!-- Broiler Mode Toggle -->
+          <div class="p-4 rounded-xl bg-surface-soft border border-hairline space-y-2.5">
+            <span class="block text-xs font-bold text-ink">{t.broilerToggleLabel}</span>
+            <div class="grid grid-cols-1 gap-2" role="group" aria-label={t.broilerToggleLabel}>
+              <button
+                type="button"
+                id="orbha-broil-off-btn"
+                aria-pressed="true"
+                class="min-h-[38px] px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer text-left bg-primary text-on-primary border-primary shadow-sm"
+              >
+                ✅ {t.broilerOff}
+              </button>
+              <button
+                type="button"
+                id="orbha-broil-on-btn"
+                aria-pressed="false"
+                class="min-h-[38px] px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer text-left bg-canvas text-ink border-hairline hover:border-error-border"
+              >
+                🔥 {t.broilerOn}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: 6 Bakeware Material Cards -->
+      <div class="space-y-3 pt-2 border-t border-hairline">
+        <div class="space-y-0.5">
+          <h3 class="text-sm sm:text-[15px] font-bold text-ink">{t.materialHeading}</h3>
+          <p class="text-xs text-muted">{t.materialSub}</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5" role="group" aria-label={t.materialHeading}>
+          {localizedMaterials.map((mat, idx) => (
+            <button
+              type="button"
+              data-orbha-mat={mat.id}
+              aria-pressed={idx === 0 ? 'true' : 'false'}
+              class={`orbha-mat-card text-left w-full p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${
+                idx === 0
+                  ? 'bg-canvas border-signature-coral ring-2 ring-signature-coral shadow-sm'
+                  : 'bg-surface-soft/65 border-hairline hover:border-signature-coral'
+              }`}
+            >
+              <div class="space-y-2">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="flex items-start gap-2 min-w-0">
+                    <span aria-hidden="true" class="text-xl leading-none mt-0.5 shrink-0">{mat.icon}</span>
+                    <div class="min-w-0">
+                      <h4 class="text-sm font-bold text-ink leading-snug">{mat.name}</h4>
+                      <span class="inline-block mt-1 px-2 py-0.5 rounded-md text-[10.5px] font-extrabold bg-surface-soft border border-hairline text-ink">
+                        {mat.tempRuleBadge}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <p class="text-[11.5px] text-muted leading-snug">{mat.examples}</p>
+              </div>
+
+              <div class="pt-2 border-t border-hairline/70 flex flex-wrap items-center justify-between gap-1.5 text-[11px] font-bold">
+                <span class="text-muted">
+                  🌡️ {t.maxTempPrefix}: {mat.maxSafeTempF >= 550 ? '500°F+ (260°C+)' : `${mat.cautionTempF}–${mat.maxSafeTempF}°F (${fToC(mat.cautionTempF)}–${fToC(mat.maxSafeTempF)}°C)`}
+                </span>
+                <span class={mat.broilerSafe ? 'text-emerald-700 dark:text-emerald-300' : 'text-red-700 dark:text-red-300'}>
+                  {mat.broilerSafe ? `✓ ${t.broilerSafeYes}` : `✕ ${t.broilerSafeNo}`}
+                </span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <!-- Step 4: Interactive Visual 5-Rack Oven Cavity Diagram + Rack Physics Inspector -->
+      <div class="space-y-4 pt-2 border-t border-hairline">
+        <div class="space-y-0.5">
+          <h3 class="text-sm sm:text-[15px] font-bold text-ink">{t.rackDiagramHeading}</h3>
+          <p class="text-xs text-muted">{t.rackDiagramSub}</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+          <!-- Left: Visual Stacked Oven Cavity Schematic -->
+          <div class="lg:col-span-7 rounded-2xl bg-surface-dark text-on-dark p-4 sm:p-5 border-2 border-white/15 shadow-sm flex flex-col justify-between gap-3">
+            <!-- Top Broiler Heating Coil Visual -->
+            <div
+              id="orbha-broiler-coil"
+              class="rounded-xl px-3.5 py-2.5 border text-center transition-all bg-red-500/12 border-red-400/35 text-red-200"
+            >
+              <div class="flex items-center justify-center gap-2 text-[11px] font-extrabold uppercase tracking-wider">
+                <span aria-hidden="true">〰️🔥〰️</span>
+                <span>{t.topBroilerElement}</span>
+                <span aria-hidden="true">〰️🔥〰️</span>
+              </div>
+            </div>
+
+            <!-- 5 Stacked Interactive Oven Rack Slots -->
+            <div class="space-y-2.5" role="group" aria-label={t.rackDiagramHeading}>
+              {localizedRacks.map((rack) => {
+                const isSelected = rack.id === defaultRack.id;
+                return (
+                  <button
+                    type="button"
+                    data-orbha-rack={rack.id}
+                    aria-pressed={isSelected ? 'true' : 'false'}
+                    class={`orbha-rack-btn w-full text-left rounded-xl p-3 border transition-all cursor-pointer ${
+                      isSelected
+                        ? 'bg-white/14 border-signature-coral ring-2 ring-signature-coral shadow-sm'
+                        : 'bg-white/5 border-white/12 hover:bg-white/10 hover:border-white/30'
+                    }`}
+                  >
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                      <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-md bg-white/12 text-[11px] font-extrabold text-white shrink-0">
+                          {rack.slotNumber}
+                        </span>
+                        <span class="text-xs sm:text-[13px] font-extrabold text-white">
+                          {rack.shortName}
+                        </span>
+                      </div>
+
+                      <div class="flex flex-wrap items-center gap-1.5">
+                        <span class={`px-2 py-0.5 rounded-md border text-[10px] font-bold ${getZoneBadgeClasses(rack.heatZoneColor)}`}>
+                          {rack.zoneBadge}
+                        </span>
+                        <span
+                          data-orbha-rack-status={rack.id}
+                          class={`px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider ${
+                            isSelected ? 'bg-signature-coral text-white' : 'hidden'
+                          }`}
+                        >
+                          {t.activeRackTag}
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Metallic Wire Rack Bar Graphic -->
+                    <div class="w-full h-1.5 rounded-full bg-white/15 overflow-hidden relative">
+                      <div
+                        data-orbha-rack-bar={rack.id}
+                        class={`h-full transition-all ${isSelected ? 'w-full bg-signature-coral' : 'w-1/4 bg-white/30'}`}
+                      />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <!-- Oven Floor Warning Bar -->
+            <div class="rounded-xl px-3.5 py-2.5 bg-amber-500/12 border border-amber-400/35 text-center">
+              <p class="text-[11px] font-extrabold uppercase tracking-wider text-amber-200">
+                🚫 {t.ovenFloorWarning}
+              </p>
+            </div>
+          </div>
+
+          <!-- Right: Selected Rack Thermodynamics & Safety Details -->
+          <div class="lg:col-span-5 rounded-2xl bg-surface-soft border border-hairline p-5 flex flex-col justify-between gap-4">
+            <div class="space-y-4">
+              <div class="space-y-1.5">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span
+                    id="orbha-rack-detail-slot"
+                    class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-primary text-on-primary"
+                  >
+                    {t.slotPrefix} {defaultRack.slotNumber} / 5
+                  </span>
+                  <span
+                    id="orbha-rack-detail-zone"
+                    class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-canvas border border-hairline text-ink"
+                  >
+                    {defaultRack.zoneBadge}
+                  </span>
+                </div>
+                <h4 id="orbha-rack-detail-name" class="text-base sm:text-lg font-extrabold text-ink leading-snug">
+                  {defaultRack.name}
+                </h4>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-canvas border border-hairline space-y-1">
+                <span class="block text-[11px] font-extrabold uppercase tracking-wider text-signature-coral">
+                  🍽️ {t.rackBestForLabel}
+                </span>
+                <p id="orbha-rack-detail-best" class="text-xs sm:text-[13px] text-body leading-relaxed">
+                  {defaultRack.bestFor}
+                </p>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-canvas border border-hairline space-y-1">
+                <span class="block text-[11px] font-extrabold uppercase tracking-wider text-ink">
+                  💨 {t.rackAirflowLabel}
+                </span>
+                <p id="orbha-rack-detail-airflow" class="text-xs sm:text-[13px] text-body leading-relaxed">
+                  {defaultRack.airflowNote}
+                </p>
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-error-bg/55 dark:bg-red-950/35 border border-error-border/70 space-y-1">
+              <span class="block text-[11px] font-extrabold uppercase tracking-wider text-error-border dark:text-red-300">
+                ⚠️ {t.rackWarningLabel}
+              </span>
+              <p id="orbha-rack-detail-warning" class="text-xs sm:text-[13px] font-semibold text-ink leading-relaxed">
+                {defaultRack.warning}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Related Companion Tools -->
+  <section class="space-y-4 print:hidden">
+    <h2 class="text-title-md font-semibold text-ink">{t.relatedHeading}</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <a
+        href={cookwareLookupUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedCookwareTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedCookwareTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedCookwareDesc}</p>
+      </a>
+
+      <a
+        href={airFryerUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedAirFryerTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedAirFryerTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedAirFryerDesc}</p>
+      </a>
+
+      <a
+        href={internalTempUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedInternalTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedInternalTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedInternalDesc}</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- Methodology & Hub Strip -->
+  <section class="p-6 rounded-2xl bg-surface-soft border border-hairline print:hidden">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-title-sm font-semibold text-ink mb-1">{t.methodologyStripTitle}</h2>
+        <p class="text-[13px] text-muted">
+          {t.methodologyStripPrefix}{' '}
+          <a href={methodologyUrl} class="text-link underline hover:text-link-active">{t.methodologyLabel}</a>.
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a
+          href={internalTempUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
+        >
+          {t.internalQuickLabel}
+        </a>
+        <a
+          href={methodologyUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
+        >
+          {t.methodologyLabel}
+        </a>
+        <a
+          href={allToolsUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors"
+        >
+          {t.allToolsLabel}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Visible FAQ Accordion (Matches JSON-LD 1:1) -->
+  <section class="print:hidden">
+    <h2 class="text-title-lg font-medium text-ink tracking-tight mb-6">
+      {t.faqTitle}
+    </h2>
+    <div class="space-y-4">
+      {localizedFaqs.map((faq) => (
+        <details class="group p-5 bg-surface-soft border border-hairline rounded-xl" open>
+          <summary class="text-title-sm font-semibold text-ink cursor-pointer list-none flex items-center justify-between gap-3">
+            <span>{faq.question}</span>
+            <span class="text-muted text-sm transition-transform group-open:rotate-180 shrink-0" aria-hidden="true">&#9662;</span>
+          </summary>
+          <p class="text-[14px] text-body leading-relaxed mt-3 pt-3 border-t border-hairline/70">
+            {faq.answer}
+          </p>
+        </details>
+      ))}
+    </div>
+  </section>
+</div>
+
+<script is:inline>
+  (function () {
+    var payloadEl = document.getElementById('orbha-payload');
+    if (!payloadEl) return;
+
+    var payload;
+    try {
+      payload = JSON.parse(payloadEl.textContent || '{}');
+    } catch (_) {
+      return;
+    }
+
+    var materials = Array.isArray(payload.materials) ? payload.materials : [];
+    var racks = Array.isArray(payload.racks) ? payload.racks : [];
+    var dishes = Array.isArray(payload.dishes) ? payload.dishes : [];
+    var ui = payload.ui || {};
+
+    var materialMap = {};
+    materials.forEach(function (m) {
+      if (m && m.id) materialMap[m.id] = m;
+    });
+
+    var rackMap = {};
+    racks.forEach(function (r) {
+      if (r && r.id) rackMap[r.id] = r;
+    });
+
+    var dishMap = {};
+    dishes.forEach(function (d) {
+      if (d && d.id) dishMap[d.id] = d;
+    });
+
+    // Elements
+    var elDashboard = document.getElementById('orbha-dashboard');
+    var elStatusPill = document.getElementById('orbha-status-pill');
+    var elComboBadge = document.getElementById('orbha-active-combo-badge');
+    var elModePill = document.getElementById('orbha-mode-pill');
+    var elAlerts = document.getElementById('orbha-alerts-container');
+
+    var elOutTempMain = document.getElementById('orbha-out-temp-main');
+    var elOutTempDelta = document.getElementById('orbha-out-temp-delta');
+    var elOutTempSub = document.getElementById('orbha-out-temp-sub');
+    var elOutTimeMain = document.getElementById('orbha-out-time-main');
+    var elOutTimeNote = document.getElementById('orbha-out-time-note');
+    var elOutTimeSub = document.getElementById('orbha-out-time-sub');
+    var elOutRackMain = document.getElementById('orbha-out-rack-main');
+    var elOutRackZone = document.getElementById('orbha-out-rack-zone');
+    var elOutRackSlot = document.getElementById('orbha-out-rack-slot');
+
+    var elMatTitle = document.getElementById('orbha-mat-title');
+    var elMatRulePill = document.getElementById('orbha-mat-rule-pill');
+    var elMatBrowning = document.getElementById('orbha-mat-browning');
+    var elMatScience = document.getElementById('orbha-mat-science');
+    var elMatSafety = document.getElementById('orbha-mat-safety');
+    var elDishTip = document.getElementById('orbha-dish-tip');
+
+    var elBroilerCoil = document.getElementById('orbha-broiler-coil');
+    var elRackDetailSlot = document.getElementById('orbha-rack-detail-slot');
+    var elRackDetailZone = document.getElementById('orbha-rack-detail-zone');
+    var elRackDetailName = document.getElementById('orbha-rack-detail-name');
+    var elRackDetailBest = document.getElementById('orbha-rack-detail-best');
+    var elRackDetailAirflow = document.getElementById('orbha-rack-detail-airflow');
+    var elRackDetailWarning = document.getElementById('orbha-rack-detail-warning');
+
+    var dishBtns = Array.from(document.querySelectorAll('.orbha-dish-btn'));
+    var unitBtns = Array.from(document.querySelectorAll('.orbha-unit-btn'));
+    var matCards = Array.from(document.querySelectorAll('.orbha-mat-card'));
+    var rackBtns = Array.from(document.querySelectorAll('.orbha-rack-btn'));
+
+    var tempInput = document.getElementById('orbha-temp-input');
+    var tempSlider = document.getElementById('orbha-temp-slider');
+    var tempUnitSuffix = document.getElementById('orbha-temp-unit-suffix');
+    var timeInput = document.getElementById('orbha-time-input');
+    var timeSlider = document.getElementById('orbha-time-slider');
+
+    var convOffBtn = document.getElementById('orbha-conv-off-btn');
+    var convOnBtn = document.getElementById('orbha-conv-on-btn');
+    var broilOffBtn = document.getElementById('orbha-broil-off-btn');
+    var broilOnBtn = document.getElementById('orbha-broil-on-btn');
+
+    var copyBtn = document.getElementById('orbha-copy-btn');
+    var copyLabel = document.getElementById('orbha-copy-label');
+    var printBtn = document.getElementById('orbha-print-btn');
+    var resetBtn = document.getElementById('orbha-reset-btn');
+
+    var initialDish = dishMap[payload.defaultDishId] || dishes[0];
+    var initialMat = materialMap[payload.defaultMaterialId] || materials[0];
+
+    var state = {
+      dishId: initialDish ? initialDish.id : 'cookies',
+      materialId: initialMat ? initialMat.id : 'bright-aluminum',
+      rackId: initialDish ? initialDish.rackId : 'center',
+      recipeTempF: initialDish ? Number(initialDish.baseTempF) : 350,
+      recipeTimeMin: initialDish ? Number(initialDish.baseTimeMin) : 11,
+      unit: payload.defaultUnit === 'C' ? 'C' : 'F',
+      convection: false,
+      broiler: initialDish ? Boolean(initialDish.broiler) : false
+    };
+
+    function fToC(f) {
+      return Math.round(((f - 32) * 5) / 9);
+    }
+
+    function cToF(c) {
+      return Math.round((c * 9) / 5 + 32);
+    }
+
+    function clamp(val, min, max) {
+      if (isNaN(val)) return min;
+      return Math.max(min, Math.min(max, val));
+    }
+
+    function roundTo5(n) {
+      return Math.round(n / 5) * 5;
+    }
+
+    function formatTempPair(f) {
+      var c = fToC(f);
+      if (state.unit === 'C') {
+        return c + '°C / ' + f + '°F';
+      }
+      return f + '°F / ' + c + '°C';
+    }
+
+    function formatDeltaPair(deltaF) {
+      if (deltaF === 0) return ui.outNoTempChange || '0°F (0°C) baseline';
+      var deltaC = Math.round((deltaF * 5) / 9);
+      var sign = deltaF > 0 ? '+' : '';
+      if (state.unit === 'C') {
+        return sign + deltaC + '°C (' + sign + deltaF + '°F)';
+      }
+      return sign + deltaF + '°F (' + sign + deltaC + '°C)';
+    }
+
+    function getZoneClasses(color) {
+      if (color === 'red') return 'bg-red-500/20 text-red-200 border-red-400/40';
+      if (color === 'amber') return 'bg-amber-500/20 text-amber-200 border-amber-400/40';
+      if (color === 'emerald') return 'bg-emerald-500/20 text-emerald-200 border-emerald-400/40';
+      if (color === 'sky') return 'bg-sky-500/20 text-sky-200 border-sky-400/40';
+      return 'bg-orange-500/20 text-orange-200 border-orange-400/40';
+    }
+
+    function setToggleBtnState(btn, active, activeDanger) {
+      if (!btn) return;
+      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+      btn.classList.remove(
+        'bg-primary',
+        'text-on-primary',
+        'border-primary',
+        'bg-error-border',
+        'text-white',
+        'border-error-border',
+        'shadow-sm',
+        'bg-canvas',
+        'text-ink',
+        'border-hairline'
+      );
+      if (active) {
+        if (activeDanger) {
+          btn.classList.add('bg-error-border', 'text-white', 'border-error-border', 'shadow-sm');
+        } else {
+          btn.classList.add('bg-primary', 'text-on-primary', 'border-primary', 'shadow-sm');
+        }
+      } else {
+        btn.classList.add('bg-canvas', 'text-ink', 'border-hairline');
+      }
+    }
+
+    function computeResult() {
+      var mat = materialMap[state.materialId] || materials[0];
+      var rack = rackMap[state.rackId] || racks[2];
+      var dish = dishMap[state.dishId] || dishes[0];
+
+      var baseTempF = clamp(Number(state.recipeTempF), 200, 525);
+      var baseTime = clamp(Number(state.recipeTimeMin), 5, 240);
+
+      var totalDeltaF = 0;
+      var doubleDropCapped = false;
+      var adjustedTempF = baseTempF;
+      var effectiveTempF = baseTempF;
+      var timeLow = baseTime;
+      var timeHigh = baseTime;
+      var timeNote = ui.outStandardTimeNote || '';
+
+      if (state.broiler) {
+        effectiveTempF = 525;
+        adjustedTempF = 525;
+        timeLow = Math.max(2, Math.round(baseTime * 0.6));
+        timeHigh = baseTime;
+        timeNote = ui.outBroilTimeSub || '';
+      } else {
+        var matDelta = Number(mat.tempDeltaF || 0);
+        var convDelta = state.convection ? -25 : 0;
+        var rawDelta = matDelta + convDelta;
+
+        if (state.convection && matDelta < 0) {
+          totalDeltaF = -35;
+          doubleDropCapped = true;
+        } else {
+          totalDeltaF = rawDelta;
+        }
+
+        adjustedTempF = Math.max(175, roundTo5(baseTempF + totalDeltaF));
+        effectiveTempF = adjustedTempF;
+
+        if (state.convection) {
+          if (doubleDropCapped) {
+            timeLow = Math.max(3, Math.round(baseTime * 0.75));
+            timeHigh = Math.max(timeLow + 1, Math.round(baseTime * 0.9));
+            timeNote = ui.outConvectionTimeNote || '';
+          } else if (mat.id === 'silicone') {
+            timeLow = Math.max(3, Math.round(baseTime * 0.85));
+            timeHigh = baseTime + 2;
+            timeNote = ui.outSiliconeTimeNote || '';
+          } else {
+            timeLow = Math.max(3, Math.round(baseTime * 0.8));
+            timeHigh = Math.max(timeLow + 1, Math.round(baseTime * 0.95));
+            timeNote = ui.outConvectionTimeNote || '';
+          }
+        } else {
+          if (mat.id === 'silicone') {
+            timeLow = baseTime + 3;
+            timeHigh = baseTime + 5;
+            timeNote = ui.outSiliconeTimeNote || '';
+          } else if (Number(mat.timeDeltaMin || 0) < 0) {
+            var earlyShift = Math.min(Math.abs(Number(mat.timeDeltaMin)), Math.max(1, Math.round(baseTime * 0.2)));
+            timeLow = Math.max(3, baseTime - earlyShift);
+            timeHigh = baseTime;
+            timeNote = ui.outEarlyCheckNote || '';
+          } else {
+            timeLow = Math.max(3, baseTime - (baseTime >= 20 ? 2 : 1));
+            timeHigh = baseTime;
+            timeNote = ui.outStandardTimeNote || '';
+          }
+        }
+      }
+
+      var alerts = [];
+      var severity = 'safe'; // 'safe' | 'caution' | 'danger'
+
+      var isBroilerUnsafe = (state.broiler || rack.id === 'top-broil') && !mat.broilerSafe;
+      if (isBroilerUnsafe) {
+        severity = 'danger';
+        alerts.push({
+          level: 'danger',
+          icon: '🚨',
+          title: ui.alertBroilerTitle || 'UNSAFE FOR BROILER!',
+          body: mat.name + ' ' + (ui.alertBroilerBodyPrefix || '') + ' ' + (ui.alertBroilerBodySuffix || '')
+        });
+      }
+
+      var isMaxExceeded = !state.broiler && effectiveTempF > Number(mat.maxSafeTempF || 500);
+      var isCautionTemp = !state.broiler && !isMaxExceeded && effectiveTempF > Number(mat.cautionTempF || 500);
+
+      if (isMaxExceeded) {
+        severity = 'danger';
+        alerts.push({
+          level: 'danger',
+          icon: '🔥',
+          title: ui.alertMaxTempTitle || 'MAX BAKEWARE TEMP EXCEEDED!',
+          body:
+            (ui.alertMaxTempBodyPrefix || '') +
+            ' (' +
+            formatTempPair(effectiveTempF) +
+            ') ' +
+            (ui.alertMaxTempBodyMid || '') +
+            ' ' +
+            mat.name +
+            ' (' +
+            formatTempPair(Number(mat.maxSafeTempF)) +
+            '). ' +
+            (ui.alertMaxTempBodySuffix || '')
+        });
+      } else if (isCautionTemp) {
+        if (severity !== 'danger') severity = 'caution';
+        alerts.push({
+          level: 'caution',
+          icon: '⚠️',
+          title: ui.alertCautionTempTitle || 'APPROACHING MAX TEMP',
+          body:
+            (ui.alertCautionTempBodyPrefix || '') +
+            ' ' +
+            mat.name +
+            ' (' +
+            formatTempPair(Number(mat.cautionTempF)) +
+            '–' +
+            formatTempPair(Number(mat.maxSafeTempF)) +
+            '). ' +
+            (ui.alertCautionTempBodySuffix || '')
+        });
+      }
+
+      if (mat.thermalShockRisk === 'extreme') {
+        if (severity === 'safe') severity = 'caution';
+        alerts.push({
+          level: 'caution',
+          icon: '💥',
+          title: ui.alertThermalExtremeTitle || 'EXTREME THERMAL SHOCK WARNING',
+          body: ui.alertThermalExtremeBody || ''
+        });
+      } else if (mat.thermalShockRisk === 'high') {
+        alerts.push({
+          level: 'info',
+          icon: '🏺',
+          title: ui.alertThermalHighTitle || 'THERMAL SHOCK CAUTION',
+          body: ui.alertThermalHighBody || ''
+        });
+      }
+
+      if (doubleDropCapped) {
+        alerts.push({
+          level: 'info',
+          icon: '🧠',
+          title: ui.alertDoubleDropTitle || 'DOUBLE-DROP CAP ACTIVE',
+          body: ui.alertDoubleDropBody || ''
+        });
+      }
+
+      if (rack.id === 'bottom') {
+        alerts.push({
+          level: 'info',
+          icon: '🚫',
+          title: ui.alertBottomFoilTitle || 'NEVER PUT FOIL ON OVEN FLOOR',
+          body: ui.alertBottomFoilBody || ''
+        });
+      }
+
+      if (dish && dish.id === 'cheesecake-custard' && state.convection && !state.broiler) {
+        alerts.push({
+          level: 'info',
+          icon: '🍮',
+          title: ui.alertCustardTitle || 'CUSTARD TIP',
+          body: ui.alertCustardBody || ''
+        });
+      }
+
+      return {
+        mat: mat,
+        rack: rack,
+        dish: dish,
+        baseTempF: baseTempF,
+        baseTime: baseTime,
+        adjustedTempF: adjustedTempF,
+        totalDeltaF: totalDeltaF,
+        doubleDropCapped: doubleDropCapped,
+        timeLow: timeLow,
+        timeHigh: timeHigh,
+        timeNote: timeNote,
+        severity: severity,
+        alerts: alerts,
+        isBroilerUnsafe: isBroilerUnsafe
+      };
+    }
+
+    function syncInputs(skipField) {
+      if (tempUnitSuffix) tempUnitSuffix.textContent = '°' + state.unit;
+
+      if (tempInput && skipField !== 'tempInput') {
+        if (state.unit === 'C') {
+          tempInput.min = '95';
+          tempInput.max = '275';
+          tempInput.value = String(fToC(state.recipeTempF));
+        } else {
+          tempInput.min = '200';
+          tempInput.max = '525';
+          tempInput.value = String(state.recipeTempF);
+        }
+      }
+      if (tempSlider && skipField !== 'tempSlider') {
+        tempSlider.value = String(state.recipeTempF);
+      }
+      if (timeInput && skipField !== 'timeInput') {
+        timeInput.value = String(state.recipeTimeMin);
+      }
+      if (timeSlider && skipField !== 'timeSlider') {
+        timeSlider.value = String(state.recipeTimeMin);
+      }
+
+      unitBtns.forEach(function (btn) {
+        var u = btn.getAttribute('data-orbha-unit');
+        var active = u === state.unit;
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('text-muted', !active);
+      });
+
+      setToggleBtnState(convOffBtn, !state.convection, false);
+      setToggleBtnState(convOnBtn, state.convection, false);
+      setToggleBtnState(broilOffBtn, !state.broiler, false);
+      setToggleBtnState(broilOnBtn, state.broiler, true);
+    }
+
+    function renderAlerts(alerts) {
+      if (!elAlerts) return;
+      while (elAlerts.firstChild) {
+        elAlerts.removeChild(elAlerts.firstChild);
+      }
+      if (!alerts || alerts.length === 0) {
+        elAlerts.classList.add('hidden');
+        return;
+      }
+      elAlerts.classList.remove('hidden');
+
+      alerts.forEach(function (alert) {
+        var box = document.createElement('div');
+        var colorClasses =
+          alert.level === 'danger'
+            ? 'bg-red-500/20 border-red-400/70 text-red-100'
+            : alert.level === 'caution'
+              ? 'bg-amber-500/18 border-amber-400/55 text-amber-100'
+              : 'bg-sky-500/15 border-sky-400/40 text-sky-100';
+        box.className = 'p-3.5 rounded-xl border space-y-1 ' + colorClasses;
+
+        var titleEl = document.createElement('p');
+        titleEl.className = 'text-xs font-extrabold tracking-wide uppercase';
+        titleEl.textContent = (alert.icon ? alert.icon + ' ' : '') + alert.title;
+
+        var bodyEl = document.createElement('p');
+        bodyEl.className = 'text-xs leading-relaxed text-white/95';
+        bodyEl.textContent = alert.body;
+
+        box.appendChild(titleEl);
+        box.appendChild(bodyEl);
+        elAlerts.appendChild(box);
+      });
+    }
+
+    function render(skipField) {
+      syncInputs(skipField);
+      var res = computeResult();
+
+      // Dashboard border & status pill
+      if (elDashboard) {
+        elDashboard.classList.remove('border-success-border', 'border-amber-400', 'border-error-border');
+        if (res.severity === 'danger') {
+          elDashboard.classList.add('border-error-border');
+        } else if (res.severity === 'caution') {
+          elDashboard.classList.add('border-amber-400');
+        } else {
+          elDashboard.classList.add('border-success-border');
+        }
+      }
+
+      if (elStatusPill) {
+        if (res.severity === 'danger') {
+          elStatusPill.className = 'badge-no';
+          elStatusPill.textContent = ui.statusDangerBadge || 'HAZARD';
+        } else if (res.severity === 'caution') {
+          elStatusPill.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-amber-500 text-slate-950';
+          elStatusPill.textContent = ui.statusCautionBadge || 'CAUTION';
+        } else {
+          elStatusPill.className = 'badge-yes';
+          elStatusPill.textContent = ui.statusSafeBadge || 'SAFE';
+        }
+      }
+
+      if (elComboBadge) {
+        elComboBadge.textContent = res.dish.icon + ' ' + res.dish.name + ' · ' + res.mat.icon + ' ' + res.mat.shortName;
+      }
+
+      if (elModePill) {
+        if (state.broiler) {
+          elModePill.textContent = '🔥 ' + (ui.broilerOn || 'Broiler ON');
+        } else if (state.convection) {
+          elModePill.textContent = '🌀 ' + (ui.modeConvection || 'Convection');
+        } else {
+          elModePill.textContent = '🔥 ' + (ui.modeConventional || 'Conventional');
+        }
+      }
+
+      renderAlerts(res.alerts);
+
+      // Output Temp Tile
+      if (elOutTempMain) {
+        elOutTempMain.textContent = state.broiler
+          ? (ui.outBroilHeadline || 'HIGH BROIL')
+          : formatTempPair(res.adjustedTempF);
+      }
+      if (elOutTempDelta) {
+        elOutTempDelta.textContent = state.broiler
+          ? (ui.outBroilSub || '~500–550°F (260–290°C)')
+          : formatDeltaPair(res.totalDeltaF);
+      }
+      if (elOutTempSub) {
+        elOutTempSub.textContent = (ui.outRecipePrefix || 'Recipe:') + ' ' + formatTempPair(res.baseTempF);
+      }
+
+      // Output Time Tile
+      if (elOutTimeMain) {
+        elOutTimeMain.textContent = res.timeLow + '–' + res.timeHigh + ' ' + (ui.minutesUnit || 'min');
+      }
+      if (elOutTimeNote) {
+        elOutTimeNote.textContent = res.timeNote;
+      }
+      if (elOutTimeSub) {
+        elOutTimeSub.textContent = (ui.outRecipePrefix || 'Recipe:') + ' ' + res.baseTime + ' ' + (ui.minutesUnit || 'min');
+      }
+
+      // Output Rack Tile
+      if (elOutRackMain) {
+        elOutRackMain.textContent = res.rack.shortName;
+      }
+      if (elOutRackZone) {
+        elOutRackZone.textContent = res.rack.zoneBadge;
+        elOutRackZone.className = 'inline-flex items-center px-2 py-0.5 rounded-md border text-[10.5px] font-bold ' + getZoneClasses(res.rack.heatZoneColor);
+      }
+      if (elOutRackSlot) {
+        elOutRackSlot.textContent = (ui.slotPrefix || 'Slot') + ' ' + res.rack.slotNumber + ' / 5';
+      }
+
+      // Material + Dish Info Strip
+      if (elMatTitle) elMatTitle.textContent = res.mat.name;
+      if (elMatRulePill) elMatRulePill.textContent = res.mat.tempRuleBadge;
+      if (elMatBrowning) elMatBrowning.textContent = (ui.matBrowningLabel || 'Browning Profile') + ': ' + res.mat.browningProfile;
+      if (elMatScience) elMatScience.textContent = res.mat.scienceNote;
+      if (elMatSafety) elMatSafety.textContent = res.mat.safetyNote;
+      if (elDishTip) elDishTip.textContent = res.dish.tip;
+
+      // Highlight active dish preset button
+      dishBtns.forEach(function (btn) {
+        var active = btn.getAttribute('data-orbha-dish') === state.dishId;
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('shadow-sm', active);
+        btn.classList.toggle('bg-surface-soft', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      // Highlight active material card
+      matCards.forEach(function (card) {
+        var active = card.getAttribute('data-orbha-mat') === state.materialId;
+        card.setAttribute('aria-pressed', active ? 'true' : 'false');
+        card.classList.toggle('bg-canvas', active);
+        card.classList.toggle('border-signature-coral', active);
+        card.classList.toggle('ring-2', active);
+        card.classList.toggle('ring-signature-coral', active);
+        card.classList.toggle('shadow-sm', active);
+        card.classList.toggle('bg-surface-soft/65', !active);
+        card.classList.toggle('border-hairline', !active);
+      });
+
+      // Top Broiler Element glow
+      if (elBroilerCoil) {
+        elBroilerCoil.classList.toggle('bg-red-600/35', state.broiler);
+        elBroilerCoil.classList.toggle('border-red-400', state.broiler);
+        elBroilerCoil.classList.toggle('text-white', state.broiler);
+        elBroilerCoil.classList.toggle('shadow-sm', state.broiler);
+        elBroilerCoil.classList.toggle('bg-red-500/12', !state.broiler);
+        elBroilerCoil.classList.toggle('border-red-400/35', !state.broiler);
+        elBroilerCoil.classList.toggle('text-red-200', !state.broiler);
+      }
+
+      // 5-Rack Oven Schematic highlight
+      rackBtns.forEach(function (btn) {
+        var rId = btn.getAttribute('data-orbha-rack');
+        var isSelected = rId === state.rackId;
+        var isDishRecommended = rId === res.dish.rackId;
+        var isDangerTop = rId === 'top-broil' && !res.mat.broilerSafe && (isSelected || state.broiler);
+
+        btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+        btn.classList.remove(
+          'bg-white/14',
+          'bg-red-500/20',
+          'bg-white/5',
+          'border-signature-coral',
+          'border-red-400',
+          'border-white/12',
+          'ring-2',
+          'ring-signature-coral',
+          'ring-red-400',
+          'shadow-sm'
+        );
+
+        if (isSelected && isDangerTop) {
+          btn.classList.add('bg-red-500/20', 'border-red-400', 'ring-2', 'ring-red-400', 'shadow-sm');
+        } else if (isSelected) {
+          btn.classList.add('bg-white/14', 'border-signature-coral', 'ring-2', 'ring-signature-coral', 'shadow-sm');
+        } else {
+          btn.classList.add('bg-white/5', 'border-white/12');
+        }
+
+        var statusBadge = btn.querySelector('[data-orbha-rack-status]');
+        if (statusBadge) {
+          statusBadge.className = 'px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider';
+          if (isDangerTop) {
+            statusBadge.classList.add('bg-error-border', 'text-white');
+            statusBadge.textContent = ui.unsafeBroilTag || 'UNSAFE PAN HERE';
+          } else if (isSelected) {
+            statusBadge.classList.add('bg-signature-coral', 'text-white');
+            statusBadge.textContent = ui.activeRackTag || 'SELECTED RACK';
+          } else if (isDishRecommended) {
+            statusBadge.classList.add('bg-emerald-500/25', 'text-emerald-200', 'border', 'border-emerald-400/40');
+            statusBadge.textContent = ui.recommendedRackTag || 'IDEAL FOR DISH';
+          } else {
+            statusBadge.classList.add('hidden');
+            statusBadge.textContent = '';
+          }
+        }
+
+        var bar = btn.querySelector('[data-orbha-rack-bar]');
+        if (bar) {
+          bar.classList.remove('w-full', 'w-1/4', 'bg-signature-coral', 'bg-error-border', 'bg-white/30');
+          if (isSelected && isDangerTop) {
+            bar.classList.add('w-full', 'bg-error-border');
+          } else if (isSelected) {
+            bar.classList.add('w-full', 'bg-signature-coral');
+          } else {
+            bar.classList.add('w-1/4', 'bg-white/30');
+          }
+        }
+      });
+
+      // Right Rack Details Inspector
+      if (elRackDetailSlot) elRackDetailSlot.textContent = (ui.slotPrefix || 'Slot') + ' ' + res.rack.slotNumber + ' / 5';
+      if (elRackDetailZone) elRackDetailZone.textContent = res.rack.zoneBadge;
+      if (elRackDetailName) elRackDetailName.textContent = res.rack.name;
+      if (elRackDetailBest) elRackDetailBest.textContent = res.rack.bestFor;
+      if (elRackDetailAirflow) elRackDetailAirflow.textContent = res.rack.airflowNote;
+      if (elRackDetailWarning) elRackDetailWarning.textContent = res.rack.warning;
+    }
+
+    function buildCopySummary() {
+      var res = computeResult();
+      var lines = [];
+      lines.push(ui.copyHeader || 'IsItKitchenSafe — Adjusted Oven Settings');
+      lines.push('');
+      lines.push((ui.copyDishLine || 'Dish:') + ' ' + res.dish.name);
+      lines.push((ui.copyMaterialLine || 'Bakeware:') + ' ' + res.mat.name + ' (' + res.mat.tempRuleBadge + ')');
+      lines.push(
+        (ui.copyModeLine || 'Mode:') +
+          ' ' +
+          (state.broiler
+            ? (ui.broilerOn || 'Broiler ON')
+            : state.convection
+              ? (ui.modeConvection || 'Convection')
+              : (ui.modeConventional || 'Conventional'))
+      );
+      lines.push(
+        (ui.copyTempLine || 'Adjusted Temp:') +
+          ' ' +
+          (state.broiler ? (ui.outBroilHeadline || 'HIGH BROIL') : formatTempPair(res.adjustedTempF)) +
+          ' (' +
+          (ui.outRecipePrefix || 'Recipe:') +
+          ' ' +
+          formatTempPair(res.baseTempF) +
+          ')'
+      );
+      lines.push(
+        (ui.copyTimeLine || 'Check-Early Window:') +
+          ' ' +
+          res.timeLow +
+          '–' +
+          res.timeHigh +
+          ' ' +
+          (ui.minutesUnit || 'min') +
+          ' (' +
+          res.timeNote +
+          ')'
+      );
+      lines.push(
+        (ui.copyRackLine || 'Oven Rack:') +
+          ' ' +
+          res.rack.name +
+          ' [' +
+          (ui.slotPrefix || 'Slot') +
+          ' ' +
+          res.rack.slotNumber +
+          '/5]'
+      );
+      lines.push('');
+
+      if (res.alerts.length > 0) {
+        lines.push(ui.copyAlertsLine || 'ACTIVE SAFETY ALERTS:');
+        res.alerts.forEach(function (a, i) {
+          lines.push('  ' + (i + 1) + ') ' + a.title + ' — ' + a.body);
+        });
+      } else {
+        lines.push(ui.copySafeLine || 'Safety Status: Safe.');
+      }
+
+      return lines.join('\n');
+    }
+
+    // Event Listeners
+    dishBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var dId = btn.getAttribute('data-orbha-dish');
+        var d = dishMap[dId];
+        if (!d) return;
+        state.dishId = d.id;
+        state.recipeTempF = Number(d.baseTempF);
+        state.recipeTimeMin = Number(d.baseTimeMin);
+        state.rackId = d.rackId;
+        state.broiler = Boolean(d.broiler);
+        if (state.broiler) {
+          state.convection = false;
+        }
+        render();
+      });
+    });
+
+    unitBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var u = btn.getAttribute('data-orbha-unit');
+        if (u === 'F' || u === 'C') {
+          state.unit = u;
+          render();
+        }
+      });
+    });
+
+    if (tempInput) {
+      tempInput.addEventListener('input', function () {
+        var raw = Number(tempInput.value);
+        if (isNaN(raw) || tempInput.value === '') return;
+        if (state.unit === 'C') {
+          state.recipeTempF = clamp(cToF(raw), 200, 525);
+        } else {
+          state.recipeTempF = clamp(raw, 200, 525);
+        }
+        render('tempInput');
+      });
+      tempInput.addEventListener('change', function () {
+        render();
+      });
+    }
+
+    if (tempSlider) {
+      tempSlider.addEventListener('input', function () {
+        state.recipeTempF = clamp(Number(tempSlider.value), 200, 525);
+        render('tempSlider');
+      });
+    }
+
+    if (timeInput) {
+      timeInput.addEventListener('input', function () {
+        var raw = Number(timeInput.value);
+        if (isNaN(raw) || timeInput.value === '') return;
+        state.recipeTimeMin = clamp(Math.round(raw), 5, 240);
+        render('timeInput');
+      });
+      timeInput.addEventListener('change', function () {
+        render();
+      });
+    }
+
+    if (timeSlider) {
+      timeSlider.addEventListener('input', function () {
+        state.recipeTimeMin = clamp(Math.round(Number(timeSlider.value)), 5, 240);
+        render('timeSlider');
+      });
+    }
+
+    if (convOffBtn) {
+      convOffBtn.addEventListener('click', function () {
+        state.convection = false;
+        render();
+      });
+    }
+
+    if (convOnBtn) {
+      convOnBtn.addEventListener('click', function () {
+        state.convection = true;
+        state.broiler = false;
+        render();
+      });
+    }
+
+    if (broilOffBtn) {
+      broilOffBtn.addEventListener('click', function () {
+        state.broiler = false;
+        var currentDish = dishMap[state.dishId];
+        if (state.rackId === 'top-broil' && currentDish && !currentDish.broiler) {
+          state.rackId = currentDish.rackId;
+        }
+        render();
+      });
+    }
+
+    if (broilOnBtn) {
+      broilOnBtn.addEventListener('click', function () {
+        state.broiler = true;
+        state.convection = false;
+        state.rackId = 'top-broil';
+        render();
+      });
+    }
+
+    matCards.forEach(function (card) {
+      card.addEventListener('click', function () {
+        var mId = card.getAttribute('data-orbha-mat');
+        if (mId && materialMap[mId]) {
+          state.materialId = mId;
+          render();
+        }
+      });
+    });
+
+    rackBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var rId = btn.getAttribute('data-orbha-rack');
+        if (rId && rackMap[rId]) {
+          state.rackId = rId;
+          render();
+        }
+      });
+    });
+
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        var text = buildCopySummary();
+        var showCopied = function () {
+          if (copyLabel) copyLabel.textContent = ui.copiedBtn || 'Settings Copied ✓';
+          window.setTimeout(function () {
+            if (copyLabel) copyLabel.textContent = '📋 ' + (ui.copyBtn || 'Copy Adjusted Settings');
+          }, 2200);
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(showCopied).catch(showCopied);
+        } else {
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'absolute';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          try {
+            document.execCommand('copy');
+          } catch (_) {
+            // ignore
+          }
+          document.body.removeChild(ta);
+          showCopied();
+        }
+      });
+    }
+
+    if (printBtn) {
+      printBtn.addEventListener('click', function () {
+        window.print();
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function () {
+        var d = dishMap[payload.defaultDishId] || dishes[0];
+        var m = materialMap[payload.defaultMaterialId] || materials[0];
+        state.dishId = d ? d.id : 'cookies';
+        state.materialId = m ? m.id : 'bright-aluminum';
+        state.rackId = d ? d.rackId : 'center';
+        state.recipeTempF = d ? Number(d.baseTempF) : 350;
+        state.recipeTimeMin = d ? Number(d.baseTimeMin) : 11;
+        state.unit = payload.defaultUnit === 'C' ? 'C' : 'F';
+        state.convection = false;
+        state.broiler = false;
+        render();
+      });
+    }
+
+    render();
+  })();
+</script>

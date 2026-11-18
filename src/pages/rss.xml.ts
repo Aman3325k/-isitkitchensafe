@@ -44,6 +44,20 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/oven-rack-bakeware-heat-adjuster/',
+    title: 'Oven Rack Position, Convection & Bakeware Material Heat Adjuster',
+    description:
+      'Calculate exact baking temperature and time adjustments across 6 pan materials (bright aluminum, dark nonstick, glass Pyrex, ceramic stoneware, cast iron, silicone) and 10 classic dishes — with interactive 5-rack oven visualization, convection fan conversion (-25°F / -15°C), and broiler thermal-shock safety alerts.',
+    date: '2026-11-18',
+  },
+  {
+    path: '/tools/moldy-food-safety-checker/',
+    title: 'USDA Moldy Food Cut-Around vs. Throw-Out Safety Checker',
+    description:
+      'Check the official USDA FSIS chart for 24 moldy foods: when you can safely cut 1 inch (2.5 cm) around hard cheese, salami, or firm veggies vs. when invisible mold roots & mycotoxins mean discarding bread, berries, jam, cream cheese, peanut butter, and leftovers.',
+    date: '2026-11-18',
+  },
+  {
     path: '/tools/food-allergy-cross-contact-checker/',
     title: 'Kitchen Food Allergy & Cross-Contact Cleaning/Cookware Safety Checker',
     description:

@@ -1,6 +1,8 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import type { SupportedLanguage } from '../../i18n/ui';
+import { getDirectoryUrl, useTranslatedPath, useTranslations } from '../../i18n/utils';
 
 export function getStaticPaths() {
   const allLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -8,7 +10,7 @@ export function getStaticPaths() {
     { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales: allLocales } },
     { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales: allLocales } },
     { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales: allLocales } },
-    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales: allLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales: allLocales } }
   ];
 }
 
@@ -17,225 +19,1099 @@ interface Props {
   availableLocales: SupportedLanguage[];
 }
 
-const { lang, availableLocales } = Astro.props;
+interface MetricCard {
+  value: string;
+  label: string;
+  detail: string;
+}
 
-const contentByLang = {
-  ja: {
-    title: "運営者情報・情報収集方法 | キッチン安全チェッカー",
-    description: "キッチン安全チェッカー（IsItKitchenSafe）の運営理念と、公的機関およびメーカー取扱説明書に基づく情報収集方法についてご紹介します。キッチンの安全を守る独立したリファレンスガイドです。",
-    faqs: [
-      {
-        question: "なぜキッチン安全チェッカーが作られたのですか？",
-        answer: "どの調理器具や食品が家電に対応しているかを正確に把握していないことで生じる、偶発的な火災、家電の故障、食器の破損を防ぐためです。公的基準に基づく素早く明確な回答を提供します。"
-      },
-      {
-        question: "「安全」「危険」「条件付き」の各判定は何を意味していますか？",
-        answer: "「安全（YES）」はその家電の環境に耐えられる設計であること、「危険（NO）」は危険が生じるか器具や家電が破損すること、「条件付き（DEPENDS）」は上段のみ、食品の重みが必要など特定の条件でのみ安全であることを示します。"
-      }
-    ],
-    h1: "キッチン安全チェッカーについて",
-    introLead: "キッチンの安全確認を、シンプルに、素早く、そして確実に。不要な前置きやクリックベイト（釣り記事）は一切排除し、「これを入れても大丈夫？」という疑問に、公的ガイドラインに基づいた明確な答えを即座にお届けします。",
-    missionTitle: "私たちのミッション",
-    missionP1: "毎年、数多くの家庭で「電子レンジ、食洗機、オーブン、冷凍庫に入れても安全かどうか分からない」という些細な疑問から、偶発的な火災、家電の故障、大切な食器の破損が発生しています。",
-    missionP2: "「キッチン安全チェッカー（Is It Kitchen Safe?）」は、忙しい現代の家庭料理人のためのクイックリファレンスとして設立されました。即座に確認できる明確な判定を提供し、家電を守り、食器を長持ちさせ、安心できる住まいをサポートします。",
-    methodologyTitle: "情報源とデータ収集方針",
-    methodologyP1: "当サイトは個人によって運営される独立したデジタルリファレンスです。独自の実験室テストや科学的主張は行っておらず、すべての内容は公的機関の規制基準、材料科学の基礎文献、およびメーカー公式の取扱説明書から直接収集・整理されています。",
-    sourcesTitle: "主な公開情報源",
-    source1: "公的規制機関：食品の保存方法、賞味期限、冷凍基準については、米国農務省食品安全検査局（USDA FSIS）および米国食品医薬品局（FDA）の公開ガイドラインと照合しています。",
-    source2: "メーカー公式マニュアル：各調理器具・容器の耐熱限界や構造（Pyrex、Corelle、Yeti、Hydro Flaskなど）の公式マニュアルに記載された注意事項を収集・整理しています。",
-    criteriaTitle: "材料特性データ",
-    criteria1: "材料科学：熱衝撃、マイクロ波照射、食洗機の高圧水流に対する各素材の既知の特性を要約しています。",
-    criteria2: "食品接触安全性：高温下でのプラスチックからのBPA溶出規制や強アルカリ洗剤による金属腐食に関するFDA等の公開知見を整理しています。",
-    verdictsLead: "当サイトでは、すべてのアイテムを以下の3つの判定基準に分類しています：",
-    verdictYesTitle: "安全（YES）",
-    verdictYesDesc: "メーカー仕様および既知の素材特性に基づき、物理的損傷や既知のリスクなしに耐えられると判断される場合。",
-    verdictNoTitle: "危険（NO）",
-    verdictNoDesc: "危険が生じるか、火災、破損、有害物質の放出、または器具や家電の故障を引き起こす可能性がある場合。",
-    verdictDependsTitle: "条件付き（DEPENDS）",
-    verdictDependsDesc: "特定の条件（食洗機の上段ラック限定、乾燥加熱サイクルの不使用、食品の重みが必要など）でのみ安全とされる場合。",
-    disclaimerTitle: "重要な免責事項",
-    disclaimerText: "公的な情報源およびメーカーの取扱説明書を基に細心の注意を払って整理しておりますが、製品の素材や仕様はブランドや製造年によって異なる場合があります。当サイトは一般的な参考情報を提供するものであり、疑問がある場合は必ず調理器具の底面にある表示やメーカーの公式マニュアルをご確認ください。"
-  },
-  'zh-cn': {
-    title: "关于我们与信息来源 | 厨房安全指南",
-    description: "了解厨房安全指南（IsItKitchenSafe）的初衷与公开指南整理方法，为您提供基于官方规程与原厂手册的厨房电器兼容性速查参考。",
-    faqs: [
-      {
-        question: "创立“厨房安全指南”的初衷是什么？",
-        answer: "我们致力于防止因不确定物品是否适用于微波炉、洗碗机、烤箱或冷冻室而导致的意外火灾、餐具损坏和电器故障。通过即时、直接且有据可查的解答，让家庭厨房更安全。"
-      },
-      {
-        question: "“安全”、“危险”和“视情况而定”分别代表什么？",
-        answer: "“安全（YES）”表示该物品专为承受相应电器环境而设计；“危险（NO）”表示会产生安全隐患或造成永久损坏；“视情况而定（DEPENDS）”表示仅在特定规则下安全（如仅限顶层架或需配合食物重量）。"
-      }
-    ],
-    h1: "关于厨房安全指南",
-    introLead: "让厨房安全验证变得简单、迅速且可靠。没有任何冗长赘述或点击诱饵——只针对您关心的“这件物品可以放进去吗？”提供立竿见影、基于公开权威指南的明确解答。",
-    missionTitle: "我们的使命",
-    missionP1: "每年，成千上万的家庭因不确定某件器皿或食材是否适用于微波炉、洗碗机、烤箱或冷冻室，从而引发意外起火、电器报废以及高价餐具毁损。",
-    missionP2: "“厨房安全指南（Is It Kitchen Safe?）”旨在为家庭烹饪者打造实用的速查手册。我们提供明确的是/否裁定，帮助您保护家用电器、爱护精致餐具，守护居家生活的每一份安全。",
-    methodologyTitle: "公开数据来源与整理方法",
-    methodologyP1: "本指南由独立发布者维护，旨在为日常烹饪提供速查参考。我们不进行实验室测试，也不提出未经证实的专有学术结论；所有条目均直接汇总自公开的监管指南、材料科学文献与制造商原厂使用说明书。",
-    sourcesTitle: "公开信息渠道",
-    source1: "官方监管机构：食品保鲜期、保质期及冷冻储存指南均参考美国农业部食品安全检验局（USDA FSIS）与美国食品药品监督管理局（FDA）的公开指南。",
-    source2: "制造商原厂手册：整理各大主流品牌官方说明书（例如 Pyrex、Corelle、Yeti、Hydro Flask 等）中注明的耐温极限与注意事项。",
-    criteriaTitle: "材料特性说明",
-    criteria1: "材料科学机理：总结材料在热应力、微波电磁辐射及洗碗机高压水流环境下的已知耐受表现。",
-    criteria2: "食品接触安全性：汇总关于高温环境下塑料 BPA 迁移防护及强碱洗涤剂导致金属腐蚀的公开规范与提示。",
-    verdictsLead: "我们对每一种物品与电器的组合划分为以下三种明确状态：",
-    verdictYesTitle: "安全（YES）",
-    verdictYesDesc: "基于制造商技术规格与材料固有特性，该物品在正常使用下无物理破损或已知安全隐患。",
-    verdictNoTitle: "危险（NO）",
-    verdictNoDesc: "放入该电器具有破坏性或安全隐患，可能引发火灾、健康损害或造成器皿与电器的永久性损坏。",
-    verdictDependsTitle: "视情况而定（DEPENDS）",
-    verdictDependsDesc: "仅在满足特定条件时方可安全使用（例如仅限放置于洗碗机顶层架、禁用电热烘干循环，或内部需盛装食物）。",
-    disclaimerTitle: "重要免责声明",
-    disclaimerText: "尽管我们尽最大努力核对公开官方规范与厂家说明，不同批次和具体型号的厨具材质仍可能存在差异。本站内容仅供一般信息参考；如有任何疑问，请务必优先遵循器皿底部的官方标示或电器原厂说明书。"
-  },
+interface CommitmentCard {
+  eyebrow: string;
+  title: string;
+  body: string;
+}
+
+interface UtilityCard {
+  path: string;
+  tag: string;
+  title: string;
+  desc: string;
+}
+
+interface ProcessStep {
+  lead: string;
+  body: string;
+}
+
+interface AboutLocaleContent {
+  title: string;
+  description: string;
+  siteName: string;
+  eyebrow: string;
+  h1: string;
+  introLead: string;
+  metricsHeadingSr: string;
+  metrics: MetricCard[];
+  commitmentsEyebrow: string;
+  commitmentsHeading: string;
+  commitments: CommitmentCard[];
+  ctaTitle: string;
+  ctaBody: string;
+  ctaMethodology: string;
+  ctaContact: string;
+  missionTitle: string;
+  missionP1: string;
+  missionP2: string;
+  methodologyTitle: string;
+  methodologyLeadBeforeLink: string;
+  methodologyLinkLabel: string;
+  methodologyLeadAfterLink: string;
+  processSteps: ProcessStep[];
+  sourcesTitle: string;
+  source1: string;
+  source2: string;
+  criteriaTitle: string;
+  criteria1: string;
+  criteria2: string;
+  verdictsHeading: string;
+  verdictYesBadge: string;
+  verdictYesDesc: string;
+  verdictDependsBadge: string;
+  verdictDependsDesc: string;
+  verdictNoBadge: string;
+  verdictNoDesc: string;
+  utilitiesEyebrow: string;
+  utilitiesHeading: string;
+  utilitiesBrowseAll: string;
+  utilitiesOpenLabel: string;
+  utilities: UtilityCard[];
+  correctionsTitle: string;
+  correctionsP1: string;
+  correctionsP2: string;
+  contactBoxTitle: string;
+  pubLabel: string;
+  pubValue: string;
+  editorialLabel: string;
+  supportLabel: string;
+  hqLabel: string;
+  hqValue: string;
+  footerLinkMethodology: string;
+  footerLinkContact: string;
+  disclaimerTitle: string;
+  disclaimerText: string;
+  knowsAbout: string[];
+}
+
+const { lang, availableLocales } = Astro.props;
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+
+const contentByLang: Record<'es' | 'pt' | 'zh-cn' | 'ja', AboutLocaleContent> = {
   es: {
-    title: "Sobre Nosotros y Fuentes | ¿Es Seguro en la Cocina?",
-    description: "Conoce la misión y el método de recopilación de pautas públicas de IsItKitchenSafe, tu guía de referencia independiente sobre compatibilidad con electrodomésticos.",
-    faqs: [
+    title: 'Sobre Nosotros, Estándares Editoriales y Plataforma | ¿Es Seguro en la Cocina?',
+    description:
+      'Conoce la misión, independencia editorial y estándares de IsItKitchenSafe: más de 10.900 páginas verificadas, 45+ calculadoras gratuitas, 5 idiomas nativos y 10 normas regulatorias citadas.',
+    siteName: '¿Es Seguro en la Cocina?',
+    eyebrow: 'Autoridad Editorial y Plataforma Independiente',
+    h1: 'Acerca de ¿Es Seguro en la Cocina?',
+    introLead:
+      'Una referencia digital independiente dedicada a prevenir accidentes domésticos, daños a electrodomésticos, migración química tóxica y enfermedades transmitidas por alimentos mediante investigación transparente basada en normas públicas.',
+    metricsHeadingSr: 'Métricas verificadas de escala y confianza de la plataforma',
+    metrics: [
       {
-        question: "¿Por qué se creó ¿Es Seguro en la Cocina? (IsItKitchenSafe)?",
-        answer: "Fue creado para prevenir incendios accidentales, electrodomésticos dañados y vajilla rota al proporcionar respuestas rápidas, directas y fundamentadas sobre la seguridad en la cocina."
+        value: '10,900+',
+        label: 'Páginas de Referencia Verificadas',
+        detail: 'Compatibilidad de electrodomésticos, vida útil, recongelación, materiales y triaje de riesgos.'
       },
       {
-        question: "¿Qué significan los veredictos SÍ, NO y DEPENDE?",
-        answer: "SÍ significa que el artículo está diseñado para resistir el electrodoméstico. NO significa que es peligroso o arruinará el artículo o aparato. DEPENDE significa que es seguro solo bajo reglas específicas (como bandeja superior o con peso de comida)."
+        value: '5',
+        label: 'Idiomas Nativos',
+        detail: 'EN · ES · PT · 中文 · 日本語 — adaptados con terminología local y unidades claras.'
+      },
+      {
+        value: '45+',
+        label: 'Calculadoras Cotidianas',
+        detail: '196 herramientas interactivas totales de hogar y laboratorio técnico, sin registro.'
+      },
+      {
+        value: '10',
+        label: 'Normas Regulatorias Citadas',
+        detail: 'USDA FSIS, FDA 21 CFR, NSF/ANSI, AAP/CDC, FARE, AOCS, ASTM, EU BfR, EPA, NIST/IEEE.'
       }
     ],
-    h1: "Acerca de ¿Es Seguro en la Cocina?",
-    introLead: "Hacemos que la seguridad en la cocina sea simple, rápida y confiable. Sin rodeos ni contenido engañoso: solo respuestas inmediatas y basadas en directrices públicas a tus preguntas de '¿Puedo meter esto ahí?'.",
-    missionTitle: "Nuestra Misión",
-    missionP1: "Cada año, miles de hogares sufren incendios accidentales, electrodomésticos arruinados y vajillas rotas simplemente porque alguien no estaba seguro de si un artículo era seguro para el microondas, lavavajillas, horno o congelador.",
-    missionP2: "IsItKitchenSafe se fundó como la guía de referencia rápida para cocineros del hogar. Brindamos veredictos claros de sí/no para proteger tus electrodomésticos, preservar tus utensilios y mantener tu hogar seguro.",
-    methodologyTitle: "Fuentes y Metodología de Recopilación",
-    methodologyP1: "IsItKitchenSafe es un recurso de referencia digital independiente creado para cocineros del hogar. No realizamos ensayos de laboratorio ni emitimos afirmaciones científicas propias; cada entrada se compila directamente a partir de normativas regulatorias públicas, literatura de ciencia de materiales y manuales oficiales del fabricante.",
-    sourcesTitle: "Canales de Información Pública",
-    source1: "Pautas Regulatorias: Consultamos directrices públicas del Servicio de Inocuidad e Inspección de los Alimentos del USDA (USDA FSIS) y de la FDA para almacenamiento, temperaturas y conservación de alimentos.",
-    source2: "Manuales del Fabricante: Catalogamos tolerancias térmicas e instrucciones publicadas por marcas líderes (Pyrex, Corelle, Yeti, Hydro Flask, etc.).",
-    criteriaTitle: "Datos Técnicos de Materiales",
-    criteria1: "Ciencia de Materiales: Resumimos las respuestas establecidas de los materiales al choque térmico, la radiación de microondas y el lavado mecánico.",
-    criteria2: "Seguridad de Contacto Alimentario: Recopilamos normativas públicas de la FDA sobre límites de temperatura, BPA en plásticos y exposición a detergentes cáusticos.",
-    verdictsLead: "Clasificamos cada combinación de artículo y electrodoméstico en tres estados claros:",
-    verdictYesTitle: "Seguro (SÍ)",
-    verdictYesDesc: "Basado en especificaciones del fabricante y propiedades del material para soportar el ciclo sin daño físico ni riesgos conocidos.",
-    verdictNoTitle: "Inseguro (NO)",
-    verdictNoDesc: "Peligroso o destructivo. Puede provocar incendios, roturas, liberación de químicos nocivos o arruinar el electrodoméstico.",
-    verdictDependsTitle: "Condicional (DEPENDE)",
-    verdictDependsDesc: "Seguro únicamente bajo reglas específicas (solo rejilla superior, sin ciclo de calor seco, o con requisitos de peso mínimo de alimentos).",
-    disclaimerTitle: "Aviso Importante",
-    disclaimerText: "Aunque recopilamos y cotejamos cada guía con fuentes públicas oficiales, los materiales pueden variar según la marca, modelo y año. Este sitio tiene fines informativos; en caso de duda, priorice siempre los símbolos oficiales grabados en el utensilio o su manual del fabricante."
+    commitmentsEyebrow: 'Compromiso con el Lector',
+    commitmentsHeading: 'Independencia Editorial, Sin Muros de Pago y Evidencia Primaria',
+    commitments: [
+      {
+        eyebrow: '100% Independencia Editorial',
+        title: 'Sin Patrocinios de Marcas ni Veredictos Pagados',
+        body: 'Cada veredicto (SÍ, DEPENDE o NO) se audita exclusivamente frente a normativas regulatorias públicas, física de materiales y manuales OEM. Ninguna marca de utensilios o electrodomésticos puede patrocinar ni modificar una calificación.'
+      },
+      {
+        eyebrow: 'Acceso Libre Sin Muro de Pago',
+        title: 'Siempre Gratuito, Directo y Sin Registro',
+        body: 'La seguridad en casa nunca debe ocultarse tras suscripciones ni rellenos interminables. Nuestras más de 10.900 guías, 45+ calculadoras cotidianas y hojas imprimibles para el refrigerador son 100% gratuitas.'
+      },
+      {
+        eyebrow: 'Verificación Basada en Evidencia',
+        title: 'Fuentes Primarias y Correcciones en 48 Horas',
+        body: 'Cada recomendación se sustenta en códigos federales y estándares de ingeniería, no en mitos virales. Si cambia un manual del fabricante o un lector reporta un error, nuestro equipo revisa las fuentes en un plazo de 48 horas hábiles.'
+      }
+    ],
+    ctaTitle: 'Consulta Nuestra Metodología o Envía una Actualización de Fuente',
+    ctaBody:
+      'Explora los 10 estándares regulatorios y tablas de límites térmicos en nuestra página de Metodología, o escribe directamente al equipo editorial.',
+    ctaMethodology: 'Ver Metodología',
+    ctaContact: 'Contactar al Equipo',
+    missionTitle: 'Nuestra Misión y Propósito',
+    missionP1:
+      'Cada año, miles de hogares sufren incidentes evitables en la cocina: chispas en el microondas por bordes metálicos, recipientes de vidrio que estallan por choque térmico, plásticos deformados en el lavavajillas, gases tóxicos por mezclar limpiadores e intoxicaciones tras cortes de energía.',
+    missionP2:
+      'IsItKitchenSafe nació para ofrecer respuestas claras, inmediatas y fundamentadas a la pregunta: "¿Puedo meter esto en mi electrodoméstico o consumir este alimento con seguridad?" Eliminamos el ruido publicitario para entregar veredictos confiables respaldados por normativas y manuales técnicos.',
+    methodologyTitle: 'Proceso de Investigación y Verificación en 4 Etapas',
+    methodologyLeadBeforeLink:
+      'Cada guía publicada en isitkitchensafe.com se verifica mediante cuatro etapas estructuradas (consulta las tablas completas en nuestra ',
+    methodologyLinkLabel: 'Metodología de Verificación',
+    methodologyLeadAfterLink: '):',
+    processSteps: [
+      {
+        lead: 'Línea Base Regulatoria:',
+        body: 'Cotejamos protocolos de inocuidad alimentaria y contacto con alimentos frente a USDA FSIS FoodKeeper, FDA 21 CFR (Partes 174–178), Código Alimentario FDA, CDC/AAP, FARE, EPA y EU BfR / EFSA.'
+      },
+      {
+        lead: 'Auditoría de Manuales del Fabricante (OEM):',
+        body: 'Revisamos especificaciones originales de tolerancia térmica (vidrio borosilicato vs. cal-sosa, acero inoxidable con sello al vacío, revestimientos PTFE/PFAS y papel de horno en freidoras de aire).'
+      },
+      {
+        lead: 'Ciencia de Materiales y Peligros Físicos:',
+        body: 'Evaluamos la respuesta de polímeros, metales, cerámicas y maderas al calentamiento dieléctrico del microondas, detergentes alcalinos (pH >10), choque térmico y cristalización bajo cero.'
+      },
+      {
+        lead: 'Consenso y Clasificación del Veredicto:',
+        body: 'Asignamos un veredicto inequívoco (SÍ, DEPENDE o NO) acompañado de límites de temperatura, ubicación en rejillas y explicación del riesgo.'
+      }
+    ],
+    sourcesTitle: 'Fuentes Públicas Primarias',
+    source1:
+      'Autoridades Regulatorias: USDA FSIS, FDA 21 CFR, NSF/ANSI 51 y 184, CDC/AAP, FARE, EPA y EU BfR para inocuidad alimentaria, alérgenos y materiales en contacto con alimentos.',
+    source2:
+      'Manuales Oficiales del Fabricante: Límites térmicos e instrucciones publicadas por marcas líderes de utensilios y electrodomésticos (Pyrex, Corelle, Yeti, Hydro Flask, Instant Pot, entre otros).',
+    criteriaTitle: 'Criterios Técnicos de Materiales',
+    criteria1:
+      'Física Térmica y Eléctrica: Límites de choque térmico (ASTM C148), arcos eléctricos por metales en microondas y estabilidad oxidativa de aceites (AOCS / Codex).',
+    criteria2:
+      'Química de Contacto y Limpieza: Degradación de polímeros bajo calor, corrosión por detergentes cáusticos y reactividad de limpiadores domésticos.',
+    verdictsHeading: 'Definición de Nuestros Veredictos de Seguridad',
+    verdictYesBadge: 'SÍ (SEGURO)',
+    verdictYesDesc:
+      'Diseñado y documentado para resistir el entorno del electrodoméstico sin daño físico, migración tóxica ni riesgo de incendio.',
+    verdictDependsBadge: 'DEPENDE (CONDICIONAL)',
+    verdictDependsDesc:
+      'Seguro únicamente bajo reglas estrictas: solo rejilla superior, sin ciclo de secado térmico, sin tapa metálica o dentro de límites de temperatura precisos.',
+    verdictNoBadge: 'NO (INSEGURO)',
+    verdictNoDesc:
+      'Peligroso o destructivo. Presenta riesgo documentado de incendio, chispas, rotura por choque térmico, lixiviación química o daño permanente al aparato.',
+    utilitiesEyebrow: 'Herramientas Interactivas Gratuitas',
+    utilitiesHeading: 'Utilidades de Seguridad en la Cocina Más Populares',
+    utilitiesBrowseAll: 'Explorar todas las calculadoras →',
+    utilitiesOpenLabel: 'Abrir herramienta →',
+    utilities: [
+      {
+        path: '/tools/kitchen-symbol-decoder/',
+        tag: 'Decodificador Visual',
+        title: 'Decodificador de Símbolos de Cocina',
+        desc: 'Identifica los iconos de lavavajillas, microondas, horno, congelador y resinas grabados en tus recipientes.'
+      },
+      {
+        path: '/tools/power-outage-food-safety-checker/',
+        tag: 'Triaje de Emergencia',
+        title: 'Verificador de Alimentos tras Apagón',
+        desc: 'Calcula qué conservar o desechar en nevera y congelador según las reglas USDA de 4h / 24h / 48h.'
+      },
+      {
+        path: '/tools/moldy-food-safety-checker/',
+        tag: 'Guía USDA',
+        title: 'Verificador de Alimentos con Moho',
+        desc: 'Comprueba qué alimentos duros pueden recortarse 2,5 cm y qué alimentos blandos deben desecharse.'
+      },
+      {
+        path: '/tools/cleaner-mixing-danger-checker/',
+        tag: 'Seguridad Química',
+        title: 'Verificador de Mezclas de Limpiadores',
+        desc: 'Comprueba combinaciones de lejía, vinagre, amoníaco y peróxido antes de mezclar para evitar gases tóxicos.'
+      },
+      {
+        path: '/tools/fridge-organization-zone-planner/',
+        tag: 'Organización Segura',
+        title: 'Planificador de Zonas del Refrigerador',
+        desc: 'Ubica carnes crudas, lácteos, verduras y sobras en zonas térmicas seguras contra la contaminación cruzada.'
+      },
+      {
+        path: '/saved/',
+        tag: 'Hoja Imprimible',
+        title: 'Hoja de Referencia Imprimible para Nevera',
+        desc: 'Guarda tus veredictos favoritos del hogar e imprime una guía rápida y clara para tu cocina.'
+      }
+    ],
+    correctionsTitle: 'Estándares Editoriales y Política de Correcciones',
+    correctionsP1:
+      'No aceptamos espacios pagados, clasificaciones patrocinadas ni compensaciones comerciales que puedan sesgar nuestras evaluaciones de seguridad. Si un fabricante modifica la formulación de un producto o detectas un dato desactualizado, te invitamos a informarnos.',
+    correctionsP2:
+      'Todas las correcciones reportadas se verifican contra documentación primaria y se actualizan en un máximo de 48 horas hábiles.',
+    contactBoxTitle: 'Información del Editor y Contacto Editorial',
+    pubLabel: 'Publicación:',
+    pubValue: '¿Es Seguro en la Cocina? (isitkitchensafe.com)',
+    editorialLabel: 'Consultas Editoriales y Correcciones:',
+    supportLabel: 'Soporte General:',
+    hqLabel: 'Sede Editorial:',
+    hqValue: 'IsItKitchenSafe Research Group, 548 Market St, Suite 29148, San Francisco, CA 94104',
+    footerLinkMethodology: 'Ver Metodología Completa de Verificación →',
+    footerLinkContact: 'Enviar una Corrección o Sugerencia →',
+    disclaimerTitle: 'Aviso Importante',
+    disclaimerText:
+      'Aunque recopilamos y verificamos cada guía con normas públicas oficiales y manuales de fabricantes, los materiales y especificaciones pueden variar según marca, modelo y año. Ante cualquier duda, prioriza siempre los símbolos grabados en el utensilio y el manual oficial de tu aparato.',
+    knowsAbout: [
+      'Normas USDA FSIS FoodKeeper y Temperaturas Internas Seguras',
+      'FDA 21 CFR Materiales en Contacto con Alimentos',
+      'NSF/ANSI 51 y 184 Equipamiento Alimentario y Lavavajillas',
+      'CDC y AAP Seguridad en Alimentación Infantil',
+      'FARE y Ley FASTER Alérgenos Alimentarios',
+      'AOCS Puntos de Humo de Aceites Culinarios',
+      'ASTM C148 Choque Térmico en Vidrio de Cocina',
+      'EU BfR y EFSA Seguridad de Compuestos de Melamina y Bambú',
+      'EPA Seguridad Química de Limpiadores Domésticos',
+      'NIST, UL e IEEE Seguridad de Electrodomésticos e Inducción'
+    ]
   },
   pt: {
-    title: "Sobre Nós e Metodologia | É Seguro na Cozinha?",
-    description: "Conheça a missão e a metodologia de compilação de orientações públicas do IsItKitchenSafe, seu guia de referência independente de compatibilidade com eletrodomésticos.",
-    faqs: [
+    title: 'Sobre Nós, Padrões Editoriais e Plataforma | É Seguro na Cozinha?',
+    description:
+      'Conheça a missão, independência editorial e padrões do IsItKitchenSafe: mais de 10.900 páginas verificadas, 45+ calculadoras gratuitas, 5 idiomas nativos e 10 normas regulatórias citadas.',
+    siteName: 'É Seguro na Cozinha?',
+    eyebrow: 'Autoridade Editorial e Plataforma Independente',
+    h1: 'Sobre o É Seguro na Cozinha?',
+    introLead:
+      'Uma referência digital independente dedicada a prevenir acidentes domésticos, danos a eletrodomésticos, migração química tóxica e doenças transmitidas por alimentos por meio de pesquisa transparente baseada em normas públicas.',
+    metricsHeadingSr: 'Métricas verificadas de escala e confiança da plataforma',
+    metrics: [
       {
-        question: "Por que o É Seguro na Cozinha (IsItKitchenSafe) foi criado?",
-        answer: "Foi criado para prevenir incêndios acidentais, eletrodomésticos danificados e louças quebradas, oferecendo respostas rápidas, diretas e fundamentadas sobre segurança na cozinha."
+        value: '10,900+',
+        label: 'Páginas de Referência Verificadas',
+        detail: 'Compatibilidade de aparelhos, validade, recongelamento, materiais e triagem de riscos.'
       },
       {
-        question: "O que significam os veredictos SIM, NÃO e DEPENDE?",
-        answer: "SIM significa que o item foi projetado para resistir ao eletrodoméstico. NÃO significa que é perigoso ou danificará o item ou aparelho. DEPENDE significa que é seguro apenas sob regras específicas (como prateleira superior ou com peso de alimentos)."
+        value: '5',
+        label: 'Idiomas Nativos',
+        detail: 'EN · ES · PT · 中文 · 日本語 — localizados com terminologia clara e unidades regionais.'
+      },
+      {
+        value: '45+',
+        label: 'Calculadoras do Dia a Dia',
+        detail: '196 ferramentas interativas totais para casa e laboratório técnico, sem cadastro.'
+      },
+      {
+        value: '10',
+        label: 'Normas Regulatórias Citadas',
+        detail: 'USDA FSIS, FDA 21 CFR, NSF/ANSI, AAP/CDC, FARE, AOCS, ASTM, EU BfR, EPA, NIST/IEEE.'
       }
     ],
-    h1: "Sobre o É Seguro na Cozinha",
-    introLead: "Tornamos a segurança na cozinha simples, rápida e confiável. Sem enrolação ou clickbait: apenas respostas imediatas e baseadas em diretrizes públicas para suas dúvidas de 'Posso colocar isso aí?'.",
-    missionTitle: "Nossa Missão",
-    missionP1: "Todos os anos, milhares de lares sofrem incêndios acidentais, eletrodomésticos arruinados e louças quebradas simplesmente porque alguém não tinha certeza se um item era seguro para micro-ondas, lava-louças, forno ou freezer.",
-    missionP2: "O IsItKitchenSafe foi fundado como o guia de referência rápida para quem cozinha em casa. Fornecemos veredictos claros de sim/não para proteger seus eletrodomésticos, preservar seus utensílios e manter seu lar seguro.",
-    methodologyTitle: "Fontes e Metodologia de Compilação",
-    methodologyP1: "O IsItKitchenSafe é uma referência digital independente desenvolvida para quem cozinha em casa. Não realizamos testes de laboratório nem emitimos pareceres científicos proprietários; todas as informações são compiladas diretamente de normas regulatórias públicas, referências de ciência dos materiais e manuais oficiais dos fabricantes.",
-    sourcesTitle: "Canais de Informação Pública",
-    source1: "Diretrizes Regulatórias: Consultamos orientações públicas do Serviço de Segurança e Inspeção de Alimentos do USDA (USDA FSIS) e da FDA para armazenamento, temperaturas e congelamento de alimentos.",
-    source2: "Manuais do Fabricante: Indexamos limites térmicos e recomendações publicadas pelas principais marcas (Pyrex, Corelle, Yeti, Hydro Flask, etc.).",
-    criteriaTitle: "Dados Técnicos de Materiais",
-    criteria1: "Ciência dos Materiais: Resumimos as respostas comprovadas dos materiais ao choque térmico, à radiação de micro-ondas e à pressão da água em lava-louças.",
-    criteria2: "Segurança no Contato com Alimentos: Analisamos diretrizes públicas da FDA sobre liberação de BPA sob aquecimento e resistência a detergentes cáusticos.",
-    verdictsLead: "Classificamos cada combinação de item e eletrodoméstico em três status claros:",
-    verdictYesTitle: "Seguro (SIM)",
-    verdictYesDesc: "Com base nas especificações do fabricante e características do material, o item resiste ao ciclo sem danos físicos nem riscos conhecidos.",
-    verdictNoTitle: "Inseguro (NÃO)",
-    verdictNoDesc: "Perigoso ou destrutivo. Pode provocar incêndios, quebra, liberação de químicos nocivos ou arruinar o eletrodoméstico.",
-    verdictDependsTitle: "Condicional (DEPENDE)",
-    verdictDependsDesc: "Seguro apenas sob regras específicas (somente prateleira superior, sem ciclo de secagem com calor, ou com requisitos de peso mínimo de alimento).",
-    disclaimerTitle: "Aviso Importante",
-    disclaimerText: "Embora nossas análises sejam compiladas a partir de fontes públicas oficiais, materiais e modelos podem mudar ao longo do tempo. Este site tem finalidade exclusivamente informativa; em caso de dúvida, priorize sempre os símbolos gravados na peça ou seu manual oficial."
+    commitmentsEyebrow: 'Compromisso com o Leitor',
+    commitmentsHeading: 'Independência Editorial, Sem Paywall e Evidência Primária',
+    commitments: [
+      {
+        eyebrow: '100% Independência Editorial',
+        title: 'Sem Patrocínios de Marcas nem Veredictos Pagos',
+        body: 'Cada veredicto (SIM, DEPENDE ou NÃO) é auditado exclusivamente frente a normas regulatórias públicas, ciência dos materiais e manuais OEM. Nenhuma marca de panelas ou eletrodomésticos pode patrocinar ou alterar uma avaliação.'
+      },
+      {
+        eyebrow: 'Utilidade Pública Sem Paywall',
+        title: 'Sempre Gratuito, Instantâneo e Sem Login',
+        body: 'Segurança na cozinha nunca deve ficar atrás de assinaturas ou textos prolixos. Todas as 10.900+ páginas de referência, 45+ calculadoras cotidianas e folhas imprimíveis para geladeira são 100% gratuitas.'
+      },
+      {
+        eyebrow: 'Verificação Baseada em Evidências',
+        title: 'Citações Primárias e Correções em 48 Horas',
+        body: 'Cada orientação se baseia em códigos federais e padrões de engenharia, nunca em boatos. Quando um fabricante atualiza especificações ou um leitor aponta divergências, nossa equipe revisa em até 48 horas úteis.'
+      }
+    ],
+    ctaTitle: 'Explore Nossa Metodologia ou Envie uma Atualização de Fonte',
+    ctaBody:
+      'Veja todas as 10 normas regulatórias citadas e tabelas térmicas na página de Metodologia, ou envie correções diretamente à nossa equipe editorial.',
+    ctaMethodology: 'Ler Metodologia',
+    ctaContact: 'Falar com a Redação',
+    missionTitle: 'Nossa Missão e Propósito',
+    missionP1:
+      'Todos os anos, milhares de lares enfrentam incidentes evitáveis na cozinha: faíscas no micro-ondas por detalhes metálicos, travessas de vidro estilhaçadas por choque térmico, plásticos deformados na lava-louças, gases tóxicos ao misturar produtos de limpeza e intoxicações após quedas de energia.',
+    missionP2:
+      'O IsItKitchenSafe foi criado para entregar respostas diretas, confiáveis e fundamentadas à pergunta: "Posso colocar isso com segurança no meu aparelho ou consumir este alimento?" Eliminamos distrações para fornecer veredictos claros apoiados por normas técnicas e manuais oficiais.',
+    methodologyTitle: 'Processo de Pesquisa e Verificação em 4 Etapas',
+    methodologyLeadBeforeLink:
+      'Cada guia publicado no isitkitchensafe.com passa por uma auditoria estruturada em quatro etapas (veja tabelas térmicas e fontes completas em nossa ',
+    methodologyLinkLabel: 'Metodologia de Segurança',
+    methodologyLeadAfterLink: '):',
+    processSteps: [
+      {
+        lead: 'Base Regulatória Oficial:',
+        body: 'Cruzamos regras de segurança alimentar e contato com alimentos com USDA FSIS FoodKeeper, FDA 21 CFR (Partes 174–178), FDA Food Code, CDC/AAP, FARE, EPA e EU BfR / EFSA.'
+      },
+      {
+        lead: 'Auditoria de Manuais do Fabricante (OEM):',
+        body: 'Consultamos limites térmicos e recomendações originais (vidro borossilicato vs. sodo-cálcico, garrafas térmicas a vácuo, revestimentos PTFE/PFAS e uso de papel na air fryer).'
+      },
+      {
+        lead: 'Ciência dos Materiais e Avaliação de Riscos:',
+        body: 'Analisamos como polímeros, metais, cerâmicas e madeiras reagem à radiação de micro-ondas, detergentes alcalinos (pH >10), choque térmico e congelamento.'
+      },
+      {
+        lead: 'Revisão de Consenso e Classificação:',
+        body: 'Definimos um veredicto claro (SIM, DEPENDE ou NÃO) com limites de temperatura, posição na prateleira e explicação objetiva do risco.'
+      }
+    ],
+    sourcesTitle: 'Fontes Públicas Primárias',
+    source1:
+      'Órgãos Regulatórios: USDA FSIS, FDA 21 CFR, NSF/ANSI 51 e 184, CDC/AAP, FARE, EPA e EU BfR para conservação, alérgenos e segurança de contato alimentar.',
+    source2:
+      'Manuais Oficiais dos Fabricantes: Limites térmicos e cuidados publicados por grandes marcas de utensílios e eletrodomésticos (Pyrex, Corelle, Yeti, Hydro Flask, Instant Pot, etc.).',
+    criteriaTitle: 'Critérios Técnicos de Materiais',
+    criteria1:
+      'Física Térmica e Elétrica: Resistência ao choque térmico (ASTM C148), faiscamento no micro-ondas e estabilidade térmica de óleos (AOCS / Codex).',
+    criteria2:
+      'Segurança Química e Limpeza: Migração de aditivos sob calor, corrosão por detergentes alcalinos e reatividade química de limpadores domésticos.',
+    verdictsHeading: 'Como Definimos Nossos Veredictos de Segurança',
+    verdictYesBadge: 'SIM (SEGURO)',
+    verdictYesDesc:
+      'Projetado e documentado para suportar o ambiente do aparelho sem danos físicos, migração tóxica ou risco de incêndio.',
+    verdictDependsBadge: 'DEPENDE (CONDICIONAL)',
+    verdictDependsDesc:
+      'Seguro apenas sob condições rigorosas: somente prateleira superior, sem ciclo de secagem quente, sem tampa metálica ou respeitando limites térmicos.',
+    verdictNoBadge: 'NÃO (INSEGURO)',
+    verdictNoDesc:
+      'Inseguro ou destrutivo. Envolve risco documentado de incêndio, faiscamento, quebra por choque térmico, liberação química ou dano permanente ao eletrodoméstico.',
+    utilitiesEyebrow: 'Ferramentas Interativas Gratuitas',
+    utilitiesHeading: 'Utilitários de Segurança na Cozinha Mais Populares',
+    utilitiesBrowseAll: 'Explorar todas as calculadoras →',
+    utilitiesOpenLabel: 'Abrir ferramenta →',
+    utilities: [
+      {
+        path: '/tools/kitchen-symbol-decoder/',
+        tag: 'Decodificador Visual',
+        title: 'Decodificador de Símbolos de Cozinha',
+        desc: 'Identifique ícones de lava-louças, micro-ondas, forno, freezer e códigos plásticos gravados nos utensílios.'
+      },
+      {
+        path: '/tools/power-outage-food-safety-checker/',
+        tag: 'Triagem de Emergência',
+        title: 'Verificador de Alimentos após Queda de Luz',
+        desc: 'Calcule o que manter ou descartar na geladeira e freezer pelas regras USDA de 4h / 24h / 48h.'
+      },
+      {
+        path: '/tools/moldy-food-safety-checker/',
+        tag: 'Orientação USDA',
+        title: 'Verificador de Alimentos com Mofo',
+        desc: 'Saiba quais alimentos firmes podem ser aparados em 2,5 cm e quais alimentos macios devem ser descartados.'
+      },
+      {
+        path: '/tools/cleaner-mixing-danger-checker/',
+        tag: 'Segurança Química',
+        title: 'Verificador de Mistura de Produtos de Limpeza',
+        desc: 'Cheque combinações de água sanitária, vinagre, amônia e água oxigenada antes de misturar.'
+      },
+      {
+        path: '/tools/fridge-organization-zone-planner/',
+        tag: 'Planejador Térmico',
+        title: 'Planejador de Zonas da Geladeira',
+        desc: 'Organize carnes cruas, laticínios, hortaliças e sobras nas prateleiras certas contra contaminação cruzada.'
+      },
+      {
+        path: '/saved/',
+        tag: 'Folha Imprimível',
+        title: 'Folha Imprimível Personalizada para Geladeira',
+        desc: 'Salve os veredictos dos utensílios da sua casa e imprima um guia rápido para a cozinha.'
+      }
+    ],
+    correctionsTitle: 'Padrões Editoriais e Política de Correções',
+    correctionsP1:
+      'Não aceitamos espaços pagos, veredictos patrocinados nem compensações comerciais que possam influenciar nossas avaliações de segurança. Se um fabricante alterar um material ou manual, ou se você identificar qualquer imprecisão, avise nossa equipe.',
+    correctionsP2:
+      'Todas as correções enviadas são checadas em documentação primária e atualizadas em até 48 horas úteis.',
+    contactBoxTitle: 'Informações do Editor e Contato Editorial',
+    pubLabel: 'Publicação:',
+    pubValue: 'É Seguro na Cozinha? (isitkitchensafe.com)',
+    editorialLabel: 'Consultas Editoriais e Correções:',
+    supportLabel: 'Suporte Geral:',
+    hqLabel: 'Sede Editorial:',
+    hqValue: 'IsItKitchenSafe Research Group, 548 Market St, Suite 29148, San Francisco, CA 94104',
+    footerLinkMethodology: 'Ver Metodologia Completa de Verificação →',
+    footerLinkContact: 'Enviar Correção ou Sugestão →',
+    disclaimerTitle: 'Aviso Importante',
+    disclaimerText:
+      'Embora nossas análises sejam compiladas e revisadas a partir de normas públicas oficiais e manuais técnicos, materiais e modelos podem variar conforme marca e lote. Em caso de dúvida, priorize sempre os símbolos gravados na peça e o manual oficial do fabricante.',
+    knowsAbout: [
+      'Diretrizes USDA FSIS FoodKeeper e Temperaturas Internas Seguras',
+      'FDA 21 CFR Materiais em Contato com Alimentos',
+      'NSF/ANSI 51 e 184 Equipamentos Alimentares e Lava-louças',
+      'CDC e AAP Segurança na Alimentação Infantil',
+      'FARE e Lei FASTER Alérgenos Alimentares',
+      'AOCS Pontos de Fumaça de Óleos Culinários',
+      'ASTM C148 Choque Térmico em Vidros de Cozinha',
+      'EU BfR e EFSA Segurança de Compósitos de Bambu e Melamina',
+      'EPA Segurança Química de Limpadores Domésticos',
+      'NIST, UL e IEEE Segurança de Fogões de Indução e Micro-ondas'
+    ]
+  },
+  'zh-cn': {
+    title: '关于我们、编辑标准与安全平台 | 厨房安全指南',
+    description:
+      '了解厨房安全指南（IsItKitchenSafe）的独立编辑立场与验证体系：10,900+ 核验安全参考页、45+ 免费日常计算器、5 种母语支持及 10 项权威监管标准引用。',
+    siteName: '厨房安全指南',
+    eyebrow: '独立编辑权威与厨房安全平台',
+    h1: '关于厨房安全指南',
+    introLead:
+      '一个独立运营的数字安全参考平台，致力于通过透明、可溯源的公开监管标准与材料科学研究，帮助家庭预防厨房意外、电器损坏、有害物质迁移与食源性疾病。',
+    metricsHeadingSr: '平台核验规模与公信力指标',
+    metrics: [
+      {
+        value: '10,900+',
+        label: '已核验安全参考页',
+        detail: '涵盖电器兼容判定、食材保质期、复冻指南、材料耐温阈值与事故应急处置。'
+      },
+      {
+        value: '5',
+        label: '种原生语言支持',
+        detail: 'EN · ES · PT · 中文 · 日本語 — 结合本地习惯与清晰温标单位本地化呈现。'
+      },
+      {
+        value: '45+',
+        label: '日常消费级安全计算器',
+        detail: '共 196 款家用与专业实验室级交互工具，无需注册即可即时使用。'
+      },
+      {
+        value: '10',
+        label: '项核心监管标准引用',
+        detail: 'USDA FSIS、FDA 21 CFR、NSF/ANSI、AAP/CDC、FARE、AOCS、ASTM、EU BfR、EPA、NIST/IEEE。'
+      }
+    ],
+    commitmentsEyebrow: '读者承诺准则',
+    commitmentsHeading: '独立编辑、零付费墙与证据优先承诺',
+    commitments: [
+      {
+        eyebrow: '100% 独立编辑审查',
+        title: '拒绝品牌赞助与付费修改结论',
+        body: '每一项“安全（YES）”“视情况而定（DEPENDS）”与“危险（NO）”裁定，均严格依据公开监管规范、热力学材料特性及原厂技术手册独立核验，绝不接受任何厨具或家电厂商的商业干预。'
+      },
+      {
+        eyebrow: '零付费墙公共实用工具',
+        title: '永久免费、无须登录、即查即用',
+        body: '家庭安全信息不应被订阅付费墙或冗长软文掩盖。全部 10,900+ 篇安全指南、45+ 款日常实用计算器与可打印冰箱速查表均 100% 免费开放。'
+      },
+      {
+        eyebrow: '证据优先与快速纠错',
+        title: '权威原始出处与 48 小时勘误机制',
+        body: '所有结论均可溯源至明确法规条文与材料标准，拒绝网络谣言。若厂商更新材质工艺或读者发现疏漏，编辑团队将在 48 个工作小时内对照一手文献完成复核与更新。'
+      }
+    ],
+    ctaTitle: '查阅完整验证方法论或提交勘误反馈',
+    ctaBody:
+      '浏览我们引用的全部 10 项监管法规与材料热阈值清单，或直接向编辑部提交原厂手册更新与纠错建议。',
+    ctaMethodology: '查看验证方法论',
+    ctaContact: '联系编辑团队',
+    missionTitle: '我们的使命与初衷',
+    missionP1:
+      '每年都有大量家庭因不确定器皿或食材是否安全而遭遇意外：带金属描边的餐具在微波炉内打火、玻璃器皿因冷热剧变炸裂、塑料盒在高温洗碗机中变形析出添加剂、误混家用清洁剂产生有毒气体，或停电后误食变质食物。',
+    missionP2:
+      '“厨房安全指南（Is It Kitchen Safe?）”致力于针对“这件物品能否安全放入电器，或这份食物能否放心食用？”给出即时、清晰且有据可依的答案，去除冗长噪音，帮助每个家庭守护日常饮食与居家安全。',
+    methodologyTitle: '四阶段研究与核验流程',
+    methodologyLeadBeforeLink:
+      '本站每一篇安全指南在发布前均经过结构化的四阶段核验（完整材料阈值表与标准索引请见',
+    methodologyLinkLabel: '安全验证方法论',
+    methodologyLeadAfterLink: '）：',
+    processSteps: [
+      {
+        lead: '法规基线比对：',
+        body: '对照 USDA FSIS FoodKeeper、FDA 21 CFR（第 174–178 部分）、FDA 食品法典、CDC/AAP、FARE、EPA 及 EU BfR / EFSA 公开标准，核查食品安全与食品接触材料规范。'
+      },
+      {
+        lead: '原厂手册与工程规格审计：',
+        body: '核查主流品牌原厂技术说明，包括高硼硅与钠钙玻璃耐温差上限、真空保温杯焊缝限制、PTFE/PFAS 不粘涂层极限温度以及空气炸锅垫纸安全规范。'
+      },
+      {
+        lead: '材料科学与风险机理评估：',
+        body: '评估聚合物、金属、陶瓷、涂层及实木在微波介电加热、强碱性洗碗机洗涤剂（pH >10）、热冲击及零下冷冻结晶环境中的物理化学响应。'
+      },
+      {
+        lead: '共识复核与明确分级：',
+        body: '赋予清晰的“安全（YES）”“视情况而定（DEPENDS）”或“危险（NO）”裁定，并注明温度上限、摆放架层与具体风险机理。'
+      }
+    ],
+    sourcesTitle: '核心公开权威来源',
+    source1:
+      '官方监管与公共卫生机构：USDA FSIS、FDA 21 CFR、NSF/ANSI 51 与 184、CDC/AAP、FARE、EPA 及 EU BfR，涵盖食品保鲜、过敏原与食品接触材料标准。',
+    source2:
+      '制造商原厂技术手册：汇总 Pyrex、Corelle、Yeti、Hydro Flask、Instant Pot 等主流厨具与电器品牌的官方耐温与保养规范。',
+    criteriaTitle: '材料与安全核验维度',
+    criteria1:
+      '热力学与电器兼容：涵盖玻璃热冲击标准（ASTM C148）、微波金属打火风险、以及食用油烟点与氧化稳定性（AOCS / Codex）。',
+    criteria2:
+      '食品接触化学与清洁安全：核查高温下塑料单体与添加剂迁移、强碱洗涤剂金属腐蚀以及家用清洁剂混用化学反应。',
+    verdictsHeading: '三大安全判定标准说明',
+    verdictYesBadge: '安全（YES）',
+    verdictYesDesc:
+      '经制造商规格与材料特性证实，可安全承受对应电器环境，无物理破损、有害迁移或起火隐患。',
+    verdictDependsBadge: '视情况而定（DEPENDS）',
+    verdictDependsDesc:
+      '仅在满足严格前提条件时安全，例如仅限洗碗机顶层架、关闭高温烘干、移除金属盖或严格控温。',
+    verdictNoBadge: '危险（NO）',
+    verdictNoDesc:
+      '存在明确安全风险或破坏性，可能导致起火、微波打火、热冲击爆裂、有害化学析出或永久损坏电器。',
+    utilitiesEyebrow: '免费交互工具',
+    utilitiesHeading: '最受欢迎的日常厨房安全实用工具',
+    utilitiesBrowseAll: '浏览全部安全计算器 →',
+    utilitiesOpenLabel: '打开工具 →',
+    utilities: [
+      {
+        path: '/tools/kitchen-symbol-decoder/',
+        tag: '图标解码器',
+        title: '厨房器皿安全图标解码器',
+        desc: '快速识别餐具底部刻印的洗碗机、微波炉、烤箱、冷冻及塑料树脂回收符号含义。'
+      },
+      {
+        path: '/tools/power-outage-food-safety-checker/',
+        tag: '停电应急判定',
+        title: '停电后食品安全检查器',
+        desc: '依据 USDA 4 小时冷藏 / 24 小时半满冷冻 / 48 小时满载冷冻准则，判断食物保留或丢弃。'
+      },
+      {
+        path: '/tools/moldy-food-safety-checker/',
+        tag: 'USDA 规范',
+        title: '发霉食物安全检查器',
+        desc: '分清哪些硬质食物可切除霉斑周围 2.5 厘米后食用，哪些软质食物必须整份丢弃。'
+      },
+      {
+        path: '/tools/cleaner-mixing-danger-checker/',
+        tag: '化学安全警示',
+        title: '清洁剂混用危险检查器',
+        desc: '混合前检测漂白水、食醋、氨水与双氧水组合，严防氯气、氯胺等剧毒气体产生。'
+      },
+      {
+        path: '/tools/fridge-organization-zone-planner/',
+        tag: '分区收纳规划',
+        title: '冰箱温度分区安全规划器',
+        desc: '科学安排生肉、乳制品、果蔬与熟食存放层位，有效降低交叉污染与变质风险。'
+      },
+      {
+        path: '/saved/',
+        tag: '可打印速查表',
+        title: '自定义可打印冰箱安全速查表',
+        desc: '收藏您家常用厨具与食材判定结果，一键打印清晰整洁的厨房贴墙速查单。'
+      }
+    ],
+    correctionsTitle: '编辑准则与勘误政策',
+    correctionsP1:
+      '我们绝不接受付费排名、品牌软广赞助或任何可能影响安全结论客观性的商业合作。若厂商变更配方或保养手册，或您发现任何内容需要修正，欢迎随时联系编辑部。',
+    correctionsP2:
+      '所有读者反馈的勘误均会对照一手监管文献与原厂资料核查，并在 48 个工作小时内完成更新。',
+    contactBoxTitle: '发布机构与编辑联系信息',
+    pubLabel: '发布平台：',
+    pubValue: '厨房安全指南（isitkitchensafe.com）',
+    editorialLabel: '编辑咨询与内容勘误：',
+    supportLabel: '常规支持邮箱：',
+    hqLabel: '编辑部地址：',
+    hqValue: 'IsItKitchenSafe Research Group, 548 Market St, Suite 29148, San Francisco, CA 94104',
+    footerLinkMethodology: '查看完整安全验证方法论 →',
+    footerLinkContact: '提交勘误或新条目建议 →',
+    disclaimerTitle: '重要免责声明',
+    disclaimerText:
+      '尽管我们依据公开官方规范与原厂手册严谨核对每一条目，不同品牌、批次与型号的厨具材质仍可能存在差异。本站内容仅供信息参考；如有任何不确定，请务必优先遵循器皿底部的官方标示或家电原厂说明书。',
+    knowsAbout: [
+      'USDA FSIS FoodKeeper 食品安全与安全中心温度标准',
+      'FDA 21 CFR 食品接触材料与聚合物迁移规范',
+      'NSF/ANSI 51 与 184 食品设备及洗碗机消毒标准',
+      'CDC 与 AAP 婴幼儿喂养及奶瓶加热安全指南',
+      'FARE 与 FDA FASTER 法案食物过敏原交叉接触防护',
+      'AOCS 食用油烟点与热氧化稳定性数据',
+      'ASTM C148 厨用玻璃器皿抗热冲击标准',
+      'EU BfR 与 EFSA 竹纤维密胺复合材料迁移警示',
+      'EPA 家用清洁剂化学反应安全矩阵',
+      'NIST、UL 与 IEEE 电磁炉及微波炉安全标准'
+    ]
+  },
+  ja: {
+    title: '運営者情報・編集基準と安全プラットフォーム | キッチン安全チェッカー',
+    description:
+      'キッチン安全チェッカー（IsItKitchenSafe）の独立した編集方針と検証体制：10,900以上の検証済みガイド、45以上の無料計算ツール、5言語対応、10の公的規制基準を引用。',
+    siteName: 'キッチン安全チェッカー',
+    eyebrow: '独立した編集権威とキッチン安全ハブ',
+    h1: 'キッチン安全チェッカーについて',
+    introLead:
+      '家庭でのキッチン事故、家電の故障、有害物質の溶出、食中毒を防ぐために、公的規制基準と材料科学の知見に基づき透明性の高い情報を提供する独立系デジタルリファレンスです。',
+    metricsHeadingSr: '検証済みプラットフォーム規模と信頼指標',
+    metrics: [
+      {
+        value: '10,900+',
+        label: '検証済み安全リファレンス',
+        detail: '家電対応判定、保存期間、再冷凍基準、素材耐熱性、トラブル対処ガイドを網羅。'
+      },
+      {
+        value: '5',
+        label: 'ネイティブ対応言語',
+        detail: 'EN · ES · PT · 中文 · 日本語 — 地域の単位や自然な用語で丁寧にローカライズ。'
+      },
+      {
+        value: '45+',
+        label: '日常向け無料安全ツール',
+        detail: '家庭向け・専門解析あわせて計196種の対話型ツールをログイン不要で提供。'
+      },
+      {
+        value: '10',
+        label: '引用する主要公的基準',
+        detail: 'USDA FSIS、FDA 21 CFR、NSF/ANSI、AAP/CDC、FARE、AOCS、ASTM、EU BfR、EPA、NIST/IEEE。'
+      }
+    ],
+    commitmentsEyebrow: '読者への約束',
+    commitmentsHeading: '編集の独立性・完全無料アクセス・根拠第一の方針',
+    commitments: [
+      {
+        eyebrow: '100% 編集の独立性',
+        title: '企業タイアップ・有料判定の完全排除',
+        body: '「安全（YES）」「条件付き（DEPENDS）」「危険（NO）」の判定は、公的規制基準・素材物性・メーカー公式マニュアルのみに基づいて独立監査されます。調理器具や家電メーカーによるスポンサー介入や評価変更は一切受け付けません。'
+      },
+      {
+        eyebrow: 'ペイウォールなしの公共ユーティリティ',
+        title: '登録不要・いつでも完全無料',
+        body: '家庭の安全に関わる知識に課金壁や冗長な前置きは不要です。10,900以上の安全ガイド、45以上の日常計算ツール、印刷用冷蔵庫チートシートをすべてアカウント不要・無料で利用できます。'
+      },
+      {
+        eyebrow: '一次資料主義と迅速な訂正',
+        title: '公的基準の明記と48時間訂正対応',
+        body: 'すべての記述は公的食品安全コードや工学基準に裏付けられています。メーカーの仕様改定や読者からのご指摘を受けた場合、編集部が一次資料を確認のうえ48営業時間以内に更新します。'
+      }
+    ],
+    ctaTitle: '検証方法論の確認・情報修正のご連絡',
+    ctaBody:
+      '引用している10の公的基準や耐熱しきい値表を「検証方法論」ページで確認できるほか、メーカー仕様の変更や訂正依頼も編集部へ直接お送りいただけます。',
+    ctaMethodology: '検証方法論を見る',
+    ctaContact: '編集部へ問い合わせる',
+    missionTitle: '私たちのミッションと目的',
+    missionP1:
+      '毎年多くの家庭で、金属装飾による電子レンジの火花、急激な温度差によるガラス容器の破損、高温食洗機でのプラスチック変形、洗剤の危険な混合による有毒ガス発生、停電後の食品劣化など、本来防げるキッチン事故が起きています。',
+    missionP2:
+      '「キッチン安全チェッカー（Is It Kitchen Safe?）」は、「これを家電に入れて大丈夫？」「この食材は食べて安全？」という疑問に、根拠のある明快な答えを即座に届けるために生まれました。不要な装飾を省き、公的ガイドラインとメーカー技術仕様に沿った信頼できる判定を提供します。',
+    methodologyTitle: '4段階の調査・検証プロセス',
+    methodologyLeadBeforeLink:
+      '当サイトのすべての安全ガイドは、公開前に以下の4段階プロセスで精査されています（詳細な耐熱表と基準一覧は',
+    methodologyLinkLabel: '安全検証方法論',
+    methodologyLeadAfterLink: 'をご覧ください）：',
+    processSteps: [
+      {
+        lead: '公的規制基準の照合：',
+        body: 'USDA FSIS FoodKeeper、FDA 21 CFR（Parts 174–178）、FDAフードコード、CDC/AAP、FARE、EPA、EU BfR / EFSAなどの公開ガイドラインと食品・接触材料の安全基準を照合します。'
+      },
+      {
+        lead: 'メーカー公式マニュアル・技術仕様の監査：',
+        body: '耐熱ホウケイ酸ガラスとソーダ石灰ガラスの耐熱温度差、真空断熱ボトルのシール構造、PTFE/PFASコーティング耐熱上限、ノンフライヤー用シートの注意点などを原典から確認します。'
+      },
+      {
+        lead: '材料科学・ハザード評価：',
+        body: '樹脂・金属・陶磁器・木製品が、マイクロ波誘電加熱、強アルカリ性食洗機洗剤（pH >10）、熱衝撃、冷凍結晶化にどう反応するかを評価します。'
+      },
+      {
+        lead: '合議レビューと判定分類：',
+        body: '明確な3段階判定（安全／条件付き／危険）を付与し、具体的な温度上限、設置ラック位置、リスクのメカニズムを明記します。'
+      }
+    ],
+    sourcesTitle: '主な一次公開情報源',
+    source1:
+      '公的規制・保健機関：USDA FSIS、FDA 21 CFR、NSF/ANSI 51・184、CDC/AAP、FARE、EPA、EU BfRによる食品保存・アレルゲン・食品接触材料の公開指針。',
+    source2:
+      'メーカー公式マニュアル：Pyrex、Corelle、Yeti、Hydro Flask、Instant Potなど主要調理器具・家電ブランドの公式耐熱制限および取扱注意事項。',
+    criteriaTitle: '素材・ハザード評価の視点',
+    criteria1:
+      '熱衝撃と家電適合性：ガラスの耐熱衝撃試験（ASTM C148）、電子レンジの火花・アーク放電、食用油の発煙点と酸化安定性（AOCS / Codex）。',
+    criteria2:
+      '食品接触安全性と化学反応：高温下での樹脂成分溶出、アルカリ洗剤による腐食、家庭用洗剤の混合による有毒ガス反応。',
+    verdictsHeading: '安全判定（3段階）の定義',
+    verdictYesBadge: '安全（YES）',
+    verdictYesDesc:
+      'メーカー仕様および素材特性に基づき、破損・有害溶出・発火などのリスクなく家電環境で使用できると確認された状態。',
+    verdictDependsBadge: '条件付き（DEPENDS）',
+    verdictDependsDesc:
+      '特定の厳格な条件（食洗機の上段ラック限定、加熱乾燥オフ、金属フタを外す、温度上限の遵守など）でのみ安全な状態。',
+    verdictNoBadge: '危険（NO）',
+    verdictNoDesc:
+      '使用不可。火災、火花、熱衝撃による破裂、有害物質の溶出、食中毒、または家電の故障を引き起こす明確なリスクがある状態。',
+    utilitiesEyebrow: '無料インタラクティブツール',
+    utilitiesHeading: '人気の日常キッチン安全ユーティリティ',
+    utilitiesBrowseAll: 'すべての安全ツールを見る →',
+    utilitiesOpenLabel: 'ツールを開く →',
+    utilities: [
+      {
+        path: '/tools/kitchen-symbol-decoder/',
+        tag: '記号デコーダー',
+        title: 'キッチン食器・耐熱記号デコーダー',
+        desc: '食器や容器の底面にある食洗機・電子レンジ・オーブン・冷凍・樹脂識別マークの意味を即座に判別。'
+      },
+      {
+        path: '/tools/power-outage-food-safety-checker/',
+        tag: '停電時トリアージ',
+        title: '停電時の食品安全チェッカー',
+        desc: 'USDAの冷蔵4時間・半量冷凍庫24時間・満杯冷凍庫48時間ルールから保存か廃棄かを判定。'
+      },
+      {
+        path: '/tools/moldy-food-safety-checker/',
+        tag: 'USDA指針',
+        title: 'カビが生えた食品の安全チェッカー',
+        desc: '周囲2.5cmを切り落として食べられる硬質食品と、丸ごと廃棄すべき軟質食品を明確に分類。'
+      },
+      {
+        path: '/tools/cleaner-mixing-danger-checker/',
+        tag: '化学安全チェック',
+        title: '洗剤「混ぜるな危険」チェッカー',
+        desc: '塩素系漂白剤・酢・アンモニア・過酸化水素の組み合わせを事前確認し有毒ガス事故を防止。'
+      },
+      {
+        path: '/tools/fridge-organization-zone-planner/',
+        tag: '温度帯プランナー',
+        title: '冷蔵庫の温度ゾーン収納プランナー',
+        desc: '生肉・乳製品・野菜・作り置きの最適な配置を可視化し、交差汚染と鮮度低下を防止。'
+      },
+      {
+        path: '/saved/',
+        tag: '印刷用シート',
+        title: 'カスタム印刷用・冷蔵庫チートシート',
+        desc: 'ご家庭でよく確認する調理器具や食材の判定を保存し、キッチンに貼れる一覧表として印刷。'
+      }
+    ],
+    correctionsTitle: '編集基準と訂正ポリシー',
+    correctionsP1:
+      '当サイトでは、判定結果に影響する有料掲載、スポンサー付きランキング、商業的対価は一切受け入れておりません。メーカーによる素材変更や取扱説明書の改訂、誤記などにお気づきの際はぜひお知らせください。',
+    correctionsP2:
+      'ご報告いただいた訂正依頼は、編集部が一次資料と照合したうえで48営業時間以内に更新いたします。',
+    contactBoxTitle: '運営・編集部お問い合わせ先',
+    pubLabel: '運営媒体：',
+    pubValue: 'キッチン安全チェッカー（isitkitchensafe.com）',
+    editorialLabel: '編集・訂正のご連絡：',
+    supportLabel: '一般お問い合わせ：',
+    hqLabel: '編集拠点：',
+    hqValue: 'IsItKitchenSafe Research Group, 548 Market St, Suite 29148, San Francisco, CA 94104',
+    footerLinkMethodology: '検証方法論の全文を確認する →',
+    footerLinkContact: '訂正・新アイテム追加を提案する →',
+    disclaimerTitle: '重要な免責事項',
+    disclaimerText:
+      '公的機関のガイドラインおよびメーカー公式マニュアルを基に細心の注意を払って整理していますが、製品の素材や仕様はブランド・製造時期・型番により異なる場合があります。迷った場合は必ず容器底面の表示やメーカー公式の取扱説明書を優先してください。',
+    knowsAbout: [
+      'USDA FSIS FoodKeeper 食品保存・安全中心温度ガイドライン',
+      'FDA 21 CFR 食品接触材料およびポリマー溶出規制',
+      'NSF/ANSI 51・184 食品機器および家庭用食洗機衛生規格',
+      'CDC・AAP 乳児栄養と哺乳瓶の安全な加温ガイドライン',
+      'FARE・FDA FASTER法 食物アレルゲン交差接触防止',
+      'AOCS 食用油の発煙点と熱酸化安定性',
+      'ASTM C148 調理用ガラスの熱衝撃基準',
+      'EU BfR・EFSA 竹繊維メラミン複合材の溶出注意喚起',
+      'EPA 家庭用洗剤の化学反応安全マトリクス',
+      'NIST・UL・IEEE IH調理器および電子レンジ安全基準'
+    ]
   }
 };
 
 const content = contentByLang[lang as keyof typeof contentByLang] || contentByLang.es;
-
-const siteName = lang === 'ja' ? "キッチン安全チェッカー" : lang === 'zh-cn' ? "厨房安全指南" : lang === 'pt' ? "É Seguro na Cozinha?" : "¿Es Seguro en la Cocina?";
+const inLanguageCode = lang === 'zh-cn' ? 'zh-CN' : lang;
+const methodologyUrl = getDirectoryUrl('methodology', lang);
+const contactUrl = getDirectoryUrl('contact', lang);
+const toolsUrl = getDirectoryUrl('tools', lang);
 
 const orgSchema = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": siteName,
-  "url": `https://isitkitchensafe.com/${lang}/about/`,
-  "logo": "https://isitkitchensafe.com/og-image.png",
-  "description": content.description,
-  "sameAs": []
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  name: content.h1,
+  url: `https://isitkitchensafe.com/${lang}/about/`,
+  inLanguage: inLanguageCode,
+  description: content.description,
+  isPartOf: {
+    '@type': 'WebSite',
+    name: 'IsItKitchenSafe',
+    url: 'https://isitkitchensafe.com/'
+  },
+  mainEntity: {
+    '@type': 'Organization',
+    name: 'IsItKitchenSafe',
+    alternateName: content.siteName,
+    url: 'https://isitkitchensafe.com/',
+    logo: {
+      '@type': 'ImageObject',
+      url: 'https://isitkitchensafe.com/favicon.svg'
+    },
+    publishingPrinciples: `https://isitkitchensafe.com${methodologyUrl}`,
+    correctionsPolicy: `https://isitkitchensafe.com/${lang}/about/#corrections-policy`,
+    contactPoint: {
+      '@type': 'ContactPoint',
+      email: 'editorial@isitkitchensafe.com',
+      contactType: 'editorial desk',
+      availableLanguage: ['English', 'Spanish', 'Portuguese', 'Chinese', 'Japanese']
+    },
+    knowsAbout: content.knowsAbout
+  }
 };
 ---
 
-<Layout title={content.title} description={content.description} faqs={content.faqs} excludeArticleSchema={true} availableLocales={availableLocales} lang={lang}>
+<Layout
+  title={content.title}
+  description={content.description}
+  excludeArticleSchema={true}
+  excludeFaqSchema={true}
+  availableLocales={availableLocales}
+  lang={lang}
+>
   <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(orgSchema)} />
-  <section class="max-w-[800px] mx-auto px-6 py-[96px]">
-    <h1 class="text-display-lg font-medium text-ink tracking-tight mb-8">{content.h1}</h1>
-    
-    <div class="prose max-w-none text-body-md text-body leading-relaxed flex flex-col gap-6">
-      <p class="text-title-md font-normal leading-relaxed text-ink">
+
+  <article class="max-w-[920px] mx-auto px-6 py-12 md:py-16">
+    <Breadcrumbs
+      items={[
+        { label: t('nav.home'), href: translatePath('/') },
+        { label: t('nav.about') }
+      ]}
+      className="mb-6"
+    />
+
+    <!-- Hero Header -->
+    <header class="mb-10">
+      <span class="text-caption text-signature-coral font-semibold uppercase tracking-wider text-xs block mb-2">
+        {content.eyebrow}
+      </span>
+      <h1 class="text-display-lg font-medium text-ink tracking-tight mb-4">
+        {content.h1}
+      </h1>
+      <p class="text-title-md font-normal leading-relaxed text-body max-w-[780px]">
         {content.introLead}
       </p>
+    </header>
 
-      <div class="border-t border-hairline my-6"></div>
+    <!-- Verified Live Scale & Trust Metrics Strip -->
+    <section aria-labelledby="platform-metrics-heading" class="mb-12">
+      <h2 id="platform-metrics-heading" class="sr-only">{content.metricsHeadingSr}</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {content.metrics.map((metric) => (
+          <div class="bg-surface-soft border border-hairline rounded-lg p-5 flex flex-col gap-1.5">
+            <span class="text-[28px] md:text-[32px] font-display font-semibold text-ink leading-none tracking-tight">
+              {metric.value}
+            </span>
+            <h3 class="text-[14px] font-semibold text-ink leading-snug mt-1">
+              {metric.label}
+            </h3>
+            <p class="text-[12.5px] text-muted leading-relaxed">
+              {metric.detail}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
 
-      <h2 class="text-title-lg text-ink font-medium tracking-tight">{content.missionTitle}</h2>
+    <!-- Editorial Independence, Zero-Paywall & Evidence-First Commitment Cards -->
+    <section aria-labelledby="commitments-heading" class="mb-12">
+      <div class="mb-5">
+        <span class="text-xs font-semibold uppercase tracking-wider text-signature-coral block mb-1">
+          {content.commitmentsEyebrow}
+        </span>
+        <h2 id="commitments-heading" class="text-title-lg text-ink font-medium tracking-tight">
+          {content.commitmentsHeading}
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {content.commitments.map((card) => (
+          <div class="bg-surface-soft border border-hairline rounded-lg p-5 flex flex-col gap-2">
+            <span class="text-[11px] font-mono uppercase tracking-wider text-muted">
+              {card.eyebrow}
+            </span>
+            <h3 class="text-title-sm font-semibold text-ink leading-snug">
+              {card.title}
+            </h3>
+            <p class="text-[13.5px] text-body leading-relaxed">
+              {card.body}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <!-- Direct CTA Strip to Methodology & Contact -->
+      <div class="mt-5 bg-surface-soft border border-hairline rounded-lg p-5 md:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="max-w-[560px]">
+          <h3 class="text-title-sm font-semibold text-ink mb-1">
+            {content.ctaTitle}
+          </h3>
+          <p class="text-[13.5px] text-body leading-relaxed">
+            {content.ctaBody}
+          </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3 shrink-0">
+          <a
+            href={methodologyUrl}
+            class="btn-primary !py-2.5 !px-4 !text-[14px]"
+          >
+            {content.ctaMethodology}
+          </a>
+          <a
+            href={contactUrl}
+            class="btn-secondary !py-2.5 !px-4 !text-[14px]"
+          >
+            {content.ctaContact}
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mission & Purpose -->
+    <section aria-labelledby="mission-heading" class="border-t border-hairline pt-10 mb-12 flex flex-col gap-4 text-body-md text-body leading-relaxed">
+      <h2 id="mission-heading" class="text-title-lg text-ink font-medium tracking-tight">
+        {content.missionTitle}
+      </h2>
       <p>{content.missionP1}</p>
       <p>{content.missionP2}</p>
+    </section>
 
-      <h2 class="text-title-lg text-ink font-medium tracking-tight mt-4">{content.methodologyTitle}</h2>
-      <p>{content.methodologyP1}</p>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-4 bg-surface-soft p-6 border border-hairline rounded-md">
+    <!-- 4-Stage Research & Verification Process + Verdict Definitions -->
+    <section aria-labelledby="verification-process-heading" class="border-t border-hairline pt-10 mb-12">
+      <h2 id="verification-process-heading" class="text-title-lg text-ink font-medium tracking-tight mb-3">
+        {content.methodologyTitle}
+      </h2>
+      <p class="text-body-md text-body leading-relaxed mb-5">
+        {content.methodologyLeadBeforeLink}
+        <a href={methodologyUrl} class="text-link hover:underline font-medium">
+          {content.methodologyLinkLabel}
+        </a>
+        {content.methodologyLeadAfterLink}
+      </p>
+
+      <ol class="list-decimal pl-6 flex flex-col gap-3 text-[14px] text-body leading-relaxed mb-6">
+        {content.processSteps.map((step) => (
+          <li>
+            <strong class="text-ink">{step.lead}</strong> {step.body}
+          </li>
+        ))}
+      </ol>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 my-6 bg-surface-soft p-6 border border-hairline rounded-lg">
         <div>
           <h3 class="text-title-sm font-semibold text-ink mb-2">{content.sourcesTitle}</h3>
-          <ul class="list-disc pl-5 flex flex-col gap-1.5 text-[13px] text-body">
+          <ul class="list-disc pl-5 flex flex-col gap-2 text-[13.5px] text-body leading-relaxed">
             <li>{content.source1}</li>
             <li>{content.source2}</li>
           </ul>
         </div>
         <div>
           <h3 class="text-title-sm font-semibold text-ink mb-2">{content.criteriaTitle}</h3>
-          <ul class="list-disc pl-5 flex flex-col gap-1.5 text-[13px] text-body">
+          <ul class="list-disc pl-5 flex flex-col gap-2 text-[13.5px] text-body leading-relaxed">
             <li>{content.criteria1}</li>
             <li>{content.criteria2}</li>
           </ul>
         </div>
       </div>
 
-      <p>{content.verdictsLead}</p>
-      <ul class="list-disc pl-5 flex flex-col gap-2">
-        <li>
-          <strong class="text-success">{content.verdictYesTitle}:</strong> {content.verdictYesDesc}
-        </li>
-        <li>
-          <strong class="text-signature-coral">{content.verdictNoTitle}:</strong> {content.verdictNoDesc}
-        </li>
-        <li>
-          <strong class="text-signature-mustard">{content.verdictDependsTitle}:</strong> {content.verdictDependsDesc}
-        </li>
-      </ul>
+      <h3 class="text-title-md text-ink font-medium tracking-tight mb-4 mt-8">
+        {content.verdictsHeading}
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-surface-soft border border-hairline rounded-lg p-5 flex flex-col gap-2.5">
+          <div><span class="badge-yes">{content.verdictYesBadge}</span></div>
+          <p class="text-[13.5px] text-body leading-relaxed">
+            {content.verdictYesDesc}
+          </p>
+        </div>
+        <div class="bg-surface-soft border border-hairline rounded-lg p-5 flex flex-col gap-2.5">
+          <div><span class="badge-depends">{content.verdictDependsBadge}</span></div>
+          <p class="text-[13.5px] text-body leading-relaxed">
+            {content.verdictDependsDesc}
+          </p>
+        </div>
+        <div class="bg-surface-soft border border-hairline rounded-lg p-5 flex flex-col gap-2.5">
+          <div><span class="badge-no">{content.verdictNoBadge}</span></div>
+          <p class="text-[13.5px] text-body leading-relaxed">
+            {content.verdictNoDesc}
+          </p>
+        </div>
+      </div>
+    </section>
 
-      <div class="bg-signature-cream/40 border border-signature-cream rounded-md p-6 mt-6">
+    <!-- Most Popular Everyday Kitchen Safety Utilities Strip -->
+    <section aria-labelledby="popular-utilities-heading" class="border-t border-hairline pt-10 mb-12">
+      <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-wider text-signature-coral block mb-1">
+            {content.utilitiesEyebrow}
+          </span>
+          <h2 id="popular-utilities-heading" class="text-title-lg text-ink font-medium tracking-tight">
+            {content.utilitiesHeading}
+          </h2>
+        </div>
+        <a href={toolsUrl} class="text-[13.5px] font-medium text-link hover:underline">
+          {content.utilitiesBrowseAll}
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {content.utilities.map((tool) => (
+          <a
+            href={translatePath(tool.path)}
+            class="group bg-surface-soft border border-hairline rounded-lg p-5 flex flex-col gap-2 hover:border-border-strong transition-colors"
+          >
+            <span class="text-[11px] font-mono uppercase tracking-wider text-muted">
+              {tool.tag}
+            </span>
+            <h3 class="text-title-sm font-semibold text-ink group-hover:text-link transition-colors leading-snug">
+              {tool.title}
+            </h3>
+            <p class="text-[13px] text-body leading-relaxed">
+              {tool.desc}
+            </p>
+            <span class="mt-auto pt-2 text-[12.5px] font-medium text-link">
+              {content.utilitiesOpenLabel}
+            </span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <!-- Editorial Standards, Corrections Policy, Contact & Disclaimer -->
+    <section id="corrections-policy" aria-labelledby="corrections-heading" class="border-t border-hairline pt-10 scroll-mt-24">
+      <h2 id="corrections-heading" class="text-title-lg text-ink font-medium tracking-tight mb-3">
+        {content.correctionsTitle}
+      </h2>
+      <p class="text-body-md text-body leading-relaxed mb-3">
+        {content.correctionsP1}
+      </p>
+      <p class="text-body-md text-body leading-relaxed mb-6">
+        {content.correctionsP2}
+      </p>
+
+      <div class="bg-surface-soft border border-hairline rounded-lg p-6 mb-6">
+        <h3 class="text-title-sm text-ink font-semibold mb-3">{content.contactBoxTitle}</h3>
+        <div class="text-[13.5px] text-body leading-relaxed space-y-1.5">
+          <p><strong class="text-ink">{content.pubLabel}</strong> {content.pubValue}</p>
+          <p>
+            <strong class="text-ink">{content.editorialLabel}</strong>{' '}
+            <!--email_off--><a href="mailto:editorial@isitkitchensafe.com" class="text-link hover:underline">editorial@isitkitchensafe.com</a><!--/email_off-->
+          </p>
+          <p>
+            <strong class="text-ink">{content.supportLabel}</strong>{' '}
+            <!--email_off--><a href="mailto:support@isitkitchensafe.com" class="text-link hover:underline">support@isitkitchensafe.com</a><!--/email_off-->
+          </p>
+          <p><strong class="text-ink">{content.hqLabel}</strong> {content.hqValue}</p>
+        </div>
+        <div class="mt-4 pt-4 border-t border-hairline flex flex-wrap gap-4 text-[13.5px]">
+          <a href={methodologyUrl} class="text-link hover:underline font-medium">
+            {content.footerLinkMethodology}
+          </a>
+          <a href={contactUrl} class="text-link hover:underline font-medium">
+            {content.footerLinkContact}
+          </a>
+        </div>
+      </div>
+
+      <div class="bg-surface-soft border border-hairline rounded-lg p-5">
         <h3 class="text-title-sm text-ink font-medium mb-2">{content.disclaimerTitle}</h3>
         <p class="text-[13px] text-muted leading-relaxed">
           {content.disclaimerText}
         </p>
       </div>
-    </div>
-  </section>
+    </section>
+  </article>
 </Layout>
