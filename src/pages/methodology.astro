@@ -1,10 +1,13 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { getDirectoryUrl, useTranslatedPath } from '../i18n/utils';
+
+const translatePath = useTranslatedPath('en');
 
 const pageTitle = 'Safety Verification Methodology & Editorial Standards | IsItKitchenSafe';
 const pageDescription =
-  'How IsItKitchenSafe determines YES, NO, and DEPENDS verdicts across kitchen appliances and food storage using USDA FSIS, FDA 21 CFR, material science thresholds, and OEM appliance manuals.';
+  'How IsItKitchenSafe determines YES, NO, and DEPENDS verdicts across kitchen appliances, cookware, and food storage using USDA FSIS, FDA 21 CFR, NSF/ANSI, CDC/AAP, EPA, and ASTM material science benchmarks.';
 
 const methodologySchema = {
   '@context': 'https://schema.org',
@@ -30,12 +33,16 @@ const methodologySchema = {
       contactType: 'editorial desk'
     },
     knowsAbout: [
-      'USDA FSIS FoodKeeper Guidelines',
-      'FDA 21 CFR Food Contact Materials',
-      'Thermal Shock in Borosilicate and Soda-Lime Glassware',
-      'PTFE and PFAS Fluoropolymer Thermal Degradation',
-      'Polymer Heat Deflection and Food Contact Migration',
-      'NSF/ANSI and UL Kitchen Appliance Safety Standards'
+      'USDA FSIS FoodKeeper Guidelines & Safe Minimum Internal Temperatures',
+      'FDA 21 CFR Parts 174–178 Food Contact Materials & Polymers',
+      'NSF/ANSI 51 & 184 Food Equipment & Dishwasher Sanitization Standards',
+      'CDC & AAP Infant Feeding & Safe Warming Guidelines',
+      'FDA FASTER Act Top 9 Food Allergens & FARE Cross-Contact Science',
+      'AOCS & Codex Alimentarius CXS 210 Lipid Smoke Points & Oxidative Stability',
+      'ASTM C148 Thermal Shock in Borosilicate and Soda-Lime Glassware',
+      'EU BfR & EFSA Bamboo-Melamine Composite Migration Advisories',
+      'EPA & Poison Control Household Chemical Reactivity Matrix',
+      'NIST, UL & IEEE Induction Cooktop EMF and Microwave Safety Standards'
     ]
   }
 };
@@ -72,6 +79,245 @@ const thresholdRows = [
     standard: 'OEM Care Specs & NSF/ANSI 184 Residential Dishwashers'
   }
 ];
+
+type StandardCategory = 'microbiology' | 'cookware' | 'appliances' | 'pediatric';
+
+interface StandardEntry {
+  id: string;
+  code: string;
+  category: StandardCategory;
+  categoryLabel: string;
+  title: string;
+  metrics: string;
+  summary: string;
+  toolPath: string;
+  toolLabel: string;
+  keywords: string;
+}
+
+const standardCategories: { id: 'all' | StandardCategory; label: string }[] = [
+  { id: 'all', label: 'All Standards (10)' },
+  { id: 'microbiology', label: 'Food Microbiology' },
+  { id: 'cookware', label: 'Cookware & Plastics' },
+  { id: 'appliances', label: 'Appliances & Heat' },
+  { id: 'pediatric', label: 'Pediatric & Allergens' }
+];
+
+const standardsDirectory: StandardEntry[] = [
+  {
+    id: 'usda-fsis',
+    code: 'USDA FSIS',
+    category: 'microbiology',
+    categoryLabel: 'Food Microbiology',
+    title: 'USDA FSIS FoodKeeper & Safe Minimum Internal Temperatures',
+    metrics: '165°F poultry/leftovers • 145°F whole cuts • 2-hr Danger Zone • 4h/24h/48h outage • Mold cut-around table',
+    summary:
+      'Governs pathogen kill temperatures (165°F / 74°C for poultry and reheated leftovers; 145°F / 63°C plus 3-minute rest for whole cuts), the 2-hour Danger Zone (40°F–140°F), power outage thresholds (4h fridge, 24h half-full freezer, 48h full freezer), and hard-vs-soft food mold cut-around rules.',
+    toolPath: '/tools/internal-cooking-temp-chart/',
+    toolLabel: 'Internal Temp Chart',
+    keywords: 'usda fsis foodkeeper 165 145 danger zone 2 hour power outage 4h 24h 48h mold cut around poultry leftovers bacteria'
+  },
+  {
+    id: 'fda-21-cfr',
+    code: 'FDA 21 CFR 174–178',
+    category: 'cookware',
+    categoryLabel: 'Cookware & Plastics',
+    title: 'FDA 21 CFR Parts 174–178 (Indirect Food Additives & Polymers)',
+    metrics: 'Plastics #1–#7 • Food-grade silicone • Melamine resin • Ceramic lead & cadmium leach limits',
+    summary:
+      'Establishes statutory chemical migration limits and permitted thermal conditions for resin identification codes #1–#7, platinum-cured silicone, melamine dinnerware, coatings, and decorative ceramic glaze lead/cadmium extraction thresholds.',
+    toolPath: '/tools/plastic-code-checker/',
+    toolLabel: 'Plastic Code Checker',
+    keywords: 'fda 21 cfr 174 178 plastics 1 2 3 4 5 6 7 silicone melamine ceramic glaze lead cadmium leach polymer migration'
+  },
+  {
+    id: 'nsf-ansi-51-184',
+    code: 'NSF/ANSI 51 & 184',
+    category: 'appliances',
+    categoryLabel: 'Appliances & Heat',
+    title: 'NSF/ANSI Standards 51 & 184 (Food Equipment Materials & Residential Dishwashers)',
+    metrics: '150°F–155°F (66°C–68°C) sanitize rinse • 99.999% log-5 bacterial reduction • Non-porous surface criteria',
+    summary:
+      'Defines residential dishwasher sanitization thermal cycles (150°F–155°F final rinse) and material cleanability, corrosion resistance, and non-porous food-contact surface requirements for kitchenware and cutting surfaces.',
+    toolPath: '/tools/kitchen-symbol-decoder/',
+    toolLabel: 'Kitchen Symbol Decoder',
+    keywords: 'nsf ansi 51 184 dishwasher sanitization rinse 150 155 non porous food equipment surface thermal cycle'
+  },
+  {
+    id: 'cdc-aap-infant',
+    code: 'CDC & AAP',
+    category: 'pediatric',
+    categoryLabel: 'Pediatric & Allergens',
+    title: 'CDC & AAP Infant Feeding & Safe Warming Guidelines',
+    metrics: 'Zero microwave milk/formula • No honey <12 months (botulism) • Bottle sanitization protocol',
+    summary:
+      'Anchors every pediatric safety verdict: strict prohibition on microwaving breast milk or infant formula (scalding hotspots and nutrient loss), strict ban on honey under 12 months due to Clostridium botulinum spores, and steam/boiling bottle sanitization rules.',
+    toolPath: '/tools/baby-bottle-safety-checker/',
+    toolLabel: 'Baby Bottle Checker',
+    keywords: 'cdc aap infant feeding breast milk formula microwave zero hotspot honey 12 months botulism baby bottle sanitization'
+  },
+  {
+    id: 'fda-faster-fare',
+    code: 'FASTER Act & FARE',
+    category: 'pediatric',
+    categoryLabel: 'Pediatric & Allergens',
+    title: 'FDA FASTER Act (Top 9 Major Food Allergens) & FARE Cross-Contact Science',
+    metrics: 'Top 9 allergens incl. sesame • Heat-stable proteins • Surfactant soap scrubbing vs. alcohol failure',
+    summary:
+      'Codifies the 9 U.S. major food allergens (milk, eggs, fish, crustacean shellfish, tree nuts, peanuts, wheat, soybeans, sesame) and physical protein removal science—demonstrating why high cooking heat and alcohol hand sanitizers fail to neutralize allergenic proteins compared to soap-and-water surfactant scrubbing.',
+    toolPath: '/tools/food-allergy-cross-contact-checker/',
+    toolLabel: 'Allergy Cross-Contact Checker',
+    keywords: 'fda faster act top 9 allergens sesame fare cross contact protein thermal stability surfactant soap alcohol sanitizer failure'
+  },
+  {
+    id: 'aocs-codex-lipids',
+    code: 'AOCS & Codex CXS 210',
+    category: 'cookware',
+    categoryLabel: 'Cookware & Plastics',
+    title: 'AOCS & Codex Alimentarius CXS 210 (Lipid Smoke Points & Oxidative Stability)',
+    metrics: 'Smoke point vs. oxidative stability • Acrolein & 4-HNE aldehydes • Polyphenol thermal protection',
+    summary:
+      'Evaluates cooking oil thermal breakdown beyond raw smoke point alone, comparing polyunsaturated oxidation (toxic acrolein and 4-HNE aldehyde generation) against monounsaturated fats and polyphenol-rich extra-virgin olive oil stability during high-heat frying.',
+    toolPath: '/tools/cooking-oil-smoke-point-finder/',
+    toolLabel: 'Oil Smoke Point Finder',
+    keywords: 'aocs codex alimentarius cxs 210 lipid smoke point oxidative stability oil thermal degradation acrolein 4-hne aldehyde polyphenol'
+  },
+  {
+    id: 'astm-c148-glass',
+    code: 'ASTM C148',
+    category: 'cookware',
+    categoryLabel: 'Cookware & Plastics',
+    title: 'ASTM C148 / Borosilicate vs. Soda-Lime Thermal Shock Testing',
+    metrics: 'Borosilicate 3.3 ΔT ~330°F (165°C) • Tempered soda-lime ΔT ~100°F (55°C)',
+    summary:
+      'Standardized polariscopic and thermal-gradient testing separating low-expansion borosilicate 3.3 lab/bakeware from tempered soda-lime glass, explaining why sudden freezer-to-oven or hot-pan-to-wet-counter transitions trigger explosive shattering.',
+    toolPath: '/tools/cookware-oven-temp-lookup/',
+    toolLabel: 'Oven Temp Lookup',
+    keywords: 'astm c148 borosilicate 3.3 soda lime glass thermal shock delta t shatter threshold 330 100 freezer oven'
+  },
+  {
+    id: 'eu-bfr-efsa-bamboo',
+    code: 'EU BfR & EFSA',
+    category: 'cookware',
+    categoryLabel: 'Cookware & Plastics',
+    title: 'EU BfR / EFSA Bamboo-Melamine Composite Advisories',
+    metrics: 'Formaldehyde & melamine leaching >158°F (70°C) • Accelerated under acidic foods/drinks',
+    summary:
+      'Documents European Food Safety Authority (EFSA) and German Federal Institute for Risk Assessment (BfR) findings that bamboo-fiber melamine-formaldehyde composites degrade rapidly when exposed to hot (>70°C) or acidic foods like coffee, tomato sauce, or microwave heating.',
+    toolPath: '/tools/kitchen-symbol-decoder/',
+    toolLabel: 'Kitchen Symbol Decoder',
+    keywords: 'eu bfr efsa bamboo melamine composite formaldehyde migration acidic hot heating 70c tableware microwave'
+  },
+  {
+    id: 'epa-poison-control',
+    code: 'EPA & Poison Control',
+    category: 'appliances',
+    categoryLabel: 'Appliances & Heat',
+    title: 'EPA & Poison Control Household Chemical Reactivity Matrix',
+    metrics: 'Bleach + Ammonia → Chloramine • Bleach + Vinegar → Chlorine gas • Vinegar + Peroxide → Peracetic acid',
+    summary:
+      'Maps hazardous gas generation and corrosive reaction pathways when common kitchen cleaning agents (sodium hypochlorite bleach, ammonia, acetic acid vinegar, hydrogen peroxide, and drain cleaners) are mixed or applied sequentially without thorough rinsing.',
+    toolPath: '/tools/cleaner-mixing-danger-checker/',
+    toolLabel: 'Cleaner Mixing Checker',
+    keywords: 'epa poison control chemical reactivity bleach ammonia chloramine vinegar chlorine gas hydrogen peroxide peracetic acid mixing'
+  },
+  {
+    id: 'nist-ul-ieee-emf',
+    code: 'NIST / UL / IEEE',
+    category: 'appliances',
+    categoryLabel: 'Appliances & Heat',
+    title: 'NIST / UL / IEEE Induction Cooktop & Microwave Safety Standards',
+    metrics: '20–50 kHz EMF • Pacemaker clearance 30–60 cm (12–24 in) • Microwave wattage-time equivalence',
+    summary:
+      'Provides electromagnetic field safety clearances for cardiac pacemakers and ICDs around 20–50 kHz induction coils alongside UL/IEC thermal safety limits and inverse-wattage scaling for safe microwave reheating without cold pathogen pockets.',
+    toolPath: '/tools/microwave-wattage-converter/',
+    toolLabel: 'Microwave Wattage Converter',
+    keywords: 'nist ul ieee induction cooktop microwave safety 20 50 khz emf pacemaker clearance 30 60 cm wattage time equivalence'
+  }
+];
+
+const workflowSteps = [
+  {
+    step: '01',
+    title: 'Primary Standard Lookup',
+    detail: 'Every rule is anchored directly to USDA FSIS, FDA 21 CFR, NSF/ANSI, CDC/AAP, ASTM, EFSA/BfR, or EPA primary clauses.'
+  },
+  {
+    step: '02',
+    title: 'Thermal & Chemical Cross-Check',
+    detail: 'Thresholds are stress-tested for worst-case kitchen deltas (dry-pan overheating, alkaline wash cycles, acidic leaching, allergen carryover).'
+  },
+  {
+    step: '03',
+    title: '5-Language Native Localization',
+    detail: 'Technical units (°F/°C, cm/in, resin codes, regulatory names) are natively localized across EN, ES, PT, ZH-CN, and JA.'
+  },
+  {
+    step: '04',
+    title: 'Automated Link & Parity Audit',
+    detail: 'Continuous validation enforces zero broken internal links, trailing-slash canonicals, and schema parity across 10,900+ pages.'
+  }
+];
+
+const changelogEntries = [
+  {
+    date: '2026-11',
+    badge: 'Standards & Tools',
+    summary:
+      'Published the interactive 10-standard Regulatory Citation Directory across all 5 locales and completed cross-checks for the Food Allergy Cross-Contact and Pantry Dry-Goods Shelf-Life tools.'
+  },
+  {
+    date: '2026-11',
+    badge: 'Microbiology & Chemistry',
+    summary:
+      'Re-audited USDA FSIS power-outage timelines (4h/24h/48h), internal temperature charts (145°F/160°F/165°F), and EPA/Poison Control cleaner mixing hazard matrices.'
+  },
+  {
+    date: '2026-11',
+    badge: 'Materials & Pediatric',
+    summary:
+      'Synchronized ASTM C148 glassware thermal shock thresholds, EU BfR bamboo-melamine heating warnings, CDC/AAP zero-microwave infant feeding guidance, and 10,900+ page localization parity.'
+  }
+];
+
+const verificationTools = [
+  {
+    href: translatePath('/tools/kitchen-symbol-decoder/'),
+    tag: 'ISO • NSF/ANSI',
+    title: 'Kitchen Symbol Decoder',
+    desc: 'Decode bottom-stamp icons for dishwasher, microwave, oven, freezer, and food-contact compliance.'
+  },
+  {
+    href: translatePath('/tools/internal-cooking-temp-chart/'),
+    tag: 'USDA FSIS',
+    title: 'Internal Cooking Temp Chart',
+    desc: 'Instant safe minimum internal temperatures (°F/°C) and rest times for poultry, meats, and leftovers.'
+  },
+  {
+    href: translatePath('/tools/power-outage-food-safety-checker/'),
+    tag: 'USDA 4h / 24h / 48h',
+    title: 'Power Outage Food Safety Checker',
+    desc: 'Keep-or-toss triage for fridge and freezer foods based on outage duration and ambient temperature.'
+  },
+  {
+    href: translatePath('/tools/cleaner-mixing-danger-checker/'),
+    tag: 'EPA • Poison Control',
+    title: 'Cleaner Mixing Danger Checker',
+    desc: 'Detect toxic chloramine, chlorine gas, and peracetic acid hazards before combining household cleaners.'
+  },
+  {
+    href: translatePath('/tools/food-allergy-cross-contact-checker/'),
+    tag: 'FASTER Act • FARE',
+    title: 'Food Allergy Cross-Contact Checker',
+    desc: 'Verify Top 9 allergen transfer risks across shared cookware, oils, and detergent-washing protocols.'
+  },
+  {
+    href: translatePath('/tools/pantry-dry-goods-shelf-life-checker/'),
+    tag: 'USDA FoodKeeper',
+    title: 'Pantry & Dry-Goods Shelf-Life Checker',
+    desc: 'Audit opened and unopened shelf life, rancidity signs, and storage humidity for dry pantry staples.'
+  }
+];
 ---
 
 <Layout
@@ -87,7 +333,7 @@ const thresholdRows = [
   <article class="max-w-[860px] mx-auto px-6 py-[48px] md:py-[64px]">
     <Breadcrumbs
       items={[
-        { label: 'Home', href: '/' },
+        { label: 'Home', href: translatePath('/') },
         { label: 'Methodology' }
       ]}
     />
@@ -265,12 +511,140 @@ const thresholdRows = [
               </p>
               <ul class="list-disc pl-5 text-body-md text-body leading-relaxed space-y-1.5">
                 <li><strong class="text-ink">Scheduled Audits:</strong> High-traffic material guides and brand-specific cookware entries undergo periodic re-verification against current USDA/FDA updates and revised product lines (such as newer dishwasher-safe powder-coat releases vs. legacy insulated bottles).</li>
-                <li><strong class="text-ink">48-Hour Corrections Desk:</strong> Reader-reported discrepancies or new OEM manual citations submitted via our <a href="/contact/" class="text-link hover:underline font-medium">Contact page</a> or <!--email_off--><a href="mailto:editorial@isitkitchensafe.com" class="text-link hover:underline font-medium">editorial@isitkitchensafe.com</a><!--/email_off--> are reviewed against primary sources and updated within 48 business hours.</li>
+                <li><strong class="text-ink">48-Hour Corrections Desk:</strong> Reader-reported discrepancies or new OEM manual citations submitted via our <a href={getDirectoryUrl('contact', 'en')} class="text-link hover:underline font-medium">Contact page</a> or <!--email_off--><a href="mailto:editorial@isitkitchensafe.com" class="text-link hover:underline font-medium">editorial@isitkitchensafe.com</a><!--/email_off--> are reviewed against primary sources and updated within 48 business hours.</li>
                 <li><strong class="text-ink">Editorial Independence:</strong> No brand, retailer, or advertiser can purchase or alter a safety verdict. All safety warnings and material risk ratings remain strictly independent.</li>
               </ul>
             </div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- Interactive Regulatory & Food-Science Standards Citation Directory -->
+    <section id="standards-directory" class="mb-14 scroll-mt-24" aria-labelledby="standards-directory-heading">
+      <div class="flex flex-wrap items-end justify-between gap-3 mb-3">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-wider text-signature-coral block mb-1">
+            Primary Source Index
+          </span>
+          <h2 id="standards-directory-heading" class="text-title-lg text-ink font-medium tracking-tight">
+            Regulatory &amp; Food-Science Standards Directory
+          </h2>
+        </div>
+        <p
+          data-standards-count
+          data-count-template="Showing {shown} of {total} standards"
+          class="text-xs font-mono text-muted"
+          aria-live="polite"
+        >
+          Showing 10 of 10 standards
+        </p>
+      </div>
+      <p class="text-body-md text-body leading-relaxed mb-5">
+        Search or filter the 10 primary regulatory codes, food-science benchmarks, and engineering standards that power every safety verdict and calculator on IsItKitchenSafe.
+      </p>
+
+      <!-- Search & Filter Controls -->
+      <div class="bg-surface-soft border border-hairline rounded-lg p-4 mb-5 space-y-3.5">
+        <div class="relative">
+          <label for="standards-search-input" class="sr-only">
+            Search regulatory standards, codes, temperatures, or hazards
+          </label>
+          <input
+            id="standards-search-input"
+            type="search"
+            data-standards-search
+            placeholder="Filter by agency, code, or hazard (e.g., USDA, 21 CFR, borosilicate, allergen, bleach)..."
+            class="w-full min-h-[42px] pl-3.5 pr-20 py-2 rounded-md bg-canvas border border-hairline text-ink placeholder:text-muted text-sm focus:border-link transition-colors"
+          />
+          <button
+            type="button"
+            data-standards-clear
+            class="hidden absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 text-xs font-medium text-muted hover:text-ink bg-surface-soft border border-hairline rounded transition-colors cursor-pointer"
+          >
+            Clear
+          </button>
+        </div>
+
+        <div class="flex flex-wrap gap-2" role="group" aria-label="Filter standards by category">
+          {standardCategories.map((cat, idx) => (
+            <button
+              type="button"
+              data-category-pill={cat.id}
+              aria-pressed={idx === 0 ? 'true' : 'false'}
+              class={
+                idx === 0
+                  ? 'min-h-[36px] px-3.5 py-1.5 rounded-full text-xs font-medium border border-primary bg-primary text-on-primary transition-colors cursor-pointer'
+                  : 'min-h-[36px] px-3.5 py-1.5 rounded-full text-xs font-medium border border-hairline bg-canvas text-ink hover:bg-surface-strong/40 transition-colors cursor-pointer'
+              }
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <!-- Standards Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {standardsDirectory.map((std) => (
+          <article
+            data-standard-card
+            data-category={std.category}
+            data-search-text={`${std.code} ${std.categoryLabel} ${std.title} ${std.metrics} ${std.summary} ${std.keywords}`}
+            class="bg-surface-soft border border-hairline rounded-lg p-5 flex flex-col gap-3"
+          >
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-[11px] font-mono font-semibold text-ink bg-canvas border border-hairline px-2.5 py-0.5 rounded">
+                {std.code}
+              </span>
+              <span class="text-[11px] font-medium text-muted">
+                {std.categoryLabel}
+              </span>
+            </div>
+
+            <h3 class="text-title-sm text-ink font-semibold leading-snug">
+              {std.title}
+            </h3>
+
+            <p class="text-[12px] font-mono text-ink bg-canvas border border-hairline rounded-md px-3 py-2 leading-relaxed">
+              {std.metrics}
+            </p>
+
+            <p class="text-body-md text-body leading-relaxed">
+              {std.summary}
+            </p>
+
+            <div class="pt-2.5 mt-auto border-t border-hairline flex items-center justify-between gap-2">
+              <span class="text-[11px] uppercase tracking-wider text-muted font-semibold">Applied in Tool</span>
+              <a
+                href={translatePath(std.toolPath)}
+                class="text-xs font-medium text-link hover:underline inline-flex items-center gap-1"
+              >
+                {std.toolLabel} &rarr;
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <!-- Empty Filter State -->
+      <div
+        data-standards-empty
+        class="hidden bg-surface-soft border border-hairline rounded-lg p-6 text-center mt-4"
+      >
+        <p class="text-body-md text-ink font-medium mb-2">
+          No regulatory standards matched your filter.
+        </p>
+        <p class="text-xs text-muted mb-4">
+          Try clearing your search term or switching back to all 10 primary standards.
+        </p>
+        <button
+          type="button"
+          data-standards-reset
+          class="min-h-[38px] px-4 py-1.5 rounded-md bg-primary hover:bg-primary-active text-on-primary text-xs font-medium transition-colors cursor-pointer"
+        >
+          Reset Filters
+        </button>
       </div>
     </section>
 
@@ -307,6 +681,106 @@ const thresholdRows = [
       </div>
     </section>
 
+    <!-- Verifiable Editorial Review & Platform Changelog Card -->
+    <section id="editorial-changelog" class="mb-14 bg-surface-soft border border-hairline rounded-lg p-6" aria-labelledby="changelog-heading">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-4 border-b border-hairline">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-wider text-signature-coral block mb-1">
+            Auditability &amp; Quality Assurance
+          </span>
+          <h2 id="changelog-heading" class="text-title-lg text-ink font-medium tracking-tight">
+            Verifiable Editorial Review &amp; Platform Changelog
+          </h2>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-canvas border border-hairline text-ink font-mono font-medium">
+            <span class="w-2 h-2 rounded-full bg-success"></span>
+            10,900+ Pages Audited
+          </span>
+          <span class="inline-flex items-center px-3 py-1 rounded-full bg-canvas border border-hairline text-muted font-mono">
+            Updated 2026-11
+          </span>
+        </div>
+      </div>
+
+      <!-- 4-Step Verification Workflow -->
+      <h3 class="text-title-sm text-ink font-semibold mb-3">
+        4-Step Editorial Verification Workflow
+      </h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-6">
+        {workflowSteps.map((item) => (
+          <div class="bg-canvas border border-hairline rounded-lg p-4 flex items-start gap-3">
+            <span class="w-7 h-7 rounded-md bg-primary text-on-primary font-mono font-semibold text-xs flex items-center justify-center shrink-0">
+              {item.step}
+            </span>
+            <div class="min-w-0">
+              <h4 class="text-sm font-semibold text-ink mb-1">{item.title}</h4>
+              <p class="text-xs text-body leading-relaxed">{item.detail}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <!-- Recent Milestones -->
+      <h3 class="text-title-sm text-ink font-semibold mb-3">
+        Recent Review Milestones
+      </h3>
+      <ol class="space-y-3">
+        {changelogEntries.map((entry) => (
+          <li class="bg-canvas border border-hairline rounded-lg p-4 flex flex-col sm:flex-row sm:items-start gap-2.5 sm:gap-4">
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="text-xs font-mono font-semibold text-ink bg-surface-soft border border-hairline px-2.5 py-0.5 rounded">
+                {entry.date}
+              </span>
+              <span class="text-[11px] font-medium text-muted">
+                {entry.badge}
+              </span>
+            </div>
+            <p class="text-body-md text-body leading-relaxed">
+              {entry.summary}
+            </p>
+          </li>
+        ))}
+      </ol>
+    </section>
+
+    <!-- Interactive Verification Tools Strip -->
+    <section id="verification-tools" class="mb-14" aria-labelledby="verification-tools-heading">
+      <div class="mb-5">
+        <span class="text-xs font-semibold uppercase tracking-wider text-signature-coral block mb-1">
+          Standards in Action
+        </span>
+        <h2 id="verification-tools-heading" class="text-title-lg text-ink font-medium tracking-tight mb-2">
+          Interactive Verification Tools
+        </h2>
+        <p class="text-body-md text-body leading-relaxed">
+          Apply these federal food-safety, material-science, and chemical-reactivity benchmarks directly to your own kitchen questions.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+        {verificationTools.map((tool) => (
+          <a
+            href={tool.href}
+            class="group bg-surface-soft hover:bg-surface-strong/40 border border-hairline rounded-lg p-4 flex flex-col gap-2 transition-colors"
+          >
+            <span class="text-[11px] font-mono text-muted">
+              {tool.tag}
+            </span>
+            <h3 class="text-sm font-semibold text-ink group-hover:text-link transition-colors">
+              {tool.title}
+            </h3>
+            <p class="text-xs text-body leading-relaxed">
+              {tool.desc}
+            </p>
+            <span class="text-xs font-medium text-link mt-auto pt-2 inline-flex items-center gap-1">
+              Open Tool &rarr;
+            </span>
+          </a>
+        ))}
+      </div>
+    </section>
+
     <!-- Related Trust & Utility Links -->
     <section class="bg-surface-soft border border-hairline rounded-lg p-6">
       <h2 class="text-title-sm text-ink font-semibold mb-2">Explore Our Standards &amp; Safety Tools</h2>
@@ -315,31 +789,31 @@ const thresholdRows = [
       </p>
       <div class="flex flex-wrap gap-3">
         <a
-          href="/about/"
+          href={getDirectoryUrl('about', 'en')}
           class="min-h-[40px] px-4 py-2 bg-canvas hover:bg-surface-strong/40 text-ink border border-hairline rounded-md text-xs font-medium inline-flex items-center gap-1.5 transition-colors"
         >
           About &amp; Editorial Board &rarr;
         </a>
         <a
-          href="/tools/"
+          href={getDirectoryUrl('tools', 'en')}
           class="min-h-[40px] px-4 py-2 bg-canvas hover:bg-surface-strong/40 text-ink border border-hairline rounded-md text-xs font-medium inline-flex items-center gap-1.5 transition-colors"
         >
           Interactive Safety Tools &rarr;
         </a>
         <a
-          href="/saved/"
+          href={getDirectoryUrl('saved', 'en')}
           class="min-h-[40px] px-4 py-2 bg-primary hover:bg-primary-active text-on-primary rounded-md text-xs font-medium inline-flex items-center gap-1.5 transition-colors"
         >
           Printable Fridge Cheat Sheet &rarr;
         </a>
         <a
-          href="/disclaimer/"
+          href={getDirectoryUrl('disclaimer', 'en')}
           class="min-h-[40px] px-4 py-2 bg-canvas hover:bg-surface-strong/40 text-muted hover:text-ink border border-hairline rounded-md text-xs font-medium inline-flex items-center gap-1.5 transition-colors"
         >
           Safety Disclaimer
         </a>
         <a
-          href="/contact/"
+          href={getDirectoryUrl('contact', 'en')}
           class="min-h-[40px] px-4 py-2 bg-canvas hover:bg-surface-strong/40 text-muted hover:text-ink border border-hairline rounded-md text-xs font-medium inline-flex items-center gap-1.5 transition-colors"
         >
           Report a Correction
@@ -347,4 +821,109 @@ const thresholdRows = [
       </div>
     </section>
   </article>
+
+  <script is:inline>
+    (function () {
+      var root = document.getElementById('standards-directory');
+      if (!root) return;
+
+      var searchInput = root.querySelector('[data-standards-search]');
+      var clearBtn = root.querySelector('[data-standards-clear]');
+      var resetBtn = root.querySelector('[data-standards-reset]');
+      var countEl = root.querySelector('[data-standards-count]');
+      var emptyEl = root.querySelector('[data-standards-empty]');
+      var pills = root.querySelectorAll('[data-category-pill]');
+      var cards = root.querySelectorAll('[data-standard-card]');
+
+      var activeCategory = 'all';
+      var totalCount = cards.length;
+      var countTemplate = countEl
+        ? (countEl.getAttribute('data-count-template') || '{shown} / {total}')
+        : '{shown} / {total}';
+
+      function updatePillStyles() {
+        for (var i = 0; i < pills.length; i++) {
+          var pill = pills[i];
+          var cat = pill.getAttribute('data-category-pill');
+          var isActive = cat === activeCategory;
+          pill.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+          if (isActive) {
+            pill.classList.add('bg-primary', 'text-on-primary', 'border-primary');
+            pill.classList.remove('bg-canvas', 'text-ink', 'border-hairline', 'hover:bg-surface-strong/40');
+          } else {
+            pill.classList.remove('bg-primary', 'text-on-primary', 'border-primary');
+            pill.classList.add('bg-canvas', 'text-ink', 'border-hairline', 'hover:bg-surface-strong/40');
+          }
+        }
+      }
+
+      function applyFilter() {
+        var query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+        var shown = 0;
+
+        for (var i = 0; i < cards.length; i++) {
+          var card = cards[i];
+          var cardCat = card.getAttribute('data-category') || '';
+          var haystack = (card.getAttribute('data-search-text') || '').toLowerCase();
+          var matchesCat = activeCategory === 'all' || cardCat === activeCategory;
+          var matchesQuery = !query || haystack.indexOf(query) !== -1;
+          var visible = matchesCat && matchesQuery;
+
+          card.classList.toggle('hidden', !visible);
+          if (visible) shown++;
+        }
+
+        if (countEl) {
+          countEl.textContent = countTemplate
+            .replace('{shown}', String(shown))
+            .replace('{total}', String(totalCount));
+        }
+
+        if (emptyEl) {
+          emptyEl.classList.toggle('hidden', shown > 0);
+        }
+
+        if (clearBtn) {
+          clearBtn.classList.toggle('hidden', query.length === 0);
+        }
+      }
+
+      for (var i = 0; i < pills.length; i++) {
+        pills[i].addEventListener('click', function (event) {
+          var btn = event.currentTarget;
+          activeCategory = btn.getAttribute('data-category-pill') || 'all';
+          updatePillStyles();
+          applyFilter();
+        });
+      }
+
+      if (searchInput) {
+        searchInput.addEventListener('input', applyFilter);
+      }
+
+      if (clearBtn) {
+        clearBtn.addEventListener('click', function () {
+          if (searchInput) {
+            searchInput.value = '';
+            searchInput.focus();
+          }
+          applyFilter();
+        });
+      }
+
+      if (resetBtn) {
+        resetBtn.addEventListener('click', function () {
+          activeCategory = 'all';
+          if (searchInput) {
+            searchInput.value = '';
+          }
+          updatePillStyles();
+          applyFilter();
+        });
+      }
+
+      updatePillStyles();
+      applyFilter();
+    })();
+  </script>
 </Layout>

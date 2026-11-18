@@ -224,7 +224,8 @@ const TOOLS_REGISTRY = [
   { slug: 'induction-cookware-compatibility-checker', name: 'Induction Cookware Compatibility & Magnet Test Checker', category: 'Consumer Kitchen Safety', component: 'InductionCookwareCompatibilityChecker.astro', dataFile: 'induction-cookware-compatibility-data.json' },
   { slug: 'dishwasher-detergent-dosage-calculator', name: 'Dishwasher Detergent, Rinse Aid & Hard Water Safety Calculator', category: 'Consumer Kitchen Safety', component: 'DishwasherDetergentDosageCalculator.astro', dataFile: 'dishwasher-detergent-dosage-data.json' },
   { slug: 'food-allergy-cross-contact-checker', name: 'Kitchen Food Allergy & Cross-Contact Cleaning/Cookware Safety Checker', category: 'Consumer Kitchen Safety', component: 'FoodAllergyCrossContactChecker.astro', dataFile: 'food-allergy-cross-contact-data.json' },
-  { slug: 'pantry-dry-goods-shelf-life-checker', name: 'Pantry, Spices & Dry Goods Shelf-Life & Safety Lookup', category: 'Consumer Kitchen Safety', component: 'PantryDryGoodsShelfLifeChecker.astro', dataFile: 'pantry-dry-goods-shelf-life-data.json' }
+  { slug: 'pantry-dry-goods-shelf-life-checker', name: 'Pantry, Spices & Dry Goods Shelf-Life & Safety Lookup', category: 'Consumer Kitchen Safety', component: 'PantryDryGoodsShelfLifeChecker.astro', dataFile: 'pantry-dry-goods-shelf-life-data.json' },
+  { slug: 'moldy-food-safety-checker', name: 'USDA Moldy Food Cut-Around vs. Throw-Out Safety Checker', category: 'Consumer Kitchen Safety', component: 'MoldyFoodSafetyChecker.astro', dataFile: 'moldy-food-safety-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -539,7 +540,8 @@ function auditDatasets() {
     'induction-cookware-compatibility-data.json',
     'dishwasher-detergent-dosage-data.json',
     'food-allergy-cross-contact-data.json',
-    'pantry-dry-goods-shelf-life-data.json'
+    'pantry-dry-goods-shelf-life-data.json',
+    'moldy-food-safety-data.json'
 ];
 
   const datasetStats = {};

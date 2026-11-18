@@ -1,0 +1,1396 @@
+---
+import rawData from '../data/moldy-food-safety-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+import { useTranslatedPath } from '../i18n/utils';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+const translatePath = useTranslatedPath(lang);
+
+const pantryUrl = translatePath('/tools/pantry-dry-goods-shelf-life-checker/');
+const fridgeZoneUrl = translatePath('/tools/fridge-organization-zone-planner/');
+const leftoverUrl = translatePath('/tools/leftover-shelf-life-calculator/');
+const methodologyUrl = translatePath('/methodology/');
+const allToolsUrl = translatePath('/tools/');
+
+type MoldCategory = 'cheeses-dairy' | 'meats-deli' | 'bread-baked' | 'produce-fruits' | 'pantry-spreads';
+type MoldVerdict = 'cut-around' | 'discard';
+type MoistureLevel = 'low-dense' | 'medium-porous' | 'high-moisture';
+type MycotoxinRisk = 'low-surface' | 'moderate' | 'high';
+
+interface LocalizedFood {
+  id: string;
+  icon: string;
+  category: MoldCategory;
+  verdict: MoldVerdict;
+  moistureLevel: MoistureLevel;
+  mycotoxinRisk: MycotoxinRisk;
+  keywords: string;
+  name: string;
+  examples: string;
+  verdictHeadline: string;
+  usdaScience: string;
+  handlingSteps: string[];
+  ateABiteNote: string;
+}
+
+interface SafetyRule {
+  icon: string;
+  title: string;
+  body: string;
+}
+
+const safetyBanner =
+  (rawData.safetyRulesBanner as Record<string, { badge: string; headline: string; rules: SafetyRule[] }>)[lang] ||
+  rawData.safetyRulesBanner.en;
+
+const localizedFoods: LocalizedFood[] = rawData.foods.map((item) => {
+  const tr = (item.i18n as Record<string, any>)[lang] || item.i18n.en;
+  return {
+    id: item.id,
+    icon: item.icon,
+    category: item.category as MoldCategory,
+    verdict: item.verdict as MoldVerdict,
+    moistureLevel: item.moistureLevel as MoistureLevel,
+    mycotoxinRisk: item.mycotoxinRisk as MycotoxinRisk,
+    keywords: `${item.keywords} ${tr.name} ${tr.examples} ${tr.verdictHeadline} ${tr.usdaScience}`.toLowerCase(),
+    name: tr.name,
+    examples: tr.examples,
+    verdictHeadline: tr.verdictHeadline,
+    usdaScience: tr.usdaScience,
+    handlingSteps: tr.handlingSteps as string[],
+    ateABiteNote: tr.ateABiteNote
+  };
+});
+
+const localizedFaqs: Array<{ question: string; answer: string }> =
+  (rawData.faqs as Record<string, Array<{ question: string; answer: string }>>)[lang] ||
+  rawData.faqs.en;
+
+const counts = {
+  all: localizedFoods.length,
+  cutAround: localizedFoods.filter((f) => f.verdict === 'cut-around').length,
+  discard: localizedFoods.filter((f) => f.verdict === 'discard').length,
+  cheesesDairy: localizedFoods.filter((f) => f.category === 'cheeses-dairy').length,
+  meatsDeli: localizedFoods.filter((f) => f.category === 'meats-deli').length,
+  breadBaked: localizedFoods.filter((f) => f.category === 'bread-baked').length,
+  produceFruits: localizedFoods.filter((f) => f.category === 'produce-fruits').length,
+  pantrySpreads: localizedFoods.filter((f) => f.category === 'pantry-spreads').length
+};
+
+interface UiDict {
+  ariaLabel: string;
+  inspectorBadge: string;
+  inspectorTitle: string;
+  inspectorSub: string;
+  copyBtn: string;
+  copiedBtn: string;
+  printBtn: string;
+  resetBtn: string;
+  verdictCutBadge: string;
+  verdictDiscardBadge: string;
+  moistureLabel: string;
+  moistureLowDense: string;
+  moistureMediumPorous: string;
+  moistureHigh: string;
+  mycotoxinLabel: string;
+  mycotoxinLow: string;
+  mycotoxinModerate: string;
+  mycotoxinHigh: string;
+  usdaScienceLabel: string;
+  handlingStepsLabel: string;
+  ateABiteLabel: string;
+  catalogTitle: string;
+  catalogSub: string;
+  searchLabel: string;
+  searchPlaceholder: string;
+  clearFiltersBtn: string;
+  categoryGroupLabel: string;
+  catAll: string;
+  catCheeses: string;
+  catMeats: string;
+  catBread: string;
+  catProduce: string;
+  catPantry: string;
+  verdictGroupLabel: string;
+  verdictAll: string;
+  verdictCutFilter: string;
+  verdictDiscardFilter: string;
+  showingPrefix: string;
+  showingOf: string;
+  showingSuffix: string;
+  noResultsTitle: string;
+  noResultsSub: string;
+  cardInspectHint: string;
+  cardSelectedLabel: string;
+  chartHeader: string;
+  chartSafeHeading: string;
+  chartDiscardHeading: string;
+  chartRulesHeading: string;
+  chartSelectedHeading: string;
+  relatedHeading: string;
+  relatedPantryTag: string;
+  relatedPantryTitle: string;
+  relatedPantryDesc: string;
+  relatedFridgeTag: string;
+  relatedFridgeTitle: string;
+  relatedFridgeDesc: string;
+  relatedLeftoverTag: string;
+  relatedLeftoverTitle: string;
+  relatedLeftoverDesc: string;
+  methodologyStripTitle: string;
+  methodologyStripPrefix: string;
+  methodologyLabel: string;
+  leftoverQuickLabel: string;
+  allToolsLabel: string;
+  faqTitle: string;
+}
+
+const UI: Record<SupportedLanguage, UiDict> = {
+  en: {
+    ariaLabel: 'USDA Moldy Food Cut-Around vs. Throw-Out Safety Checker',
+    inspectorBadge: 'USDA FSIS Mold Verdict Inspector',
+    inspectorTitle: 'Should You Cut Around the Mold or Throw It Out?',
+    inspectorSub: 'Click any of the 24 foods below to inspect its official USDA FSIS moisture & mycotoxin verdict, exact safe handling steps, and what to do if you already took a bite.',
+    copyBtn: 'Copy USDA Mold Chart',
+    copiedBtn: 'USDA Chart Copied ✓',
+    printBtn: 'Print Fridge Mold Safety Chart',
+    resetBtn: 'Reset',
+    verdictCutBadge: 'CUT 1 INCH (2.5 CM) AROUND',
+    verdictDiscardBadge: 'DISCARD ENTIRE ITEM',
+    moistureLabel: 'Texture / Moisture',
+    moistureLowDense: 'Low Moisture · Dense',
+    moistureMediumPorous: 'Porous / Emulsified',
+    moistureHigh: 'High Moisture',
+    mycotoxinLabel: 'Mycotoxin Risk',
+    mycotoxinLow: 'Low (Surface Only)',
+    mycotoxinModerate: 'Moderate',
+    mycotoxinHigh: 'High (Invisible Spread)',
+    usdaScienceLabel: 'Official USDA FSIS Science Rationale',
+    handlingStepsLabel: 'Exact Safe Handling & Disposal Steps',
+    ateABiteLabel: 'What If I Already Ate a Bite?',
+    catalogTitle: '24 Everyday Foods: Official USDA Cut-Around vs. Discard Matrix',
+    catalogSub: 'Filter by food category or USDA verdict, or search any ingredient to check it immediately.',
+    searchLabel: 'Search food item',
+    searchPlaceholder: 'Search cheddar, bread, jam, strawberries, peanut butter, cream cheese, apples, bacon...',
+    clearFiltersBtn: 'Clear Filters',
+    categoryGroupLabel: 'Food Category',
+    catAll: 'All',
+    catCheeses: 'Cheeses & Dairy',
+    catMeats: 'Meats & Deli',
+    catBread: 'Bread & Baked',
+    catProduce: 'Produce & Fruits',
+    catPantry: 'Pantry & Spreads',
+    verdictGroupLabel: 'USDA Verdict',
+    verdictAll: 'All Verdicts',
+    verdictCutFilter: 'Cut 1 Inch Around (Safe)',
+    verdictDiscardFilter: 'Discard Entire Item',
+    showingPrefix: 'Showing',
+    showingOf: 'of',
+    showingSuffix: 'foods',
+    noResultsTitle: 'No matching foods found',
+    noResultsSub: 'Try searching cheddar, bread, berries, jam, peanut butter, yogurt, salsa, apples, or maple syrup.',
+    cardInspectHint: 'Click to inspect USDA verdict ↑',
+    cardSelectedLabel: 'Viewing Verdict ↑',
+    chartHeader: 'IsItKitchenSafe — Official USDA FSIS Moldy Food Cut-Around vs. Discard Chart',
+    chartSafeHeading: 'SAFE TO CUT 1 INCH (2.5 CM) AROUND & BELOW (4 USDA-Approved Foods):',
+    chartDiscardHeading: 'ALWAYS DISCARD ENTIRE ITEM (20 High-Moisture / Porous / Mycotoxin Foods):',
+    chartRulesHeading: '3 CRITICAL USDA MOLD SAFETY RULES:',
+    chartSelectedHeading: 'SELECTED FOOD PROTOCOL',
+    relatedHeading: 'Related Food Storage & Spoilage Prevention Tools',
+    relatedPantryTag: 'Dry Goods & Spreads',
+    relatedPantryTitle: 'Pantry & Dry Goods Shelf Life Checker →',
+    relatedPantryDesc: 'Check safe storage windows for flour, oats, nuts, peanut butter, coffee, jams, and maple syrup before dampness causes mold.',
+    relatedFridgeTag: 'Humidity & Mold Control',
+    relatedFridgeTitle: 'Fridge Organization Zone Planner →',
+    relatedFridgeDesc: 'Place berries, cheeses, produce, and deli meats in the right temperature & crisper humidity zone to prevent early mold growth.',
+    relatedLeftoverTag: '3–4 Day Leftover Rule',
+    relatedLeftoverTitle: 'Leftover Shelf Life Calculator →',
+    relatedLeftoverDesc: 'Track cooked meat, rice, pasta, and casseroles against USDA 3–4 day limits long before invisible mold or bacteria multiply.',
+    methodologyStripTitle: 'Grounded Strictly in USDA FSIS "Molds on Food: Are They Dangerous?" & FDA Mycotoxin Science',
+    methodologyStripPrefix: 'Every cut-around vs. discard decision, 1-inch (2.5 cm) margin rule, and baking soda fridge sanitization formula aligns with USDA FSIS and FDA guidance. Read our',
+    methodologyLabel: 'Methodology',
+    leftoverQuickLabel: 'Leftover Shelf Life Calculator',
+    allToolsLabel: 'All Kitchen Tools →',
+    faqTitle: 'Frequently Asked Questions: Moldy Food Safety & Mycotoxins'
+  },
+  es: {
+    ariaLabel: 'Verificador USDA de Alimentos con Moho: Recortar vs. Desechar',
+    inspectorBadge: 'Inspector de Veredicto USDA FSIS',
+    inspectorTitle: '¿Puedes Cortar Alrededor del Moho o Debes Tirar Todo?',
+    inspectorSub: 'Pulsa cualquiera de los 24 alimentos de abajo para ver su veredicto oficial USDA FSIS sobre humedad y micotoxinas, pasos exactos de manejo y qué hacer si ya comiste un bocado.',
+    copyBtn: 'Copiar Tabla USDA de Moho',
+    copiedBtn: 'Tabla USDA Copiada ✓',
+    printBtn: 'Imprimir Guía para el Refrigerador',
+    resetBtn: 'Restablecer',
+    verdictCutBadge: 'CORTAR 2,5 CM (1 PULG.) ALREDEDOR',
+    verdictDiscardBadge: 'DESECHAR TODO EL ALIMENTO',
+    moistureLabel: 'Textura / Humedad',
+    moistureLowDense: 'Baja Humedad · Denso',
+    moistureMediumPorous: 'Poroso / Emulsionado',
+    moistureHigh: 'Alta Humedad',
+    mycotoxinLabel: 'Riesgo de Micotoxinas',
+    mycotoxinLow: 'Bajo (Solo Superficie)',
+    mycotoxinModerate: 'Moderado',
+    mycotoxinHigh: 'Alto (Propagación Invisible)',
+    usdaScienceLabel: 'Base Científica Oficial USDA FSIS',
+    handlingStepsLabel: 'Pasos Exactos de Manejo y Descarte Seguro',
+    ateABiteLabel: '¿Qué Pasa Si Ya Comí un Bocado?',
+    catalogTitle: '24 Alimentos Cotidianos: Matriz Oficial USDA Recortar vs. Desechar',
+    catalogSub: 'Filtra por categoría o veredicto del USDA, o busca cualquier ingrediente al instante.',
+    searchLabel: 'Buscar alimento',
+    searchPlaceholder: 'Busca cheddar, pan, mermelada, fresas, maní, queso crema, manzanas, tocino...',
+    clearFiltersBtn: 'Limpiar Filtros',
+    categoryGroupLabel: 'Categoría',
+    catAll: 'Todos',
+    catCheeses: 'Quesos y Lácteos',
+    catMeats: 'Carnes y Fiambres',
+    catBread: 'Pan y Granos',
+    catProduce: 'Frutas y Verduras',
+    catPantry: 'Despensa y Untables',
+    verdictGroupLabel: 'Veredicto USDA',
+    verdictAll: 'Todos los Veredictos',
+    verdictCutFilter: 'Cortar 2,5 cm Alrededor (Seguro)',
+    verdictDiscardFilter: 'Desechar Todo el Alimento',
+    showingPrefix: 'Mostrando',
+    showingOf: 'de',
+    showingSuffix: 'alimentos',
+    noResultsTitle: 'No encontramos alimentos coincidentes',
+    noResultsSub: 'Prueba buscando cheddar, pan, fresas, mermelada, cacahuete, yogur, salsa, manzanas o jarabe.',
+    cardInspectHint: 'Pulsa para ver el veredicto USDA ↑',
+    cardSelectedLabel: 'Viendo Veredicto ↑',
+    chartHeader: 'IsItKitchenSafe — Tabla Oficial USDA FSIS de Alimentos con Moho (Recortar vs. Desechar)',
+    chartSafeHeading: 'SEGURO CORTAR 2,5 CM ALREDEDOR Y DEBAJO (4 Alimentos Aprobados por USDA):',
+    chartDiscardHeading: 'DESECHAR SIEMPRE TODO EL ENVASE (20 Alimentos Húmedos / Porosos / Con Micotoxinas):',
+    chartRulesHeading: '3 REGLAS CRÍTICAS DEL USDA SOBRE MOHO:',
+    chartSelectedHeading: 'PROTOCOLO DEL ALIMENTO SELECCIONADO',
+    relatedHeading: 'Herramientas Relacionadas de Conservación y Seguridad Alimentaria',
+    relatedPantryTag: 'Despensa y Untables',
+    relatedPantryTitle: 'Verificador de Vida Útil de Despensa →',
+    relatedPantryDesc: 'Comprueba plazos seguros para harina, avena, frutos secos, café, mermelada y jarabe de arce antes de que aparezca moho.',
+    relatedFridgeTag: 'Control de Humedad',
+    relatedFridgeTitle: 'Planificador de Zonas del Refrigerador →',
+    relatedFridgeDesc: 'Ubica frutas, quesos, verduras y fiambres en la zona de temperatura y humedad ideal para frenar el moho.',
+    relatedLeftoverTag: 'Regla de 3–4 Días',
+    relatedLeftoverTitle: 'Calculadora de Vida Útil de Sobras →',
+    relatedLeftoverDesc: 'Controla carnes, arroz, pasta y guisos cocidos dentro del límite USDA de 3–4 días antes de que crezca moho o bacterias.',
+    methodologyStripTitle: 'Basado Estrictamente en USDA FSIS "Molds on Food" y Ciencia FDA de Micotoxinas',
+    methodologyStripPrefix: 'Cada veredicto de recorte o descarte, la regla de 2,5 cm y la fórmula con bicarbonato para desinfectar cajones siguen guías oficiales de USDA FSIS y FDA. Lee nuestra',
+    methodologyLabel: 'Metodología',
+    leftoverQuickLabel: 'Calculadora de Sobras',
+    allToolsLabel: 'Todas las Herramientas →',
+    faqTitle: 'Preguntas Frecuentes: Alimentos con Moho y Micotoxinas'
+  },
+  pt: {
+    ariaLabel: 'Verificador USDA de Alimentos Mofados: Cortar vs. Descartar',
+    inspectorBadge: 'Inspetor de Veredito USDA FSIS',
+    inspectorTitle: 'Pode Cortar ao Redor do Mofo ou Precisa Jogar Tudo Fora?',
+    inspectorSub: 'Clique em qualquer um dos 24 alimentos abaixo para ver o veredito oficial do USDA FSIS sobre umidade e micotoxinas, passos seguros de manuseio e o que fazer se já deu uma mordida.',
+    copyBtn: 'Copiar Tabela USDA de Mofo',
+    copiedBtn: 'Tabela USDA Copiada ✓',
+    printBtn: 'Imprimir Guia para a Geladeira',
+    resetBtn: 'Redefinir',
+    verdictCutBadge: 'CORTAR 2,5 CM (1 POL.) AO REDOR',
+    verdictDiscardBadge: 'DESCARTAR TUDO',
+    moistureLabel: 'Textura / Umidade',
+    moistureLowDense: 'Baixa Umidade · Denso',
+    moistureMediumPorous: 'Poroso / Emulsionado',
+    moistureHigh: 'Alta Umidade',
+    mycotoxinLabel: 'Risco de Micotoxinas',
+    mycotoxinLow: 'Baixo (Só Superfície)',
+    mycotoxinModerate: 'Moderado',
+    mycotoxinHigh: 'Alto (Propagação Invisível)',
+    usdaScienceLabel: 'Base Científica Oficial USDA FSIS',
+    handlingStepsLabel: 'Passos Exatos de Manuseio e Descarte Seguro',
+    ateABiteLabel: 'E Se Eu Já Comi uma Mordida?',
+    catalogTitle: '24 Alimentos do Dia a Dia: Matriz Oficial USDA Cortar vs. Descartar',
+    catalogSub: 'Filtre por categoria ou veredito do USDA, ou pesquise qualquer alimento imediatamente.',
+    searchLabel: 'Buscar alimento',
+    searchPlaceholder: 'Busque cheddar, pão, geleia, morangos, amendoim, cream cheese, maçãs, bacon...',
+    clearFiltersBtn: 'Limpar Filtros',
+    categoryGroupLabel: 'Categoria',
+    catAll: 'Todos',
+    catCheeses: 'Queijos e Laticínios',
+    catMeats: 'Carnes e Frios',
+    catBread: 'Pães e Grãos',
+    catProduce: 'Frutas e Vegetais',
+    catPantry: 'Despensa e Pastas',
+    verdictGroupLabel: 'Veredito USDA',
+    verdictAll: 'Todos os Vereditos',
+    verdictCutFilter: 'Cortar 2,5 cm ao Redor (Seguro)',
+    verdictDiscardFilter: 'Descartar Inteiro',
+    showingPrefix: 'Mostrando',
+    showingOf: 'de',
+    showingSuffix: 'alimentos',
+    noResultsTitle: 'Nenhum alimento correspondente encontrado',
+    noResultsSub: 'Tente buscar cheddar, pão, morango, geleia, amendoim, iogurte, molho, maçã ou xarope.',
+    cardInspectHint: 'Clique para ver o veredito USDA ↑',
+    cardSelectedLabel: 'Vendo Veredito ↑',
+    chartHeader: 'IsItKitchenSafe — Tabela Oficial USDA FSIS de Alimentos Mofados (Cortar vs. Descartar)',
+    chartSafeHeading: 'SEGURO CORTAR 2,5 CM AO REDOR E ABAIXO (4 Alimentos Aprovados pelo USDA):',
+    chartDiscardHeading: 'DESCARTAR SEMPRE O ITEM INTEIRO (20 Alimentos Úmidos / Porosos / Com Micotoxinas):',
+    chartRulesHeading: '3 REGRAS CRÍTICAS DO USDA SOBRE MOFO:',
+    chartSelectedHeading: 'PROTOCOLO DO ALIMENTO SELECIONADO',
+    relatedHeading: 'Ferramentas Relacionadas de Conservação e Prevenção de Mofo',
+    relatedPantryTag: 'Despensa e Secos',
+    relatedPantryTitle: 'Verificador de Validade da Despensa →',
+    relatedPantryDesc: 'Confira prazos seguros para farinha, aveia, castanhas, café, geleias e maple syrup antes que a umidade crie mofo.',
+    relatedFridgeTag: 'Controle de Umidade',
+    relatedFridgeTitle: 'Planejador de Zonas da Geladeira →',
+    relatedFridgeDesc: 'Organize frutas, queijos, verduras e frios na temperatura e umidade certas para evitar mofo precoce.',
+    relatedLeftoverTag: 'Regra de 3–4 Dias',
+    relatedLeftoverTitle: 'Calculadora de Validade de Sobras →',
+    relatedLeftoverDesc: 'Controle carnes, arroz, massas e assados dentro do limite USDA de 3–4 dias antes do surgimento de fungos e bactérias.',
+    methodologyStripTitle: 'Baseado Estritamente no Guia USDA FSIS "Molds on Food" e Ciência FDA de Micotoxinas',
+    methodologyStripPrefix: 'Cada decisão de cortar ou descartar, a margem de 2,5 cm e a limpeza com bicarbonato seguem diretrizes oficiais do USDA FSIS e FDA. Conheça nossa',
+    methodologyLabel: 'Metodologia',
+    leftoverQuickLabel: 'Validade de Sobras',
+    allToolsLabel: 'Todas as Ferramentas →',
+    faqTitle: 'Perguntas Frequentes: Alimentos Mofados e Micotoxinas'
+  },
+  'zh-cn': {
+    ariaLabel: '美国农业部 USDA 发霉食物切除 vs. 丢弃安全检查器',
+    inspectorBadge: 'USDA FSIS 发霉安全判定面板',
+    inspectorTitle: '发霉食物该切掉继续吃，还是必须整份丢弃？',
+    inspectorSub: '点击下方 24 种常见食材中的任意一种，即刻查看美国农业部 USDA FSIS 官方水分与霉菌毒素判定、安全处理步骤及“误食一口怎么办”指南。',
+    copyBtn: '复制 USDA 发霉对照表',
+    copiedBtn: 'USDA 对照表已复制 ✓',
+    printBtn: '打印冰箱防霉安全表',
+    resetBtn: '重置',
+    verdictCutBadge: '可切除四周及下方 2.5cm（1 英寸）',
+    verdictDiscardBadge: '必须整份丢弃',
+    moistureLabel: '质地 / 含水量',
+    moistureLowDense: '低水分 · 质地致密',
+    moistureMediumPorous: '多孔 / 乳化水分',
+    moistureHigh: '高水分',
+    mycotoxinLabel: '霉菌毒素风险',
+    mycotoxinLow: '低（仅限表面）',
+    mycotoxinModerate: '中风险',
+    mycotoxinHigh: '高风险（隐形渗透）',
+    usdaScienceLabel: '美国农业部 USDA FSIS 科学依据',
+    handlingStepsLabel: '安全处理与防孢子扩散步骤',
+    ateABiteLabel: '如果不小心已经吃了一口怎么办？',
+    catalogTitle: '24 种日常食材：USDA 官方可切除 vs. 必须丢弃对照矩阵',
+    catalogSub: '按食材分类或安全结论筛选，或直接搜索任意食材立即查询。',
+    searchLabel: '搜索食材名称',
+    searchPlaceholder: '搜索切达奶酪、面包、果酱、草莓、花生酱、奶油奶酪、苹果、培根...',
+    clearFiltersBtn: '清除筛选',
+    categoryGroupLabel: '食材分类',
+    catAll: '全部',
+    catCheeses: '奶酪与乳制品',
+    catMeats: '肉类与熟食',
+    catBread: '面包与谷物',
+    catProduce: '蔬果与浆果',
+    catPantry: '干货与酱料',
+    verdictGroupLabel: 'USDA 判定',
+    verdictAll: '全部判定',
+    verdictCutFilter: '可切除 2.5cm（安全）',
+    verdictDiscardFilter: '必须整份丢弃',
+    showingPrefix: '当前显示',
+    showingOf: '/',
+    showingSuffix: '种常见食材',
+    noResultsTitle: '未找到匹配的食材',
+    noResultsSub: '试试搜索：奶酪、面包、草莓、果酱、花生酱、酸奶、莎莎酱、苹果或枫糖浆。',
+    cardInspectHint: '点击查看 USDA 判定 ↑',
+    cardSelectedLabel: '正在查看判定 ↑',
+    chartHeader: 'IsItKitchenSafe — 美国农业部 USDA FSIS 发霉食物切除 vs. 丢弃安全表',
+    chartSafeHeading: '可安全切除四周及下方 2.5 厘米（仅限 4 类 USDA 认可食材）：',
+    chartDiscardHeading: '必须整份/整包丢弃（20 类高水分 / 多孔 / 霉菌毒素高危食材）：',
+    chartRulesHeading: '美国农业部三大发霉食物安全铁律：',
+    chartSelectedHeading: '当前选中食材处理方案',
+    relatedHeading: '相关食材储存与防变质工具',
+    relatedPantryTag: '干货与酱料保质期',
+    relatedPantryTitle: '橱柜干货保质期检查器 →',
+    relatedPantryDesc: '在受潮发霉之前，查清面粉、燕麦、坚果、花生酱、咖啡、果酱和枫糖浆的安全储存期限。',
+    relatedFridgeTag: '冰箱控湿防霉',
+    relatedFridgeTitle: '冰箱分区收纳规划器 →',
+    relatedFridgeDesc: '把浆果、奶酪、果蔬和熟食放进最合适的温湿度区，显著延缓发霉变质。',
+    relatedLeftoverTag: '剩菜 3–4 天铁律',
+    relatedLeftoverTitle: '剩菜保质期计算器 →',
+    relatedLeftoverDesc: '按 USDA 3–4 天标准追踪熟肉、米饭、意面和炖菜，在霉菌与细菌滋生前及时吃完。',
+    methodologyStripTitle: '严格遵循美国农业部 USDA FSIS《食物上的霉菌》与 FDA 霉菌毒素指南',
+    methodologyStripPrefix: '所有切除/丢弃判定、2.5 厘米（1 英寸）安全边距及小苏打水冰箱消毒配方均对照 USDA FSIS 与 FDA 权威文件核验。查看我们的',
+    methodologyLabel: '科学方法论',
+    leftoverQuickLabel: '剩菜保质期计算器',
+    allToolsLabel: '全部厨房工具 →',
+    faqTitle: '常见问题：发霉食物安全与霉菌毒素'
+  },
+  ja: {
+    ariaLabel: '米国農務省 USDA カビ食品・切り落とし可否＆廃棄安全チェッカー',
+    inspectorBadge: 'USDA FSIS カビ判定インスペクター',
+    inspectorTitle: 'カビ部分を切り落として食べてよい？丸ごと捨てるべき？',
+    inspectorSub: '下の24食品から該当アイテムをクリックすると、USDA FSIS公式の水分・カビ毒（マイコトキシン）判定、安全な処理手順、誤って一口食べた場合の対処法を確認できます。',
+    copyBtn: 'USDA カビ判定表をコピー',
+    copiedBtn: 'USDA 判定表をコピーしました ✓',
+    printBtn: '冷蔵庫用カビ安全表を印刷',
+    resetBtn: 'リセット',
+    verdictCutBadge: '周囲＆下側 2.5cm（1インチ）切除で安全',
+    verdictDiscardBadge: '丸ごと全部廃棄',
+    moistureLabel: '質感・水分量',
+    moistureLowDense: '低水分・緻密',
+    moistureMediumPorous: '多孔質・乳化水分',
+    moistureHigh: '高水分',
+    mycotoxinLabel: 'カビ毒リスク',
+    mycotoxinLow: '低（表面のみ）',
+    mycotoxinModerate: '中リスク',
+    mycotoxinHigh: '高（目に見えず拡散）',
+    usdaScienceLabel: 'USDA FSIS 公式科学的根拠',
+    handlingStepsLabel: '安全な処理・廃棄ステップ',
+    ateABiteLabel: 'うっかり一口食べてしまったら？',
+    catalogTitle: '身近な食品24種：USDA公式 切り落とし可 vs. 全量廃棄マトリクス',
+    catalogSub: '食品カテゴリや判定結果で絞り込むか、キーワード検索ですぐに確認できます。',
+    searchLabel: '食品を検索',
+    searchPlaceholder: 'チェダー、パン、ジャム、いちご、ピーナッツバター、クリームチーズ、リンゴ等を検索...',
+    clearFiltersBtn: 'フィルターをクリア',
+    categoryGroupLabel: '食品カテゴリ',
+    catAll: 'すべて',
+    catCheeses: 'チーズ・乳製品',
+    catMeats: '肉類・加工肉',
+    catBread: 'パン・穀類',
+    catProduce: '野菜・果物',
+    catPantry: '常備品・ジャム・ソース',
+    verdictGroupLabel: 'USDA 判定',
+    verdictAll: 'すべての判定',
+    verdictCutFilter: '2.5cm切除で安全',
+    verdictDiscardFilter: '丸ごと全部廃棄',
+    showingPrefix: '表示中：',
+    showingOf: '/',
+    showingSuffix: '食品',
+    noResultsTitle: '一致する食品が見つかりませんでした',
+    noResultsSub: 'チェダー、パン、いちご、ジャム、ピーナッツ、ヨーグルト、リンゴ、メープル等で再検索してください。',
+    cardInspectHint: 'クリックしてUSDA判定を確認 ↑',
+    cardSelectedLabel: '判定表示中 ↑',
+    chartHeader: 'IsItKitchenSafe — 米国農務省 USDA FSIS カビ食品 切り落とし可否・廃棄一覧表',
+    chartSafeHeading: '周囲＆下側2.5cm切除で安全（USDA認定4食品のみ）：',
+    chartDiscardHeading: '必ず丸ごと全量廃棄（高水分・多孔質・カビ毒リスク20食品）：',
+    chartRulesHeading: 'USDA カビ安全の3大原則：',
+    chartSelectedHeading: '選択中の食品プロトコル',
+    relatedHeading: '関連する食品保存・カビ予防ツール',
+    relatedPantryTag: '乾物・スプレッド消費期限',
+    relatedPantryTitle: 'パントリー乾物・保存食 賞味期限チェッカー →',
+    relatedPantryDesc: '小麦粉・オーツ・ナッツ・ピーナッツバター・コーヒー・ジャムが湿気でカビる前に適切な保存期間を確認。',
+    relatedFridgeTag: '湿度・カビ発生予防',
+    relatedFridgeTitle: '冷蔵庫ゾーン整理プランナー →',
+    relatedFridgeDesc: 'ベリー・チーズ・野菜・ハムを最適な温度・湿度ゾーンに配置し、カビの発生を大幅に遅らせます。',
+    relatedLeftoverTag: '作り置き3〜4日ルール',
+    relatedLeftoverTitle: '残り物・作り置き日持ち計算機 →',
+    relatedLeftoverDesc: '肉料理・ご飯・パスタ・グラタンをUSDA基準の3〜4日以内で管理し、カビや食中毒菌の増殖を防ぎます。',
+    methodologyStripTitle: 'USDA FSIS「Molds on Food」および FDA カビ毒指針に厳密準拠',
+    methodologyStripPrefix: 'すべての切り落とし／廃棄判定、2.5cm（1インチ）切除基準、重曹水による冷蔵庫清掃手順はUSDA FSIS・FDA公式資料に基づきます。詳細は',
+    methodologyLabel: '検証メソドロジー',
+    leftoverQuickLabel: '残り物日持ち計算機',
+    allToolsLabel: 'すべてのツールを見る →',
+    faqTitle: 'よくある質問：カビの生えた食品の安全性とカビ毒'
+  }
+};
+
+const t = UI[lang] || UI.en;
+const defaultFood = localizedFoods[0];
+
+function getCategoryLabel(cat: MoldCategory): string {
+  if (cat === 'cheeses-dairy') return t.catCheeses;
+  if (cat === 'meats-deli') return t.catMeats;
+  if (cat === 'bread-baked') return t.catBread;
+  if (cat === 'produce-fruits') return t.catProduce;
+  return t.catPantry;
+}
+
+function getVerdictPillClass(verdict: MoldVerdict): string {
+  return verdict === 'cut-around' ? 'badge-yes' : 'badge-no';
+}
+
+function getVerdictLabel(verdict: MoldVerdict): string {
+  return verdict === 'cut-around' ? t.verdictCutBadge : t.verdictDiscardBadge;
+}
+
+function getMoistureLabel(level: MoistureLevel): string {
+  if (level === 'low-dense') return t.moistureLowDense;
+  if (level === 'medium-porous') return t.moistureMediumPorous;
+  return t.moistureHigh;
+}
+
+function getMycotoxinLabel(risk: MycotoxinRisk): string {
+  if (risk === 'low-surface') return t.mycotoxinLow;
+  if (risk === 'moderate') return t.mycotoxinModerate;
+  return t.mycotoxinHigh;
+}
+
+function getMycotoxinBadgeClass(risk: MycotoxinRisk): string {
+  if (risk === 'low-surface') return 'bg-emerald-500/20 text-emerald-200 border-emerald-400/40';
+  if (risk === 'moderate') return 'bg-amber-500/20 text-amber-200 border-amber-400/40';
+  return 'bg-red-500/20 text-red-200 border-red-400/40';
+}
+
+function getCardBorderAccent(verdict: MoldVerdict): string {
+  return verdict === 'cut-around'
+    ? 'border-l-4 border-l-success-border'
+    : 'border-l-4 border-l-error-border';
+}
+
+const clientPayload = {
+  totalCount: localizedFoods.length,
+  foods: localizedFoods,
+  rules: safetyBanner.rules,
+  ui: {
+    copyBtn: t.copyBtn,
+    copiedBtn: t.copiedBtn,
+    verdictCutBadge: t.verdictCutBadge,
+    verdictDiscardBadge: t.verdictDiscardBadge,
+    moistureLabel: t.moistureLabel,
+    moistureLowDense: t.moistureLowDense,
+    moistureMediumPorous: t.moistureMediumPorous,
+    moistureHigh: t.moistureHigh,
+    mycotoxinLabel: t.mycotoxinLabel,
+    mycotoxinLow: t.mycotoxinLow,
+    mycotoxinModerate: t.mycotoxinModerate,
+    mycotoxinHigh: t.mycotoxinHigh,
+    showingPrefix: t.showingPrefix,
+    showingOf: t.showingOf,
+    showingSuffix: t.showingSuffix,
+    cardInspectHint: t.cardInspectHint,
+    cardSelectedLabel: t.cardSelectedLabel,
+    chartHeader: t.chartHeader,
+    chartSafeHeading: t.chartSafeHeading,
+    chartDiscardHeading: t.chartDiscardHeading,
+    chartRulesHeading: t.chartRulesHeading,
+    chartSelectedHeading: t.chartSelectedHeading
+  }
+};
+---
+
+<div id="moldy-food-checker-root" class="space-y-12">
+  <!-- Critical USDA Safety Rules Banner -->
+  <aside
+    class="p-5 sm:p-6 rounded-2xl bg-error-bg/65 dark:bg-red-950/35 border-2 border-error-border/80 shadow-sm space-y-4"
+    role="note"
+    aria-label={safetyBanner.badge}
+  >
+    <div class="space-y-1">
+      <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-error-border text-white">
+        ⚠️ {safetyBanner.badge}
+      </span>
+      <h2 class="text-base sm:text-lg font-extrabold text-ink leading-snug">
+        {safetyBanner.headline}
+      </h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      {safetyBanner.rules.map((rule) => (
+        <div class="p-3.5 rounded-xl bg-canvas border border-hairline shadow-xs space-y-1.5">
+          <div class="flex items-start gap-2">
+            <span aria-hidden="true" class="text-lg leading-none mt-0.5 shrink-0">{rule.icon}</span>
+            <h3 class="text-xs sm:text-[13px] font-extrabold text-ink leading-snug">{rule.title}</h3>
+          </div>
+          <p class="text-xs text-body leading-relaxed">{rule.body}</p>
+        </div>
+      ))}
+    </div>
+  </aside>
+
+  <!-- Main Interactive Checker Card -->
+  <section
+    id="moldy-food-safety-checker"
+    class="bg-canvas border border-hairline rounded-2xl shadow-sm overflow-hidden"
+    aria-label={t.ariaLabel}
+  >
+    <script type="application/json" id="mfsc-payload" set:html={JSON.stringify(clientPayload)} />
+
+    <!-- PART 1: Header Actions + High-Contrast Dark USDA Mold Verdict Inspector -->
+    <div class="p-5 sm:p-6 border-b border-hairline bg-surface-soft/50 space-y-5">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div class="space-y-1 max-w-2xl">
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-signature-coral text-white">
+            🔬 {t.inspectorBadge}
+          </span>
+          <h2 class="text-title-md font-bold text-ink">{t.inspectorTitle}</h2>
+          <p class="text-xs sm:text-[13px] text-muted leading-relaxed">{t.inspectorSub}</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 print:hidden">
+          <button
+            type="button"
+            id="mfsc-copy-btn"
+            class="min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors cursor-pointer shadow-sm"
+          >
+            <span id="mfsc-copy-label">📋 {t.copyBtn}</span>
+          </button>
+          <button
+            type="button"
+            id="mfsc-print-btn"
+            class="min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-semibold bg-canvas text-ink border border-hairline hover:border-signature-coral transition-colors cursor-pointer"
+          >
+            🖨️ {t.printBtn}
+          </button>
+          <button
+            type="button"
+            id="mfsc-reset-btn"
+            class="min-h-[40px] px-3 py-2 rounded-xl text-xs font-semibold bg-canvas text-muted border border-hairline hover:border-border-strong hover:text-ink transition-colors cursor-pointer"
+          >
+            {t.resetBtn}
+          </button>
+        </div>
+      </div>
+
+      <!-- High-Contrast Dark USDA Mold Verdict Inspector -->
+      <div
+        id="mfsc-verdict-inspector"
+        aria-live="polite"
+        class={`w-full rounded-2xl bg-surface-dark text-on-dark p-5 sm:p-6 space-y-4 shadow-sm border-l-4 ${
+          defaultFood.verdict === 'cut-around' ? 'border-success-border' : 'border-error-border'
+        }`}
+      >
+        <div class="flex flex-wrap items-center justify-between gap-2.5">
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="mfsc-dash-pill" class={getVerdictPillClass(defaultFood.verdict)}>
+              {getVerdictLabel(defaultFood.verdict)}
+            </span>
+            <span
+              id="mfsc-dash-moisture"
+              class="inline-flex items-center px-2.5 py-0.5 rounded-md border text-[11px] font-bold bg-white/10 text-white/90 border-white/20"
+            >
+              💧 {t.moistureLabel}: {getMoistureLabel(defaultFood.moistureLevel)}
+            </span>
+            <span
+              id="mfsc-dash-mycotoxin"
+              class={`inline-flex items-center px-2.5 py-0.5 rounded-md border text-[11px] font-bold ${getMycotoxinBadgeClass(defaultFood.mycotoxinRisk)}`}
+            >
+              ☣️ {t.mycotoxinLabel}: {getMycotoxinLabel(defaultFood.mycotoxinRisk)}
+            </span>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <span id="mfsc-dash-icon" aria-hidden="true" class="text-3xl leading-none mt-0.5 shrink-0">
+            {defaultFood.icon}
+          </span>
+          <div class="space-y-1">
+            <h3 id="mfsc-dash-name" class="text-lg sm:text-xl font-extrabold tracking-tight text-white leading-snug">
+              {defaultFood.name}
+            </h3>
+            <p id="mfsc-dash-examples" class="text-xs text-white/75 leading-relaxed">
+              {defaultFood.examples}
+            </p>
+            <p
+              id="mfsc-dash-headline"
+              class={`text-xs sm:text-sm font-extrabold leading-snug pt-0.5 ${
+                defaultFood.verdict === 'cut-around' ? 'text-signature-mint' : 'text-red-300'
+              }`}
+            >
+              {defaultFood.verdictHeadline}
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <!-- Left: USDA Science + What If I Ate a Bite -->
+          <div class="lg:col-span-6 space-y-3">
+            <div class="p-3.5 rounded-xl bg-white/6 border border-white/12">
+              <span class="block text-[10.5px] font-bold uppercase tracking-wider text-signature-peach">
+                🧪 {t.usdaScienceLabel}
+              </span>
+              <p id="mfsc-dash-science" class="text-xs sm:text-[13px] text-white/92 leading-relaxed mt-1.5">
+                {defaultFood.usdaScience}
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-amber-500/12 border border-amber-400/35">
+              <span class="block text-[10.5px] font-bold uppercase tracking-wider text-amber-200">
+                🩺 {t.ateABiteLabel}
+              </span>
+              <p id="mfsc-dash-bite" class="text-xs sm:text-[13px] text-white/95 leading-relaxed mt-1.5">
+                {defaultFood.ateABiteNote}
+              </p>
+            </div>
+          </div>
+
+          <!-- Right: Safe Handling Steps -->
+          <div class="lg:col-span-6 p-4 rounded-xl bg-white/6 border border-white/12 flex flex-col justify-between">
+            <div class="space-y-2">
+              <span class="block text-[10.5px] font-bold uppercase tracking-wider text-signature-mint">
+                ✅ {t.handlingStepsLabel}
+              </span>
+              <ol id="mfsc-dash-steps" class="space-y-2 text-xs sm:text-[13px] text-white/95 list-decimal list-outside pl-5">
+                {defaultFood.handlingSteps.map((step) => (
+                  <li class="leading-relaxed">{step}</li>
+                ))}
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PART 2: Search, Category Pills, Verdict Filter & 24 Clickable Food Cards -->
+    <div class="p-5 sm:p-6 space-y-5">
+      <div class="space-y-1">
+        <h2 class="text-title-md font-semibold text-ink">{t.catalogTitle}</h2>
+        <p class="text-xs sm:text-[13px] text-muted">{t.catalogSub}</p>
+      </div>
+
+      <!-- Search + Filters -->
+      <div class="space-y-3.5 print:hidden">
+        <!-- Search Row -->
+        <div class="flex flex-col sm:flex-row gap-2.5">
+          <div class="relative flex-1">
+            <label for="mfsc-search-input" class="sr-only">{t.searchLabel}</label>
+            <span aria-hidden="true" class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-muted">
+              🔎
+            </span>
+            <input
+              id="mfsc-search-input"
+              type="search"
+              autocomplete="off"
+              placeholder={t.searchPlaceholder}
+              class="w-full min-h-[44px] pl-10 pr-4 py-2 rounded-xl bg-surface-soft border border-hairline text-sm text-ink placeholder:text-muted focus:outline-none focus:border-signature-coral focus:ring-2 focus:ring-signature-coral/25 transition-all"
+            />
+          </div>
+          <button
+            type="button"
+            id="mfsc-clear-btn"
+            class="min-h-[44px] px-4 py-2 rounded-xl text-xs font-semibold bg-canvas text-ink border border-hairline hover:border-signature-coral transition-colors cursor-pointer shrink-0"
+          >
+            {t.clearFiltersBtn}
+          </button>
+        </div>
+
+        <!-- Category Filter Pills -->
+        <div class="space-y-1.5">
+          <span class="block text-[11px] font-bold uppercase tracking-wider text-muted">
+            {t.categoryGroupLabel}
+          </span>
+          <div class="flex flex-wrap gap-2" role="group" aria-label={t.categoryGroupLabel}>
+            <button
+              type="button"
+              data-mfsc-cat="all"
+              aria-pressed="true"
+              class="mfsc-cat-btn px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-primary text-on-primary border-primary shadow-sm"
+            >
+              {t.catAll} ({counts.all})
+            </button>
+            <button
+              type="button"
+              data-mfsc-cat="cheeses-dairy"
+              aria-pressed="false"
+              class="mfsc-cat-btn px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-border-strong"
+            >
+              🧀 {t.catCheeses} ({counts.cheesesDairy})
+            </button>
+            <button
+              type="button"
+              data-mfsc-cat="meats-deli"
+              aria-pressed="false"
+              class="mfsc-cat-btn px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-border-strong"
+            >
+              🥩 {t.catMeats} ({counts.meatsDeli})
+            </button>
+            <button
+              type="button"
+              data-mfsc-cat="bread-baked"
+              aria-pressed="false"
+              class="mfsc-cat-btn px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-border-strong"
+            >
+              🍞 {t.catBread} ({counts.breadBaked})
+            </button>
+            <button
+              type="button"
+              data-mfsc-cat="produce-fruits"
+              aria-pressed="false"
+              class="mfsc-cat-btn px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-border-strong"
+            >
+              🍓 {t.catProduce} ({counts.produceFruits})
+            </button>
+            <button
+              type="button"
+              data-mfsc-cat="pantry-spreads"
+              aria-pressed="false"
+              class="mfsc-cat-btn px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-border-strong"
+            >
+              🫙 {t.catPantry} ({counts.pantrySpreads})
+            </button>
+          </div>
+        </div>
+
+        <!-- Verdict Filter + Count Readout -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+          <div class="flex flex-wrap items-center gap-2" role="group" aria-label={t.verdictGroupLabel}>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted mr-1">
+              {t.verdictGroupLabel}:
+            </span>
+            <button
+              type="button"
+              data-mfsc-verdict="all"
+              aria-pressed="true"
+              class="mfsc-verdict-btn px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-primary text-on-primary border-primary shadow-sm"
+            >
+              {t.verdictAll} ({counts.all})
+            </button>
+            <button
+              type="button"
+              data-mfsc-verdict="cut-around"
+              aria-pressed="false"
+              class="mfsc-verdict-btn px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-success-border"
+            >
+              ✅ {t.verdictCutFilter} ({counts.cutAround})
+            </button>
+            <button
+              type="button"
+              data-mfsc-verdict="discard"
+              aria-pressed="false"
+              class="mfsc-verdict-btn px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-error-border"
+            >
+              🚫 {t.verdictDiscardFilter} ({counts.discard})
+            </button>
+          </div>
+
+          <p id="mfsc-count-readout" aria-live="polite" class="text-xs font-semibold text-muted">
+            {t.showingPrefix} {counts.all} {t.showingOf} {counts.all} {t.showingSuffix}
+          </p>
+        </div>
+      </div>
+
+      <!-- Empty Search State -->
+      <div
+        id="mfsc-empty-state"
+        class="hidden p-8 rounded-2xl bg-surface-soft border border-hairline text-center space-y-2"
+      >
+        <p class="text-sm font-bold text-ink">{t.noResultsTitle}</p>
+        <p class="text-xs text-muted">{t.noResultsSub}</p>
+        <button
+          type="button"
+          id="mfsc-empty-reset-btn"
+          class="mt-2 px-4 py-2 rounded-xl text-xs font-bold bg-primary text-on-primary hover:bg-primary-active transition-colors cursor-pointer"
+        >
+          {t.clearFiltersBtn}
+        </button>
+      </div>
+
+      <!-- 24 Clickable Food Cards -->
+      <div id="mfsc-cards-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {localizedFoods.map((food, idx) => (
+          <button
+            type="button"
+            data-mfsc-card={food.id}
+            data-mfsc-cat={food.category}
+            data-mfsc-verdict={food.verdict}
+            data-mfsc-search={food.keywords}
+            aria-pressed={idx === 0 ? 'true' : 'false'}
+            class={`mfsc-card text-left w-full p-4 sm:p-5 rounded-2xl bg-surface-soft/55 border border-hairline hover:border-signature-coral ${getCardBorderAccent(food.verdict)} flex flex-col justify-between gap-3 transition-all cursor-pointer ${
+              idx === 0 ? 'ring-2 ring-signature-coral bg-canvas shadow-sm' : ''
+            }`}
+          >
+            <div class="space-y-2 w-full">
+              <div class="flex items-start justify-between gap-2.5">
+                <div class="flex items-start gap-2.5 min-w-0">
+                  <span aria-hidden="true" class="text-xl leading-none mt-0.5 shrink-0">{food.icon}</span>
+                  <div class="min-w-0">
+                    <h3 class="text-sm sm:text-[15px] font-bold text-ink leading-snug">{food.name}</h3>
+                    <p class="text-[11px] font-semibold text-muted mt-0.5">
+                      {getCategoryLabel(food.category)}
+                    </p>
+                  </div>
+                </div>
+                <span class={`shrink-0 ${getVerdictPillClass(food.verdict)}`}>
+                  {getVerdictLabel(food.verdict)}
+                </span>
+              </div>
+
+              <p class="text-xs text-muted leading-snug">
+                {food.examples}
+              </p>
+
+              <p class="text-xs sm:text-[13px] font-semibold text-ink leading-snug">
+                {food.verdictHeadline}
+              </p>
+            </div>
+
+            <div class="w-full pt-2 border-t border-hairline/70 flex items-center justify-between gap-2">
+              <span class="text-[11px] font-semibold text-muted">
+                💧 {getMoistureLabel(food.moistureLevel)}
+              </span>
+              <span
+                data-mfsc-card-hint
+                class={`text-[11px] font-bold ${idx === 0 ? 'text-signature-coral' : 'text-muted'}`}
+              >
+                {idx === 0 ? t.cardSelectedLabel : t.cardInspectHint}
+              </span>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Related Companion Tools -->
+  <section class="space-y-4 print:hidden">
+    <h2 class="text-title-md font-semibold text-ink">{t.relatedHeading}</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <a
+        href={pantryUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedPantryTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedPantryTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedPantryDesc}</p>
+      </a>
+
+      <a
+        href={fridgeZoneUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedFridgeTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedFridgeTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedFridgeDesc}</p>
+      </a>
+
+      <a
+        href={leftoverUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedLeftoverTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedLeftoverTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedLeftoverDesc}</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- Methodology & Hub Strip -->
+  <section class="p-6 rounded-2xl bg-surface-soft border border-hairline print:hidden">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-title-sm font-semibold text-ink mb-1">{t.methodologyStripTitle}</h2>
+        <p class="text-[13px] text-muted">
+          {t.methodologyStripPrefix}{' '}
+          <a href={methodologyUrl} class="text-link underline hover:text-link-active">{t.methodologyLabel}</a>.
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a
+          href={leftoverUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
+        >
+          {t.leftoverQuickLabel}
+        </a>
+        <a
+          href={methodologyUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
+        >
+          {t.methodologyLabel}
+        </a>
+        <a
+          href={allToolsUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors"
+        >
+          {t.allToolsLabel}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Visible FAQ Accordion (Matches JSON-LD 1:1) -->
+  <section class="print:hidden">
+    <h2 class="text-title-lg font-medium text-ink tracking-tight mb-6">
+      {t.faqTitle}
+    </h2>
+    <div class="space-y-4">
+      {localizedFaqs.map((faq) => (
+        <details class="group p-5 bg-surface-soft border border-hairline rounded-xl" open>
+          <summary class="text-title-sm font-semibold text-ink cursor-pointer list-none flex items-center justify-between gap-3">
+            <span>{faq.question}</span>
+            <span class="text-muted text-sm transition-transform group-open:rotate-180 shrink-0" aria-hidden="true">&#9662;</span>
+          </summary>
+          <p class="text-[14px] text-body leading-relaxed mt-3 pt-3 border-t border-hairline/70">
+            {faq.answer}
+          </p>
+        </details>
+      ))}
+    </div>
+  </section>
+</div>
+
+<script is:inline>
+  (function () {
+    var payloadEl = document.getElementById('mfsc-payload');
+    if (!payloadEl) return;
+
+    var payload;
+    try {
+      payload = JSON.parse(payloadEl.textContent || '{}');
+    } catch (_) {
+      return;
+    }
+
+    var foods = Array.isArray(payload.foods) ? payload.foods : [];
+    var rules = Array.isArray(payload.rules) ? payload.rules : [];
+    var ui = payload.ui || {};
+    var totalCount = Number(payload.totalCount || foods.length || 24);
+
+    var foodMap = {};
+    foods.forEach(function (f) {
+      if (f && f.id) foodMap[f.id] = f;
+    });
+
+    // Verdict inspector elements
+    var elInspector = document.getElementById('mfsc-verdict-inspector');
+    var elDashPill = document.getElementById('mfsc-dash-pill');
+    var elDashMoisture = document.getElementById('mfsc-dash-moisture');
+    var elDashMycotoxin = document.getElementById('mfsc-dash-mycotoxin');
+    var elDashIcon = document.getElementById('mfsc-dash-icon');
+    var elDashName = document.getElementById('mfsc-dash-name');
+    var elDashExamples = document.getElementById('mfsc-dash-examples');
+    var elDashHeadline = document.getElementById('mfsc-dash-headline');
+    var elDashScience = document.getElementById('mfsc-dash-science');
+    var elDashBite = document.getElementById('mfsc-dash-bite');
+    var elDashSteps = document.getElementById('mfsc-dash-steps');
+
+    // Catalog controls
+    var searchInput = document.getElementById('mfsc-search-input');
+    var clearBtn = document.getElementById('mfsc-clear-btn');
+    var emptyResetBtn = document.getElementById('mfsc-empty-reset-btn');
+    var catBtns = Array.from(document.querySelectorAll('.mfsc-cat-btn'));
+    var verdictBtns = Array.from(document.querySelectorAll('.mfsc-verdict-btn'));
+    var cards = Array.from(document.querySelectorAll('.mfsc-card'));
+    var countReadout = document.getElementById('mfsc-count-readout');
+    var emptyState = document.getElementById('mfsc-empty-state');
+    var cardsGrid = document.getElementById('mfsc-cards-grid');
+
+    // Top action buttons
+    var copyBtn = document.getElementById('mfsc-copy-btn');
+    var copyLabel = document.getElementById('mfsc-copy-label');
+    var printBtn = document.getElementById('mfsc-print-btn');
+    var resetBtn = document.getElementById('mfsc-reset-btn');
+
+    var state = {
+      foodId: foods[0] ? foods[0].id : 'hard-cheeses',
+      category: 'all',
+      verdict: 'all',
+      query: ''
+    };
+
+    function getVerdictLabel(verdict) {
+      return verdict === 'cut-around'
+        ? (ui.verdictCutBadge || 'CUT 1 INCH (2.5 CM) AROUND')
+        : (ui.verdictDiscardBadge || 'DISCARD ENTIRE ITEM');
+    }
+
+    function getMoistureText(level) {
+      if (level === 'low-dense') return ui.moistureLowDense || 'Low Moisture · Dense';
+      if (level === 'medium-porous') return ui.moistureMediumPorous || 'Porous / Emulsified';
+      return ui.moistureHigh || 'High Moisture';
+    }
+
+    function getMycotoxinText(risk) {
+      if (risk === 'low-surface') return ui.mycotoxinLow || 'Low (Surface Only)';
+      if (risk === 'moderate') return ui.mycotoxinModerate || 'Moderate';
+      return ui.mycotoxinHigh || 'High (Invisible Spread)';
+    }
+
+    function setMycotoxinClasses(el, risk) {
+      if (!el) return;
+      el.classList.remove(
+        'bg-emerald-500/20',
+        'text-emerald-200',
+        'border-emerald-400/40',
+        'bg-amber-500/20',
+        'text-amber-200',
+        'border-amber-400/40',
+        'bg-red-500/20',
+        'text-red-200',
+        'border-red-400/40'
+      );
+      if (risk === 'low-surface') {
+        el.classList.add('bg-emerald-500/20', 'text-emerald-200', 'border-emerald-400/40');
+      } else if (risk === 'moderate') {
+        el.classList.add('bg-amber-500/20', 'text-amber-200', 'border-amber-400/40');
+      } else {
+        el.classList.add('bg-red-500/20', 'text-red-200', 'border-red-400/40');
+      }
+    }
+
+    function renderInspector() {
+      var food = foodMap[state.foodId] || foods[0];
+      if (!food) return;
+
+      var isCut = food.verdict === 'cut-around';
+
+      if (elDashPill) {
+        elDashPill.className = isCut ? 'badge-yes' : 'badge-no';
+        elDashPill.textContent = getVerdictLabel(food.verdict);
+      }
+
+      if (elDashMoisture) {
+        elDashMoisture.textContent = '💧 ' + (ui.moistureLabel || 'Texture / Moisture') + ': ' + getMoistureText(food.moistureLevel);
+      }
+
+      if (elDashMycotoxin) {
+        elDashMycotoxin.textContent = '☣️ ' + (ui.mycotoxinLabel || 'Mycotoxin Risk') + ': ' + getMycotoxinText(food.mycotoxinRisk);
+        setMycotoxinClasses(elDashMycotoxin, food.mycotoxinRisk);
+      }
+
+      if (elDashIcon) elDashIcon.textContent = food.icon || '';
+      if (elDashName) elDashName.textContent = food.name || '';
+      if (elDashExamples) elDashExamples.textContent = food.examples || '';
+
+      if (elDashHeadline) {
+        elDashHeadline.textContent = food.verdictHeadline || '';
+        elDashHeadline.classList.toggle('text-signature-mint', isCut);
+        elDashHeadline.classList.toggle('text-red-300', !isCut);
+      }
+
+      if (elDashScience) elDashScience.textContent = food.usdaScience || '';
+      if (elDashBite) elDashBite.textContent = food.ateABiteNote || '';
+
+      if (elDashSteps) {
+        while (elDashSteps.firstChild) {
+          elDashSteps.removeChild(elDashSteps.firstChild);
+        }
+        var steps = Array.isArray(food.handlingSteps) ? food.handlingSteps : [];
+        steps.forEach(function (stepText) {
+          var li = document.createElement('li');
+          li.className = 'leading-relaxed';
+          li.textContent = stepText;
+          elDashSteps.appendChild(li);
+        });
+      }
+
+      if (elInspector) {
+        elInspector.classList.remove('border-success-border', 'border-error-border');
+        elInspector.classList.add(isCut ? 'border-success-border' : 'border-error-border');
+      }
+
+      cards.forEach(function (card) {
+        var active = card.getAttribute('data-mfsc-card') === food.id;
+        card.setAttribute('aria-pressed', active ? 'true' : 'false');
+        card.classList.toggle('ring-2', active);
+        card.classList.toggle('ring-signature-coral', active);
+        card.classList.toggle('bg-canvas', active);
+        card.classList.toggle('shadow-sm', active);
+        card.classList.toggle('bg-surface-soft/55', !active);
+        var hint = card.querySelector('[data-mfsc-card-hint]');
+        if (hint) {
+          hint.textContent = active
+            ? (ui.cardSelectedLabel || 'Viewing Verdict ↑')
+            : (ui.cardInspectHint || 'Click to inspect USDA verdict ↑');
+          hint.classList.toggle('text-signature-coral', active);
+          hint.classList.toggle('text-muted', !active);
+        }
+      });
+    }
+
+    function togglePillActive(btn, active) {
+      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+      btn.classList.toggle('bg-primary', active);
+      btn.classList.toggle('text-on-primary', active);
+      btn.classList.toggle('border-primary', active);
+      btn.classList.toggle('shadow-sm', active);
+      btn.classList.toggle('bg-canvas', !active);
+      btn.classList.toggle('text-ink', !active);
+      btn.classList.toggle('border-hairline', !active);
+    }
+
+    function renderCatalog() {
+      var q = (state.query || '').trim().toLowerCase();
+      var visibleCount = 0;
+
+      catBtns.forEach(function (btn) {
+        var cVal = btn.getAttribute('data-mfsc-cat');
+        togglePillActive(btn, cVal === state.category);
+      });
+
+      verdictBtns.forEach(function (btn) {
+        var vVal = btn.getAttribute('data-mfsc-verdict');
+        togglePillActive(btn, vVal === state.verdict);
+      });
+
+      cards.forEach(function (card) {
+        var cat = card.getAttribute('data-mfsc-cat') || '';
+        var verdict = card.getAttribute('data-mfsc-verdict') || '';
+        var haystack = card.getAttribute('data-mfsc-search') || '';
+        var catMatch = state.category === 'all' || cat === state.category;
+        var verdictMatch = state.verdict === 'all' || verdict === state.verdict;
+        var queryMatch = !q || haystack.indexOf(q) !== -1;
+        var show = catMatch && verdictMatch && queryMatch;
+        card.classList.toggle('hidden', !show);
+        if (show) visibleCount += 1;
+      });
+
+      if (countReadout) {
+        countReadout.textContent =
+          (ui.showingPrefix || 'Showing') +
+          ' ' +
+          visibleCount +
+          ' ' +
+          (ui.showingOf || 'of') +
+          ' ' +
+          totalCount +
+          ' ' +
+          (ui.showingSuffix || 'foods');
+      }
+
+      var isEmpty = visibleCount === 0;
+      if (emptyState) emptyState.classList.toggle('hidden', !isEmpty);
+      if (cardsGrid) cardsGrid.classList.toggle('hidden', isEmpty);
+    }
+
+    function buildChartText() {
+      var selected = foodMap[state.foodId] || foods[0];
+      var lines = [];
+      lines.push(ui.chartHeader || 'IsItKitchenSafe — Official USDA FSIS Moldy Food Chart');
+      lines.push('');
+
+      if (selected) {
+        lines.push((ui.chartSelectedHeading || 'SELECTED FOOD PROTOCOL') + ': ' + selected.name + ' [' + getVerdictLabel(selected.verdict) + ']');
+        lines.push('- ' + selected.verdictHeadline);
+        if (Array.isArray(selected.handlingSteps)) {
+          selected.handlingSteps.forEach(function (step, i) {
+            lines.push('  ' + (i + 1) + ') ' + step);
+          });
+        }
+        lines.push('');
+      }
+
+      lines.push(ui.chartSafeHeading || 'SAFE TO CUT 1 INCH (2.5 CM) AROUND & BELOW:');
+      foods.forEach(function (f) {
+        if (f.verdict === 'cut-around') {
+          lines.push('  [SAFE CUT] ' + f.name + ' — ' + f.examples);
+        }
+      });
+      lines.push('');
+
+      lines.push(ui.chartDiscardHeading || 'ALWAYS DISCARD ENTIRE ITEM:');
+      foods.forEach(function (f) {
+        if (f.verdict === 'discard') {
+          lines.push('  [DISCARD] ' + f.name + ' — ' + f.examples);
+        }
+      });
+      lines.push('');
+
+      lines.push(ui.chartRulesHeading || '3 CRITICAL USDA MOLD SAFETY RULES:');
+      rules.forEach(function (r, idx) {
+        lines.push('  ' + (idx + 1) + '. ' + r.title + ' — ' + r.body);
+      });
+
+      return lines.join('\n');
+    }
+
+    function clearCatalogFilters() {
+      state.category = 'all';
+      state.verdict = 'all';
+      state.query = '';
+      if (searchInput) searchInput.value = '';
+      renderCatalog();
+    }
+
+    cards.forEach(function (card) {
+      card.addEventListener('click', function () {
+        var id = card.getAttribute('data-mfsc-card');
+        if (id && foodMap[id]) {
+          state.foodId = id;
+          renderInspector();
+          if (elInspector && typeof elInspector.scrollIntoView === 'function') {
+            var rect = elInspector.getBoundingClientRect();
+            if (rect.top < 0 || rect.top > window.innerHeight * 0.65) {
+              elInspector.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+          }
+        }
+      });
+    });
+
+    catBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var val = btn.getAttribute('data-mfsc-cat');
+        if (val) {
+          state.category = val;
+          renderCatalog();
+        }
+      });
+    });
+
+    verdictBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var val = btn.getAttribute('data-mfsc-verdict');
+        if (val) {
+          state.verdict = val;
+          renderCatalog();
+        }
+      });
+    });
+
+    if (searchInput) {
+      searchInput.addEventListener('input', function () {
+        state.query = searchInput.value || '';
+        renderCatalog();
+      });
+    }
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', clearCatalogFilters);
+    }
+    if (emptyResetBtn) {
+      emptyResetBtn.addEventListener('click', clearCatalogFilters);
+    }
+
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        var chartText = buildChartText();
+        var showCopied = function () {
+          if (copyLabel) copyLabel.textContent = ui.copiedBtn || 'USDA Chart Copied ✓';
+          window.setTimeout(function () {
+            if (copyLabel) copyLabel.textContent = '📋 ' + (ui.copyBtn || 'Copy USDA Mold Chart');
+          }, 2200);
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(chartText).then(showCopied).catch(showCopied);
+        } else {
+          var ta = document.createElement('textarea');
+          ta.value = chartText;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'absolute';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          try {
+            document.execCommand('copy');
+          } catch (_) {
+            // ignore
+          }
+          document.body.removeChild(ta);
+          showCopied();
+        }
+      });
+    }
+
+    if (printBtn) {
+      printBtn.addEventListener('click', function () {
+        window.print();
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function () {
+        state.foodId = foods[0] ? foods[0].id : 'hard-cheeses';
+        clearCatalogFilters();
+        renderInspector();
+      });
+    }
+
+    renderInspector();
+    renderCatalog();
+  })();
+</script>

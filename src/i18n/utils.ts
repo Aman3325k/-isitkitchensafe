@@ -226,6 +226,7 @@ const SPECIAL_PAGES = [
   'tools/dishwasher-detergent-dosage-calculator',
   'tools/food-allergy-cross-contact-checker',
   'tools/pantry-dry-goods-shelf-life-checker',
+  'tools/moldy-food-safety-checker',
   'methodology',
   'saved'
 ];

@@ -1,0 +1,162 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import MoldyFoodSafetyChecker from '../../../components/MoldyFoodSafetyChecker.astro';
+import rawData from '../../../data/moldy-food-safety-data.json';
+import type { SupportedLanguage } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+
+interface LocalePageContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  heroSub: string;
+  breadcrumbs: Array<{ label: string; href?: string }>;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocalePageContent> = {
+  es: {
+    pageTitle: "Verificador USDA de Alimentos con Moho: Recortar vs. Desechar | IsItKitchenSafe",
+    pageDescription: "Consulta la guía oficial USDA FSIS para 24 alimentos con moho: cuándo puedes cortar 2,5 cm (1 pulgada) en quesos duros, salami o verduras firmes y cuándo desechar pan, mermelada, bayas, queso crema, crema de maní y sobras por riesgo de micotoxinas.",
+    badge: "Tabla Oficial USDA FSIS · 24 Alimentos · Guía de Micotoxinas",
+    h1: "Verificador USDA de Alimentos con Moho: ¿Recortar o Desechar?",
+    heroSub: "Comprueba al instante si puedes salvar queso cheddar, pan, fresas, mermelada, mantequilla de maní, queso crema, manzanas, salami, jarabe de arce o sobras con la regla USDA de 2,5 cm o si debes desechar todo por raíces invisibles y micotoxinas termoestables.",
+    breadcrumbs: [
+      { label: "Inicio", href: "/es/" },
+      { label: "Herramientas", href: "/es/tools/" },
+      { label: "Alimentos con Moho" }
+    ]
+  },
+  pt: {
+    pageTitle: "Verificador USDA de Alimentos Mofados: Cortar vs. Descartar | IsItKitchenSafe",
+    pageDescription: "Consulte a tabela oficial USDA FSIS para 24 alimentos mofados: quando é seguro cortar 2,5 cm em queijos duros, salame ou legumes firmes e quando descartar pão, geleia, morangos, cream cheese, pasta de amendoim e sobras por risco de micotoxinas.",
+    badge: "Tabela Oficial USDA FSIS · 24 Alimentos · Guia de Micotoxinas",
+    h1: "Verificador USDA de Alimentos Mofados: Cortar ou Jogar Fora?",
+    heroSub: "Veja na hora se queijo cheddar, pão, morangos, geleia, pasta de amendoim, cream cheese, maçãs, salame, maple syrup ou sobras podem ser salvos com a regra USDA de 2,5 cm ou exigem descarte imediato por raízes invisíveis e micotoxinas.",
+    breadcrumbs: [
+      { label: "Início", href: "/pt/" },
+      { label: "Ferramentas", href: "/pt/tools/" },
+      { label: "Alimentos Mofados" }
+    ]
+  },
+  'zh-cn': {
+    pageTitle: "美国农业部 USDA 发霉食物切除 vs. 丢弃安全检查器 | IsItKitchenSafe",
+    pageDescription: "对照美国农业部 USDA FSIS 官方 24 种发霉食物安全表：一键查清硬奶酪、硬萨拉米、硬质蔬果何时可安全切除 2.5 厘米，以及面包、果酱、草莓、奶油奶酪、花生酱与剩菜为何因隐形菌丝和耐热霉菌毒素必须整份丢弃。",
+    badge: "美国农业部 USDA FSIS 官方表 · 24 种食材 · 霉菌毒素安全指南",
+    h1: "USDA 发霉食物安全检查器：切掉继续吃还是整份丢弃？",
+    heroSub: "即刻核查切达奶酪、面包、草莓、果酱、花生酱、奶油奶酪、苹果、萨拉米、枫糖浆与剩菜发霉后能否按 USDA 2.5 厘米标准切除，或因隐形菌丝与耐热霉菌毒素必须整份丢弃。",
+    breadcrumbs: [
+      { label: "首页", href: "/zh-cn/" },
+      { label: "实用工具", href: "/zh-cn/tools/" },
+      { label: "发霉食物安全检查器" }
+    ]
+  },
+  ja: {
+    pageTitle: "米国農務省 USDA カビ食品・切り落とし可否＆廃棄安全チェッカー | IsItKitchenSafe",
+    pageDescription: "米国農務省（USDA FSIS）公式チャートに基づき身近な24食品を即判定。ハードチーズ・ハードサラミ・硬い野菜の2.5cm切り落とし基準から、パン・ジャム・いちご・クリームチーズ・ピーナッツバター・残り物のカビ毒廃棄理由まで網羅。",
+    badge: "USDA FSIS 公式チャート · 24食品 · カビ毒（マイコトキシン）対策",
+    h1: "USDA カビ食品チェッカー：切り落とし可 vs. 丸ごと廃棄",
+    heroSub: "チェダーチーズ、パン、いちご、ジャム、ピーナッツバター、クリームチーズ、リンゴ、サラミ、メープルシロップ、残り物にカビが出た際、USDAの2.5cm切除ルールで安全か、見えない菌糸や耐熱カビ毒のため全量廃棄すべきか即座に判定します。",
+    breadcrumbs: [
+      { label: "ホーム", href: "/ja/" },
+      { label: "ツール", href: "/ja/tools/" },
+      { label: "カビ食品安全チェッカー" }
+    ]
+  }
+};
+
+const c = CONTENT[lang as Exclude<SupportedLanguage, 'en'>] || CONTENT.es;
+const faqs = (rawData.faqs as Record<string, Array<{ question: string; answer: string }>>)[lang] || rawData.faqs.en;
+const localizedUrl = `https://isitkitchensafe.com/${lang}/tools/moldy-food-safety-checker/`;
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": c.h1,
+  "url": localizedUrl,
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript.",
+  "description": c.pageDescription,
+  "inLanguage": lang === 'zh-cn' ? 'zh-CN' : lang,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IsItKitchenSafe",
+    "url": "https://isitkitchensafe.com"
+  }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map((faq) => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+};
+---
+
+<Layout
+  title={c.pageTitle}
+  description={c.pageDescription}
+  faqs={faqs}
+  excludeFaqSchema={true}
+  availableLocales={availableLocales}
+  lang={lang}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(webAppSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+  </Fragment>
+
+  <!-- Breadcrumbs -->
+  <div class="bg-surface-soft border-b border-hairline py-1 print:hidden">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <Breadcrumbs items={c.breadcrumbs} className="mb-0" />
+    </div>
+  </div>
+
+  <div class="max-w-[1140px] mx-auto px-6 py-10 md:py-14">
+    <!-- Hero Header -->
+    <header class="mb-10 text-center max-w-3xl mx-auto">
+      <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-signature-coral text-white mb-3">
+        {c.badge}
+      </span>
+      <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-4">
+        {c.h1}
+      </h1>
+      <p class="text-body text-[15px] md:text-[16px] leading-relaxed">
+        {c.heroSub}
+      </p>
+    </header>
+
+    <!-- Main Interactive Checker Component -->
+    <MoldyFoodSafetyChecker lang={lang} />
+  </div>
+</Layout>
