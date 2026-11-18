@@ -82,7 +82,14 @@ const curatedTools: Array<{
     path: '/tools/internal-cooking-temp-chart/',
     title: 'USDA Safe Internal Cooking Temperature Chart & Doneness Lookup',
     description:
-      'Interactive USDA FSIS minimum safe internal cooking temperatures, rest timers, and thermometer probe placement tips across 24 cuts of meat, poultry, seafood, eggs, and leftovers in °F and °C.',
+      'Interactive USDA FSIS minimum safe internal cooking temperatures, live °F/°C toggle, thermometer probe checker, rest timers, and printable fridge chart across 24 cuts of meat, poultry, seafood, eggs, and leftovers.',
+    date: '2026-11-18',
+  },
+  {
+    path: '/tools/appliance-descaling-calculator/',
+    title: 'Coffee Maker, Electric Kettle & Espresso Descaling Ratio Calculator',
+    description:
+      'Calculate exact citric acid and white vinegar descaling ratios by reservoir volume, check aluminum and brass boiler corrosion alerts, and build hard-water descale schedules for drip brewers, electric kettles, Keurig, Nespresso, and espresso machines.',
     date: '2026-11-18',
   },
   {

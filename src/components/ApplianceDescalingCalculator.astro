@@ -1,0 +1,956 @@
+---
+import descalingData from '../data/appliance-descaling-calculator-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+const UI_TEXT: Record<SupportedLanguage, {
+  kicker: string;
+  heading: string;
+  subheading: string;
+  step1: string;
+  step2: string;
+  step3: string;
+  step4: string;
+  applianceLabel: string;
+  volumeLabel: string;
+  agentLabel: string;
+  hardnessLabel: string;
+  resultsTitle: string;
+  doseLabel: string;
+  waterLabel: string;
+  ratioLabel: string;
+  soakLabel: string;
+  rinseLabel: string;
+  frequencyLabel: string;
+  safetyTitle: string;
+  stepsTitle: string;
+  compatibilityTitle: string;
+  cautionNotice: string;
+  dangerNotice: string;
+  safeNotice: string;
+  printBtn: string;
+  resetBtn: string;
+  unitMl: string;
+  unitL: string;
+  unitOz: string;
+  unitCups: string;
+  tablespoons: string;
+  grams: string;
+  fluidOz: string;
+  minutes: string;
+  cycles: string;
+  everyDays: string;
+}> = {
+  en: {
+    kicker: 'Citric Acid vs. Vinegar Dilution Engine',
+    heading: 'Appliance Descaling Ratio & Safe Acid Calculator',
+    subheading: 'Calculate exact citric acid powder grams, 5% white vinegar volumes, and commercial lactic ratios for coffee makers, kettles, Keurig, Nespresso, and espresso boilers without damaging heating elements or rubber gaskets.',
+    step1: '1. Select Appliance',
+    step2: '2. Water Reservoir Size',
+    step3: '3. Descaling Agent',
+    step4: '4. Water Hardness Level',
+    resultsTitle: 'Exact Descaling Recipe & Cycle Parameters',
+    doseLabel: 'Acid Dose',
+    waterLabel: 'Warm Water Volume',
+    ratioLabel: 'Target Concentration',
+    soakLabel: 'Soak / Dwell Time',
+    rinseLabel: 'Fresh Water Rinses',
+    frequencyLabel: 'Recommended Schedule',
+    safetyTitle: 'Material Compatibility & Chemical Safety',
+    stepsTitle: 'Step-by-Step Descaling Protocol',
+    compatibilityTitle: 'Boiler & Internal Heating Metallurgy',
+    cautionNotice: 'Use with caution — adhere strictly to dwell time and rinse instructions.',
+    dangerNotice: 'DO NOT USE — This acid severely corrodes internal metals or strips plating.',
+    safeNotice: 'Verified safe — fully compatible with internal heating elements and gaskets.',
+    printBtn: 'Print / Save Instructions',
+    resetBtn: 'Reset to Defaults',
+    unitMl: 'ml',
+    unitL: 'Liters',
+    unitOz: 'fl oz',
+    unitCups: 'Cups',
+    tablespoons: 'tbsp',
+    grams: 'g',
+    fluidOz: 'fl oz',
+    minutes: 'minutes',
+    cycles: 'full tank cycles',
+    everyDays: 'Every {days} days'
+  },
+  es: {
+    kicker: 'Motor de Dilución de Ácido Cítrico y Vinagre',
+    heading: 'Calculadora de Descalcificación de Electrodomésticos',
+    subheading: 'Calcula los gramos exactos de ácido cítrico en polvo, volúmenes de vinagre blanco al 5% y ratios de ácido láctico para cafeteras de goteo, hervidores, Keurig, Nespresso y calderas de espresso sin dañar resistencias ni juntas de goma.',
+    step1: '1. Selecciona el Electrodoméstico',
+    step2: '2. Capacidad del Depósito',
+    step3: '3. Agente Descalcificador',
+    step4: '4. Dureza del Agua',
+    resultsTitle: 'Fórmula Exacta y Parámetros del Ciclo',
+    doseLabel: 'Dosis de Ácido',
+    waterLabel: 'Volumen de Agua Tibia',
+    ratioLabel: 'Concentración Objetivo',
+    soakLabel: 'Tiempo de Reposo / Remojo',
+    rinseLabel: 'Enjuagues con Agua Limpia',
+    frequencyLabel: 'Frecuencia Recomendada',
+    safetyTitle: 'Compatibilidad de Materiales y Seguridad Química',
+    stepsTitle: 'Protocolo Paso a Paso de Descalcificación',
+    compatibilityTitle: 'Metalurgia Interna de Caldera y Resistencias',
+    cautionNotice: 'Uso con precaución — respeta estrictamente el tiempo de remojo y enjuague.',
+    dangerNotice: 'NO UTILIZAR — Este ácido corroe metales internos o degrada recubrimientos.',
+    safeNotice: 'Verificado seguro — totalmente compatible con resistencias y juntas.',
+    printBtn: 'Imprimir / Guardar Guía',
+    resetBtn: 'Restablecer Valores',
+    unitMl: 'ml',
+    unitL: 'Litros',
+    unitOz: 'oz líq',
+    unitCups: 'Tazas',
+    tablespoons: 'cdas',
+    grams: 'g',
+    fluidOz: 'oz líq',
+    minutes: 'minutos',
+    cycles: 'ciclos de depósito lleno',
+    everyDays: 'Cada {days} días'
+  },
+  pt: {
+    kicker: 'Motor de Diluição de Ácido Cítrico e Vinagre',
+    heading: 'Calculadora de Descalcificação de Eletrodomésticos',
+    subheading: 'Calcule as gramas exatas de ácido cítrico em pó, proporções de vinagre branco a 5% e descalcificante lático para cafeteiras de filtro, chaleiras, Keurig, Nespresso e máquinas de espresso sem corroer resistências ou juntas de vedação.',
+    step1: '1. Selecione o Eletrodoméstico',
+    step2: '2. Capacidade do Reservatório',
+    step3: '3. Agente Descalcificante',
+    step4: '4. Dureza da Água',
+    resultsTitle: 'Receita Exata e Parâmetros de Ciclo',
+    doseLabel: 'Dose do Ácido',
+    waterLabel: 'Volume de Água Morna',
+    ratioLabel: 'Concentração Alvo',
+    soakLabel: 'Tempo de Ação / Molho',
+    rinseLabel: 'Enxágues com Água Limpa',
+    frequencyLabel: 'Frequência Recomendada',
+    safetyTitle: 'Compatibilidade de Materiais e Segurança Química',
+    stepsTitle: 'Protocolo Passo a Passo de Descalcificação',
+    compatibilityTitle: 'Metalurgia Interna da Caldeira e Resistências',
+    cautionNotice: 'Usar com cautela — respeite rigorosamente o tempo de molho e enxágue.',
+    dangerNotice: 'NÃO UTILIZAR — Este ácido corrói metais internos ou danifica banhos metálicos.',
+    safeNotice: 'Verificado seguro — totalmente compatível com resistências e borrachas.',
+    printBtn: 'Imprimir / Salvar Guia',
+    resetBtn: 'Restaurar Padrões',
+    unitMl: 'ml',
+    unitL: 'Litros',
+    unitOz: 'fl oz',
+    unitCups: 'Xícaras',
+    tablespoons: 'colh. sopa',
+    grams: 'g',
+    fluidOz: 'fl oz',
+    minutes: 'minutos',
+    cycles: 'ciclos completos de reservatório',
+    everyDays: 'A cada {days} dias'
+  },
+  'zh-cn': {
+    kicker: '柠檬酸粉末与食用白醋配比计算引擎',
+    heading: '厨房电器除水垢比例与安全酸液计算器',
+    subheading: '精准计算美式滴滤机、电热水壶、Keurig/Nespresso 胶囊机及意式半自动咖啡机锅炉所需的食品级柠檬酸克数、5% 白醋体积与商用乳酸稀释配比，避免腐蚀金属加热管与硅胶密封圈。',
+    step1: '1. 选择除垢电器',
+    step2: '2. 水箱 / 容器容量',
+    step3: '3. 除垢介质选择',
+    step4: '4. 自来水硬度等级',
+    resultsTitle: '精准除垢配方与运行参数',
+    doseLabel: '除垢剂投加量',
+    waterLabel: '温水注水量',
+    ratioLabel: '目标溶液浓度',
+    soakLabel: '浸泡反应时长',
+    rinseLabel: '清水空煮冲洗次数',
+    frequencyLabel: '建议维护周期',
+    safetyTitle: '材质相容性与化学安全须知',
+    stepsTitle: '标准除垢实操流程',
+    compatibilityTitle: '内部管路与锅炉金属构成',
+    cautionNotice: '谨慎使用 — 须严格遵守浸泡时限并彻底冲洗。',
+    dangerNotice: '严禁使用 — 该酸液会剧烈腐蚀内部金属或剥离镀层！',
+    safeNotice: '安全认证 — 完全兼容该电器的加热元件与密封圈。',
+    printBtn: '打印 / 保存说明卡',
+    resetBtn: '重置为默认值',
+    unitMl: '毫升 (ml)',
+    unitL: '升 (L)',
+    unitOz: '盎司 (fl oz)',
+    unitCups: '标准杯 (Cups)',
+    tablespoons: '汤匙',
+    grams: '克 (g)',
+    fluidOz: '液盎司',
+    minutes: '分钟',
+    cycles: '轮满水箱冲洗',
+    everyDays: '每 {days} 天一次'
+  },
+  ja: {
+    kicker: 'クエン酸・ホワイトビネガー希釈エンジン',
+    heading: '家電製品・ケトル・コーヒーメーカー除垢比率計算機',
+    subheading: 'ドリップコーヒーメーカー、電気ケトル、ネスプレッソ、カプセル式、エスプレッソマシンのボイラーに対応。ヒーター管やゴムパッキンを傷めない食品グレードクエン酸のグラム数、5%蒸留酢、専用除石灰剤の最適比率を即座に算出します。',
+    step1: '1. 除垢する家電を選択',
+    step2: '2. 給水タンク／ケトル容量',
+    step3: '3. 使用する除垢剤',
+    step4: '4. 水道水の硬度レベル',
+    resultsTitle: '正確な除垢配合と洗浄サイクル',
+    doseLabel: '除垢剤の適量',
+    waterLabel: '使用するぬるま湯量',
+    ratioLabel: '目標酸濃度',
+    soakLabel: 'つけ置き反応時間',
+    rinseLabel: 'きれいな水でのすすぎ回数',
+    frequencyLabel: '推奨メンテナンス頻度',
+    safetyTitle: '素材相性と化学的安全性',
+    stepsTitle: 'ステップ別除垢・洗浄手順',
+    compatibilityTitle: 'ボイラーおよび内部加熱部の金属材質',
+    cautionNotice: '注意して使用 — つけ置き時間とすすぎ回数を厳格に守ってください。',
+    dangerNotice: '使用禁止 — 内部の金属ボイラーを激しく腐食またはメッキ剥離させます。',
+    safeNotice: '安全確認済み — ヒーター管およびパッキン素材に適合しています。',
+    printBtn: '手順を印刷／保存',
+    resetBtn: '初期値に戻す',
+    unitMl: 'ml',
+    unitL: 'リットル',
+    unitOz: 'オンス',
+    unitCups: 'カップ',
+    tablespoons: '大さじ',
+    grams: 'g',
+    fluidOz: 'fl oz',
+    minutes: '分',
+    cycles: '回（満水空運転）',
+    everyDays: '{days}日ごと'
+  }
+};
+
+const ui = UI_TEXT[lang] || UI_TEXT.en;
+const appliances = descalingData.appliances;
+const agents = descalingData.agents;
+const hardnessLevels = descalingData.hardnessLevels;
+---
+
+<div class="not-prose my-8 bg-canvas border border-hairline rounded-2xl shadow-xs overflow-hidden" id="appliance-descaling-tool" data-lang={lang}>
+  <!-- Tool Header Strip -->
+  <div class="bg-surface-soft border-b border-hairline px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-2">
+      <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-teal-700 text-white text-sm font-bold">
+        ⚖️
+      </span>
+      <div>
+        <p class="text-[11px] font-bold uppercase tracking-wider text-teal-800 dark:text-teal-400">
+          {ui.kicker}
+        </p>
+        <p class="text-xs text-muted">
+          USDA / NSF / Manufacturer Thermal Descaling Standard
+        </p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        id="descale-print-btn"
+        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-canvas text-ink border border-hairline hover:bg-surface-strong transition-colors cursor-pointer"
+        aria-label={ui.printBtn}
+      >
+        <svg class="w-3.5 h-3.5 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+        </svg>
+        <span>{ui.printBtn}</span>
+      </button>
+
+      <button
+        type="button"
+        id="descale-reset-btn"
+        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-muted hover:text-ink hover:bg-surface-strong transition-colors cursor-pointer"
+        aria-label={ui.resetBtn}
+      >
+        <span>{ui.resetBtn}</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="p-6 md:p-8 space-y-8">
+    <!-- Configuration Controls Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Left Column: Appliance & Reservoir -->
+      <div class="space-y-6">
+        <!-- Step 1: Appliance Selection -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-ink mb-2.5">
+            {ui.step1}
+          </label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" role="radiogroup" aria-label={ui.applianceLabel}>
+            {appliances.map((app, idx) => (
+              <button
+                type="button"
+                data-appliance-id={app.id}
+                class={`descale-app-btn text-left p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between min-h-[92px] ${
+                  idx === 0
+                    ? 'bg-teal-700/10 border-teal-700 text-teal-900 dark:text-teal-200 ring-2 ring-teal-700/30'
+                    : 'bg-surface-soft border-hairline text-ink hover:border-muted'
+                }`}
+                aria-pressed={idx === 0 ? "true" : "false"}
+              >
+                <div class="flex items-center justify-between w-full mb-1">
+                  <span class="text-xl" aria-hidden="true">{app.icon}</span>
+                  {app.quickPreset && (
+                    <span class="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-teal-700 text-white">
+                      Popular
+                    </span>
+                  )}
+                </div>
+                <span class="text-xs font-semibold leading-tight line-clamp-2">
+                  {(app.shortName as any)[lang] || app.shortName.en}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <!-- Step 2: Reservoir Capacity -->
+        <div class="bg-surface-soft border border-hairline rounded-xl p-4 sm:p-5">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <label for="descale-vol-input" class="text-xs font-bold uppercase tracking-wider text-ink">
+              {ui.step2}
+            </label>
+            <!-- Unit Selector -->
+            <div class="flex items-center gap-1 bg-canvas border border-hairline rounded-lg p-0.5 text-xs">
+              <button
+                type="button"
+                data-vol-unit="ml"
+                class="descale-unit-btn px-2 py-0.5 rounded text-[11px] font-semibold bg-ink text-white transition-colors cursor-pointer"
+              >
+                {ui.unitMl}
+              </button>
+              <button
+                type="button"
+                data-vol-unit="L"
+                class="descale-unit-btn px-2 py-0.5 rounded text-[11px] font-semibold text-muted hover:text-ink transition-colors cursor-pointer"
+              >
+                {ui.unitL}
+              </button>
+              <button
+                type="button"
+                data-vol-unit="oz"
+                class="descale-unit-btn px-2 py-0.5 rounded text-[11px] font-semibold text-muted hover:text-ink transition-colors cursor-pointer"
+              >
+                {ui.unitOz}
+              </button>
+              <button
+                type="button"
+                data-vol-unit="cups"
+                class="descale-unit-btn px-2 py-0.5 rounded text-[11px] font-semibold text-muted hover:text-ink transition-colors cursor-pointer"
+              >
+                {ui.unitCups}
+              </button>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-4 mt-3">
+            <input
+              type="range"
+              id="descale-vol-slider"
+              min="300"
+              max="3500"
+              step="50"
+              value="1800"
+              class="w-full h-2 bg-hairline rounded-lg appearance-none cursor-pointer accent-teal-700"
+              aria-label="Reservoir volume slider"
+            />
+            <div class="flex items-center gap-1.5 shrink-0">
+              <input
+                type="number"
+                id="descale-vol-input"
+                min="200"
+                max="5000"
+                step="50"
+                value="1800"
+                class="w-24 px-3 py-1.5 rounded-lg bg-canvas border border-hairline text-ink text-sm font-mono font-bold text-right focus:outline-none focus:ring-2 focus:ring-teal-700"
+              />
+              <span id="descale-vol-unit-display" class="text-xs font-semibold text-muted w-8">
+                ml
+              </span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between text-[11px] text-muted mt-2 font-mono">
+            <span>Min: 300 ml (10 oz)</span>
+            <span id="descale-vol-presets-hint">Default: 1800 ml (12-Cup Carafe)</span>
+            <span>Max: 3500 ml (118 oz)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Agent & Hardness Selection -->
+      <div class="space-y-6">
+        <!-- Step 3: Descaling Agent -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-ink mb-2.5">
+            {ui.step3}
+          </label>
+          <div class="space-y-2.5" role="radiogroup" aria-label={ui.agentLabel}>
+            {agents.map((ag, idx) => (
+              <button
+                type="button"
+                data-agent-id={ag.id}
+                class={`descale-agent-btn w-full text-left p-3.5 rounded-xl border transition-all cursor-pointer flex items-start gap-3 ${
+                  idx === 0
+                    ? 'bg-teal-700/10 border-teal-700 ring-2 ring-teal-700/30'
+                    : 'bg-surface-soft border-hairline hover:border-muted'
+                }`}
+                aria-pressed={idx === 0 ? "true" : "false"}
+              >
+                <div class="w-4 h-4 rounded-full border border-teal-700 flex items-center justify-center mt-0.5 shrink-0 bg-canvas">
+                  <div class={`descale-agent-radio-dot w-2 h-2 rounded-full bg-teal-700 ${idx === 0 ? '' : 'hidden'}`} />
+                </div>
+                <div class="flex-grow">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="text-sm font-bold text-ink">
+                      {(ag.shortName as any)[lang] || ag.shortName.en}
+                    </span>
+                    {ag.recommendedBadge && (
+                      <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-700 text-white">
+                        Recommended
+                      </span>
+                    )}
+                    <span id={`agent-compat-badge-${ag.id}`} class="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                      Safe
+                    </span>
+                  </div>
+                  <p class="text-xs text-muted leading-relaxed">
+                    {(ag.tagline as any)[lang] || ag.tagline.en}
+                  </p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <!-- Step 4: Water Hardness -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-ink mb-2.5">
+            {ui.step4}
+          </label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" role="radiogroup" aria-label={ui.hardnessLabel}>
+            {hardnessLevels.map((hard, idx) => (
+              <button
+                type="button"
+                data-hardness-id={hard.id}
+                class={`descale-hardness-btn text-left p-3 rounded-xl border transition-all cursor-pointer ${
+                  idx === 1
+                    ? 'bg-teal-700/10 border-teal-700 ring-2 ring-teal-700/30 text-teal-950 dark:text-teal-200'
+                    : 'bg-surface-soft border-hairline text-ink hover:border-muted'
+                }`}
+                aria-pressed={idx === 1 ? "true" : "false"}
+              >
+                <div class="text-xs font-bold mb-0.5">
+                  {(hard.label as any)[lang] || hard.label.en}
+                </div>
+                <div class="text-[10px] font-mono text-muted">
+                  {hard.ppm}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Chemical & Material Compatibility Alert Banner -->
+    <div id="descale-compat-banner" class="rounded-xl border p-4.5 transition-all bg-emerald-50 border-emerald-300 text-emerald-900 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-200 flex items-start gap-3">
+      <span id="descale-compat-icon" class="text-xl shrink-0" aria-hidden="true">
+        ✅
+      </span>
+      <div class="space-y-1">
+        <p id="descale-compat-title" class="text-xs font-bold uppercase tracking-wider">
+          {ui.safeNotice}
+        </p>
+        <p id="descale-compat-body" class="text-xs leading-relaxed text-body">
+          Loading compatibility details...
+        </p>
+      </div>
+    </div>
+
+    <!-- Results Dashboard (4 Key Metric Cards) -->
+    <div class="bg-surface-soft border border-hairline rounded-2xl p-6 md:p-8 space-y-6">
+      <div class="flex items-center justify-between border-b border-hairline pb-4">
+        <div>
+          <h2 class="text-base font-bold text-ink">
+            {ui.resultsTitle}
+          </h2>
+          <p id="descale-selected-summary" class="text-xs text-muted">
+            Drip Coffee Maker • 1800 ml (12-Cup) • Citric Acid Powder
+          </p>
+        </div>
+        <span id="descale-active-agent-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-teal-700 text-white">
+          Citric Acid
+        </span>
+      </div>
+
+      <!-- 4 Calculation Stat Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Card 1: Acid Dose -->
+        <div class="bg-canvas border border-hairline rounded-xl p-4 flex flex-col justify-between">
+          <div>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted">
+              {ui.doseLabel}
+            </span>
+            <div class="mt-2 flex items-baseline gap-1.5">
+              <span id="descale-res-dose" class="text-2xl font-black font-mono text-teal-800 dark:text-teal-400">
+                27
+              </span>
+              <span id="descale-res-dose-unit" class="text-xs font-bold text-muted">
+                grams (1.8 tbsp)
+              </span>
+            </div>
+          </div>
+          <p id="descale-res-dose-sub" class="text-[11px] text-muted mt-2 border-t border-hairline/60 pt-2">
+            Dissolve fully in warm water
+          </p>
+        </div>
+
+        <!-- Card 2: Warm Water Volume -->
+        <div class="bg-canvas border border-hairline rounded-xl p-4 flex flex-col justify-between">
+          <div>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted">
+              {ui.waterLabel}
+            </span>
+            <div class="mt-2 flex items-baseline gap-1.5">
+              <span id="descale-res-water" class="text-2xl font-black font-mono text-ink">
+                1800
+              </span>
+              <span id="descale-res-water-unit" class="text-xs font-bold text-muted">
+                ml (60.9 fl oz)
+              </span>
+            </div>
+          </div>
+          <p id="descale-res-water-sub" class="text-[11px] text-muted mt-2 border-t border-hairline/60 pt-2">
+            Target concentration: ~1.5% acid
+          </p>
+        </div>
+
+        <!-- Card 3: Soak & Brew Time -->
+        <div class="bg-canvas border border-hairline rounded-xl p-4 flex flex-col justify-between">
+          <div>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted">
+              {ui.soakLabel}
+            </span>
+            <div class="mt-2 flex items-baseline gap-1.5">
+              <span id="descale-res-soak" class="text-2xl font-black font-mono text-amber-700 dark:text-amber-400">
+                30
+              </span>
+              <span class="text-xs font-bold text-muted">
+                {ui.minutes}
+              </span>
+            </div>
+          </div>
+          <p class="text-[11px] text-muted mt-2 border-t border-hairline/60 pt-2">
+            Pause midway to let acid dissolve scale
+          </p>
+        </div>
+
+        <!-- Card 4: Required Rinses -->
+        <div class="bg-canvas border border-hairline rounded-xl p-4 flex flex-col justify-between">
+          <div>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted">
+              {ui.rinseLabel}
+            </span>
+            <div class="mt-2 flex items-baseline gap-1.5">
+              <span id="descale-res-rinse" class="text-2xl font-black font-mono text-ink">
+                3
+              </span>
+              <span class="text-xs font-bold text-muted">
+                {ui.cycles}
+              </span>
+            </div>
+          </div>
+          <p id="descale-res-freq" class="text-[11px] text-muted mt-2 border-t border-hairline/60 pt-2">
+            Every 60 days (Moderate hardness)
+          </p>
+        </div>
+      </div>
+
+      <!-- Step-by-Step Instructions & Metallurgy Details -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
+        <!-- Left: Step-by-Step Checklist -->
+        <div class="bg-canvas border border-hairline rounded-xl p-5">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-ink mb-3 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-teal-700" />
+            <span>{ui.stepsTitle}</span>
+          </h3>
+          <ol id="descale-steps-list" class="space-y-3 text-xs text-body leading-relaxed list-decimal list-inside">
+            <!-- Injected via client JS -->
+          </ol>
+        </div>
+
+        <!-- Right: Metallurgy & Material Warnings -->
+        <div class="bg-canvas border border-hairline rounded-xl p-5 space-y-4">
+          <div>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-ink mb-1.5 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-amber-600" />
+              <span>{ui.compatibilityTitle}</span>
+            </h3>
+            <p id="descale-boiler-material" class="text-xs text-muted leading-relaxed">
+              Loading boiler metallurgy...
+            </p>
+          </div>
+
+          <div class="border-t border-hairline pt-3">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-ink mb-1.5">
+              {ui.safetyTitle}
+            </h4>
+            <p id="descale-material-warning" class="text-xs text-muted leading-relaxed">
+              Loading safety instructions...
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script is:inline define:vars={{ descalingData, lang, UI_TEXT }}>
+  (function initDescalingCalculator() {
+    const root = document.getElementById('appliance-descaling-tool');
+    if (!root) return;
+
+    const ui = UI_TEXT[lang] || UI_TEXT.en;
+    const appliances = descalingData.appliances;
+    const agents = descalingData.agents;
+    const hardnessLevels = descalingData.hardnessLevels;
+
+    // State
+    let selectedAppId = appliances[0].id;
+    let selectedAgentId = agents[0].id;
+    let selectedHardnessId = 'moderate';
+    let currentVolumeMl = appliances[0].defaultVolumeMl || 1800;
+    let currentUnit = 'ml'; // ml, L, oz, cups
+
+    // DOM Elements
+    const appBtns = root.querySelectorAll('.descale-app-btn');
+    const agentBtns = root.querySelectorAll('.descale-agent-btn');
+    const hardnessBtns = root.querySelectorAll('.descale-hardness-btn');
+    const unitBtns = root.querySelectorAll('.descale-unit-btn');
+    const volSlider = document.getElementById('descale-vol-slider');
+    const volInput = document.getElementById('descale-vol-input');
+    const volUnitDisplay = document.getElementById('descale-vol-unit-display');
+    const volPresetsHint = document.getElementById('descale-vol-presets-hint');
+
+    const compatBanner = document.getElementById('descale-compat-banner');
+    const compatIcon = document.getElementById('descale-compat-icon');
+    const compatTitle = document.getElementById('descale-compat-title');
+    const compatBody = document.getElementById('descale-compat-body');
+
+    const selectedSummary = document.getElementById('descale-selected-summary');
+    const activeAgentBadge = document.getElementById('descale-active-agent-badge');
+    const resDose = document.getElementById('descale-res-dose');
+    const resDoseUnit = document.getElementById('descale-res-dose-unit');
+    const resDoseSub = document.getElementById('descale-res-dose-sub');
+    const resWater = document.getElementById('descale-res-water');
+    const resWaterUnit = document.getElementById('descale-res-water-unit');
+    const resWaterSub = document.getElementById('descale-res-water-sub');
+    const resSoak = document.getElementById('descale-res-soak');
+    const resRinse = document.getElementById('descale-res-rinse');
+    const resFreq = document.getElementById('descale-res-freq');
+
+    const stepsList = document.getElementById('descale-steps-list');
+    const boilerMaterialEl = document.getElementById('descale-boiler-material');
+    const materialWarningEl = document.getElementById('descale-material-warning');
+
+    const printBtn = document.getElementById('descale-print-btn');
+    const resetBtn = document.getElementById('descale-reset-btn');
+
+    function getAppliance() {
+      return appliances.find(a => a.id === selectedAppId) || appliances[0];
+    }
+
+    function getAgent() {
+      return agents.find(a => a.id === selectedAgentId) || agents[0];
+    }
+
+    function getHardness() {
+      return hardnessLevels.find(h => h.id === selectedHardnessId) || hardnessLevels[1];
+    }
+
+    function convertMlToUnit(ml, unit) {
+      switch (unit) {
+        case 'L': return (ml / 1000).toFixed(2);
+        case 'oz': return (ml / 29.5735).toFixed(1);
+        case 'cups': return (ml / 236.588).toFixed(1);
+        default: return Math.round(ml);
+      }
+    }
+
+    function convertUnitToMl(val, unit) {
+      const num = parseFloat(val) || 0;
+      switch (unit) {
+        case 'L': return Math.round(num * 1000);
+        case 'oz': return Math.round(num * 29.5735);
+        case 'cups': return Math.round(num * 236.588);
+        default: return Math.round(num);
+      }
+    }
+
+    function updateCalculations() {
+      const app = getAppliance();
+      const agent = getAgent();
+      const hardness = getHardness();
+
+      // Check Agent Compatibility for this Appliance
+      let compat = 'yes';
+      if (agent.id === 'citric-acid') compat = app.citricSafe;
+      else if (agent.id === 'white-vinegar') compat = app.vinegarSafe;
+      else if (agent.id === 'commercial-lactic') compat = app.lacticSafe;
+
+      // Update Compatibility Banner
+      compatBanner.className = 'rounded-xl border p-4.5 transition-all flex items-start gap-3 ';
+      if (compat === 'no') {
+        compatBanner.className += 'bg-rose-50 border-rose-300 text-rose-900 dark:bg-rose-950/40 dark:border-rose-800 dark:text-rose-200';
+        compatIcon.textContent = '🚨';
+        compatTitle.textContent = ui.dangerNotice;
+      } else if (compat === 'caution') {
+        compatBanner.className += 'bg-amber-50 border-amber-300 text-amber-900 dark:bg-amber-950/40 dark:border-amber-800 dark:text-amber-200';
+        compatIcon.textContent = '⚠️';
+        compatTitle.textContent = ui.cautionNotice;
+      } else {
+        compatBanner.className += 'bg-emerald-50 border-emerald-300 text-emerald-900 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-200';
+        compatIcon.textContent = '✅';
+        compatTitle.textContent = ui.safeNotice;
+      }
+
+      const warningText = (app.materialWarning as any)[lang] || app.materialWarning.en;
+      compatBody.textContent = warningText;
+
+      // Update Agent Buttons Compatibility Badges
+      agents.forEach(ag => {
+        const badge = document.getElementById(`agent-compat-badge-${ag.id}`);
+        if (!badge) return;
+        let c = 'yes';
+        if (ag.id === 'citric-acid') c = app.citricSafe;
+        else if (ag.id === 'white-vinegar') c = app.vinegarSafe;
+        else if (ag.id === 'commercial-lactic') c = app.lacticSafe;
+
+        badge.className = 'ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full ';
+        if (c === 'no') {
+          badge.className += 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300';
+          badge.textContent = 'UNSAFE';
+        } else if (c === 'caution') {
+          badge.className += 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300';
+          badge.textContent = 'CAUTION';
+        } else {
+          badge.className += 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300';
+          badge.textContent = 'SAFE';
+        }
+      });
+
+      // Dose Calculations
+      const volumeLiters = currentVolumeMl / 1000;
+      let doseVal = '';
+      let doseUnitText = '';
+      let doseSubText = '';
+      let waterVal = '';
+      let waterUnitText = '';
+      let waterSubText = '';
+
+      if (agent.id === 'citric-acid') {
+        const gramsPerL = app.citricGramsPerLiter || 15;
+        const totalGrams = Math.round(volumeLiters * gramsPerL);
+        const tablespoons = (totalGrams / 15).toFixed(1);
+        doseVal = totalGrams.toString();
+        doseUnitText = `${ui.grams} (~${tablespoons} ${ui.tablespoons})`;
+        doseSubText = `Dissolve in ${Math.round(currentVolumeMl)} ml warm water`;
+
+        waterVal = currentVolumeMl.toString();
+        waterUnitText = `${currentVolumeMl} ml (${(currentVolumeMl / 29.5735).toFixed(1)} fl oz)`;
+        waterSubText = `~${((totalGrams / currentVolumeMl) * 100).toFixed(1)}% citric solution`;
+      } else if (agent.id === 'white-vinegar') {
+        const vinegarPct = (app.vinegarRatioPct || 50) / 100;
+        const vinegarMl = Math.round(currentVolumeMl * vinegarPct);
+        const waterMl = currentVolumeMl - vinegarMl;
+
+        doseVal = vinegarMl.toString();
+        doseUnitText = `ml (${(vinegarMl / 29.5735).toFixed(1)} fl oz)`;
+        doseSubText = `${Math.round(vinegarPct * 100)}% 5% White Vinegar ratio`;
+
+        waterVal = waterMl.toString();
+        waterUnitText = `ml (${(waterMl / 29.5735).toFixed(1)} fl oz)`;
+        waterSubText = `${Math.round((1 - vinegarPct) * 100)}% tap or filtered water`;
+      } else {
+        // Commercial lactic
+        const mlPerL = app.lacticMlPerLiter || 100;
+        const totalLacticMl = Math.round(volumeLiters * mlPerL);
+        const waterMl = currentVolumeMl - totalLacticMl;
+
+        doseVal = totalLacticMl.toString();
+        doseUnitText = `ml (${(totalLacticMl / 29.5735).toFixed(1)} fl oz)`;
+        doseSubText = 'Buffered commercial formula';
+
+        waterVal = waterMl.toString();
+        waterUnitText = `ml (${(waterMl / 29.5735).toFixed(1)} fl oz)`;
+        waterSubText = 'Follow manufacturer fill line';
+      }
+
+      resDose.textContent = doseVal;
+      resDoseUnit.textContent = doseUnitText;
+      resDoseSub.textContent = doseSubText;
+
+      resWater.textContent = waterVal;
+      resWaterUnit.textContent = waterUnitText;
+      resWaterSub.textContent = waterSubText;
+
+      // Soak & Rinse
+      const soakBase = app.soakMinutes || 30;
+      const soakBoost = hardness.soakBoostMin || 0;
+      const totalSoak = soakBase + soakBoost;
+      resSoak.textContent = totalSoak.toString();
+
+      resRinse.textContent = (app.rinseCycles || 3).toString();
+
+      // Frequency
+      const intervalDays = app.intervalDaysByHardness?.[selectedHardnessId] || 60;
+      resFreq.textContent = ui.everyDays.replace('{days}', intervalDays.toString()) + ` (${(hardness.label as any)[lang] || hardness.label.en})`;
+
+      // Summary Bar
+      const appName = (app.shortName as any)[lang] || app.shortName.en;
+      const agName = (agent.shortName as any)[lang] || agent.shortName.en;
+      selectedSummary.textContent = `${appName} • ${currentVolumeMl} ml • ${agName}`;
+      activeAgentBadge.textContent = agName;
+
+      // Steps List
+      const steps = (app.stepByStep as any)[lang] || app.stepByStep.en || [];
+      stepsList.innerHTML = '';
+      steps.forEach((step, idx) => {
+        const li = document.createElement('li');
+        li.className = 'pl-1';
+        li.textContent = step;
+        stepsList.appendChild(li);
+      });
+
+      // Metallurgy
+      boilerMaterialEl.textContent = (app.boilerMaterial as any)[lang] || app.boilerMaterial.en;
+      materialWarningEl.textContent = warningText;
+    }
+
+    // Event Handlers
+    appBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const appId = btn.getAttribute('data-appliance-id');
+        if (!appId) return;
+        selectedAppId = appId;
+
+        appBtns.forEach(b => {
+          b.setAttribute('aria-pressed', 'false');
+          b.className = b.className
+            .replace(/bg-teal-700\/10 border-teal-700 ring-2 ring-teal-700\/30 text-teal-900 dark:text-teal-200/g, '')
+            + ' bg-surface-soft border-hairline text-ink';
+        });
+
+        btn.setAttribute('aria-pressed', 'true');
+        btn.className = btn.className
+          .replace(/bg-surface-soft border-hairline text-ink/g, '')
+          + ' bg-teal-700/10 border-teal-700 ring-2 ring-teal-700/30 text-teal-900 dark:text-teal-200';
+
+        const app = getAppliance();
+        if (app.defaultVolumeMl) {
+          currentVolumeMl = app.defaultVolumeMl;
+          volSlider.value = currentVolumeMl.toString();
+          volInput.value = convertMlToUnit(currentVolumeMl, currentUnit);
+          volPresetsHint.textContent = `Default: ${currentVolumeMl} ml (${(app.name as any)[lang] || app.name.en})`;
+        }
+
+        updateCalculations();
+      });
+    });
+
+    agentBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const agId = btn.getAttribute('data-agent-id');
+        if (!agId) return;
+        selectedAgentId = agId;
+
+        agentBtns.forEach(b => {
+          b.setAttribute('aria-pressed', 'false');
+          b.className = b.className.replace(/bg-teal-700\/10 border-teal-700 ring-2 ring-teal-700\/30/g, '') + ' bg-surface-soft border-hairline';
+          const dot = b.querySelector('.descale-agent-radio-dot');
+          if (dot) dot.classList.add('hidden');
+        });
+
+        btn.setAttribute('aria-pressed', 'true');
+        btn.className = btn.className.replace(/bg-surface-soft border-hairline/g, '') + ' bg-teal-700/10 border-teal-700 ring-2 ring-teal-700/30';
+        const activeDot = btn.querySelector('.descale-agent-radio-dot');
+        if (activeDot) activeDot.classList.remove('hidden');
+
+        updateCalculations();
+      });
+    });
+
+    hardnessBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const hId = btn.getAttribute('data-hardness-id');
+        if (!hId) return;
+        selectedHardnessId = hId;
+
+        hardnessBtns.forEach(b => {
+          b.setAttribute('aria-pressed', 'false');
+          b.className = b.className.replace(/bg-teal-700\/10 border-teal-700 ring-2 ring-teal-700\/30 text-teal-950 dark:text-teal-200/g, '') + ' bg-surface-soft border-hairline text-ink';
+        });
+
+        btn.setAttribute('aria-pressed', 'true');
+        btn.className = btn.className.replace(/bg-surface-soft border-hairline text-ink/g, '') + ' bg-teal-700/10 border-teal-700 ring-2 ring-teal-700/30 text-teal-950 dark:text-teal-200';
+
+        updateCalculations();
+      });
+    });
+
+    unitBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const unit = btn.getAttribute('data-vol-unit');
+        if (!unit) return;
+        currentUnit = unit;
+
+        unitBtns.forEach(b => {
+          b.className = 'descale-unit-btn px-2 py-0.5 rounded text-[11px] font-semibold text-muted hover:text-ink transition-colors cursor-pointer';
+        });
+        btn.className = 'descale-unit-btn px-2 py-0.5 rounded text-[11px] font-semibold bg-ink text-white transition-colors cursor-pointer';
+
+        volUnitDisplay.textContent = unit;
+        volInput.value = convertMlToUnit(currentVolumeMl, currentUnit);
+      });
+    });
+
+    volSlider.addEventListener('input', () => {
+      currentVolumeMl = parseInt(volSlider.value, 10);
+      volInput.value = convertMlToUnit(currentVolumeMl, currentUnit);
+      updateCalculations();
+    });
+
+    volInput.addEventListener('change', () => {
+      const ml = convertUnitToMl(volInput.value, currentUnit);
+      currentVolumeMl = Math.max(200, Math.min(5000, ml));
+      volSlider.value = currentVolumeMl.toString();
+      volInput.value = convertMlToUnit(currentVolumeMl, currentUnit);
+      updateCalculations();
+    });
+
+    printBtn.addEventListener('click', () => {
+      window.print();
+    });
+
+    resetBtn.addEventListener('click', () => {
+      selectedAppId = appliances[0].id;
+      selectedAgentId = agents[0].id;
+      selectedHardnessId = 'moderate';
+      currentVolumeMl = appliances[0].defaultVolumeMl || 1800;
+      currentUnit = 'ml';
+
+      volSlider.value = currentVolumeMl.toString();
+      volInput.value = currentVolumeMl.toString();
+      volUnitDisplay.textContent = 'ml';
+
+      // Trigger button updates
+      appBtns[0].click();
+      agentBtns[0].click();
+      hardnessBtns[1].click();
+      unitBtns[0].click();
+    });
+
+    // Initial render
+    updateCalculations();
+  })();
+</script>

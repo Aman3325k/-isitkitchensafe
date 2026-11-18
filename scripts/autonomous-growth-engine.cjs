@@ -211,7 +211,8 @@ const TOOLS_REGISTRY = [
   { slug: 'plastic-code-checker', name: 'Plastic Recycling Code (#1-#7) Kitchen Safety Checker', category: 'Consumer Kitchen Safety', component: 'PlasticCodeChecker.astro', dataFile: 'plastic-code-checker-data.json' },
   { slug: 'air-fryer-oven-converter', name: 'Air Fryer to Oven Conversion Calculator & Gas Mark Chart', category: 'Consumer Kitchen Safety', component: 'AirFryerOvenConverter.astro', dataFile: 'air-fryer-oven-converter-data.json' },
   { slug: 'cookware-oven-temp-lookup', name: 'Cookware & Bakeware Safe Oven Temperature Lookup', category: 'Consumer Kitchen Safety', component: 'CookwareOvenTempLookup.astro', dataFile: 'cookware-oven-temp-data.json' },
-  { slug: 'internal-cooking-temp-chart', name: 'USDA Safe Internal Cooking Temperature Chart & Doneness Lookup', category: 'Consumer Kitchen Safety', component: 'InternalCookingTempChart.astro', dataFile: 'internal-cooking-temp-data.json' }
+  { slug: 'internal-cooking-temp-chart', name: 'USDA Safe Internal Cooking Temperature Chart & Doneness Lookup', category: 'Consumer Kitchen Safety', component: 'InternalCookingTempChart.astro', dataFile: 'internal-cooking-temp-data.json' },
+  { slug: 'appliance-descaling-calculator', name: 'Coffee Maker, Electric Kettle & Espresso Descaling Ratio Calculator', category: 'Consumer Kitchen Safety', component: 'ApplianceDescalingCalculator.astro', dataFile: 'appliance-descaling-calculator-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -513,7 +514,8 @@ function auditDatasets() {
     'plastic-code-checker-data.json',
     'air-fryer-oven-converter-data.json',
     'cookware-oven-temp-data.json',
-    'internal-cooking-temp-data.json'
+    'internal-cooking-temp-data.json',
+    'appliance-descaling-calculator-data.json'
 ];
 
   const datasetStats = {};

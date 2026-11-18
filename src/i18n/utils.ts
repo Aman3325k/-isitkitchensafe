@@ -213,6 +213,7 @@ const SPECIAL_PAGES = [
   'tools/air-fryer-oven-converter',
   'tools/cookware-oven-temp-lookup',
   'tools/internal-cooking-temp-chart',
+  'tools/appliance-descaling-calculator',
   'methodology',
   'saved'
 ];

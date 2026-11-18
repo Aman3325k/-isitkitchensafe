@@ -1,0 +1,461 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import ApplianceDescalingCalculator from '../../../components/ApplianceDescalingCalculator.astro';
+import type { SupportedLanguage } from '../../../i18n/ui';
+import { getApplianceUrl, getDirectoryUrl } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+
+interface LocaleContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  heroSub: string;
+  trapsKicker: string;
+  trapsTitle: string;
+  trapsSub: string;
+  traps: Array<{ title: string; desc: string; icon: string }>;
+  relatedTitle: string;
+  cookwareTag: string;
+  cookwareTitle: string;
+  cookwareDesc: string;
+  airFryerTag: string;
+  airFryerTitle: string;
+  airFryerDesc: string;
+  internalTempTag: string;
+  internalTempTitle: string;
+  internalTempDesc: string;
+  faqKicker: string;
+  faqTitle: string;
+  faqSub: string;
+  faqs: Array<{ question: string; answer: string }>;
+  homeLabel: string;
+  toolsLabel: string;
+  toolShortLabel: string;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocaleContent> = {
+  es: {
+    pageTitle: "Calculadora de Descalcificación de Cafeteras, Hervidores y Espresso | IsItKitchenSafe",
+    pageDescription: "Calcula proporciones exactas de ácido cítrico, vinagre blanco y descalcificador láctico comercial, volumen de agua y tiempos de remojo para Keurig, Nespresso, cafeteras y teteras.",
+    badge: "Metalurgia de Electrodomésticos y Ciencia de Descalcificación Grado Alimentario",
+    h1: "Calculadora de Proporciones para Descalcificar Cafeteras, Hervidores y Máquinas de Espresso",
+    heroSub: "Elimina el sarro incrustado, evita el sabor agrio residual y previene averías prematuras en calderas y termobloques. Selecciona tu electrodoméstico, volumen del depósito y dureza del agua para calcular la dilución exacta, tiempo de remojo y ciclos de enjuague.",
+    trapsKicker: "Normas Críticas de Seguridad y Metalurgia",
+    trapsTitle: "4 Errores Graves al Descalcificar Electrodomésticos de Cocina",
+    trapsSub: "El uso de productos incorrectos o mezclas caseras puede corroer calderas de aluminio, destruir juntas de silicona o generar gases peligrosos.",
+    traps: [
+      {
+        icon: "🚫",
+        title: "Peligro Letal: Jamás Mezcles Ácidos Descalcificadores con Cloro/Lejía",
+        desc: "Combinar ácido cítrico, vinagre o descalcificadores comerciales con lejía genera gas cloro tóxico (Cl₂) de forma inmediata. Enjuaga abundantemente con agua limpia antes de cualquier procedimiento de higienización."
+      },
+      {
+        icon: "⚠️",
+        title: "La Trampa del Bicarbonato de Sodio: Neutraliza el Ácido",
+        desc: "Mezclar bicarbonato con vinagre o ácido cítrico produce burbujas espectaculares de CO₂, pero neutraliza químicamente la acidez convirtiéndola en agua salada sin poder desincrustante. Además, los microcristales pueden obstruir las microválvulas."
+      },
+      {
+        icon: "☕",
+        title: "Por Qué Nespresso y Breville Prohíben el Vinagre Blanco",
+        desc: "El ácido acético corroe los bloques térmicos de aluminio y reseca los sellos de silicona internos. Además, el olor a vinagre penetra en las tuberías plásticas y arruina el café durante semanas. Usa siempre ácido cítrico o láctico."
+      },
+      {
+        icon: "💡",
+        title: "Cómo Apagar la Luz 'Descale' en Cafeteras Keurig",
+        desc: "La luz no se apaga analizando el agua, sino al completar el ciclo continuo de enjuague. Deja que el depósito se vacíe por completo hasta que pida agua, y luego pasa un tanque completo de agua limpia sin pausar la máquina."
+      }
+    ],
+    relatedTitle: "Herramientas de Seguridad en la Cocina Relacionadas",
+    cookwareTag: "Guía de Baterías de Cocina",
+    cookwareTitle: "Buscador de Temperatura de Utensilios →",
+    cookwareDesc: "Verifica temperaturas máximas seguras de sartenes y fuentes en horno y asador.",
+    airFryerTag: "Calculadora de Cocción",
+    airFryerTitle: "Conversor de Horno a Freidora de Aire →",
+    airFryerDesc: "Ajusta tiempos y temperaturas de recetas de horno tradicional para freidora de aire.",
+    internalTempTag: "Seguridad USDA",
+    internalTempTitle: "Tabla de Temperaturas Internas de Cocción →",
+    internalTempDesc: "Temperaturas mínimas seguras y tiempos de reposo del USDA para carnes y aves.",
+    faqKicker: "Preguntas Frecuentes",
+    faqTitle: "Preguntas Frecuentes sobre Descalcificación",
+    faqSub: "Respuestas respaldadas por ingeniería de materiales y ciencia química.",
+    faqs: [
+      {
+        question: "¿Por qué se recomienda el ácido cítrico en polvo sobre el vinagre?",
+        answer: "El ácido cítrico en polvo es 100% inodoro, no deja regusto agrio en el café, disuelve el carbonato de calcio el doble de rápido y es seguro para calderas de aluminio, acero inoxidable y cobre, costando una fracción de los líquidos comerciales de marca."
+      },
+      {
+        question: "¿Cómo sé con qué frecuencia debo descalcificar mi cafetera o tetera?",
+        answer: "Depende de la dureza del agua: en agua blanda (<60 ppm) cada 4 a 6 meses; en agua de dureza moderada (60-120 ppm) cada 2 a 3 meses; en agua dura o muy dura (>120 ppm) cada 3 a 4 semanas para evitar que el sarro tape el termobloque y queme la bomba."
+      },
+      {
+        question: "¿Qué hago si mi cafetera sabe a descalcificador después de limpiarla?",
+        answer: "El ácido cítrico y el láctico se eliminan totalmente en 2 o 3 ciclos de agua fresca. Si usaste vinagre blanco, el ácido acético puede requerir entre 6 y 10 enjuagues completos para que el olor y sabor penetrado en tubos de silicona desaparezca por completo."
+      }
+    ],
+    homeLabel: "Inicio",
+    toolsLabel: "Herramientas",
+    toolShortLabel: "Calculadora de Descalcificación"
+  },
+  pt: {
+    pageTitle: "Calculadora de Descalcificação de Cafeteiras, Chaleiras e Espresso | IsItKitchenSafe",
+    pageDescription: "Calcule a proporção exata de ácido cítrico, vinagre branco e descalcificante lático comercial, volume de enxágue e tempos de molho para Keurig, Nespresso, cafeteiras e chaleiras elétricas.",
+    badge: "Metalurgia de Eletrodomésticos e Ciência de Descalcificação Grau Alimentício",
+    h1: "Calculadora de Proporções para Descalcificar Cafeteiras, Chaleiras e Máquinas de Espresso",
+    heroSub: "Remova o calcário incrustado, acabe com o gosto amargo e residual e previna a queima de termoblocos e bombas. Escolha seu aparelho, capacidade do reservatório e dureza da água para calcular proporções exatas de diluição e ciclos de enxágue.",
+    trapsKicker: "Regras Críticas de Segurança e Metalurgia",
+    trapsTitle: "4 Erros Graves ao Descalcificar Eletrodomésticos de Cozinha",
+    trapsSub: "O uso de agentes incorretos ou misturas caseiras pode corroer peças de alumínio, degradar vedações de silicone ou produzir gases tóxicos.",
+    traps: [
+      {
+        icon: "🚫",
+        title: "Perigo Mortal: Jamais Misture Ácidos Descalcificantes com Água Sanitária (Cloro)",
+        desc: "A mistura de ácido cítrico, vinagre ou descalcificantes comerciais com alvejante/cloro libera imediatamente gás cloro letal (Cl₂). Enxágue completamente o reservatório com água pura antes de sanitizar."
+      },
+      {
+        icon: "⚠️",
+        title: "A Armadilha do Bicarbonato de Sódio: Neutraliza o Ácido",
+        desc: "Misturar bicarbonato com vinagre ou ácido cítrico produz efervescência de CO₂, mas neutraliza a acidez tornando a solução água salgada sem capacidade de dissolver calcário. Grânulos não dissolvidos também entopem válvulas."
+      },
+      {
+        icon: "☕",
+        title: "Por Que a Nespresso e a Breville Proíbem o Uso de Vinagre Branco",
+        desc: "O ácido acético ataca blocos de alumínio e resseca anéis de vedação de silicone. Além disso, o odor pungente penetra nos dutos plásticos e contamina o sabor do café. Prefira ácido cítrico ou ácido lático."
+      },
+      {
+        icon: "💡",
+        title: "Como Apagar a Luz de Alerta 'Descale' da Keurig",
+        desc: "A luz apaga após a conclusão de um ciclo contínuo de enxágue. Deixe o reservatório esvaziar completamente até indicar falta de água e execute um reservatório inteiro de água limpa sem interromper o processo."
+      }
+    ],
+    relatedTitle: "Ferramentas Relacionadas de Segurança na Cozinha",
+    cookwareTag: "Consulta de Utensílios",
+    cookwareTitle: "Buscador de Temperatura de Panelas →",
+    cookwareDesc: "Verifique temperaturas seguras para forno e grelha por material e marca.",
+    airFryerTag: "Calculadora de Cozinha",
+    airFryerTitle: "Conversor de Forno para Air Fryer →",
+    airFryerDesc: "Converta tempos e temperaturas de receitas de forno tradicional para fritadeira sem óleo.",
+    internalTempTag: "Segurança USDA",
+    internalTempTitle: "Tabela de Temperaturas Internas de Cozimento →",
+    internalTempDesc: "Temperaturas mínimas seguras e tempo de repouso para carnes e aves.",
+    faqKicker: "Perguntas Frequentes",
+    faqTitle: "Dúvidas Frequentes sobre Descalcificação",
+    faqSub: "Orientações fundamentadas em engenharia de materiais e química doméstica.",
+    faqs: [
+      {
+        question: "Por que o pó de ácido cítrico é a melhor opção para descalcificar?",
+        answer: "O ácido cítrico grau alimentício é 100% inodoro, não deixa nenhum resíduo de sabor no café, dissolve o calcário na metade do tempo do vinagre e é compatível com alumínio, inox e cobre por uma fração do preço."
+      },
+      {
+        question: "Com que frequência devo descalcificar minha chaleira ou cafeteira?",
+        answer: "Para água macia (<60 ppm), a cada 4 a 6 meses; água moderada (60 a 120 ppm), a cada 2 a 3 meses; água dura (>120 ppm), a cada 3 a 4 semanas para evitar perda de pressão e superaquecimento da resistência."
+      },
+      {
+        question: "O que fazer se o café continuar com cheiro após a limpeza?",
+        answer: "Se usou vinagre, repita o ciclo de enxágue de 4 a 8 vezes com água fresca, pois o ácido acético se fixa no silicone. Com ácido cítrico, normalmente 2 enxágues são suficientes para eliminar qualquer traço."
+      }
+    ],
+    homeLabel: "Início",
+    toolsLabel: "Ferramentas",
+    toolShortLabel: "Calculadora de Descalcificação"
+  },
+  'zh-cn': {
+    pageTitle: "咖啡机、电水壶与意式浓缩机除垢稀释比例计算器 | IsItKitchenSafe",
+    pageDescription: "精准计算食品级柠檬酸、食用白醋及商用乳酸除垢剂的水容量配比、浸泡时长与冲洗次数，适用于 Keurig、Nespresso、德龙意式机与电水壶。",
+    badge: "厨房电器冶金材料与食品级除垢化学工程",
+    h1: "咖啡机、电水壶与意式浓缩咖啡机除垢比例计算器",
+    heroSub: "彻底清除顽固碳酸钙水垢，杜绝咖啡酸腐异味，预防加热块干烧损坏。根据机器类型、水箱容量与当地自来水硬度，精准计算科学酸液配比、静置浸泡时长与安全冲洗步骤。",
+    trapsKicker: "E-E-A-T 厨房电器安全法则",
+    trapsTitle: "家用电器除垢的 4 个致命误区",
+    trapsSub: "错误使用除垢剂或民间偏方会导致铝制加热块永久点蚀穿孔、硅胶密封圈硬化漏水，甚至释放有毒氯气。",
+    traps: [
+      {
+        icon: "🚫",
+        title: "绝命禁忌：严禁将任何除垢酸与含氯漂白剂（84消毒液）混合",
+        desc: "柠檬酸、白醋或氨基磺酸除垢剂一旦与次氯酸钠漂白剂混合，会瞬间剧烈释放高毒性氯气（Cl₂），引发严重呼吸道水肿。除垢前后必须用纯水彻底清洗管路。"
+      },
+      {
+        icon: "⚠️",
+        title: "小苏打除垢骗局：酸碱中和彻底失效",
+        desc: "在白醋或柠檬酸中加入小苏打会产生剧烈的二氧化碳泡沫，但酸碱中和后生成的是毫无除垢能力的醋酸钠盐水，未融化微小颗粒极易堵塞精密电磁阀针孔。"
+      },
+      {
+        icon: "☕",
+        title: "为什么 Nespresso 雀巢与 Breville 铂富严禁使用白醋",
+        desc: "白醋中的乙酸对铝制加热块具有强腐蚀性，且会加速内部硅胶圈老化脆裂。此外挥发性醋味极易吸附在管路塑料中，导致接下来数十杯咖啡带有难以消除的酸涩败味。"
+      },
+      {
+        icon: "💡",
+        title: "Keurig 胶囊咖啡机 Descale 除垢指示灯复位技巧",
+        desc: "除垢灯并不是靠水质传感器熄灭，而是监测必须完整运行至水箱彻底抽干。水箱放空亮起加水提示后，必须重新注满清水连续出水冲洗，中途不得断电关机。"
+      }
+    ],
+    relatedTitle: "相关厨房食品与电器安全工具",
+    cookwareTag: "锅具耐温速查",
+    cookwareTitle: "锅具烤箱安全耐温速查工具 →",
+    cookwareDesc: "查询不锈钢、铸铁、不粘锅与硅胶烤模的最高安全烘烤温度。",
+    airFryerTag: "厨房换算器",
+    airFryerTitle: "烤箱食谱空气炸锅换算器 →",
+    airFryerDesc: "传统烤箱食谱一键换算为空气炸锅烘烤温度与缩短时长。",
+    internalTempTag: "USDA 食品安全",
+    internalTempTitle: "USDA 食品安全中心内部烹饪温度表 →",
+    internalTempDesc: "肉禽海鲜熟度核心温度标准与 3 分钟静置杀菌时间要求。",
+    faqKicker: "常见问题解答",
+    faqTitle: "关于咖啡机与水壶除垢的科学问答",
+    faqSub: "基于材料学与化学反应原理的权威指南。",
+    faqs: [
+      {
+        question: "为什么食品级柠檬酸粉末是咖啡机与水壶除垢的首选？",
+        answer: "食品级柠檬酸完全无味、无挥发性异味，与钙镁离子螯合速度是白醋的两倍以上，对食品级不锈钢、铜管及铝制加热块极温和，且价格远低于品牌专用浓缩除垢液。"
+      },
+      {
+        question: "我应该多久为电水壶或咖啡机除垢一次？",
+        answer: "取决于水质硬度：软水（<60 ppm）每 4 到 6 个月一次；中等硬度（60-120 ppm）每 2 到 3 个月一次；硬水或极硬水地区（>120 ppm）建议每 3 到 4 周除垢一次，避免水垢堵死细管导致机器烧毁。"
+      },
+      {
+        question: "除垢完成后需要清洗冲洗多少次？",
+        answer: "使用柠檬酸除垢通常经过 2 次全水箱清水循环即可彻底无残留；若误用了白醋，则通常需要 6 至 10 次清水彻底循环才能完全排净附着在硅胶管壁上的酸腐刺鼻气味。"
+      }
+    ],
+    homeLabel: "首页",
+    toolsLabel: "实用工具",
+    toolShortLabel: "电器除垢计算器"
+  },
+  ja: {
+    pageTitle: "コーヒーメーカー・電気ケトル・エスプレッソマシン クエン酸洗浄・除垢希釈計算機 | IsItKitchenSafe",
+    pageDescription: "食品グレードクエン酸、ホワイトビネガー、市販乳酸スケール除去剤の最適水比率、放置時間、すすぎ回数をKeurig、Nespresso、デロンギ、電気ケトル向けに精密計算。",
+    badge: "調理家電冶金学・食品グレード洗浄化学基準",
+    h1: "コーヒーメーカー・電気ケトル・エスプレッソマシン除垢比率計算機",
+    heroSub: "頑固な炭酸カルシウム（カルキ）を安全に溶解し、コーヒーの酸敗臭を防ぎ、ヒーターの空焚き・故障を予防します。家電タイプ、タンク容量、水道水の硬度から最適な洗浄濃度とすすぎ手順を算出します。",
+    trapsKicker: "家電メンテナンス安全基準",
+    trapsTitle: "キッチンのスケール除去（カルキ抜き）における4大危険ミス",
+    trapsSub: "不適切な洗浄剤や誤った自己流の混合は、アルミボイラーの腐食点蝕、シリコンパッキンの劣化漏水、有毒塩素ガスの発生を招きます。",
+    traps: [
+      {
+        icon: "🚫",
+        title: "命に関わる危険：酸性除垢剤と塩素系漂白剤の混合厳禁",
+        desc: "クエン酸、酢、市販デスケーラーと次亜塩素酸ナトリウム（ハイター等）が混ざると、猛毒の塩素ガス（Cl₂）が瞬時に発生します。除垢前後は必ず真水で十分に濯いでください。"
+      },
+      {
+        icon: "⚠️",
+        title: "重曹（ベーキングソーダ）混合の罠：中和され洗浄力ゼロに",
+        desc: "クエン酸や酢に重曹を加えると派手に発泡しますが、酸とアルカリが中和されて単なる無害な塩水になります。カルキ溶解作用が消えるだけでなく、未溶解の粒が微細ノズルを詰まらせます。"
+      },
+      {
+        icon: "☕",
+        title: "ネスプレッソやブレビルが「食酢」の使用を禁止する理由",
+        desc: "酢酸はアルミ製サーモブロックを侵し、内部シリコンパッキンを脆化させます。さらに揮発性の強い酢臭がプラスチック管に染み付き、何週間もコーヒーの風味を損ないます。"
+      },
+      {
+        icon: "💡",
+        title: "Keurigの「Descale」警告ランプを消灯・リセットする方法",
+        desc: "水質センサーではなく、連続した完全なすすぎサイクルの実行を検知して消灯します。給水警告が出るまでタンクを空にしてから、満水の真水で連続抽出を中断せずに行ってください。"
+      }
+    ],
+    relatedTitle: "関連するキッチン安全ツール",
+    cookwareTag: "調理器具耐熱ガイド",
+    cookwareTitle: "調理器具オーブン安全耐熱温度早見表 →",
+    cookwareDesc: "フライパン、ホーロー鍋、耐熱皿の最高許容温度とグリル使用可否を確認。",
+    airFryerTag: "調理換算ツール",
+    airFryerTitle: "オーブンレシピ ノンフライヤー換算機 →",
+    airFryerDesc: "一般的なオーブン料理の温度と加熱時間をノンフライヤー向けに即座に変換。",
+    internalTempTag: "USDA安全基準",
+    internalTempTitle: "USDA安全内部調理温度・肉の焼き加減早見表 →",
+    internalTempDesc: "肉・鶏肉・魚介の安全中心温度基準と3分間の余熱休止ルール。",
+    faqKicker: "よくある質問",
+    faqTitle: "家電のカルキ抜き・クエン酸洗浄に関するQ&A",
+    faqSub: "材料工学と化学反応に基づく確かなメンテナンス知識。",
+    faqs: [
+      {
+        question: "なぜ家電のカルキ抜きにはクエン酸粉末が推奨されるのですか？",
+        answer: "食品グレードのクエン酸は完全無臭でコーヒーに臭いが残らず、カルシウムのキレート溶解速度がお酢の2倍以上と高く、ステンレスやアルミを傷めず、市販の液体洗浄剤より遥かに経済的です。"
+      },
+      {
+        question: "電気ケトルやコーヒーメーカーはどの頻度で洗浄すべきですか？",
+        answer: "軟水地域（60 ppm未満）では3〜6ヶ月に1回、中硬水（60〜120 ppm）では2〜3ヶ月に1回、硬水地域（120 ppm以上）ではヒーターの過熱や流路詰まりを防ぐため3〜4週間に1回が目安です。"
+      },
+      {
+        question: "洗浄後に酸の味が残らないようにするにはどうすればよいですか？",
+        answer: "クエン酸を用いた場合は満水での真水すすぎを2〜3回行うだけで完全に無味無臭になります。お酢を使ってしまった場合はシリコンに臭いが吸着するため、6〜10回以上のすすぎが必要になります。"
+      }
+    ],
+    homeLabel: "ホーム",
+    toolsLabel: "ツール一覧",
+    toolShortLabel: "家電除垢・クエン酸計算機"
+  }
+};
+
+const c = CONTENT[lang as Exclude<SupportedLanguage, 'en'>];
+
+const breadcrumbs = [
+  { label: c.homeLabel, href: `/${lang}/` },
+  { label: c.toolsLabel, href: `/${lang}/tools/` },
+  { label: c.toolShortLabel }
+];
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": c.h1,
+  "url": `https://isitkitchensafe.com/${lang}/tools/appliance-descaling-calculator/`,
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript.",
+  "description": c.pageDescription,
+  "inLanguage": lang,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IsItKitchenSafe",
+    "url": "https://isitkitchensafe.com"
+  }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": c.faqs.map((faq) => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+};
+---
+
+<Layout
+  title={c.pageTitle}
+  description={c.pageDescription}
+  breadcrumbs={breadcrumbs}
+  faqs={c.faqs}
+  excludeFaqSchema={true}
+  availableLocales={availableLocales}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(webAppSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+  <!-- Breadcrumbs -->
+  <div class="bg-surface-soft border-b border-hairline py-1">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <Breadcrumbs items={breadcrumbs} className="mb-0" />
+    </div>
+  </div>
+
+  <main class="max-w-[1280px] mx-auto px-6 py-10 md:py-14">
+    <!-- Hero Header -->
+    <header class="max-w-[880px] mb-8">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-signature-teal text-white mb-3">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693l-1.57-.393m15.6 0l1.24 3.72A2.25 2.25 0 0118.705 22H5.295a2.25 2.25 0 01-2.135-2.987l1.24-3.72" />
+        </svg>
+        <span>{c.badge}</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-heading tracking-tight mb-4">
+        {c.h1}
+      </h1>
+      <p class="text-base sm:text-lg text-body-secondary leading-relaxed">
+        {c.heroSub}
+      </p>
+    </header>
+
+    <!-- Interactive Component -->
+    <section class="mb-14">
+      <ApplianceDescalingCalculator lang={lang} />
+    </section>
+
+    <!-- Critical Kitchen Safety Alerts & E-E-A-T Guide -->
+    <section class="mt-14 border-t border-hairline pt-12">
+      <div class="max-w-[960px] mx-auto">
+        <h2 class="text-2xl sm:text-3xl font-bold text-heading tracking-tight mb-4">
+          {c.trapsTitle}
+        </h2>
+        <p class="text-base text-body-secondary mb-8">
+          {c.trapsSub}
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+          {c.traps.map((trap, idx) => (
+            <div class={`p-6 rounded-2xl ${idx === 0 ? 'bg-danger-soft border border-danger-hairline' : idx === 1 ? 'bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40' : 'bg-surface-soft border border-hairline'}`}>
+              <div class="flex items-start gap-3">
+                <span class="text-2xl" aria-hidden="true">{trap.icon}</span>
+                <div>
+                  <h3 class={`font-bold text-lg mb-1 ${idx === 0 ? 'text-red-900 dark:text-red-300' : idx === 1 ? 'text-amber-900 dark:text-amber-300' : 'text-heading'}`}>
+                    {trap.title}
+                  </h3>
+                  <p class={`text-sm leading-relaxed ${idx === 0 ? 'text-red-800 dark:text-red-200' : idx === 1 ? 'text-amber-800 dark:text-amber-200' : 'text-body-secondary'}`}>
+                    {trap.desc}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="mt-12">
+          <h2 class="text-2xl sm:text-3xl font-bold text-heading tracking-tight mb-6">
+            {c.faqTitle}
+          </h2>
+          <div class="space-y-4">
+            {c.faqs.map((faq) => (
+              <details class="group p-5 rounded-xl border border-hairline bg-surface-soft open:bg-surface-elevated transition-colors">
+                <summary class="font-bold text-heading cursor-pointer list-none flex items-center justify-between gap-4">
+                  <span>{faq.question}</span>
+                  <span class="text-signature-teal group-open:rotate-180 transition-transform text-lg leading-none" aria-hidden="true">▾</span>
+                </summary>
+                <p class="mt-3 text-sm text-body-secondary leading-relaxed border-t border-hairline pt-3">
+                  {faq.answer}
+                </p>
+              </details>
+            ))}
+          </div>
+        </div>
+
+        <!-- Related Consumer Tools -->
+        <div class="mt-12 pt-8 border-t border-hairline">
+          <h3 class="text-lg font-bold text-heading mb-4">{c.relatedTitle}</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <a href={`/${lang}/tools/cookware-oven-temp-lookup/`} class="p-4 rounded-xl border border-hairline bg-surface-soft hover:border-signature-teal transition-all group">
+              <span class="text-xs font-semibold text-signature-teal block mb-1">{c.cookwareTag}</span>
+              <span class="font-bold text-heading text-sm group-hover:text-signature-teal block">{c.cookwareTitle}</span>
+              <p class="text-xs text-body-secondary mt-1">{c.cookwareDesc}</p>
+            </a>
+            <a href={`/${lang}/tools/air-fryer-oven-converter/`} class="p-4 rounded-xl border border-hairline bg-surface-soft hover:border-signature-teal transition-all group">
+              <span class="text-xs font-semibold text-signature-teal block mb-1">{c.airFryerTag}</span>
+              <span class="font-bold text-heading text-sm group-hover:text-signature-teal block">{c.airFryerTitle}</span>
+              <p class="text-xs text-body-secondary mt-1">{c.airFryerDesc}</p>
+            </a>
+            <a href={`/${lang}/tools/internal-cooking-temp-chart/`} class="p-4 rounded-xl border border-hairline bg-surface-soft hover:border-signature-teal transition-all group">
+              <span class="text-xs font-semibold text-signature-teal block mb-1">{c.internalTempTag}</span>
+              <span class="font-bold text-heading text-sm group-hover:text-signature-teal block">{c.internalTempTitle}</span>
+              <p class="text-xs text-body-secondary mt-1">{c.internalTempDesc}</p>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
