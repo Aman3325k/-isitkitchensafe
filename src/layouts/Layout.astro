@@ -260,6 +260,9 @@ const appliances = [
         }
       })();
     </script>
+    <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+    <link rel="dns-prefetch" href="https://www.google-analytics.com" />
     <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
     <link rel="preconnect" href="https://www.google-analytics.com" crossorigin />
     <script is:inline>
@@ -429,8 +432,11 @@ const appliances = [
     <slot name="head" />
   </head>
   <body class="bg-canvas text-body font-sans selection:bg-signature-cream selection:text-ink min-h-screen flex flex-col">
+    <!-- Subtle Reading Progress Bar (GPU-composited scaleX, hidden under prefers-reduced-motion & print) -->
+    <div id="reading-progress-bar" class="no-print" aria-hidden="true"></div>
+
     <!-- Skip to Content Link -->
-    <a href="#main-content" class="absolute left-0 top-0 -translate-y-full focus:translate-y-0 bg-primary text-on-primary min-h-[44px] px-4 py-2 flex items-center font-medium transition-transform z-[200] rounded-br-md">
+    <a href="#main-content" class="skip-link no-print absolute left-0 top-0 -translate-y-full focus:translate-y-0 bg-primary text-on-primary min-h-[44px] px-4 py-2 flex items-center font-medium transition-transform z-[200] rounded-br-md">
       {t('nav.skip')}
     </a>
 
@@ -703,7 +709,7 @@ const appliances = [
       role="dialog"
       aria-modal="true"
       aria-label="Mobile Navigation"
-      class="fixed inset-0 bg-canvas z-[110] transform translate-x-full transition-transform duration-300 xl:hidden flex flex-col pt-16 px-6 overflow-y-auto pb-8 hidden"
+      class="no-print fixed inset-0 bg-canvas z-[110] transform translate-x-full transition-transform duration-300 xl:hidden flex flex-col pt-16 px-6 overflow-y-auto pb-8 hidden"
       aria-hidden="true"
     >
       <button 
@@ -954,7 +960,7 @@ const appliances = [
       aria-modal="true"
       aria-label="Quick Search"
       aria-hidden="true"
-      class="fixed inset-0 z-[150] hidden items-start justify-center pt-[10vh] sm:pt-[14vh] px-4 bg-black/50 backdrop-blur-xs print:hidden"
+      class="no-print fixed inset-0 z-[150] hidden items-start justify-center pt-[10vh] sm:pt-[14vh] px-4 bg-black/50 backdrop-blur-xs print:hidden"
     >
       <div
         id="quick-search-panel"
@@ -1491,35 +1497,102 @@ const appliances = [
         const container = document.getElementById('back-to-top-container');
         const btn = document.getElementById('back-to-top-btn');
         const progressCircle = document.getElementById('back-to-top-progress');
-        if (!container || !btn || !progressCircle) return;
+        const progressBar = document.getElementById('reading-progress-bar');
+
+        if (!container && !progressBar) return;
 
         const circumference = 2 * Math.PI * 20; // 125.66
-        progressCircle.style.strokeDasharray = `${circumference}`;
+        if (progressCircle) {
+          progressCircle.style.strokeDasharray = `${circumference}`;
+        }
 
-        function onScroll() {
-          const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        if (btn && btn.dataset.bound !== 'true') {
+          btn.dataset.bound = 'true';
+          btn.addEventListener('click', () => {
+            const prefersReduced = Boolean(
+              window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+            );
+            window.scrollTo({ top: 0, behavior: prefersReduced ? 'auto' : 'smooth' });
+            const mainContent = document.getElementById('main-content');
+            if (mainContent && typeof mainContent.focus === 'function') {
+              mainContent.focus({ preventScroll: true });
+            }
+          });
+        }
+
+        const updateScrollUI = () => {
+          const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
           const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+          const progress = scrollHeight > 0 ? Math.min(1, Math.max(0, scrollTop / scrollHeight)) : 0;
 
-          if (scrollTop > 300) {
-            container.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-3');
-            container.classList.add('opacity-100', 'translate-y-0');
-          } else {
-            container.classList.add('opacity-0', 'pointer-events-none', 'translate-y-3');
-            container.classList.remove('opacity-100', 'translate-y-0');
+          if (progressBar) {
+            progressBar.style.transform = `scaleX(${progress.toFixed(4)})`;
           }
 
-          if (scrollHeight > 0) {
-            const progress = Math.min(1, Math.max(0, scrollTop / scrollHeight));
+          if (container && btn) {
+            const shouldShow = scrollTop > 480;
+            if (shouldShow) {
+              container.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-3');
+              container.classList.add('opacity-100', 'translate-y-0');
+              container.setAttribute('aria-hidden', 'false');
+              btn.removeAttribute('tabindex');
+            } else {
+              container.classList.add('opacity-0', 'pointer-events-none', 'translate-y-3');
+              container.classList.remove('opacity-100', 'translate-y-0');
+              container.setAttribute('aria-hidden', 'true');
+              btn.setAttribute('tabindex', '-1');
+            }
+          }
+
+          if (progressCircle) {
             const offset = circumference - progress * circumference;
             progressCircle.style.strokeDashoffset = `${offset}`;
           }
+        };
+
+        if (typeof window.__iksScrollUiUpdate === 'function') {
+          window.__iksScrollUiUpdate = updateScrollUI;
+          updateScrollUI();
+          return;
         }
 
-        window.addEventListener('scroll', onScroll, { passive: true });
-        btn.addEventListener('click', () => {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.__iksScrollUiUpdate = updateScrollUI;
+        let rafScheduled = false;
+        const scheduleScrollUpdate = () => {
+          if (rafScheduled) return;
+          rafScheduled = true;
+          requestAnimationFrame(() => {
+            rafScheduled = false;
+            if (typeof window.__iksScrollUiUpdate === 'function') {
+              window.__iksScrollUiUpdate();
+            }
+          });
+        };
+
+        window.addEventListener('scroll', scheduleScrollUpdate, { passive: true });
+        window.addEventListener('resize', scheduleScrollUpdate, { passive: true });
+        updateScrollUI();
+      }
+
+      function initPrintSupport() {
+        if (window.__iksPrintBound) return;
+        window.__iksPrintBound = true;
+
+        window.addEventListener('beforeprint', () => {
+          const closedDetails = document.querySelectorAll('details:not([open])');
+          closedDetails.forEach((el) => {
+            el.setAttribute('open', '');
+            el.dataset.printOpened = 'true';
+          });
         });
-        onScroll();
+
+        window.addEventListener('afterprint', () => {
+          const openedDetails = document.querySelectorAll('details[data-print-opened="true"]');
+          openedDetails.forEach((el) => {
+            el.removeAttribute('open');
+            delete el.dataset.printOpened;
+          });
+        });
       }
 
       function initQuickSearchModal() {
@@ -1817,6 +1890,7 @@ const appliances = [
         initQuickSearchModal();
         setupLanguagePickers();
         initBackToTop();
+        initPrintSupport();
       }
 
       if (document.readyState === 'loading') {
@@ -1828,15 +1902,16 @@ const appliances = [
     </script>
 
     <!-- Dynamic Back to Top Button with Circular Scroll Progress -->
-    <div id="back-to-top-container" class="fixed bottom-6 right-6 z-40 transition-all duration-300 opacity-0 pointer-events-none translate-y-3 print:hidden">
+    <div id="back-to-top-container" aria-hidden="true" class="no-print fixed bottom-6 right-6 z-40 transition-all duration-300 opacity-0 pointer-events-none translate-y-3 print:hidden">
       <button
         id="back-to-top-btn"
         type="button"
+        tabindex="-1"
         aria-label={t('action.backToTop')}
         title={t('action.backToTop')}
-        class="relative w-12 h-12 flex items-center justify-center rounded-full bg-canvas/95 dark:bg-surface-soft/95 text-ink shadow-lg border border-hairline hover:border-border-strong hover:scale-105 active:scale-95 transition-all cursor-pointer backdrop-blur-xs group"
+        class="no-print relative w-12 h-12 flex items-center justify-center rounded-full bg-canvas/95 dark:bg-surface-soft/95 text-ink shadow-lg border border-hairline hover:border-border-strong hover:scale-105 active:scale-95 transition-all cursor-pointer backdrop-blur-xs group"
       >
-        <svg class="absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 48 48">
+        <svg class="absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 48 48" aria-hidden="true">
           <circle
             cx="24"
             cy="24"
@@ -1867,7 +1942,7 @@ const appliances = [
     </div>
 
     <!-- Cookie Consent Banner -->
-    <div id="cookie-consent-banner" class="fixed bottom-4 left-4 right-4 md:left-auto md:max-w-md bg-canvas border border-hairline shadow-lg rounded-lg p-6 z-[100] hidden transition-all duration-300 transform translate-y-4 opacity-0">
+    <div id="cookie-consent-banner" class="no-print fixed bottom-4 left-4 right-4 md:left-auto md:max-w-md bg-canvas border border-hairline shadow-lg rounded-lg p-6 z-[100] hidden transition-all duration-300 transform translate-y-4 opacity-0">
       <h3 class="text-title-sm text-ink font-semibold mb-2">{t('cookie.title')}</h3>
       <p class="text-[13px] text-body mb-4 leading-relaxed">
         {t('cookie.message')} <a href="/privacy/" class="text-link underline hover:underline">{t('footer.privacy')}</a>.

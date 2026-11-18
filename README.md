@@ -4,7 +4,7 @@ A static kitchen safety reference platform and interactive consumer tool suite a
 
 ## Overview
 
-IsItKitchenSafe delivers **10,782+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **187 interactive tools** (including **36 Google-indexed Everyday Consumer Kitchen Safety Tools**), **26 evergreen blog guides × 5 languages (130 localized articles)**, **63 high-intent brand comparisons × 5 languages (315 localized pages)**, **WCAG 2.1 AA accessibility**, and transparent E-E-A-T verification standards.
+IsItKitchenSafe delivers **10,782+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **188 interactive tools** (including **37 Google-indexed Everyday Consumer Kitchen Safety Tools**), **26 evergreen blog guides × 5 languages (130 localized articles)**, **63 high-intent brand comparisons × 5 languages (315 localized pages)**, **WCAG 2.1 AA accessibility**, and transparent E-E-A-T verification standards.
 
 ## Tech Stack
 - **Framework**: Astro.js (MPA static generation)
@@ -101,7 +101,7 @@ npm run ops:engine
 
 ## Scale & Metrics
 - **10,782+ Static Pages** across 11 verticals and 5 languages (EN, ES, PT, ZH-CN, JA)
-- **187 Interactive Tools** with 100% 5-language parity, including **36 Google-indexed Everyday Consumer Utilities** (`src/data/consumer-tools-allowlist.json`)
+- **188 Interactive Tools** with 100% 5-language parity, including **37 Google-indexed Everyday Consumer Utilities** (`src/data/consumer-tools-allowlist.json`)
 - **26 Evergreen Guides × 5 Languages (130 Articles)** with 100% slug parity + **63 High-Intent Brand Comparisons × 5 Languages (315 Pages)**
 - **WCAG 2.1 AA Accessibility** (`:focus-visible`, `prefers-reduced-motion`, ARIA landmarks) + **Live Instant Search** across `/tools/`, `/blog/`, `/how-long/`, `/refreeze/`, `/compare/`, `/material/`, and `/what-happens/`
 - **0 Broken Links** (1,000,000+ internal hrefs audited with 100% resolution)

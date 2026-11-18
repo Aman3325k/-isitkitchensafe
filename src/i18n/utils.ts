@@ -218,6 +218,7 @@ const SPECIAL_PAGES = [
   'tools/microwave-wattage-converter',
   'tools/power-outage-food-safety-checker',
   'tools/baby-bottle-safety-checker',
+  'tools/cooking-oil-smoke-point-finder',
   'methodology',
   'saved'
 ];

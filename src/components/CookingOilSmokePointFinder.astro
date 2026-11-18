@@ -1,0 +1,772 @@
+---
+import rawData from '../data/cooking-oil-smoke-point-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+import { useTranslatedPath } from '../i18n/utils';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+const translatePath = useTranslatedPath(lang);
+
+const cookwareTempUrl = translatePath('/tools/cookware-oven-temp-lookup/');
+const internalTempUrl = translatePath('/tools/internal-cooking-temp-chart/');
+const panScratchUrl = translatePath('/tools/pan-scratch-inspector/');
+const airFryerUrl = translatePath('/tools/air-fryer-oven-converter/');
+const methodologyUrl = translatePath('/methodology/');
+const allToolsUrl = translatePath('/tools/');
+
+type CategoryFilter = 'all' | 'high-heat' | 'medium-heat' | 'low-heat-raw' | 'animal-fat';
+
+interface LocalizedOil {
+  id: string;
+  icon: string;
+  category: string;
+  smokePointF: number;
+  smokePointC: number;
+  stabilityScore: number;
+  primaryFat: string;
+  aldehydeRisk: string;
+  name: string;
+  categoryLabel: string;
+  bestFor: string;
+  healthVerdict: string;
+  warning: string;
+}
+
+const localizedOils: LocalizedOil[] = rawData.oils.map((o) => {
+  const tr = (o.i18n as Record<string, any>)[lang] || o.i18n.en;
+  return {
+    id: o.id,
+    icon: o.icon,
+    category: o.category,
+    smokePointF: o.smokePointF,
+    smokePointC: o.smokePointC,
+    stabilityScore: o.stabilityScore,
+    primaryFat: o.primaryFat,
+    aldehydeRisk: o.aldehydeRisk,
+    name: tr.name,
+    categoryLabel: tr.categoryLabel,
+    bestFor: tr.bestFor,
+    healthVerdict: tr.healthVerdict,
+    warning: tr.warning
+  };
+});
+
+const faqs = (rawData.faqs as Record<string, Array<{ question: string; answer: string }>>)[lang] || rawData.faqs.en;
+
+const UI = {
+  en: {
+    searchPlaceholder: "Search 28 cooking oils (e.g. olive, avocado, ghee, tallow, coconut)...",
+    filterAll: "All Oils & Fats",
+    filterHigh: "High-Heat Searing (450°F+)",
+    filterMed: "Medium Frying (350°–449°F)",
+    filterLow: "Low-Heat / Raw (<350°F)",
+    filterAnimal: "Animal Fats & Butters",
+    tempF: "°F Fahrenheit",
+    tempC: "°C Celsius",
+    showingCount: "Showing {visible} of {total} cooking oils",
+    clearSearch: "Clear",
+    resetFilters: "Reset All Filters",
+    smokePointLabel: "Smoke Point:",
+    stabilityLabel: "Oxidative Stability:",
+    fatProfileLabel: "Fat Profile:",
+    bestForLabel: "Best Culinary Uses:",
+    aldehydeRiskLabel: "Toxic Aldehyde Risk:",
+    verdictLabel: "Scientific Health Verdict:",
+    warningLabel: "Kitchen Caution:",
+    simTitle: "Interactive Cooking Heat & Searing Threshold Checker",
+    simDesc: "Select your target cooking heat to instantly see which oils stay below their smoke point and which are in danger of breaking down into toxic acrolein fumes:",
+    simSafeBadge: "SAFE TO COOK",
+    simWarningBadge: "PAST SMOKE POINT — BREAKDOWN RISK",
+    heatPresets: [
+      { label: "Raw / Salad", tempF: 72, tempC: 22 },
+      { label: "Low Sauté", tempF: 275, tempC: 135 },
+      { label: "Pan-Frying", tempF: 350, tempC: 177 },
+      { label: "Deep-Frying", tempF: 375, tempC: 190 },
+      { label: "Wok Stir-Fry", tempF: 425, tempC: 218 },
+      { label: "Steak Searing", tempF: 500, tempC: 260 }
+    ],
+    emptyTitle: "No cooking oils match your search",
+    emptyDesc: "Try adjusting your search terms or clearing category filters to view all 28 cooking fats.",
+    faqsTitle: "Frequently Asked Scientific Questions About Cooking Oils & Smoke Points",
+    relatedToolsTitle: "Related Kitchen Temperature & Safety Utilities",
+    methodologyNote: "Smoke points and lipid degradation kinetics derived from Codex Alimentarius (CXS 210-1999), peer-reviewed chromatography trials (De Alzaa et al., 2018), and European Commission Regulation (EU) 2019/343 frying oil limits."
+  },
+  es: {
+    searchPlaceholder: "Buscar entre 28 aceites (ej. oliva, aguacate, ghee, sebo, coco)...",
+    filterAll: "Todos los Aceites y Grasas",
+    filterHigh: "Fuego Muy Alto (232°C+ / 450°F+)",
+    filterMed: "Fritura Media (177°–231°C)",
+    filterLow: "Fuego Bajo / Crudo (<177°C)",
+    filterAnimal: "Grasas Animales y Mantequillas",
+    tempF: "°F Fahrenheit",
+    tempC: "°C Celsius",
+    showingCount: "Mostrando {visible} de {total} aceites y grasas",
+    clearSearch: "Limpiar",
+    resetFilters: "Restablecer Filtros",
+    smokePointLabel: "Punto de Humo:",
+    stabilityLabel: "Estabilidad Oxidativa:",
+    fatProfileLabel: "Perfil Lipídico:",
+    bestForLabel: "Mejores Usos Culinarios:",
+    aldehydeRiskLabel: "Riesgo de Aldehídos Tóxicos:",
+    verdictLabel: "Veredicto Científico de Salud:",
+    warningLabel: "Precaución en Cocina:",
+    simTitle: "Simulador Interactivo de Temperatura de Cocción y Sellado",
+    simDesc: "Selecciona la temperatura deseada para comprobar qué aceites permanecen por debajo de su punto de humo y cuáles corren riesgo de degradación:",
+    simSafeBadge: "SEGURO PARA COCINAR",
+    simWarningBadge: "SUPERA PUNTO DE HUMO — RIESGO TÓXICO",
+    heatPresets: [
+      { label: "Aliño / Crudo", tempF: 72, tempC: 22 },
+      { label: "Salteado Suave", tempF: 275, tempC: 135 },
+      { label: "Fritura en Sartén", tempF: 350, tempC: 177 },
+      { label: "Fritura Profunda", tempF: 375, tempC: 190 },
+      { label: "Wok / Salteado Vivo", tempF: 425, tempC: 218 },
+      { label: "Sellado de Carne", tempF: 500, tempC: 260 }
+    ],
+    emptyTitle: "Ningún aceite coincide con tu búsqueda",
+    emptyDesc: "Prueba con otros términos o restablece los filtros para consultar las 28 grasas culinarias.",
+    faqsTitle: "Preguntas Frecuentes Científicas sobre Aceites y Puntos de Humo",
+    relatedToolsTitle: "Herramientas Relacionadas de Temperatura y Seguridad",
+    methodologyNote: "Puntos de humo y estabilidad lipídica contrastados con normas Codex Alimentarius (CXS 210-1999), estudios cromatográficos (De Alzaa et al., 2018) y límites de la UE (2019/343)."
+  },
+  pt: {
+    searchPlaceholder: "Pesquisar 28 óleos e gorduras (ex: azeite, abacate, ghee, sebo, coco)...",
+    filterAll: "Todos os Óleos e Gorduras",
+    filterHigh: "Alta Temperatura (232°C+ / 450°F+)",
+    filterMed: "Fritura Média (177°–231°C)",
+    filterLow: "Fogo Baixo / Cru (<177°C)",
+    filterAnimal: "Gorduras Animais e Manteigas",
+    tempF: "°F Fahrenheit",
+    tempC: "°C Celsius",
+    showingCount: "Exibindo {visible} de {total} óleos culinários",
+    clearSearch: "Limpar",
+    resetFilters: "Redefinir Filtros",
+    smokePointLabel: "Ponto de Fumaça:",
+    stabilityLabel: "Estabilidade Oxidativa:",
+    fatProfileLabel: "Perfil Lipídico:",
+    bestForLabel: "Melhores Usos na Cozinha:",
+    aldehydeRiskLabel: "Risco de Aldeídos Tóxicos:",
+    verdictLabel: "Parecer Científico de Saúde:",
+    warningLabel: "Alerta de Cuidados:",
+    simTitle: "Simulador Interativo de Calor e Ponto de Fumaça",
+    simDesc: "Escolha a temperatura de preparo para verificar quais óleos se mantêm seguros e quais entram na zona de degradação térmica com emissão de acroleína:",
+    simSafeBadge: "SEGURO PARA COZINHAR",
+    simWarningBadge: "ULTRAPASSOU PONTO DE FUMAÇA — RISCO TÓXICO",
+    heatPresets: [
+      { label: "Saladas / Cru", tempF: 72, tempC: 22 },
+      { label: "Refogado Suave", tempF: 275, tempC: 135 },
+      { label: "Frigideira Média", tempF: 350, tempC: 177 },
+      { label: "Fritura por Imersão", tempF: 375, tempC: 190 },
+      { label: "Wok / Alta Chama", tempF: 425, tempC: 218 },
+      { label: "Selagem de Carnes", tempF: 500, tempC: 260 }
+    ],
+    emptyTitle: "Nenhum óleo corresponde à sua pesquisa",
+    emptyDesc: "Tente outros termos ou redefina os filtros para ver todos os 28 óleos e gorduras culinárias.",
+    faqsTitle: "Perguntas Científicas Frequentes sobre Óleos e Ponto de Fumaça",
+    relatedToolsTitle: "Calculadoras Relacionadas de Temperatura e Segurança",
+    methodologyNote: "Parâmetros lipídicos baseados no Codex Alimentarius (CXS 210-1999), ensaios cromatográficos (De Alzaa et al., 2018) e limites da União Europeia (Regulamento 2019/343)."
+  },
+  'zh-cn': {
+    searchPlaceholder: "输入油品名称搜索（如：橄榄油、牛油果油、酥油、牛油、椰子油、猪油）...",
+    filterAll: "全部 28 种食用油与动物油脂",
+    filterHigh: "超高温爆炒与煎炸（232°C+ / 450°F+）",
+    filterMed: "中温煎炒炸（177°–231°C）",
+    filterLow: "低温烹饪与生食凉拌（<177°C）",
+    filterAnimal: "天然动物油脂与无水酥油",
+    tempF: "°F 华氏度",
+    tempC: "°C 摄氏度",
+    showingCount: "显示 {visible} / {total} 种食用油脂",
+    clearSearch: "清空",
+    resetFilters: "重置所有筛选",
+    smokePointLabel: "实测发烟点：",
+    stabilityLabel: "热氧化稳定性：",
+    fatProfileLabel: "核心脂肪酸构成：",
+    bestForLabel: "最佳烹饪应用：",
+    aldehydeRiskLabel: "有毒醛类产生风险：",
+    verdictLabel: "科学营养健康结论：",
+    warningLabel: "厨房安全预警：",
+    simTitle: "交互式烹饪火候发烟点与热裂解安全检测器",
+    simDesc: "选择烹饪目标温度，即刻核对哪些油品处于安全发烟点之下，哪些正处于热解产生剧毒丙烯醛有毒气体的超标危险温区：",
+    simSafeBadge: "安全烹饪范围",
+    simWarningBadge: "超过发烟点 — 严重氧化与毒性挥发",
+    heatPresets: [
+      { label: "冷拌 / 沙拉", tempF: 72, tempC: 22 },
+      { label: "小火慢煎", tempF: 275, tempC: 135 },
+      { label: "中火煎炒", tempF: 350, tempC: 177 },
+      { label: "深度油炸", tempF: 375, tempC: 190 },
+      { label: "铁锅大火爆炒", tempF: 425, tempC: 218 },
+      { label: "牛排猛火煎封", tempF: 500, tempC: 260 }
+    ],
+    emptyTitle: "未找到匹配的食用油脂",
+    emptyDesc: "请尝试更改搜索关键词或重置分类筛选，以查看全部 28 款食用油与油脂参数。",
+    faqsTitle: "食用油发烟点、热稳定性与健康科学深度解答（FAQ）",
+    relatedToolsTitle: "相关厨房温度与食品安全检测工具",
+    methodologyNote: "发烟点数据及脂质降解动力学源自国际食品法典标准（CXS 210-1999）、同行评议色谱实测分析（De Alzaa et al., 2018）及欧盟废弃煎炸油标准（EU 2019/343）。"
+  },
+  ja: {
+    searchPlaceholder: "食用油を検索（例：オリーブ油、アボカド、ギー、牛脂、ココナッツ、ラード）...",
+    filterAll: "全28種類の食用油・油脂",
+    filterHigh: "超高温焼き・揚げ物（232°C+ / 450°F+）",
+    filterMed: "中温調理・フライ（177°–231°C）",
+    filterLow: "低温調理・生食専用（<177°C）",
+    filterAnimal: "伝統的動物性油脂・バター",
+    tempF: "°F 華氏",
+    tempC: "°C 摂氏",
+    showingCount: "{total} 種類中 {visible} 種類を表示中",
+    clearSearch: "クリア",
+    resetFilters: "フィルターをリセット",
+    smokePointLabel: "発煙点（スモークポイント）:",
+    stabilityLabel: "熱酸化安定性:",
+    fatProfileLabel: "主成分脂肪酸:",
+    bestForLabel: "おすすめの調理用途:",
+    aldehydeRiskLabel: "有害アルデヒド発生リスク:",
+    verdictLabel: "科学的・栄養学的判定:",
+    warningLabel: "調理上の重要注意点:",
+    simTitle: "調理温度別 スモークポイント・熱酸化シミュレーター",
+    simDesc: "調理予定の温度を選択すると、どの油が発煙点未満で安全か、どの油が有害なアクロレインや過酸化脂質を放出する危険域か即座に判定します：",
+    simSafeBadge: "安全調理範囲",
+    simWarningBadge: "発煙点超過 — 有害ガス発生リスク",
+    heatPresets: [
+      { label: "生食・ドレッシング", tempF: 72, tempC: 22 },
+      { label: "弱火ソテー", tempF: 275, tempC: 135 },
+      { label: "中火フライパン炒め", tempF: 350, tempC: 177 },
+      { label: "天ぷら・揚げ物", tempF: 375, tempC: 190 },
+      { label: "強火中華炒め", tempF: 425, tempC: 218 },
+      { label: "ステーキ強火焼き", tempF: 500, tempC: 260 }
+    ],
+    emptyTitle: "一致する食用油が見つかりませんでした",
+    emptyDesc: "検索キーワードを変更するか、フィルターをリセットして全28種類のオイルをご確認ください。",
+    faqsTitle: "食用油の発煙点と健康安全性に関する科学的FAQ",
+    relatedToolsTitle: "関連する厨房温度＆安全チェッカー",
+    methodologyNote: "各油の発煙点および脂質熱分解動態は、国際食品規格（Codex CXS 210-1999）、査読付きクロマトグラフィー分析（De Alzaa et al., 2018）、欧州委員会規則（EU 2019/343）に基づきます。"
+  }
+};
+
+const c = UI[lang] || UI.en;
+---
+
+<div id="cooking-oil-finder" class="space-y-10" data-lang={lang}>
+  <!-- Top Controls & Search Bar -->
+  <div class="bg-surface-soft border border-hairline rounded-2xl p-6 md:p-8 shadow-xs">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+      <div class="relative flex-1">
+        <input
+          id="oil-search-input"
+          type="search"
+          placeholder={c.searchPlaceholder}
+          class="w-full pl-11 pr-10 py-3.5 bg-canvas text-ink border border-hairline rounded-xl text-sm md:text-base focus:border-link focus:ring-2 focus:ring-link/20 transition-all outline-none"
+          aria-label={c.searchPlaceholder}
+        />
+        <svg class="w-5 h-5 text-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <button
+          id="oil-search-clear"
+          type="button"
+          class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-ink text-xs font-medium px-2 py-1 rounded bg-surface-strong cursor-pointer"
+        >
+          {c.clearSearch}
+        </button>
+      </div>
+
+      <!-- Temperature Unit Toggle -->
+      <div class="flex items-center gap-1 bg-surface-strong p-1 rounded-xl self-start md:self-auto shrink-0" role="radiogroup" aria-label="Temperature unit selector">
+        <button
+          id="btn-unit-f"
+          type="button"
+          class="px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer bg-signature-coral text-white shadow-xs"
+          data-unit="f"
+          aria-checked="true"
+        >
+          {c.tempF}
+        </button>
+        <button
+          id="btn-unit-c"
+          type="button"
+          class="px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer text-body hover:text-ink"
+          data-unit="c"
+          aria-checked="false"
+        >
+          {c.tempC}
+        </button>
+      </div>
+    </div>
+
+    <!-- Category Filter Chips -->
+    <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-hairline/60">
+      <button
+        type="button"
+        class="oil-filter-chip px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer bg-signature-coral text-white"
+        data-filter="all"
+      >
+        {c.filterAll} (<span id="count-all">{localizedOils.length}</span>)
+      </button>
+      <button
+        type="button"
+        class="oil-filter-chip px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer bg-canvas border border-hairline text-body hover:text-ink hover:border-border-strong"
+        data-filter="high-heat"
+      >
+        🔥 {c.filterHigh}
+      </button>
+      <button
+        type="button"
+        class="oil-filter-chip px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer bg-canvas border border-hairline text-body hover:text-ink hover:border-border-strong"
+        data-filter="medium-heat"
+      >
+        🍳 {c.filterMed}
+      </button>
+      <button
+        type="button"
+        class="oil-filter-chip px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer bg-canvas border border-hairline text-body hover:text-ink hover:border-border-strong"
+        data-filter="low-heat-raw"
+      >
+        🥗 {c.filterLow}
+      </button>
+      <button
+        type="button"
+        class="oil-filter-chip px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer bg-canvas border border-hairline text-body hover:text-ink hover:border-border-strong"
+        data-filter="animal-fat"
+      >
+        🥩 {c.filterAnimal}
+      </button>
+    </div>
+
+    <div class="mt-4 flex items-center justify-between text-xs text-muted">
+      <span id="oil-match-count" data-template={c.showingCount}>
+        Showing {localizedOils.length} of {localizedOils.length} cooking oils
+      </span>
+      <span class="inline-flex items-center gap-1 text-success font-medium">
+        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+        </svg>
+        Codex Alimentarius &amp; EU Frying Standards Verified
+      </span>
+    </div>
+  </div>
+
+  <!-- Interactive Cooking Heat Preset Bar -->
+  <div class="bg-gradient-to-br from-amber-50/50 to-orange-50/40 border border-amber-200/80 rounded-2xl p-6 md:p-8">
+    <div class="max-w-2xl mb-5">
+      <h3 class="text-title-md font-medium text-ink flex items-center gap-2 mb-2">
+        🌡️ {c.simTitle}
+      </h3>
+      <p class="text-xs md:text-sm text-body leading-relaxed">
+        {c.simDesc}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+      {c.heatPresets.map((preset, idx) => (
+        <button
+          type="button"
+          class={`heat-preset-btn p-3 rounded-xl border text-left transition-all cursor-pointer ${idx === 3 ? 'bg-signature-coral text-white border-signature-coral shadow-xs' : 'bg-canvas border-amber-200 text-ink hover:border-signature-coral'}`}
+          data-temp-f={preset.tempF}
+          data-temp-c={preset.tempC}
+        >
+          <span class="text-[11px] font-bold uppercase tracking-wider block opacity-90 mb-1">
+            {preset.label}
+          </span>
+          <span class="text-base font-extrabold block">
+            <span class="preset-temp-f">{preset.tempF}°F</span>
+            <span class="preset-temp-c hidden">{preset.tempC}°C</span>
+          </span>
+        </button>
+      ))}
+    </div>
+
+    <div id="sim-status-banner" class="mt-5 p-3.5 rounded-xl bg-canvas border border-amber-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-ink">Active Test Heat:</span>
+        <span id="active-sim-temp" class="font-mono font-extrabold text-signature-coral text-sm">375°F (190°C)</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="inline-flex items-center gap-1.5 text-success font-medium">
+          <span class="w-2.5 h-2.5 rounded-full bg-success"></span>
+          <span id="safe-count-badge">23 Safe Oils</span>
+        </span>
+        <span class="inline-flex items-center gap-1.5 text-error font-medium">
+          <span class="w-2.5 h-2.5 rounded-full bg-error"></span>
+          <span id="breakdown-count-badge">5 Past Smoke Point</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Oil Cards Grid -->
+  <div id="oil-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {localizedOils.map((oil) => {
+      const isHighHeat = oil.smokePointF >= 450;
+      const isMedHeat = oil.smokePointF >= 350 && oil.smokePointF < 450;
+      const isLowHeat = oil.smokePointF < 350;
+      const isAnimal = oil.category === 'animal-fat';
+
+      return (
+        <article
+          class="oil-card bg-surface-soft border border-hairline rounded-2xl p-6 md:p-7 flex flex-col justify-between shadow-xs hover:shadow-md transition-all"
+          data-category={oil.category}
+          data-smoke-f={oil.smokePointF}
+          data-smoke-c={oil.smokePointC}
+          data-name={oil.name.toLowerCase()}
+          data-fat={oil.primaryFat.toLowerCase()}
+          data-best={oil.bestFor.toLowerCase()}
+        >
+          <div>
+            <!-- Header Badges -->
+            <div class="flex items-center justify-between gap-2 mb-4">
+              <span class={`inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                isHighHeat ? 'bg-signature-coral text-white' :
+                isMedHeat ? 'bg-amber-700 text-white' :
+                'bg-emerald-700 text-white'
+              }`}>
+                {oil.categoryLabel}
+              </span>
+              <span class="text-xs font-bold text-ink bg-canvas px-2.5 py-1 rounded-lg border border-hairline">
+                Stability: {oil.stabilityScore}/10
+              </span>
+            </div>
+
+            <!-- Title & Icon -->
+            <div class="flex items-start gap-3.5 mb-4">
+              <span class="text-3xl shrink-0 p-2.5 rounded-xl bg-canvas border border-hairline shadow-2xs">
+                {oil.icon}
+              </span>
+              <div>
+                <h3 class="text-title-lg font-bold text-ink tracking-tight leading-snug">
+                  {oil.name}
+                </h3>
+                <span class="text-xs text-muted block mt-0.5">
+                  {oil.primaryFat}
+                </span>
+              </div>
+            </div>
+
+            <!-- Smoke Point Highlight Badge -->
+            <div class="my-4 p-4 rounded-xl bg-canvas border border-hairline/80 flex items-center justify-between">
+              <div>
+                <span class="text-caption text-muted uppercase tracking-wider text-[11px] block">
+                  {c.smokePointLabel}
+                </span>
+                <span class="text-display-sm font-extrabold text-ink tracking-tight">
+                  <span class="oil-sp-f">{oil.smokePointF}°F</span>
+                  <span class="oil-sp-c hidden">{oil.smokePointC}°C</span>
+                </span>
+              </div>
+              <div id={`sim-pill-${oil.id}`} class="oil-sim-pill px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors bg-success/10 text-success border border-success/20">
+                {c.simSafeBadge}
+              </div>
+            </div>
+
+            <!-- Key Specs List -->
+            <div class="space-y-2.5 text-xs py-3 border-y border-hairline/60 mb-4">
+              <div>
+                <span class="text-muted block mb-0.5 font-medium">{c.bestForLabel}</span>
+                <strong class="text-ink font-semibold">{oil.bestFor}</strong>
+              </div>
+              <div>
+                <span class="text-muted block mb-0.5 font-medium">{c.aldehydeRiskLabel}</span>
+                <span class={`font-bold inline-block px-2 py-0.5 rounded text-[11px] ${
+                  oil.aldehydeRisk.toLowerCase().includes('minimal') || oil.aldehydeRisk.toLowerCase().includes('low') ? 'bg-success/10 text-success' :
+                  oil.aldehydeRisk.toLowerCase().includes('moderate') ? 'bg-warning/10 text-warning' :
+                  'bg-error/10 text-error'
+                }`}>
+                  {oil.aldehydeRisk}
+                </span>
+              </div>
+            </div>
+
+            <!-- Scientific Health Verdict -->
+            <div class="mb-4">
+              <span class="text-caption text-muted uppercase tracking-wider text-[11px] block mb-1">
+                {c.verdictLabel}
+              </span>
+              <p class="text-body text-[13px] leading-relaxed">
+                {oil.healthVerdict}
+              </p>
+            </div>
+          </div>
+
+          <!-- Kitchen Warning / Care Note -->
+          <div class="mt-4 p-3.5 rounded-xl bg-signature-cream/40 border border-signature-cream text-xs leading-relaxed text-ink">
+            <span class="font-bold text-signature-coral">⚠️ {c.warningLabel}</span> {oil.warning}
+          </div>
+        </article>
+      );
+    })}
+  </div>
+
+  <!-- Empty State -->
+  <div id="oil-empty-state" class="hidden bg-surface-soft border border-hairline rounded-2xl p-10 text-center">
+    <span class="text-4xl block mb-3">🔍</span>
+    <h3 class="text-title-md font-semibold text-ink mb-2">{c.emptyTitle}</h3>
+    <p class="text-sm text-muted mb-5 max-w-md mx-auto">{c.emptyDesc}</p>
+    <button
+      id="oil-empty-reset"
+      type="button"
+      class="px-5 py-2.5 rounded-xl bg-ink hover:bg-black text-white text-sm font-medium transition-colors cursor-pointer"
+    >
+      {c.resetFilters}
+    </button>
+  </div>
+
+  <!-- Companion Tools Cross-Linking Strip -->
+  <div class="bg-surface-soft border border-hairline rounded-2xl p-8">
+    <h3 class="text-title-md font-medium text-ink mb-6 flex items-center gap-2">
+      🛠️ {c.relatedToolsTitle}
+    </h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <a href={cookwareTempUrl} class="p-4 rounded-xl bg-canvas hover:bg-surface-strong border border-hairline transition-all shadow-xs flex flex-col justify-between">
+        <div>
+          <span class="text-xs font-bold text-rose-700 block mb-1">🍳 Cookware Oven Temps</span>
+          <h4 class="font-semibold text-ink text-sm mb-1">Cookware Safe Temp Lookup</h4>
+          <p class="text-xs text-muted">Check safe oven &amp; broiler ceilings across 24 brands.</p>
+        </div>
+        <span class="text-xs text-link font-medium mt-3 inline-block">Lookup Cookware &rarr;</span>
+      </a>
+
+      <a href={internalTempUrl} class="p-4 rounded-xl bg-canvas hover:bg-surface-strong border border-hairline transition-all shadow-xs flex flex-col justify-between">
+        <div>
+          <span class="text-xs font-bold text-emerald-700 block mb-1">🌡️ USDA Food Safety</span>
+          <h4 class="font-semibold text-ink text-sm mb-1">Internal Cooking Temp Chart</h4>
+          <p class="text-xs text-muted">Official USDA safe temps &amp; probe rest timers for 24 foods.</p>
+        </div>
+        <span class="text-xs text-link font-medium mt-3 inline-block">Check Safe Temps &rarr;</span>
+      </a>
+
+      <a href={airFryerUrl} class="p-4 rounded-xl bg-canvas hover:bg-surface-strong border border-hairline transition-all shadow-xs flex flex-col justify-between">
+        <div>
+          <span class="text-xs font-bold text-amber-700 block mb-1">🔥 Air Fryer Heat</span>
+          <h4 class="font-semibold text-ink text-sm mb-1">Air Fryer to Oven Converter</h4>
+          <p class="text-xs text-muted">Convert baking temps and check parchment &amp; foil safety.</p>
+        </div>
+        <span class="text-xs text-link font-medium mt-3 inline-block">Convert Recipe &rarr;</span>
+      </a>
+
+      <a href={panScratchUrl} class="p-4 rounded-xl bg-canvas hover:bg-surface-strong border border-hairline transition-all shadow-xs flex flex-col justify-between">
+        <div>
+          <span class="text-xs font-bold text-ink block mb-1">🔬 Nonstick Coatings</span>
+          <h4 class="font-semibold text-ink text-sm mb-1">Pan Scratch Inspector</h4>
+          <p class="text-xs text-muted">Scan nonstick skillet photos to evaluate coating wear.</p>
+        </div>
+        <span class="text-xs text-link font-medium mt-3 inline-block">Inspect Pan &rarr;</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Scientific FAQs Accordion -->
+  <section class="border-t border-hairline pt-10">
+    <h3 class="text-title-lg font-medium text-ink mb-6">
+      {c.faqsTitle}
+    </h3>
+    <div class="space-y-4">
+      {faqs.map((faq, idx) => (
+        <details class="group bg-surface-soft border border-hairline rounded-xl overflow-hidden transition-all">
+          <summary class="p-5 font-semibold text-ink text-sm md:text-base cursor-pointer flex items-center justify-between hover:bg-surface-strong/40 transition-colors">
+            <span>{faq.question}</span>
+            <span class="text-muted group-open:rotate-180 transition-transform ml-4 shrink-0 font-bold">&darr;</span>
+          </summary>
+          <div class="p-5 pt-0 text-body text-xs md:text-sm leading-relaxed border-t border-hairline/40">
+            {faq.answer}
+          </div>
+        </details>
+      ))}
+    </div>
+  </section>
+
+  <!-- Methodology E-E-A-T Footer Reference -->
+  <div class="p-5 rounded-xl bg-canvas border border-hairline text-xs text-muted leading-relaxed">
+    <strong class="text-ink">Scientific Methodology &amp; Standards:</strong> {c.methodologyNote} <a href={methodologyUrl} class="text-link underline hover:text-ink">Read full methodology</a>.
+  </div>
+</div>
+
+<script is:inline>
+  (function() {
+    function initOilFinder() {
+      var root = document.getElementById('cooking-oil-finder');
+      if (!root || root.dataset.initialized === 'true') return;
+      root.dataset.initialized = 'true';
+
+      var searchInput = document.getElementById('oil-search-input');
+      var clearBtn = document.getElementById('oil-search-clear');
+      var filterChips = Array.prototype.slice.call(root.querySelectorAll('.oil-filter-chip'));
+      var cards = Array.prototype.slice.call(root.querySelectorAll('.oil-card'));
+      var matchCountEl = document.getElementById('oil-match-count');
+      var emptyState = document.getElementById('oil-empty-state');
+      var emptyResetBtn = document.getElementById('oil-empty-reset');
+
+      var btnUnitF = document.getElementById('btn-unit-f');
+      var btnUnitC = document.getElementById('btn-unit-c');
+      var presetBtns = Array.prototype.slice.call(root.querySelectorAll('.heat-preset-btn'));
+      var activeSimTempEl = document.getElementById('active-sim-temp');
+      var safeBadgeEl = document.getElementById('safe-count-badge');
+      var breakdownBadgeEl = document.getElementById('breakdown-count-badge');
+
+      var currentUnit = 'f';
+      var currentFilter = 'all';
+      var currentHeatF = 375;
+      var currentHeatC = 190;
+      var countTemplate = matchCountEl ? (matchCountEl.getAttribute('data-template') || 'Showing {visible} of {total} cooking oils') : '';
+
+      function updateUnits() {
+        var isC = currentUnit === 'c';
+        btnUnitF.classList.toggle('bg-signature-coral', !isC);
+        btnUnitF.classList.toggle('text-white', !isC);
+        btnUnitF.classList.toggle('text-body', isC);
+        btnUnitF.setAttribute('aria-checked', (!isC).toString());
+
+        btnUnitC.classList.toggle('bg-signature-coral', isC);
+        btnUnitC.classList.toggle('text-white', isC);
+        btnUnitC.classList.toggle('text-body', !isC);
+        btnUnitC.setAttribute('aria-checked', isC.toString());
+
+        root.querySelectorAll('.oil-sp-f').forEach(function(el) { el.classList.toggle('hidden', isC); });
+        root.querySelectorAll('.oil-sp-c').forEach(function(el) { el.classList.toggle('hidden', !isC); });
+
+        root.querySelectorAll('.preset-temp-f').forEach(function(el) { el.classList.toggle('hidden', isC); });
+        root.querySelectorAll('.preset-temp-c').forEach(function(el) { el.classList.toggle('hidden', !isC); });
+
+        if (activeSimTempEl) {
+          activeSimTempEl.textContent = isC ? (currentHeatC + '°C (' + currentHeatF + '°F)') : (currentHeatF + '°F (' + currentHeatC + '°C)');
+        }
+      }
+
+      function updateSimulationPills() {
+        var safeCount = 0;
+        var breakdownCount = 0;
+
+        cards.forEach(function(card) {
+          var smokeF = parseInt(card.getAttribute('data-smoke-f') || '0', 10);
+          var pill = card.querySelector('.oil-sim-pill');
+          var isPastSmoke = currentHeatF > smokeF;
+
+          if (isPastSmoke) {
+            breakdownCount++;
+            if (pill) {
+              pill.textContent = 'PAST SMOKE POINT ⚠️';
+              pill.className = 'oil-sim-pill px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors bg-error/15 text-error border border-error/30';
+            }
+          } else {
+            safeCount++;
+            if (pill) {
+              pill.textContent = 'SAFE TO COOK ✓';
+              pill.className = 'oil-sim-pill px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors bg-success/15 text-success border border-success/30';
+            }
+          }
+        });
+
+        if (safeBadgeEl) safeBadgeEl.textContent = safeCount + ' Safe Oils';
+        if (breakdownBadgeEl) breakdownBadgeEl.textContent = breakdownCount + ' Past Smoke Point';
+      }
+
+      function applyFilters() {
+        var query = (searchInput.value || '').trim().toLowerCase();
+        var visibleCount = 0;
+
+        if (clearBtn) {
+          clearBtn.classList.toggle('hidden', query.length === 0);
+        }
+
+        cards.forEach(function(card) {
+          var category = card.getAttribute('data-category') || '';
+          var name = card.getAttribute('data-name') || '';
+          var fat = card.getAttribute('data-fat') || '';
+          var best = card.getAttribute('data-best') || '';
+          var text = (name + ' ' + fat + ' ' + best).toLowerCase();
+
+          var matchesCategory = (currentFilter === 'all') ||
+            (currentFilter === 'high-heat' && parseInt(card.getAttribute('data-smoke-f') || '0', 10) >= 450) ||
+            (currentFilter === 'medium-heat' && parseInt(card.getAttribute('data-smoke-f') || '0', 10) >= 350 && parseInt(card.getAttribute('data-smoke-f') || '0', 10) < 450) ||
+            (currentFilter === 'low-heat-raw' && parseInt(card.getAttribute('data-smoke-f') || '0', 10) < 350) ||
+            (currentFilter === 'animal-fat' && category === 'animal-fat');
+
+          var matchesQuery = query.length === 0 || text.indexOf(query) !== -1;
+
+          var shouldShow = matchesCategory && matchesQuery;
+          card.classList.toggle('hidden', !shouldShow);
+          if (shouldShow) visibleCount++;
+        });
+
+        if (matchCountEl) {
+          matchCountEl.textContent = countTemplate
+            .replace('{visible}', String(visibleCount))
+            .replace('{total}', String(cards.length));
+        }
+
+        if (emptyState) {
+          emptyState.classList.toggle('hidden', visibleCount > 0);
+        }
+      }
+
+      function updateChipStyles() {
+        filterChips.forEach(function(chip) {
+          var isCurrent = chip.getAttribute('data-filter') === currentFilter;
+          if (isCurrent) {
+            chip.className = 'oil-filter-chip px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer bg-signature-coral text-white';
+          } else {
+            chip.className = 'oil-filter-chip px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer bg-canvas border border-hairline text-body hover:text-ink hover:border-border-strong';
+          }
+        });
+      }
+
+      function resetAll() {
+        if (searchInput) searchInput.value = '';
+        currentFilter = 'all';
+        updateChipStyles();
+        applyFilters();
+      }
+
+      // Event Listeners
+      if (searchInput) searchInput.addEventListener('input', applyFilters);
+      if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+          searchInput.value = '';
+          applyFilters();
+          searchInput.focus();
+        });
+      }
+      if (emptyResetBtn) emptyResetBtn.addEventListener('click', resetAll);
+
+      filterChips.forEach(function(chip) {
+        chip.addEventListener('click', function() {
+          currentFilter = chip.getAttribute('data-filter') || 'all';
+          updateChipStyles();
+          applyFilters();
+        });
+      });
+
+      if (btnUnitF && btnUnitC) {
+        btnUnitF.addEventListener('click', function() { currentUnit = 'f'; updateUnits(); });
+        btnUnitC.addEventListener('click', function() { currentUnit = 'c'; updateUnits(); });
+      }
+
+      presetBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          presetBtns.forEach(function(b) {
+            b.classList.remove('bg-signature-coral', 'text-white', 'border-signature-coral', 'shadow-xs');
+            b.classList.add('bg-canvas', 'border-amber-200', 'text-ink');
+          });
+          btn.classList.remove('bg-canvas', 'border-amber-200', 'text-ink');
+          btn.classList.add('bg-signature-coral', 'text-white', 'border-signature-coral', 'shadow-xs');
+
+          currentHeatF = parseInt(btn.getAttribute('data-temp-f') || '375', 10);
+          currentHeatC = parseInt(btn.getAttribute('data-temp-c') || '190', 10);
+
+          updateUnits();
+          updateSimulationPills();
+        });
+      });
+
+      updateUnits();
+      updateSimulationPills();
+      applyFilters();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initOilFinder);
+    } else {
+      initOilFinder();
+    }
+    document.addEventListener('astro:page-load', initOilFinder);
+  })();
+</script>

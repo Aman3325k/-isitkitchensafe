@@ -1,0 +1,162 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import CookingOilSmokePointFinder from '../../../components/CookingOilSmokePointFinder.astro';
+import rawData from '../../../data/cooking-oil-smoke-point-data.json';
+import type { SupportedLanguage } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+
+interface LocalePageContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  heroSub: string;
+  breadcrumbs: Array<{ label: string; href?: string }>;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocalePageContent> = {
+  es: {
+    pageTitle: "Buscador de Punto de Humo de Aceites de Cocina y Fritura Segura (28 Aceites) | IsItKitchenSafe",
+    pageDescription: "Consulta al instante el punto de humo USDA/AOCS, la estabilidad oxidativa y la temperatura segura para freír, usar freidora de aire, hornear o sellar carne con 28 aceites y grasas: aguacate, AOVE, ghee, sebo, mantequilla y linaza.",
+    badge: "USDA · AOCS Punto de Humo y Estabilidad Oxidativa",
+    h1: "Buscador de Punto de Humo de Aceites y Temperatura Segura",
+    heroSub: "Ajusta tu temperatura de cocción —desde aliños en frío (21°C) y freidora de aire (190–204°C) hasta sellar carne en hierro fundido (260°C)— y comprueba al instante cuáles de los 28 aceites y grasas son seguros, resisten aldehídos tóxicos o se queman y humean.",
+    breadcrumbs: [
+      { label: "Inicio", href: "/es/" },
+      { label: "Herramientas", href: "/es/tools/" },
+      { label: "Punto de Humo de Aceites" }
+    ]
+  },
+  pt: {
+    pageTitle: "Localizador de Ponto de Fumaça de Óleos de Cozinha e Fritura Segura (28 Óleos) | IsItKitchenSafe",
+    pageDescription: "Consulte na hora o ponto de fumaça USDA/AOCS, estabilidade oxidativa e temperatura segura para fritar, air fryer, assar ou selar carnes com 28 óleos e gorduras: abacate, azeite extravirgem, ghee, sebo, manteiga e linhaça.",
+    badge: "USDA · AOCS Ponto de Fumaça e Estabilidade",
+    h1: "Localizador de Ponto de Fumaça de Óleos e Fritura Segura",
+    heroSub: "Escolha sua temperatura de preparo — de molhos a frio (21°C) e Air Fryer (190–204°C) até selar bife em ferro fundido (260°C) — e veja na hora quais dos 28 óleos e gorduras permanecem seguros, resistem a aldeídos tóxicos ou soltam fumaça e queimam.",
+    breadcrumbs: [
+      { label: "Início", href: "/pt/" },
+      { label: "Ferramentas", href: "/pt/tools/" },
+      { label: "Ponto de Fumaça de Óleos" }
+    ]
+  },
+  'zh-cn': {
+    pageTitle: "食用油烟点与安全煎炸温度查询器（28 种常见油）| IsItKitchenSafe",
+    pageDescription: "按 USDA 与 AOCS 标准一键查询 28 种日常食用油与动物油脂（精炼牛油果油、特级初榨橄榄油、酥油、牛油、黄油、香油、亚麻籽油等）的烟点、热氧化稳定性、空气炸锅与爆炒安全温度。",
+    badge: "USDA · AOCS 食用油烟点与热稳定性查询",
+    h1: "食用油烟点与安全煎炸温度查询器",
+    heroSub: "拖动设定你的目标油温——从凉拌生食 (21°C)、空气炸锅与油炸 (190–204°C) 到铸铁锅猛火煎牛排 (260°C)——实时查看 28 种常见食用油与油脂哪些安全低醛类、哪些临近烟点、哪些会立即冒烟烧焦。",
+    breadcrumbs: [
+      { label: "首页", href: "/zh-cn/" },
+      { label: "实用工具", href: "/zh-cn/tools/" },
+      { label: "食用油烟点查询器" }
+    ]
+  },
+  ja: {
+    pageTitle: "食用油の煙点・安全な揚げ焼き温度ファインダー（全28種）| IsItKitchenSafe",
+    pageDescription: "精製アボカド油・EVOOオリーブ油・ギー・こめ油・牛脂・バター・ごま油・亜麻仁油など全28種の食用油の煙点（USDA/AOCS準拠）と酸化安定性を目標温度から即判定。揚げ物・ノンフライヤー・強火ステーキ焼きに最適。",
+    badge: "USDA・AOCS 食用油の煙点＆酸化安定性",
+    h1: "食用油の煙点・安全な揚げ焼き温度ファインダー",
+    heroSub: "ドレッシング（21°C）やノンフライヤー・揚げ物（190〜204°C）、鋳鉄パンの強火ステーキ焼き（260°C）まで目標油温を設定するだけで、全28種の食用油・油脂の安全余裕度と酸化安定性を瞬時に比較できます。",
+    breadcrumbs: [
+      { label: "ホーム", href: "/ja/" },
+      { label: "ツール", href: "/ja/tools/" },
+      { label: "食用油の煙点ファインダー" }
+    ]
+  }
+};
+
+const c = CONTENT[lang as Exclude<SupportedLanguage, 'en'>] || CONTENT.es;
+const faqs = (rawData.faqs as Record<string, Array<{ question: string; answer: string }>>)[lang] || rawData.faqs.en;
+const localizedUrl = `https://isitkitchensafe.com/${lang}/tools/cooking-oil-smoke-point-finder/`;
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": c.h1,
+  "url": localizedUrl,
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript.",
+  "description": c.pageDescription,
+  "inLanguage": lang === 'zh-cn' ? 'zh-CN' : lang,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IsItKitchenSafe",
+    "url": "https://isitkitchensafe.com"
+  }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map((faq) => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+};
+---
+
+<Layout
+  title={c.pageTitle}
+  description={c.pageDescription}
+  faqs={faqs}
+  excludeFaqSchema={true}
+  availableLocales={availableLocales}
+  lang={lang}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(webAppSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+  </Fragment>
+
+  <!-- Breadcrumbs -->
+  <div class="bg-surface-soft border-b border-hairline py-1 print:hidden">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <Breadcrumbs items={c.breadcrumbs} className="mb-0" />
+    </div>
+  </div>
+
+  <div class="max-w-[1140px] mx-auto px-6 py-10 md:py-14">
+    <!-- Hero Header -->
+    <header class="mb-10 text-center max-w-3xl mx-auto">
+      <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-signature-coral text-white mb-3">
+        {c.badge}
+      </span>
+      <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-4">
+        {c.h1}
+      </h1>
+      <p class="text-body text-[15px] md:text-[16px] leading-relaxed">
+        {c.heroSub}
+      </p>
+    </header>
+
+    <!-- Main Interactive Finder, Related Links & 5 Visible FAQs -->
+    <CookingOilSmokePointFinder lang={lang} />
+  </div>
+</Layout>

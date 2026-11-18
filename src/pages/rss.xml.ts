@@ -107,6 +107,13 @@ const curatedTools: Array<{
     date: '2026-11-18',
   },
   {
+    path: '/tools/cooking-oil-smoke-point-finder/',
+    title: 'Cooking Oil Smoke Point & Safe Frying Temperature Finder (USDA & AOCS)',
+    description:
+      'Compare USDA & AOCS smoke points, oxidative stability, and safe cooking temperatures across 28 culinary oils & fats. Interactive temperature simulator for cold dressings, sauteing, deep frying, air frying, and high-heat cast iron searing.',
+    date: '2026-11-18',
+  },
+  {
     path: '/tools/cleaner-mixing-danger-checker/',
     title: 'Kitchen Cleaner Mixing Danger Checker: Bleach, Vinegar, Ammonia & Peroxide',
     description:

@@ -216,7 +216,8 @@ const TOOLS_REGISTRY = [
   { slug: 'cleaner-mixing-danger-checker', name: 'Kitchen Cleaner Mixing Danger Checker & Chemical Reaction Guide', category: 'Consumer Kitchen Safety', component: 'CleanerMixingDangerChecker.astro', dataFile: 'cleaner-mixing-danger-checker-data.json' },
   { slug: 'microwave-wattage-converter', name: 'Microwave Wattage Time Converter (600W-1250W)', category: 'Consumer Kitchen Safety', component: 'MicrowaveWattageConverter.astro', dataFile: 'microwave-wattage-converter-data.json' },
   { slug: 'power-outage-food-safety-checker', name: 'Fridge & Freezer Power Outage Food Safety Checker', category: 'Consumer Kitchen Safety', component: 'PowerOutageFoodSafetyChecker.astro', dataFile: 'power-outage-food-safety-data.json' },
-  { slug: 'baby-bottle-safety-checker', name: 'Baby Bottle, Sippy Cup & Kids Kitchenware Safety Checker', category: 'Consumer Kitchen Safety', component: 'BabyBottleSafetyChecker.astro', dataFile: 'baby-bottle-safety-data.json' }
+  { slug: 'baby-bottle-safety-checker', name: 'Baby Bottle, Sippy Cup & Kids Kitchenware Safety Checker', category: 'Consumer Kitchen Safety', component: 'BabyBottleSafetyChecker.astro', dataFile: 'baby-bottle-safety-data.json' },
+  { slug: 'cooking-oil-smoke-point-finder', name: 'Cooking Oil Smoke Point & Safe Frying/Searing Temperature Finder', category: 'Consumer Kitchen Safety', component: 'CookingOilSmokePointFinder.astro', dataFile: 'cooking-oil-smoke-point-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -523,7 +524,8 @@ function auditDatasets() {
     'cleaner-mixing-danger-checker-data.json',
     'microwave-wattage-converter-data.json',
     'power-outage-food-safety-data.json',
-    'baby-bottle-safety-data.json'
+    'baby-bottle-safety-data.json',
+    'cooking-oil-smoke-point-data.json'
 ];
 
   const datasetStats = {};

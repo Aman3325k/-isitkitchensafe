@@ -51,6 +51,11 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+  }
+
+  img, svg {
+    max-width: 100%;
   }
 
   html, body {
@@ -251,6 +256,12 @@
   contain-intrinsic-size: 1px 600px;
 }
 
+/* Clean opt-in content-visibility utility for below-the-fold blocks */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 400px;
+}
+
 /* CJK Typography & Line-Breaking Specification */
 html:lang(zh-CN),
 html:lang(zh) {
@@ -287,10 +298,47 @@ html:lang(ja) .badge-depends {
   line-height: 1.35;
 }
 
+/* Reading Progress Bar (GPU-composited scaleX, zero CLS) */
+#reading-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #059669;
+  transform-origin: left center;
+  transform: scaleX(0);
+  z-index: 60;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.dark #reading-progress-bar {
+  background-color: #34d399;
+}
+
+/* Accessible Back-to-Top Floating Button */
+#back-to-top-container {
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+#back-to-top-btn {
+  transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#back-to-top-btn:focus-visible {
+  outline: 2px solid var(--color-link);
+  outline-offset: 3px;
+}
+
 /* Respect Motion-Sensitive Preferences (WCAG 2.1 AA) */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto !important;
+  }
+
+  #reading-progress-bar {
+    display: none !important;
   }
 
   *,
@@ -303,22 +351,171 @@ html:lang(ja) .badge-depends {
   }
 }
 
-/* Print Optimization for Kitchen Fridge Cards */
+/* Universal Print Stylesheet (Guides, Checklists, Charts & Fridge Cheat Sheets) */
 @media print {
-  header, nav, footer, #cookie-consent-banner, #back-to-top-container, .no-print, #paa-section, #related-items-section, #cross-refs-section {
+  @page {
+    margin: 1.5cm;
+  }
+
+  header,
+  nav,
+  footer,
+  .no-print,
+  .skip-link,
+  #reading-progress-bar,
+  #mobile-menu,
+  #quick-search-modal,
+  #cookie-consent-banner,
+  #back-to-top-container,
+  #back-to-top-btn,
+  #paa-section,
+  #related-items-section,
+  #cross-refs-section,
+  [role="dialog"] {
     display: none !important;
   }
-  body {
+
+  html,
+  html.dark,
+  body,
+  .dark body {
+    --color-canvas: #ffffff;
+    --color-surface-soft: #f9fafb;
+    --color-surface-strong: #f3f4f6;
+    --color-surface-dark: #ffffff;
+    --color-surface-dark-elevated: #f9fafb;
+    --color-hairline: #d1d5db;
+    --color-border-strong: #6b7280;
+    --color-ink: #111827;
+    --color-body: #111827;
+    --color-muted: #374151;
+    --color-on-dark: #111827;
     background: #ffffff !important;
     color: #111827 !important;
     font-size: 11pt !important;
+    line-height: 1.45 !important;
+    overflow: visible !important;
   }
+
+  /* Ensure virtualized off-screen sections always render in print output */
+  .item-card,
+  .content-visibility-auto,
+  .cv-auto {
+    content-visibility: visible !important;
+    contain: none !important;
+    contain-intrinsic-size: auto !important;
+  }
+
+  main,
   article {
     padding: 0 !important;
+    margin: 0 !important;
     max-width: 100% !important;
+    width: 100% !important;
+    background: #ffffff !important;
   }
+
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  .bg-surface-dark,
+  .bg-surface-dark-elevated {
+    background: #ffffff !important;
+    color: #111827 !important;
+    border: 1px solid #d1d5db !important;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: #111827 !important;
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  p, li {
+    color: #111827 !important;
+    orphans: 3;
+    widows: 3;
+  }
+
+  a {
+    color: #111827 !important;
+    text-decoration: none;
+  }
+
+  /* Protect cards, verdict boxes, tables, and callouts from splitting mid-page */
+  .quick-answer,
+  .item-card,
+  .verdict-card,
+  [data-print-card],
+  blockquote,
+  figure,
+  pre,
+  details {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
   .quick-answer {
+    background: #ffffff !important;
     border: 2px solid #111827 !important;
+  }
+
+  .badge,
+  .badge-yes,
+  .badge-no,
+  .badge-depends,
+  .badge-time {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    border: 1.5px solid #111827 !important;
+  }
+
+  /* Clean ink-saving tables */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    break-inside: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tr, th, td {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  th, td {
+    border: 1px solid #d1d5db !important;
+    color: #111827 !important;
+    background: #ffffff !important;
+    padding: 6pt 8pt !important;
+  }
+
+  th {
+    background: #f3f4f6 !important;
+    font-weight: 600 !important;
+  }
+
+  /* Clarify <details> accordions (auto-opened via beforeprint hook) */
+  details {
+    border: 1px solid #d1d5db !important;
+    background: #ffffff !important;
+    padding: 6pt 8pt !important;
+    margin-bottom: 6pt !important;
+  }
+
+  details summary {
+    font-weight: 600 !important;
+    color: #111827 !important;
+    list-style: none;
+  }
+
+  details summary::-webkit-details-marker {
+    display: none;
   }
 }
 
