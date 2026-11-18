@@ -217,7 +217,9 @@ const TOOLS_REGISTRY = [
   { slug: 'microwave-wattage-converter', name: 'Microwave Wattage Time Converter (600W-1250W)', category: 'Consumer Kitchen Safety', component: 'MicrowaveWattageConverter.astro', dataFile: 'microwave-wattage-converter-data.json' },
   { slug: 'power-outage-food-safety-checker', name: 'Fridge & Freezer Power Outage Food Safety Checker', category: 'Consumer Kitchen Safety', component: 'PowerOutageFoodSafetyChecker.astro', dataFile: 'power-outage-food-safety-data.json' },
   { slug: 'baby-bottle-safety-checker', name: 'Baby Bottle, Sippy Cup & Kids Kitchenware Safety Checker', category: 'Consumer Kitchen Safety', component: 'BabyBottleSafetyChecker.astro', dataFile: 'baby-bottle-safety-data.json' },
-  { slug: 'cooking-oil-smoke-point-finder', name: 'Cooking Oil Smoke Point & Safe Frying/Searing Temperature Finder', category: 'Consumer Kitchen Safety', component: 'CookingOilSmokePointFinder.astro', dataFile: 'cooking-oil-smoke-point-data.json' }
+  { slug: 'cooking-oil-smoke-point-finder', name: 'Cooking Oil Smoke Point & Safe Frying/Searing Temperature Finder', category: 'Consumer Kitchen Safety', component: 'CookingOilSmokePointFinder.astro', dataFile: 'cooking-oil-smoke-point-data.json' },
+  { slug: 'cast-iron-seasoning-troubleshooter', name: 'Cast Iron & Carbon Steel Seasoning & Rust Troubleshooter', category: 'Consumer Kitchen Safety', component: 'CastIronSeasoningTroubleshooter.astro', dataFile: 'cast-iron-seasoning-troubleshooter-data.json' },
+  { slug: 'fridge-organization-zone-planner', name: 'Interactive Fridge Organization & Safe Shelf-Zone Planner', category: 'Consumer Kitchen Safety', component: 'FridgeOrganizationZonePlanner.astro', dataFile: 'fridge-organization-zone-planner-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -525,7 +527,9 @@ function auditDatasets() {
     'microwave-wattage-converter-data.json',
     'power-outage-food-safety-data.json',
     'baby-bottle-safety-data.json',
-    'cooking-oil-smoke-point-data.json'
+    'cooking-oil-smoke-point-data.json',
+    'cast-iron-seasoning-troubleshooter-data.json',
+    'fridge-organization-zone-planner-data.json'
 ];
 
   const datasetStats = {};
@@ -905,7 +909,7 @@ function runMasterBuild() {
   let buildSuccess = false;
 
   try {
-    buildOutput = execSync('npm run build', { cwd: PROJECT_ROOT, encoding: 'utf8', stdio: 'pipe', maxBuffer: 50 * 1024 * 1024 });
+    buildOutput = execSync('npm run build', { cwd: PROJECT_ROOT, encoding: 'utf8', stdio: 'pipe', maxBuffer: 50 * 1024 * 1024, env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=8192' } });
     buildSuccess = true;
   } catch (err) {
     buildOutput = (err.stdout || '') + '\n' + (err.stderr || '');

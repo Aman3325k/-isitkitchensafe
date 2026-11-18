@@ -114,6 +114,20 @@ const curatedTools: Array<{
     date: '2026-11-18',
   },
   {
+    path: '/tools/cast-iron-seasoning-troubleshooter/',
+    title: 'Cast Iron & Carbon Steel Seasoning & Rust Troubleshooter',
+    description:
+      'Diagnose sticky seasoning, flaking black flecks, orange surface rust, acid stripping, and fishy smell. Step-by-step restoration protocols with oven temperature and grapeseed/crisco polymerization guides.',
+    date: '2026-11-18',
+  },
+  {
+    path: '/tools/fridge-organization-zone-planner/',
+    title: 'Interactive Refrigerator Organization & Safe Shelf-Zone Planner (USDA & FDA)',
+    description:
+      'USDA top-to-bottom refrigerator shelf zone mapper to prevent cross-contamination. Drag-and-drop or select ready-to-eat foods, raw poultry, meats, produce crispers, and milk door alerts.',
+    date: '2026-11-18',
+  },
+  {
     path: '/tools/cleaner-mixing-danger-checker/',
     title: 'Kitchen Cleaner Mixing Danger Checker: Bleach, Vinegar, Ammonia & Peroxide',
     description:

@@ -1,0 +1,1706 @@
+---
+import rawData from '../data/fridge-organization-zone-planner-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+import { useTranslatedPath } from '../i18n/utils';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+const translatePath = useTranslatedPath(lang);
+
+const leftoverUrl = translatePath('/tools/leftover-shelf-life-calculator/');
+const powerOutageUrl = translatePath('/tools/power-outage-food-safety-checker/');
+const thawingUrl = translatePath('/tools/meat-thawing-calculator/');
+const methodologyUrl = translatePath('/methodology/');
+const allToolsUrl = translatePath('/tools/');
+
+type EthyleneRole = 'producer' | 'sensitive' | 'neutral';
+
+interface LocalizedZone {
+  id: string;
+  icon: string;
+  isFridge: boolean;
+  tempF: string;
+  tempC: string;
+  humidityKey: string;
+  tone: string;
+  fdaTier: number;
+  name: string;
+  shortName: string;
+  tempSub: string;
+  humidityLabel: string;
+  ruleTitle: string;
+  safetyRule: string;
+  neverPutHere: string;
+  bestFor: string;
+  itemCount: number;
+}
+
+interface LocalizedFood {
+  id: string;
+  icon: string;
+  zoneId: string;
+  ethylene: EthyleneRole;
+  quickChip: boolean;
+  name: string;
+  aliases: string;
+  shelfLife: string;
+  mistake: string;
+  container: string;
+}
+
+const localizedFoods: LocalizedFood[] = rawData.foods.map((f) => {
+  const tr = (f.i18n as Record<string, any>)[lang] || f.i18n.en;
+  return {
+    id: f.id,
+    icon: f.icon,
+    zoneId: f.zoneId,
+    ethylene: f.ethylene as EthyleneRole,
+    quickChip: Boolean(f.quickChip),
+    name: tr.name,
+    aliases: tr.aliases,
+    shelfLife: tr.shelfLife,
+    mistake: tr.mistake,
+    container: tr.container
+  };
+});
+
+const localizedZones: LocalizedZone[] = rawData.zones.map((z) => {
+  const tr = (z.i18n as Record<string, any>)[lang] || z.i18n.en;
+  const itemCount = localizedFoods.filter((f) => f.zoneId === z.id).length;
+  return {
+    id: z.id,
+    icon: z.icon,
+    isFridge: Boolean(z.isFridge),
+    tempF: z.tempF,
+    tempC: z.tempC,
+    humidityKey: z.humidityKey,
+    tone: z.tone,
+    fdaTier: z.fdaTier,
+    name: tr.name,
+    shortName: tr.shortName,
+    tempSub: tr.tempSub,
+    humidityLabel: tr.humidityLabel,
+    ruleTitle: tr.ruleTitle,
+    safetyRule: tr.safetyRule,
+    neverPutHere: tr.neverPutHere,
+    bestFor: tr.bestFor,
+    itemCount
+  };
+});
+
+const zoneMap = new Map(localizedZones.map((z) => [z.id, z]));
+const quickChipFoods = localizedFoods.filter((f) => f.quickChip);
+
+const localizedFaqs: Array<{ question: string; answer: string }> =
+  (rawData.faqs as Record<string, Array<{ question: string; answer: string }>>)[lang] ||
+  rawData.faqs.en;
+
+interface UiDict {
+  ariaLabel: string;
+  searchLabel: string;
+  searchPlaceholder: string;
+  clearSearch: string;
+  quickSearchLabel: string;
+  tempUnitLabel: string;
+  mapHeading: string;
+  mapSub: string;
+  usdaTargetF: string;
+  usdaTargetC: string;
+  showAllZonesBtn: string;
+  fridgeInteriorLabel: string;
+  topToBottomLabel: string;
+  fridgeDoorLabel: string;
+  doorPocket1: string;
+  doorPocket2: string;
+  doorPocket3: string;
+  doorWarningMicro: string;
+  dripTrayMicro: string;
+  ventClosedMicro: string;
+  ventOpenMicro: string;
+  pantryBannerTag: string;
+  matchCountSuffix: string;
+  itemsWord: string;
+  inspectorBadgeFridge: string;
+  inspectorBadgePantry: string;
+  inspectorSafetyLabel: string;
+  inspectorNeverLabel: string;
+  inspectorBestForLabel: string;
+  inspectorItemsInZone: string;
+  copyCheatSheetBtn: string;
+  copiedCheatSheetBtn: string;
+  printMapBtn: string;
+  resetBtn: string;
+  groceryListHeadingAll: string;
+  groceryListHeadingZone: string;
+  groceryListHeadingSearch: string;
+  ethyleneFilterLabel: string;
+  ethAll: string;
+  ethProducer: string;
+  ethSensitive: string;
+  ethNeutral: string;
+  ethBadgeProducer: string;
+  ethBadgeSensitive: string;
+  ethBadgeNeutral: string;
+  mistakeLabel: string;
+  containerLabel: string;
+  shelfLifeLabel: string;
+  noResultsMsg: string;
+  scienceHeading: string;
+  scienceSub: string;
+  rule1Title: string;
+  rule1Body: string;
+  rule2Title: string;
+  rule2Body: string;
+  rule3Title: string;
+  rule3Body: string;
+  relatedHeading: string;
+  relatedLeftoverTag: string;
+  relatedLeftoverTitle: string;
+  relatedLeftoverDesc: string;
+  relatedOutageTag: string;
+  relatedOutageTitle: string;
+  relatedOutageDesc: string;
+  relatedThawTag: string;
+  relatedThawTitle: string;
+  relatedThawDesc: string;
+  methodologyStripTitle: string;
+  methodologyStripPrefix: string;
+  methodologyLabel: string;
+  allToolsLabel: string;
+  faqTitle: string;
+  copyHeader: string;
+  copyTargetLineF: string;
+  copyTargetLineC: string;
+  copyNeverPrefix: string;
+  copyFoodsPrefix: string;
+}
+
+const UI: Record<SupportedLanguage, UiDict> = {
+  en: {
+    ariaLabel: 'Interactive Fridge Organization and Safe Shelf-Zone Planner',
+    searchLabel: 'Instant Grocery Lookup — Where does it go?',
+    searchPlaceholder: 'Search any grocery (e.g., eggs, raw chicken, milk, tomatoes, strawberries, potatoes, apples)...',
+    clearSearch: 'Clear',
+    quickSearchLabel: 'Popular lookups:',
+    tempUnitLabel: 'Temperature Unit',
+    mapHeading: 'Interactive 6-Zone Fridge Map + Counter/Pantry',
+    mapSub: 'Click any shelf, crisper drawer, or door pocket to inspect its safe temperature, drip rule, and matching groceries.',
+    usdaTargetF: 'USDA Fridge Target: 35–38°F (≤40°F) · Freezer: 0°F',
+    usdaTargetC: 'USDA Fridge Target: 2–3°C (≤4°C) · Freezer: -18°C',
+    showAllZonesBtn: 'All 7 Zones (28)',
+    fridgeInteriorLabel: 'Main Cold Cabinet',
+    topToBottomLabel: 'Top ↓ Bottom',
+    fridgeDoorLabel: 'Hinged Door',
+    doorPocket1: 'Butter (Covered)',
+    doorPocket2: 'Ketchup / Soy',
+    doorPocket3: 'Jams / Pickles',
+    doorWarningMicro: 'Warmest zone · NO milk, eggs, or raw meat!',
+    dripTrayMicro: 'Rimmed drip tray · Raw poultry at very bottom',
+    ventClosedMicro: 'Vent Closed · Ethylene-Sensitive',
+    ventOpenMicro: 'Vent Open · Ethylene Producers',
+    pantryBannerTag: 'Do NOT Refrigerate!',
+    matchCountSuffix: 'match',
+    itemsWord: 'items',
+    inspectorBadgeFridge: 'Inside Refrigerator Zone',
+    inspectorBadgePantry: 'Keep Out of Refrigerator',
+    inspectorSafetyLabel: 'USDA / FDA Safety Rule',
+    inspectorNeverLabel: 'Never Store Here',
+    inspectorBestForLabel: 'Best Foods for This Zone',
+    inspectorItemsInZone: 'Mapped groceries in this zone',
+    copyCheatSheetBtn: 'Copy Fridge Zone Cheat Sheet',
+    copiedCheatSheetBtn: 'Cheat Sheet Copied ✓',
+    printMapBtn: 'Print Fridge Door Map',
+    resetBtn: 'Reset',
+    groceryListHeadingAll: 'All 28 Everyday Groceries by Optimal Zone',
+    groceryListHeadingZone: 'Zone Groceries',
+    groceryListHeadingSearch: 'Lookup Results',
+    ethyleneFilterLabel: 'Ethylene Filter:',
+    ethAll: 'All',
+    ethProducer: 'Ethylene Producers',
+    ethSensitive: 'Ethylene-Sensitive',
+    ethNeutral: 'Neutral',
+    ethBadgeProducer: 'Ethylene Producer',
+    ethBadgeSensitive: 'Ethylene-Sensitive',
+    ethBadgeNeutral: 'Ethylene-Neutral',
+    mistakeLabel: '#1 Storage Mistake',
+    containerLabel: 'Best Container / Prep',
+    shelfLifeLabel: 'USDA Shelf Life',
+    noResultsMsg: 'No groceries match your search or filter. Try clearing the search box or switching to "All".',
+    scienceHeading: '3 Core Rules of Safe Fridge Organization (USDA, FDA & Produce Science)',
+    scienceSub: 'Apply these evidence-based principles to prevent cross-contamination drips and double fresh produce life.',
+    rule1Title: 'FDA Top-to-Bottom Cooking-Temp Hierarchy',
+    rule1Body: 'Arrange shelves from ready-to-eat foods at the top down to whole seafood/beef (145°F / 63°C), ground meats (160°F / 71°C), and raw poultry (165°F / 74°C) on a rimmed tray at the very bottom.',
+    rule2Title: 'Separate Ethylene Producers from Sensitive Greens',
+    rule2Body: 'Apples, pears, stone fruit, avocados, and melons emit natural ethylene gas that turns spinach, lettuce, broccoli, carrots, and cucumbers yellow, bitter, or slimy. Keep vents open for fruits and closed for greens.',
+    rule3Title: 'Verify ≤40°F (4°C) & Keep 25% Open Airflow',
+    rule3Body: 'Overstuffing shelves blocks cold air vents and creates warm pockets >40°F (4°C). Fill your fridge to about 75% capacity and confirm middle-shelf temperature with an appliance thermometer.',
+    relatedHeading: 'Related Food Storage & Kitchen Safety Tools',
+    relatedLeftoverTag: 'Fridge Shelf Life',
+    relatedLeftoverTitle: 'Leftover Shelf Life Calculator →',
+    relatedLeftoverDesc: 'Look up exact USDA refrigerator and freezer storage days for cooked meats, rice, soups, and meal prep.',
+    relatedOutageTag: 'Blackout Triage',
+    relatedOutageTitle: 'Power Outage Food Safety Checker →',
+    relatedOutageDesc: 'Check which fridge and freezer items to keep, cook, or discard after a power outage using USDA 4h/48h rules.',
+    relatedThawTag: 'Safe Defrosting',
+    relatedThawTitle: 'Meat Thawing Time Calculator →',
+    relatedThawDesc: 'Calculate safe bottom-shelf fridge and cold-water defrost times for steaks, chicken, and whole turkeys.',
+    methodologyStripTitle: 'Grounded in USDA FSIS, FDA Food Code & Postharvest Produce Science',
+    methodologyStripPrefix: 'Every temperature range, drip-hierarchy rule, and shelf-life figure is verified against public-health standards. Review our citations in',
+    methodologyLabel: 'Methodology',
+    allToolsLabel: 'All Kitchen Tools →',
+    faqTitle: 'Frequently Asked Questions: Fridge Organization & Food Safety',
+    copyHeader: 'IsItKitchenSafe — USDA & FDA Fridge Organization Cheat Sheet',
+    copyTargetLineF: 'Target Temps: Fridge 35–38°F (Never >40°F) | Freezer 0°F (-18°C)',
+    copyTargetLineC: 'Target Temps: Fridge 2–3°C (Never >4°C) | Freezer -18°C (0°F)',
+    copyNeverPrefix: 'NEVER HERE',
+    copyFoodsPrefix: 'Best foods'
+  },
+  es: {
+    ariaLabel: 'Planificador Interactivo de Organización de Nevera y Zonas Seguras',
+    searchLabel: 'Buscador Instantáneo — ¿Dónde va cada alimento?',
+    searchPlaceholder: 'Busca un alimento (ej. huevos, pollo crudo, leche, tomates, fresas, papas, manzanas)...',
+    clearSearch: 'Borrar',
+    quickSearchLabel: 'Búsquedas rápidas:',
+    tempUnitLabel: 'Unidad de Temperatura',
+    mapHeading: 'Mapa Interactivo de 6 Zonas de Nevera + Encimera',
+    mapSub: 'Haz clic en cualquier estante, cajón o puerta para ver su temperatura segura, regla antigoteo y alimentos ideales.',
+    usdaTargetF: 'Meta USDA Nevera: 35–38°F (≤40°F) · Congelador: 0°F',
+    usdaTargetC: 'Meta USDA Nevera: 2–3°C (≤4°C) · Congelador: -18°C',
+    showAllZonesBtn: 'Ver las 7 Zonas (28)',
+    fridgeInteriorLabel: 'Interior Principal',
+    topToBottomLabel: 'Arriba ↓ Abajo',
+    fridgeDoorLabel: 'Puerta',
+    doorPocket1: 'Mantequilla',
+    doorPocket2: 'Kétchup / Soja',
+    doorPocket3: 'Mermeladas',
+    doorWarningMicro: 'Zona más cálida · ¡NO leche, huevos ni carne cruda!',
+    dripTrayMicro: 'Bandeja antigoteo · Pollo crudo hasta abajo',
+    ventClosedMicro: 'Rejilla Cerrada · Sensibles al Etileno',
+    ventOpenMicro: 'Rejilla Abierta · Productores de Etileno',
+    pantryBannerTag: '¡NO Refrigerar!',
+    matchCountSuffix: 'coincid.',
+    itemsWord: 'alimentos',
+    inspectorBadgeFridge: 'Zona Interior de Nevera',
+    inspectorBadgePantry: 'Mantener Fuera de la Nevera',
+    inspectorSafetyLabel: 'Regla de Seguridad USDA / FDA',
+    inspectorNeverLabel: 'Nunca Guardar Aquí',
+    inspectorBestForLabel: 'Alimentos Ideales en Esta Zona',
+    inspectorItemsInZone: 'Alimentos asignados a esta zona',
+    copyCheatSheetBtn: 'Copiar Guía Rápida de Zonas',
+    copiedCheatSheetBtn: 'Guía Copiada ✓',
+    printMapBtn: 'Imprimir Mapa para la Nevera',
+    resetBtn: 'Restablecer',
+    groceryListHeadingAll: 'Los 28 Alimentos Cotidianos por Zona Óptima',
+    groceryListHeadingZone: 'Alimentos de Esta Zona',
+    groceryListHeadingSearch: 'Resultados de Búsqueda',
+    ethyleneFilterLabel: 'Filtro de Etileno:',
+    ethAll: 'Todos',
+    ethProducer: 'Productores de Etileno',
+    ethSensitive: 'Sensibles al Etileno',
+    ethNeutral: 'Neutros',
+    ethBadgeProducer: 'Produce Etileno',
+    ethBadgeSensitive: 'Sensible al Etileno',
+    ethBadgeNeutral: 'Etileno Neutro',
+    mistakeLabel: 'Error #1 de Almacenamiento',
+    containerLabel: 'Mejor Envase / Preparación',
+    shelfLifeLabel: 'Duración USDA',
+    noResultsMsg: 'Ningún alimento coincide con tu búsqueda o filtro. Limpia la búsqueda o elige "Todos".',
+    scienceHeading: '3 Reglas Clave de Organización Segura (USDA, FDA y Ciencia de Etileno)',
+    scienceSub: 'Aplica estos principios para evitar la contaminación cruzada y duplicar la frescura de frutas y verduras.',
+    rule1Title: 'Jerarquía FDA de Arriba hacia Abajo',
+    rule1Body: 'Coloca listos para comer arriba, luego pescados y filetes enteros (63°C), carne molida (71°C) y pollo crudo (74°C) en una bandeja con borde hasta el fondo.',
+    rule2Title: 'Separa Productores de Etileno de Hojas Verdes',
+    rule2Body: 'Manzanas, peras, duraznos, aguacates y melones liberan gas etileno que amarillea y pudre espinacas, lechuga, brócoli y pepinos. Abre la rejilla para frutas y ciérrala para verduras.',
+    rule3Title: 'Verifica ≤4°C (40°F) y Deja 25% de Circulación',
+    rule3Body: 'Sobrecargar los estantes bloquea el flujo de aire frío y crea bolsas tibias >4°C. Llena hasta el 75% y comprueba con un termómetro en el estante central.',
+    relatedHeading: 'Herramientas Relacionadas de Conservación y Seguridad',
+    relatedLeftoverTag: 'Conservación en Nevera',
+    relatedLeftoverTitle: 'Calculadora de Duración de Sobras →',
+    relatedLeftoverDesc: 'Consulta los días exactos USDA en nevera y congelador para carnes cocidas, arroz, sopas y sobras.',
+    relatedOutageTag: 'Triaje en Apagones',
+    relatedOutageTitle: 'Seguridad Alimentaria en Cortes de Luz →',
+    relatedOutageDesc: 'Comprueba qué alimentos conservar, cocinar o desechar tras un apagón con las reglas USDA de 4h/48h.',
+    relatedThawTag: 'Descongelado Seguro',
+    relatedThawTitle: 'Calculadora de Descongelado de Carne →',
+    relatedThawDesc: 'Calcula horas seguras de descongelado en el estante inferior y agua fría para filetes, pollo y pavo.',
+    methodologyStripTitle: 'Basado en USDA FSIS, Código Alimentario FDA y Ciencia Poscosecha',
+    methodologyStripPrefix: 'Cada rango de temperatura y regla de organización está auditado según estándares oficiales. Revisa las fuentes en',
+    methodologyLabel: 'Metodología',
+    allToolsLabel: 'Todas las Herramientas →',
+    faqTitle: 'Preguntas Frecuentes: Organización Segura de la Nevera',
+    copyHeader: 'IsItKitchenSafe — Guía de Zonas de Nevera (USDA & FDA)',
+    copyTargetLineF: 'Temperaturas Meta: Nevera 35–38°F (Nunca >40°F) | Congelador 0°F',
+    copyTargetLineC: 'Temperaturas Meta: Nevera 2–3°C (Nunca >4°C) | Congelador -18°C',
+    copyNeverPrefix: 'NUNCA AQUÍ',
+    copyFoodsPrefix: 'Alimentos ideales'
+  },
+  pt: {
+    ariaLabel: 'Planejador Interativo de Organização da Geladeira e Zonas Seguras',
+    searchLabel: 'Busca Instantânea — Onde guardar cada alimento?',
+    searchPlaceholder: 'Busque um alimento (ex.: ovos, frango cru, leite, tomates, morangos, batatas, maçãs)...',
+    clearSearch: 'Limpar',
+    quickSearchLabel: 'Buscas populares:',
+    tempUnitLabel: 'Unidade de Temperatura',
+    mapHeading: 'Mapa Interativo de 6 Zonas da Geladeira + Bancada',
+    mapSub: 'Clique em qualquer prateleira, gaveta ou porta para ver a temperatura ideal, regra antigotejamento e alimentos.',
+    usdaTargetF: 'Meta USDA Geladeira: 35–38°F (≤40°F) · Freezer: 0°F',
+    usdaTargetC: 'Meta USDA Geladeira: 2–3°C (≤4°C) · Freezer: -18°C',
+    showAllZonesBtn: 'Todas as 7 Zonas (28)',
+    fridgeInteriorLabel: 'Interior Principal',
+    topToBottomLabel: 'Topo ↓ Fundo',
+    fridgeDoorLabel: 'Porta',
+    doorPocket1: 'Manteiga',
+    doorPocket2: 'Ketchup / Shoyu',
+    doorPocket3: 'Geleias / Picles',
+    doorWarningMicro: 'Zona mais quente · NÃO leite, ovos ou carne crua!',
+    dripTrayMicro: 'Travessa com borda · Frango cru bem embaixo',
+    ventClosedMicro: 'Abertura Fechada · Sensíveis ao Etileno',
+    ventOpenMicro: 'Abertura Aberta · Produtores de Etileno',
+    pantryBannerTag: 'NÃO Refrigerar!',
+    matchCountSuffix: 'itens',
+    itemsWord: 'itens',
+    inspectorBadgeFridge: 'Zona Interna da Geladeira',
+    inspectorBadgePantry: 'Manter Fora da Geladeira',
+    inspectorSafetyLabel: 'Regra de Segurança USDA / FDA',
+    inspectorNeverLabel: 'Nunca Guarde Aqui',
+    inspectorBestForLabel: 'Melhores Alimentos para Esta Zona',
+    inspectorItemsInZone: 'Alimentos mapeados nesta zona',
+    copyCheatSheetBtn: 'Copiar Guia Rápido de Zonas',
+    copiedCheatSheetBtn: 'Guia Copiado ✓',
+    printMapBtn: 'Imprimir Mapa para a Geladeira',
+    resetBtn: 'Redefinir',
+    groceryListHeadingAll: 'Todos os 28 Alimentos por Zona Ideal',
+    groceryListHeadingZone: 'Alimentos Desta Zona',
+    groceryListHeadingSearch: 'Resultados da Busca',
+    ethyleneFilterLabel: 'Filtro de Etileno:',
+    ethAll: 'Todos',
+    ethProducer: 'Produtores de Etileno',
+    ethSensitive: 'Sensíveis ao Etileno',
+    ethNeutral: 'Neutros',
+    ethBadgeProducer: 'Produz Etileno',
+    ethBadgeSensitive: 'Sensível ao Etileno',
+    ethBadgeNeutral: 'Etileno Neutro',
+    mistakeLabel: 'Erro nº 1 de Armazenamento',
+    containerLabel: 'Melhor Recipiente / Preparo',
+    shelfLifeLabel: 'Validade USDA',
+    noResultsMsg: 'Nenhum alimento corresponde à busca ou filtro. Limpe a pesquisa ou selecione "Todos".',
+    scienceHeading: '3 Regras Essenciais de Organização Segura (USDA, FDA e Etileno)',
+    scienceSub: 'Aplique estes princípios para evitar contaminação cruzada e dobrar a durabilidade de frutas e verduras.',
+    rule1Title: 'Hierarquia FDA de Cima para Baixo',
+    rule1Body: 'Deixe prontos para consumo no topo, seguidos de peixes e bifes (63°C), carne moída (71°C) e frango cru (74°C) em travessa com borda na prateleira mais baixa.',
+    rule2Title: 'Separe Produtores de Etileno das Folhas Verdes',
+    rule2Body: 'Maçãs, peras, pêssegos, abacates e melões soltam gás etileno que amarela e estraga espinafre, alface, brócolis e pepinos. Deixe a abertura aberta para frutas e fechada para verduras.',
+    rule3Title: 'Confira ≤4°C (40°F) e Mantenha 25% de Espaço Livre',
+    rule3Body: 'Geladeira lotada bloqueia o ar frio e cria zonas acima de 4°C. Preencha até ~75% da capacidade e verifique com um termômetro na prateleira do meio.',
+    relatedHeading: 'Ferramentas Relacionadas de Conservação e Segurança',
+    relatedLeftoverTag: 'Validade na Geladeira',
+    relatedLeftoverTitle: 'Calculadora de Validade de Sobras →',
+    relatedLeftoverDesc: 'Veja os dias exatos na geladeira e no freezer para carnes cozidas, arroz, sopas e marmitas.',
+    relatedOutageTag: 'Triagem em Apagão',
+    relatedOutageTitle: 'Segurança Alimentar em Falta de Energia →',
+    relatedOutageDesc: 'Descubra o que manter, cozinhar ou descartar após queda de luz pelas regras USDA de 4h/48h.',
+    relatedThawTag: 'Descongelamento Seguro',
+    relatedThawTitle: 'Calculadora de Descongelamento de Carnes →',
+    relatedThawDesc: 'Calcule o tempo seguro na prateleira inferior e em água fria para bifes, frango e peru.',
+    methodologyStripTitle: 'Baseado nos Padrões USDA FSIS, Código FDA e Ciência Pós-Colheita',
+    methodologyStripPrefix: 'Cada faixa de temperatura e regra de armazenamento segue referências oficiais de saúde pública. Confira nossa',
+    methodologyLabel: 'Metodologia',
+    allToolsLabel: 'Todas as Ferramentas →',
+    faqTitle: 'Perguntas Frequentes: Organização Segura da Geladeira',
+    copyHeader: 'IsItKitchenSafe — Guia de Zonas da Geladeira (USDA & FDA)',
+    copyTargetLineF: 'Alvo: Geladeira 35–38°F (Nunca >40°F) | Freezer 0°F',
+    copyTargetLineC: 'Alvo: Geladeira 2–3°C (Nunca >4°C) | Freezer -18°C',
+    copyNeverPrefix: 'NUNCA AQUI',
+    copyFoodsPrefix: 'Melhores alimentos'
+  },
+  'zh-cn': {
+    ariaLabel: '互动冰箱分区收纳与安全温区规划器',
+    searchLabel: '食材秒查 —— 它应该放在冰箱哪一层？',
+    searchPlaceholder: '搜索任意食材（如：鸡蛋、生鸡肉、牛奶、番茄、草莓、土豆、苹果、菠菜）...',
+    clearSearch: '清空',
+    quickSearchLabel: '热门速查：',
+    tempUnitLabel: '温度单位',
+    mapHeading: '互动 6 大冰箱温区图谱 + 常温阴凉区',
+    mapSub: '点击任意隔板、果蔬抽屉或门架，立即查看安全温度范围、防滴漏原则与适配食材。',
+    usdaTargetF: 'USDA 建议温度：冷藏 35–38°F (≤40°F) · 冷冻 0°F',
+    usdaTargetC: 'USDA 建议温度：冷藏 2–3°C (≤4°C) · 冷冻 -18°C',
+    showAllZonesBtn: '全部 7 大分区 (28)',
+    fridgeInteriorLabel: '冷藏主箱体',
+    topToBottomLabel: '自上 ↓ 而下',
+    fridgeDoorLabel: '冰箱门架',
+    doorPocket1: '带盖黄油',
+    doorPocket2: '番茄酱 / 酱油',
+    doorPocket3: '果酱 / 泡菜',
+    doorWarningMicro: '最暖波动区 · 禁放牛奶、鸡蛋与生肉！',
+    dripTrayMicro: '配防漏托盘 · 生禽肉放最底',
+    ventClosedMicro: '关阀锁水 · 乙烯敏感菜',
+    ventOpenMicro: '开阀透气 · 产乙烯水果',
+    pantryBannerTag: '切勿放冰箱！',
+    matchCountSuffix: '项匹配',
+    itemsWord: '类食材',
+    inspectorBadgeFridge: '冰箱冷藏内部分区',
+    inspectorBadgePantry: '请勿放入冰箱冷藏',
+    inspectorSafetyLabel: 'USDA / FDA 核心安全法则',
+    inspectorNeverLabel: '严禁放置以下食材',
+    inspectorBestForLabel: '本区最佳适配食材',
+    inspectorItemsInZone: '本区收录食材数量',
+    copyCheatSheetBtn: '复制冰箱分区速查表',
+    copiedCheatSheetBtn: '速查表已复制 ✓',
+    printMapBtn: '打印贴门分区图',
+    resetBtn: '重置',
+    groceryListHeadingAll: '28 类日常食材最佳存放分区一览',
+    groceryListHeadingZone: '本分区食材清单',
+    groceryListHeadingSearch: '食材速查结果',
+    ethyleneFilterLabel: '乙烯属性筛选：',
+    ethAll: '全部',
+    ethProducer: '释放乙烯水果',
+    ethSensitive: '乙烯敏感蔬菜',
+    ethNeutral: '乙烯中性',
+    ethBadgeProducer: '释放乙烯气体',
+    ethBadgeSensitive: '对乙烯高度敏感',
+    ethBadgeNeutral: '乙烯中性',
+    mistakeLabel: '头号存放误区',
+    containerLabel: '推荐容器与保鲜处理',
+    shelfLifeLabel: 'USDA 安全保鲜期',
+    noResultsMsg: '未找到匹配的食材，请清空搜索词或切换为“全部”。',
+    scienceHeading: '科学冰箱收纳 3 大黄金法则（USDA、FDA 与果蔬乙烯科学）',
+    scienceSub: '掌握以下循证规则，既能杜绝生熟交叉污染，又能让鲜蔬保鲜期延长一倍。',
+    rule1Title: 'FDA 从上到下安全烹调温度排序',
+    rule1Body: '由上至下依次放即食熟食、生海鲜/整块牛排 (63°C)、生肉馅 (71°C)，最底层用带边托盘放生鸡鸭禽类 (74°C)，杜绝血水滴漏。',
+    rule2Title: '严格隔离“产乙烯水果”与“敏感绿叶菜”',
+    rule2Body: '苹果、梨、桃李、牛油果和甜瓜释放的乙烯会让菠菜、生菜、西兰花、胡萝卜和黄瓜迅速发黄烂叶；水果开阀透气，绿叶菜关阀锁水。',
+    rule3Title: '确保 ≤4°C (40°F) 并预留 25% 空气流通空间',
+    rule3Body: '冰箱塞得太满会堵住冷风口形成 >4°C 局部热区。建议最多装满 75%，并在中层放一支独立温度计定期核对。',
+    relatedHeading: '相关冰箱保鲜与食品安全工具',
+    relatedLeftoverTag: '剩菜保存期限',
+    relatedLeftoverTitle: '剩菜冰箱保质期计算器 →',
+    relatedLeftoverDesc: '速查熟肉、米饭、浓汤和备餐在冷藏室与冷冻室的 USDA 准确保存天数。',
+    relatedOutageTag: '停电应急排查',
+    relatedOutageTitle: '停电冰箱食品安全排查器 →',
+    relatedOutageDesc: '依据 USDA 4 小时冷藏 / 48 小时冷冻规则，一键判定停电后哪些食物可留可弃。',
+    relatedThawTag: '安全解冻定时',
+    relatedThawTitle: '肉类安全解冻时间计算器 →',
+    relatedThawDesc: '精准计算牛排、鸡肉与整只火鸡在冰箱最底层与冷水中的安全解冻小时数。',
+    methodologyStripTitle: '依据 USDA FSIS、FDA 食品法典与采后果蔬科学构建',
+    methodologyStripPrefix: '所有温区范围、防滴漏层级与保鲜天数均核对官方公共卫生标准，详见我们的',
+    methodologyLabel: '评估方法论',
+    allToolsLabel: '全部实用工具 →',
+    faqTitle: '冰箱分区收纳与食品安全常见问题解答',
+    copyHeader: 'IsItKitchenSafe — 冰箱科学分区速查表 (USDA & FDA)',
+    copyTargetLineF: '目标温度：冷藏 35–38°F (严禁 >40°F) | 冷冻 0°F',
+    copyTargetLineC: '目标温度：冷藏 2–3°C (严禁 >4°C) | 冷冻 -18°C',
+    copyNeverPrefix: '禁放提醒',
+    copyFoodsPrefix: '推荐食材'
+  },
+  ja: {
+    ariaLabel: '冷蔵庫ゾーン別収納＆食品安全プランナー',
+    searchLabel: '食材スピード検索 — どこにしまうのが正解？',
+    searchPlaceholder: '食材名を入力（例：卵、鶏肉、牛乳、トマト、いちご、じゃがいも、リンゴ、ほうれん草）...',
+    clearSearch: 'クリア',
+    quickSearchLabel: 'よくある検索：',
+    tempUnitLabel: '温度単位',
+    mapHeading: 'インタラクティブ冷蔵庫6ゾーン図＋常温・冷暗所',
+    mapSub: '各棚・野菜室・ドアポケットをクリックすると、適正温度・交差汚染防止ルール・対象食材を確認できます。',
+    usdaTargetF: 'USDA基準：冷蔵 35–38°F (40°F以下) ・ 冷凍 0°F',
+    usdaTargetC: 'USDA基準：冷蔵 2–3°C (4°C以下) ・ 冷凍 -18°C',
+    showAllZonesBtn: '全7ゾーン (28品目)',
+    fridgeInteriorLabel: '冷蔵室メイン庫内',
+    topToBottomLabel: '上段 ↓ 下段',
+    fridgeDoorLabel: 'ドアポケット',
+    doorPocket1: '蓋付きバター',
+    doorPocket2: 'ケチャップ・醤油',
+    doorPocket3: 'ジャム・ピクルス',
+    doorWarningMicro: '最高温ゾーン · 牛乳・卵・生肉はNG！',
+    dripTrayMicro: '縁付きトレイ必須 · 生鶏肉は最下部',
+    ventClosedMicro: '通気口閉 · エチレン感受性',
+    ventOpenMicro: '通気口開 · エチレン発生果物',
+    pantryBannerTag: '冷蔵NG！',
+    matchCountSuffix: '件一致',
+    itemsWord: '品目',
+    inspectorBadgeFridge: '冷蔵庫内ゾーン',
+    inspectorBadgePantry: '冷蔵庫に入れない食品',
+    inspectorSafetyLabel: 'USDA・FDA 食品安全ルール',
+    inspectorNeverLabel: 'ここに置いてはいけないもの',
+    inspectorBestForLabel: 'このゾーンに最適な食材',
+    inspectorItemsInZone: 'このゾーンの該当食材',
+    copyCheatSheetBtn: 'ゾーン早見表をコピー',
+    copiedCheatSheetBtn: 'コピーしました ✓',
+    printMapBtn: '冷蔵庫貼り付け用マップを印刷',
+    resetBtn: 'リセット',
+    groceryListHeadingAll: '日常食材28カテゴリー 最適保存ゾーン一覧',
+    groceryListHeadingZone: '選択ゾーンの食材',
+    groceryListHeadingSearch: '検索結果',
+    ethyleneFilterLabel: 'エチレン分類：',
+    ethAll: 'すべて',
+    ethProducer: 'エチレン発生源',
+    ethSensitive: 'エチレン感受性',
+    ethNeutral: '影響なし',
+    ethBadgeProducer: 'エチレン発生',
+    ethBadgeSensitive: 'エチレンに弱い',
+    ethBadgeNeutral: 'エチレン中立',
+    mistakeLabel: 'よくあるNG保存',
+    containerLabel: 'おすすめ容器・保存コツ',
+    shelfLifeLabel: 'USDA 保存目安',
+    noResultsMsg: '一致する食材が見つかりません。検索をクリアするか「すべて」を選択してください。',
+    scienceHeading: '安全な冷蔵庫整理 3大原則（USDA・FDA・エチレン科学）',
+    scienceSub: '交差汚染ドリップを防ぎ、生鮮野菜の鮮度を長持ちさせる科学的ルールです。',
+    rule1Title: 'FDA 上から下への加熱温度階層ルール',
+    rule1Body: '最上段に即食・調理済み食品を置き、下に向かって生魚・塊肉(63°C)→生ひき肉(71°C)→生鶏肉(74°C)の順に縁付きトレイで最下段へ配置します。',
+    rule2Title: 'エチレン発生果物と葉物野菜を完全に分ける',
+    rule2Body: 'リンゴ・梨・桃・アボカド・メロンが出すエチレンガスは、ほうれん草・レタス・ブロッコリー・にんじん・きゅうりを急速に劣化させます。果物は通気口を開け、野菜は閉じて保管。',
+    rule3Title: '4°C（40°F）以下を維持し、庫内25%の空気通路を確保',
+    rule3Body: '詰め込みすぎは冷気循環を妨げ4°C超の暖かい溜まりを作ります。収納は7〜8割にとどめ、中段に市販の冷蔵庫温度計を置いて確認しましょう。',
+    relatedHeading: '関連する食品保存・キッチン安全ツール',
+    relatedLeftoverTag: '冷蔵保存ガイド',
+    relatedLeftoverTitle: '作り置き・残り物日持ち計算機 →',
+    relatedLeftoverDesc: '調理済みの肉、ご飯、スープ、惣菜の冷蔵・冷凍保存日数をUSDA基準で確認。',
+    relatedOutageTag: '停電時トリアージ',
+    relatedOutageTitle: '停電時の食品廃棄判定チェッカー →',
+    relatedOutageDesc: '停電後に冷蔵庫・冷凍庫の食品を残すか捨てるか、USDAの4時間／48時間基準で即判定。',
+    relatedThawTag: '安全な解凍タイマー',
+    relatedThawTitle: 'お肉の安全解凍時間計算機 →',
+    relatedThawDesc: 'ステーキ、鶏肉、七面鳥を下段棚冷蔵・流水で安全に解凍する時間を計算。',
+    methodologyStripTitle: 'USDA FSIS・FDA食品コード・ポストハーベスト青果科学に準拠',
+    methodologyStripPrefix: 'すべての温度帯・ドリップ階層・保存日数は公的機関の一次基準に基づき検証されています。詳細は',
+    methodologyLabel: '検証メソドロジー',
+    allToolsLabel: '全ツール一覧 →',
+    faqTitle: '冷蔵庫の整理と食品安全に関するよくある質問',
+    copyHeader: 'IsItKitchenSafe — 冷蔵庫ゾーン別収納早見表 (USDA・FDA)',
+    copyTargetLineF: '目標温度：冷蔵 35–38°F (40°F超NG) | 冷凍 0°F',
+    copyTargetLineC: '目標温度：冷蔵 2–3°C (4°C超NG) | 冷凍 -18°C',
+    copyNeverPrefix: 'NG食品',
+    copyFoodsPrefix: '最適食材'
+  }
+};
+
+const t = UI[lang] || UI.en;
+const defaultTempUnit: 'F' | 'C' = lang === 'en' ? 'F' : 'C';
+const defaultZoneId = 'middle-shelf';
+const defaultZone = zoneMap.get(defaultZoneId) || localizedZones[0];
+
+function getTempRange(z: LocalizedZone, unit: 'F' | 'C'): string {
+  return unit === 'C' ? z.tempC : z.tempF;
+}
+
+function getEthyleneBadgeClass(role: EthyleneRole): string {
+  if (role === 'producer') return 'badge-depends';
+  if (role === 'sensitive') return 'badge-time';
+  return 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-surface-soft text-muted border border-hairline';
+}
+
+function getEthyleneBadgeLabel(role: EthyleneRole): string {
+  if (role === 'producer') return '💨 ' + t.ethBadgeProducer;
+  if (role === 'sensitive') return '🌿 ' + t.ethBadgeSensitive;
+  return '✓ ' + t.ethBadgeNeutral;
+}
+
+const topZone = zoneMap.get('top-shelf')!;
+const middleZone = zoneMap.get('middle-shelf')!;
+const bottomZone = zoneMap.get('bottom-shelf')!;
+const highCrisperZone = zoneMap.get('high-humidity-crisper')!;
+const lowCrisperZone = zoneMap.get('low-humidity-crisper')!;
+const doorZone = zoneMap.get('fridge-door')!;
+const pantryZone = zoneMap.get('counter-pantry')!;
+
+const clientPayload = {
+  lang,
+  defaultTempUnit,
+  defaultZoneId,
+  zones: localizedZones,
+  foods: localizedFoods,
+  ui: t
+};
+---
+
+<div id="fridge-zone-planner-root" class="space-y-12">
+  <!-- Main Interactive Planner Card -->
+  <section
+    id="fridge-organization-zone-planner"
+    class="bg-canvas border border-hairline rounded-2xl shadow-sm overflow-hidden"
+    aria-label={t.ariaLabel}
+  >
+    <script type="application/json" id="foz-payload" set:html={JSON.stringify(clientPayload)} />
+
+    <!-- Top Instant Grocery Search & Unit Toggle Bar -->
+    <div class="p-5 sm:p-6 bg-surface-soft/70 border-b border-hairline space-y-4 print:hidden">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <label for="foz-search-input" class="text-title-sm font-semibold text-ink">
+          🔎 {t.searchLabel}
+        </label>
+        <div class="inline-flex items-center gap-2 self-start md:self-auto">
+          <span class="text-xs font-medium text-muted">{t.tempUnitLabel}:</span>
+          <div class="inline-flex rounded-lg border border-hairline bg-canvas p-0.5" role="radiogroup" aria-label={t.tempUnitLabel}>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={defaultTempUnit === 'F' ? 'true' : 'false'}
+              data-foz-unit="F"
+              class={`foz-unit-btn px-3 py-1 rounded-md text-xs font-bold cursor-pointer transition-all ${
+                defaultTempUnit === 'F' ? 'bg-signature-coral text-white shadow-sm' : 'text-ink hover:bg-surface-soft'
+              }`}
+            >
+              °F
+            </button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={defaultTempUnit === 'C' ? 'true' : 'false'}
+              data-foz-unit="C"
+              class={`foz-unit-btn px-3 py-1 rounded-md text-xs font-bold cursor-pointer transition-all ${
+                defaultTempUnit === 'C' ? 'bg-signature-coral text-white shadow-sm' : 'text-ink hover:bg-surface-soft'
+              }`}
+            >
+              °C
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-2.5">
+        <div class="relative flex-1">
+          <span aria-hidden="true" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">🛒</span>
+          <input
+            type="search"
+            id="foz-search-input"
+            placeholder={t.searchPlaceholder}
+            aria-label={t.searchPlaceholder}
+            class="w-full h-11 pl-10 pr-4 rounded-xl bg-canvas border border-hairline text-ink text-sm focus:outline-none focus:border-info-border shadow-xs"
+          />
+        </div>
+        <button
+          type="button"
+          id="foz-clear-search-btn"
+          class="hidden h-11 px-4 rounded-xl text-xs font-bold bg-canvas text-ink border border-hairline hover:border-signature-coral cursor-pointer transition-colors shrink-0"
+        >
+          ✕ {t.clearSearch}
+        </button>
+      </div>
+
+      <!-- Quick Lookup Chips -->
+      <div class="flex flex-wrap items-center gap-1.5">
+        <span class="text-[11px] font-semibold text-muted mr-1">{t.quickSearchLabel}</span>
+        {quickChipFoods.map((qf) => (
+          <button
+            type="button"
+            data-foz-quick={qf.id}
+            class="foz-quick-chip px-2.5 py-1 rounded-full text-xs font-medium bg-canvas text-ink border border-hairline hover:border-signature-coral hover:text-signature-coral transition-colors cursor-pointer"
+          >
+            {qf.icon} {qf.name.split('(')[0].split(',')[0].trim()}
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <!-- Main 2-Column Interactive Fridge Schematic + Active Zone Inspector -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-hairline">
+      <!-- Left Column: Visual 6-Zone Fridge Map + Counter/Pantry Tab -->
+      <div class="lg:col-span-7 p-5 sm:p-6 space-y-4">
+        <div class="flex flex-wrap items-start justify-between gap-2">
+          <div>
+            <h2 class="text-title-sm font-semibold text-ink">{t.mapHeading}</h2>
+            <p class="text-xs text-muted mt-0.5">{t.mapSub}</p>
+          </div>
+          <button
+            type="button"
+            id="foz-show-all-btn"
+            aria-pressed="false"
+            class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-signature-coral print:hidden"
+          >
+            {t.showAllZonesBtn}
+          </button>
+        </div>
+
+        <!-- USDA Fridge Thermometer Target Bar -->
+        <div class="flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-surface-soft border border-hairline text-xs">
+          <span class="font-semibold text-ink">🌡️ <span id="foz-usda-target">{defaultTempUnit === 'C' ? t.usdaTargetC : t.usdaTargetF}</span></span>
+        </div>
+
+        <!-- Refrigerator Appliance Visual Diagram -->
+        <div class="rounded-2xl border-2 border-border-strong/55 bg-surface-soft/80 p-3 sm:p-4 space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+            <!-- Main Cold Cabinet (8 cols) -->
+            <div class="sm:col-span-8 flex flex-col gap-2">
+              <div class="flex items-center justify-between px-1 text-[10.5px] font-bold uppercase tracking-wider text-muted">
+                <span>❄️ {t.fridgeInteriorLabel}</span>
+                <span>{t.topToBottomLabel}</span>
+              </div>
+
+              <!-- Zone 1: Top Shelf -->
+              <button
+                type="button"
+                data-foz-zone="top-shelf"
+                aria-pressed="false"
+                class="foz-zone-btn w-full text-left p-3 rounded-xl border-2 transition-all cursor-pointer bg-canvas border-hairline hover:border-info-border"
+              >
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-xs sm:text-sm font-bold text-ink flex items-center gap-1.5">
+                    <span aria-hidden="true">{topZone.icon}</span>
+                    <span>{topZone.shortName}</span>
+                  </span>
+                  <span class="flex items-center gap-1.5 shrink-0">
+                    <span data-foz-match-pill="top-shelf" class="hidden px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-signature-coral text-white" />
+                    <span data-foz-zone-temp="top-shelf" class="px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-surface-soft text-ink border border-hairline">
+                      {getTempRange(topZone, defaultTempUnit)}
+                    </span>
+                  </span>
+                </div>
+                <div class="flex items-center justify-between gap-2 mt-1 text-[11px] text-muted">
+                  <span class="truncate">{topZone.tempSub}</span>
+                  <span class="shrink-0 font-semibold">{topZone.itemCount} {t.itemsWord}</span>
+                </div>
+              </button>
+
+              <!-- Zone 2: Middle Shelf (Default Selected) -->
+              <button
+                type="button"
+                data-foz-zone="middle-shelf"
+                aria-pressed="true"
+                class="foz-zone-btn w-full text-left p-3 rounded-xl border-2 transition-all cursor-pointer bg-canvas border-hairline hover:border-info-border ring-2 ring-signature-coral ring-offset-1 shadow-sm"
+              >
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-xs sm:text-sm font-bold text-ink flex items-center gap-1.5">
+                    <span aria-hidden="true">{middleZone.icon}</span>
+                    <span>{middleZone.shortName}</span>
+                  </span>
+                  <span class="flex items-center gap-1.5 shrink-0">
+                    <span data-foz-match-pill="middle-shelf" class="hidden px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-signature-coral text-white" />
+                    <span data-foz-zone-temp="middle-shelf" class="px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-surface-soft text-ink border border-hairline">
+                      {getTempRange(middleZone, defaultTempUnit)}
+                    </span>
+                  </span>
+                </div>
+                <div class="flex items-center justify-between gap-2 mt-1 text-[11px] text-muted">
+                  <span class="truncate">{middleZone.tempSub}</span>
+                  <span class="shrink-0 font-semibold">{middleZone.itemCount} {t.itemsWord}</span>
+                </div>
+              </button>
+
+              <!-- Zone 3: Bottom Shelf (Coldest Raw Protein Zone) -->
+              <button
+                type="button"
+                data-foz-zone="bottom-shelf"
+                aria-pressed="false"
+                class="foz-zone-btn w-full text-left p-3 rounded-xl border-2 transition-all cursor-pointer bg-error-bg/45 dark:bg-red-950/25 border-error-border/75 hover:border-error-border"
+              >
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-xs sm:text-sm font-bold text-ink flex items-center gap-1.5">
+                    <span aria-hidden="true">{bottomZone.icon}</span>
+                    <span>{bottomZone.shortName}</span>
+                  </span>
+                  <span class="flex items-center gap-1.5 shrink-0">
+                    <span data-foz-match-pill="bottom-shelf" class="hidden px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-signature-coral text-white" />
+                    <span data-foz-zone-temp="bottom-shelf" class="px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-canvas text-ink border border-hairline">
+                      {getTempRange(bottomZone, defaultTempUnit)}
+                    </span>
+                  </span>
+                </div>
+                <div class="flex items-center justify-between gap-2 mt-1 text-[11px] text-body">
+                  <span class="truncate font-medium">⚠️ {t.dripTrayMicro}</span>
+                  <span class="shrink-0 font-semibold">{bottomZone.itemCount} {t.itemsWord}</span>
+                </div>
+              </button>
+
+              <!-- Zones 4 & 5: Side-by-Side Crisper Drawers -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-0.5">
+                <button
+                  type="button"
+                  data-foz-zone="high-humidity-crisper"
+                  aria-pressed="false"
+                  class="foz-zone-btn w-full text-left p-3 rounded-xl border-2 transition-all cursor-pointer bg-canvas border-success-border/60 hover:border-success-border"
+                >
+                  <div class="flex items-center justify-between gap-1.5">
+                    <span class="text-xs font-bold text-ink flex items-center gap-1 min-w-0">
+                      <span aria-hidden="true">{highCrisperZone.icon}</span>
+                      <span class="truncate">{highCrisperZone.shortName}</span>
+                    </span>
+                    <span data-foz-match-pill="high-humidity-crisper" class="hidden px-1.5 py-0.5 rounded-full text-[10px] font-extrabold bg-signature-coral text-white shrink-0" />
+                  </div>
+                  <div class="flex items-center justify-between gap-1 mt-1.5">
+                    <span data-foz-zone-temp="high-humidity-crisper" class="px-1.5 py-0.5 rounded text-[10.5px] font-mono font-bold bg-surface-soft text-ink border border-hairline">
+                      {getTempRange(highCrisperZone, defaultTempUnit)}
+                    </span>
+                    <span class="text-[10.5px] text-muted font-semibold">{highCrisperZone.itemCount} {t.itemsWord}</span>
+                  </div>
+                  <span class="block text-[10.5px] text-muted mt-1 leading-tight">💧 {t.ventClosedMicro}</span>
+                </button>
+
+                <button
+                  type="button"
+                  data-foz-zone="low-humidity-crisper"
+                  aria-pressed="false"
+                  class="foz-zone-btn w-full text-left p-3 rounded-xl border-2 transition-all cursor-pointer bg-canvas border-warning-border/75 hover:border-warning-border"
+                >
+                  <div class="flex items-center justify-between gap-1.5">
+                    <span class="text-xs font-bold text-ink flex items-center gap-1 min-w-0">
+                      <span aria-hidden="true">{lowCrisperZone.icon}</span>
+                      <span class="truncate">{lowCrisperZone.shortName}</span>
+                    </span>
+                    <span data-foz-match-pill="low-humidity-crisper" class="hidden px-1.5 py-0.5 rounded-full text-[10px] font-extrabold bg-signature-coral text-white shrink-0" />
+                  </div>
+                  <div class="flex items-center justify-between gap-1 mt-1.5">
+                    <span data-foz-zone-temp="low-humidity-crisper" class="px-1.5 py-0.5 rounded text-[10.5px] font-mono font-bold bg-surface-soft text-ink border border-hairline">
+                      {getTempRange(lowCrisperZone, defaultTempUnit)}
+                    </span>
+                    <span class="text-[10.5px] text-muted font-semibold">{lowCrisperZone.itemCount} {t.itemsWord}</span>
+                  </div>
+                  <span class="block text-[10.5px] text-muted mt-1 leading-tight">💨 {t.ventOpenMicro}</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Hinged Fridge Door (4 cols) -->
+            <div class="sm:col-span-4 flex flex-col gap-2">
+              <div class="flex items-center justify-between px-1 text-[10.5px] font-bold uppercase tracking-wider text-muted">
+                <span>🚪 {t.fridgeDoorLabel}</span>
+              </div>
+              <button
+                type="button"
+                data-foz-zone="fridge-door"
+                aria-pressed="false"
+                class="foz-zone-btn flex-1 w-full text-left p-3.5 rounded-xl border-2 border-dashed transition-all cursor-pointer bg-warning-bg/45 dark:bg-amber-950/20 border-warning-border/80 hover:border-signature-coral flex flex-col justify-between gap-3"
+              >
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between gap-1.5">
+                    <span class="text-xs sm:text-sm font-bold text-ink flex items-center gap-1.5">
+                      <span aria-hidden="true">{doorZone.icon}</span>
+                      <span>{doorZone.shortName}</span>
+                    </span>
+                    <span data-foz-match-pill="fridge-door" class="hidden px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-signature-coral text-white shrink-0" />
+                  </div>
+                  <span data-foz-zone-temp="fridge-door" class="inline-block px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-canvas text-ink border border-hairline">
+                    {getTempRange(doorZone, defaultTempUnit)}
+                  </span>
+                  <!-- Visual Door Pocket Bars -->
+                  <div class="space-y-1.5 pt-1 opacity-85" aria-hidden="true">
+                    <div class="h-6 rounded-md bg-canvas/80 border border-hairline flex items-center px-2 text-[10.5px] text-muted">🧈 {t.doorPocket1}</div>
+                    <div class="h-6 rounded-md bg-canvas/80 border border-hairline flex items-center px-2 text-[10.5px] text-muted">🥫 {t.doorPocket2}</div>
+                    <div class="h-6 rounded-md bg-canvas/80 border border-hairline flex items-center px-2 text-[10.5px] text-muted">🫙 {t.doorPocket3}</div>
+                  </div>
+                </div>
+                <div class="space-y-1 pt-2 border-t border-hairline/70">
+                  <span class="block text-[11px] font-bold text-error leading-snug">🚫 {t.doorWarningMicro}</span>
+                  <span class="block text-[10.5px] text-muted font-semibold">{doorZone.itemCount} {t.itemsWord}</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zone 7: Outside Fridge — Counter / Cool Dark Pantry Tab -->
+        <button
+          type="button"
+          data-foz-zone="counter-pantry"
+          aria-pressed="false"
+          class="foz-zone-btn w-full text-left p-3.5 rounded-xl border-2 transition-all cursor-pointer bg-canvas border-hairline hover:border-signature-coral"
+        >
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span aria-hidden="true" class="text-lg">{pantryZone.icon}</span>
+              <span class="text-xs sm:text-sm font-bold text-ink">{pantryZone.shortName}</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-signature-coral text-white">
+                {t.pantryBannerTag}
+              </span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span data-foz-match-pill="counter-pantry" class="hidden px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-signature-coral text-white" />
+              <span data-foz-zone-temp="counter-pantry" class="px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-surface-soft text-ink border border-hairline">
+                {getTempRange(pantryZone, defaultTempUnit)}
+              </span>
+              <span class="text-[11px] font-semibold text-muted">{pantryZone.itemCount} {t.itemsWord}</span>
+            </div>
+          </div>
+          <p class="text-[11.5px] text-muted mt-1 leading-snug">{pantryZone.bestFor}</p>
+        </button>
+      </div>
+
+      <!-- Right Column: Active Zone Safety Inspector & Actions -->
+      <div class="lg:col-span-5 p-5 sm:p-6 bg-surface-soft/50 flex flex-col justify-between gap-5">
+        <div
+          id="foz-inspector-panel"
+          aria-live="polite"
+          class="rounded-2xl bg-surface-dark text-on-dark p-5 sm:p-6 space-y-4 shadow-sm border-l-4 border-info-border"
+        >
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span id="foz-inspector-badge" class="text-[11px] font-bold uppercase tracking-wider text-orange-300">
+              {t.inspectorBadgeFridge}
+            </span>
+            <span
+              id="foz-inspector-temp"
+              class="px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-white/15 text-white"
+            >
+              {getTempRange(defaultZone, defaultTempUnit)}
+            </span>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <span id="foz-inspector-icon" aria-hidden="true" class="text-3xl leading-none shrink-0 mt-0.5">
+              {defaultZone.icon}
+            </span>
+            <div class="min-w-0">
+              <h2 id="foz-inspector-name" class="text-lg sm:text-xl font-extrabold tracking-tight text-white leading-snug">
+                {defaultZone.name}
+              </h2>
+              <p id="foz-inspector-humidity" class="text-xs font-medium text-sky-300 mt-1">
+                {defaultZone.humidityLabel}
+              </p>
+            </div>
+          </div>
+
+          <!-- Core Safety Rule -->
+          <div class="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1.5">
+            <span class="block text-[10.5px] font-bold uppercase tracking-wider text-emerald-300">
+              ✅ {t.inspectorSafetyLabel}
+            </span>
+            <h3 id="foz-inspector-rule-title" class="text-xs sm:text-sm font-bold text-white leading-snug">
+              {defaultZone.ruleTitle}
+            </h3>
+            <p id="foz-inspector-rule-body" class="text-xs text-white/85 leading-relaxed">
+              {defaultZone.safetyRule}
+            </p>
+          </div>
+
+          <!-- Never Store Here Warning -->
+          <div class="p-3.5 rounded-xl bg-red-500/15 border border-red-400/35 space-y-1">
+            <span class="block text-[10.5px] font-bold uppercase tracking-wider text-rose-300">
+              🚫 {t.inspectorNeverLabel}
+            </span>
+            <p id="foz-inspector-never" class="text-xs text-white/90 leading-relaxed">
+              {defaultZone.neverPutHere}
+            </p>
+          </div>
+
+          <!-- Best Foods Summary -->
+          <div class="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-[10.5px] font-bold uppercase tracking-wider text-amber-300">
+                📦 {t.inspectorBestForLabel}
+              </span>
+              <span id="foz-inspector-count" class="text-[11px] font-mono font-bold text-white/85">
+                {defaultZone.itemCount} {t.itemsWord}
+              </span>
+            </div>
+            <p id="foz-inspector-best" class="text-xs text-white/85 leading-relaxed">
+              {defaultZone.bestFor}
+            </p>
+          </div>
+        </div>
+
+        <!-- Copy Cheat Sheet, Print Fridge Door Map & Reset -->
+        <div class="space-y-2.5 print:hidden">
+          <button
+            type="button"
+            id="foz-copy-btn"
+            class="w-full min-h-[44px] px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors cursor-pointer shadow-sm"
+          >
+            <span id="foz-copy-label">📋 {t.copyCheatSheetBtn}</span>
+          </button>
+          <div class="flex items-center gap-2.5">
+            <button
+              type="button"
+              id="foz-print-btn"
+              class="flex-1 min-h-[42px] px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-canvas text-ink border border-hairline hover:border-signature-coral transition-colors cursor-pointer"
+            >
+              🖨️ {t.printMapBtn}
+            </button>
+            <button
+              type="button"
+              id="foz-reset-btn"
+              class="min-h-[42px] px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-canvas text-muted border border-hairline hover:border-border-strong hover:text-ink transition-colors cursor-pointer"
+            >
+              {t.resetBtn}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 28 Everyday Groceries Directory & Ethylene Filter -->
+    <div class="border-t border-hairline p-5 sm:p-6 space-y-5">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <h2 id="foz-list-heading" class="text-title-md font-semibold text-ink">
+            {defaultZone.icon} {defaultZone.shortName} — {t.groceryListHeadingZone}
+          </h2>
+          <span
+            id="foz-visible-count-badge"
+            class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-surface-soft text-ink border border-hairline"
+          >
+            {defaultZone.itemCount} / {localizedFoods.length}
+          </span>
+        </div>
+
+        <!-- Ethylene Role Filter Pills -->
+        <div class="flex flex-wrap items-center gap-1.5 print:hidden" role="group" aria-label={t.ethyleneFilterLabel}>
+          <span class="text-xs font-semibold text-muted mr-1">{t.ethyleneFilterLabel}</span>
+          <button
+            type="button"
+            aria-pressed="true"
+            data-foz-eth="all"
+            class="foz-eth-btn px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-primary text-on-primary border-primary"
+          >
+            {t.ethAll}
+          </button>
+          <button
+            type="button"
+            aria-pressed="false"
+            data-foz-eth="producer"
+            class="foz-eth-btn px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-warning-border"
+          >
+            💨 {t.ethProducer}
+          </button>
+          <button
+            type="button"
+            aria-pressed="false"
+            data-foz-eth="sensitive"
+            class="foz-eth-btn px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-info-border"
+          >
+            🌿 {t.ethSensitive}
+          </button>
+          <button
+            type="button"
+            aria-pressed="false"
+            data-foz-eth="neutral"
+            class="foz-eth-btn px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-border-strong"
+          >
+            {t.ethNeutral}
+          </button>
+        </div>
+      </div>
+
+      <!-- Empty Search State -->
+      <div id="foz-empty-state" class="hidden p-8 rounded-xl bg-surface-soft border border-hairline text-center text-sm text-muted">
+        {t.noResultsMsg}
+      </div>
+
+      <!-- 28 SSR-Rendered Grocery Cards -->
+      <div id="foz-food-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+        {localizedFoods.map((food) => {
+          const z = zoneMap.get(food.zoneId) || localizedZones[0];
+          const inDefault = food.zoneId === defaultZoneId;
+          return (
+            <article
+              data-foz-card={food.id}
+              data-foz-card-zone={food.zoneId}
+              data-foz-card-eth={food.ethylene}
+              class={`foz-food-card p-4 rounded-xl border border-hairline bg-canvas flex flex-col justify-between gap-3 transition-all hover:border-border-strong ${
+                inDefault ? '' : 'hidden'
+              }`}
+            >
+              <div class="space-y-3">
+                <!-- Title + Optimal Zone Jump Pill -->
+                <div class="flex items-start justify-between gap-2.5">
+                  <div class="flex items-start gap-2.5 min-w-0">
+                    <span aria-hidden="true" class="text-xl shrink-0 leading-none mt-0.5">{food.icon}</span>
+                    <div class="min-w-0">
+                      <h3 class="text-sm font-bold text-ink leading-snug">{food.name}</h3>
+                      <p class="text-[11.5px] text-muted mt-0.5">
+                        ⏱️ <span class="font-semibold">{t.shelfLifeLabel}:</span> {food.shelfLife}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    data-foz-jump-zone={food.zoneId}
+                    class="foz-jump-zone-btn shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-surface-soft text-ink border border-hairline hover:border-signature-coral transition-colors cursor-pointer text-right"
+                  >
+                    <span class="block leading-tight">{z.icon} {z.shortName}</span>
+                    <span data-foz-card-temp={food.zoneId} class="block font-mono text-[10px] text-muted mt-0.5">
+                      {getTempRange(z, defaultTempUnit)}
+                    </span>
+                  </button>
+                </div>
+
+                <!-- Ethylene Role Badge -->
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class={getEthyleneBadgeClass(food.ethylene)}>
+                    {getEthyleneBadgeLabel(food.ethylene)}
+                  </span>
+                </div>
+
+                <!-- #1 Storage Mistake Callout -->
+                <div class="p-2.5 rounded-lg bg-error-bg/50 dark:bg-red-950/25 border border-error-border/50 space-y-0.5">
+                  <span class="block text-[10.5px] font-bold uppercase tracking-wider text-error">
+                    ⚠️ {t.mistakeLabel}
+                  </span>
+                  <p class="text-xs text-body leading-relaxed">{food.mistake}</p>
+                </div>
+              </div>
+
+              <!-- Best Container / Prep Tip -->
+              <div class="pt-2 border-t border-hairline/70 text-xs text-body leading-relaxed">
+                <span class="font-bold text-ink">📦 {t.containerLabel}:</span> {food.container}
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </div>
+
+    <!-- 3-Card USDA / FDA / Ethylene Food Science Strip -->
+    <div class="border-t border-hairline p-5 sm:p-6 bg-surface-soft/50 space-y-4">
+      <div>
+        <h2 class="text-title-md font-semibold text-ink">{t.scienceHeading}</h2>
+        <p class="text-xs text-muted mt-0.5">{t.scienceSub}</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <article class="p-4 rounded-xl border bg-error-bg/50 dark:bg-red-950/25 border-error-border/65 space-y-1.5">
+          <div class="flex items-center gap-2">
+            <span aria-hidden="true" class="text-lg">🥩</span>
+            <h3 class="text-xs sm:text-sm font-bold text-ink leading-snug">{t.rule1Title}</h3>
+          </div>
+          <p class="text-xs text-body leading-relaxed">{t.rule1Body}</p>
+        </article>
+        <article class="p-4 rounded-xl border bg-warning-bg/60 dark:bg-amber-950/25 border-warning-border/70 space-y-1.5">
+          <div class="flex items-center gap-2">
+            <span aria-hidden="true" class="text-lg">🍎</span>
+            <h3 class="text-xs sm:text-sm font-bold text-ink leading-snug">{t.rule2Title}</h3>
+          </div>
+          <p class="text-xs text-body leading-relaxed">{t.rule2Body}</p>
+        </article>
+        <article class="p-4 rounded-xl border bg-canvas border-hairline space-y-1.5">
+          <div class="flex items-center gap-2">
+            <span aria-hidden="true" class="text-lg">🌡️</span>
+            <h3 class="text-xs sm:text-sm font-bold text-ink leading-snug">{t.rule3Title}</h3>
+          </div>
+          <p class="text-xs text-body leading-relaxed">{t.rule3Body}</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Related Verified Companion Tools -->
+  <section class="space-y-4 print:hidden">
+    <h2 class="text-title-md font-semibold text-ink">{t.relatedHeading}</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <a
+        href={leftoverUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedLeftoverTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedLeftoverTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedLeftoverDesc}</p>
+      </a>
+
+      <a
+        href={powerOutageUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedOutageTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedOutageTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedOutageDesc}</p>
+      </a>
+
+      <a
+        href={thawingUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedThawTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedThawTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedThawDesc}</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- Methodology & All Tools Strip -->
+  <section class="p-6 rounded-2xl bg-surface-soft border border-hairline print:hidden">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-title-sm font-semibold text-ink mb-1">{t.methodologyStripTitle}</h2>
+        <p class="text-[13px] text-muted">
+          {t.methodologyStripPrefix}{' '}
+          <a href={methodologyUrl} class="text-link underline hover:text-link-active">{t.methodologyLabel}</a>.
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a
+          href={methodologyUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
+        >
+          {t.methodologyLabel}
+        </a>
+        <a
+          href={allToolsUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors"
+        >
+          {t.allToolsLabel}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Visible FAQ Accordion (Matches JSON-LD 1:1) -->
+  <section class="print:hidden">
+    <h2 class="text-title-lg font-medium text-ink tracking-tight mb-6">
+      {t.faqTitle}
+    </h2>
+    <div class="space-y-4">
+      {localizedFaqs.map((faq) => (
+        <details class="group p-5 bg-surface-soft border border-hairline rounded-xl" open>
+          <summary class="text-title-sm font-semibold text-ink cursor-pointer list-none flex items-center justify-between gap-3">
+            <span>{faq.question}</span>
+            <span class="text-muted text-sm transition-transform group-open:rotate-180 shrink-0" aria-hidden="true">&#9662;</span>
+          </summary>
+          <p class="text-[14px] text-body leading-relaxed mt-3 pt-3 border-t border-hairline/70">
+            {faq.answer}
+          </p>
+        </details>
+      ))}
+    </div>
+  </section>
+</div>
+
+<script is:inline>
+  (function () {
+    const payloadEl = document.getElementById('foz-payload');
+    if (!payloadEl) return;
+
+    let payload;
+    try {
+      payload = JSON.parse(payloadEl.textContent || '{}');
+    } catch (_) {
+      return;
+    }
+
+    const zones = payload.zones || [];
+    const foods = payload.foods || [];
+    const ui = payload.ui || {};
+    const zoneById = new Map(zones.map((z) => [z.id, z]));
+    const foodById = new Map(foods.map((f) => [f.id, f]));
+
+    // Controls
+    const searchInput = document.getElementById('foz-search-input');
+    const clearSearchBtn = document.getElementById('foz-clear-search-btn');
+    const quickChips = Array.from(document.querySelectorAll('.foz-quick-chip'));
+    const unitBtns = Array.from(document.querySelectorAll('.foz-unit-btn'));
+    const zoneBtns = Array.from(document.querySelectorAll('.foz-zone-btn'));
+    const showAllBtn = document.getElementById('foz-show-all-btn');
+    const ethBtns = Array.from(document.querySelectorAll('.foz-eth-btn'));
+    const jumpZoneBtns = Array.from(document.querySelectorAll('.foz-jump-zone-btn'));
+    const cardEls = Array.from(document.querySelectorAll('.foz-food-card'));
+    const zoneTempEls = Array.from(document.querySelectorAll('[data-foz-zone-temp]'));
+    const cardTempEls = Array.from(document.querySelectorAll('[data-foz-card-temp]'));
+    const matchPillEls = Array.from(document.querySelectorAll('[data-foz-match-pill]'));
+
+    // Inspector & summary elements
+    const usdaTargetEl = document.getElementById('foz-usda-target');
+    const inspectorPanel = document.getElementById('foz-inspector-panel');
+    const inspectorBadge = document.getElementById('foz-inspector-badge');
+    const inspectorTemp = document.getElementById('foz-inspector-temp');
+    const inspectorIcon = document.getElementById('foz-inspector-icon');
+    const inspectorName = document.getElementById('foz-inspector-name');
+    const inspectorHumidity = document.getElementById('foz-inspector-humidity');
+    const inspectorRuleTitle = document.getElementById('foz-inspector-rule-title');
+    const inspectorRuleBody = document.getElementById('foz-inspector-rule-body');
+    const inspectorNever = document.getElementById('foz-inspector-never');
+    const inspectorBest = document.getElementById('foz-inspector-best');
+    const inspectorCount = document.getElementById('foz-inspector-count');
+
+    const listHeadingEl = document.getElementById('foz-list-heading');
+    const visibleCountBadge = document.getElementById('foz-visible-count-badge');
+    const emptyStateEl = document.getElementById('foz-empty-state');
+
+    const copyBtn = document.getElementById('foz-copy-btn');
+    const copyLabel = document.getElementById('foz-copy-label');
+    const printBtn = document.getElementById('foz-print-btn');
+    const resetBtn = document.getElementById('foz-reset-btn');
+
+    const state = {
+      tempUnit: payload.defaultTempUnit || 'F',
+      selectedZoneId: payload.defaultZoneId || 'middle-shelf',
+      showAllZones: false,
+      ethFilter: 'all',
+      query: ''
+    };
+
+    let lastCheatSheetText = '';
+
+    function getZoneTemp(zone, unit) {
+      if (!zone) return '';
+      return unit === 'C' ? zone.tempC : zone.tempF;
+    }
+
+    function getInspectorBorderClass(zone) {
+      if (!zone) return 'border-info-border';
+      if (zone.id === 'bottom-shelf') return 'border-error-border';
+      if (zone.id === 'high-humidity-crisper') return 'border-success-border';
+      if (zone.id === 'low-humidity-crisper' || zone.id === 'fridge-door') return 'border-warning-border';
+      if (zone.id === 'counter-pantry') return 'border-signature-coral';
+      return 'border-info-border';
+    }
+
+    function buildCheatSheetText() {
+      const targetLine = state.tempUnit === 'C' ? ui.copyTargetLineC : ui.copyTargetLineF;
+      const lines = [
+        ui.copyHeader || 'Fridge Organization Cheat Sheet',
+        targetLine || '',
+        ''
+      ];
+
+      zones.forEach((z) => {
+        const zFoods = foods.filter((f) => f.zoneId === z.id).map((f) => f.name);
+        lines.push(
+          z.icon + ' ' + z.name + ' [' + getZoneTemp(z, state.tempUnit) + ']',
+          '  - ' + z.ruleTitle,
+          '  - ' + (ui.copyFoodsPrefix || 'Best foods') + ': ' + zFoods.join(', '),
+          '  - ' + (ui.copyNeverPrefix || 'NEVER HERE') + ': ' + z.neverPutHere,
+          ''
+        );
+      });
+
+      return lines.join('\n').trim();
+    }
+
+    function updateTempDisplays() {
+      if (usdaTargetEl) {
+        usdaTargetEl.textContent = state.tempUnit === 'C' ? (ui.usdaTargetC || '') : (ui.usdaTargetF || '');
+      }
+
+      zoneTempEls.forEach((el) => {
+        const zid = el.getAttribute('data-foz-zone-temp') || '';
+        const z = zoneById.get(zid);
+        if (z) el.textContent = getZoneTemp(z, state.tempUnit);
+      });
+
+      cardTempEls.forEach((el) => {
+        const zid = el.getAttribute('data-foz-card-temp') || '';
+        const z = zoneById.get(zid);
+        if (z) el.textContent = getZoneTemp(z, state.tempUnit);
+      });
+    }
+
+    function updateInspector(zone) {
+      if (!zone) return;
+      if (inspectorPanel) {
+        inspectorPanel.classList.remove(
+          'border-info-border',
+          'border-error-border',
+          'border-success-border',
+          'border-warning-border',
+          'border-signature-coral'
+        );
+        inspectorPanel.classList.add(getInspectorBorderClass(zone));
+      }
+      if (inspectorBadge) {
+        inspectorBadge.textContent = zone.isFridge
+          ? (ui.inspectorBadgeFridge || 'Inside Refrigerator Zone')
+          : (ui.inspectorBadgePantry || 'Keep Out of Refrigerator');
+      }
+      if (inspectorTemp) inspectorTemp.textContent = getZoneTemp(zone, state.tempUnit);
+      if (inspectorIcon) inspectorIcon.textContent = zone.icon;
+      if (inspectorName) inspectorName.textContent = zone.name;
+      if (inspectorHumidity) inspectorHumidity.textContent = zone.humidityLabel;
+      if (inspectorRuleTitle) inspectorRuleTitle.textContent = zone.ruleTitle;
+      if (inspectorRuleBody) inspectorRuleBody.textContent = zone.safetyRule;
+      if (inspectorNever) inspectorNever.textContent = zone.neverPutHere;
+      if (inspectorBest) inspectorBest.textContent = zone.bestFor;
+      if (inspectorCount) inspectorCount.textContent = String(zone.itemCount) + ' ' + (ui.itemsWord || 'items');
+    }
+
+    function applyButtonStates(searchMatchesByZone, hasQuery) {
+      unitBtns.forEach((btn) => {
+        const active = btn.getAttribute('data-foz-unit') === state.tempUnit;
+        btn.setAttribute('aria-checked', active ? 'true' : 'false');
+        btn.classList.toggle('bg-signature-coral', active);
+        btn.classList.toggle('text-white', active);
+        btn.classList.toggle('shadow-sm', active);
+        btn.classList.toggle('text-ink', !active);
+      });
+
+      if (showAllBtn) {
+        const active = state.showAllZones && !hasQuery;
+        showAllBtn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        showAllBtn.classList.toggle('bg-primary', active);
+        showAllBtn.classList.toggle('text-on-primary', active);
+        showAllBtn.classList.toggle('border-primary', active);
+        showAllBtn.classList.toggle('bg-canvas', !active);
+        showAllBtn.classList.toggle('text-ink', !active);
+        showAllBtn.classList.toggle('border-hairline', !active);
+      }
+
+      if (clearSearchBtn) {
+        clearSearchBtn.classList.toggle('hidden', !hasQuery);
+      }
+
+      ethBtns.forEach((btn) => {
+        const active = btn.getAttribute('data-foz-eth') === state.ethFilter;
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      zoneBtns.forEach((btn) => {
+        const zid = btn.getAttribute('data-foz-zone') || '';
+        const matchCount = searchMatchesByZone.get(zid) || 0;
+        const isSelected = !state.showAllZones && zid === state.selectedZoneId;
+        const isSearchHit = hasQuery && matchCount > 0;
+
+        btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+        btn.classList.remove(
+          'ring-2',
+          'ring-signature-coral',
+          'ring-offset-1',
+          'opacity-45',
+          'shadow-sm'
+        );
+
+        if (isSelected && !hasQuery) {
+          btn.classList.add('ring-2', 'ring-signature-coral', 'ring-offset-1', 'shadow-sm');
+        }
+
+        if (hasQuery) {
+          if (isSearchHit) {
+            btn.classList.add('ring-2', 'ring-signature-coral', 'ring-offset-1', 'shadow-sm');
+          } else {
+            btn.classList.add('opacity-45');
+          }
+        }
+      });
+
+      matchPillEls.forEach((pill) => {
+        const zid = pill.getAttribute('data-foz-match-pill') || '';
+        const count = searchMatchesByZone.get(zid) || 0;
+        if (hasQuery && count > 0) {
+          pill.textContent = String(count) + ' ' + (ui.matchCountSuffix || 'match');
+          pill.classList.remove('hidden');
+        } else {
+          pill.textContent = '';
+          pill.classList.add('hidden');
+        }
+      });
+    }
+
+    function render() {
+      updateTempDisplays();
+
+      const queryLower = state.query.trim().toLowerCase();
+      const hasQuery = queryLower.length > 0;
+      const searchMatchesByZone = new Map();
+      let firstMatchedZoneId = null;
+      let visibleCount = 0;
+
+      cardEls.forEach((cardEl) => {
+        const fid = cardEl.getAttribute('data-foz-card') || '';
+        const food = foodById.get(fid);
+        if (!food) return;
+
+        const zone = zoneById.get(food.zoneId);
+        const matchesEth = state.ethFilter === 'all' || food.ethylene === state.ethFilter;
+
+        let matchesQuery = true;
+        if (hasQuery) {
+          const haystack = (
+            food.name +
+            ' ' +
+            food.aliases +
+            ' ' +
+            food.mistake +
+            ' ' +
+            food.container +
+            ' ' +
+            (zone ? zone.name + ' ' + zone.shortName : '')
+          ).toLowerCase();
+          matchesQuery = haystack.indexOf(queryLower) !== -1;
+        }
+
+        if (hasQuery && matchesQuery && matchesEth) {
+          searchMatchesByZone.set(food.zoneId, (searchMatchesByZone.get(food.zoneId) || 0) + 1);
+          if (!firstMatchedZoneId) firstMatchedZoneId = food.zoneId;
+        }
+
+        const matchesZone = hasQuery || state.showAllZones || food.zoneId === state.selectedZoneId;
+        const show = matchesZone && matchesEth && matchesQuery;
+        cardEl.classList.toggle('hidden', !show);
+        if (show) visibleCount += 1;
+      });
+
+      if (hasQuery && firstMatchedZoneId) {
+        state.selectedZoneId = firstMatchedZoneId;
+      }
+
+      const activeZone = zoneById.get(state.selectedZoneId) || zones[0];
+      updateInspector(activeZone);
+      applyButtonStates(searchMatchesByZone, hasQuery);
+
+      if (emptyStateEl) {
+        emptyStateEl.classList.toggle('hidden', visibleCount > 0);
+      }
+
+      if (visibleCountBadge) {
+        visibleCountBadge.textContent = String(visibleCount) + ' / ' + String(foods.length);
+      }
+
+      if (listHeadingEl) {
+        if (hasQuery) {
+          listHeadingEl.textContent = '🔎 ' + (ui.groceryListHeadingSearch || 'Lookup Results') + ': "' + state.query.trim() + '"';
+        } else if (state.showAllZones) {
+          listHeadingEl.textContent = ui.groceryListHeadingAll || 'All 28 Everyday Groceries';
+        } else if (activeZone) {
+          listHeadingEl.textContent = activeZone.icon + ' ' + activeZone.shortName + ' — ' + (ui.groceryListHeadingZone || 'Zone Groceries');
+        }
+      }
+
+      lastCheatSheetText = buildCheatSheetText();
+    }
+
+    // Event bindings
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        state.query = searchInput.value || '';
+        render();
+      });
+    }
+
+    if (clearSearchBtn) {
+      clearSearchBtn.addEventListener('click', () => {
+        state.query = '';
+        if (searchInput) {
+          searchInput.value = '';
+          searchInput.focus();
+        }
+        render();
+      });
+    }
+
+    quickChips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const fid = chip.getAttribute('data-foz-quick') || '';
+        const food = foodById.get(fid);
+        if (!food) return;
+        const shortTerm = food.name.split('(')[0].split(',')[0].trim();
+        state.query = shortTerm;
+        state.ethFilter = 'all';
+        state.showAllZones = false;
+        state.selectedZoneId = food.zoneId;
+        if (searchInput) searchInput.value = shortTerm;
+        render();
+      });
+    });
+
+    unitBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.tempUnit = btn.getAttribute('data-foz-unit') === 'C' ? 'C' : 'F';
+        render();
+      });
+    });
+
+    zoneBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const zid = btn.getAttribute('data-foz-zone');
+        if (!zid) return;
+        state.selectedZoneId = zid;
+        state.showAllZones = false;
+        state.query = '';
+        if (searchInput) searchInput.value = '';
+        render();
+      });
+    });
+
+    if (showAllBtn) {
+      showAllBtn.addEventListener('click', () => {
+        state.showAllZones = !state.showAllZones;
+        state.query = '';
+        if (searchInput) searchInput.value = '';
+        render();
+      });
+    }
+
+    ethBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        state.ethFilter = btn.getAttribute('data-foz-eth') || 'all';
+        if (state.ethFilter !== 'all' && !state.query.trim()) {
+          state.showAllZones = true;
+        }
+        render();
+      });
+    });
+
+    jumpZoneBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const zid = btn.getAttribute('data-foz-jump-zone');
+        if (!zid) return;
+        state.selectedZoneId = zid;
+        state.showAllZones = false;
+        state.query = '';
+        if (searchInput) searchInput.value = '';
+        render();
+        if (inspectorPanel && inspectorPanel.scrollIntoView) {
+          inspectorPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+    });
+
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        const showCopied = () => {
+          if (copyLabel) copyLabel.textContent = ui.copiedCheatSheetBtn || 'Cheat Sheet Copied ✓';
+          window.setTimeout(() => {
+            if (copyLabel) copyLabel.textContent = '📋 ' + (ui.copyCheatSheetBtn || 'Copy Fridge Zone Cheat Sheet');
+          }, 2200);
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(lastCheatSheetText).then(showCopied).catch(showCopied);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = lastCheatSheetText;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'absolute';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          try {
+            document.execCommand('copy');
+          } catch (_) {
+            // ignore
+          }
+          document.body.removeChild(ta);
+          showCopied();
+        }
+      });
+    }
+
+    if (printBtn) {
+      printBtn.addEventListener('click', () => {
+        const prevShowAll = state.showAllZones;
+        state.showAllZones = true;
+        render();
+        window.print();
+        state.showAllZones = prevShowAll;
+        render();
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        state.tempUnit = payload.defaultTempUnit || 'F';
+        state.selectedZoneId = payload.defaultZoneId || 'middle-shelf';
+        state.showAllZones = false;
+        state.ethFilter = 'all';
+        state.query = '';
+        if (searchInput) searchInput.value = '';
+        render();
+      });
+    }
+
+    render();
+  })();
+</script>

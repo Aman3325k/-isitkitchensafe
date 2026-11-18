@@ -219,6 +219,8 @@ const SPECIAL_PAGES = [
   'tools/power-outage-food-safety-checker',
   'tools/baby-bottle-safety-checker',
   'tools/cooking-oil-smoke-point-finder',
+  'tools/cast-iron-seasoning-troubleshooter',
+  'tools/fridge-organization-zone-planner',
   'methodology',
   'saved'
 ];

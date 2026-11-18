@@ -1,0 +1,1639 @@
+---
+import rawData from '../data/cast-iron-seasoning-troubleshooter-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+import { useTranslatedPath } from '../i18n/utils';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+const translatePath = useTranslatedPath(lang);
+
+const cookwareOvenUrl = translatePath('/tools/cookware-oven-temp-lookup/');
+const smokePointUrl = translatePath('/tools/cooking-oil-smoke-point-finder/');
+const symbolDecoderUrl = translatePath('/tools/kitchen-symbol-decoder/');
+const methodologyUrl = translatePath('/methodology/');
+const allToolsUrl = translatePath('/tools/');
+
+type PanTypeId = 'cast-iron' | 'carbon-steel' | 'enameled';
+type SeverityLevel = 'low' | 'moderate' | 'high' | 'critical';
+type CookSafetyLevel = 'safe' | 'caution' | 'unsafe';
+type OilRating = 'top-pick' | 'best-everyday' | 'classic' | 'high-heat' | 'warning' | 'avoid';
+
+interface LocalizedPanType {
+  id: PanTypeId;
+  icon: string;
+  isEnameled: boolean;
+  label: string;
+  sub: string;
+  shortNote: string;
+}
+
+interface LocalizedSymptom {
+  id: string;
+  icon: string;
+  severity: SeverityLevel;
+  cookSafety: CookSafetyLevel;
+  needsFullStrip: boolean;
+  defaultOilId: string;
+  recommendedTempF: number;
+  recommendedTempC: number;
+  bakeMinutes: number;
+  roundsRecommended: number;
+  shortLabel: string;
+  title: string;
+  severityLabel: string;
+  verdictLabel: string;
+  rootCause: string;
+  safetyVerdict: string;
+  steps: string[];
+  carbonSteelNote: string;
+  preventionTip: string;
+}
+
+interface LocalizedOil {
+  id: string;
+  rating: OilRating;
+  durability: number;
+  smokePointF: number;
+  smokePointC: number;
+  bakeTempF: number;
+  bakeTempC: number;
+  bakeMinutes: number;
+  coolMinutes: number;
+  name: string;
+  badge: string;
+  pros: string;
+  cons: string;
+  warning: string;
+}
+
+const localizedPanTypes: LocalizedPanType[] = rawData.panTypes.map((p) => {
+  const tr = (p.i18n as Record<string, any>)[lang] || p.i18n.en;
+  return {
+    id: p.id as PanTypeId,
+    icon: p.icon,
+    isEnameled: Boolean(p.isEnameled),
+    label: tr.label,
+    sub: tr.sub,
+    shortNote: tr.shortNote
+  };
+});
+
+const localizedEnameledAlert =
+  (rawData.enameledAlert as Record<string, {
+    badge: string;
+    title: string;
+    summary: string;
+    stepsTitle: string;
+    steps: string[];
+    safetyCallout: string;
+  }>)[lang] || rawData.enameledAlert.en;
+
+const localizedSymptoms: LocalizedSymptom[] = rawData.symptoms.map((s) => {
+  const tr = (s.i18n as Record<string, any>)[lang] || s.i18n.en;
+  return {
+    id: s.id,
+    icon: s.icon,
+    severity: s.severity as SeverityLevel,
+    cookSafety: s.cookSafety as CookSafetyLevel,
+    needsFullStrip: Boolean(s.needsFullStrip),
+    defaultOilId: s.defaultOilId,
+    recommendedTempF: s.recommendedTempF,
+    recommendedTempC: s.recommendedTempC,
+    bakeMinutes: s.bakeMinutes,
+    roundsRecommended: s.roundsRecommended,
+    shortLabel: tr.shortLabel,
+    title: tr.title,
+    severityLabel: tr.severityLabel,
+    verdictLabel: tr.verdictLabel,
+    rootCause: tr.rootCause,
+    safetyVerdict: tr.safetyVerdict,
+    steps: tr.steps,
+    carbonSteelNote: tr.carbonSteelNote,
+    preventionTip: tr.preventionTip
+  };
+});
+
+const localizedOils: LocalizedOil[] = rawData.oils.map((o) => {
+  const tr = (o.i18n as Record<string, any>)[lang] || o.i18n.en;
+  return {
+    id: o.id,
+    rating: o.rating as OilRating,
+    durability: o.durability,
+    smokePointF: o.smokePointF,
+    smokePointC: o.smokePointC,
+    bakeTempF: o.bakeTempF,
+    bakeTempC: o.bakeTempC,
+    bakeMinutes: o.bakeMinutes,
+    coolMinutes: o.coolMinutes,
+    name: tr.name,
+    badge: tr.badge,
+    pros: tr.pros,
+    cons: tr.cons,
+    warning: tr.warning
+  };
+});
+
+const localizedFaqs: Array<{ question: string; answer: string }> =
+  (rawData.faqs as Record<string, Array<{ question: string; answer: string }>>)[lang] ||
+  rawData.faqs.en;
+
+interface UiDict {
+  ariaLabel: string;
+  step1Title: string;
+  unitLabel: string;
+  step2Title: string;
+  step2Sub: string;
+  dashboardBadge: string;
+  rootCauseTitle: string;
+  rescueStepsTitle: string;
+  recommendedOilLabel: string;
+  ovenTempLabel: string;
+  bakeCycleLabel: string;
+  preventionTitle: string;
+  carbonSteelBadge: string;
+  copyBtn: string;
+  copiedBtn: string;
+  printBtn: string;
+  resetBtn: string;
+  enameledSwitchBack: string;
+  oilCalcTitle: string;
+  oilCalcSub: string;
+  coatsLabel: string;
+  coat1: string;
+  coat2: string;
+  coat3: string;
+  oilBakeTemp: string;
+  oilSmokePoint: string;
+  oilBakeTime: string;
+  oilCoolTime: string;
+  oilTotalTime: string;
+  oilDurability: string;
+  oilProsLabel: string;
+  oilConsLabel: string;
+  oilWarningTitle: string;
+  minUnit: string;
+  hrUnit: string;
+  roundsWord: string;
+  upsideDownNote: string;
+  rulesTitle: string;
+  rulesSub: string;
+  rule1Title: string;
+  rule1Body: string;
+  rule2Title: string;
+  rule2Body: string;
+  rule3Title: string;
+  rule3Body: string;
+  relatedHeading: string;
+  relatedOvenTag: string;
+  relatedOvenTitle: string;
+  relatedOvenDesc: string;
+  relatedSmokeTag: string;
+  relatedSmokeTitle: string;
+  relatedSmokeDesc: string;
+  relatedSymbolTag: string;
+  relatedSymbolTitle: string;
+  relatedSymbolDesc: string;
+  methodologyStripTitle: string;
+  methodologyStripPrefix: string;
+  methodologyLabel: string;
+  smokePointLabel: string;
+  allToolsLabel: string;
+  faqTitle: string;
+  copyHeader: string;
+  copyPanLine: string;
+  copySymptomLine: string;
+  copyVerdictLine: string;
+  copyCauseLine: string;
+  copyOilTempLine: string;
+  copyStepsHeader: string;
+  copyPreventLine: string;
+}
+
+const UI: Record<SupportedLanguage, UiDict> = {
+  en: {
+    ariaLabel: 'Cast Iron and Carbon Steel Seasoning and Rust Troubleshooter',
+    step1Title: '1. Select Your Cookware Type',
+    unitLabel: 'Temp Unit',
+    step2Title: '2. Click Your Pan Symptom (8 Real-World Diagnostics)',
+    step2Sub: 'Select the issue that matches your skillet, Dutch oven, griddle, or wok for an instant rescue protocol.',
+    dashboardBadge: 'Step-by-Step Rescue Protocol',
+    rootCauseTitle: 'Why This Happened (Root Cause)',
+    rescueStepsTitle: 'Exact Step-by-Step Rescue Plan',
+    recommendedOilLabel: 'Recommended Oil',
+    ovenTempLabel: 'Oven Bake Temp',
+    bakeCycleLabel: 'Cycle & Coats',
+    preventionTitle: 'How to Prevent It Next Time',
+    carbonSteelBadge: 'Carbon Steel Specific Adjustment',
+    copyBtn: 'Copy Rescue Plan',
+    copiedBtn: 'Rescue Plan Copied ✓',
+    printBtn: 'Print Seasoning Guide',
+    resetBtn: 'Reset',
+    enameledSwitchBack: 'Switch back to Bare Cast Iron diagnostics →',
+    oilCalcTitle: 'Seasoning Oil Selector & Oven Polymerization Calculator',
+    oilCalcSub: 'Compare 6 oils by polymerization bake temperature, smoke point, durability, and flaking risk.',
+    coatsLabel: 'Number of Seasoning Rounds:',
+    coat1: '1 Coat (Touch-Up)',
+    coat2: '2 Coats (Standard)',
+    coat3: '3 Coats (Full Strip)',
+    oilBakeTemp: 'Exact Oven Bake Temp',
+    oilSmokePoint: 'Oil Smoke Point',
+    oilBakeTime: 'Active Bake Time',
+    oilCoolTime: 'Oven Cool-Down',
+    oilTotalTime: 'Total Cycle Estimate',
+    oilDurability: 'Durability Score',
+    oilProsLabel: 'Why Cooks Use It',
+    oilConsLabel: 'Watch-Outs',
+    oilWarningTitle: 'Seasoning Warning',
+    minUnit: 'min',
+    hrUnit: 'hrs',
+    roundsWord: 'rounds',
+    upsideDownNote: 'Always place skillet upside down on middle rack with foil below; let cool inside turned-off oven.',
+    rulesTitle: '3 Science-Backed Rules of Cast Iron & Carbon Steel Care',
+    rulesSub: 'Evidence-based metallurgy and oil polymerization habits—zero kitchen myths.',
+    rule1Title: 'Modern Dish Soap Is 100% Safe',
+    rule1Body: 'Liquid dish soaps like Dawn contain zero lye. They wash away burnt food carbon without harming true polymerized seasoning. Just dry on a warm burner for 60 seconds.',
+    rule2Title: 'Wipe Oil Like It Was a Mistake',
+    rule2Body: 'Sticky pans happen from thick oil coats. Buff oil off with a clean lint-free cloth until the surface looks almost dry before baking—microscopic layers polymerize glass-smooth.',
+    rule3Title: 'Bake Upside Down Above Smoke Point',
+    rule3Body: 'Bake 60 minutes at 450°F (232°C) for grapeseed, canola, or Crisco (500°F / 260°C for avocado) and cool inside the closed oven so polymerization finishes evenly.',
+    relatedHeading: 'Related Cookware & Heat Safety Tools',
+    relatedOvenTag: 'Handle & Lid Limits',
+    relatedOvenTitle: 'Cookware Oven Temperature Lookup →',
+    relatedOvenDesc: 'Check exact max oven temperatures for De Buyer handles, Lodge, Le Creuset knobs, Pyrex, and silicone handles.',
+    relatedSmokeTag: '50+ Cooking Fats',
+    relatedSmokeTitle: 'Cooking Oil Smoke Point Finder →',
+    relatedSmokeDesc: 'Compare smoke points, searing safety, and oxidative stability across grapeseed, avocado, canola, and olive oils.',
+    relatedSymbolTag: 'Cookware Base Stamps',
+    relatedSymbolTitle: 'Kitchen Appliance Symbol Decoder →',
+    relatedSymbolDesc: 'Identify induction coil icons, oven-safe marks, dishwasher warnings, and ceramic/gas compatibility stamps.',
+    methodologyStripTitle: 'Verified Against Metallurgy & Lipid Polymerization Standards',
+    methodologyStripPrefix: 'Our seasoning temps, rust removal intervals, and enamel safety thresholds follow manufacturer engineering specs. Read our',
+    methodologyLabel: 'Methodology',
+    smokePointLabel: 'Oil Smoke Point Finder',
+    allToolsLabel: 'All Kitchen Tools →',
+    faqTitle: 'Frequently Asked Questions: Cast Iron & Carbon Steel Seasoning',
+    copyHeader: 'IsItKitchenSafe — Cast Iron & Carbon Steel Rescue Protocol',
+    copyPanLine: 'Cookware Type',
+    copySymptomLine: 'Symptom',
+    copyVerdictLine: 'Safety Verdict',
+    copyCauseLine: 'Root Cause',
+    copyOilTempLine: 'Recommended Oil & Oven Temp',
+    copyStepsHeader: 'Rescue Steps:',
+    copyPreventLine: 'Prevention Tip'
+  },
+  es: {
+    ariaLabel: 'Solucionador de Curado y Óxido para Hierro Fundido y Acero al Carbono',
+    step1Title: '1. Selecciona Tu Tipo de Sartén u Olla',
+    unitLabel: 'Unidad',
+    step2Title: '2. Elige el Síntoma de Tu Sartén (8 Diagnósticos Reales)',
+    step2Sub: 'Haz clic en el problema que ves para obtener el protocolo paso a paso de rescate.',
+    dashboardBadge: 'Protocolo de Rescate Paso a Paso',
+    rootCauseTitle: 'Por Qué Ocurrió (Causa Raíz)',
+    rescueStepsTitle: 'Plan Exacto de Rescate Paso a Paso',
+    recommendedOilLabel: 'Aceite Recomendado',
+    ovenTempLabel: 'Temp. de Horno',
+    bakeCycleLabel: 'Ciclo y Capas',
+    preventionTitle: 'Cómo Evitarlo la Próxima Vez',
+    carbonSteelBadge: 'Ajuste para Acero al Carbono',
+    copyBtn: 'Copiar Plan de Rescate',
+    copiedBtn: 'Plan Copiado ✓',
+    printBtn: 'Imprimir Guía de Curado',
+    resetBtn: 'Restablecer',
+    enameledSwitchBack: 'Volver al diagnóstico de Hierro Sin Esmalte →',
+    oilCalcTitle: 'Selector de Aceite y Calculadora de Polimerización en Horno',
+    oilCalcSub: 'Compara 6 aceites por temperatura exacta de horneado, punto de humo, durabilidad y riesgo de escamas.',
+    coatsLabel: 'Número de Rondas de Curado:',
+    coat1: '1 Capa (Retoque)',
+    coat2: '2 Capas (Estándar)',
+    coat3: '3 Capas (Restauración)',
+    oilBakeTemp: 'Temp. Exacta de Horno',
+    oilSmokePoint: 'Punto de Humo',
+    oilBakeTime: 'Horneado Activo',
+    oilCoolTime: 'Enfriado en Horno',
+    oilTotalTime: 'Tiempo Total Estimado',
+    oilDurability: 'Durabilidad',
+    oilProsLabel: 'Ventajas',
+    oilConsLabel: 'Inconvenientes',
+    oilWarningTitle: 'Advertencia de Curado',
+    minUnit: 'min',
+    hrUnit: 'h',
+    roundsWord: 'rondas',
+    upsideDownNote: 'Hornea siempre boca abajo en la rejilla central con aluminio debajo y deja enfriar dentro del horno apagado.',
+    rulesTitle: '3 Reglas Científicas del Cuidado de Hierro Fundido y Acero al Carbono',
+    rulesSub: 'Hábitos basados en polimerización real de aceites — cero mitos antiguos.',
+    rule1Title: 'El Jabón Moderno Es 100% Seguro',
+    rule1Body: 'Los lavavajillas líquidos modernos no contienen sosa cáustica; limpian el carbón sin quitar el curado polimerizado. Solo seca 60 segundos al fuego.',
+    rule2Title: 'Retira el Aceite Como Si Fuera un Error',
+    rule2Body: 'Las sartenes pegajosas surgen por exceso de aceite. Limpia con paño seco hasta que parezca casi seca antes de hornear.',
+    rule3Title: 'Hornea Boca Abajo Sobre el Punto de Humo',
+    rule3Body: 'Hornea 60 min a 232°C (450°F) para semilla de uva, canola o Crisco (260°C / 500°F para aguacate) y deja enfriar con el horno cerrado.',
+    relatedHeading: 'Herramientas Relacionadas de Ollas y Calor',
+    relatedOvenTag: 'Límites de Mangos y Tapas',
+    relatedOvenTitle: 'Temperatura Máxima de Ollas en Horno →',
+    relatedOvenDesc: 'Consulta temperaturas máximas para mangos De Buyer, perillas Le Creuset, Lodge, Pyrex y silicona.',
+    relatedSmokeTag: '50+ Grasas de Cocina',
+    relatedSmokeTitle: 'Buscador de Punto de Humo de Aceites →',
+    relatedSmokeDesc: 'Compara puntos de humo y estabilidad térmica de semilla de uva, aguacate, canola y oliva.',
+    relatedSymbolTag: 'Iconos en la Base',
+    relatedSymbolTitle: 'Decodificador de Símbolos de Cocina →',
+    relatedSymbolDesc: 'Identifica iconos de inducción, apto para horno, lavavajillas y compatibilidad de placas.',
+    methodologyStripTitle: 'Verificado con Normas de Metalurgia y Polimerización Lipídica',
+    methodologyStripPrefix: 'Todas las temperaturas y tiempos de rescate siguen especificaciones técnicas de fabricantes. Revisa nuestra',
+    methodologyLabel: 'Metodología',
+    smokePointLabel: 'Puntos de Humo',
+    allToolsLabel: 'Todas las Herramientas →',
+    faqTitle: 'Preguntas Frecuentes: Curado de Hierro Fundido y Acero al Carbono',
+    copyHeader: 'IsItKitchenSafe — Plan de Rescate para Hierro Fundido y Acero al Carbono',
+    copyPanLine: 'Tipo de Sartén',
+    copySymptomLine: 'Síntoma',
+    copyVerdictLine: 'Veredicto de Seguridad',
+    copyCauseLine: 'Causa Raíz',
+    copyOilTempLine: 'Aceite y Temp. de Horno',
+    copyStepsHeader: 'Pasos de Rescate:',
+    copyPreventLine: 'Prevención'
+  },
+  pt: {
+    ariaLabel: 'Solucionador de Cura e Ferrugem para Ferro Fundido e Aço Carbono',
+    step1Title: '1. Selecione o Tipo da Sua Panela',
+    unitLabel: 'Unidade',
+    step2Title: '2. Clique no Sintoma da Panela (8 Diagnósticos Reais)',
+    step2Sub: 'Escolha o problema que corresponde à sua frigideira, panela ou wok para ver o protocolo exato.',
+    dashboardBadge: 'Protocolo de Resgate Passo a Passo',
+    rootCauseTitle: 'Por Que Isso Aconteceu (Causa Raiz)',
+    rescueStepsTitle: 'Plano Exato de Resgate Passo a Passo',
+    recommendedOilLabel: 'Óleo Recomendado',
+    ovenTempLabel: 'Temp. do Forno',
+    bakeCycleLabel: 'Ciclo e Camadas',
+    preventionTitle: 'Como Evitar na Próxima Vez',
+    carbonSteelBadge: 'Ajuste para Aço Carbono',
+    copyBtn: 'Copiar Plano de Resgate',
+    copiedBtn: 'Plano Copiado ✓',
+    printBtn: 'Imprimir Guia de Cura',
+    resetBtn: 'Redefinir',
+    enameledSwitchBack: 'Voltar ao diagnóstico de Ferro Fundido Cru →',
+    oilCalcTitle: 'Seletor de Óleo e Calculadora de Polimerização no Forno',
+    oilCalcSub: 'Compare 6 óleos por temperatura exata de forno, ponto de fumaça, durabilidade e risco de descamar.',
+    coatsLabel: 'Número de Camadas de Cura:',
+    coat1: '1 Camada (Retoque)',
+    coat2: '2 Camadas (Padrão)',
+    coat3: '3 Camadas (Restauração)',
+    oilBakeTemp: 'Temp. Exata do Forno',
+    oilSmokePoint: 'Ponto de Fumaça',
+    oilBakeTime: 'Tempo de Forno',
+    oilCoolTime: 'Resfriamento Interno',
+    oilTotalTime: 'Tempo Total Estimado',
+    oilDurability: 'Durabilidade',
+    oilProsLabel: 'Pontos Fortes',
+    oilConsLabel: 'Atenção',
+    oilWarningTitle: 'Alerta de Cura',
+    minUnit: 'min',
+    hrUnit: 'h',
+    roundsWord: 'rodadas',
+    upsideDownNote: 'Asse sempre de boca para baixo na grade do meio com papel-alumínio embaixo e deixe esfriar no forno desligado.',
+    rulesTitle: '3 Regras Científicas para Ferro Fundido e Aço Carbono',
+    rulesSub: 'Hábitos baseados em polimerização real — sem mitos antigos de cozinha.',
+    rule1Title: 'Detergente Neutro Moderno É 100% Seguro',
+    rule1Body: 'Detergentes modernos não contêm soda cáustica e removem restos queimados sem destruir a cura polimerizada. Só seque 60 segundos no fogo.',
+    rule2Title: 'Limpe o Óleo Como Se Fosse Um Erro',
+    rule2Body: 'Panelas grudentas vêm de excesso de óleo. Retire o excesso com pano seco até parecer quase seca antes de ir ao forno.',
+    rule3Title: 'Asse de Boca Para Baixo Acima do Ponto de Fumaça',
+    rule3Body: 'Asse 60 min a 232°C (450°F) para semente de uva, canola ou Crisco (260°C / 500°F para abacate) e deixe esfriar dentro do forno fechado.',
+    relatedHeading: 'Ferramentas Relacionadas de Panelas e Calor',
+    relatedOvenTag: 'Limites de Cabos e Tampas',
+    relatedOvenTitle: 'Temperatura Máxima de Panelas no Forno →',
+    relatedOvenDesc: 'Confira limites de forno para cabos De Buyer, pegadores Le Creuset, Lodge, Pyrex e silicone.',
+    relatedSmokeTag: '50+ Óleos e Gorduras',
+    relatedSmokeTitle: 'Buscador de Ponto de Fumaça de Óleos →',
+    relatedSmokeDesc: 'Compare pontos de fumaça e estabilidade térmica de semente de uva, abacate, canola e azeite.',
+    relatedSymbolTag: 'Ícones no Fundo',
+    relatedSymbolTitle: 'Decodificador de Símbolos de Cozinha →',
+    relatedSymbolDesc: 'Identifique ícones de indução, forno, lava-louças e compatibilidade com cooktops.',
+    methodologyStripTitle: 'Verificado Segundo Padrões de Metalurgia e Polimerização',
+    methodologyStripPrefix: 'Todas as temperaturas, tempos de vinagre e alertas de esmalte seguem dados técnicos dos fabricantes. Veja nossa',
+    methodologyLabel: 'Metodologia',
+    smokePointLabel: 'Ponto de Fumaça',
+    allToolsLabel: 'Todas as Ferramentas →',
+    faqTitle: 'Perguntas Frequentes: Cura de Ferro Fundido e Aço Carbono',
+    copyHeader: 'IsItKitchenSafe — Plano de Resgate de Ferro Fundido e Aço Carbono',
+    copyPanLine: 'Tipo de Panela',
+    copySymptomLine: 'Sintoma',
+    copyVerdictLine: 'Veredito de Segurança',
+    copyCauseLine: 'Causa Raiz',
+    copyOilTempLine: 'Óleo e Temp. do Forno',
+    copyStepsHeader: 'Passos de Resgate:',
+    copyPreventLine: 'Dica de Prevenção'
+  },
+  'zh-cn': {
+    ariaLabel: '铸铁锅与碳钢锅开锅养护及除锈诊断排查工具',
+    step1Title: '1. 选择你的锅具类型',
+    unitLabel: '温度单位',
+    step2Title: '2. 点击锅具当前症状（8 大常见实景诊断）',
+    step2Sub: '点选最符合你手中铸铁锅、平底锅或铁炒锅的问题，立即生成分步抢救方案。',
+    dashboardBadge: '分步抢救与修复方案',
+    rootCauseTitle: '原因解析（为什么会这样）',
+    rescueStepsTitle: '精准分步抢救流程',
+    recommendedOilLabel: '推荐聚合用油',
+    ovenTempLabel: '烤箱聚合温度',
+    bakeCycleLabel: '烘烤时长与遍数',
+    preventionTitle: '如何彻底预防复发',
+    carbonSteelBadge: '碳钢锅 / 熟铁锅专属修正',
+    copyBtn: '复制抢救方案',
+    copiedBtn: '方案已复制 ✓',
+    printBtn: '打印开锅养护指南',
+    resetBtn: '重置',
+    enameledSwitchBack: '切换回无涂层铸铁锅诊断 →',
+    oilCalcTitle: '开锅用油选择器与烤箱聚合温度计算器',
+    oilCalcSub: '横向对比 6 种常见食用油的聚合烤温、烟点、耐用度及起皮/发黏避雷预警。',
+    coatsLabel: '选择烤油遍数：',
+    coat1: '1 遍（日常补膜）',
+    coat2: '2 遍（标准修复）',
+    coat3: '3 遍（退层大翻新）',
+    oilBakeTemp: '精确烤箱烘烤温度',
+    oilSmokePoint: '油脂烟点',
+    oilBakeTime: '实际烘烤时间',
+    oilCoolTime: '烤箱内自然冷却',
+    oilTotalTime: '总耗时估算',
+    oilDurability: '油膜耐用评级',
+    oilProsLabel: '核心优势',
+    oilConsLabel: '注意事项',
+    oilWarningTitle: '用油避雷警示',
+    minUnit: '分钟',
+    hrUnit: '小时',
+    roundsWord: '轮',
+    upsideDownNote: '务必将锅倒扣在烤箱中层烤网上，下层垫锡纸；烤完关火让锅在闭门烤箱内自然冷却。',
+    rulesTitle: '铸铁锅与碳钢锅科学养护 3 大铁律',
+    rulesSub: '基于油脂高温聚合化学原理——告别过时厨房误区。',
+    rule1Title: '现代中性洗洁精完全安全',
+    rule1Body: 'Dawn 等现代洗洁精不含强碱，不会洗掉已聚合油膜，反而能洗净焦黑积碳。洗完上灶烘干 60 秒即可。',
+    rule2Title: '擦油要像“擦掉误倒的油”一样狠',
+    rule2Body: '锅面发黏几乎全是油抹太厚所致。入烤箱前用干净纸巾反复擦至肉眼看似无油，超薄油膜才能光滑如镜。',
+    rule3Title: '高于烟点倒扣烤 60 分钟 + 炉内缓冷',
+    rule3Body: '葡萄籽油、菜籽油、Crisco 设定 232°C (450°F) 烤足 60 分钟（牛油果油需 260°C / 500°F），并在关火烤箱内冷却定型。',
+    relatedHeading: '相关锅具耐温与用油安全工具',
+    relatedOvenTag: '锅柄与锅盖耐温查询',
+    relatedOvenTitle: '锅具烤箱耐高温速查表 →',
+    relatedOvenDesc: '核对 De Buyer 锅柄、Lodge、Le Creuset 盖钮、派热克斯玻璃与硅胶配件的烤箱温度上限。',
+    relatedSmokeTag: '50+ 食用油脂数据库',
+    relatedSmokeTitle: '食用油烟点查询对比工具 →',
+    relatedSmokeDesc: '精准对比葡萄籽油、牛油果油、菜籽油、橄榄油的烟点与高温煎炸稳定性。',
+    relatedSymbolTag: '锅底安全标识解码',
+    relatedSymbolTitle: '厨房电器与餐具图标解码器 →',
+    relatedSymbolDesc: '一眼读懂电磁炉线圈、烤箱耐热、禁洗碗机及燃气/电陶炉适用标志。',
+    methodologyStripTitle: '依据金属材料学与油脂热聚合技术规范校验',
+    methodologyStripPrefix: '所有烤温阈值、醋泡时限与珐琅安全警示均核对品牌工程手册，详见',
+    methodologyLabel: '评估方法论',
+    smokePointLabel: '食用油烟点查询',
+    allToolsLabel: '全部实用工具 →',
+    faqTitle: '铸铁锅与碳钢锅开锅除锈常见问题解答',
+    copyHeader: 'IsItKitchenSafe — 铸铁锅与碳钢锅修复抢救方案',
+    copyPanLine: '锅具类型',
+    copySymptomLine: '诊断症状',
+    copyVerdictLine: '安全结论',
+    copyCauseLine: '根本原因',
+    copyOilTempLine: '推荐用油与烤温',
+    copyStepsHeader: '修复步骤：',
+    copyPreventLine: '预防建议'
+  },
+  ja: {
+    ariaLabel: 'キャストアイアン＆カーボンスチール シーズニング・サビ診断ツール',
+    step1Title: '1. お手持ちの鉄鍋タイプを選択',
+    unitLabel: '温度単位',
+    step2Title: '2. フライパン・鍋の症状をクリック（8大トラブル診断）',
+    step2Sub: '現在の状態を選ぶだけで、科学的な原因とステップ別リカバリー手順を即表示します。',
+    dashboardBadge: 'ステップ別リカバリー手順',
+    rootCauseTitle: 'なぜ起きたのか（根本原因）',
+    rescueStepsTitle: '具体的な修復ステップ',
+    recommendedOilLabel: '推奨オイル',
+    ovenTempLabel: 'オーブン焼成温度',
+    bakeCycleLabel: '焼成時間・回数',
+    preventionTitle: '再発を防ぐお手入れのコツ',
+    carbonSteelBadge: 'カーボンスチール（薄手鉄鍋）向けの調整',
+    copyBtn: '修復プランをコピー',
+    copiedBtn: 'コピーしました ✓',
+    printBtn: 'シーズニング手順を印刷',
+    resetBtn: 'リセット',
+    enameledSwitchBack: '無塗装キャストアイアン診断に戻る →',
+    oilCalcTitle: 'シーズニング用オイル比較＆オーブン重合温度計算機',
+    oilCalcSub: '6種類の油について最適な焼成温度・発煙点・耐久性・剥がれリスクを比較できます。',
+    coatsLabel: '焼き込み回数（コート数）：',
+    coat1: '1回（部分補修）',
+    coat2: '2回（標準再生）',
+    coat3: '3回（完全剥離後）',
+    oilBakeTemp: '最適オーブン焼成温度',
+    oilSmokePoint: '油の発煙点',
+    oilBakeTime: 'オーブン加熱時間',
+    oilCoolTime: '庫内放冷時間',
+    oilTotalTime: '合計所要目安',
+    oilDurability: '被膜の耐久性',
+    oilProsLabel: 'メリット',
+    oilConsLabel: '注意点',
+    oilWarningTitle: 'オイル使用上の注意',
+    minUnit: '分',
+    hrUnit: '時間',
+    roundsWord: '回',
+    upsideDownNote: '中段ラックに必ず鍋を逆さまで置き、下段にホイルを敷いて焼成後は庫内で自然冷却してください。',
+    rulesTitle: '鉄鍋・スキレットを一生モノにする3大科学ルール',
+    rulesSub: '迷信ではなく油脂重合と金属工学に基づく正しいケア習慣。',
+    rule1Title: '現代の中性洗剤は100%安全',
+    rule1Body: '中性食器用洗剤に苛性ソーダは含まれず、定着した重合油膜を傷めず焦げ汚れだけ落とせます。洗ったら60秒火にかけて乾燥を。',
+    rule2Title: '油は「拭き取りすぎる」くらい極薄に',
+    rule2Body: 'ベタつきの原因は厚塗りです。乾いた布や紙でほぼ乾いて見えるまで徹底的に拭き取ってから焼くのが滑らかな被膜の秘訣です。',
+    rule3Title: '発煙点以上で逆さま60分＋庫内冷却',
+    rule3Body: 'グレープシード油・キャノーラ油・ショートニングは232°C（450°F）で60分（アボカド油は260°C / 500°F）、焼成後はオーブン内で冷まします。',
+    relatedHeading: '関連する調理器具・耐熱安全ツール',
+    relatedOvenTag: 'ハンドル・蓋の耐熱上限',
+    relatedOvenTitle: '調理器具オーブン耐熱温度検索 →',
+    relatedOvenDesc: 'De Buyerハンドル・ル・クルーゼつまみ・Lodge・Pyrex・シリコンのオーブン上限温度を確認。',
+    relatedSmokeTag: '50種以上の食用油データ',
+    relatedSmokeTitle: '食用油の発煙点ファインダー →',
+    relatedSmokeDesc: 'グレープシード・アボカド・キャノーラ・オリーブ油の発煙点と高温調理適性を比較。',
+    relatedSymbolTag: '鍋底マークの解読',
+    relatedSymbolTitle: 'キッチン家電・食器マークデコーダー →',
+    relatedSymbolDesc: 'IHコイル記号・オーブン可・食洗機不可・ガス/ラジエント対応マークを瞬時に判別。',
+    methodologyStripTitle: '金属工学と油脂重合データに基づく検証基準',
+    methodologyStripPrefix: '各オーブン温度・酢浸け上限・ホーロー安全警告はメーカー仕様書と一次資料に基づきます。詳細は',
+    methodologyLabel: '検証メソドロジー',
+    smokePointLabel: '食用油の発煙点検索',
+    allToolsLabel: '全ツール一覧 →',
+    faqTitle: 'キャストアイアン＆鉄フライパンのシーズニングよくある質問',
+    copyHeader: 'IsItKitchenSafe — キャストアイアン＆鉄フライパン修復プラン',
+    copyPanLine: '鍋タイプ',
+    copySymptomLine: '症状',
+    copyVerdictLine: '安全判定',
+    copyCauseLine: '原因',
+    copyOilTempLine: '推奨オイル＆オーブン温度',
+    copyStepsHeader: '修復手順：',
+    copyPreventLine: '予防ポイント'
+  }
+};
+
+const t = UI[lang] || UI.en;
+const defaultUnit: 'F' | 'C' = lang === 'en' ? 'F' : 'C';
+const defaultPanType = localizedPanTypes[0]; // cast-iron
+const defaultSymptom = localizedSymptoms[0]; // sticky-tacky
+const defaultOil = localizedOils.find((o) => o.id === defaultSymptom.defaultOilId) || localizedOils[0];
+
+function formatTemp(f: number, c: number, unit: 'F' | 'C'): string {
+  return unit === 'F' ? `${f}°F (${c}°C)` : `${c}°C (${f}°F)`;
+}
+
+function getSafetyPillClass(safety: CookSafetyLevel): string {
+  if (safety === 'safe') return 'badge-yes';
+  if (safety === 'caution') return 'badge-depends';
+  return 'badge-no';
+}
+
+function getSeverityDotClass(severity: SeverityLevel): string {
+  if (severity === 'low') return 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/40';
+  if (severity === 'moderate') return 'bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-500/40';
+  if (severity === 'high') return 'bg-orange-500/20 text-orange-800 dark:text-orange-300 border-orange-500/40';
+  return 'bg-red-500/20 text-red-800 dark:text-red-300 border-red-500/40';
+}
+
+function getOilBadgeClass(rating: OilRating): string {
+  if (rating === 'top-pick' || rating === 'best-everyday' || rating === 'classic') return 'badge-yes';
+  if (rating === 'high-heat') return 'badge-depends';
+  return 'badge-no';
+}
+
+const clientPayload = {
+  lang,
+  defaultUnit,
+  panTypes: localizedPanTypes,
+  enameledAlert: localizedEnameledAlert,
+  symptoms: localizedSymptoms,
+  oils: localizedOils,
+  ui: t
+};
+---
+
+<div id="cast-iron-troubleshooter-root" class="space-y-12">
+  <!-- Main Interactive Troubleshooter Card -->
+  <section
+    id="cast-iron-seasoning-troubleshooter"
+    class="bg-canvas border border-hairline rounded-2xl shadow-sm overflow-hidden"
+    aria-label={t.ariaLabel}
+  >
+    <script type="application/json" id="cist-payload" set:html={JSON.stringify(clientPayload)} />
+
+    <!-- Top Bar: Step 1 Pan Type Toggle + °F/°C Unit Switch -->
+    <div class="p-5 sm:p-6 border-b border-hairline bg-surface-soft/50 space-y-4 print:hidden">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h2 class="text-title-sm font-semibold text-ink">{t.step1Title}</h2>
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-semibold text-muted">{t.unitLabel}:</span>
+          <div
+            class="inline-flex rounded-lg border border-hairline bg-canvas p-0.5"
+            role="radiogroup"
+            aria-label={t.unitLabel}
+          >
+            <button
+              type="button"
+              role="radio"
+              aria-checked={defaultUnit === 'F' ? 'true' : 'false'}
+              data-cist-unit="F"
+              class={`cist-unit-btn px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                defaultUnit === 'F' ? 'bg-primary text-on-primary' : 'text-ink hover:bg-surface-soft'
+              }`}
+            >
+              °F
+            </button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={defaultUnit === 'C' ? 'true' : 'false'}
+              data-cist-unit="C"
+              class={`cist-unit-btn px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                defaultUnit === 'C' ? 'bg-primary text-on-primary' : 'text-ink hover:bg-surface-soft'
+              }`}
+            >
+              °C
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 Pan Type Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5" role="radiogroup" aria-label={t.step1Title}>
+        {localizedPanTypes.map((pan) => {
+          const isSelected = pan.id === defaultPanType.id;
+          return (
+            <button
+              type="button"
+              role="radio"
+              aria-checked={isSelected ? 'true' : 'false'}
+              data-cist-pan={pan.id}
+              class={`cist-pan-btn p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
+                isSelected
+                  ? 'bg-primary text-on-primary border-primary shadow-sm'
+                  : pan.isEnameled
+                    ? 'bg-warning-bg/55 dark:bg-amber-950/25 text-ink border-warning-border/80 hover:border-error-border'
+                    : 'bg-canvas text-ink border-hairline hover:border-border-strong'
+              }`}
+            >
+              <span class="flex items-center justify-between gap-2">
+                <span class="text-sm font-bold leading-snug">
+                  {pan.icon} {pan.label}
+                </span>
+                {pan.isEnameled && (
+                  <span class="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-error-border text-white shrink-0">
+                    ⚠️
+                  </span>
+                )}
+              </span>
+              <span class="block text-[11px] opacity-85 mt-0.5 leading-tight">{pan.sub}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <p id="cist-pan-note" class="text-xs text-body bg-canvas border border-hairline rounded-xl px-3.5 py-2.5 leading-relaxed">
+        {defaultPanType.shortNote}
+      </p>
+    </div>
+
+    <!-- Explicit Enameled Cast Iron Warning Banner (Shown immediately when Enameled is selected) -->
+    <div
+      id="cist-enameled-panel"
+      class="hidden border-b-2 border-error-border bg-error-bg/60 dark:bg-red-950/35 p-5 sm:p-6 space-y-4"
+      role="region"
+      aria-label={localizedEnameledAlert.title}
+    >
+      <div class="space-y-2 max-w-4xl">
+        <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-error-border text-white">
+          🚨 {localizedEnameledAlert.badge}
+        </span>
+        <h2 class="text-title-md font-extrabold text-ink leading-snug">
+          {localizedEnameledAlert.title}
+        </h2>
+        <p class="text-xs sm:text-sm text-body leading-relaxed">
+          {localizedEnameledAlert.summary}
+        </p>
+      </div>
+
+      <div class="p-4 rounded-xl bg-canvas border border-error-border/60 space-y-2.5">
+        <h3 class="text-xs sm:text-sm font-bold text-ink">{localizedEnameledAlert.stepsTitle}</h3>
+        <ol class="space-y-2 text-xs sm:text-[13px] text-body list-decimal list-inside">
+          {localizedEnameledAlert.steps.map((step) => (
+            <li class="leading-relaxed">{step}</li>
+          ))}
+        </ol>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-warning-bg/75 dark:bg-amber-950/40 border border-warning-border">
+        <p class="text-xs font-bold text-ink leading-snug">
+          ⚠️ {localizedEnameledAlert.safetyCallout}
+        </p>
+        <button
+          type="button"
+          id="cist-enameled-back-btn"
+          class="min-h-[38px] px-3.5 py-1.5 rounded-lg text-xs font-bold bg-primary text-on-primary hover:bg-primary-active transition-colors cursor-pointer shrink-0 print:hidden"
+        >
+          {t.enameledSwitchBack}
+        </button>
+      </div>
+    </div>
+
+    <!-- Main 2-Column Diagnostic Grid: 8 Symptom Cards + Live Step-by-Step Rescue Protocol Dashboard -->
+    <div id="cist-diagnostic-grid" class="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-hairline">
+      <!-- Left Column: 8 Clickable Symptom Diagnostic Cards -->
+      <div class="lg:col-span-5 p-5 sm:p-6 space-y-4 print:hidden">
+        <div>
+          <h2 class="text-title-sm font-semibold text-ink">{t.step2Title}</h2>
+          <p class="text-xs text-muted mt-0.5">{t.step2Sub}</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2.5" role="radiogroup" aria-label={t.step2Title}>
+          {localizedSymptoms.map((sym) => {
+            const isSelected = sym.id === defaultSymptom.id;
+            return (
+              <button
+                type="button"
+                role="radio"
+                aria-checked={isSelected ? 'true' : 'false'}
+                data-cist-symptom={sym.id}
+                class={`cist-symptom-btn w-full p-3.5 rounded-xl border text-left transition-all cursor-pointer flex items-start gap-3 ${
+                  isSelected
+                    ? 'bg-surface-soft border-signature-coral ring-2 ring-signature-coral shadow-sm'
+                    : 'bg-canvas border-hairline hover:border-border-strong'
+                }`}
+              >
+                <span aria-hidden="true" class="text-xl leading-none mt-0.5 shrink-0">{sym.icon}</span>
+                <div class="min-w-0 flex-1 space-y-1">
+                  <div class="flex flex-wrap items-center justify-between gap-1.5">
+                    <span class="text-xs sm:text-[13px] font-bold text-ink leading-snug">
+                      {sym.title}
+                    </span>
+                  </div>
+                  <span class={`inline-block px-2 py-0.5 rounded border text-[10.5px] font-bold ${getSeverityDotClass(sym.severity)}`}>
+                    {sym.severityLabel}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <!-- Right Column: Live Step-by-Step Rescue Protocol Dashboard -->
+      <div class="lg:col-span-7 p-5 sm:p-6 bg-surface-soft/40 flex flex-col justify-between space-y-5">
+        <div class="space-y-4">
+          <!-- High-Contrast Dark Verdict Banner -->
+          <div
+            id="cist-rescue-banner"
+            aria-live="polite"
+            class="rounded-2xl bg-surface-dark text-on-dark p-5 sm:p-6 space-y-4 shadow-sm border-l-4 border-success-border"
+          >
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-signature-peach">
+                {t.dashboardBadge} · <span id="cist-active-pan-label">{defaultPanType.label}</span>
+              </span>
+              <span id="cist-verdict-pill" class={getSafetyPillClass(defaultSymptom.cookSafety)}>
+                {defaultSymptom.verdictLabel}
+              </span>
+            </div>
+
+            <div class="flex items-start gap-3">
+              <span id="cist-banner-icon" aria-hidden="true" class="text-2xl leading-none mt-0.5 shrink-0">
+                {defaultSymptom.icon}
+              </span>
+              <div class="min-w-0 space-y-1.5">
+                <h2 id="cist-banner-title" class="text-lg sm:text-xl font-extrabold tracking-tight text-white leading-snug">
+                  {defaultSymptom.title}
+                </h2>
+                <p id="cist-safety-verdict" class="text-xs sm:text-[13px] text-white/90 leading-relaxed">
+                  {defaultSymptom.safetyVerdict}
+                </p>
+              </div>
+            </div>
+
+            <!-- 3-Metric Quick Strip: Oil / Oven Temp / Bake Cycle -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+              <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+                <span class="block text-[10.5px] font-medium text-white/70">{t.recommendedOilLabel}</span>
+                <span id="cist-rec-oil" class="block text-xs sm:text-[13px] font-bold text-signature-yellow mt-0.5">
+                  {defaultOil.name}
+                </span>
+              </div>
+              <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+                <span class="block text-[10.5px] font-medium text-white/70">{t.ovenTempLabel}</span>
+                <span id="cist-rec-temp" class="block text-xs sm:text-[13px] font-mono font-bold text-signature-mint mt-0.5">
+                  {formatTemp(defaultSymptom.recommendedTempF, defaultSymptom.recommendedTempC, defaultUnit)}
+                </span>
+              </div>
+              <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+                <span class="block text-[10.5px] font-medium text-white/70">{t.bakeCycleLabel}</span>
+                <span id="cist-rec-cycle" class="block text-xs sm:text-[13px] font-bold text-white mt-0.5">
+                  {defaultSymptom.bakeMinutes} {t.minUnit} × {defaultSymptom.roundsRecommended}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Root Cause Box -->
+          <div class="p-4 rounded-xl bg-canvas border border-hairline space-y-1">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-ink flex items-center gap-1.5">
+              <span aria-hidden="true">🔬</span> {t.rootCauseTitle}
+            </h3>
+            <p id="cist-root-cause" class="text-xs sm:text-[13px] text-body leading-relaxed">
+              {defaultSymptom.rootCause}
+            </p>
+          </div>
+
+          <!-- Numbered Step-by-Step Rescue Plan -->
+          <div class="p-4 sm:p-5 rounded-xl bg-canvas border border-hairline space-y-3">
+            <h3 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-ink flex items-center gap-1.5">
+              <span aria-hidden="true">🛠️</span> {t.rescueStepsTitle}
+            </h3>
+            <ol id="cist-steps-list" class="space-y-2.5 text-xs sm:text-[13.5px] text-body list-decimal list-outside pl-5">
+              {defaultSymptom.steps.map((step) => (
+                <li class="leading-relaxed pl-1">{step}</li>
+              ))}
+            </ol>
+          </div>
+
+          <!-- Carbon Steel Specific Note (Revealed when Carbon Steel mode is active) -->
+          <div
+            id="cist-carbon-note-box"
+            class="hidden p-4 rounded-xl bg-warning-bg/60 dark:bg-amber-950/30 border border-warning-border/80 space-y-1"
+          >
+            <h3 class="text-xs font-bold uppercase tracking-wider text-ink flex items-center gap-1.5">
+              <span aria-hidden="true">🥘</span> {t.carbonSteelBadge}
+            </h3>
+            <p id="cist-carbon-note" class="text-xs sm:text-[13px] text-body leading-relaxed">
+              {defaultSymptom.carbonSteelNote}
+            </p>
+          </div>
+
+          <!-- Prevention Tip -->
+          <div class="p-4 rounded-xl bg-surface-soft border border-hairline space-y-1">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-ink flex items-center gap-1.5">
+              <span aria-hidden="true">🛡️</span> {t.preventionTitle}
+            </h3>
+            <p id="cist-prevention-tip" class="text-xs sm:text-[13px] text-body leading-relaxed">
+              {defaultSymptom.preventionTip}
+            </p>
+          </div>
+
+          <!-- Action Buttons: Copy / Print / Reset -->
+          <div class="flex flex-wrap items-center gap-2.5 pt-1 print:hidden">
+            <button
+              type="button"
+              id="cist-copy-btn"
+              class="min-h-[44px] flex-1 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors cursor-pointer shadow-sm"
+            >
+              <span id="cist-copy-label">📋 {t.copyBtn}</span>
+            </button>
+            <button
+              type="button"
+              id="cist-print-btn"
+              class="min-h-[44px] px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-canvas text-ink border border-hairline hover:border-signature-coral transition-colors cursor-pointer"
+            >
+              🖨️ {t.printBtn}
+            </button>
+            <button
+              type="button"
+              id="cist-reset-btn"
+              class="min-h-[44px] px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-canvas text-muted border border-hairline hover:border-border-strong hover:text-ink transition-colors cursor-pointer"
+            >
+              {t.resetBtn}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Seasoning Oil Selector & Bake Temp Calculator -->
+    <div class="border-t border-hairline p-5 sm:p-6 space-y-5">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-3">
+        <div>
+          <h2 class="text-title-md font-semibold text-ink">{t.oilCalcTitle}</h2>
+          <p class="text-xs text-muted mt-0.5">{t.oilCalcSub}</p>
+        </div>
+
+        <!-- Coat Rounds Selector -->
+        <div class="flex flex-wrap items-center gap-2 print:hidden">
+          <span class="text-xs font-semibold text-muted">{t.coatsLabel}</span>
+          <div class="inline-flex rounded-lg border border-hairline bg-surface-soft p-0.5" role="radiogroup" aria-label={t.coatsLabel}>
+            <button
+              type="button"
+              role="radio"
+              aria-checked="false"
+              data-cist-coats="1"
+              class="cist-coats-btn px-2.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer text-ink hover:bg-canvas"
+            >
+              {t.coat1}
+            </button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked="true"
+              data-cist-coats="2"
+              class="cist-coats-btn px-2.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer bg-primary text-on-primary"
+            >
+              {t.coat2}
+            </button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked="false"
+              data-cist-coats="3"
+              class="cist-coats-btn px-2.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer text-ink hover:bg-canvas"
+            >
+              {t.coat3}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6 Oil Selector Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {localizedOils.map((oil) => {
+          const isSelected = oil.id === defaultOil.id;
+          return (
+            <button
+              type="button"
+              data-cist-oil={oil.id}
+              aria-pressed={isSelected ? 'true' : 'false'}
+              class={`cist-oil-btn p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
+                isSelected
+                  ? 'bg-surface-soft border-signature-coral ring-2 ring-signature-coral shadow-sm'
+                  : oil.rating === 'avoid' || oil.rating === 'warning'
+                    ? 'bg-error-bg/35 dark:bg-red-950/20 border-error-border/60 hover:border-error-border'
+                    : 'bg-canvas border-hairline hover:border-border-strong'
+              }`}
+            >
+              <div class="flex items-start justify-between gap-2 w-full">
+                <span class="text-sm font-bold text-ink leading-snug">{oil.name}</span>
+                <span class={`shrink-0 ${getOilBadgeClass(oil.rating)}`}>{oil.badge}</span>
+              </div>
+              <div class="flex items-center justify-between gap-2 text-xs text-muted pt-1 border-t border-hairline/60 w-full">
+                <span data-cist-oil-card-temp={oil.id} class="font-mono font-bold text-ink">
+                  🔥 {formatTemp(oil.bakeTempF, oil.bakeTempC, defaultUnit)}
+                </span>
+                <span class="font-semibold">
+                  {oil.durability}/5 ★
+                </span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      <!-- Live Oil Polymerization Readout Panel -->
+      <div
+        id="cist-oil-detail"
+        aria-live="polite"
+        class="p-5 rounded-2xl bg-surface-soft border border-hairline space-y-4"
+      >
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h3 id="cist-oil-name" class="text-title-sm font-bold text-ink">{defaultOil.name}</h3>
+          <span id="cist-oil-badge" class={getOilBadgeClass(defaultOil.rating)}>{defaultOil.badge}</span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+          <div class="p-3 rounded-xl bg-canvas border border-hairline">
+            <span class="block text-[11px] text-muted font-medium">{t.oilBakeTemp}</span>
+            <span id="cist-oil-bake-temp" class="block text-sm font-mono font-extrabold text-ink mt-0.5">
+              {formatTemp(defaultOil.bakeTempF, defaultOil.bakeTempC, defaultUnit)}
+            </span>
+          </div>
+          <div class="p-3 rounded-xl bg-canvas border border-hairline">
+            <span class="block text-[11px] text-muted font-medium">{t.oilSmokePoint}</span>
+            <span id="cist-oil-smoke-temp" class="block text-sm font-mono font-bold text-ink mt-0.5">
+              {formatTemp(defaultOil.smokePointF, defaultOil.smokePointC, defaultUnit)}
+            </span>
+          </div>
+          <div class="p-3 rounded-xl bg-canvas border border-hairline">
+            <span class="block text-[11px] text-muted font-medium">{t.oilBakeTime}</span>
+            <span id="cist-oil-bake-time" class="block text-sm font-bold text-ink mt-0.5">
+              60 {t.minUnit} × 2
+            </span>
+          </div>
+          <div class="p-3 rounded-xl bg-canvas border border-hairline">
+            <span class="block text-[11px] text-muted font-medium">{t.oilCoolTime}</span>
+            <span id="cist-oil-cool-time" class="block text-sm font-bold text-ink mt-0.5">
+              60 {t.minUnit} × 2
+            </span>
+          </div>
+          <div class="p-3 rounded-xl bg-canvas border border-hairline col-span-2 sm:col-span-1">
+            <span class="block text-[11px] text-muted font-medium">{t.oilTotalTime}</span>
+            <span id="cist-oil-total-time" class="block text-sm font-extrabold text-signature-coral mt-0.5">
+              4 {t.hrUnit}
+            </span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="p-3.5 rounded-xl bg-canvas border border-hairline space-y-1">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted block">✅ {t.oilProsLabel}</span>
+            <p id="cist-oil-pros" class="text-xs sm:text-[13px] text-body leading-relaxed">{defaultOil.pros}</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-canvas border border-hairline space-y-1">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted block">📌 {t.oilConsLabel}</span>
+            <p id="cist-oil-cons" class="text-xs sm:text-[13px] text-body leading-relaxed">{defaultOil.cons}</p>
+          </div>
+        </div>
+
+        <!-- Dynamic Oil Warning Callout (Flaxseed / EVOO / Avocado) -->
+        <div
+          id="cist-oil-warning-box"
+          class="hidden p-4 rounded-xl bg-error-bg/55 dark:bg-red-950/30 border border-error-border/75 space-y-1"
+        >
+          <span class="text-xs font-extrabold uppercase tracking-wider text-ink block">
+            ⚠️ {t.oilWarningTitle}
+          </span>
+          <p id="cist-oil-warning-text" class="text-xs sm:text-[13px] text-body leading-relaxed"></p>
+        </div>
+
+        <p class="text-[12px] text-muted leading-relaxed">
+          💡 {t.upsideDownNote}
+        </p>
+      </div>
+    </div>
+
+    <!-- 3 Science-Backed Rules Strip -->
+    <div class="border-t border-hairline p-5 sm:p-6 bg-surface-soft/50 space-y-4">
+      <div>
+        <h2 class="text-title-md font-semibold text-ink">{t.rulesTitle}</h2>
+        <p class="text-xs text-muted mt-0.5">{t.rulesSub}</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <article class="p-4 rounded-xl border bg-canvas border-hairline space-y-1.5">
+          <div class="flex items-center gap-2">
+            <span aria-hidden="true" class="text-lg">🧼</span>
+            <h3 class="text-xs sm:text-sm font-bold text-ink leading-snug">{t.rule1Title}</h3>
+          </div>
+          <p class="text-xs text-body leading-relaxed">{t.rule1Body}</p>
+        </article>
+        <article class="p-4 rounded-xl border bg-warning-bg/55 dark:bg-amber-950/25 border-warning-border/70 space-y-1.5">
+          <div class="flex items-center gap-2">
+            <span aria-hidden="true" class="text-lg">🧻</span>
+            <h3 class="text-xs sm:text-sm font-bold text-ink leading-snug">{t.rule2Title}</h3>
+          </div>
+          <p class="text-xs text-body leading-relaxed">{t.rule2Body}</p>
+        </article>
+        <article class="p-4 rounded-xl border bg-canvas border-hairline space-y-1.5">
+          <div class="flex items-center gap-2">
+            <span aria-hidden="true" class="text-lg">🔥</span>
+            <h3 class="text-xs sm:text-sm font-bold text-ink leading-snug">{t.rule3Title}</h3>
+          </div>
+          <p class="text-xs text-body leading-relaxed">{t.rule3Body}</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Related Companion Tools -->
+  <section class="space-y-4 print:hidden">
+    <h2 class="text-title-md font-semibold text-ink">{t.relatedHeading}</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <a
+        href={cookwareOvenUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedOvenTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedOvenTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedOvenDesc}</p>
+      </a>
+
+      <a
+        href={smokePointUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedSmokeTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedSmokeTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedSmokeDesc}</p>
+      </a>
+
+      <a
+        href={symbolDecoderUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedSymbolTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedSymbolTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedSymbolDesc}</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- Methodology & Hub Strip -->
+  <section class="p-6 rounded-2xl bg-surface-soft border border-hairline print:hidden">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-title-sm font-semibold text-ink mb-1">{t.methodologyStripTitle}</h2>
+        <p class="text-[13px] text-muted">
+          {t.methodologyStripPrefix}{' '}
+          <a href={methodologyUrl} class="text-link underline hover:text-link-active">{t.methodologyLabel}</a>.
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a
+          href={smokePointUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
+        >
+          {t.smokePointLabel}
+        </a>
+        <a
+          href={methodologyUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
+        >
+          {t.methodologyLabel}
+        </a>
+        <a
+          href={allToolsUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors"
+        >
+          {t.allToolsLabel}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Visible FAQ Accordion (Matches JSON-LD 1:1) -->
+  <section class="print:hidden">
+    <h2 class="text-title-lg font-medium text-ink tracking-tight mb-6">
+      {t.faqTitle}
+    </h2>
+    <div class="space-y-4">
+      {localizedFaqs.map((faq) => (
+        <details class="group p-5 bg-surface-soft border border-hairline rounded-xl" open>
+          <summary class="text-title-sm font-semibold text-ink cursor-pointer list-none flex items-center justify-between gap-3">
+            <span>{faq.question}</span>
+            <span class="text-muted text-sm transition-transform group-open:rotate-180 shrink-0" aria-hidden="true">&#9662;</span>
+          </summary>
+          <p class="text-[14px] text-body leading-relaxed mt-3 pt-3 border-t border-hairline/70">
+            {faq.answer}
+          </p>
+        </details>
+      ))}
+    </div>
+  </section>
+</div>
+
+<script is:inline>
+  (function () {
+    const payloadEl = document.getElementById('cist-payload');
+    if (!payloadEl) return;
+
+    let payload;
+    try {
+      payload = JSON.parse(payloadEl.textContent || '{}');
+    } catch (_) {
+      return;
+    }
+
+    const panTypes = payload.panTypes || [];
+    const symptoms = payload.symptoms || [];
+    const oils = payload.oils || [];
+    const ui = payload.ui || {};
+
+    if (!panTypes.length || !symptoms.length || !oils.length) return;
+
+    const panById = new Map(panTypes.map(function (p) { return [p.id, p]; }));
+    const symById = new Map(symptoms.map(function (s) { return [s.id, s]; }));
+    const oilById = new Map(oils.map(function (o) { return [o.id, o]; }));
+
+    // Controls
+    const panBtns = Array.from(document.querySelectorAll('.cist-pan-btn'));
+    const unitBtns = Array.from(document.querySelectorAll('.cist-unit-btn'));
+    const symptomBtns = Array.from(document.querySelectorAll('.cist-symptom-btn'));
+    const oilBtns = Array.from(document.querySelectorAll('.cist-oil-btn'));
+    const coatsBtns = Array.from(document.querySelectorAll('.cist-coats-btn'));
+
+    // Dashboard outputs
+    const panNoteEl = document.getElementById('cist-pan-note');
+    const enameledPanel = document.getElementById('cist-enameled-panel');
+    const enameledBackBtn = document.getElementById('cist-enameled-back-btn');
+    const diagnosticGrid = document.getElementById('cist-diagnostic-grid');
+
+    const rescueBanner = document.getElementById('cist-rescue-banner');
+    const activePanLabel = document.getElementById('cist-active-pan-label');
+    const verdictPill = document.getElementById('cist-verdict-pill');
+    const bannerIcon = document.getElementById('cist-banner-icon');
+    const bannerTitle = document.getElementById('cist-banner-title');
+    const safetyVerdictEl = document.getElementById('cist-safety-verdict');
+    const recOilEl = document.getElementById('cist-rec-oil');
+    const recTempEl = document.getElementById('cist-rec-temp');
+    const recCycleEl = document.getElementById('cist-rec-cycle');
+    const rootCauseEl = document.getElementById('cist-root-cause');
+    const stepsListEl = document.getElementById('cist-steps-list');
+    const carbonNoteBox = document.getElementById('cist-carbon-note-box');
+    const carbonNoteEl = document.getElementById('cist-carbon-note');
+    const preventionTipEl = document.getElementById('cist-prevention-tip');
+
+    // Oil calculator outputs
+    const oilNameEl = document.getElementById('cist-oil-name');
+    const oilBadgeEl = document.getElementById('cist-oil-badge');
+    const oilBakeTempEl = document.getElementById('cist-oil-bake-temp');
+    const oilSmokeTempEl = document.getElementById('cist-oil-smoke-temp');
+    const oilBakeTimeEl = document.getElementById('cist-oil-bake-time');
+    const oilCoolTimeEl = document.getElementById('cist-oil-cool-time');
+    const oilTotalTimeEl = document.getElementById('cist-oil-total-time');
+    const oilProsEl = document.getElementById('cist-oil-pros');
+    const oilConsEl = document.getElementById('cist-oil-cons');
+    const oilWarningBox = document.getElementById('cist-oil-warning-box');
+    const oilWarningText = document.getElementById('cist-oil-warning-text');
+
+    // Action buttons
+    const copyBtn = document.getElementById('cist-copy-btn');
+    const copyLabel = document.getElementById('cist-copy-label');
+    const printBtn = document.getElementById('cist-print-btn');
+    const resetBtn = document.getElementById('cist-reset-btn');
+
+    const state = {
+      panId: 'cast-iron',
+      unit: payload.defaultUnit === 'C' ? 'C' : 'F',
+      symptomId: symptoms[0].id,
+      oilId: symptoms[0].defaultOilId || oils[0].id,
+      coats: 2
+    };
+
+    let lastRescueText = '';
+
+    function fmtTemp(f, c) {
+      if (state.unit === 'C') {
+        return c + '°C (' + f + '°F)';
+      }
+      return f + '°F (' + c + '°C)';
+    }
+
+    function getSafetyPillClass(safety) {
+      if (safety === 'safe') return 'badge-yes';
+      if (safety === 'caution') return 'badge-depends';
+      return 'badge-no';
+    }
+
+    function getOilBadgeClass(rating) {
+      if (rating === 'top-pick' || rating === 'best-everyday' || rating === 'classic') return 'badge-yes';
+      if (rating === 'high-heat') return 'badge-depends';
+      return 'badge-no';
+    }
+
+    function render() {
+      const activePan = panById.get(state.panId) || panTypes[0];
+      const activeSym = symById.get(state.symptomId) || symptoms[0];
+      const recOil = oilById.get(activeSym.defaultOilId) || oils[0];
+      const activeOil = oilById.get(state.oilId) || oils[0];
+      const isEnameled = Boolean(activePan.isEnameled);
+
+      // Update unit toggle buttons
+      unitBtns.forEach(function (btn) {
+        const active = btn.getAttribute('data-cist-unit') === state.unit;
+        btn.setAttribute('aria-checked', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('text-ink', !active);
+      });
+
+      // Update pan type buttons
+      panBtns.forEach(function (btn) {
+        const pid = btn.getAttribute('data-cist-pan');
+        const active = pid === state.panId;
+        const pObj = panById.get(pid);
+        const btnIsEnamel = Boolean(pObj && pObj.isEnameled);
+
+        btn.setAttribute('aria-checked', active ? 'true' : 'false');
+        btn.classList.remove(
+          'bg-primary',
+          'text-on-primary',
+          'border-primary',
+          'bg-error-border',
+          'text-white',
+          'border-error-border',
+          'shadow-sm',
+          'bg-canvas',
+          'text-ink',
+          'border-hairline',
+          'bg-warning-bg/55',
+          'dark:bg-amber-950/25',
+          'border-warning-border/80'
+        );
+
+        if (active && btnIsEnamel) {
+          btn.classList.add('bg-error-border', 'text-white', 'border-error-border', 'shadow-sm');
+        } else if (active) {
+          btn.classList.add('bg-primary', 'text-on-primary', 'border-primary', 'shadow-sm');
+        } else if (btnIsEnamel) {
+          btn.classList.add('bg-warning-bg/55', 'dark:bg-amber-950/25', 'text-ink', 'border-warning-border/80');
+        } else {
+          btn.classList.add('bg-canvas', 'text-ink', 'border-hairline');
+        }
+      });
+
+      if (panNoteEl) {
+        panNoteEl.textContent = activePan.shortNote;
+      }
+
+      // Enameled warning visibility
+      if (enameledPanel) {
+        enameledPanel.classList.toggle('hidden', !isEnameled);
+      }
+      if (diagnosticGrid) {
+        diagnosticGrid.classList.toggle('opacity-55', isEnameled);
+      }
+
+      // Symptom button active styles
+      symptomBtns.forEach(function (btn) {
+        const active = btn.getAttribute('data-cist-symptom') === state.symptomId;
+        btn.setAttribute('aria-checked', active ? 'true' : 'false');
+        btn.classList.toggle('bg-surface-soft', active);
+        btn.classList.toggle('border-signature-coral', active);
+        btn.classList.toggle('ring-2', active);
+        btn.classList.toggle('ring-signature-coral', active);
+        btn.classList.toggle('shadow-sm', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      // Update Rescue Protocol Dashboard
+      if (activePanLabel) activePanLabel.textContent = activePan.label;
+      if (bannerIcon) bannerIcon.textContent = activeSym.icon;
+      if (bannerTitle) bannerTitle.textContent = activeSym.title;
+      if (safetyVerdictEl) safetyVerdictEl.textContent = activeSym.safetyVerdict;
+      if (rootCauseEl) rootCauseEl.textContent = activeSym.rootCause;
+      if (preventionTipEl) preventionTipEl.textContent = activeSym.preventionTip;
+
+      if (verdictPill) {
+        verdictPill.className = getSafetyPillClass(activeSym.cookSafety);
+        verdictPill.textContent = activeSym.verdictLabel;
+      }
+
+      if (rescueBanner) {
+        rescueBanner.classList.remove('border-success-border', 'border-warning-border', 'border-error-border');
+        rescueBanner.classList.add(
+          activeSym.cookSafety === 'safe'
+            ? 'border-success-border'
+            : activeSym.cookSafety === 'caution'
+              ? 'border-warning-border'
+              : 'border-error-border'
+        );
+      }
+
+      if (recOilEl) recOilEl.textContent = recOil.name;
+      if (recTempEl) recTempEl.textContent = fmtTemp(activeSym.recommendedTempF, activeSym.recommendedTempC);
+      if (recCycleEl) {
+        recCycleEl.textContent =
+          activeSym.bakeMinutes + ' ' + (ui.minUnit || 'min') + ' × ' + activeSym.roundsRecommended;
+      }
+
+      // Render numbered rescue steps via pure DOM nodes
+      if (stepsListEl) {
+        while (stepsListEl.firstChild) {
+          stepsListEl.removeChild(stepsListEl.firstChild);
+        }
+        (activeSym.steps || []).forEach(function (stepText) {
+          const li = document.createElement('li');
+          li.className = 'leading-relaxed pl-1';
+          li.textContent = stepText;
+          stepsListEl.appendChild(li);
+        });
+      }
+
+      // Carbon Steel specific adjustment box
+      const showCarbonNote = state.panId === 'carbon-steel' && Boolean(activeSym.carbonSteelNote);
+      if (carbonNoteBox) {
+        carbonNoteBox.classList.toggle('hidden', !showCarbonNote);
+      }
+      if (carbonNoteEl && activeSym.carbonSteelNote) {
+        carbonNoteEl.textContent = activeSym.carbonSteelNote;
+      }
+
+      // Update Oil Selector cards & calculator
+      oilBtns.forEach(function (btn) {
+        const oid = btn.getAttribute('data-cist-oil');
+        const active = oid === state.oilId;
+        const oObj = oilById.get(oid);
+        const isRisky = Boolean(oObj && (oObj.rating === 'avoid' || oObj.rating === 'warning'));
+
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        btn.classList.remove(
+          'bg-surface-soft',
+          'border-signature-coral',
+          'ring-2',
+          'ring-signature-coral',
+          'shadow-sm',
+          'bg-canvas',
+          'border-hairline',
+          'bg-error-bg/35',
+          'dark:bg-red-950/20',
+          'border-error-border/60'
+        );
+
+        if (active) {
+          btn.classList.add('bg-surface-soft', 'border-signature-coral', 'ring-2', 'ring-signature-coral', 'shadow-sm');
+        } else if (isRisky) {
+          btn.classList.add('bg-error-bg/35', 'dark:bg-red-950/20', 'border-error-border/60');
+        } else {
+          btn.classList.add('bg-canvas', 'border-hairline');
+        }
+
+        const cardTempEl = btn.querySelector('[data-cist-oil-card-temp]');
+        if (cardTempEl && oObj) {
+          cardTempEl.textContent = '🔥 ' + fmtTemp(oObj.bakeTempF, oObj.bakeTempC);
+        }
+      });
+
+      coatsBtns.forEach(function (btn) {
+        const cNum = Number(btn.getAttribute('data-cist-coats') || '2');
+        const active = cNum === state.coats;
+        btn.setAttribute('aria-checked', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('text-ink', !active);
+      });
+
+      if (oilNameEl) oilNameEl.textContent = activeOil.name;
+      if (oilBadgeEl) {
+        oilBadgeEl.className = getOilBadgeClass(activeOil.rating);
+        oilBadgeEl.textContent = activeOil.badge;
+      }
+      if (oilBakeTempEl) oilBakeTempEl.textContent = fmtTemp(activeOil.bakeTempF, activeOil.bakeTempC);
+      if (oilSmokeTempEl) oilSmokeTempEl.textContent = fmtTemp(activeOil.smokePointF, activeOil.smokePointC);
+      if (oilBakeTimeEl) {
+        oilBakeTimeEl.textContent = activeOil.bakeMinutes + ' ' + (ui.minUnit || 'min') + ' × ' + state.coats;
+      }
+      if (oilCoolTimeEl) {
+        oilCoolTimeEl.textContent = activeOil.coolMinutes + ' ' + (ui.minUnit || 'min') + ' × ' + state.coats;
+      }
+      if (oilTotalTimeEl) {
+        const totalHours = ((activeOil.bakeMinutes + activeOil.coolMinutes) * state.coats) / 60;
+        oilTotalTimeEl.textContent = totalHours + ' ' + (ui.hrUnit || 'hrs');
+      }
+      if (oilProsEl) oilProsEl.textContent = activeOil.pros;
+      if (oilConsEl) oilConsEl.textContent = activeOil.cons;
+
+      const hasWarning = Boolean(activeOil.warning && activeOil.warning.trim().length > 0);
+      if (oilWarningBox) {
+        oilWarningBox.classList.toggle('hidden', !hasWarning);
+      }
+      if (oilWarningText) {
+        oilWarningText.textContent = activeOil.warning || '';
+      }
+
+      // Build copyable plain-text rescue plan
+      const stepLines = (activeSym.steps || []).map(function (st, idx) {
+        return '  ' + (idx + 1) + '. ' + st;
+      });
+
+      const summaryLines = [
+        ui.copyHeader || 'Cast Iron & Carbon Steel Rescue Protocol',
+        (ui.copyPanLine || 'Cookware') + ': ' + activePan.label,
+        (ui.copySymptomLine || 'Symptom') + ': ' + activeSym.title,
+        (ui.copyVerdictLine || 'Verdict') + ': ' + activeSym.verdictLabel + ' — ' + activeSym.safetyVerdict,
+        (ui.copyCauseLine || 'Root Cause') + ': ' + activeSym.rootCause,
+        (ui.copyOilTempLine || 'Recommended Oil & Oven Temp') +
+          ': ' +
+          recOil.name +
+          ' @ ' +
+          fmtTemp(activeSym.recommendedTempF, activeSym.recommendedTempC) +
+          ' (' +
+          activeSym.bakeMinutes +
+          ' ' +
+          (ui.minUnit || 'min') +
+          ' x ' +
+          activeSym.roundsRecommended +
+          ')',
+        '',
+        ui.copyStepsHeader || 'Rescue Steps:',
+        stepLines.join('\n'),
+        '',
+        (ui.copyPreventLine || 'Prevention') + ': ' + activeSym.preventionTip
+      ];
+
+      lastRescueText = summaryLines.join('\n');
+    }
+
+    // Event bindings
+    panBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const pid = btn.getAttribute('data-cist-pan');
+        if (pid && panById.has(pid)) {
+          state.panId = pid;
+          render();
+        }
+      });
+    });
+
+    if (enameledBackBtn) {
+      enameledBackBtn.addEventListener('click', function () {
+        state.panId = 'cast-iron';
+        render();
+      });
+    }
+
+    unitBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const u = btn.getAttribute('data-cist-unit');
+        if (u === 'F' || u === 'C') {
+          state.unit = u;
+          render();
+        }
+      });
+    });
+
+    symptomBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const sid = btn.getAttribute('data-cist-symptom');
+        if (sid && symById.has(sid)) {
+          state.symptomId = sid;
+          const symObj = symById.get(sid);
+          if (symObj && symObj.defaultOilId && oilById.has(symObj.defaultOilId)) {
+            state.oilId = symObj.defaultOilId;
+          }
+          if (symObj && symObj.roundsRecommended) {
+            state.coats = symObj.roundsRecommended;
+          }
+          if (state.panId === 'enameled') {
+            state.panId = 'cast-iron';
+          }
+          render();
+        }
+      });
+    });
+
+    oilBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const oid = btn.getAttribute('data-cist-oil');
+        if (oid && oilById.has(oid)) {
+          state.oilId = oid;
+          render();
+        }
+      });
+    });
+
+    coatsBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const cNum = Number(btn.getAttribute('data-cist-coats') || '2');
+        if (cNum >= 1 && cNum <= 3) {
+          state.coats = cNum;
+          render();
+        }
+      });
+    });
+
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        const showCopied = function () {
+          if (copyLabel) copyLabel.textContent = ui.copiedBtn || 'Rescue Plan Copied ✓';
+          window.setTimeout(function () {
+            if (copyLabel) copyLabel.textContent = '📋 ' + (ui.copyBtn || 'Copy Rescue Plan');
+          }, 2200);
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(lastRescueText).then(showCopied).catch(showCopied);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = lastRescueText;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'absolute';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          try {
+            document.execCommand('copy');
+          } catch (_) {
+            // ignore
+          }
+          document.body.removeChild(ta);
+          showCopied();
+        }
+      });
+    }
+
+    if (printBtn) {
+      printBtn.addEventListener('click', function () {
+        window.print();
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function () {
+        state.panId = 'cast-iron';
+        state.unit = payload.defaultUnit === 'C' ? 'C' : 'F';
+        state.symptomId = symptoms[0].id;
+        state.oilId = symptoms[0].defaultOilId || oils[0].id;
+        state.coats = 2;
+        render();
+      });
+    }
+
+    render();
+  })();
+</script>
