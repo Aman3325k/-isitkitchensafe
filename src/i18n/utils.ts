@@ -211,6 +211,7 @@ const SPECIAL_PAGES = [
   'tools/meat-thawing-calculator',
   'tools/plastic-code-checker',
   'tools/air-fryer-oven-converter',
+  'tools/cookware-oven-temp-lookup',
   'methodology',
   'saved'
 ];

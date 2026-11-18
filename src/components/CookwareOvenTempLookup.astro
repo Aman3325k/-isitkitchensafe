@@ -1,0 +1,1569 @@
+---
+import rawData from '../data/cookware-oven-temp-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+const defaultUnit = lang === 'en' ? 'F' : 'C';
+
+interface LocalizedItem {
+  id: string;
+  category: string;
+  categoryLabel: string;
+  maxOvenTempF: number;
+  maxOvenTempC: number;
+  maxUncoveredTempF: number | null;
+  tempRangeDisplayF: string;
+  tempRangeDisplayC: string;
+  broilerSafe: boolean;
+  thermalRisk: string;
+  searchText: string;
+  name: string;
+  summary: string;
+  warning: string;
+  lidOrHandleNote: string;
+  failureMode: string;
+  safeAlternative: string;
+}
+
+const categoryMap = new Map<string, string>();
+const localizedCategories = rawData.categories.map((cat) => {
+  const label = (cat.label as Record<string, string>)[lang] || cat.label.en;
+  categoryMap.set(cat.id, label);
+  return {
+    id: cat.id,
+    label,
+    count: rawData.items.filter((i) => i.category === cat.id).length
+  };
+});
+
+const localizedItems: LocalizedItem[] = rawData.items.map((item) => {
+  const name = (item.name as Record<string, string>)[lang] || item.name.en;
+  const summary = (item.summary as Record<string, string>)[lang] || item.summary.en;
+  const warning = (item.warning as Record<string, string>)[lang] || item.warning.en;
+  const lidOrHandleNote = (item.lidOrHandleNote as Record<string, string>)[lang] || item.lidOrHandleNote.en;
+  const failureMode = (item.failureMode as Record<string, string>)[lang] || item.failureMode.en;
+  const safeAlternative = (item.safeAlternative as Record<string, string>)[lang] || item.safeAlternative.en;
+  const categoryLabel = categoryMap.get(item.category) || item.category;
+
+  const searchParts = [
+    name,
+    item.name.en,
+    summary,
+    warning,
+    lidOrHandleNote,
+    categoryLabel,
+    item.searchAliases || ''
+  ];
+
+  return {
+    id: item.id,
+    category: item.category,
+    categoryLabel,
+    maxOvenTempF: item.maxOvenTempF,
+    maxOvenTempC: item.maxOvenTempC,
+    maxUncoveredTempF: typeof (item as any).maxUncoveredTempF === 'number' ? (item as any).maxUncoveredTempF : null,
+    tempRangeDisplayF: item.tempRangeDisplayF,
+    tempRangeDisplayC: item.tempRangeDisplayC,
+    broilerSafe: item.broilerSafe,
+    thermalRisk: item.thermalRisk,
+    searchText: searchParts.join(' ').toLowerCase(),
+    name,
+    summary,
+    warning,
+    lidOrHandleNote,
+    failureMode,
+    safeAlternative
+  };
+});
+
+interface UiDict {
+  tempHeading: string;
+  tempSub: string;
+  unitLabel: string;
+  broilerTitle: string;
+  broilerSub: string;
+  broilerOnTag: string;
+  broilerOffTag: string;
+  searchLabel: string;
+  searchPlaceholder: string;
+  clearSearch: string;
+  quickSearchesLabel: string;
+  quickSearches: Array<{ label: string; query: string }>;
+  allCategories: string;
+  summaryPrefix: string;
+  summaryBroilerPrefix: string;
+  statusSafe: string;
+  statusCaution: string;
+  statusUnsafe: string;
+  shortSafe: string;
+  shortCaution: string;
+  shortUnsafe: string;
+  broilerOkBadge: string;
+  noBroilerBadge: string;
+  neverOvenBadge: string;
+  sortLabel: string;
+  sortSafeFirst: string;
+  sortUnsafeFirst: string;
+  sortHighestTemp: string;
+  sortDefault: string;
+  resetBtn: string;
+  filterAllVerdicts: string;
+  inspectorBadge: string;
+  inspectorMaxTemp: string;
+  inspectorBroiler: string;
+  inspectorRisk: string;
+  inspectorFailureTitle: string;
+  inspectorLidTitle: string;
+  inspectorAltTitle: string;
+  inspectorCopyBtn: string;
+  inspectorCopiedBtn: string;
+  cardInspectHint: string;
+  cardSelectedHint: string;
+  emptyTitle: string;
+  emptySub: string;
+  riskLabels: Record<string, string>;
+  reasonNeverOven: string;
+  reasonBroilerForbidden: string;
+  reasonExceedsTemp: string;
+  reasonNearLimit: string;
+  reasonBroilerRemoveLid: string;
+  reasonBroilerClearance: string;
+  reasonSafeHeadroom: string;
+  copyHeader: string;
+  copySetting: string;
+  copyVerdict: string;
+  copyLimit: string;
+  copyLidNote: string;
+  copyAlt: string;
+}
+
+const UI: Record<SupportedLanguage, UiDict> = {
+  en: {
+    tempHeading: 'Check My Oven Temperature',
+    tempSub: 'Drag the slider or tap a preset to test all 24 cookware brands, bakeware materials, lids, and liners live.',
+    unitLabel: 'Unit',
+    broilerTitle: 'Broiler Mode',
+    broilerSub: '500–550°F (260–288°C) direct radiant heat',
+    broilerOnTag: 'BROILER ON',
+    broilerOffTag: 'OFF',
+    searchLabel: 'Search Cookware, Brand, or Material',
+    searchPlaceholder: 'Search HexClad, Pyrex, Le Creuset, silicone, parchment, wax paper...',
+    clearSearch: 'Clear',
+    quickSearchesLabel: 'Popular lookups:',
+    quickSearches: [
+      { label: 'HexClad', query: 'HexClad' },
+      { label: 'Pyrex', query: 'Pyrex' },
+      { label: 'Le Creuset', query: 'Le Creuset' },
+      { label: 'Teflon / PTFE', query: 'PTFE' },
+      { label: 'Silicone', query: 'Silicone' },
+      { label: 'Parchment', query: 'Parchment' },
+      { label: 'Wax Paper', query: 'Wax Paper' }
+    ],
+    allCategories: 'All Cookware',
+    summaryPrefix: 'Live Verdict at',
+    summaryBroilerPrefix: 'Live Verdict under Broiler',
+    statusSafe: 'SAFE ✅',
+    statusCaution: 'NEAR LIMIT / CAUTION ⚠️',
+    statusUnsafe: 'UNSAFE ❌',
+    shortSafe: 'Safe',
+    shortCaution: 'Caution',
+    shortUnsafe: 'Unsafe',
+    broilerOkBadge: 'Broiler Safe',
+    noBroilerBadge: 'No Broiler',
+    neverOvenBadge: 'Never Oven Safe',
+    sortLabel: 'Sort:',
+    sortSafeFirst: 'Safe First',
+    sortUnsafeFirst: 'Unsafe First',
+    sortHighestTemp: 'Highest Max Temp',
+    sortDefault: 'Brand / Category Order',
+    resetBtn: 'Reset All',
+    filterAllVerdicts: 'Showing all verdicts',
+    inspectorBadge: 'Selected Cookware Safety Inspector',
+    inspectorMaxTemp: 'Max Oven Temp',
+    inspectorBroiler: 'Broiler Rating',
+    inspectorRisk: 'Thermal Risk',
+    inspectorFailureTitle: 'Failure Mode & Warning',
+    inspectorLidTitle: 'Lid, Knob & Handle Exception',
+    inspectorAltTitle: 'Safer Alternative',
+    inspectorCopyBtn: 'Copy Safety Card',
+    inspectorCopiedBtn: 'Copied ✓',
+    cardInspectHint: 'Inspect failure mode & lid limits →',
+    cardSelectedHint: 'Inspecting details above ✓',
+    emptyTitle: 'No cookware matched your filter',
+    emptySub: 'Try clearing the search query or switching back to All Cookware.',
+    riskLabels: {
+      low: 'Low Risk',
+      moderate: 'Moderate Risk',
+      high: 'High Risk',
+      critical: 'Critical Hazard'
+    },
+    reasonNeverOven: 'NEVER OVEN SAFE at any temperature — severe fire, melting, or structural failure hazard.',
+    reasonBroilerForbidden: 'UNSAFE under Broiler — direct radiant heat (500–550°F+) is strictly forbidden for this material.',
+    reasonExceedsTemp: 'UNSAFE — Your oven setting exceeds this cookware\'s maximum safe limit by {diff}.',
+    reasonNearLimit: 'NEAR LIMIT — Within {margin} of maximum oven rating. Watch closely for hot spots and remove lids.',
+    reasonBroilerRemoveLid: 'CAUTION under Broiler — Remove lid above 500°F (260°C); pot body alone safely handles broiler heat.',
+    reasonBroilerClearance: 'CAUTION under Broiler — Keep at least 2.5 in (6.5 cm) clearance from element and do not preheat empty.',
+    reasonSafeHeadroom: 'SAFE — {margin} of thermal safety headroom below this item\'s maximum limit.',
+    copyHeader: 'IsItKitchenSafe — Oven Temperature Safety Check',
+    copySetting: 'Oven Setting',
+    copyVerdict: 'Verdict',
+    copyLimit: 'Max Limit',
+    copyLidNote: 'Lid / Handle Exception',
+    copyAlt: 'Safe Alternative'
+  },
+  es: {
+    tempHeading: 'Comprueba la Temperatura de Tu Horno',
+    tempSub: 'Mueve el control o pulsa un preajuste para evaluar al instante las 24 marcas, materiales, tapas y papeles.',
+    unitLabel: 'Unidad',
+    broilerTitle: 'Modo Gratinador (Broiler)',
+    broilerSub: '260–288°C (500–550°F) calor radiante directo',
+    broilerOnTag: 'ACTIVADO',
+    broilerOffTag: 'DESACTIVADO',
+    searchLabel: 'Buscar Marca, Utensilio o Material',
+    searchPlaceholder: 'Busca HexClad, Pyrex, Le Creuset, silicona, papel encerado...',
+    clearSearch: 'Borrar',
+    quickSearchesLabel: 'Búsquedas rápidas:',
+    quickSearches: [
+      { label: 'HexClad', query: 'HexClad' },
+      { label: 'Pyrex', query: 'Pyrex' },
+      { label: 'Le Creuset', query: 'Le Creuset' },
+      { label: 'Teflón / PTFE', query: 'PTFE' },
+      { label: 'Silicona', query: 'Silicona' },
+      { label: 'Papel Horno', query: 'Pergamino' },
+      { label: 'Papel Encerado', query: 'Encerado' }
+    ],
+    allCategories: 'Todo el Menaje',
+    summaryPrefix: 'Veredicto en vivo a',
+    summaryBroilerPrefix: 'Veredicto en Modo Gratinador',
+    statusSafe: 'SEGURO ✅',
+    statusCaution: 'CERCA DEL LÍMITE / PRECAUCIÓN ⚠️',
+    statusUnsafe: 'NO SEGURO ❌',
+    shortSafe: 'Seguro',
+    shortCaution: 'Precaución',
+    shortUnsafe: 'No Seguro',
+    broilerOkBadge: 'Apto Gratinador',
+    noBroilerBadge: 'Sin Gratinador',
+    neverOvenBadge: 'Nunca al Horno',
+    sortLabel: 'Ordenar:',
+    sortSafeFirst: 'Seguros Primero',
+    sortUnsafeFirst: 'Riesgosos Primero',
+    sortHighestTemp: 'Mayor Temperatura Máx.',
+    sortDefault: 'Orden Original',
+    resetBtn: 'Restablecer',
+    filterAllVerdicts: 'Mostrando todos los estados',
+    inspectorBadge: 'Inspector Detallado del Utensilio Seleccionado',
+    inspectorMaxTemp: 'Temp. Máx. Horno',
+    inspectorBroiler: 'Gratinador (Broiler)',
+    inspectorRisk: 'Riesgo Térmico',
+    inspectorFailureTitle: 'Modo de Fallo y Advertencia',
+    inspectorLidTitle: 'Excepción de Tapa, Pomo o Mango',
+    inspectorAltTitle: 'Alternativa Más Segura',
+    inspectorCopyBtn: 'Copiar Ficha Segura',
+    inspectorCopiedBtn: 'Copiado ✓',
+    cardInspectHint: 'Ver fallo y límite de tapas →',
+    cardSelectedHint: 'Detalles visibles arriba ✓',
+    emptyTitle: 'Ningún utensilio coincide con tu búsqueda',
+    emptySub: 'Borra el texto de búsqueda o selecciona "Todo el Menaje".',
+    riskLabels: {
+      low: 'Riesgo Bajo',
+      moderate: 'Riesgo Moderado',
+      high: 'Riesgo Alto',
+      critical: 'Peligro Crítico'
+    },
+    reasonNeverOven: 'NUNCA APTO PARA HORNO a ninguna temperatura: riesgo grave de incendio, derretimiento o rotura.',
+    reasonBroilerForbidden: 'NO SEGURO bajo gratinador: el calor radiante directo (260–288°C+) está estrictamente prohibido para este material.',
+    reasonExceedsTemp: 'NO SEGURO: Tu ajuste de horno supera el límite máximo seguro en {diff}.',
+    reasonNearLimit: 'CERCA DEL LÍMITE: A solo {margin} de la temperatura máxima. Vigila puntos calientes y retira tapas.',
+    reasonBroilerRemoveLid: 'PRECAUCIÓN en gratinador: Retira la tapa por encima de 260°C (500°F); el cuerpo de la olla sí resiste.',
+    reasonBroilerClearance: 'PRECAUCIÓN en gratinador: Mantén al menos 6,5 cm de la resistencia y no precalientes vacía.',
+    reasonSafeHeadroom: 'SEGURO: Tienes {margin} de margen térmico por debajo del límite máximo de esta pieza.',
+    copyHeader: 'IsItKitchenSafe — Verificación de Temperatura Segura en Horno',
+    copySetting: 'Ajuste de Horno',
+    copyVerdict: 'Veredicto',
+    copyLimit: 'Límite Máximo',
+    copyLidNote: 'Excepción de Tapa / Mango',
+    copyAlt: 'Alternativa Segura'
+  },
+  pt: {
+    tempHeading: 'Verifique a Temperatura do Seu Forno',
+    tempSub: 'Arraste o controle ou toque em um atalho para testar ao vivo todas as 24 marcas, materiais, tampas e forros.',
+    unitLabel: 'Unidade',
+    broilerTitle: 'Modo Broiler / Grill',
+    broilerSub: '260–288°C (500–550°F) calor radiante direto',
+    broilerOnTag: 'ATIVADO',
+    broilerOffTag: 'DESLIGADO',
+    searchLabel: 'Buscar Marca, Panela ou Material',
+    searchPlaceholder: 'Pesquise HexClad, Pyrex, Le Creuset, silicone, papel encerado...',
+    clearSearch: 'Limpar',
+    quickSearchesLabel: 'Buscas populares:',
+    quickSearches: [
+      { label: 'HexClad', query: 'HexClad' },
+      { label: 'Pyrex', query: 'Pyrex' },
+      { label: 'Le Creuset', query: 'Le Creuset' },
+      { label: 'Teflon / PTFE', query: 'PTFE' },
+      { label: 'Silicone', query: 'Silicone' },
+      { label: 'Papel Manteiga', query: 'Manteiga' },
+      { label: 'Papel Encerado', query: 'Encerado' }
+    ],
+    allCategories: 'Todos os Utensílios',
+    summaryPrefix: 'Veredito ao vivo a',
+    summaryBroilerPrefix: 'Veredito no Modo Broiler',
+    statusSafe: 'SEGURO ✅',
+    statusCaution: 'NO LIMITE / ATENÇÃO ⚠️',
+    statusUnsafe: 'INSEGURO ❌',
+    shortSafe: 'Seguro',
+    shortCaution: 'Atenção',
+    shortUnsafe: 'Inseguro',
+    broilerOkBadge: 'Aceita Broiler',
+    noBroilerBadge: 'Sem Broiler',
+    neverOvenBadge: 'Nunca no Forno',
+    sortLabel: 'Ordenar:',
+    sortSafeFirst: 'Seguros Primeiro',
+    sortUnsafeFirst: 'Inseguros Primeiro',
+    sortHighestTemp: 'Maior Temp. Máxima',
+    sortDefault: 'Ordem Padrão',
+    resetBtn: 'Redefinir',
+    filterAllVerdicts: 'Exibindo todos os status',
+    inspectorBadge: 'Inspetor de Segurança do Utensílio Selecionado',
+    inspectorMaxTemp: 'Temp. Máx. Forno',
+    inspectorBroiler: 'Uso no Broiler',
+    inspectorRisk: 'Risco Térmico',
+    inspectorFailureTitle: 'Modo de Falha e Alerta',
+    inspectorLidTitle: 'Exceção de Tampa, Pegador ou Cabo',
+    inspectorAltTitle: 'Alternativa Mais Segura',
+    inspectorCopyBtn: 'Copiar Ficha Segura',
+    inspectorCopiedBtn: 'Copiado ✓',
+    cardInspectHint: 'Ver falha e limites de tampa →',
+    cardSelectedHint: 'Detalhes abertos acima ✓',
+    emptyTitle: 'Nenhum utensílio encontrado',
+    emptySub: 'Tente limpar a busca ou voltar para "Todos os Utensílios".',
+    riskLabels: {
+      low: 'Risco Baixo',
+      moderate: 'Risco Moderado',
+      high: 'Risco Alto',
+      critical: 'Perigo Crítico'
+    },
+    reasonNeverOven: 'NUNCA SEGURO NO FORNO em nenhuma temperatura — alto risco de incêndio, derretimento ou quebra.',
+    reasonBroilerForbidden: 'INSEGURO no Broiler — calor radiante direto (260–288°C+) é proibido para este material.',
+    reasonExceedsTemp: 'INSEGURO — A temperatura escolhida ultrapassa o limite seguro em {diff}.',
+    reasonNearLimit: 'PRÓXIMO DO LIMITE — Apenas {margin} abaixo do máximo suportado. Evite pontos quentes e retire tampas.',
+    reasonBroilerRemoveLid: 'ATENÇÃO no Broiler — Retire a tampa acima de 260°C (500°F); a panela destampada suporta broiler.',
+    reasonBroilerClearance: 'ATENÇÃO no Broiler — Mantenha 6,5 cm da resistência e não pré-aqueça totalmente vazia.',
+    reasonSafeHeadroom: 'SEGURO — Folga térmica de {margin} abaixo da temperatura máxima deste item.',
+    copyHeader: 'IsItKitchenSafe — Checagem de Temperatura Segura no Forno',
+    copySetting: 'Ajuste do Forno',
+    copyVerdict: 'Veredito',
+    copyLimit: 'Limite Máximo',
+    copyLidNote: 'Exceção de Tampa / Cabo',
+    copyAlt: 'Alternativa Segura'
+  },
+  'zh-cn': {
+    tempHeading: '检测我的烤箱温度',
+    tempSub: '拖动滑块或点击常用温度，实时评估全部 24 款热门锅具品牌、烤盘材质、锅盖与烘焙纸的耐温安全性。',
+    unitLabel: '温标',
+    broilerTitle: '上火炙烤模式 (Broiler)',
+    broilerSub: '260–288°C（500–550°F）强辐射直烤',
+    broilerOnTag: '炙烤开启',
+    broilerOffTag: '关闭',
+    searchLabel: '搜索品牌、锅具或烤盘材质',
+    searchPlaceholder: '搜索 HexClad、Pyrex、Le Creuset、硅胶、烘焙纸、蜡纸...',
+    clearSearch: '清除',
+    quickSearchesLabel: '热门速查：',
+    quickSearches: [
+      { label: 'HexClad', query: 'HexClad' },
+      { label: 'Pyrex 玻璃', query: 'Pyrex' },
+      { label: 'Le Creuset', query: 'Le Creuset' },
+      { label: '特氟龙 PTFE', query: 'PTFE' },
+      { label: '硅胶垫', query: '硅胶' },
+      { label: '烘焙纸', query: '烘焙纸' },
+      { label: '蜡纸', query: '蜡纸' }
+    ],
+    allCategories: '全部厨具',
+    summaryPrefix: '当前温度安全结论：',
+    summaryBroilerPrefix: '上火炙烤模式结论：',
+    statusSafe: '安全可用 ✅',
+    statusCaution: '接近上限 / 谨慎使用 ⚠️',
+    statusUnsafe: '不安全 / 严禁使用 ❌',
+    shortSafe: '安全',
+    shortCaution: '谨慎',
+    shortUnsafe: '不安全',
+    broilerOkBadge: '可上火炙烤',
+    noBroilerBadge: '禁上火炙烤',
+    neverOvenBadge: '严禁进烤箱',
+    sortLabel: '排序：',
+    sortSafeFirst: '安全优先',
+    sortUnsafeFirst: '高危优先',
+    sortHighestTemp: '耐温从高到低',
+    sortDefault: '默认顺序',
+    resetBtn: '重置',
+    filterAllVerdicts: '显示全部状态',
+    inspectorBadge: '已选厨具安全详查面板',
+    inspectorMaxTemp: '烤箱最高耐温',
+    inspectorBroiler: '上火炙烤许可',
+    inspectorRisk: '热风险等级',
+    inspectorFailureTitle: '失效模式与安全警示',
+    inspectorLidTitle: '锅盖、盖钮与手柄例外限制',
+    inspectorAltTitle: '更安全的替代方案',
+    inspectorCopyBtn: '复制安全卡片',
+    inspectorCopiedBtn: '已复制 ✓',
+    cardInspectHint: '查看失效原因与锅盖限制 →',
+    cardSelectedHint: '已在上方展开详情 ✓',
+    emptyTitle: '没有找到匹配的厨具或材质',
+    emptySub: '请尝试清空搜索词，或切回“全部厨具”分类。',
+    riskLabels: {
+      low: '低风险',
+      moderate: '中风险',
+      high: '高风险',
+      critical: '极高危险'
+    },
+    reasonNeverOven: '任何温度下均严禁进烤箱——存在起火、熔化或结构断裂等严重危险。',
+    reasonBroilerForbidden: '炙烤模式不安全——此类材质严禁承受 260–288°C+ 顶部直火强辐射热。',
+    reasonExceedsTemp: '不安全——当前设定温度已超出该厨具最高耐温上限 {diff}。',
+    reasonNearLimit: '接近极限——距离最高耐温仅剩 {margin} 安全余量，请注意炉内热点并移除玻璃/塑料盖。',
+    reasonBroilerRemoveLid: '炙烤需谨慎——超过 260°C（500°F）必须揭盖，去盖后锅身本身可承受炙烤高温。',
+    reasonBroilerClearance: '炙烤需谨慎——锅沿须距发热管至少 6.5 厘米，且不可空锅干烤。',
+    reasonSafeHeadroom: '安全——比该厨具最高耐温上限低 {margin}，具备充足热安全裕度。',
+    copyHeader: 'IsItKitchenSafe — 锅具与烤盘烤箱耐温安全核查',
+    copySetting: '烤箱设定',
+    copyVerdict: '安全结论',
+    copyLimit: '耐温上限',
+    copyLidNote: '锅盖/手柄限制',
+    copyAlt: '安全替代方案'
+  },
+  ja: {
+    tempHeading: 'オーブン設定温度をチェック',
+    tempSub: 'スライダーやプリセット温度を操作すると、主要24種の鍋・耐熱皿・フタ・シートの安全性を瞬時に判定します。',
+    unitLabel: '単位',
+    broilerTitle: 'ブロイラー（直火上焼き）モード',
+    broilerSub: '260〜288°C（500〜550°F）強い輻射熱',
+    broilerOnTag: 'ON（稼働中）',
+    broilerOffTag: 'OFF',
+    searchLabel: 'ブランド名・器具・素材で検索',
+    searchPlaceholder: 'HexClad、Pyrex、ル・クルーゼ、シリコン、ワックスペーパー...',
+    clearSearch: 'クリア',
+    quickSearchesLabel: 'よく検索される項目：',
+    quickSearches: [
+      { label: 'HexClad', query: 'HexClad' },
+      { label: 'Pyrex', query: 'Pyrex' },
+      { label: 'ル・クルーゼ', query: 'ル・クルーゼ' },
+      { label: 'テフロン / PTFE', query: 'PTFE' },
+      { label: 'シリコン', query: 'シリコン' },
+      { label: 'クッキングシート', query: 'クッキングシート' },
+      { label: 'ワックスペーパー', query: 'ワックス' }
+    ],
+    allCategories: 'すべて表示',
+    summaryPrefix: '現在の温度での判定：',
+    summaryBroilerPrefix: 'ブロイラーモード判定：',
+    statusSafe: '安全 ✅',
+    statusCaution: '上限付近・要注意 ⚠️',
+    statusUnsafe: '使用不可・危険 ❌',
+    shortSafe: '安全',
+    shortCaution: '注意',
+    shortUnsafe: '危険',
+    broilerOkBadge: 'ブロイラー可',
+    noBroilerBadge: 'ブロイラー不可',
+    neverOvenBadge: 'オーブン厳禁',
+    sortLabel: '並び替え：',
+    sortSafeFirst: '安全な順',
+    sortUnsafeFirst: '危険な順',
+    sortHighestTemp: '耐熱温度が高い順',
+    sortDefault: '標準順',
+    resetBtn: 'リセット',
+    filterAllVerdicts: '全ステータス表示中',
+    inspectorBadge: '選択中の調理器具 詳細安全インスペクター',
+    inspectorMaxTemp: '耐熱上限温度',
+    inspectorBroiler: 'ブロイラー可否',
+    inspectorRisk: '熱リスク評価',
+    inspectorFailureTitle: '破損メカニズム・警告',
+    inspectorLidTitle: 'フタ・ツマミ・ハンドルの例外条件',
+    inspectorAltTitle: 'より安全な代替器具',
+    inspectorCopyBtn: '安全メモをコピー',
+    inspectorCopiedBtn: 'コピー完了 ✓',
+    cardInspectHint: '破損原因とフタ上限を見る →',
+    cardSelectedHint: '上に詳細を表示中 ✓',
+    emptyTitle: '条件に一致する調理器具が見つかりません',
+    emptySub: '検索キーワードを消去するか「すべて表示」に切り替えてください。',
+    riskLabels: {
+      low: '低リスク',
+      moderate: '中リスク',
+      high: '高リスク',
+      critical: '極めて危険'
+    },
+    reasonNeverOven: 'どの温度でもオーブン使用厳禁。発火・融解・破損の重大な危険があります。',
+    reasonBroilerForbidden: 'ブロイラー使用不可：260〜288°C超の強い上火輻射熱はこの素材には厳禁です。',
+    reasonExceedsTemp: '使用不可：設定温度が耐熱上限を {diff} 上回っています。',
+    reasonNearLimit: '上限間近：耐熱上限まで残り {margin} です。庫内の局所加熱に注意し、フタは外してください。',
+    reasonBroilerRemoveLid: 'ブロイラー注意：260°C（500°F）超ではフタを外してください（鍋本体のみなら対応）。',
+    reasonBroilerClearance: 'ブロイラー注意：熱源から6.5cm以上離し、空焚き予熱は避けてください。',
+    reasonSafeHeadroom: '安全：耐熱上限まで {margin} の余裕があります。',
+    copyHeader: 'IsItKitchenSafe — 調理器具オーブン耐熱チェック',
+    copySetting: 'オーブン設定',
+    copyVerdict: '判定',
+    copyLimit: '耐熱上限',
+    copyLidNote: 'フタ・ハンドル制限',
+    copyAlt: '安全な代替案'
+  }
+};
+
+const ui = UI[lang] || UI.en;
+
+const tempPresets = [
+  { f: 325, c: 165 },
+  { f: 350, c: 175 },
+  { f: 400, c: 205 },
+  { f: 425, c: 220 },
+  { f: 450, c: 230 },
+  { f: 500, c: 260 },
+  { f: 550, c: 288 }
+];
+
+const payload = {
+  lang,
+  defaultUnit,
+  items: localizedItems,
+  ui
+};
+---
+
+<section
+  id="cookware-oven-temp-lookup"
+  class="space-y-6"
+  aria-label={ui.tempHeading}
+>
+  <script type="application/json" id="cotl-payload" is:inline set:html={JSON.stringify(payload)}></script>
+
+  <!-- Interactive Control Console -->
+  <div class="rounded-2xl bg-surface-soft border border-hairline p-5 sm:p-6 shadow-xs space-y-5">
+    <!-- Row 1: Oven Temperature Slider + Unit Toggle + Broiler Mode -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+      <!-- Temperature Slider Panel -->
+      <div class="lg:col-span-8 rounded-xl bg-canvas border border-hairline p-4 sm:p-5 flex flex-col justify-between gap-4">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 class="text-title-sm font-semibold text-ink">{ui.tempHeading}</h2>
+            <p class="text-xs text-muted mt-0.5 leading-relaxed">{ui.tempSub}</p>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <div class="inline-flex rounded-lg border border-hairline bg-surface-soft p-0.5" role="group" aria-label={ui.unitLabel}>
+              <button
+                type="button"
+                data-cotl-unit="F"
+                class="cotl-unit-btn px-3 py-1 rounded-md text-xs font-bold transition-colors cursor-pointer"
+              >
+                °F
+              </button>
+              <button
+                type="button"
+                data-cotl-unit="C"
+                class="cotl-unit-btn px-3 py-1 rounded-md text-xs font-bold transition-colors cursor-pointer"
+              >
+                °C
+              </button>
+            </div>
+            <div class="px-3.5 py-1.5 rounded-xl bg-primary text-on-primary text-center min-w-[104px]">
+              <div id="cotl-temp-primary" class="text-lg font-bold leading-tight tabular-nums">425°F</div>
+              <div id="cotl-temp-secondary" class="text-[11px] opacity-80 leading-tight tabular-nums">218°C</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Range Slider -->
+        <div class="space-y-2">
+          <input
+            id="cotl-temp-slider"
+            type="range"
+            min="200"
+            max="550"
+            step="5"
+            value="425"
+            aria-label={ui.tempHeading}
+            class="w-full h-2.5 rounded-lg appearance-none cursor-pointer bg-surface-strong accent-signature-coral"
+          />
+          <div class="flex items-center justify-between text-[11px] font-medium text-muted tabular-nums">
+            <span id="cotl-tick-1">200°F</span>
+            <span id="cotl-tick-2">325°F</span>
+            <span id="cotl-tick-3">425°F</span>
+            <span id="cotl-tick-4">550°F</span>
+          </div>
+        </div>
+
+        <!-- Quick Temperature Preset Chips -->
+        <div class="flex flex-wrap items-center gap-1.5">
+          {tempPresets.map((p) => (
+            <button
+              type="button"
+              data-cotl-preset-f={p.f}
+              data-cotl-preset-c={p.c}
+              class="cotl-preset-btn px-2.5 py-1 rounded-lg text-xs font-semibold border border-hairline bg-surface-soft text-ink hover:border-signature-coral transition-colors cursor-pointer tabular-nums"
+            >
+              {defaultUnit === 'C' ? `${p.c}°C` : `${p.f}°F`}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <!-- Broiler Mode Toggle Panel -->
+      <div class="lg:col-span-4 rounded-xl bg-canvas border border-hairline p-4 sm:p-5 flex flex-col justify-between gap-4">
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="inline-flex items-center gap-1.5 text-sm font-semibold text-ink">
+              <span aria-hidden="true">🔥</span>
+              <span>{ui.broilerTitle}</span>
+            </span>
+            <span
+              id="cotl-broiler-pill"
+              class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-surface-strong text-muted"
+            >
+              {ui.broilerOffTag}
+            </span>
+          </div>
+          <p class="text-xs text-muted leading-relaxed">{ui.broilerSub}</p>
+        </div>
+
+        <button
+          type="button"
+          id="cotl-broiler-toggle"
+          aria-pressed="false"
+          class="w-full py-3 px-4 rounded-xl border-2 border-hairline bg-surface-soft hover:border-signature-coral text-ink font-semibold text-sm flex items-center justify-between gap-3 transition-all cursor-pointer"
+        >
+          <span class="flex items-center gap-2">
+            <span aria-hidden="true">⚡</span>
+            <span id="cotl-broiler-btn-text">{ui.broilerTitle}</span>
+          </span>
+          <span
+            id="cotl-broiler-switch"
+            class="w-11 h-6 rounded-full bg-border-strong/60 p-0.5 transition-colors flex items-center"
+          >
+            <span
+              id="cotl-broiler-knob"
+              class="w-5 h-5 rounded-full bg-white shadow-xs transition-transform translate-x-0"
+            ></span>
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Row 2: Live Text Search + Category Filter Pills -->
+    <div class="space-y-3">
+      <div class="relative">
+        <label for="cotl-search" class="sr-only">{ui.searchLabel}</label>
+        <span class="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-muted" aria-hidden="true">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </svg>
+        </span>
+        <input
+          id="cotl-search"
+          type="search"
+          autocomplete="off"
+          placeholder={ui.searchPlaceholder}
+          class="w-full pl-10 pr-20 py-3 rounded-xl bg-canvas border border-hairline text-sm text-ink placeholder:text-muted/80 focus:outline-none focus:border-signature-coral focus:ring-2 focus:ring-signature-coral/20 transition-all"
+        />
+        <button
+          type="button"
+          id="cotl-search-clear"
+          class="hidden absolute inset-y-1.5 right-2 px-3 rounded-lg text-xs font-semibold bg-surface-soft border border-hairline text-ink hover:border-signature-coral cursor-pointer"
+        >
+          {ui.clearSearch}
+        </button>
+      </div>
+
+      <!-- Quick Brand Chips -->
+      <div class="flex flex-wrap items-center gap-1.5 text-xs">
+        <span class="text-muted font-medium mr-1">{ui.quickSearchesLabel}</span>
+        {ui.quickSearches.map((qs) => (
+          <button
+            type="button"
+            data-cotl-quick={qs.query}
+            class="cotl-quick-btn px-2.5 py-1 rounded-full bg-canvas border border-hairline text-ink hover:border-signature-coral hover:text-signature-coral transition-colors cursor-pointer font-medium"
+          >
+            {qs.label}
+          </button>
+        ))}
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="flex flex-wrap items-center gap-2 pt-1" role="tablist" aria-label="Cookware categories">
+        <button
+          type="button"
+          data-cotl-cat="all"
+          class="cotl-cat-btn px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-colors cursor-pointer"
+        >
+          {ui.allCategories} ({localizedItems.length})
+        </button>
+        {localizedCategories.map((cat) => (
+          <button
+            type="button"
+            data-cotl-cat={cat.id}
+            class="cotl-cat-btn px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-colors cursor-pointer"
+          >
+            {cat.label} ({cat.count})
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <!-- Row 3: Live Summary Counts + Verdict Quick-Filter + Sort -->
+    <div class="pt-4 border-t border-hairline flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div class="flex flex-wrap items-center gap-2">
+        <span id="cotl-summary-label" class="text-xs font-bold uppercase tracking-wider text-muted mr-1">
+          {ui.summaryPrefix} 425°F:
+        </span>
+        <button
+          type="button"
+          data-cotl-verdict-filter="safe"
+          class="cotl-verdict-btn inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border border-success/30 bg-success/10 text-success dark:text-success-border transition-all cursor-pointer"
+        >
+          <span id="cotl-count-safe" class="tabular-nums">10</span>
+          <span>{ui.shortSafe} ✅</span>
+        </button>
+        <button
+          type="button"
+          data-cotl-verdict-filter="caution"
+          class="cotl-verdict-btn inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border border-warning-border bg-warning-bg text-warning dark:text-amber-300 transition-all cursor-pointer"
+        >
+          <span id="cotl-count-caution" class="tabular-nums">6</span>
+          <span>{ui.shortCaution} ⚠️</span>
+        </button>
+        <button
+          type="button"
+          data-cotl-verdict-filter="unsafe"
+          class="cotl-verdict-btn inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border border-error-border bg-error-bg text-error dark:text-error-border transition-all cursor-pointer"
+        >
+          <span id="cotl-count-unsafe" class="tabular-nums">8</span>
+          <span>{ui.shortUnsafe} ❌</span>
+        </button>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <label for="cotl-sort" class="text-xs font-medium text-muted">{ui.sortLabel}</label>
+        <select
+          id="cotl-sort"
+          class="px-2.5 py-1.5 rounded-lg bg-canvas border border-hairline text-xs font-semibold text-ink cursor-pointer focus:outline-none focus:border-signature-coral"
+        >
+          <option value="safe-first">{ui.sortSafeFirst}</option>
+          <option value="unsafe-first">{ui.sortUnsafeFirst}</option>
+          <option value="highest-temp">{ui.sortHighestTemp}</option>
+          <option value="default">{ui.sortDefault}</option>
+        </select>
+        <button
+          type="button"
+          id="cotl-reset"
+          class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors cursor-pointer"
+        >
+          {ui.resetBtn}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Selected Cookware Safety Inspector Panel -->
+  <div
+    id="cotl-inspector"
+    class="rounded-2xl border-2 border-hairline bg-canvas p-5 sm:p-6 shadow-xs transition-colors space-y-4"
+    aria-live="polite"
+  >
+    <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+      <div class="space-y-1">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral">
+            {ui.inspectorBadge}
+          </span>
+          <span id="cotl-insp-cat" class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-surface-soft border border-hairline text-muted">
+            {localizedItems[0].categoryLabel}
+          </span>
+        </div>
+        <h3 id="cotl-insp-name" class="text-title-md sm:text-title-lg font-semibold text-ink">
+          {localizedItems[0].name}
+        </h3>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 shrink-0">
+        <span
+          id="cotl-insp-verdict"
+          class="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wide border border-success/30 bg-success/10 text-success dark:text-success-border"
+        >
+          {ui.statusSafe}
+        </span>
+        <button
+          type="button"
+          id="cotl-copy-btn"
+          class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-surface-soft border border-hairline text-ink hover:border-signature-coral transition-colors cursor-pointer"
+        >
+          {ui.inspectorCopyBtn}
+        </button>
+      </div>
+    </div>
+
+    <!-- Live Evaluation Banner -->
+    <div id="cotl-insp-reason-box" class="rounded-xl p-3.5 border border-hairline bg-surface-soft text-sm font-medium text-ink leading-relaxed">
+      <span id="cotl-insp-reason"></span>
+    </div>
+
+    <!-- Key Specs Bar -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div class="rounded-xl bg-surface-soft border border-hairline px-4 py-3">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-muted">{ui.inspectorMaxTemp}</div>
+        <div id="cotl-insp-maxtemp" class="text-base font-bold text-ink mt-0.5 tabular-nums">
+          {localizedItems[0].tempRangeDisplayF} / {localizedItems[0].tempRangeDisplayC}
+        </div>
+      </div>
+      <div class="rounded-xl bg-surface-soft border border-hairline px-4 py-3">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-muted">{ui.inspectorBroiler}</div>
+        <div id="cotl-insp-broiler" class="text-base font-bold text-ink mt-0.5">
+          {localizedItems[0].broilerSafe ? `${ui.broilerOkBadge} ✅` : `${ui.noBroilerBadge} ❌`}
+        </div>
+      </div>
+      <div class="rounded-xl bg-surface-soft border border-hairline px-4 py-3">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-muted">{ui.inspectorRisk}</div>
+        <div id="cotl-insp-risk" class="text-base font-bold text-ink mt-0.5">
+          {ui.riskLabels[localizedItems[0].thermalRisk] || localizedItems[0].thermalRisk}
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 Detailed Breakdown Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="rounded-xl bg-error-bg/60 dark:bg-red-950/20 border border-error-border/50 p-4 space-y-1.5">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-error dark:text-error-border">
+          {ui.inspectorFailureTitle}
+        </h4>
+        <p id="cotl-insp-failure" class="text-[13px] text-body leading-relaxed">
+          {localizedItems[0].failureMode}
+        </p>
+        <p id="cotl-insp-warning" class="text-xs font-medium text-ink pt-1.5 border-t border-error-border/30 leading-relaxed">
+          {localizedItems[0].warning}
+        </p>
+      </div>
+
+      <div class="rounded-xl bg-warning-bg/70 dark:bg-amber-950/20 border border-warning-border/60 p-4 space-y-1.5">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-warning dark:text-amber-300">
+          {ui.inspectorLidTitle}
+        </h4>
+        <p id="cotl-insp-lid" class="text-[13px] text-body leading-relaxed">
+          {localizedItems[0].lidOrHandleNote}
+        </p>
+      </div>
+
+      <div class="rounded-xl bg-success/5 dark:bg-emerald-950/20 border border-success/30 p-4 space-y-1.5">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-success dark:text-success-border">
+          {ui.inspectorAltTitle}
+        </h4>
+        <p id="cotl-insp-alt" class="text-[13px] text-body leading-relaxed">
+          {localizedItems[0].safeAlternative}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 24-Item Live Cookware Lookup Grid -->
+  <div id="cotl-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {localizedItems.map((item, idx) => (
+      <button
+        type="button"
+        data-cotl-card={item.id}
+        data-cotl-index={idx}
+        data-cotl-category={item.category}
+        class="cotl-card text-left rounded-2xl border border-hairline bg-canvas p-4 sm:p-5 flex flex-col justify-between gap-3 hover:border-signature-coral transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-signature-coral/40"
+      >
+        <div class="space-y-2.5 w-full">
+          <!-- Top Row: Category & Live Verdict Badge -->
+          <div class="flex items-center justify-between gap-2">
+            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-surface-soft border border-hairline text-muted truncate">
+              {item.categoryLabel}
+            </span>
+            <span
+              data-cotl-card-badge={item.id}
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border shrink-0"
+            >
+              {ui.statusSafe}
+            </span>
+          </div>
+
+          <!-- Title -->
+          <h3 class="text-[15px] font-semibold text-ink leading-snug">
+            {item.name}
+          </h3>
+
+          <!-- Specs Row -->
+          <div class="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold">
+            <span class="px-2 py-0.5 rounded-md bg-surface-soft border border-hairline text-ink tabular-nums">
+              {item.maxOvenTempF === 0
+                ? ui.neverOvenBadge
+                : `${item.tempRangeDisplayF} · ${item.tempRangeDisplayC}`}
+            </span>
+            <span
+              class:list={[
+                'px-2 py-0.5 rounded-md border',
+                item.broilerSafe
+                  ? 'bg-success/10 text-success dark:text-success-border border-success/30'
+                  : 'bg-error-bg text-error dark:text-error-border border-error-border/60'
+              ]}
+            >
+              {item.broilerSafe ? `${ui.broilerOkBadge} ✓` : `${ui.noBroilerBadge} ✕`}
+            </span>
+          </div>
+
+          <!-- Summary -->
+          <p class="text-[13px] text-body leading-relaxed line-clamp-3">
+            {item.summary}
+          </p>
+        </div>
+
+        <!-- Thermal Margin Meter + Inspect Hint -->
+        <div class="w-full pt-2.5 border-t border-hairline/70 space-y-2">
+          <div class="w-full h-1.5 rounded-full bg-surface-strong overflow-hidden">
+            <div
+              data-cotl-card-bar={item.id}
+              class="h-full rounded-full bg-success transition-all duration-200"
+              style="width: 65%"
+            ></div>
+          </div>
+          <div class="flex items-center justify-between gap-2 text-[11px] font-semibold">
+            <span data-cotl-card-hint={item.id} class="text-signature-coral">
+              {ui.cardInspectHint}
+            </span>
+          </div>
+        </div>
+      </button>
+    ))}
+  </div>
+
+  <!-- Empty State -->
+  <div id="cotl-empty" class="hidden rounded-2xl border border-hairline bg-surface-soft p-10 text-center space-y-3">
+    <p class="text-base font-semibold text-ink">{ui.emptyTitle}</p>
+    <p class="text-xs text-muted">{ui.emptySub}</p>
+    <button
+      type="button"
+      id="cotl-empty-reset"
+      class="px-4 py-2 rounded-lg text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors cursor-pointer"
+    >
+      {ui.resetBtn}
+    </button>
+  </div>
+</section>
+
+<script is:inline>
+  (function () {
+    const payloadEl = document.getElementById('cotl-payload');
+    if (!payloadEl) return;
+
+    let payload;
+    try {
+      payload = JSON.parse(payloadEl.textContent || '{}');
+    } catch (_) {
+      return;
+    }
+
+    const items = payload.items || [];
+    const ui = payload.ui || {};
+    const itemById = new Map(items.map((it) => [it.id, it]));
+
+    const state = {
+      tempF: 425,
+      unit: payload.defaultUnit || 'F',
+      broilerMode: false,
+      category: 'all',
+      verdictFilter: 'all',
+      search: '',
+      sort: 'safe-first',
+      selectedId: items.length ? items[0].id : ''
+    };
+
+    // DOM refs
+    const slider = document.getElementById('cotl-temp-slider');
+    const tempPrimary = document.getElementById('cotl-temp-primary');
+    const tempSecondary = document.getElementById('cotl-temp-secondary');
+    const tick1 = document.getElementById('cotl-tick-1');
+    const tick2 = document.getElementById('cotl-tick-2');
+    const tick3 = document.getElementById('cotl-tick-3');
+    const tick4 = document.getElementById('cotl-tick-4');
+
+    const unitBtns = Array.from(document.querySelectorAll('.cotl-unit-btn'));
+    const presetBtns = Array.from(document.querySelectorAll('.cotl-preset-btn'));
+    const broilerToggle = document.getElementById('cotl-broiler-toggle');
+    const broilerPill = document.getElementById('cotl-broiler-pill');
+    const broilerSwitch = document.getElementById('cotl-broiler-switch');
+    const broilerKnob = document.getElementById('cotl-broiler-knob');
+
+    const searchInput = document.getElementById('cotl-search');
+    const searchClear = document.getElementById('cotl-search-clear');
+    const quickBtns = Array.from(document.querySelectorAll('.cotl-quick-btn'));
+    const catBtns = Array.from(document.querySelectorAll('.cotl-cat-btn'));
+    const verdictBtns = Array.from(document.querySelectorAll('.cotl-verdict-btn'));
+    const sortSelect = document.getElementById('cotl-sort');
+    const resetBtn = document.getElementById('cotl-reset');
+    const emptyResetBtn = document.getElementById('cotl-empty-reset');
+
+    const summaryLabel = document.getElementById('cotl-summary-label');
+    const countSafeEl = document.getElementById('cotl-count-safe');
+    const countCautionEl = document.getElementById('cotl-count-caution');
+    const countUnsafeEl = document.getElementById('cotl-count-unsafe');
+
+    const inspector = document.getElementById('cotl-inspector');
+    const inspCat = document.getElementById('cotl-insp-cat');
+    const inspName = document.getElementById('cotl-insp-name');
+    const inspVerdict = document.getElementById('cotl-insp-verdict');
+    const inspReasonBox = document.getElementById('cotl-insp-reason-box');
+    const inspReason = document.getElementById('cotl-insp-reason');
+    const inspMaxTemp = document.getElementById('cotl-insp-maxtemp');
+    const inspBroiler = document.getElementById('cotl-insp-broiler');
+    const inspRisk = document.getElementById('cotl-insp-risk');
+    const inspFailure = document.getElementById('cotl-insp-failure');
+    const inspWarning = document.getElementById('cotl-insp-warning');
+    const inspLid = document.getElementById('cotl-insp-lid');
+    const inspAlt = document.getElementById('cotl-insp-alt');
+    const copyBtn = document.getElementById('cotl-copy-btn');
+
+    const grid = document.getElementById('cotl-grid');
+    const emptyState = document.getElementById('cotl-empty');
+    const cards = Array.from(document.querySelectorAll('.cotl-card'));
+    const cardById = new Map(cards.map((el) => [el.getAttribute('data-cotl-card'), el]));
+
+    function fToC(f) {
+      return Math.round(((f - 32) * 5) / 9);
+    }
+
+    function formatDelta(diffF) {
+      const absF = Math.max(0, Math.round(diffF));
+      const absC = Math.round((absF * 5) / 9);
+      return state.unit === 'C' ? absC + '°C (' + absF + '°F)' : absF + '°F (' + absC + '°C)';
+    }
+
+    function getEffectiveTempF() {
+      return state.broilerMode ? Math.max(state.tempF, 525) : state.tempF;
+    }
+
+    function evaluateItem(item) {
+      const effF = getEffectiveTempF();
+
+      if (item.maxOvenTempF === 0) {
+        return {
+          status: 'unsafe',
+          reason: ui.reasonNeverOven || 'Never oven safe.',
+          fillPct: 100
+        };
+      }
+
+      if (state.broilerMode) {
+        if (!item.broilerSafe) {
+          return {
+            status: 'unsafe',
+            reason: ui.reasonBroilerForbidden || 'Broiler forbidden.',
+            fillPct: 100
+          };
+        }
+        if (effF > item.maxOvenTempF) {
+          if (item.maxUncoveredTempF && effF <= item.maxUncoveredTempF) {
+            return {
+              status: 'caution',
+              reason: ui.reasonBroilerRemoveLid || 'Remove lid under broiler.',
+              fillPct: 88
+            };
+          }
+          if (item.maxOvenTempF === 500 && item.broilerSafe) {
+            return {
+              status: 'caution',
+              reason: ui.reasonBroilerClearance || 'Keep clearance from broiler.',
+              fillPct: 92
+            };
+          }
+          return {
+            status: 'unsafe',
+            reason: (ui.reasonExceedsTemp || '').replace('{diff}', formatDelta(effF - item.maxOvenTempF)),
+            fillPct: 100
+          };
+        }
+        const marginB = item.maxOvenTempF - effF;
+        if (marginB <= 25) {
+          return {
+            status: 'caution',
+            reason: (ui.reasonNearLimit || '').replace('{margin}', formatDelta(marginB)),
+            fillPct: 90
+          };
+        }
+        return {
+          status: 'safe',
+          reason: (ui.reasonSafeHeadroom || '').replace('{margin}', formatDelta(marginB)),
+          fillPct: Math.min(82, Math.max(20, Math.round((effF / item.maxOvenTempF) * 100)))
+        };
+      }
+
+      // Standard oven mode
+      if (effF > item.maxOvenTempF) {
+        return {
+          status: 'unsafe',
+          reason: (ui.reasonExceedsTemp || '').replace('{diff}', formatDelta(effF - item.maxOvenTempF)),
+          fillPct: 100
+        };
+      }
+
+      const margin = item.maxOvenTempF - effF;
+      if (margin <= 25) {
+        return {
+          status: 'caution',
+          reason: (ui.reasonNearLimit || '').replace('{margin}', formatDelta(margin)),
+          fillPct: 92
+        };
+      }
+
+      return {
+        status: 'safe',
+        reason: (ui.reasonSafeHeadroom || '').replace('{margin}', formatDelta(margin)),
+        fillPct: Math.min(82, Math.max(18, Math.round((effF / item.maxOvenTempF) * 100)))
+      };
+    }
+
+    function badgeClasses(status) {
+      if (status === 'unsafe') {
+        return 'bg-error-bg text-error dark:text-error-border border-error-border';
+      }
+      if (status === 'caution') {
+        return 'bg-warning-bg text-warning dark:text-amber-300 border-warning-border';
+      }
+      return 'bg-success/10 text-success dark:text-success-border border-success/30';
+    }
+
+    function badgeText(status) {
+      if (status === 'unsafe') return ui.statusUnsafe || 'UNSAFE ❌';
+      if (status === 'caution') return ui.statusCaution || 'CAUTION ⚠️';
+      return ui.statusSafe || 'SAFE ✅';
+    }
+
+    function shortBadgeText(status) {
+      if (status === 'unsafe') return (ui.shortUnsafe || 'Unsafe') + ' ❌';
+      if (status === 'caution') return (ui.shortCaution || 'Caution') + ' ⚠️';
+      return (ui.shortSafe || 'Safe') + ' ✅';
+    }
+
+    function barClass(status) {
+      if (status === 'unsafe') return 'bg-error';
+      if (status === 'caution') return 'bg-warning';
+      return 'bg-success';
+    }
+
+    function updateUnitUI() {
+      unitBtns.forEach((btn) => {
+        const active = btn.getAttribute('data-cotl-unit') === state.unit;
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('text-muted', !active);
+      });
+
+      if (tick1) tick1.textContent = state.unit === 'C' ? '93°C' : '200°F';
+      if (tick2) tick2.textContent = state.unit === 'C' ? '165°C' : '325°F';
+      if (tick3) tick3.textContent = state.unit === 'C' ? '220°C' : '425°F';
+      if (tick4) tick4.textContent = state.unit === 'C' ? '288°C' : '550°F';
+
+      presetBtns.forEach((btn) => {
+        const pf = parseInt(btn.getAttribute('data-cotl-preset-f') || '425', 10);
+        const pc = parseInt(btn.getAttribute('data-cotl-preset-c') || '220', 10);
+        btn.textContent = state.unit === 'C' ? pc + '°C' : pf + '°F';
+      });
+    }
+
+    function updateTempDisplay() {
+      const f = state.tempF;
+      const c = fToC(f);
+      if (slider) slider.value = String(f);
+      if (tempPrimary && tempSecondary) {
+        if (state.unit === 'C') {
+          tempPrimary.textContent = c + '°C';
+          tempSecondary.textContent = f + '°F';
+        } else {
+          tempPrimary.textContent = f + '°F';
+          tempSecondary.textContent = c + '°C';
+        }
+      }
+
+      presetBtns.forEach((btn) => {
+        const pf = parseInt(btn.getAttribute('data-cotl-preset-f') || '0', 10);
+        const active = !state.broilerMode && pf === state.tempF;
+        btn.classList.toggle('bg-signature-coral', active);
+        btn.classList.toggle('text-white', active);
+        btn.classList.toggle('border-signature-coral', active);
+        btn.classList.toggle('bg-surface-soft', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+    }
+
+    function updateBroilerUI() {
+      const on = state.broilerMode;
+      if (broilerToggle) {
+        broilerToggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+        broilerToggle.classList.toggle('border-signature-coral', on);
+        broilerToggle.classList.toggle('bg-signature-coral/10', on);
+        broilerToggle.classList.toggle('border-hairline', !on);
+        broilerToggle.classList.toggle('bg-surface-soft', !on);
+      }
+      if (broilerPill) {
+        broilerPill.textContent = on ? ui.broilerOnTag : ui.broilerOffTag;
+        broilerPill.classList.toggle('bg-signature-coral', on);
+        broilerPill.classList.toggle('text-white', on);
+        broilerPill.classList.toggle('bg-surface-strong', !on);
+        broilerPill.classList.toggle('text-muted', !on);
+      }
+      if (broilerSwitch) {
+        broilerSwitch.classList.toggle('bg-signature-coral', on);
+        broilerSwitch.classList.toggle('bg-border-strong/60', !on);
+      }
+      if (broilerKnob) {
+        broilerKnob.classList.toggle('translate-x-5', on);
+        broilerKnob.classList.toggle('translate-x-0', !on);
+      }
+    }
+
+    function updateFilterPills() {
+      catBtns.forEach((btn) => {
+        const active = btn.getAttribute('data-cotl-cat') === state.category;
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      verdictBtns.forEach((btn) => {
+        const vf = btn.getAttribute('data-cotl-verdict-filter');
+        const active = state.verdictFilter === vf;
+        btn.classList.toggle('ring-2', active);
+        btn.classList.toggle('ring-offset-1', active);
+        btn.classList.toggle('ring-signature-coral', active);
+        btn.classList.toggle('opacity-55', state.verdictFilter !== 'all' && !active);
+      });
+    }
+
+    let lastCopyText = '';
+
+    function renderInspector() {
+      const item = itemById.get(state.selectedId) || items[0];
+      if (!item) return;
+      const ev = evaluateItem(item);
+
+      if (inspCat) inspCat.textContent = item.categoryLabel;
+      if (inspName) inspName.textContent = item.name;
+      if (inspVerdict) {
+        inspVerdict.textContent = badgeText(ev.status);
+        inspVerdict.className = 'inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-bold tracking-wide border ' + badgeClasses(ev.status);
+      }
+      if (inspector) {
+        inspector.classList.remove('border-success/50', 'border-warning-border', 'border-error-border', 'border-hairline');
+        if (ev.status === 'unsafe') inspector.classList.add('border-error-border');
+        else if (ev.status === 'caution') inspector.classList.add('border-warning-border');
+        else inspector.classList.add('border-success/50');
+      }
+      if (inspReasonBox) {
+        inspReasonBox.className = 'rounded-xl p-3.5 border text-sm font-semibold leading-relaxed ' + badgeClasses(ev.status);
+      }
+      if (inspReason) inspReason.textContent = ev.reason;
+
+      if (inspMaxTemp) {
+        if (item.maxOvenTempF === 0) {
+          inspMaxTemp.textContent = ui.neverOvenBadge;
+        } else {
+          inspMaxTemp.textContent =
+            state.unit === 'C'
+              ? item.tempRangeDisplayC + ' (' + item.tempRangeDisplayF + ')'
+              : item.tempRangeDisplayF + ' (' + item.tempRangeDisplayC + ')';
+        }
+      }
+      if (inspBroiler) {
+        inspBroiler.textContent = item.broilerSafe
+          ? (ui.broilerOkBadge || 'Broiler Safe') + ' ✅'
+          : (ui.noBroilerBadge || 'No Broiler') + ' ❌';
+      }
+      if (inspRisk) {
+        inspRisk.textContent = (ui.riskLabels && ui.riskLabels[item.thermalRisk]) || item.thermalRisk;
+      }
+      if (inspFailure) inspFailure.textContent = item.failureMode;
+      if (inspWarning) inspWarning.textContent = item.warning;
+      if (inspLid) inspLid.textContent = item.lidOrHandleNote;
+      if (inspAlt) inspAlt.textContent = item.safeAlternative;
+
+      const settingLabel = state.broilerMode
+        ? ui.broilerTitle + ' (500–550°F / 260–288°C)'
+        : state.tempF + '°F (' + fToC(state.tempF) + '°C)';
+      lastCopyText = [
+        ui.copyHeader,
+        item.name,
+        ui.copySetting + ': ' + settingLabel,
+        ui.copyVerdict + ': ' + badgeText(ev.status) + ' — ' + ev.reason,
+        ui.copyLimit + ': ' + (item.maxOvenTempF === 0 ? ui.neverOvenBadge : item.tempRangeDisplayF + ' / ' + item.tempRangeDisplayC),
+        ui.copyLidNote + ': ' + item.lidOrHandleNote,
+        ui.copyAlt + ': ' + item.safeAlternative
+      ].join('\n');
+    }
+
+    function renderAll() {
+      updateUnitUI();
+      updateTempDisplay();
+      updateBroilerUI();
+      updateFilterPills();
+
+      const query = state.search.trim().toLowerCase();
+      if (searchClear) searchClear.classList.toggle('hidden', query.length === 0);
+
+      // Evaluate ALL 24 items first for live summary counts (across all 24 items at current temp/broiler)
+      const evalMap = new Map();
+      let safeCount = 0;
+      let cautionCount = 0;
+      let unsafeCount = 0;
+
+      items.forEach((item) => {
+        const ev = evaluateItem(item);
+        evalMap.set(item.id, ev);
+        if (ev.status === 'safe') safeCount += 1;
+        else if (ev.status === 'caution') cautionCount += 1;
+        else unsafeCount += 1;
+      });
+
+      if (countSafeEl) countSafeEl.textContent = String(safeCount);
+      if (countCautionEl) countCautionEl.textContent = String(cautionCount);
+      if (countUnsafeEl) countUnsafeEl.textContent = String(unsafeCount);
+
+      if (summaryLabel) {
+        if (state.broilerMode) {
+          summaryLabel.textContent = ui.summaryBroilerPrefix + ' (500–550°F / 260–288°C):';
+        } else {
+          const tStr =
+            state.unit === 'C'
+              ? fToC(state.tempF) + '°C (' + state.tempF + '°F)'
+              : state.tempF + '°F (' + fToC(state.tempF) + '°C)';
+          summaryLabel.textContent = ui.summaryPrefix + ' ' + tStr + ':';
+        }
+      }
+
+      // Filter and sort cards
+      const rankSafeFirst = { safe: 0, caution: 1, unsafe: 2 };
+      const rankUnsafeFirst = { unsafe: 0, caution: 1, safe: 2 };
+
+      const ordered = items.slice().sort((a, b) => {
+        const ea = evalMap.get(a.id);
+        const eb = evalMap.get(b.id);
+        if (state.sort === 'safe-first') {
+          const diff = rankSafeFirst[ea.status] - rankSafeFirst[eb.status];
+          if (diff !== 0) return diff;
+          return b.maxOvenTempF - a.maxOvenTempF;
+        }
+        if (state.sort === 'unsafe-first') {
+          const diff = rankUnsafeFirst[ea.status] - rankUnsafeFirst[eb.status];
+          if (diff !== 0) return diff;
+          return a.maxOvenTempF - b.maxOvenTempF;
+        }
+        if (state.sort === 'highest-temp') {
+          return b.maxOvenTempF - a.maxOvenTempF;
+        }
+        return 0;
+      });
+
+      let visibleCount = 0;
+      let firstVisibleId = null;
+
+      ordered.forEach((item) => {
+        const el = cardById.get(item.id);
+        if (!el) return;
+        const ev = evalMap.get(item.id);
+
+        const matchesCat = state.category === 'all' || item.category === state.category;
+        const matchesVerdict = state.verdictFilter === 'all' || ev.status === state.verdictFilter;
+        const matchesQuery = !query || item.searchText.indexOf(query) !== -1;
+        const visible = matchesCat && matchesVerdict && matchesQuery;
+
+        el.classList.toggle('hidden', !visible);
+        if (visible) {
+          visibleCount += 1;
+          if (!firstVisibleId) firstVisibleId = item.id;
+        }
+
+        // Update card badge
+        const badge = el.querySelector('[data-cotl-card-badge]');
+        if (badge) {
+          badge.textContent = shortBadgeText(ev.status);
+          badge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border shrink-0 ' + badgeClasses(ev.status);
+        }
+
+        // Update thermal meter bar
+        const bar = el.querySelector('[data-cotl-card-bar]');
+        if (bar) {
+          bar.style.width = ev.fillPct + '%';
+          bar.className = 'h-full rounded-full transition-all duration-200 ' + barClass(ev.status);
+        }
+
+        // Selected styling
+        const isSelected = state.selectedId === item.id;
+        el.classList.toggle('ring-2', isSelected);
+        el.classList.toggle('ring-signature-coral', isSelected);
+        el.classList.toggle('border-signature-coral', isSelected);
+        el.classList.toggle('bg-surface-soft', isSelected);
+        el.classList.toggle('border-hairline', !isSelected);
+        el.classList.toggle('bg-canvas', !isSelected);
+
+        const hint = el.querySelector('[data-cotl-card-hint]');
+        if (hint) {
+          hint.textContent = isSelected ? ui.cardSelectedHint : ui.cardInspectHint;
+        }
+
+        if (grid) grid.appendChild(el);
+      });
+
+      if (emptyState) emptyState.classList.toggle('hidden', visibleCount > 0);
+
+      // Ensure selectedId points to a visible item if current is hidden
+      const selectedEl = cardById.get(state.selectedId);
+      if (firstVisibleId && selectedEl && selectedEl.classList.contains('hidden')) {
+        state.selectedId = firstVisibleId;
+        const newSel = cardById.get(firstVisibleId);
+        if (newSel) {
+          newSel.classList.add('ring-2', 'ring-signature-coral', 'border-signature-coral', 'bg-surface-soft');
+          newSel.classList.remove('border-hairline', 'bg-canvas');
+          const hint = newSel.querySelector('[data-cotl-card-hint]');
+          if (hint) hint.textContent = ui.cardSelectedHint;
+        }
+      }
+
+      renderInspector();
+    }
+
+    // Event bindings
+    if (slider) {
+      slider.addEventListener('input', () => {
+        state.tempF = parseInt(slider.value, 10) || 425;
+        if (state.broilerMode) state.broilerMode = false;
+        renderAll();
+      });
+    }
+
+    unitBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const next = btn.getAttribute('data-cotl-unit');
+        if (!next || next === state.unit) return;
+        state.unit = next;
+        renderAll();
+      });
+    });
+
+    presetBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const pf = parseInt(btn.getAttribute('data-cotl-preset-f') || '425', 10);
+        state.tempF = pf;
+        state.broilerMode = false;
+        renderAll();
+      });
+    });
+
+    if (broilerToggle) {
+      broilerToggle.addEventListener('click', () => {
+        state.broilerMode = !state.broilerMode;
+        if (state.broilerMode && state.tempF < 500) {
+          state.tempF = 525;
+        }
+        renderAll();
+      });
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        state.search = searchInput.value || '';
+        renderAll();
+      });
+    }
+
+    if (searchClear) {
+      searchClear.addEventListener('click', () => {
+        state.search = '';
+        if (searchInput) searchInput.value = '';
+        renderAll();
+      });
+    }
+
+    quickBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const q = btn.getAttribute('data-cotl-quick') || '';
+        state.search = q;
+        state.category = 'all';
+        state.verdictFilter = 'all';
+        if (searchInput) searchInput.value = q;
+        renderAll();
+      });
+    });
+
+    catBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const cat = btn.getAttribute('data-cotl-cat') || 'all';
+        state.category = cat;
+        renderAll();
+      });
+    });
+
+    verdictBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const vf = btn.getAttribute('data-cotl-verdict-filter') || 'all';
+        state.verdictFilter = state.verdictFilter === vf ? 'all' : vf;
+        renderAll();
+      });
+    });
+
+    if (sortSelect) {
+      sortSelect.addEventListener('change', () => {
+        state.sort = sortSelect.value || 'safe-first';
+        renderAll();
+      });
+    }
+
+    function resetAll() {
+      state.tempF = 425;
+      state.broilerMode = false;
+      state.category = 'all';
+      state.verdictFilter = 'all';
+      state.search = '';
+      state.sort = 'safe-first';
+      state.selectedId = items.length ? items[0].id : '';
+      if (searchInput) searchInput.value = '';
+      if (sortSelect) sortSelect.value = 'safe-first';
+      renderAll();
+    }
+
+    if (resetBtn) resetBtn.addEventListener('click', resetAll);
+    if (emptyResetBtn) emptyResetBtn.addEventListener('click', resetAll);
+
+    cards.forEach((card) => {
+      card.addEventListener('click', () => {
+        const id = card.getAttribute('data-cotl-card');
+        if (!id || !itemById.has(id)) return;
+        state.selectedId = id;
+        renderAll();
+        if (inspector) {
+          const rect = inspector.getBoundingClientRect();
+          if (rect.top < 16 || rect.top > window.innerHeight * 0.65) {
+            inspector.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        }
+      });
+    });
+
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        if (!navigator.clipboard || !lastCopyText) return;
+        navigator.clipboard
+          .writeText(lastCopyText)
+          .then(() => {
+            copyBtn.textContent = ui.inspectorCopiedBtn || 'Copied ✓';
+            setTimeout(() => {
+              copyBtn.textContent = ui.inspectorCopyBtn || 'Copy Safety Card';
+            }, 2000);
+          })
+          .catch(() => {});
+      });
+    }
+
+    // Initial render
+    renderAll();
+  })();
+</script>

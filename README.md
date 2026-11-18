@@ -1,16 +1,45 @@
 # Is It Kitchen Safe?
 
-A static reference site answering "Can you put X in Y?" questions for kitchen appliances.
+A static kitchen safety reference platform and interactive consumer tool suite answering *"Can you put X in Y?"* and everyday food, cookware, and appliance safety questions.
 
 ## Overview
-IsItKitchenSafe provides 10,562 static diagnostic pages detailing whether everyday items are safe for the dishwasher, microwave, freezer, oven, dryer, air fryer, refrigerator, and more across 5 languages (English, Spanish, Portuguese, Japanese, Simplified Chinese), backed by 175 flagship interactive diagnostic tools.
+
+IsItKitchenSafe delivers **10,600+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **181 interactive tools** (including **30 Google-indexed Everyday Consumer Kitchen Safety Tools**), **16 multilingual blog guides**, high-intent brand comparisons, and transparent E-E-A-T verification standards.
 
 ## Tech Stack
-- **Framework**: Astro.js
+- **Framework**: Astro.js (MPA static generation)
 - **Styling**: Tailwind CSS v4
-- **Hosting**: Cloudflare Pages
-- **Architecture**: MPA (Multi-Page Application)
-- **Engine**: Autonomous Growth & Ops Engine v2.0 (All-Day Smart Engine)
+- **Hosting & Edge**: Cloudflare Pages + Cloudflare Pages Functions (`functions/api/og.svg.js`, `functions/_redirects-map.js`)
+- **Operations**: Autonomous Growth & Ops Engine v2.0 + 15-Minute Autonomous Growth Roadmap (`logs/website_growth_roadmap.json`)
+
+## Consumer Growth, E-E-A-T & Retention Architecture
+
+### Everyday Consumer Kitchen Safety Tools (30 Google-Indexed Tools)
+All 181 interactive tools are split cleanly between everyday consumer utilities and specialized commercial/lab simulators. **30 high-utility consumer tools** are explicitly allowlisted for search indexing in [`src/data/consumer-tools-allowlist.json`](src/data/consumer-tools-allowlist.json) across all 5 languages, including:
+- **Kitchen Bottom Symbol Decoder** (`kitchen-symbol-decoder`)
+- **USDA Leftover Shelf-Life Countdown Calculator** (`leftover-shelf-life-calculator`)
+- **USDA Meat & Turkey Thawing Calculator** (`meat-thawing-calculator`)
+- **Plastic Recycling Code `#1–#7` Safety Checker** (`plastic-code-checker`)
+- **Air Fryer & Oven Temp Converter** (`air-fryer-oven-converter`)
+- **Cookware Safe Oven Temp Lookup** (`cookware-oven-temp-lookup`)
+- **Pan Scratch Inspector** (`pan-scratch-inspector`)
+- Plus recall scanning, thermal shock, culinary oil smoke point, cookware brand transparency, and hazard triage tools.
+
+### Content & Comparison Verticals
+- **16 Multilingual Blog Guides** with **100% 5-language slug parity** across EN, ES, PT, ZH-CN, and JA.
+- **High-Intent Brand & Material Comparisons** (`/compare/`), covering popular cookware, drinkware, and kitchen material matchups across 5 languages.
+- **Original SVG Visual Safety Diagrams** embedded across all **7 appliance hubs** (Dishwasher, Microwave, Freezer, Oven, Dryer, Air Fryer, Refrigerator).
+
+### E-E-A-T, Discovery & Retention Features
+- **Multilingual Verification Standards**: Localized `/methodology/` pages detailing USDA, FDA, NSF, and materials-science review standards.
+- **Printable 1-Page Fridge Safety Cheat Sheet**: Localized `/saved/` bookmark hub with clean print layout for kitchen reference.
+- **1080×1350 Browser PNG Safety Card Exporter**: One-click client-side social/reference card download.
+- **Dynamic Cloudflare Edge OG/Pinterest Card Generator**: On-the-fly SVG card rendering at [`functions/api/og.svg.js`](functions/api/og.svg.js).
+- **Global Quick Search**: Instant keyboard-accessible `Ctrl+K` / `/` search across items, tools, and guides.
+- **Syndication, PWA & AI Discovery**:
+  - **RSS 2.0 Feed**: `/rss.xml`
+  - **PWA Web App Manifest**: [`public/manifest.webmanifest`](public/manifest.webmanifest)
+  - **AI Search Directory**: [`public/llms.txt`](public/llms.txt)
 
 ## Running Locally
 
@@ -25,9 +54,9 @@ npm run dev
 npm run build
 ```
 
-## Autonomous Growth & Ops Engine (v2.0 - All-Day Smart Engine)
+## Autonomous Growth Roadmap & Ops Engine
 
-Continuous operations and automated growth engine with multi-language telemetry, bundle budgets, schema audits, component parity, sitemap health, topical opportunity intelligence, and background daemon monitoring:
+The site tracks iterative consumer SEO, UX, and tool shipping waves on a **15-minute autonomous growth cadence** in [`logs/website_growth_roadmap.json`](logs/website_growth_roadmap.json), backed by automated validation and IndexNow discovery scripts:
 
 ```sh
 # Run fast validation (<2s) across tools, parity, redirects, datasets, schemas, and CWV budgets
@@ -42,27 +71,34 @@ npm run ops:parity
 # Run sitemap XML and search engine indexing coverage audit
 npm run ops:sitemaps
 
+# Validate IndexNow key file, dist/sitemap-0.xml extraction, batching & priority consumer URLs (no live HTTP POST)
+npm run ops:indexnow -- --dry-run
+
+# Submit verified priority & sitemap URLs live via IndexNow (Bing, Yandex, Seznam)
+npm run ops:indexnow
+
 # Run targeted audits
 npm run ops:seo        # Structured data (JSON-LD FAQPage, BreadcrumbList) & canonicals
 npm run ops:cwv        # Core Web Vitals bundle budgets & asset geometry
-node scripts/autonomous-growth-engine.cjs --tools      # 175 tools × 5 languages audit
+node scripts/autonomous-growth-engine.cjs --tools      # 181 tools × 5 languages audit
 node scripts/autonomous-growth-engine.cjs --redirects  # Cloudflare Pages 2k ceiling monitor
-node scripts/autonomous-growth-engine.cjs --datasets   # 180+ multilingual data assets
+node scripts/autonomous-growth-engine.cjs --datasets   # Multilingual data assets audit
 
 # Run all-day autonomous background daemon (default 30m heartbeat)
 npm run ops:daemon
 
-# Run full master cycle (audits + 10,562-page static build + link verification)
+# Run full master cycle (audits + 10,600+-page static build + link verification)
 npm run ops:engine
 ```
 
 ## Scale & Metrics
-- **10,562 Static Pages** across 11 verticals and 5 languages (EN, ES, PT, JA, ZH-CN)
-- **175 Flagship Interactive Tools** with 100% multilingual parity (875 tool pages)
-- **Zero Dead Links** (1,026,000+ hrefs audited with 100% resolution)
-- **10,394+ Indexed URLs** in verified XML Sitemaps (`sitemap-index.xml`, `sitemap-0.xml`)
-- **Cloudflare Edge Middleware** fallback synchronization (`functions/_redirects-map.js`)
-- **100% JSON-LD Schema Compliance** on all tool and reference pages
+- **10,600+ Static Pages** across 11 verticals and 5 languages (EN, ES, PT, ZH-CN, JA)
+- **181 Interactive Tools** with 100% 5-language parity, including **30 Google-indexed Everyday Consumer Tools** (`src/data/consumer-tools-allowlist.json`)
+- **16 Multilingual Blog Guides** (100% 5-language slug parity) + **High-Intent Brand Comparisons**
+- **Zero Dead Links** (1,000,000+ internal hrefs audited with 100% resolution)
+- **Verified XML Sitemaps & Real-Time Indexing** (`sitemap-index.xml`, `sitemap-0.xml`, `scripts/ping-indexnow.cjs`)
+- **Cloudflare Edge Middleware & Dynamic Cards** (`functions/_redirects-map.js`, `functions/api/og.svg.js`)
+- **100% JSON-LD Schema Compliance** across consumer tools, comparisons, guides, and reference pages
 
 ## SEO Investigation
 A technical SEO investigation was conducted regarding a sudden drop in GSC traffic on July 14-15. See [SEO_INVESTIGATION_STATUS.md](SEO_INVESTIGATION_STATUS.md) for full details and findings.

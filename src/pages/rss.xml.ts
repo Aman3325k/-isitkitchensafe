@@ -66,9 +66,16 @@ const curatedTools: Array<{
   },
   {
     path: '/tools/air-fryer-oven-converter/',
-    title: 'Air Fryer to Oven Conversion Calculator & Gas Mark Chart',
+    title: 'Air Fryer, Convection Oven & Gas Mark Conversion Calculator',
     description:
-      'Convert conventional oven recipes to exact air fryer temperatures and times. Translates between conventional ovens, fan-assisted convection, Fahrenheit, Celsius, and British Gas Mark dial settings.',
+      'Instant °F / °C / Gas Mark 1–9 conversion plus air fryer time/temp reduction and real-time parchment, silicone, and PTFE thermal safety alerts.',
+    date: '2026-11-18',
+  },
+  {
+    path: '/tools/cookware-oven-temp-lookup/',
+    title: 'Cookware & Bakeware Safe Oven Temperature Lookup',
+    description:
+      'Live oven temperature and broiler safety check across 24 cookware and bakeware brands and materials including HexClad, Le Creuset, Caraway, Lodge, Pyrex, silicone, and parchment paper.',
     date: '2026-11-18',
   },
   {
