@@ -1,0 +1,411 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import AirFryerOvenConverter from '../../../components/AirFryerOvenConverter.astro';
+import type { SupportedLanguage } from '../../../i18n/ui';
+import { getApplianceUrl, getDirectoryUrl } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+
+interface LocaleContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  heroSub: string;
+  relatedAfTag: string;
+  relatedAfTitle: string;
+  relatedAfDesc: string;
+  relatedShockTag: string;
+  relatedShockTitle: string;
+  relatedShockDesc: string;
+  hubsTitle: string;
+  hubsDescPrefix: string;
+  methodologyLabel: string;
+  hubLabels: {
+    airfryer: string;
+    oven: string;
+    methodology: string;
+    allTools: string;
+  };
+  faqTitle: string;
+  faqs: Array<{ question: string; answer: string }>;
+  breadcrumbs: Array<{ label: string; href?: string }>;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocaleContent> = {
+  es: {
+    pageTitle: "Conversor de Freidora de Aire, Horno de Convección y Gas Mark | IsItKitchenSafe",
+    pageDescription: "Convierte recetas de horno a freidora de aire al instante (-14°C/-25°F y -20% tiempo), cambia entre °F, °C y Gas Mark 1/4–9 y verifica en tiempo real la seguridad térmica de papel pergamino, silicona, teflón PTFE y vidrio.",
+    badge: "Calculadora de Conversión y Seguridad Térmica",
+    h1: "Conversor de Freidora de Aire, Horno y Gas Mark",
+    heroSub: "Adapta cualquier receta de horno convencional a freidora de aire (o al revés), convierte entre °F, °C, horno con ventilador y Gas Mark 1/4–9, calcula el minuto exacto para voltear y comprueba los límites seguros de papel de horno, silicona, antiadherente y vidrio.",
+    relatedAfTag: "Herramienta Relacionada de Freidora de Aire",
+    relatedAfTitle: "Calculadora de Acrilamida y Dorado en Freidora de Aire →",
+    relatedAfDesc: "¿Cocinas patatas fritas o empanados a más de 190°C? Evalúa los límites europeos UE 2017/2158 de acrilamida y técnicas de remojo.",
+    relatedShockTag: "Herramienta Relacionada de Utensilios",
+    relatedShockTitle: "Simulador de Choque Térmico en Vidrio y Cerámica →",
+    relatedShockDesc: "Compara el riesgo de estallido entre vidrio templado sódico-cálcico y borosilicato al pasar de la nevera al horno caliente.",
+    hubsTitle: "Verifica Qué Materiales Son Seguros en Tu Freidora de Aire y Horno",
+    hubsDescPrefix: "Explora nuestras guías material por material y revisa nuestras fuentes en",
+    methodologyLabel: "Metodología",
+    hubLabels: {
+      airfryer: "Guía de Freidora de Aire",
+      oven: "Guía de Horno",
+      methodology: "Metodología",
+      allTools: "Todas las Herramientas →"
+    },
+    faqTitle: "Preguntas Frecuentes sobre Conversiones de Freidora de Aire, Horno y Gas Mark",
+    faqs: [
+      {
+        question: "¿Cómo convertir una receta de horno tradicional a freidora de aire?",
+        answer: "Aplica la regla 25/20: reduce la temperatura del horno convencional en 14–15°C (25°F) y acorta el tiempo total de cocción en un 20% (multiplica los minutos por 0.80). Debido a que la freidora de aire concentra aire caliente a gran velocidad en una cesta pequeña, voltea o agita a mitad del tiempo y revisa el punto 2 o 3 minutos antes de terminar."
+      },
+      {
+        question: "¿A cuántos grados equivalen Gas Mark 4, 5 y 6 en Celsius y Fahrenheit?",
+        answer: "Gas Mark 4 equivale a 180°C convencional (160°C con ventilador / 350°F), Gas Mark 5 a 190°C convencional (170°C con ventilador / 375°F) y Gas Mark 6 a 200°C convencional (180°C con ventilador / 400°F). Cada punto entero adicional suma aproximadamente 10–15°C (25°F)."
+      },
+      {
+        question: "¿Puede incendiarse el papel pergamino o de horno dentro de la freidora de aire?",
+        answer: "Sí, si se usa mal. El papel pergamino suele resistir entre 215°C y 232°C (420–450°F), por lo que superar 215°C puede quemar los bordes. Además, nunca precalientes la freidora vacía con papel dentro ni coloques alimentos muy ligeros que no lo sujeten: la corriente ascendente puede succionarlo contra la resistencia superior y prenderle fuego."
+      },
+      {
+        question: "¿Cuál es la temperatura máxima segura para teflón PTFE, silicona y fuentes de vidrio?",
+        answer: "El antiadherente PTFE (Teflón) no debe alcanzar los 260°C (500°F), pues se degrada liberando vapores tóxicos para aves domésticas. Los moldes de silicona alimentaria suelen tener un máximo de 218–232°C (425–450°F). El vidrio templado sódico-cálcico soporta hasta 218°C (425°F) y es sensible al choque térmico, mientras que el borosilicato llega a 260°C (500°F) y el hierro fundido supera 288°C (550°F)."
+      },
+      {
+        question: "¿Por qué conviene usar un termómetro de alimentos tras convertir el tiempo?",
+        answer: "La potencia y el tamaño de cesta varían mucho entre marcas de freidoras de aire, por lo que el exterior puede dorarse antes de que el centro esté listo. Confirma siempre las temperaturas internas seguras USDA: 74°C (165°F) para aves y recalentados, y 63°C (145°F) para pescado y cortes enteros de cerdo o res (con 3 minutos de reposo)."
+      }
+    ],
+    breadcrumbs: [
+      { label: "Inicio", href: "/es/" },
+      { label: "Herramientas", href: "/es/tools/" },
+      { label: "Conversor Freidora de Aire y Horno" }
+    ]
+  },
+  pt: {
+    pageTitle: "Conversor de Air Fryer, Forno de Convecção e Gas Mark | IsItKitchenSafe",
+    pageDescription: "Converta receitas de forno para air fryer na hora (-14°C/-25°F e -20% de tempo), alterne entre °F, °C e Gas Mark 1/4–9 e confira alertas térmicos em tempo real para papel manteiga, silicone, teflon PTFE e vidro.",
+    badge: "Calculadora de Conversão e Segurança Térmica",
+    h1: "Conversor de Air Fryer, Forno e Gas Mark",
+    heroSub: "Converta qualquer receita de forno convencional para air fryer (ou o inverso), traduza temperaturas entre °F, °C, forno com ventilação e Gas Mark 1/4–9, veja a hora exata de virar o alimento e cheque os limites seguros de papel manteiga, silicone, antiaderente e refratários de vidro.",
+    relatedAfTag: "Ferramenta Relacionada de Air Fryer",
+    relatedAfTitle: "Calculadora de Acrilamida e Douramento na Air Fryer →",
+    relatedAfDesc: "Preparando batatas fritas ou empanados acima de 190°C? Veja os limites europeus UE 2017/2158 de acrilamida e protocolos de remolho.",
+    relatedShockTag: "Ferramenta Relacionada de Utensílios",
+    relatedShockTitle: "Simulador de Choque Térmico em Vidro e Cerâmica →",
+    relatedShockDesc: "Compare o risco de estilhaçar entre vidro temperado comum e borossilicato ao levar travessas da geladeira ao forno quente.",
+    hubsTitle: "Confira Quais Materiais São Seguros na Air Fryer e no Forno",
+    hubsDescPrefix: "Consulte os guias completos por material e conheça nossos critérios técnicos em",
+    methodologyLabel: "Metodologia",
+    hubLabels: {
+      airfryer: "Guia da Air Fryer",
+      oven: "Guia do Forno",
+      methodology: "Metodologia",
+      allTools: "Todas as Ferramentas →"
+    },
+    faqTitle: "Perguntas Frequentes sobre Conversão de Air Fryer, Forno e Gas Mark",
+    faqs: [
+      {
+        question: "Como converter uma receita de forno convencional para air fryer?",
+        answer: "Use a regra prática 25/20: diminua a temperatura do forno em 14–15°C (25°F) e reduza o tempo total de preparo em 20% (multiplique os minutos por 0,80). Como a air fryer concentra ar quente de alta velocidade em um cesto compacto, vire ou agite na metade e confira o ponto 2 a 3 minutos antes do final."
+      },
+      {
+        question: "Quanto equivale Gas Mark 4, 5 e 6 em Celsius e Fahrenheit?",
+        answer: "Gas Mark 4 equivale a 180°C em forno comum (160°C convecção / 350°F), Gas Mark 5 a 190°C (170°C convecção / 375°F) e Gas Mark 6 a 200°C (180°C convecção / 400°F). Cada ponto inteiro extra aumenta cerca de 10–15°C (25°F)."
+      },
+      {
+        question: "Papel manteiga pode pegar fogo dentro da air fryer?",
+        answer: "Sim, se usado de forma incorreta. O papel manteiga suporta de 215°C a 232°C (420–450°F); acima disso as bordas podem chamuscar. Além disso, nunca pré-aqueça a air fryer vazia com papel dentro nem use alimentos leves demais para prendê-lo — o vento puxa o papel até a resistência superior e provoca chamas."
+      },
+      {
+        question: "Qual a temperatura máxima segura para panelas PTFE, formas de silicone e vidro?",
+        answer: "Revestimentos antiaderentes PTFE (Teflon) devem ficar abaixo de 260°C (500°F) para evitar degradação e liberação de vapores tóxicos (letais para aves de estimação). Forros de silicone culinário suportam 218–232°C (425–450°F). Vidro temperado comum tem limite de 218°C (425°F) com alto risco de choque térmico, enquanto vidro borossilicato vai a 260°C (500°F) e ferro fundido passa de 288°C (550°F)."
+      },
+      {
+        question: "Por que ainda devo verificar a temperatura interna com termômetro culinário?",
+        answer: "A potência e o tamanho do cesto variam entre modelos de air fryer, podendo dourar o exterior antes de cozinhar totalmente o centro. Confirme sempre as metas USDA: 74°C (165°F) para aves e sobras reaquecidas, e 63°C (145°F) para peixes e cortes inteiros de suíno ou bovino (com 3 minutos de descanso)."
+      }
+    ],
+    breadcrumbs: [
+      { label: "Início", href: "/pt/" },
+      { label: "Ferramentas", href: "/pt/tools/" },
+      { label: "Conversor de Air Fryer e Forno" }
+    ]
+  },
+  'zh-cn': {
+    pageTitle: "空气炸锅、热风烤箱与英式燃气刻度 (Gas Mark) 温度时间换算器 | IsItKitchenSafe",
+    pageDescription: "一键完成传统烤箱与空气炸锅温度时间互转（降温 25°F / 缩短 20% 时长），支持 °F、°C、平炉/热风与 Gas Mark 1/4–9 速查，并实时检测烘焙纸起火、硅胶垫、特氟龙 PTFE 及玻璃烤碗热冲击风险。",
+    badge: "厨房温控换算与耐热安全计算器",
+    h1: "空气炸锅、烤箱与 Gas Mark 温度时间换算器",
+    heroSub: "精准实现烤箱食谱转空气炸锅（及反向换算）、普通平炉与热风循环互转，以及 °F / °C / 英式燃气刻度 Gas Mark 1/4–9 转换；内置 12 款高频食材预设、翻面提醒节点与烘焙纸/硅胶/PTFE/玻璃耐温安全预警。",
+    relatedAfTag: "相关空气炸锅安全工具",
+    relatedAfTitle: "空气炸锅丙烯酰胺与美拉德褐变风险计算器 →",
+    relatedAfDesc: "190°C 以上炸薯条或裹粉食材？立即评估欧盟 EU 2017/2158 丙烯酰胺基准与冷水浸泡减毒效果。",
+    relatedShockTag: "相关厨具耐热安全工具",
+    relatedShockTitle: "玻璃与陶瓷烤碗热冲击炸裂模拟器 →",
+    relatedShockDesc: "对比普通钢化钠钙玻璃与高硼硅玻璃在冰箱冷藏转高温烤箱时的冷热冲击爆裂风险。",
+    hubsTitle: "查询各类器皿与材质能否放入空气炸锅或烤箱",
+    hubsDescPrefix: "逐项查阅权威厨房安全指南，并了解我们的科学评估标准：",
+    methodologyLabel: "评估方法论",
+    hubLabels: {
+      airfryer: "空气炸锅安全指南",
+      oven: "烤箱安全指南",
+      methodology: "评估方法论",
+      allTools: "全部工具 →"
+    },
+    faqTitle: "空气炸锅、烤箱换算与厨具耐温安全常见问题",
+    faqs: [
+      {
+        question: "普通烤箱食谱如何换算成空气炸锅的温度和时间？",
+        answer: "最经典的家庭通用公式是“减 25 / 缩 20”法则：将传统烤箱温度降低 25°F（约 14–15°C），同时将总烘烤时间缩短 20%（原分钟数 × 0.80）。由于空气炸锅腔体紧凑且热风流速极高，务必在过半时间翻面或晃篮，并提前 2–3 分钟检查熟度防烤焦。"
+      },
+      {
+        question: "英式食谱中的 Gas Mark 4、5、6 分别对应多少摄氏度和华氏度？",
+        answer: "Gas Mark 4 对应平炉 180°C（热风 160°C / 350°F），Gas Mark 5 对应平炉 190°C（热风 170°C / 375°F），Gas Mark 6 对应平炉 200°C（热风 180°C / 400°F）。在 Gas Mark 1 以上，每增加 1 档大约升温 10–15°C（25°F）。"
+      },
+      {
+        question: "空气炸锅里放烘焙纸（硅油纸）真的会起火吗？",
+        answer: "使用不当确实可能引发起火。普通烘焙纸耐温上限多为 215–232°C（420–450°F），超温极易烤焦边缘；更危险的是空篮带纸预热，或铺在西兰花等轻质食材下方，强力上升热风会将未被压牢的烘焙纸直接吸到顶部发热管上引燃。"
+      },
+      {
+        question: "不粘锅（PTFE 特氟龙）、硅胶垫与耐热玻璃碗的最高安全温度各是多少？",
+        answer: "PTFE 不粘涂层须严控在 260°C（500°F）以下，超温分解会释放对宠物鸟致命的含氟烟雾；食品级硅胶垫通常上限为 218–232°C（425–450°F）；普通钢化钠钙玻璃上限仅 218°C（425°F）且怕冷热骤变，高硼硅玻璃可达 260°C（500°F），铸铁锅则可安全超过 288°C（550°F）。"
+      },
+      {
+        question: "换算好时间后为什么仍建议用食品探针温度计测中心熟度？",
+        answer: "不同品牌空气炸锅功率与风道差异很大，食材表皮常在中心尚未完全熟透前就已金黄。出锅前请以 USDA 安全中心温度为准：禽肉与复热剩菜须达 74°C（165°F），鱼类 63°C（145°F），整块猪排与牛排达 63°C（145°F）并静置 3 分钟。"
+      }
+    ],
+    breadcrumbs: [
+      { label: "首页", href: "/zh-cn/" },
+      { label: "工具", href: "/zh-cn/tools/" },
+      { label: "空气炸锅与烤箱换算器" }
+    ]
+  },
+  ja: {
+    pageTitle: "ノンフライヤー・オーブン・ガスマーク温度＆時間変換ツール | IsItKitchenSafe",
+    pageDescription: "オーブンレシピをノンフライヤーの温度・時間へ瞬時に変換（-14°C/-25°F・時間20%短縮）。°F・°C・熱風ファン・英国ガスマーク1/4〜9の相互変換と、クッキングシート発火・シリコン・PTFE・耐熱ガラスの安全チェックをリアルタイム実行。",
+    badge: "調理温度換算＆耐熱安全チェッカー",
+    h1: "ノンフライヤー・オーブン・ガスマーク変換ツール",
+    heroSub: "通常オーブンからノンフライヤー（または逆変換）、熱風コンベクション、華氏°F・摂氏°C・英国ガスマーク 1/4〜9 をワンクリック換算。定番12種のプリセット、裏返し目安時間、クッキングシートやテフロン・耐熱ガラスのリアルタイム安全警告付きです。",
+    relatedAfTag: "関連ノンフライヤー安全ツール",
+    relatedAfTitle: "ノンフライヤー・アクリルアミド＆焦げリスク計算機 →",
+    relatedAfDesc: "190°C以上でポテトや揚げ物を調理する場合に。EU 2017/2158基準と水さらし低減効果を確認できます。",
+    relatedShockTag: "関連調理器具安全ツール",
+    relatedShockTitle: "耐熱ガラス・セラミックのヒートショック破損シミュレーター →",
+    relatedShockDesc: "強化ソーダライムガラスとホウケイ酸ガラスの急激な温度差による破裂リスクを比較できます。",
+    hubsTitle: "ノンフライヤー・オーブンで安全に使える素材を確認",
+    hubsDescPrefix: "素材ごとの可否ガイドと科学的根拠の検証基準は以下から確認できます：",
+    methodologyLabel: "検証メソドロジー",
+    hubLabels: {
+      airfryer: "ノンフライヤー安全ガイド",
+      oven: "オーブン安全ガイド",
+      methodology: "メソドロジー",
+      allTools: "全ツール一覧 →"
+    },
+    faqTitle: "ノンフライヤー・オーブン変換と耐熱安全に関するよくある質問",
+    faqs: [
+      {
+        question: "通常のオーブンレシピをノンフライヤーに変換する基本ルールは？",
+        answer: "基本は「温度マイナス14〜15°C（25°F）、加熱時間20%短縮（元の時間×0.80）」の25/20ルールです。ノンフライヤーは狭い庫内で高速熱風を循環させるため焼き色が早くつきます。半分の時間で裏返すか振り混ぜ、終了2〜3分前に火の通りを確認してください。"
+      },
+      {
+        question: "英国レシピのガスマーク（Gas Mark）4・5・6は摂氏・華氏で何度ですか？",
+        answer: "Gas Mark 4は通常オーブン180°C（熱風160°C／350°F）、Gas Mark 5は190°C（熱風170°C／375°F）、Gas Mark 6は200°C（熱風180°C／400°F）に相当します。Gas Mark 1以上は1段階ごとに約10〜15°C（25°F）上がります。"
+      },
+      {
+        question: "ノンフライヤーでクッキングシートが発火することはありますか？",
+        answer: "はい、誤った使い方で発火事故が起こり得ます。一般的なクッキングシートの耐熱上限は215〜232°C（420〜450°F）のため高温で焦げやすくなります。特に食材を載せずに空予熱したり、ブロッコリーなど軽い食材で押さえ切れないと、熱風で上部ヒーターに吸い込まれ発火するため厳禁です。"
+      },
+      {
+        question: "テフロン（PTFE）・シリコン・耐熱ガラス容器の安全な耐熱上限は？",
+        answer: "PTFEフッ素加工は260°C（500°F）付近で熱分解し有害ガス（小鳥には致命的）を発生します。食品用シリコンライナーの上限は通常218〜232°C（425〜450°F）です。強化ソーダライムガラスは218°C（425°F）上限で急冷破損に弱く、ホウケイ酸ガラスは260°C（500°F）、鋳鉄は288°C（550°F）超まで対応します。"
+      },
+      {
+        question: "時間を変換した後も料理用温度計で中心温度を測るべき理由は？",
+        answer: "ノンフライヤーのワット数や食材の厚みにより、外側がこんがり焼けても中心が生焼けになる場合があります。USDA推奨の安全な中心温度（鶏肉・再加熱は74°C／165°F、魚および豚・牛の塊肉は63°C／145°F＋3分休ませる）を温度計で確認すると確実です。"
+      }
+    ],
+    breadcrumbs: [
+      { label: "ホーム", href: "/ja/" },
+      { label: "ツール", href: "/ja/tools/" },
+      { label: "ノンフライヤー＆オーブン変換ツール" }
+    ]
+  }
+};
+
+const c = CONTENT[lang as Exclude<SupportedLanguage, 'en'>] || CONTENT.es;
+const localizedUrl = `https://isitkitchensafe.com/${lang}/tools/air-fryer-oven-converter/`;
+
+const airfryerUrl = getApplianceUrl('airfryer', lang);
+const ovenUrl = getApplianceUrl('oven', lang);
+const toolsUrl = getDirectoryUrl('tools', lang);
+const acrylamideUrl = `/${lang}/tools/air-fryer-acrylamide-calculator/`;
+const thermalShockUrl = `/${lang}/tools/thermal-shock-simulator/`;
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": c.h1,
+  "url": localizedUrl,
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript.",
+  "description": c.pageDescription,
+  "inLanguage": lang === 'zh-cn' ? 'zh-CN' : lang,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IsItKitchenSafe",
+    "url": "https://isitkitchensafe.com"
+  }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": c.faqs.map((faq) => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+};
+---
+
+<Layout
+  title={c.pageTitle}
+  description={c.pageDescription}
+  excludeFaqSchema={true}
+  availableLocales={availableLocales}
+  lang={lang}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(webAppSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+  </Fragment>
+
+  <!-- Breadcrumbs -->
+  <div class="bg-surface-soft border-b border-hairline py-1">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <Breadcrumbs items={c.breadcrumbs} className="mb-0" />
+    </div>
+  </div>
+
+  <div class="max-w-[1140px] mx-auto px-6 py-10 md:py-14">
+    <!-- Hero Header -->
+    <header class="mb-10 text-center max-w-3xl mx-auto">
+      <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-signature-coral text-white mb-3">
+        {c.badge}
+      </span>
+      <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-4">
+        {c.h1}
+      </h1>
+      <p class="text-body text-[15px] md:text-[16px] leading-relaxed">
+        {c.heroSub}
+      </p>
+    </header>
+
+    <!-- Main Interactive Converter -->
+    <div class="mb-14">
+      <AirFryerOvenConverter lang={lang} />
+    </div>
+
+    <!-- Related Companion Tools -->
+    <section class="mb-14 grid grid-cols-1 md:grid-cols-2 gap-5">
+      <a
+        href={acrylamideUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {c.relatedAfTag}
+        </span>
+        <h2 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {c.relatedAfTitle}
+        </h2>
+        <p class="text-[13.5px] text-body leading-relaxed">
+          {c.relatedAfDesc}
+        </p>
+      </a>
+
+      <a
+        href={thermalShockUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {c.relatedShockTag}
+        </span>
+        <h2 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {c.relatedShockTitle}
+        </h2>
+        <p class="text-[13.5px] text-body leading-relaxed">
+          {c.relatedShockDesc}
+        </p>
+      </a>
+    </section>
+
+    <!-- Verified Appliance Hubs Strip -->
+    <section class="mb-14 p-6 rounded-2xl bg-surface-soft border border-hairline">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-title-sm font-semibold text-ink mb-1">
+            {c.hubsTitle}
+          </h2>
+          <p class="text-[13px] text-muted">
+            {c.hubsDescPrefix}{' '}
+            <a href="/methodology/" class="text-link underline hover:text-link-active">{c.methodologyLabel}</a>.
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <a href={airfryerUrl} class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors">{c.hubLabels.airfryer}</a>
+          <a href={ovenUrl} class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors">{c.hubLabels.oven}</a>
+          <a href="/methodology/" class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors">{c.hubLabels.methodology}</a>
+          <a href={toolsUrl} class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors">{c.hubLabels.allTools}</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Section (5 Consumer FAQs) -->
+    <section class="mb-8">
+      <h2 class="text-title-lg font-medium text-ink tracking-tight mb-6">
+        {c.faqTitle}
+      </h2>
+      <div class="space-y-4">
+        {c.faqs.map((faq) => (
+          <details class="group p-5 bg-surface-soft border border-hairline rounded-xl" open>
+            <summary class="text-title-sm font-semibold text-ink cursor-pointer list-none flex items-center justify-between gap-3">
+              <span>{faq.question}</span>
+              <span class="text-muted text-sm transition-transform group-open:rotate-180 shrink-0" aria-hidden="true">&#9662;</span>
+            </summary>
+            <p class="text-[14px] text-body leading-relaxed mt-3 pt-3 border-t border-hairline/70">
+              {faq.answer}
+            </p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+</Layout>

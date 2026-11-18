@@ -210,6 +210,7 @@ const SPECIAL_PAGES = [
   'tools/leftover-shelf-life-calculator',
   'tools/meat-thawing-calculator',
   'tools/plastic-code-checker',
+  'tools/air-fryer-oven-converter',
   'methodology',
   'saved'
 ];

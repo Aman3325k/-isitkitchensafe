@@ -65,6 +65,13 @@ const curatedTools: Array<{
     date: '2026-11-18',
   },
   {
+    path: '/tools/air-fryer-oven-converter/',
+    title: 'Air Fryer to Oven Conversion Calculator & Gas Mark Chart',
+    description:
+      'Convert conventional oven recipes to exact air fryer temperatures and times. Translates between conventional ovens, fan-assisted convection, Fahrenheit, Celsius, and British Gas Mark dial settings.',
+    date: '2026-11-18',
+  },
+  {
     path: '/tools/leftover-shelf-life-calculator/',
     title: 'Leftover Shelf Life & Safe Storage Calculator',
     description:

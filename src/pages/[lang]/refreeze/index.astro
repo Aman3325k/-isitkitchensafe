@@ -5,7 +5,7 @@ import refreezeEs from '../../../data/refreeze.es.json';
 import refreezePt from '../../../data/refreeze.pt.json';
 import refreezeZh from '../../../data/refreeze.zh-cn.json';
 import refreezeJa from '../../../data/refreeze.ja.json';
-import { getApplianceUrl, getDirectoryUrl } from '../../../i18n/utils';
+import { getApplianceUrl, getDirectoryUrl, useTranslatedPath } from '../../../i18n/utils';
 import type { SupportedLanguage } from '../../../i18n/ui';
 
 export function getStaticPaths() {
@@ -53,6 +53,11 @@ interface Props {
 }
 
 const { lang, items, availableLocales } = Astro.props;
+const tp = useTranslatedPath(lang);
+const totalCount = items.length;
+const yesCount = items.filter(item => item.safe === 'yes').length;
+const dependsCount = items.filter(item => item.safe === 'depends').length;
+const noCount = items.filter(item => item.safe === 'no').length;
 
 const ui = {
   es: {
@@ -66,12 +71,24 @@ const ui = {
     testedSub: "Evaluaciones completas alineadas al USDA para alimentos crudos y cocinados.",
     searchPlaceholder: "Buscar alimentos (ej. Carne picada, Pollo)...",
     searchAria: "Buscar alimentos para recongelación",
+    clearSearchAria: "Limpiar búsqueda",
+    countTemplate: "Mostrando {count} de {total} guías",
+    verdictAria: "Filtrar por veredicto de seguridad",
+    pillAll: "Todos",
+    pillYes: "Seguro / Sí",
+    pillDepends: "Depende / Precaución",
+    pillNo: "No seguro / No",
+    resetFilters: "Restablecer filtros",
+    spotlightTag: "Calculadora Interactiva",
+    spotlightTitle: "¿Descongelando carne o aves congeladas?",
+    spotlightDesc: "Calcula los tiempos exactos de descongelación segura en refrigerador o agua fría según peso y corte para evitar la zona de peligro bacteriano.",
+    spotlightCta: "Calculadora de Descongelación de Carne",
     guideTag: "Guía de Recongelación",
     badgeYes: "SÍ",
     badgeNo: "NO",
     badgeDepends: "DEPENDE",
     readDetails: "Leer detalles de recongelación",
-    noResults: "No se encontraron alimentos que coincidan con tu búsqueda.",
+    noResults: "No se encontraron alimentos que coincidan con tu búsqueda o filtro.",
     relatedHeading: "Categorías Relacionadas de Electrodomésticos y Seguridad",
     categories: [
       { name: "Lavavajillas", slug: "dishwasher", tag: "Guía de Electrodoméstico" },
@@ -97,12 +114,24 @@ const ui = {
     testedSub: "Avaliações completas e alinhadas ao USDA para alimentos crus e cozidos.",
     searchPlaceholder: "Pesquisar alimentos (ex. Carne moída, Frango)...",
     searchAria: "Pesquisar alimentos para recongelamento",
+    clearSearchAria: "Limpar pesquisa",
+    countTemplate: "Mostrando {count} de {total} guias",
+    verdictAria: "Filtrar por veredito de segurança",
+    pillAll: "Todos",
+    pillYes: "Seguro / Sim",
+    pillDepends: "Depende / Atenção",
+    pillNo: "Não seguro / Não",
+    resetFilters: "Redefinir filtros",
+    spotlightTag: "Calculadora Interativa",
+    spotlightTitle: "Descongelando carne ou aves congeladas?",
+    spotlightDesc: "Calcule os tempos exatos de descongelamento seguro na geladeira ou em água fria por peso e corte, mantendo longe da zona de perigo.",
+    spotlightCta: "Calculadora de Descongelamento de Carnes",
     guideTag: "Guia de Recongelamento",
     badgeYes: "SIM",
     badgeNo: "NÃO",
     badgeDepends: "DEPENDE",
     readDetails: "Ver detalhes de recongelamento",
-    noResults: "Nenhum alimento corresponde à sua pesquisa.",
+    noResults: "Nenhum alimento corresponde à sua pesquisa ou filtro.",
     relatedHeading: "Categorias Relacionadas de Eletrodomésticos e Segurança",
     categories: [
       { name: "Lava-Louças", slug: "dishwasher", tag: "Guia de Eletrodoméstico" },
@@ -128,12 +157,24 @@ const ui = {
     testedSub: "涵盖生鲜肉类与熟食菜肴的完整USDA标准二次冷冻科学评估。",
     searchPlaceholder: "搜索食品（如：牛肉馅、生鸡肉）...",
     searchAria: "搜索二次冷冻食品",
+    clearSearchAria: "清除搜索",
+    countTemplate: "显示 {count} / {total} 篇指南",
+    verdictAria: "按安全结论筛选",
+    pillAll: "全部",
+    pillYes: "安全 / 可以",
+    pillDepends: "视情况 / 需注意",
+    pillNo: "不安全 / 严禁",
+    resetFilters: "重置筛选",
+    spotlightTag: "实用计算工具",
+    spotlightTitle: "正在解冻冷冻肉类或禽类？",
+    spotlightDesc: "根据肉类重量和部位，精准计算冷藏与冷水安全解冻所需时间，避免食物进入细菌滋生危险温区。",
+    spotlightCta: "肉类安全解冻计算器",
     guideTag: "二次冷冻指南",
     badgeYes: "可以",
     badgeNo: "严禁",
     badgeDepends: "视情况而定",
     readDetails: "查看详细安全指南",
-    noResults: "未找到符合搜索条件的食品。",
+    noResults: "未找到符合当前搜索或筛选条件的食品。",
     relatedHeading: "相关厨房电器与安全分类",
     categories: [
       { name: "洗碗机", slug: "dishwasher", tag: "电器指南" },
@@ -159,12 +200,24 @@ const ui = {
     testedSub: "生鮮食品から加熱調理済み食品まで、USDA基準に準拠した包括的な再冷凍判定。",
     searchPlaceholder: "食品を検索（例: 牛ひき肉、鶏肉）...",
     searchAria: "再冷凍食品の検索",
+    clearSearchAria: "検索をクリア",
+    countTemplate: "{total}件中 {count}件のガイドを表示",
+    verdictAria: "安全性判定で絞り込み",
+    pillAll: "すべて",
+    pillYes: "安全 / 可能",
+    pillDepends: "条件付き / 注意",
+    pillNo: "不可 / 危険",
+    resetFilters: "フィルターをリセット",
+    spotlightTag: "インタラクティブ計算ツール",
+    spotlightTitle: "冷凍肉や鶏肉を解凍中ですか？",
+    spotlightDesc: "肉の種類と重さから、冷蔵庫解凍・流水解凍の安全な所要時間を正確に計算し、食中毒の危険温度帯を防ぎます。",
+    spotlightCta: "肉の安全解凍計算ツール",
     guideTag: "再冷凍ガイド",
     badgeYes: "可能",
     badgeNo: "不可",
     badgeDepends: "条件付き",
     readDetails: "詳細な解説を見る",
-    noResults: "検索条件に一致する食品が見つかりませんでした。",
+    noResults: "検索条件またはフィルターに一致する食品が見つかりませんでした。",
     relatedHeading: "関連する家電・キッチン安全性ガイド",
     categories: [
       { name: "食洗機", slug: "dishwasher", tag: "家電ガイド" },
@@ -220,22 +273,120 @@ const formatCardTitle = (itemName: string) => {
   </section>
 
   <!-- Items Grid Section -->
-  <section class="max-w-[1280px] mx-auto px-6 py-[96px]">
-    <div class="flex flex-col md:flex-row md:items-end justify-between border-b border-hairline pb-8 mb-12">
-      <div>
-        <h2 class="text-display-md text-ink tracking-tight mb-2">{currentUi.testedItems}</h2>
-        <p class="text-body-md text-muted">{currentUi.testedSub}</p>
+  <section class="max-w-[1280px] mx-auto px-6 py-[72px] md:py-[96px]">
+    <!-- Featured Calculator Spotlight Banner -->
+    <div class="mb-10 rounded-lg border border-hairline bg-surface-soft/80 p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
+      <div class="flex items-start gap-4">
+        <div class="w-10 h-10 rounded-md bg-signature-cream text-ink border border-hairline flex items-center justify-center shrink-0 mt-0.5" aria-hidden="true">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18m0-18l-2.5 2.5M12 3l2.5 2.5M12 21l-2.5-2.5M12 21l2.5-2.5M3 12h18M3 12l2.5-2.5M3 12l2.5 2.5M21 12l-2.5-2.5M21 12l-2.5 2.5" />
+          </svg>
+        </div>
+        <div>
+          <span class="inline-block text-[11px] font-bold uppercase tracking-wider text-info mb-1">{currentUi.spotlightTag}</span>
+          <h2 class="text-title-sm font-semibold text-ink mb-1">{currentUi.spotlightTitle}</h2>
+          <p class="text-body-md text-muted leading-relaxed">
+            {currentUi.spotlightDesc}
+          </p>
+        </div>
       </div>
-      
-      <!-- Filter Input -->
-      <div class="mt-6 md:mt-0 flex gap-3 max-w-[320px] w-full">
-        <input 
-          type="text" 
-          id="filter-input"
-          placeholder={currentUi.searchPlaceholder}
-          aria-label={currentUi.searchAria}
-          class="w-full h-11 px-3 py-2 bg-canvas text-ink text-[16px] md:text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
-        />
+      <a
+        href={tp('/tools/meat-thawing-calculator/')}
+        class="shrink-0 inline-flex items-center justify-center gap-2 px-5 py-2.5 min-h-[44px] bg-primary text-on-primary text-[14px] font-medium rounded-lg hover:bg-primary-active transition-colors whitespace-nowrap"
+      >
+        <span>{currentUi.spotlightCta}</span>
+        <span aria-hidden="true">&rarr;</span>
+      </a>
+    </div>
+
+    <!-- Header, Instant Search & Verdict Filter Pills -->
+    <div class="border-b border-hairline pb-8 mb-10">
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+        <div>
+          <h2 class="text-display-md text-ink tracking-tight mb-2">{currentUi.testedItems}</h2>
+          <p class="text-body-md text-muted">{currentUi.testedSub}</p>
+        </div>
+        
+        <!-- Instant Search Input -->
+        <div class="w-full lg:max-w-[420px]">
+          <div class="relative">
+            <svg class="w-4 h-4 text-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1010.5 18a7.5 7.5 0 006.15-3.35z" />
+            </svg>
+            <input 
+              type="text" 
+              id="refreeze-search"
+              autocomplete="off"
+              placeholder={currentUi.searchPlaceholder}
+              aria-label={currentUi.searchAria}
+              class="w-full h-11 pl-10 pr-10 py-2 bg-canvas text-ink text-[16px] md:text-[14px] border border-hairline rounded-md focus:outline-none focus:border-info-border shadow-xs"
+            />
+            <button
+              type="button"
+              id="refreeze-clear"
+              aria-label={currentUi.clearSearchAria}
+              class="hidden absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-md text-muted hover:text-ink hover:bg-surface-soft inline-flex items-center justify-center transition-colors cursor-pointer"
+            >
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Verdict Filter Pills + Live Match Counter -->
+      <div class="mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div id="refreeze-verdict-filters" class="flex flex-wrap gap-2" role="group" aria-label={currentUi.verdictAria}>
+          <button
+            type="button"
+            data-verdict="all"
+            aria-pressed="true"
+            class="verdict-pill min-h-[40px] px-4 py-2 rounded-full text-[13px] font-medium border bg-primary text-on-primary border-primary cursor-pointer transition-colors inline-flex items-center gap-2 select-none"
+          >
+            <span>{currentUi.pillAll}</span>
+            <span class="text-[11px] opacity-80">({totalCount})</span>
+          </button>
+          <button
+            type="button"
+            data-verdict="yes"
+            aria-pressed="false"
+            class="verdict-pill min-h-[40px] px-4 py-2 rounded-full text-[13px] font-medium border bg-canvas text-body border-hairline hover:border-border-strong hover:text-ink cursor-pointer transition-colors inline-flex items-center gap-2 select-none"
+          >
+            <span class="w-2 h-2 rounded-full bg-success shrink-0" aria-hidden="true"></span>
+            <span>{currentUi.pillYes}</span>
+            <span class="text-[11px] opacity-75">({yesCount})</span>
+          </button>
+          <button
+            type="button"
+            data-verdict="depends"
+            aria-pressed="false"
+            class="verdict-pill min-h-[40px] px-4 py-2 rounded-full text-[13px] font-medium border bg-canvas text-body border-hairline hover:border-border-strong hover:text-ink cursor-pointer transition-colors inline-flex items-center gap-2 select-none"
+          >
+            <span class="w-2 h-2 rounded-full bg-warning shrink-0" aria-hidden="true"></span>
+            <span>{currentUi.pillDepends}</span>
+            <span class="text-[11px] opacity-75">({dependsCount})</span>
+          </button>
+          <button
+            type="button"
+            data-verdict="no"
+            aria-pressed="false"
+            class="verdict-pill min-h-[40px] px-4 py-2 rounded-full text-[13px] font-medium border bg-canvas text-body border-hairline hover:border-border-strong hover:text-ink cursor-pointer transition-colors inline-flex items-center gap-2 select-none"
+          >
+            <span class="w-2 h-2 rounded-full bg-error shrink-0" aria-hidden="true"></span>
+            <span>{currentUi.pillNo}</span>
+            <span class="text-[11px] opacity-75">({noCount})</span>
+          </button>
+        </div>
+
+        <p
+          id="refreeze-count"
+          aria-live="polite"
+          data-template={currentUi.countTemplate}
+          class="text-xs font-medium text-muted shrink-0"
+        >
+          {currentUi.countTemplate.replace('{count}', String(totalCount)).replace('{total}', String(totalCount))}
+        </p>
       </div>
     </div>
 
@@ -245,6 +396,8 @@ const formatCardTitle = (itemName: string) => {
         <div 
           class="item-card bg-canvas border border-hairline rounded-md p-6 flex flex-col justify-between shadow-xs transition-all hover:border-border-strong"
           data-name={item.item.toLowerCase()}
+          data-verdict={item.safe}
+          data-search={`${item.item} ${item.shortAnswer} ${item.safe}`.toLowerCase()}
         >
           <div>
             <div class="flex items-center justify-between mb-4">
@@ -275,7 +428,14 @@ const formatCardTitle = (itemName: string) => {
 
     <!-- No results message -->
     <div id="no-results" class="hidden text-center py-12">
-      <p class="text-title-md text-muted">{currentUi.noResults}</p>
+      <p class="text-title-md text-muted mb-4">{currentUi.noResults}</p>
+      <button
+        type="button"
+        id="refreeze-reset"
+        class="px-4 py-2 min-h-[40px] bg-canvas text-ink text-[13px] font-medium border border-hairline hover:border-border-strong rounded-md transition-colors cursor-pointer"
+      >
+        {currentUi.resetFilters}
+      </button>
     </div>
   </section>
 
@@ -305,35 +465,98 @@ const formatCardTitle = (itemName: string) => {
 
   <!-- Client-side filtering script -->
   <script is:inline>
-    const filterInput = document.getElementById('filter-input');
-    const itemsGrid = document.getElementById('items-grid');
-    const noResults = document.getElementById('no-results');
+    (() => {
+      const searchInput = document.getElementById('refreeze-search');
+      const clearBtn = document.getElementById('refreeze-clear');
+      const resetBtn = document.getElementById('refreeze-reset');
+      const countEl = document.getElementById('refreeze-count');
+      const itemsGrid = document.getElementById('items-grid');
+      const noResults = document.getElementById('no-results');
+      const verdictButtons = Array.from(document.querySelectorAll('#refreeze-verdict-filters .verdict-pill'));
 
-    if (filterInput && itemsGrid) {
-      const cards = itemsGrid.getElementsByClassName('item-card');
-      
-      filterInput.addEventListener('input', (e) => {
-        const query = e.target.value.trim().toLowerCase();
+      if (!searchInput || !itemsGrid) return;
+
+      const cards = Array.from(itemsGrid.getElementsByClassName('item-card'));
+      const total = cards.length;
+      const template = (countEl && countEl.getAttribute('data-template')) || 'Showing {count} of {total} guides';
+      let activeVerdict = 'all';
+
+      const setActiveButton = (verdict) => {
+        verdictButtons.forEach((btn) => {
+          const isSelected = btn.getAttribute('data-verdict') === verdict;
+          btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+          btn.classList.toggle('bg-primary', isSelected);
+          btn.classList.toggle('text-on-primary', isSelected);
+          btn.classList.toggle('border-primary', isSelected);
+          btn.classList.toggle('bg-canvas', !isSelected);
+          btn.classList.toggle('text-body', !isSelected);
+          btn.classList.toggle('border-hairline', !isSelected);
+          btn.classList.toggle('hover:border-border-strong', !isSelected);
+          btn.classList.toggle('hover:text-ink', !isSelected);
+        });
+      };
+
+      const applyFilter = () => {
+        const query = searchInput.value.trim().toLowerCase();
         let matches = 0;
-        
-        for (let i = 0; i < cards.length; i++) {
+
+        for (let i = 0; i < total; i++) {
           const card = cards[i];
-          const name = card.getAttribute('data-name');
-          
-          if (name && name.includes(query)) {
+          const haystack = card.getAttribute('data-search') || card.getAttribute('data-name') || '';
+          const verdict = card.getAttribute('data-verdict') || '';
+          const matchesQuery = !query || haystack.includes(query);
+          const matchesVerdict = activeVerdict === 'all' || verdict === activeVerdict;
+
+          if (matchesQuery && matchesVerdict) {
             card.classList.remove('hidden');
             matches++;
           } else {
             card.classList.add('hidden');
           }
         }
-        
-        if (matches === 0) {
-          noResults.classList.remove('hidden');
-        } else {
-          noResults.classList.add('hidden');
+
+        if (clearBtn) {
+          clearBtn.classList.toggle('hidden', query.length === 0);
         }
+
+        if (countEl) {
+          countEl.textContent = template
+            .replace('{count}', String(matches))
+            .replace('{total}', String(total));
+        }
+
+        if (noResults) {
+          noResults.classList.toggle('hidden', matches > 0);
+        }
+      };
+
+      searchInput.addEventListener('input', applyFilter);
+
+      verdictButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          activeVerdict = btn.getAttribute('data-verdict') || 'all';
+          setActiveButton(activeVerdict);
+          applyFilter();
+        });
       });
-    }
+
+      if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+          searchInput.value = '';
+          applyFilter();
+          searchInput.focus();
+        });
+      }
+
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          searchInput.value = '';
+          activeVerdict = 'all';
+          setActiveButton('all');
+          applyFilter();
+          searchInput.focus();
+        });
+      }
+    })();
   </script>
 </Layout>

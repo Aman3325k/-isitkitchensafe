@@ -1,0 +1,1844 @@
+---
+import rawData from '../data/air-fryer-oven-converter-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+const defaultUnit = lang === 'en' ? 'F' : 'C';
+
+const localizedGasMarks = rawData.gasMarks.map((g) => ({
+  mark: g.mark,
+  numericValue: g.numericValue,
+  tempF: g.tempF,
+  tempCConventional: g.tempCConventional,
+  tempCFan: g.tempCFan,
+  level: (g.level as Record<string, string>)[lang] || g.level.en
+}));
+
+const localizedPresets = rawData.presets.map((p) => {
+  const tr = (p.i18n as Record<string, any>)[lang] || p.i18n.en;
+  return {
+    id: p.id,
+    icon: p.icon,
+    ovenTempF: p.ovenTempF,
+    ovenTempC: p.ovenTempC,
+    ovenTimeMin: p.ovenTimeMin,
+    airFryerTempF: p.airFryerTempF,
+    airFryerTempC: p.airFryerTempC,
+    airFryerTimeMin: p.airFryerTimeMin,
+    usdaSafeTempF: p.usdaSafeTempF,
+    usdaSafeTempC: p.usdaSafeTempC,
+    shakeFlipAtPct: p.shakeFlipAtPct,
+    recommendedLiner: p.recommendedLiner,
+    name: tr.name,
+    usdaLabel: tr.usdaLabel,
+    afAdjustment: tr.afAdjustment,
+    shakeFlip: tr.shakeFlip,
+    linerNote: tr.linerNote
+  };
+});
+
+const localizedThresholds = rawData.cookwareThresholds.map((c) => {
+  const tr = (c.i18n as Record<string, any>)[lang] || c.i18n.en;
+  return {
+    id: c.id,
+    maxRangeF: c.maxRangeF,
+    maxRangeC: c.maxRangeC,
+    cautionF: c.cautionF,
+    hazardF: c.hazardF,
+    name: tr.name,
+    risk: tr.risk
+  };
+});
+
+const localizedLiners = rawData.linerOptions.map((l) => {
+  const tr = (l.i18n as Record<string, any>)[lang] || l.i18n.en;
+  return {
+    id: l.id,
+    cautionF: l.cautionF,
+    hazardF: l.hazardF,
+    maxLabelF: l.maxLabelF,
+    name: tr.name,
+    safeTitle: tr.safeTitle,
+    safeBody: tr.safeBody,
+    cautionTitle: tr.cautionTitle,
+    cautionBody: tr.cautionBody,
+    hazardTitle: tr.hazardTitle,
+    hazardBody: tr.hazardBody
+  };
+});
+
+interface UiDict {
+  modeTabs: {
+    ovenToAf: string;
+    afToOven: string;
+    convFan: string;
+    tempOnly: string;
+  };
+  convSubModes: {
+    toFan: string;
+    toConv: string;
+  };
+  step1Heading: string;
+  tempInputLabel: string;
+  tempInputLabelAf: string;
+  tempInputLabelConv: string;
+  tempInputLabelFan: string;
+  tempInputLabelQuick: string;
+  unitF: string;
+  unitC: string;
+  unitGas: string;
+  selectGasMarkLabel: string;
+  timeInputLabel: string;
+  timeInputLabelAf: string;
+  timeUnitMin: string;
+  timeDisabledNote: string;
+  presetsHeading: string;
+  presetsSub: string;
+  linerHeading: string;
+  linerSub: string;
+  dashboardBadge: string;
+  resultTempLabelAf: string;
+  resultTempLabelOven: string;
+  resultTempLabelFan: string;
+  resultTempLabelConv: string;
+  resultTempLabelQuick: string;
+  resultTimeLabel: string;
+  resultGasClosest: string;
+  resultFanEquiv: string;
+  resultConvEquiv: string;
+  resultHeatLevel: string;
+  shakeCheckpointLabel: string;
+  shakeAtPrefix: string;
+  shakeRemainingSuffix: string;
+  formulaOvenToAf: string;
+  formulaAfToOven: string;
+  formulaConvToFan: string;
+  formulaFanToConv: string;
+  formulaTempOnly: string;
+  presetCardHeading: string;
+  presetUsdaLabel: string;
+  presetTipLabel: string;
+  presetFlipLabel: string;
+  presetLinerLabel: string;
+  safetyCardHeading: string;
+  safetyCheckedTemp: string;
+  safetyAirFryerParchmentExtra: string;
+  statusSafe: string;
+  statusCaution: string;
+  statusHazard: string;
+  copyBtn: string;
+  copiedBtn: string;
+  resetBtn: string;
+  gasChartTitle: string;
+  gasChartSub: string;
+  gasHeaders: [string, string, string, string, string];
+  thresholdsTitle: string;
+  thresholdsSub: string;
+  thresholdHeaders: [string, string, string, string];
+  thresholdStatusSafe: string;
+  thresholdStatusCaution: string;
+  thresholdStatusHazard: string;
+  copySummaryTitle: string;
+  copyInputLine: string;
+  copyConvertedLine: string;
+  copyShakeLine: string;
+  copyPresetLine: string;
+  copySafetyLine: string;
+}
+
+const UI: Record<SupportedLanguage, UiDict> = {
+  en: {
+    modeTabs: {
+      ovenToAf: 'Oven → Air Fryer',
+      afToOven: 'Air Fryer → Oven',
+      convFan: 'Conventional ↔ Convection',
+      tempOnly: '°F / °C / Gas Mark'
+    },
+    convSubModes: {
+      toFan: 'Conventional → Convection / Fan',
+      toConv: 'Convection / Fan → Conventional'
+    },
+    step1Heading: '1. Enter Recipe Temperature & Time',
+    tempInputLabel: 'Conventional Oven Temperature',
+    tempInputLabelAf: 'Air Fryer Temperature',
+    tempInputLabelConv: 'Conventional Oven Temperature',
+    tempInputLabelFan: 'Convection / Fan Oven Temperature',
+    tempInputLabelQuick: 'Temperature to Convert',
+    unitF: '°F',
+    unitC: '°C',
+    unitGas: 'Gas Mark',
+    selectGasMarkLabel: 'Pick UK Gas Mark (1/4 to 9)',
+    timeInputLabel: 'Original Oven Cooking Time',
+    timeInputLabelAf: 'Original Air Fryer Time',
+    timeUnitMin: 'min',
+    timeDisabledNote: 'Pure temperature conversion mode — switch to a cooking tab above to convert cooking duration & shake checkpoints.',
+    presetsHeading: '2. Quick Food Presets (12 Popular Recipes)',
+    presetsSub: 'Tap any food to auto-fill temperature, time, USDA safe internal target, and liner advice.',
+    linerHeading: '3. Liner & Bakeware Thermal Safety Check',
+    linerSub: 'Select what touches your food to trigger real-time scorch, PTFE fume, and glass thermal shock alerts.',
+    dashboardBadge: 'Live Converted Cooking Settings',
+    resultTempLabelAf: 'Set Air Fryer To',
+    resultTempLabelOven: 'Set Conventional Oven To',
+    resultTempLabelFan: 'Set Convection / Fan Oven To',
+    resultTempLabelConv: 'Set Conventional Oven To',
+    resultTempLabelQuick: 'Converted Temperature Scale',
+    resultTimeLabel: 'Converted Cooking Time',
+    resultGasClosest: 'Closest Gas Mark',
+    resultFanEquiv: 'Fan / Convection °C',
+    resultConvEquiv: 'Conventional °C',
+    resultHeatLevel: 'Heat Level',
+    shakeCheckpointLabel: 'Shake / Flip Checkpoint',
+    shakeAtPrefix: 'Flip / shake at',
+    shakeRemainingSuffix: 'remaining',
+    formulaOvenToAf: 'Rule: -25°F (-14°C) & -20% cooking time',
+    formulaAfToOven: 'Rule: +25°F (+14°C) & +25% cooking time',
+    formulaConvToFan: 'Rule: -25°F (-14°C) & -15% cooking time',
+    formulaFanToConv: 'Rule: +25°F (+14°C) & +18% cooking time',
+    formulaTempOnly: 'Exact °F ↔ °C Conventional ↔ °C Fan ↔ UK Gas Mark',
+    presetCardHeading: 'Selected Food Guide',
+    presetUsdaLabel: 'USDA / Target Doneness',
+    presetTipLabel: 'Air Fryer Tip',
+    presetFlipLabel: 'Shake / Flip Reminder',
+    presetLinerLabel: 'Liner Safety Advice',
+    safetyCardHeading: 'Cookware & Liner Safety Verdict',
+    safetyCheckedTemp: 'Evaluated at operating temp',
+    safetyAirFryerParchmentExtra: 'Air Fryer Fire Warning: Never preheat an empty air fryer with parchment inside — strong upward airflow pulls unweighted paper into the heating coil.',
+    statusSafe: 'SAFE ✅',
+    statusCaution: 'CAUTION ⚠️',
+    statusHazard: 'HAZARD ❌',
+    copyBtn: 'Copy Converted Recipe',
+    copiedBtn: 'Copied to Clipboard ✓',
+    resetBtn: 'Reset',
+    gasChartTitle: 'Interactive Gas Mark 1/4 – 9 Quick Reference Chart',
+    gasChartSub: 'Click any row to load that Gas Mark temperature directly into the converter.',
+    gasHeaders: ['Gas Mark', 'Fahrenheit (°F)', 'Conventional (°C)', 'Fan / Convection (°C)', 'Oven Heat Level'],
+    thresholdsTitle: 'Cookware & Liner Thermal Threshold Reference',
+    thresholdsSub: 'Live status column reflects your current operating temperature above.',
+    thresholdHeaders: ['Material / Liner', 'Max Safe Temp', 'Live Status', 'Primary Thermal Hazard'],
+    thresholdStatusSafe: 'SAFE ✅',
+    thresholdStatusCaution: 'CAUTION ⚠️',
+    thresholdStatusHazard: 'HAZARD ❌',
+    copySummaryTitle: 'IsItKitchenSafe — Air Fryer & Oven Conversion',
+    copyInputLine: 'Original',
+    copyConvertedLine: 'Converted',
+    copyShakeLine: 'Shake / Flip Checkpoint',
+    copyPresetLine: 'Preset Target',
+    copySafetyLine: 'Cookware / Liner Check'
+  },
+  es: {
+    modeTabs: {
+      ovenToAf: 'Horno → Freidora de Aire',
+      afToOven: 'Freidora de Aire → Horno',
+      convFan: 'Convencional ↔ Convección',
+      tempOnly: '°F / °C / Gas Mark'
+    },
+    convSubModes: {
+      toFan: 'Horno Normal → Convección / Ventilador',
+      toConv: 'Convección / Ventilador → Horno Normal'
+    },
+    step1Heading: '1. Ingresa Temperatura y Tiempo de la Receta',
+    tempInputLabel: 'Temperatura de Horno Convencional',
+    tempInputLabelAf: 'Temperatura de Freidora de Aire',
+    tempInputLabelConv: 'Temperatura de Horno Convencional',
+    tempInputLabelFan: 'Temperatura de Horno con Ventilador',
+    tempInputLabelQuick: 'Temperatura a Convertir',
+    unitF: '°F',
+    unitC: '°C',
+    unitGas: 'Gas Mark',
+    selectGasMarkLabel: 'Elige Marca de Gas UK (1/4 a 9)',
+    timeInputLabel: 'Tiempo Original de Horno',
+    timeInputLabelAf: 'Tiempo Original en Freidora de Aire',
+    timeUnitMin: 'min',
+    timeDisabledNote: 'Modo de conversión pura de temperatura: cambia a una pestaña de cocción arriba para ajustar tiempo y volteo.',
+    presetsHeading: '2. Recetas Rápidas Populares (12 Alimentos)',
+    presetsSub: 'Pulsa cualquier alimento para autocompletar temperatura, tiempo, punto interno USDA y consejo de papel/molde.',
+    linerHeading: '3. Verificación Térmica de Papel, Molde o Bandeja',
+    linerSub: 'Indica qué recipiente o forro usarás para recibir alertas en tiempo real de incendio, gases PTFE o choque térmico.',
+    dashboardBadge: 'Ajuste de Cocción Convertido en Vivo',
+    resultTempLabelAf: 'Ajusta tu Freidora de Aire a',
+    resultTempLabelOven: 'Ajusta el Horno Convencional a',
+    resultTempLabelFan: 'Ajusta el Horno con Ventilador a',
+    resultTempLabelConv: 'Ajusta el Horno Convencional a',
+    resultTempLabelQuick: 'Escala de Temperatura Convertida',
+    resultTimeLabel: 'Tiempo de Cocción Convertido',
+    resultGasClosest: 'Gas Mark Más Cercano',
+    resultFanEquiv: '°C Convección / Aire',
+    resultConvEquiv: '°C Convencional',
+    resultHeatLevel: 'Nivel de Calor',
+    shakeCheckpointLabel: 'Aviso de Voltear / Agitar',
+    shakeAtPrefix: 'Voltear / agitar a los',
+    shakeRemainingSuffix: 'restantes',
+    formulaOvenToAf: 'Regla: -14°C (-25°F) y -20% de tiempo',
+    formulaAfToOven: 'Regla: +14°C (+25°F) y +25% de tiempo',
+    formulaConvToFan: 'Regla: -14°C (-25°F) y -15% de tiempo',
+    formulaFanToConv: 'Regla: +14°C (+25°F) y +18% de tiempo',
+    formulaTempOnly: 'Equivalencia exacta °F ↔ °C Normal ↔ °C Aire ↔ Gas Mark',
+    presetCardHeading: 'Guía del Alimento Seleccionado',
+    presetUsdaLabel: 'Temperatura Interna Segura USDA',
+    presetTipLabel: 'Consejo para Freidora de Aire',
+    presetFlipLabel: 'Recordatorio de Volteo / Agitado',
+    presetLinerLabel: 'Seguridad del Forro / Cesta',
+    safetyCardHeading: 'Dictamen de Seguridad de Recipiente / Forro',
+    safetyCheckedTemp: 'Evaluado a temperatura de uso',
+    safetyAirFryerParchmentExtra: 'Riesgo de Incendio en Air Fryer: Nunca precalientes con papel pergamino vacío; el aire fuerte lo aspira hacia la resistencia superior.',
+    statusSafe: 'SEGURO ✅',
+    statusCaution: 'PRECAUCIÓN ⚠️',
+    statusHazard: 'PELIGRO ❌',
+    copyBtn: 'Copiar Receta Convertida',
+    copiedBtn: 'Copiado al Portapapeles ✓',
+    resetBtn: 'Restablecer',
+    gasChartTitle: 'Tabla Interactiva de Equivalencias Gas Mark 1/4 – 9',
+    gasChartSub: 'Haz clic en cualquier fila para cargar esa temperatura en el conversor.',
+    gasHeaders: ['Gas Mark', 'Fahrenheit (°F)', 'Horno Normal (°C)', 'Convección (°C)', 'Nivel de Calor'],
+    thresholdsTitle: 'Límites Térmicos de Utensilios y Forros de Cocina',
+    thresholdsSub: 'El estado en vivo se actualiza según la temperatura de cocción actual.',
+    thresholdHeaders: ['Material / Forro', 'Temp. Máxima Segura', 'Estado Actual', 'Riesgo Térmico Principal'],
+    thresholdStatusSafe: 'SEGURO ✅',
+    thresholdStatusCaution: 'PRECAUCIÓN ⚠️',
+    thresholdStatusHazard: 'PELIGRO ❌',
+    copySummaryTitle: 'IsItKitchenSafe — Conversor de Freidora de Aire y Horno',
+    copyInputLine: 'Original',
+    copyConvertedLine: 'Convertido',
+    copyShakeLine: 'Voltear / Agitar',
+    copyPresetLine: 'Objetivo de Receta',
+    copySafetyLine: 'Seguridad Utensilio / Forro'
+  },
+  pt: {
+    modeTabs: {
+      ovenToAf: 'Forno → Air Fryer',
+      afToOven: 'Air Fryer → Forno',
+      convFan: 'Convencional ↔ Convecção',
+      tempOnly: '°F / °C / Gas Mark'
+    },
+    convSubModes: {
+      toFan: 'Forno Comum → Convecção / Ventilador',
+      toConv: 'Convecção / Ventilador → Forno Comum'
+    },
+    step1Heading: '1. Informe Temperatura e Tempo da Receita',
+    tempInputLabel: 'Temperatura do Forno Convencional',
+    tempInputLabelAf: 'Temperatura da Air Fryer',
+    tempInputLabelConv: 'Temperatura do Forno Convencional',
+    tempInputLabelFan: 'Temperatura do Forno com Convecção',
+    tempInputLabelQuick: 'Temperatura para Converter',
+    unitF: '°F',
+    unitC: '°C',
+    unitGas: 'Gas Mark',
+    selectGasMarkLabel: 'Escolha Gas Mark UK (1/4 a 9)',
+    timeInputLabel: 'Tempo Original de Forno',
+    timeInputLabelAf: 'Tempo Original na Air Fryer',
+    timeUnitMin: 'min',
+    timeDisabledNote: 'Modo de conversão direta de temperatura — mude para uma aba de preparo acima para calcular tempo e hora de virar.',
+    presetsHeading: '2. Predefinições Rápidas (12 Receitas Populares)',
+    presetsSub: 'Toque em qualquer alimento para preencher temperatura, tempo, ponto interno USDA e segurança do forro.',
+    linerHeading: '3. Verificação Térmica de Papel, Silicone ou Assadeira',
+    linerSub: 'Escolha o material que vai ao calor para alertas em tempo real de incêndio, vapores PTFE e choque térmico em vidro.',
+    dashboardBadge: 'Conversão de Preparo em Tempo Real',
+    resultTempLabelAf: 'Ajuste sua Air Fryer para',
+    resultTempLabelOven: 'Ajuste o Forno Convencional para',
+    resultTempLabelFan: 'Ajuste o Forno de Convecção para',
+    resultTempLabelConv: 'Ajuste o Forno Convencional para',
+    resultTempLabelQuick: 'Escala de Temperatura Convertida',
+    resultTimeLabel: 'Tempo de Preparo Convertido',
+    resultGasClosest: 'Gas Mark Equivalente',
+    resultFanEquiv: '°C Convecção / Ar',
+    resultConvEquiv: '°C Convencional',
+    resultHeatLevel: 'Nível de Calor',
+    shakeCheckpointLabel: 'Hora de Virar / Agitar',
+    shakeAtPrefix: 'Virar / agitar aos',
+    shakeRemainingSuffix: 'restantes',
+    formulaOvenToAf: 'Regra: -14°C (-25°F) e -20% de tempo',
+    formulaAfToOven: 'Regra: +14°C (+25°F) e +25% de tempo',
+    formulaConvToFan: 'Regra: -14°C (-25°F) e -15% de tempo',
+    formulaFanToConv: 'Regra: +14°C (+25°F) e +18% de tempo',
+    formulaTempOnly: 'Conversão exata °F ↔ °C Comum ↔ °C Convecção ↔ Gas Mark',
+    presetCardHeading: 'Guia do Alimento Selecionado',
+    presetUsdaLabel: 'Temperatura Interna Segura USDA',
+    presetTipLabel: 'Dica para Air Fryer',
+    presetFlipLabel: 'Lembrete de Virar / Agitar',
+    presetLinerLabel: 'Segurança do Forro / Cesto',
+    safetyCardHeading: 'Status de Segurança do Utensílio / Forro',
+    safetyCheckedTemp: 'Avaliado na temperatura de operação',
+    safetyAirFryerParchmentExtra: 'Risco de Fogo na Air Fryer: Nunca pré-aqueça com papel manteiga vazio — o fluxo de ar puxa o papel leve para a resistência superior.',
+    statusSafe: 'SEGURO ✅',
+    statusCaution: 'ATENÇÃO ⚠️',
+    statusHazard: 'PERIGO ❌',
+    copyBtn: 'Copiar Receita Convertida',
+    copiedBtn: 'Copiado ✓',
+    resetBtn: 'Redefinir',
+    gasChartTitle: 'Tabela Interativa de Conversão Gas Mark 1/4 – 9',
+    gasChartSub: 'Clique em qualquer linha para carregar essa temperatura no conversor.',
+    gasHeaders: ['Gas Mark', 'Fahrenheit (°F)', 'Forno Comum (°C)', 'Convecção (°C)', 'Nível de Calor'],
+    thresholdsTitle: 'Referência de Limites Térmicos de Utensílios e Forros',
+    thresholdsSub: 'A coluna de status ao vivo reflete sua temperatura atual acima.',
+    thresholdHeaders: ['Material / Forro', 'Temp. Máx. Segura', 'Status Atual', 'Principal Risco Térmico'],
+    thresholdStatusSafe: 'SEGURO ✅',
+    thresholdStatusCaution: 'ATENÇÃO ⚠️',
+    thresholdStatusHazard: 'PERIGO ❌',
+    copySummaryTitle: 'IsItKitchenSafe — Conversor Air Fryer e Forno',
+    copyInputLine: 'Original',
+    copyConvertedLine: 'Convertido',
+    copyShakeLine: 'Virar / Agitar',
+    copyPresetLine: 'Alvo da Receita',
+    copySafetyLine: 'Segurança do Forro'
+  },
+  'zh-cn': {
+    modeTabs: {
+      ovenToAf: '烤箱 → 空气炸锅',
+      afToOven: '空气炸锅 → 烤箱',
+      convFan: '平炉 ↔ 热风烤箱',
+      tempOnly: '°F / °C / 燃气刻度'
+    },
+    convSubModes: {
+      toFan: '普通平炉烤箱 → 热风循环烤箱',
+      toConv: '热风循环烤箱 → 普通平炉烤箱'
+    },
+    step1Heading: '1. 输入原食谱温度与时间',
+    tempInputLabel: '传统平炉烤箱温度',
+    tempInputLabelAf: '空气炸锅设定温度',
+    tempInputLabelConv: '传统平炉烤箱温度',
+    tempInputLabelFan: '热风循环烤箱温度',
+    tempInputLabelQuick: '待换算温度',
+    unitF: '°F 华氏',
+    unitC: '°C 摄氏',
+    unitGas: 'Gas Mark',
+    selectGasMarkLabel: '选择英式燃气烤箱刻度 (1/4 – 9)',
+    timeInputLabel: '原烤箱烘烤时长',
+    timeInputLabelAf: '原空气炸锅时长',
+    timeUnitMin: '分钟',
+    timeDisabledNote: '当前为纯温度单位换算模式——切换上方烹饪换算标签页可自动计算时长与中途翻面节点。',
+    presetsHeading: '2. 12 款高频食材一键预设',
+    presetsSub: '点击任意食材自动填入温度、时间、USDA 安全熟度温度与垫纸安全提示。',
+    linerHeading: '3. 垫纸 / 烤盘耐温与厨房安全实时检测',
+    linerSub: '选择放入炸篮或烤箱的材质，实时预警烘焙纸起火、PTFE 有毒烟雾及玻璃冷热炸裂风险。',
+    dashboardBadge: '实时换算烹饪参数',
+    resultTempLabelAf: '空气炸锅建议设定温度',
+    resultTempLabelOven: '传统烤箱建议设定温度',
+    resultTempLabelFan: '热风烤箱建议设定温度',
+    resultTempLabelConv: '传统平炉建议设定温度',
+    resultTempLabelQuick: '实时温度刻度换算结果',
+    resultTimeLabel: '换算后烹饪时长',
+    resultGasClosest: '最接近燃气刻度',
+    resultFanEquiv: '热风烤箱 °C',
+    resultConvEquiv: '平炉烤箱 °C',
+    resultHeatLevel: '火力档位',
+    shakeCheckpointLabel: '中途翻面 / 颠篮节点',
+    shakeAtPrefix: '第',
+    shakeRemainingSuffix: '剩余',
+    formulaOvenToAf: '换算公式：温度 -25°F (-14°C)，时间缩短 20%',
+    formulaAfToOven: '换算公式：温度 +25°F (+14°C)，时间延长 25%',
+    formulaConvToFan: '换算公式：温度 -25°F (-14°C)，时间缩短 15%',
+    formulaFanToConv: '换算公式：温度 +25°F (+14°C)，时间延长 18%',
+    formulaTempOnly: '精准换算 °F ↔ 平炉 °C ↔ 热风 °C ↔ 英式 Gas Mark',
+    presetCardHeading: '当前预设食材烹饪指南',
+    presetUsdaLabel: 'USDA 安全中心温度 / 熟度标准',
+    presetTipLabel: '空气炸锅调整要点',
+    presetFlipLabel: '翻面 / 晃动提醒',
+    presetLinerLabel: '垫纸与炸篮安全建议',
+    safetyCardHeading: '器皿与垫纸耐温安全判定',
+    safetyCheckedTemp: '按实际工作温度评估',
+    safetyAirFryerParchmentExtra: '空气炸锅起火警示：严禁空篮放入烘焙纸预热！高速上升气流会将轻质垫纸吸到顶部发热管直接引燃。',
+    statusSafe: '安全 SAFE ✅',
+    statusCaution: '注意 CAUTION ⚠️',
+    statusHazard: '危险 HAZARD ❌',
+    copyBtn: '复制换算食谱',
+    copiedBtn: '已复制到剪贴板 ✓',
+    resetBtn: '重置',
+    gasChartTitle: '英式燃气刻度 Gas Mark 1/4 – 9 交互速查表',
+    gasChartSub: '点击任意一行即可直接将该温度载入上方换算器。',
+    gasHeaders: ['Gas Mark', '华氏 (°F)', '平炉 (°C)', '热风 (°C)', '火力描述'],
+    thresholdsTitle: '常见厨具与内衬材料耐温安全阈值对照表',
+    thresholdsSub: '「当前状态」列会根据你上方设定的实际工作温度实时变化。',
+    thresholdHeaders: ['材质 / 内衬', '最高安全耐温', '当前状态', '主要高温安全隐患'],
+    thresholdStatusSafe: '安全 ✅',
+    thresholdStatusCaution: '注意 ⚠️',
+    thresholdStatusHazard: '危险 ❌',
+    copySummaryTitle: 'IsItKitchenSafe — 空气炸锅与烤箱温度时间换算',
+    copyInputLine: '原食谱',
+    copyConvertedLine: '换算结果',
+    copyShakeLine: '中途翻面节点',
+    copyPresetLine: '食材目标熟度',
+    copySafetyLine: '器皿/垫纸安全判定'
+  },
+  ja: {
+    modeTabs: {
+      ovenToAf: 'オーブン → ノンフライヤー',
+      afToOven: 'ノンフライヤー → オーブン',
+      convFan: '通常オーブン ↔ 熱風ファン',
+      tempOnly: '°F / °C / ガスマーク'
+    },
+    convSubModes: {
+      toFan: '通常オーブン → コンベクション（熱風）',
+      toConv: 'コンベクション（熱風） → 通常オーブン'
+    },
+    step1Heading: '1. 元レシピの温度と加熱時間を入力',
+    tempInputLabel: '通常オーブンの設定温度',
+    tempInputLabelAf: 'ノンフライヤーの設定温度',
+    tempInputLabelConv: '通常オーブンの設定温度',
+    tempInputLabelFan: 'コンベクション（熱風）温度',
+    tempInputLabelQuick: '変換する温度',
+    unitF: '°F',
+    unitC: '°C',
+    unitGas: 'ガスマーク',
+    selectGasMarkLabel: '英国ガスマークを選択 (1/4〜9)',
+    timeInputLabel: '元レシピの加熱時間',
+    timeInputLabelAf: 'ノンフライヤーの加熱時間',
+    timeUnitMin: '分',
+    timeDisabledNote: '温度単位のみのクイック変換モードです。時間や裏返し目安を計算するには上の調理タブを選んでください。',
+    presetsHeading: '2. 定番レシピ12種クイックプリセット',
+    presetsSub: '食材をタップすると温度・時間・USDA安全中心温度・シート使用の注意点を自動入力します。',
+    linerHeading: '3. ライナー・耐熱容器の耐熱安全チェック',
+    linerSub: '使用するシートや容器を選ぶと、発火・PTFE有害ガス・ガラス破損リスクをリアルタイム判定します。',
+    dashboardBadge: 'リアルタイム変換結果',
+    resultTempLabelAf: 'ノンフライヤー設定温度',
+    resultTempLabelOven: '通常オーブン設定温度',
+    resultTempLabelFan: '熱風オーブン設定温度',
+    resultTempLabelConv: '通常オーブン設定温度',
+    resultTempLabelQuick: '温度換算結果',
+    resultTimeLabel: '変換後の加熱時間',
+    resultGasClosest: '近似ガスマーク',
+    resultFanEquiv: '熱風オーブン °C',
+    resultConvEquiv: '通常オーブン °C',
+    resultHeatLevel: '火力レベル',
+    shakeCheckpointLabel: '裏返し・振り混ぜ目安',
+    shakeAtPrefix: '開始から',
+    shakeRemainingSuffix: '残り',
+    formulaOvenToAf: '換算式：温度 -25°F (-14°C)・時間 -20%',
+    formulaAfToOven: '換算式：温度 +25°F (+14°C)・時間 +25%',
+    formulaConvToFan: '換算式：温度 -25°F (-14°C)・時間 -15%',
+    formulaFanToConv: '換算式：温度 +25°F (+14°C)・時間 +18%',
+    formulaTempOnly: '°F ↔ 通常°C ↔ 熱風°C ↔ 英国ガスマーク相互変換',
+    presetCardHeading: '選択中の食材ガイド',
+    presetUsdaLabel: 'USDA 安全中心温度・焼き上がり目安',
+    presetTipLabel: 'ノンフライヤー調整ポイント',
+    presetFlipLabel: '裏返し・振り混ぜリマインダー',
+    presetLinerLabel: 'シート・ライナー安全メモ',
+    safetyCardHeading: '調理器具・ライナー安全判定',
+    safetyCheckedTemp: '使用温度に基づく判定',
+    safetyAirFryerParchmentExtra: 'ノンフライヤー発火警告：食材を載せずにクッキングシートだけで空予熱しないでください。熱風で上部ヒーターに吸い込まれ発火する危険があります。',
+    statusSafe: '安全 SAFE ✅',
+    statusCaution: '注意 CAUTION ⚠️',
+    statusHazard: '危険 HAZARD ❌',
+    copyBtn: '変換レシピをコピー',
+    copiedBtn: 'コピーしました ✓',
+    resetBtn: 'リセット',
+    gasChartTitle: 'ガスマーク 1/4〜9 インタラクティブ早見表',
+    gasChartSub: '任意の行をクリックすると、その温度が上の変換ツールへ即座に反映されます。',
+    gasHeaders: ['ガスマーク', '華氏 (°F)', '通常 (°C)', '熱風 (°C)', '火力目安'],
+    thresholdsTitle: '調理器具・ライナー耐熱限界リファレンス',
+    thresholdsSub: 'ステータス列は現在の設定温度に合わせてリアルタイム更新されます。',
+    thresholdHeaders: ['素材・ライナー', '耐熱上限目安', '現在の判定', '主な熱リスク'],
+    thresholdStatusSafe: '安全 ✅',
+    thresholdStatusCaution: '注意 ⚠️',
+    thresholdStatusHazard: '危険 ❌',
+    copySummaryTitle: 'IsItKitchenSafe — ノンフライヤー＆オーブン変換結果',
+    copyInputLine: '元レシピ',
+    copyConvertedLine: '変換後',
+    copyShakeLine: '裏返し・振り混ぜ目安',
+    copyPresetLine: '仕上がり目安',
+    copySafetyLine: '器具・ライナー判定'
+  }
+};
+
+const t = UI[lang] || UI.en;
+
+const clientPayload = {
+  lang,
+  defaultUnit,
+  gasMarks: localizedGasMarks,
+  presets: localizedPresets,
+  thresholds: localizedThresholds,
+  liners: localizedLiners,
+  ui: t
+};
+---
+
+<section
+  id="air-fryer-oven-converter"
+  class="bg-canvas border border-hairline rounded-2xl shadow-sm overflow-hidden"
+  aria-label={t.dashboardBadge}
+>
+  <script type="application/json" id="afoc-payload" set:html={JSON.stringify(clientPayload)} />
+
+  <!-- Top Mode Tabs -->
+  <div class="bg-surface-soft border-b border-hairline p-3 sm:p-4">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2" role="tablist" aria-label="Conversion Mode">
+      <button
+        type="button"
+        role="tab"
+        data-afoc-mode="oven-to-af"
+        aria-selected="true"
+        class="afoc-mode-btn min-h-[44px] px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold border transition-all cursor-pointer bg-primary text-on-primary border-primary shadow-sm"
+      >
+        {t.modeTabs.ovenToAf}
+      </button>
+      <button
+        type="button"
+        role="tab"
+        data-afoc-mode="af-to-oven"
+        aria-selected="false"
+        class="afoc-mode-btn min-h-[44px] px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-border-strong"
+      >
+        {t.modeTabs.afToOven}
+      </button>
+      <button
+        type="button"
+        role="tab"
+        data-afoc-mode="conv-fan"
+        aria-selected="false"
+        class="afoc-mode-btn min-h-[44px] px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-border-strong"
+      >
+        {t.modeTabs.convFan}
+      </button>
+      <button
+        type="button"
+        role="tab"
+        data-afoc-mode="temp-only"
+        aria-selected="false"
+        class="afoc-mode-btn min-h-[44px] px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-border-strong"
+      >
+        {t.modeTabs.tempOnly}
+      </button>
+    </div>
+
+    <!-- Convection Sub-Direction Toggle (shown only in conv-fan mode) -->
+    <div id="afoc-conv-subrow" class="hidden mt-3 flex flex-wrap items-center justify-center gap-2">
+      <button
+        type="button"
+        data-afoc-convdir="to-fan"
+        class="afoc-convdir-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold border cursor-pointer transition-colors bg-primary text-on-primary border-primary"
+      >
+        {t.convSubModes.toFan}
+      </button>
+      <button
+        type="button"
+        data-afoc-convdir="to-conv"
+        class="afoc-convdir-btn px-3.5 py-1.5 rounded-lg text-xs font-semibold border cursor-pointer transition-colors bg-canvas text-ink border-hairline hover:border-border-strong"
+      >
+        {t.convSubModes.toConv}
+      </button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-hairline">
+    <!-- Left Column: Controls -->
+    <div class="lg:col-span-6 p-5 sm:p-6 space-y-6">
+      <!-- Step 1: Temperature & Time -->
+      <div class="space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h2 class="text-title-sm font-semibold text-ink">{t.step1Heading}</h2>
+          <!-- Unit Toggle: °F / °C / Gas Mark -->
+          <div class="inline-flex rounded-lg border border-hairline bg-surface-soft p-0.5" role="group" aria-label="Temperature Unit">
+            <button
+              type="button"
+              data-afoc-unit="F"
+              class={`afoc-unit-btn px-3 py-1.5 rounded-md text-xs font-bold cursor-pointer transition-colors ${defaultUnit === 'F' ? 'bg-primary text-on-primary' : 'text-ink hover:bg-canvas'}`}
+            >
+              {t.unitF}
+            </button>
+            <button
+              type="button"
+              data-afoc-unit="C"
+              class={`afoc-unit-btn px-3 py-1.5 rounded-md text-xs font-bold cursor-pointer transition-colors ${defaultUnit === 'C' ? 'bg-primary text-on-primary' : 'text-ink hover:bg-canvas'}`}
+            >
+              {t.unitC}
+            </button>
+            <button
+              type="button"
+              data-afoc-unit="GAS"
+              class="afoc-unit-btn px-3 py-1.5 rounded-md text-xs font-bold cursor-pointer transition-colors text-ink hover:bg-canvas"
+            >
+              {t.unitGas}
+            </button>
+          </div>
+        </div>
+
+        <!-- Numeric + Slider Temperature Control (visible for °F and °C) -->
+        <div id="afoc-temp-numeric-wrap" class="p-4 rounded-xl bg-surface-soft border border-hairline space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <label for="afoc-temp-input" id="afoc-temp-label" class="text-xs sm:text-sm font-semibold text-ink">
+              {t.tempInputLabel}
+            </label>
+            <span id="afoc-temp-equiv" class="text-xs font-mono font-medium text-muted">
+              204°C · Gas 6
+            </span>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div class="relative w-28 shrink-0">
+              <input
+                type="number"
+                id="afoc-temp-input"
+                min="200"
+                max="500"
+                step="5"
+                value={defaultUnit === 'F' ? '400' : '200'}
+                class="w-full h-11 pl-3 pr-8 rounded-lg bg-canvas border border-hairline text-ink font-bold text-base focus:outline-none focus:border-info-border"
+              />
+              <span id="afoc-temp-unit-badge" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted pointer-events-none">
+                {defaultUnit === 'F' ? '°F' : '°C'}
+              </span>
+            </div>
+            <div class="flex-1 space-y-1">
+              <input
+                type="range"
+                id="afoc-temp-slider"
+                min={defaultUnit === 'F' ? '200' : '95'}
+                max={defaultUnit === 'F' ? '500' : '260'}
+                step="5"
+                value={defaultUnit === 'F' ? '400' : '200'}
+                aria-label={t.tempInputLabel}
+                class="w-full accent-[#aa2d00] cursor-pointer h-2 rounded-lg"
+              />
+              <div class="flex justify-between text-[11px] text-muted font-mono">
+                <span id="afoc-slider-min">{defaultUnit === 'F' ? '200°F' : '95°C'}</span>
+                <span id="afoc-slider-mid">{defaultUnit === 'F' ? '350°F' : '180°C'}</span>
+                <span id="afoc-slider-max">{defaultUnit === 'F' ? '500°F' : '260°C'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gas Mark Picker (visible when GAS unit selected) -->
+        <div id="afoc-gas-picker-wrap" class="hidden p-4 rounded-xl bg-surface-soft border border-hairline space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs sm:text-sm font-semibold text-ink">{t.selectGasMarkLabel}</span>
+            <span id="afoc-gas-picked-equiv" class="text-xs font-mono font-medium text-muted">400°F · 200°C</span>
+          </div>
+          <div class="grid grid-cols-4 sm:grid-cols-6 gap-1.5">
+            {localizedGasMarks.map((gm) => (
+              <button
+                type="button"
+                data-afoc-gas-pick={gm.mark}
+                class="afoc-gas-pick-btn min-h-[40px] px-2 py-1.5 rounded-lg text-xs font-bold border border-hairline bg-canvas text-ink hover:border-signature-coral transition-colors cursor-pointer"
+              >
+                GM {gm.mark}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <!-- Cooking Time Control -->
+        <div id="afoc-time-wrap" class="p-4 rounded-xl bg-surface-soft border border-hairline space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <label for="afoc-time-input" id="afoc-time-label" class="text-xs sm:text-sm font-semibold text-ink">
+              {t.timeInputLabel}
+            </label>
+            <span class="text-xs font-mono text-muted">1 – 180 {t.timeUnitMin}</span>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div class="relative w-28 shrink-0">
+              <input
+                type="number"
+                id="afoc-time-input"
+                min="1"
+                max="180"
+                step="1"
+                value="25"
+                class="w-full h-11 pl-3 pr-11 rounded-lg bg-canvas border border-hairline text-ink font-bold text-base focus:outline-none focus:border-info-border"
+              />
+              <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-muted pointer-events-none">
+                {t.timeUnitMin}
+              </span>
+            </div>
+            <div class="flex-1 space-y-1">
+              <input
+                type="range"
+                id="afoc-time-slider"
+                min="1"
+                max="180"
+                step="1"
+                value="25"
+                aria-label={t.timeInputLabel}
+                class="w-full accent-[#aa2d00] cursor-pointer h-2 rounded-lg"
+              />
+              <div class="flex justify-between text-[11px] text-muted font-mono">
+                <span>5 {t.timeUnitMin}</span>
+                <span>45 {t.timeUnitMin}</span>
+                <span>90 {t.timeUnitMin}</span>
+                <span>180 {t.timeUnitMin}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Note when in Temp-Only Mode -->
+        <div id="afoc-time-disabled-msg" class="hidden p-3.5 rounded-xl bg-surface-soft border border-hairline text-xs text-muted leading-relaxed">
+          {t.timeDisabledNote}
+        </div>
+      </div>
+
+      <!-- Step 2: 12 Quick Food Presets -->
+      <div class="space-y-2.5">
+        <div>
+          <h2 class="text-title-sm font-semibold text-ink">{t.presetsHeading}</h2>
+          <p class="text-xs text-muted mt-0.5">{t.presetsSub}</p>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {localizedPresets.map((preset) => (
+            <button
+              type="button"
+              data-afoc-preset={preset.id}
+              class="afoc-preset-btn min-h-[42px] px-2.5 py-2 rounded-xl border border-hairline bg-surface-soft hover:border-signature-coral text-left text-xs font-medium text-ink transition-all cursor-pointer flex items-center gap-1.5"
+            >
+              <span aria-hidden="true" class="text-sm shrink-0">{preset.icon}</span>
+              <span class="truncate">{preset.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <!-- Step 3: Optional Liner / Bakeware Thermal Check -->
+      <div class="space-y-2.5">
+        <div>
+          <h2 class="text-title-sm font-semibold text-ink">{t.linerHeading}</h2>
+          <p class="text-xs text-muted mt-0.5">{t.linerSub}</p>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" role="radiogroup" aria-label={t.linerHeading}>
+          {localizedLiners.map((liner, idx) => (
+            <button
+              type="button"
+              role="radio"
+              aria-checked={idx === 0 ? 'true' : 'false'}
+              data-afoc-liner={liner.id}
+              class={`afoc-liner-btn min-h-[44px] px-3 py-2 rounded-xl border text-left text-xs font-semibold transition-all cursor-pointer ${
+                idx === 0
+                  ? 'bg-primary text-on-primary border-primary shadow-sm'
+                  : 'bg-canvas text-ink border-hairline hover:border-border-strong'
+              }`}
+            >
+              {liner.name}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Live Result Dashboard -->
+    <div class="lg:col-span-6 p-5 sm:p-6 bg-surface-soft/50 flex flex-col justify-between space-y-5">
+      <div class="space-y-5">
+        <!-- Main High-Contrast Result Card -->
+        <div class="rounded-2xl bg-surface-dark text-on-dark p-5 sm:p-6 space-y-4 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-signature-peach">
+              {t.dashboardBadge}
+            </span>
+            <span id="afoc-formula-pill" class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white/10 text-white/90">
+              {t.formulaOvenToAf}
+            </span>
+          </div>
+
+          <!-- Standard Cooking Conversion Display (Temp + Time) -->
+          <div id="afoc-cooking-result-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+            <div class="p-4 rounded-xl bg-white/5 border border-white/10 space-y-1">
+              <div id="afoc-result-temp-label" class="text-xs text-white/75 font-medium">
+                {t.resultTempLabelAf}
+              </div>
+              <div id="afoc-result-temp-main" class="text-3xl sm:text-4xl font-bold tracking-tight text-white">
+                375°F
+              </div>
+              <div id="afoc-result-temp-sub" class="text-xs sm:text-sm font-mono text-signature-yellow">
+                191°C · Gas Mark 5
+              </div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-white/5 border border-white/10 space-y-1">
+              <div class="text-xs text-white/75 font-medium">
+                {t.resultTimeLabel}
+              </div>
+              <div id="afoc-result-time-main" class="text-3xl sm:text-4xl font-bold tracking-tight text-white">
+                20 min
+              </div>
+              <div id="afoc-shake-line" class="text-xs font-medium text-signature-mint flex items-center gap-1.5 pt-0.5">
+                <span aria-hidden="true">⏱️</span>
+                <span id="afoc-shake-text">{t.shakeAtPrefix} 10 {t.timeUnitMin} (10 {t.timeUnitMin} {t.shakeRemainingSuffix})</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pure Temp-Only Scale Breakdown (hidden unless temp-only mode) -->
+          <div id="afoc-quick-result-grid" class="hidden grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
+            <div class="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+              <div class="text-[11px] text-white/70">°F</div>
+              <div id="afoc-q-f" class="text-2xl font-bold text-white mt-0.5">400°F</div>
+            </div>
+            <div class="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+              <div class="text-[11px] text-white/70">{t.resultConvEquiv}</div>
+              <div id="afoc-q-c" class="text-2xl font-bold text-white mt-0.5">204°C</div>
+            </div>
+            <div class="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+              <div class="text-[11px] text-white/70">{t.resultFanEquiv}</div>
+              <div id="afoc-q-fan" class="text-2xl font-bold text-signature-yellow mt-0.5">184°C</div>
+            </div>
+            <div class="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+              <div class="text-[11px] text-white/70">{t.resultGasClosest}</div>
+              <div id="afoc-q-gas" class="text-2xl font-bold text-signature-mint mt-0.5">GM 6</div>
+            </div>
+          </div>
+
+          <!-- Heat Level & Closest Gas Mark Strip -->
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/10 text-xs text-white/80">
+            <span>
+              <strong class="text-white">{t.resultHeatLevel}:</strong>{' '}
+              <span id="afoc-heat-level">Moderate / Medium-High</span>
+            </span>
+            <span>
+              <strong class="text-white">{t.resultGasClosest}:</strong>{' '}
+              <span id="afoc-gas-closest-badge">Gas Mark 5</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Active Food Preset Advisory Card (shown when a preset is clicked) -->
+        <div id="afoc-preset-card" class="hidden rounded-2xl bg-canvas border border-hairline p-4 sm:p-5 space-y-3">
+          <div class="flex items-center justify-between gap-2 border-b border-hairline pb-2.5">
+            <div class="flex items-center gap-2">
+              <span id="afoc-preset-icon" class="text-xl" aria-hidden="true">🍗</span>
+              <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-signature-coral block">
+                  {t.presetCardHeading}
+                </span>
+                <h3 id="afoc-preset-name" class="text-sm sm:text-base font-bold text-ink"></h3>
+              </div>
+            </div>
+            <span id="afoc-preset-usda-pill" class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-info/10 text-info dark:text-info-border border border-info/25"></span>
+          </div>
+
+          <div class="grid grid-cols-1 gap-2 text-xs text-body leading-relaxed">
+            <div>
+              <strong class="text-ink">{t.presetUsdaLabel}:</strong>{' '}
+              <span id="afoc-preset-usda-text"></span>
+            </div>
+            <div>
+              <strong class="text-ink">{t.presetTipLabel}:</strong>{' '}
+              <span id="afoc-preset-tip"></span>
+            </div>
+            <div>
+              <strong class="text-ink">{t.presetFlipLabel}:</strong>{' '}
+              <span id="afoc-preset-flip"></span>
+            </div>
+            <div>
+              <strong class="text-ink">{t.presetLinerLabel}:</strong>{' '}
+              <span id="afoc-preset-liner"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Cookware / Liner Safety Status Card -->
+        <div id="afoc-safety-card" class="rounded-2xl border p-4 sm:p-5 space-y-2.5 bg-canvas border-success/40 transition-colors">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-muted block">
+                {t.safetyCardHeading}
+              </span>
+              <h3 id="afoc-safety-title" class="text-sm sm:text-base font-bold text-ink mt-0.5">
+                {localizedLiners[0].safeTitle}
+              </h3>
+            </div>
+            <span
+              id="afoc-safety-badge"
+              class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold tracking-wide bg-success/10 text-success dark:text-success-border border border-success/30"
+            >
+              {t.statusSafe}
+            </span>
+          </div>
+
+          <p id="afoc-safety-body" class="text-xs sm:text-[13px] text-body leading-relaxed">
+            {localizedLiners[0].safeBody}
+          </p>
+
+          <div id="afoc-safety-extra" class="hidden p-3 rounded-xl bg-warning-bg dark:bg-amber-950/40 border border-warning-border text-xs text-warning dark:text-amber-300 font-medium leading-relaxed">
+            {t.safetyAirFryerParchmentExtra}
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-hairline/70 text-[11px] text-muted font-mono">
+            <span id="afoc-safety-temp-eval">{t.safetyCheckedTemp}: 375°F (191°C)</span>
+            <span id="afoc-safety-max-label">{localizedLiners[0].maxLabelF}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+        <button
+          type="button"
+          id="afoc-reset-btn"
+          class="min-h-[44px] px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-canvas text-ink border border-hairline hover:border-border-strong transition-colors cursor-pointer"
+        >
+          {t.resetBtn}
+        </button>
+        <button
+          type="button"
+          id="afoc-copy-btn"
+          class="min-h-[44px] flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors cursor-pointer shadow-sm"
+        >
+          <span id="afoc-copy-label">{t.copyBtn}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Gas Mark 1/4 – 9 Quick Reference Chart -->
+  <div class="border-t border-hairline p-5 sm:p-6 space-y-4">
+    <div>
+      <h2 class="text-title-md font-semibold text-ink">{t.gasChartTitle}</h2>
+      <p class="text-xs text-muted mt-0.5">{t.gasChartSub}</p>
+    </div>
+
+    <div class="border border-hairline rounded-xl overflow-hidden bg-canvas">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs sm:text-sm">
+          <thead class="bg-surface-strong border-b border-hairline text-ink font-semibold">
+            <tr>
+              <th class="p-3">{t.gasHeaders[0]}</th>
+              <th class="p-3">{t.gasHeaders[1]}</th>
+              <th class="p-3">{t.gasHeaders[2]}</th>
+              <th class="p-3">{t.gasHeaders[3]}</th>
+              <th class="p-3">{t.gasHeaders[4]}</th>
+            </tr>
+          </thead>
+          <tbody id="afoc-gas-tbody" class="divide-y divide-hairline">
+            {localizedGasMarks.map((gm, idx) => (
+              <tr
+                data-afoc-gas-row={gm.mark}
+                data-afoc-gas-tempf={gm.tempF}
+                class={`afoc-gas-row cursor-pointer transition-colors hover:bg-signature-cream/40 dark:hover:bg-white/5 ${idx % 2 === 0 ? 'bg-canvas' : 'bg-surface-soft'}`}
+              >
+                <td class="p-3 font-bold text-ink whitespace-nowrap">Gas Mark {gm.mark}</td>
+                <td class="p-3 font-mono font-semibold text-ink whitespace-nowrap">{gm.tempF}°F</td>
+                <td class="p-3 font-mono text-body whitespace-nowrap">{gm.tempCConventional}°C</td>
+                <td class="p-3 font-mono text-body whitespace-nowrap">{gm.tempCFan}°C</td>
+                <td class="p-3 text-body">{gm.level}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cookware & Liner Thermal Threshold Reference Table -->
+  <div class="border-t border-hairline p-5 sm:p-6 bg-surface-soft/50 space-y-4">
+    <div>
+      <h2 class="text-title-md font-semibold text-ink">{t.thresholdsTitle}</h2>
+      <p class="text-xs text-muted mt-0.5">{t.thresholdsSub}</p>
+    </div>
+
+    <div class="border border-hairline rounded-xl overflow-hidden bg-canvas">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs sm:text-sm">
+          <thead class="bg-surface-strong border-b border-hairline text-ink font-semibold">
+            <tr>
+              <th class="p-3">{t.thresholdHeaders[0]}</th>
+              <th class="p-3">{t.thresholdHeaders[1]}</th>
+              <th class="p-3">{t.thresholdHeaders[2]}</th>
+              <th class="p-3">{t.thresholdHeaders[3]}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-hairline">
+            {localizedThresholds.map((item, idx) => (
+              <tr class={idx % 2 === 0 ? 'bg-canvas' : 'bg-surface-soft'}>
+                <td class="p-3 font-semibold text-ink whitespace-nowrap">{item.name}</td>
+                <td class="p-3 font-mono text-body whitespace-nowrap">{item.maxRangeF} ({item.maxRangeC})</td>
+                <td class="p-3 whitespace-nowrap">
+                  <span
+                    data-afoc-threshold-status={item.id}
+                    data-caution-f={item.cautionF}
+                    data-hazard-f={item.hazardF}
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-success/10 text-success dark:text-success-border border border-success/30"
+                  >
+                    {t.thresholdStatusSafe}
+                  </span>
+                </td>
+                <td class="p-3 text-body leading-snug">{item.risk}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  (function () {
+    const payloadEl = document.getElementById('afoc-payload');
+    if (!payloadEl) return;
+
+    let payload;
+    try {
+      payload = JSON.parse(payloadEl.textContent || '{}');
+    } catch (_) {
+      return;
+    }
+
+    const gasMarks = payload.gasMarks || [];
+    const presets = payload.presets || [];
+    const liners = payload.liners || [];
+    const ui = payload.ui || {};
+
+    const presetById = new Map(presets.map((p) => [p.id, p]));
+    const linerById = new Map(liners.map((l) => [l.id, l]));
+    const gasByMark = new Map(gasMarks.map((g) => [g.mark, g]));
+
+    // DOM References
+    const modeButtons = Array.from(document.querySelectorAll('.afoc-mode-btn'));
+    const convSubRow = document.getElementById('afoc-conv-subrow');
+    const convDirButtons = Array.from(document.querySelectorAll('.afoc-convdir-btn'));
+    const unitButtons = Array.from(document.querySelectorAll('.afoc-unit-btn'));
+    const presetButtons = Array.from(document.querySelectorAll('.afoc-preset-btn'));
+    const linerButtons = Array.from(document.querySelectorAll('.afoc-liner-btn'));
+    const gasPickButtons = Array.from(document.querySelectorAll('.afoc-gas-pick-btn'));
+    const gasRows = Array.from(document.querySelectorAll('.afoc-gas-row'));
+    const thresholdBadges = Array.from(document.querySelectorAll('[data-afoc-threshold-status]'));
+
+    const tempNumericWrap = document.getElementById('afoc-temp-numeric-wrap');
+    const gasPickerWrap = document.getElementById('afoc-gas-picker-wrap');
+    const gasPickedEquiv = document.getElementById('afoc-gas-picked-equiv');
+    const tempLabel = document.getElementById('afoc-temp-label');
+    const tempInput = document.getElementById('afoc-temp-input');
+    const tempSlider = document.getElementById('afoc-temp-slider');
+    const tempUnitBadge = document.getElementById('afoc-temp-unit-badge');
+    const tempEquiv = document.getElementById('afoc-temp-equiv');
+    const sliderMin = document.getElementById('afoc-slider-min');
+    const sliderMid = document.getElementById('afoc-slider-mid');
+    const sliderMax = document.getElementById('afoc-slider-max');
+
+    const timeWrap = document.getElementById('afoc-time-wrap');
+    const timeDisabledMsg = document.getElementById('afoc-time-disabled-msg');
+    const timeLabel = document.getElementById('afoc-time-label');
+    const timeInput = document.getElementById('afoc-time-input');
+    const timeSlider = document.getElementById('afoc-time-slider');
+
+    const formulaPill = document.getElementById('afoc-formula-pill');
+    const cookingResultGrid = document.getElementById('afoc-cooking-result-grid');
+    const quickResultGrid = document.getElementById('afoc-quick-result-grid');
+    const resultTempLabel = document.getElementById('afoc-result-temp-label');
+    const resultTempMain = document.getElementById('afoc-result-temp-main');
+    const resultTempSub = document.getElementById('afoc-result-temp-sub');
+    const resultTimeMain = document.getElementById('afoc-result-time-main');
+    const shakeText = document.getElementById('afoc-shake-text');
+    const heatLevelEl = document.getElementById('afoc-heat-level');
+    const gasClosestBadge = document.getElementById('afoc-gas-closest-badge');
+
+    const qF = document.getElementById('afoc-q-f');
+    const qC = document.getElementById('afoc-q-c');
+    const qFan = document.getElementById('afoc-q-fan');
+    const qGas = document.getElementById('afoc-q-gas');
+
+    const presetCard = document.getElementById('afoc-preset-card');
+    const presetIcon = document.getElementById('afoc-preset-icon');
+    const presetName = document.getElementById('afoc-preset-name');
+    const presetUsdaPill = document.getElementById('afoc-preset-usda-pill');
+    const presetUsdaText = document.getElementById('afoc-preset-usda-text');
+    const presetTip = document.getElementById('afoc-preset-tip');
+    const presetFlip = document.getElementById('afoc-preset-flip');
+    const presetLiner = document.getElementById('afoc-preset-liner');
+
+    const safetyCard = document.getElementById('afoc-safety-card');
+    const safetyTitle = document.getElementById('afoc-safety-title');
+    const safetyBadge = document.getElementById('afoc-safety-badge');
+    const safetyBody = document.getElementById('afoc-safety-body');
+    const safetyExtra = document.getElementById('afoc-safety-extra');
+    const safetyTempEval = document.getElementById('afoc-safety-temp-eval');
+    const safetyMaxLabel = document.getElementById('afoc-safety-max-label');
+
+    const resetBtn = document.getElementById('afoc-reset-btn');
+    const copyBtn = document.getElementById('afoc-copy-btn');
+    const copyLabel = document.getElementById('afoc-copy-label');
+
+    // State (canonical temperature stored in °F, clamped 200-500)
+    const state = {
+      mode: 'oven-to-af', // 'oven-to-af' | 'af-to-oven' | 'conv-fan' | 'temp-only'
+      convDir: 'to-fan',  // 'to-fan' | 'to-conv'
+      unit: payload.defaultUnit || 'F', // 'F' | 'C' | 'GAS'
+      inputTempF: 400,
+      inputTimeMin: 25,
+      selectedGasMark: '6',
+      activePresetId: null,
+      linerId: 'none'
+    };
+
+    let lastCopySummary = '';
+
+    function fToC(f) {
+      return Math.round(((f - 32) * 5) / 9);
+    }
+
+    function cToF(c) {
+      return Math.round((c * 9) / 5 + 32);
+    }
+
+    function clamp(val, min, max) {
+      return Math.min(max, Math.max(min, val));
+    }
+
+    function findClosestGasMark(tempF) {
+      if (!gasMarks.length) {
+        return { mark: '4', tempF: 350, tempCConventional: 180, tempCFan: 160, level: 'Moderate' };
+      }
+      let best = gasMarks[0];
+      let bestDiff = Math.abs(tempF - best.tempF);
+      for (let i = 1; i < gasMarks.length; i++) {
+        const diff = Math.abs(tempF - gasMarks[i].tempF);
+        if (diff < bestDiff) {
+          best = gasMarks[i];
+          bestDiff = diff;
+        }
+      }
+      return best;
+    }
+
+    function syncTempControls() {
+      const displayF = clamp(Math.round(state.inputTempF), 200, 500);
+      const displayC = clamp(fToC(displayF), 95, 260);
+      const closestGas = findClosestGasMark(displayF);
+      state.selectedGasMark = closestGas.mark;
+
+      if (state.unit === 'GAS') {
+        if (tempNumericWrap) tempNumericWrap.classList.add('hidden');
+        if (gasPickerWrap) gasPickerWrap.classList.remove('hidden');
+        if (gasPickedEquiv) {
+          gasPickedEquiv.textContent = displayF + '°F · ' + closestGas.tempCConventional + '°C';
+        }
+        gasPickButtons.forEach((btn) => {
+          const m = btn.getAttribute('data-afoc-gas-pick');
+          const active = m === state.selectedGasMark;
+          btn.classList.toggle('bg-primary', active);
+          btn.classList.toggle('text-on-primary', active);
+          btn.classList.toggle('border-primary', active);
+          btn.classList.toggle('bg-canvas', !active);
+          btn.classList.toggle('text-ink', !active);
+          btn.classList.toggle('border-hairline', !active);
+        });
+      } else {
+        if (tempNumericWrap) tempNumericWrap.classList.remove('hidden');
+        if (gasPickerWrap) gasPickerWrap.classList.add('hidden');
+
+        if (state.unit === 'F') {
+          if (tempInput) {
+            tempInput.min = '200';
+            tempInput.max = '500';
+            tempInput.value = String(displayF);
+          }
+          if (tempSlider) {
+            tempSlider.min = '200';
+            tempSlider.max = '500';
+            tempSlider.value = String(displayF);
+          }
+          if (tempUnitBadge) tempUnitBadge.textContent = '°F';
+          if (sliderMin) sliderMin.textContent = '200°F';
+          if (sliderMid) sliderMid.textContent = '350°F';
+          if (sliderMax) sliderMax.textContent = '500°F';
+          if (tempEquiv) tempEquiv.textContent = displayC + '°C · GM ' + closestGas.mark;
+        } else {
+          if (tempInput) {
+            tempInput.min = '95';
+            tempInput.max = '260';
+            tempInput.value = String(displayC);
+          }
+          if (tempSlider) {
+            tempSlider.min = '95';
+            tempSlider.max = '260';
+            tempSlider.value = String(displayC);
+          }
+          if (tempUnitBadge) tempUnitBadge.textContent = '°C';
+          if (sliderMin) sliderMin.textContent = '95°C';
+          if (sliderMid) sliderMid.textContent = '180°C';
+          if (sliderMax) sliderMax.textContent = '260°C';
+          if (tempEquiv) tempEquiv.textContent = displayF + '°F · GM ' + closestGas.mark;
+        }
+      }
+    }
+
+    function syncTimeControls() {
+      const tVal = clamp(Math.round(state.inputTimeMin), 1, 180);
+      if (timeInput) timeInput.value = String(tVal);
+      if (timeSlider) timeSlider.value = String(tVal);
+    }
+
+    function updateModeStyles() {
+      modeButtons.forEach((btn) => {
+        const m = btn.getAttribute('data-afoc-mode');
+        const active = m === state.mode;
+        btn.setAttribute('aria-selected', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('shadow-sm', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      if (convSubRow) {
+        convSubRow.classList.toggle('hidden', state.mode !== 'conv-fan');
+      }
+
+      convDirButtons.forEach((btn) => {
+        const d = btn.getAttribute('data-afoc-convdir');
+        const active = d === state.convDir;
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      const isTempOnly = state.mode === 'temp-only';
+      if (timeWrap) timeWrap.classList.toggle('hidden', isTempOnly);
+      if (timeDisabledMsg) timeDisabledMsg.classList.toggle('hidden', !isTempOnly);
+
+      if (tempLabel) {
+        if (state.mode === 'oven-to-af') tempLabel.textContent = ui.tempInputLabel;
+        else if (state.mode === 'af-to-oven') tempLabel.textContent = ui.tempInputLabelAf;
+        else if (state.mode === 'conv-fan') {
+          tempLabel.textContent = state.convDir === 'to-fan' ? ui.tempInputLabelConv : ui.tempInputLabelFan;
+        } else tempLabel.textContent = ui.tempInputLabelQuick;
+      }
+
+      if (timeLabel) {
+        timeLabel.textContent = state.mode === 'af-to-oven' ? ui.timeInputLabelAf : ui.timeInputLabel;
+      }
+    }
+
+    function updateUnitStyles() {
+      unitButtons.forEach((btn) => {
+        const u = btn.getAttribute('data-afoc-unit');
+        const active = u === state.unit;
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('text-ink', !active);
+      });
+    }
+
+    function updatePresetStyles() {
+      presetButtons.forEach((btn) => {
+        const pid = btn.getAttribute('data-afoc-preset');
+        const active = pid === state.activePresetId;
+        btn.classList.toggle('border-signature-coral', active);
+        btn.classList.toggle('bg-signature-cream/50', active);
+        btn.classList.toggle('dark:bg-white/10', active);
+        btn.classList.toggle('font-bold', active);
+        btn.classList.toggle('border-hairline', !active);
+        btn.classList.toggle('bg-surface-soft', !active);
+      });
+    }
+
+    function updateLinerStyles() {
+      linerButtons.forEach((btn) => {
+        const lid = btn.getAttribute('data-afoc-liner');
+        const active = lid === state.linerId;
+        btn.setAttribute('aria-checked', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('shadow-sm', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+    }
+
+    function renderSafety(operatingTempF, isTargetAirFryer) {
+      const liner = linerById.get(state.linerId) || liners[0];
+      const operatingTempC = fToC(operatingTempF);
+
+      let status = 'safe'; // 'safe' | 'caution' | 'hazard'
+      let title = liner.safeTitle;
+      let body = liner.safeBody;
+
+      if (liner.id === 'nonstick') {
+        if (operatingTempF >= liner.hazardF) {
+          status = 'hazard';
+          title = liner.hazardTitle;
+          body = liner.hazardBody;
+        } else if (operatingTempF >= liner.cautionF) {
+          status = 'caution';
+          title = liner.cautionTitle;
+          body = liner.cautionBody;
+        }
+      } else if (liner.id === 'parchment' || liner.id === 'silicone' || liner.id === 'glass') {
+        if (operatingTempF > liner.hazardF) {
+          status = 'hazard';
+          title = liner.hazardTitle;
+          body = liner.hazardBody;
+        } else if (operatingTempF > liner.cautionF) {
+          status = 'caution';
+          title = liner.cautionTitle;
+          body = liner.cautionBody;
+        }
+      } else if (liner.id === 'foil') {
+        if (operatingTempF >= liner.hazardF) {
+          status = 'hazard';
+          title = liner.hazardTitle;
+          body = liner.hazardBody;
+        } else if (operatingTempF > liner.cautionF || isTargetAirFryer) {
+          status = 'caution';
+          title = liner.cautionTitle;
+          body = liner.cautionBody;
+        }
+      } else {
+        // none / bare basket
+        if (operatingTempF >= liner.hazardF) {
+          status = 'hazard';
+          title = liner.hazardTitle;
+          body = liner.hazardBody;
+        } else if (operatingTempF >= liner.cautionF && isTargetAirFryer) {
+          status = 'caution';
+          title = liner.cautionTitle;
+          body = liner.cautionBody;
+        }
+      }
+
+      if (safetyTitle) safetyTitle.textContent = title;
+      if (safetyBody) safetyBody.textContent = body;
+      if (safetyTempEval) {
+        safetyTempEval.textContent = ui.safetyCheckedTemp + ': ' + operatingTempF + '°F (' + operatingTempC + '°C)';
+      }
+      if (safetyMaxLabel) safetyMaxLabel.textContent = liner.maxLabelF;
+
+      // Show unweighted parchment air-fryer coil alert whenever parchment + air fryer is active
+      if (safetyExtra) {
+        const showParchmentAfWarn = liner.id === 'parchment' && isTargetAirFryer;
+        safetyExtra.classList.toggle('hidden', !showParchmentAfWarn);
+      }
+
+      // Style status card & badge
+      if (safetyCard && safetyBadge) {
+        safetyCard.className = 'rounded-2xl border p-4 sm:p-5 space-y-2.5 transition-colors ';
+        safetyBadge.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-bold tracking-wide border ';
+
+        if (status === 'hazard') {
+          safetyCard.className += 'bg-error-bg dark:bg-red-950/30 border-error-border';
+          safetyBadge.className += 'bg-error/15 text-error dark:text-error-border border-error-border';
+          safetyBadge.textContent = ui.statusHazard;
+        } else if (status === 'caution') {
+          safetyCard.className += 'bg-warning-bg dark:bg-amber-950/30 border-warning-border';
+          safetyBadge.className += 'bg-warning/15 text-warning dark:text-amber-300 border-warning-border';
+          safetyBadge.textContent = ui.statusCaution;
+        } else {
+          safetyCard.className += 'bg-canvas border-success/40';
+          safetyBadge.className += 'bg-success/10 text-success dark:text-success-border border-success/30';
+          safetyBadge.textContent = ui.statusSafe;
+        }
+      }
+
+      // Update live status badges in the bottom Cookware Threshold Reference table
+      thresholdBadges.forEach((el) => {
+        const cautionF = parseFloat(el.getAttribute('data-caution-f') || '450');
+        const hazardF = parseFloat(el.getAttribute('data-hazard-f') || '500');
+        const matId = el.getAttribute('data-afoc-threshold-status');
+
+        let rowStatus = 'safe';
+        if (matId === 'ptfe-nonstick') {
+          if (operatingTempF >= hazardF) rowStatus = 'hazard';
+          else if (operatingTempF >= cautionF) rowStatus = 'caution';
+        } else {
+          if (operatingTempF > hazardF) rowStatus = 'hazard';
+          else if (operatingTempF > cautionF) rowStatus = 'caution';
+        }
+
+        el.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border ';
+        if (rowStatus === 'hazard') {
+          el.className += 'bg-error/15 text-error dark:text-error-border border-error-border';
+          el.textContent = ui.thresholdStatusHazard;
+        } else if (rowStatus === 'caution') {
+          el.className += 'bg-warning/15 text-warning dark:text-amber-300 border-warning-border';
+          el.textContent = ui.thresholdStatusCaution;
+        } else {
+          el.className += 'bg-success/10 text-success dark:text-success-border border-success/30';
+          el.textContent = ui.thresholdStatusSafe;
+        }
+      });
+
+      return {
+        linerName: liner.name,
+        verdict: status === 'hazard' ? ui.statusHazard : status === 'caution' ? ui.statusCaution : ui.statusSafe,
+        title
+      };
+    }
+
+    function render() {
+      const inF = clamp(Math.round(state.inputTempF), 200, 500);
+      const inC = fToC(inF);
+      const inTime = clamp(Math.round(state.inputTimeMin), 1, 180);
+
+      let outF = inF;
+      let outTime = inTime;
+      let isTargetAirFryer = false;
+
+      if (state.mode === 'oven-to-af') {
+        outF = clamp(inF - 25, 175, 475);
+        outTime = Math.max(1, Math.round(inTime * 0.8));
+        isTargetAirFryer = true;
+        if (formulaPill) formulaPill.textContent = ui.formulaOvenToAf;
+        if (resultTempLabel) resultTempLabel.textContent = ui.resultTempLabelAf;
+      } else if (state.mode === 'af-to-oven') {
+        outF = clamp(inF + 25, 225, 525);
+        outTime = Math.max(1, Math.round(inTime / 0.8));
+        isTargetAirFryer = false;
+        if (formulaPill) formulaPill.textContent = ui.formulaAfToOven;
+        if (resultTempLabel) resultTempLabel.textContent = ui.resultTempLabelOven;
+      } else if (state.mode === 'conv-fan') {
+        if (state.convDir === 'to-fan') {
+          outF = clamp(inF - 25, 175, 475);
+          outTime = Math.max(1, Math.round(inTime * 0.85));
+          if (formulaPill) formulaPill.textContent = ui.formulaConvToFan;
+          if (resultTempLabel) resultTempLabel.textContent = ui.resultTempLabelFan;
+        } else {
+          outF = clamp(inF + 25, 225, 525);
+          outTime = Math.max(1, Math.round(inTime / 0.85));
+          if (formulaPill) formulaPill.textContent = ui.formulaFanToConv;
+          if (resultTempLabel) resultTempLabel.textContent = ui.resultTempLabelConv;
+        }
+        isTargetAirFryer = false;
+      } else {
+        // temp-only
+        outF = inF;
+        outTime = inTime;
+        isTargetAirFryer = false;
+        if (formulaPill) formulaPill.textContent = ui.formulaTempOnly;
+      }
+
+      const outC = fToC(outF);
+      const closestGas = findClosestGasMark(outF);
+      const fanC = Math.max(75, outC - 20);
+
+      // Toggle Cooking Grid vs Quick Scale Grid
+      const isTempOnly = state.mode === 'temp-only';
+      if (cookingResultGrid) cookingResultGrid.classList.toggle('hidden', isTempOnly);
+      if (quickResultGrid) quickResultGrid.classList.toggle('hidden', !isTempOnly);
+
+      if (isTempOnly) {
+        if (qF) qF.textContent = outF + '°F';
+        if (qC) qC.textContent = outC + '°C';
+        if (qFan) qFan.textContent = fanC + '°C';
+        if (qGas) qGas.textContent = 'GM ' + closestGas.mark;
+      } else {
+        if (resultTempMain && resultTempSub) {
+          if (state.unit === 'C') {
+            resultTempMain.textContent = outC + '°C';
+            resultTempSub.textContent = outF + '°F · Gas Mark ' + closestGas.mark;
+          } else {
+            resultTempMain.textContent = outF + '°F';
+            resultTempSub.textContent = outC + '°C · Gas Mark ' + closestGas.mark;
+          }
+        }
+        if (resultTimeMain) {
+          resultTimeMain.textContent = outTime + ' ' + ui.timeUnitMin;
+        }
+
+        const activePreset = state.activePresetId ? presetById.get(state.activePresetId) : null;
+        const pct = activePreset && activePreset.shakeFlipAtPct ? activePreset.shakeFlipAtPct : 0.5;
+        const shakeAt = Math.max(1, Math.round(outTime * pct));
+        const remaining = Math.max(0, outTime - shakeAt);
+        if (shakeText) {
+          shakeText.textContent =
+            ui.shakeAtPrefix +
+            ' ' +
+            shakeAt +
+            ' ' +
+            ui.timeUnitMin +
+            ' (' +
+            remaining +
+            ' ' +
+            ui.timeUnitMin +
+            ' ' +
+            ui.shakeRemainingSuffix +
+            ')';
+        }
+      }
+
+      if (heatLevelEl) heatLevelEl.textContent = closestGas.level;
+      if (gasClosestBadge) gasClosestBadge.textContent = 'Gas Mark ' + closestGas.mark;
+
+      // Highlight matching row in Gas Mark table
+      gasRows.forEach((row) => {
+        const m = row.getAttribute('data-afoc-gas-row');
+        const active = m === closestGas.mark;
+        row.classList.toggle('ring-2', active);
+        row.classList.toggle('ring-inset', active);
+        row.classList.toggle('ring-signature-coral', active);
+        row.classList.toggle('bg-signature-cream/50', active);
+        row.classList.toggle('dark:bg-white/10', active);
+      });
+
+      // Active Preset Advisory Panel
+      const activePreset = state.activePresetId ? presetById.get(state.activePresetId) : null;
+      if (presetCard) {
+        if (activePreset) {
+          presetCard.classList.remove('hidden');
+          if (presetIcon) presetIcon.textContent = activePreset.icon;
+          if (presetName) presetName.textContent = activePreset.name;
+          if (presetUsdaPill) {
+            if (activePreset.usdaSafeTempF) {
+              presetUsdaPill.textContent = 'USDA ' + activePreset.usdaSafeTempF + '°F / ' + activePreset.usdaSafeTempC + '°C';
+              presetUsdaPill.classList.remove('hidden');
+            } else {
+              presetUsdaPill.classList.add('hidden');
+            }
+          }
+          if (presetUsdaText) presetUsdaText.textContent = activePreset.usdaLabel;
+          if (presetTip) presetTip.textContent = activePreset.afAdjustment;
+          if (presetFlip) presetFlip.textContent = activePreset.shakeFlip;
+          if (presetLiner) presetLiner.textContent = activePreset.linerNote;
+        } else {
+          presetCard.classList.add('hidden');
+        }
+      }
+
+      // Render Cookware & Liner Safety Verdict
+      const safetyInfo = renderSafety(outF, isTargetAirFryer);
+
+      // Build Plain-Text Copy Summary (zero HTML tags)
+      const lines = [ui.copySummaryTitle];
+      if (isTempOnly) {
+        lines.push(
+          ui.copyConvertedLine +
+            ': ' +
+            outF +
+            '°F = ' +
+            outC +
+            '°C (Conventional) = ' +
+            fanC +
+            '°C (Fan) · Gas Mark ' +
+            closestGas.mark +
+            ' (' +
+            closestGas.level +
+            ')'
+        );
+      } else {
+        const pct = activePreset && activePreset.shakeFlipAtPct ? activePreset.shakeFlipAtPct : 0.5;
+        const shakeAt = Math.max(1, Math.round(outTime * pct));
+        lines.push(ui.copyInputLine + ': ' + inF + '°F (' + inC + '°C) · ' + inTime + ' ' + ui.timeUnitMin);
+        lines.push(
+          ui.copyConvertedLine +
+            ': ' +
+            outF +
+            '°F (' +
+            outC +
+            '°C / Gas Mark ' +
+            closestGas.mark +
+            ') · ' +
+            outTime +
+            ' ' +
+            ui.timeUnitMin
+        );
+        lines.push(ui.copyShakeLine + ': ' + ui.shakeAtPrefix + ' ' + shakeAt + ' ' + ui.timeUnitMin);
+      }
+      if (activePreset) {
+        lines.push(ui.copyPresetLine + ': ' + activePreset.name + ' — ' + activePreset.usdaLabel);
+      }
+      lines.push(ui.copySafetyLine + ': ' + safetyInfo.linerName + ' — ' + safetyInfo.verdict + ' (' + safetyInfo.title + ')');
+      lastCopySummary = lines.join('\n');
+    }
+
+    // Event Listeners
+    modeButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const nextMode = btn.getAttribute('data-afoc-mode');
+        if (!nextMode) return;
+        state.mode = nextMode;
+        updateModeStyles();
+        render();
+      });
+    });
+
+    convDirButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const nextDir = btn.getAttribute('data-afoc-convdir');
+        if (!nextDir) return;
+        state.convDir = nextDir;
+        updateModeStyles();
+        render();
+      });
+    });
+
+    unitButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const nextUnit = btn.getAttribute('data-afoc-unit');
+        if (!nextUnit || nextUnit === state.unit) return;
+        state.unit = nextUnit;
+        updateUnitStyles();
+        syncTempControls();
+        render();
+      });
+    });
+
+    function handleTempInputChange(rawVal) {
+      const parsed = parseFloat(rawVal);
+      if (Number.isNaN(parsed)) return;
+      state.activePresetId = null;
+      updatePresetStyles();
+      if (state.unit === 'C') {
+        state.inputTempF = clamp(cToF(parsed), 200, 500);
+      } else {
+        state.inputTempF = clamp(parsed, 200, 500);
+      }
+      const displayF = Math.round(state.inputTempF);
+      const displayC = fToC(displayF);
+      const closestGas = findClosestGasMark(displayF);
+      if (tempEquiv) {
+        tempEquiv.textContent =
+          state.unit === 'C'
+            ? displayF + '°F · GM ' + closestGas.mark
+            : displayC + '°C · GM ' + closestGas.mark;
+      }
+      render();
+    }
+
+    if (tempSlider) {
+      tempSlider.addEventListener('input', () => {
+        if (tempInput) tempInput.value = tempSlider.value;
+        handleTempInputChange(tempSlider.value);
+      });
+    }
+
+    if (tempInput) {
+      tempInput.addEventListener('input', () => {
+        if (tempSlider) tempSlider.value = tempInput.value;
+        handleTempInputChange(tempInput.value);
+      });
+      tempInput.addEventListener('blur', () => {
+        syncTempControls();
+        render();
+      });
+    }
+
+    gasPickButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const mark = btn.getAttribute('data-afoc-gas-pick');
+        const gm = mark ? gasByMark.get(mark) : null;
+        if (!gm) return;
+        state.activePresetId = null;
+        updatePresetStyles();
+        state.inputTempF = gm.tempF;
+        state.selectedGasMark = gm.mark;
+        syncTempControls();
+        render();
+      });
+    });
+
+    gasRows.forEach((row) => {
+      row.addEventListener('click', () => {
+        const mark = row.getAttribute('data-afoc-gas-row');
+        const tempF = parseFloat(row.getAttribute('data-afoc-gas-tempf') || '350');
+        state.activePresetId = null;
+        updatePresetStyles();
+        state.inputTempF = clamp(tempF, 200, 500);
+        if (mark) state.selectedGasMark = mark;
+        syncTempControls();
+        render();
+      });
+    });
+
+    function handleTimeChange(rawVal) {
+      const parsed = parseInt(rawVal, 10);
+      if (Number.isNaN(parsed)) return;
+      state.inputTimeMin = clamp(parsed, 1, 180);
+      render();
+    }
+
+    if (timeSlider) {
+      timeSlider.addEventListener('input', () => {
+        if (timeInput) timeInput.value = timeSlider.value;
+        handleTimeChange(timeSlider.value);
+      });
+    }
+
+    if (timeInput) {
+      timeInput.addEventListener('input', () => {
+        if (timeSlider) timeSlider.value = timeInput.value;
+        handleTimeChange(timeInput.value);
+      });
+      timeInput.addEventListener('blur', () => {
+        syncTimeControls();
+        render();
+      });
+    }
+
+    presetButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const pid = btn.getAttribute('data-afoc-preset');
+        const preset = pid ? presetById.get(pid) : null;
+        if (!preset) return;
+
+        state.activePresetId = preset.id;
+        if (state.mode === 'temp-only') {
+          state.mode = 'oven-to-af';
+          updateModeStyles();
+        }
+
+        if (state.mode === 'af-to-oven') {
+          state.inputTempF = preset.airFryerTempF;
+          state.inputTimeMin = preset.airFryerTimeMin;
+        } else {
+          state.inputTempF = preset.ovenTempF;
+          state.inputTimeMin = preset.ovenTimeMin;
+        }
+
+        syncTempControls();
+        syncTimeControls();
+        updatePresetStyles();
+        render();
+      });
+    });
+
+    linerButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const lid = btn.getAttribute('data-afoc-liner');
+        if (!lid || !linerById.has(lid)) return;
+        state.linerId = lid;
+        updateLinerStyles();
+        render();
+      });
+    });
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        state.mode = 'oven-to-af';
+        state.convDir = 'to-fan';
+        state.unit = payload.defaultUnit || 'F';
+        state.inputTempF = 400;
+        state.inputTimeMin = 25;
+        state.activePresetId = null;
+        state.linerId = 'none';
+        updateModeStyles();
+        updateUnitStyles();
+        updatePresetStyles();
+        updateLinerStyles();
+        syncTempControls();
+        syncTimeControls();
+        render();
+      });
+    }
+
+    if (copyBtn && copyLabel) {
+      copyBtn.addEventListener('click', () => {
+        if (!navigator.clipboard || !lastCopySummary) return;
+        navigator.clipboard.writeText(lastCopySummary).then(() => {
+          copyLabel.textContent = ui.copiedBtn || 'Copied ✓';
+          setTimeout(() => {
+            copyLabel.textContent = ui.copyBtn || 'Copy';
+          }, 2200);
+        }).catch(() => {});
+      });
+    }
+
+    // Initial render
+    updateModeStyles();
+    updateUnitStyles();
+    updatePresetStyles();
+    updateLinerStyles();
+    syncTempControls();
+    syncTimeControls();
+    render();
+  })();
+</script>

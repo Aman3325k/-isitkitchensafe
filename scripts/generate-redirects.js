@@ -16,6 +16,12 @@ import path from 'path';
 const redirectsPath = path.resolve('redirects.json');
 const publicRedirectsPath = path.resolve('public', '_redirects');
 const functionsMapPath = path.resolve('functions', '_redirects-map.js');
+const distPath = path.resolve('dist');
+
+// Clean dist directory before build to avoid stale Vite/Rollup prerender chunk collisions on Windows
+if (fs.existsSync(distPath)) {
+  fs.rmSync(distPath, { recursive: true, force: true });
+}
 
 const rawRedirects = JSON.parse(fs.readFileSync(redirectsPath, 'utf8'));
 

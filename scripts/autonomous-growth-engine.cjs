@@ -208,7 +208,8 @@ const TOOLS_REGISTRY = [
   { slug: 'kitchen-symbol-decoder', name: 'Kitchen Bottom Symbol Decoder & Plastic Resin Code Lookup (#1-#7)', category: 'Consumer Kitchen Safety', component: 'KitchenSymbolDecoder.astro', dataFile: 'kitchen-symbol-decoder-data.json' },
   { slug: 'leftover-shelf-life-calculator', name: 'USDA Leftover & Fridge Shelf-Life Countdown Calculator', category: 'Consumer Kitchen Safety', component: 'LeftoverShelfLifeCalculator.astro', dataFile: 'leftover-shelf-life-data.json' },
   { slug: 'meat-thawing-calculator', name: 'USDA Meat & Turkey Safe Thawing Time Calculator', category: 'Consumer Kitchen Safety', component: 'MeatThawingCalculator.astro', dataFile: 'meat-thawing-calculator-data.json' },
-  { slug: 'plastic-code-checker', name: 'Plastic Recycling Code (#1-#7) Kitchen Safety Checker', category: 'Consumer Kitchen Safety', component: 'PlasticCodeChecker.astro', dataFile: 'plastic-code-checker-data.json' }
+  { slug: 'plastic-code-checker', name: 'Plastic Recycling Code (#1-#7) Kitchen Safety Checker', category: 'Consumer Kitchen Safety', component: 'PlasticCodeChecker.astro', dataFile: 'plastic-code-checker-data.json' },
+  { slug: 'air-fryer-oven-converter', name: 'Air Fryer to Oven Conversion Calculator & Gas Mark Chart', category: 'Consumer Kitchen Safety', component: 'AirFryerOvenConverter.astro', dataFile: 'air-fryer-oven-converter-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -507,7 +508,8 @@ function auditDatasets() {
     'kitchen-symbol-decoder-data.json',
     'leftover-shelf-life-data.json',
     'meat-thawing-calculator-data.json',
-    'plastic-code-checker-data.json'
+    'plastic-code-checker-data.json',
+    'air-fryer-oven-converter-data.json'
 ];
 
   const datasetStats = {};
