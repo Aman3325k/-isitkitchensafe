@@ -4,7 +4,7 @@ A static kitchen safety reference platform and interactive consumer tool suite a
 
 ## Overview
 
-IsItKitchenSafe delivers **10,782+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **188 interactive tools** (including **37 Google-indexed Everyday Consumer Kitchen Safety Tools**), **26 evergreen blog guides × 5 languages (130 localized articles)**, **63 high-intent brand comparisons × 5 languages (315 localized pages)**, **WCAG 2.1 AA accessibility**, and transparent E-E-A-T verification standards.
+IsItKitchenSafe delivers **10,807+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **190 interactive tools** (including **39 Google-indexed Everyday Consumer Kitchen Safety Tools**), **29 evergreen blog guides × 5 languages (145 localized articles)**, **63 high-intent brand comparisons × 5 languages (315 localized pages)**, **WCAG 2.1 AA accessibility**, and transparent E-E-A-T verification standards.
 
 ## Tech Stack
 - **Framework**: Astro.js (MPA static generation)
@@ -95,14 +95,14 @@ node scripts/autonomous-growth-engine.cjs --datasets   # Multilingual data asset
 # Run all-day autonomous background daemon (default 30m heartbeat)
 npm run ops:daemon
 
-# Run full master cycle (audits + 10,782+-page static build + link verification)
+# Run full master cycle (audits + 10,807+-page static build + link verification)
 npm run ops:engine
 ```
 
 ## Scale & Metrics
-- **10,782+ Static Pages** across 11 verticals and 5 languages (EN, ES, PT, ZH-CN, JA)
-- **188 Interactive Tools** with 100% 5-language parity, including **37 Google-indexed Everyday Consumer Utilities** (`src/data/consumer-tools-allowlist.json`)
-- **26 Evergreen Guides × 5 Languages (130 Articles)** with 100% slug parity + **63 High-Intent Brand Comparisons × 5 Languages (315 Pages)**
+- **10,807+ Static Pages** across 11 verticals and 5 languages (EN, ES, PT, ZH-CN, JA)
+- **190 Interactive Tools** with 100% 5-language parity, including **39 Google-indexed Everyday Consumer Utilities** (`src/data/consumer-tools-allowlist.json`)
+- **29 Evergreen Guides × 5 Languages (145 Articles)** with 100% slug parity + **63 High-Intent Brand Comparisons × 5 Languages (315 Pages)**
 - **WCAG 2.1 AA Accessibility** (`:focus-visible`, `prefers-reduced-motion`, ARIA landmarks) + **Live Instant Search** across `/tools/`, `/blog/`, `/how-long/`, `/refreeze/`, `/compare/`, `/material/`, and `/what-happens/`
 - **0 Broken Links** (1,000,000+ internal hrefs audited with 100% resolution)
 - **Verified XML Sitemaps & Real-Time Indexing** (`sitemap-index.xml`, `sitemap-0.xml`, `scripts/ping-indexnow.cjs`)
