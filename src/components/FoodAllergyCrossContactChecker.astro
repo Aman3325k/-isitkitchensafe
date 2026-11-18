@@ -1,0 +1,1499 @@
+---
+import rawData from '../data/food-allergy-cross-contact-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+import { useTranslatedPath } from '../i18n/utils';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+const translatePath = useTranslatedPath(lang);
+
+const dishwasherUrl = translatePath('/tools/dishwasher-detergent-dosage-calculator/');
+const cleanerMixingUrl = translatePath('/tools/cleaner-mixing-danger-checker/');
+const fridgeZoneUrl = translatePath('/tools/fridge-organization-zone-planner/');
+const methodologyUrl = translatePath('/methodology/');
+const allToolsUrl = translatePath('/tools/');
+
+type RiskLevel = 'cannot-decontaminate' | 'high-risk-scrub' | 'safe-after-wash';
+type CanShareType = 'no-dedicated-only' | 'caution-strict-wash' | 'yes-with-soap-wash';
+type SubRiskLevel = 'high' | 'moderate' | 'low';
+
+interface LocalizedAllergen {
+  id: string;
+  icon: string;
+  airborneRisk: SubRiskLevel;
+  oilFilmRisk: SubRiskLevel;
+  fdaTop9: boolean;
+  name: string;
+  shortName: string;
+  persistenceTag: string;
+  riskHeadline: string;
+  persistenceFact: string;
+  specialPrecaution: string;
+  checklistNote: string;
+}
+
+interface LocalizedSurface {
+  id: string;
+  icon: string;
+  riskLevel: RiskLevel;
+  canShare: CanShareType;
+  heatDestroysAllergen: boolean;
+  keywords: string;
+  name: string;
+  shortLabel: string;
+  verdictHeadline: string;
+  whyRisky: string;
+  cleaningSteps: string[];
+  dedicatedRecommendation: string;
+  anaphylaxisNote: string;
+}
+
+const mythBanner =
+  (rawData.mythBanner as Record<string, { badge: string; headline: string; body: string }>)[lang] ||
+  rawData.mythBanner.en;
+
+const localizedAllergens: LocalizedAllergen[] = rawData.allergens.map((item) => {
+  const tr = (item.i18n as Record<string, any>)[lang] || item.i18n.en;
+  return {
+    id: item.id,
+    icon: item.icon,
+    airborneRisk: item.airborneRisk as SubRiskLevel,
+    oilFilmRisk: item.oilFilmRisk as SubRiskLevel,
+    fdaTop9: Boolean(item.fdaTop9),
+    name: tr.name,
+    shortName: tr.shortName,
+    persistenceTag: tr.persistenceTag,
+    riskHeadline: tr.riskHeadline,
+    persistenceFact: tr.persistenceFact,
+    specialPrecaution: tr.specialPrecaution,
+    checklistNote: tr.checklistNote
+  };
+});
+
+const localizedSurfaces: LocalizedSurface[] = rawData.surfaces.map((item) => {
+  const tr = (item.i18n as Record<string, any>)[lang] || item.i18n.en;
+  return {
+    id: item.id,
+    icon: item.icon,
+    riskLevel: item.riskLevel as RiskLevel,
+    canShare: item.canShare as CanShareType,
+    heatDestroysAllergen: Boolean(item.heatDestroysAllergen),
+    keywords: `${item.keywords} ${tr.name} ${tr.shortLabel} ${tr.verdictHeadline} ${tr.whyRisky}`.toLowerCase(),
+    name: tr.name,
+    shortLabel: tr.shortLabel,
+    verdictHeadline: tr.verdictHeadline,
+    whyRisky: tr.whyRisky,
+    cleaningSteps: tr.cleaningSteps as string[],
+    dedicatedRecommendation: tr.dedicatedRecommendation,
+    anaphylaxisNote: tr.anaphylaxisNote
+  };
+});
+
+const localizedFaqs: Array<{ question: string; answer: string }> =
+  (rawData.faqs as Record<string, Array<{ question: string; answer: string }>>)[lang] ||
+  rawData.faqs.en;
+
+const counts = {
+  all: localizedSurfaces.length,
+  cannotDecontaminate: localizedSurfaces.filter((s) => s.riskLevel === 'cannot-decontaminate').length,
+  highRiskScrub: localizedSurfaces.filter((s) => s.riskLevel === 'high-risk-scrub').length,
+  safeAfterWash: localizedSurfaces.filter((s) => s.riskLevel === 'safe-after-wash').length
+};
+
+interface UiDict {
+  ariaLabel: string;
+  step1Badge: string;
+  step1Title: string;
+  step1Sub: string;
+  copyBtn: string;
+  copiedBtn: string;
+  printBtn: string;
+  resetBtn: string;
+  allergenAlertBadge: string;
+  airborneLabel: string;
+  oilFilmLabel: string;
+  fdaTop9Tag: string;
+  protocolMultiTag: string;
+  riskHigh: string;
+  riskModerate: string;
+  riskLow: string;
+  precautionLabel: string;
+  dashboardBadge: string;
+  heatMythPill: string;
+  whyRiskyLabel: string;
+  protocolStepsLabel: string;
+  dedicatedLabel: string;
+  anaphylaxisCalloutLabel: string;
+  catalogTitle: string;
+  catalogSub: string;
+  searchLabel: string;
+  searchPlaceholder: string;
+  clearSearchBtn: string;
+  filterAll: string;
+  filterNeverShare: string;
+  filterStrictScrub: string;
+  filterSafeWash: string;
+  showingPrefix: string;
+  showingOf: string;
+  showingSuffix: string;
+  noResultsTitle: string;
+  noResultsSub: string;
+  badgeNeverShare: string;
+  badgeStrictScrub: string;
+  badgeSafeWash: string;
+  shareNo: string;
+  shareCaution: string;
+  shareYes: string;
+  cardInspectHint: string;
+  cardSelectedLabel: string;
+  checklistHeader: string;
+  checklistCoreRules: string[];
+  checklistSurfacePrefix: string;
+  checklistAllergenPrefix: string;
+  relatedHeading: string;
+  relatedDishTag: string;
+  relatedDishTitle: string;
+  relatedDishDesc: string;
+  relatedCleanerTag: string;
+  relatedCleanerTitle: string;
+  relatedCleanerDesc: string;
+  relatedFridgeTag: string;
+  relatedFridgeTitle: string;
+  relatedFridgeDesc: string;
+  methodologyStripTitle: string;
+  methodologyStripPrefix: string;
+  methodologyLabel: string;
+  cleanerQuickLabel: string;
+  allToolsLabel: string;
+  faqTitle: string;
+}
+
+const UI: Record<SupportedLanguage, UiDict> = {
+  en: {
+    ariaLabel: 'Kitchen Food Allergy and Cross-Contact Cleaning & Cookware Safety Checker',
+    step1Badge: 'Step 1 · FDA FASTER Act Top 9 + Anaphylaxis Protocol',
+    step1Title: 'Select the Allergen You Are Protecting Against',
+    step1Sub: 'Pick an allergen below to see its unique kitchen persistence risk (airborne flour, aerosolized steam, or sticky oils), then click any appliance or surface card to load its exact FDA/FARE decontamination protocol.',
+    copyBtn: 'Copy Guest Allergy Prep Checklist',
+    copiedBtn: 'Checklist Copied ✓',
+    printBtn: 'Print Allergy-Safe Kitchen Plan',
+    resetBtn: 'Reset',
+    allergenAlertBadge: 'Allergen-Specific Risk Alert',
+    airborneLabel: 'Airborne / Steam Risk',
+    oilFilmLabel: 'Sticky Oil / Residue Risk',
+    fdaTop9Tag: 'FDA Top 9 Major Allergen',
+    protocolMultiTag: 'Zero-Tolerance Anaphylaxis Protocol',
+    riskHigh: 'High',
+    riskModerate: 'Moderate',
+    riskLow: 'Low',
+    precautionLabel: 'Key Kitchen Precaution',
+    dashboardBadge: 'FDA / FARE Surface Decontamination Protocol',
+    heatMythPill: 'Heat Destroys Allergen: NO',
+    whyRiskyLabel: 'Why This Surface Is Risky',
+    protocolStepsLabel: 'Exact Step-by-Step Cleaning & Decontamination Protocol',
+    dedicatedLabel: 'Dedicated vs. Shared Recommendation',
+    anaphylaxisCalloutLabel: 'Severe Allergy / Anaphylaxis Guidance',
+    catalogTitle: '10 Shared Kitchen Appliances & Surfaces: Cross-Contact Risk Matrix',
+    catalogSub: 'Click any card to inspect its complete step-by-step decontamination protocol above, or filter by whether it can be safely shared.',
+    searchLabel: 'Search kitchen appliance or surface',
+    searchPlaceholder: 'Search toaster, air fryer, cast iron, wooden board, sponge, oven, sanitizer...',
+    clearSearchBtn: 'Clear Filters',
+    filterAll: 'All',
+    filterNeverShare: 'Never Share / Dedicated Only',
+    filterStrictScrub: 'Strict Soap Scrub Required',
+    filterSafeWash: 'Safe After Proper Wash',
+    showingPrefix: 'Showing',
+    showingOf: 'of',
+    showingSuffix: 'surfaces & appliances',
+    noResultsTitle: 'No matching kitchen appliances or surfaces found',
+    noResultsSub: 'Try searching a broader term like toaster, fryer, wood, cast iron, silicone, sponge, or oven.',
+    badgeNeverShare: 'Never Share / Dedicated Only',
+    badgeStrictScrub: 'Strict Soap Scrub Required',
+    badgeSafeWash: 'Safe After Proper Wash',
+    shareNo: 'Dedicated Only',
+    shareCaution: 'Caution: Strict Wash / Barrier',
+    shareYes: 'Safe After Soap Wash',
+    cardInspectHint: 'Click to view full FDA/FARE protocol ↑',
+    cardSelectedLabel: 'Viewing Protocol ↑',
+    checklistHeader: 'IsItKitchenSafe — Guest Allergy-Safe Kitchen Prep Checklist (FDA / FARE / Celiac Grounded)',
+    checklistCoreRules: [
+      '1. MYTH CHECK: Heat (375–600°F), boiling, freezing, and alcohol hand sanitizer do NOT destroy food allergens—only physical soap + water + friction removes them.',
+      '2. HANDS & COUNTERS: Wash hands and scrub counters with warm dish soap + water + fresh disposable paper towels (never sink sponges or reused dishcloths).',
+      '3. NEVER SHARE: Pop-up slot toasters, used deep-fryer oil, porous wooden cutting boards/spoons, or household sink sponges.',
+      '4. COOK SAFE FIRST: Prepare the allergen-free meal FIRST in a clean zone using freshly dishwashed stainless steel/glass cookware, convection fan OFF, TOP oven rack sealed with fresh foil.'
+    ],
+    checklistSurfacePrefix: 'Selected Appliance/Surface Protocol',
+    checklistAllergenPrefix: 'Active Allergen Focus',
+    relatedHeading: 'Related Kitchen Hygiene & Cleaning Safety Tools',
+    relatedDishTag: 'Dishwasher Cleaning Power',
+    relatedDishTitle: 'Dishwasher Detergent Dosage Calculator →',
+    relatedDishDesc: 'Dial in the exact detergent dose for your water hardness so plates, glasses, and stainless cookware rinse free of food films.',
+    relatedCleanerTag: 'Chemical Mixing Safety',
+    relatedCleanerTitle: 'Cleaner Mixing Danger Checker →',
+    relatedCleanerDesc: 'Verify before combining bleach, vinegar, dish soap, or degreasers so kitchen decontamination stays free of toxic fumes.',
+    relatedFridgeTag: 'Safe Allergen-Free Storage',
+    relatedFridgeTitle: 'Fridge Organization Zone Planner →',
+    relatedFridgeDesc: 'Store sealed allergen-free foods on the top shelf away from drips, raw proteins, and cross-contact spills.',
+    methodologyStripTitle: 'Grounded in FDA FASTER Act, FARE & Celiac Disease Foundation Science',
+    methodologyStripPrefix: 'Allergen persistence timelines, surfactant vs. sanitizer evidence (Perry et al., JACI), and decontamination steps follow US FDA, FARE, and Celiac Disease Foundation guidance. Read our',
+    methodologyLabel: 'Methodology',
+    cleanerQuickLabel: 'Cleaner Mixing Checker',
+    allToolsLabel: 'All Kitchen Tools →',
+    faqTitle: 'Frequently Asked Questions: Food Allergy Cross-Contact & Decontamination'
+  },
+  es: {
+    ariaLabel: 'Verificador de Alergias Alimentarias y Descontaminación de Contacto Cruzado en Cocina',
+    step1Badge: 'Paso 1 · Top 9 Alérgenos FDA FASTER Act + Protocolo Anafilaxia',
+    step1Title: 'Selecciona el Alérgeno del que Debes Proteger la Cocina',
+    step1Sub: 'Elige un alérgeno para ver su riesgo específico de persistencia (harina en el aire, vapor o aceites pegajosos) y pulsa cualquier tarjeta de electrodoméstico o superficie para cargar su protocolo exacto FDA/FARE.',
+    copyBtn: 'Copiar Checklist para Invitados con Alergia',
+    copiedBtn: 'Checklist Copiada ✓',
+    printBtn: 'Imprimir Plan de Cocina Segura',
+    resetBtn: 'Restablecer',
+    allergenAlertBadge: 'Alerta Específica del Alérgeno',
+    airborneLabel: 'Riesgo Aéreo / Vapor',
+    oilFilmLabel: 'Riesgo de Aceite / Residuo',
+    fdaTop9Tag: 'Top 9 Alérgeno Principal FDA',
+    protocolMultiTag: 'Protocolo Anafilaxia Tolerancia Cero',
+    riskHigh: 'Alto',
+    riskModerate: 'Moderado',
+    riskLow: 'Bajo',
+    precautionLabel: 'Precaución Clave en Cocina',
+    dashboardBadge: 'Protocolo FDA / FARE de Descontaminación',
+    heatMythPill: '¿El Calor Destruye el Alérgeno?: NO',
+    whyRiskyLabel: 'Por Qué Esta Superficie Es Riesgosa',
+    protocolStepsLabel: 'Protocolo Paso a Paso de Limpieza y Descontaminación',
+    dedicatedLabel: 'Recomendación: Exclusivo vs. Compartido',
+    anaphylaxisCalloutLabel: 'Guía para Alergia Grave / Anafilaxia',
+    catalogTitle: '10 Electrodomésticos y Superficies Compartidas: Matriz de Contacto Cruzado',
+    catalogSub: 'Pulsa cualquier tarjeta para ver arriba su protocolo completo paso a paso, o filtra según si puede compartirse con seguridad.',
+    searchLabel: 'Buscar electrodoméstico o superficie de cocina',
+    searchPlaceholder: 'Busca tostadora, freidora de aire, hierro fundido, madera, esponja, horno...',
+    clearSearchBtn: 'Limpiar Filtros',
+    filterAll: 'Todos',
+    filterNeverShare: 'Nunca Compartir / Exclusivo',
+    filterStrictScrub: 'Requiere Fregado Estricto',
+    filterSafeWash: 'Seguro Tras Buen Lavado',
+    showingPrefix: 'Mostrando',
+    showingOf: 'de',
+    showingSuffix: 'superficies y aparatos',
+    noResultsTitle: 'No encontramos superficies o aparatos coincidentes',
+    noResultsSub: 'Prueba con términos como tostadora, freidora, madera, hierro, silicona, esponja u horno.',
+    badgeNeverShare: 'Nunca Compartir / Exclusivo',
+    badgeStrictScrub: 'Fregado Estricto con Jabón',
+    badgeSafeWash: 'Seguro Tras Buen Lavado',
+    shareNo: 'Solo Exclusivo',
+    shareCaution: 'Precaución: Lavado Estricto / Barrera',
+    shareYes: 'Seguro Tras Lavar con Jabón',
+    cardInspectHint: 'Pulsa para ver el protocolo completo ↑',
+    cardSelectedLabel: 'Viendo Protocolo ↑',
+    checklistHeader: 'IsItKitchenSafe — Checklist de Cocina Segura para Invitados con Alergia (FDA / FARE / Celiaquía)',
+    checklistCoreRules: [
+      '1. MITO CIENTÍFICO: Calor (190–315 °C), hervir, congelar y el gel hidroalcohólico NO destruyen alérgenos; solo el jabón + agua + fricción los elimina.',
+      '2. MANOS Y ENCIMERAS: Lava manos y friega encimeras con agua tibia, jabón lavavajillas y papel desechable nuevo (nunca esponjas ni paños usados).',
+      '3. NUNCA COMPARTIR: Tostadoras de ranura, aceite de freidora usado, tablas/cucharas de madera porosa ni esponjas del fregadero.',
+      '4. COCINA PRIMERO LO SEGURO: Prepara primero el plato sin alérgenos con acero inoxidable/vidrio recién lavado, horno sin ventilador y rejilla superior sellada con aluminio.'
+    ],
+    checklistSurfacePrefix: 'Protocolo de Superficie Seleccionada',
+    checklistAllergenPrefix: 'Alérgeno Seleccionado',
+    relatedHeading: 'Herramientas Relacionadas de Higiene y Limpieza en Cocina',
+    relatedDishTag: 'Eficacia del Lavavajillas',
+    relatedDishTitle: 'Calculadora de Dosis de Detergente de Lavavajillas →',
+    relatedDishDesc: 'Ajusta la dosis exacta según la dureza del agua para que platos y acero inoxidable queden libres de residuos.',
+    relatedCleanerTag: 'Seguridad al Limpiar',
+    relatedCleanerTitle: 'Verificador de Peligro al Mezclar Limpiadores →',
+    relatedCleanerDesc: 'Comprueba antes de combinar cloro, vinagre, jabón o desengrasantes para evitar gases tóxicos.',
+    relatedFridgeTag: 'Almacenamiento Seguro',
+    relatedFridgeTitle: 'Planificador de Zonas del Refrigerador →',
+    relatedFridgeDesc: 'Guarda alimentos sin alérgenos sellados en el estante superior lejos de goteos y contaminación cruzada.',
+    methodologyStripTitle: 'Basado en FDA FASTER Act, FARE y la Celiac Disease Foundation',
+    methodologyStripPrefix: 'Tiempos de persistencia de alérgenos, evidencia sobre jabón frente a alcohol (Perry et al., JACI) y protocolos verificados con FDA, FARE y Celiac Disease Foundation. Consulta nuestra',
+    methodologyLabel: 'Metodología',
+    cleanerQuickLabel: 'Mezcla de Limpiadores',
+    allToolsLabel: 'Todas las Herramientas →',
+    faqTitle: 'Preguntas Frecuentes: Alergias Alimentarias y Contacto Cruzado'
+  },
+  pt: {
+    ariaLabel: 'Verificador de Alergias Alimentares e Descontaminação de Contato Cruzado na Cozinha',
+    step1Badge: 'Passo 1 · Top 9 Alérgenos FDA FASTER Act + Protocolo Anafilaxia',
+    step1Title: 'Selecione o Alérgeno Contra o Qual Você Está Protegendo a Cozinha',
+    step1Sub: 'Escolha um alérgeno abaixo para ver o risco específico de persistência (farinha no ar, vapor ou óleos pegajosos) e clique em qualquer aparelho ou superfície para abrir o protocolo FDA/FARE.',
+    copyBtn: 'Copiar Checklist para Convidados Alérgicos',
+    copiedBtn: 'Checklist Copiada ✓',
+    printBtn: 'Imprimir Plano de Cozinha Segura',
+    resetBtn: 'Redefinir',
+    allergenAlertBadge: 'Alerta Específico do Alérgeno',
+    airborneLabel: 'Risco no Ar / Vapor',
+    oilFilmLabel: 'Risco de Óleo / Resíduo',
+    fdaTop9Tag: 'Top 9 Alérgeno Principal FDA',
+    protocolMultiTag: 'Protocolo Anafilaxia Tolerância Zero',
+    riskHigh: 'Alto',
+    riskModerate: 'Moderado',
+    riskLow: 'Baixo',
+    precautionLabel: 'Precaução Essencial na Cozinha',
+    dashboardBadge: 'Protocolo FDA / FARE de Descontaminação',
+    heatMythPill: 'Calor Destrói Alérgeno?: NÃO',
+    whyRiskyLabel: 'Por Que Esta Superfície É Arriscada',
+    protocolStepsLabel: 'Protocolo Passo a Passo de Limpeza e Descontaminação',
+    dedicatedLabel: 'Recomendação: Dedicado vs. Compartilhado',
+    anaphylaxisCalloutLabel: 'Orientação para Alergia Grave / Anafilaxia',
+    catalogTitle: '10 Aparelhos e Superfícies Compartilhadas: Matriz de Contato Cruzado',
+    catalogSub: 'Clique em qualquer cartão para abrir o protocolo passo a passo completo acima, ou filtre pelo nível de segurança.',
+    searchLabel: 'Buscar aparelho ou superfície da cozinha',
+    searchPlaceholder: 'Busque torradeira, air fryer, ferro fundido, madeira, esponja, forno...',
+    clearSearchBtn: 'Limpar Filtros',
+    filterAll: 'Todos',
+    filterNeverShare: 'Nunca Compartilhar / Dedicado',
+    filterStrictScrub: 'Exige Lavagem Rigorosa',
+    filterSafeWash: 'Seguro Após Lavagem Correta',
+    showingPrefix: 'Mostrando',
+    showingOf: 'de',
+    showingSuffix: 'superfícies e aparelhos',
+    noResultsTitle: 'Nenhum aparelho ou superfície encontrado',
+    noResultsSub: 'Tente termos mais amplos como torradeira, air fryer, madeira, ferro, silicone, esponja ou forno.',
+    badgeNeverShare: 'Nunca Compartilhar / Dedicado',
+    badgeStrictScrub: 'Lavagem Rigorosa com Detergente',
+    badgeSafeWash: 'Seguro Após Lavagem Correta',
+    shareNo: 'Somente Dedicado',
+    shareCaution: 'Cuidado: Lavagem Rigorosa / Barreira',
+    shareYes: 'Seguro Após Lavar com Detergente',
+    cardInspectHint: 'Clique para ver protocolo completo ↑',
+    cardSelectedLabel: 'Visualizando Protocolo ↑',
+    checklistHeader: 'IsItKitchenSafe — Checklist de Cozinha Segura para Convidados com Alergia (FDA / FARE / Celíacos)',
+    checklistCoreRules: [
+      '1. MITO CIENTÍFICO: Calor (190–315 °C), fervura, congelamento e álcool em gel NÃO destroem alérgenos — apenas sabão/detergente + água + fricção removem proteínas.',
+      '2. MÃOS E BANCADAS: Lave mãos e bancadas com água morna, detergente e papel-toalha descartável novo (nunca esponjas da pia ou panos reutilizados).',
+      '3. NUNCA COMPARTILHAR: Torradeiras de fenda, óleo de fritura usado, tábuas/colheres de madeira porosa ou esponjas comuns.',
+      '4. PREPARE O SEGURO PRIMEIRO: Cozinhe a refeição segura PRIMEIRO em aço inox/vidro recém-lavado, forno sem ventoinha e prateleira superior vedada com papel-alumínio.'
+    ],
+    checklistSurfacePrefix: 'Protocolo da Superfície Selecionada',
+    checklistAllergenPrefix: 'Alérgeno Selecionado',
+    relatedHeading: 'Ferramentas Relacionadas de Higiene e Limpeza na Cozinha',
+    relatedDishTag: 'Eficiência da Lava-Louças',
+    relatedDishTitle: 'Calculadora de Dose de Detergente para Lava-Louças →',
+    relatedDishDesc: 'Calcule a dose exata para a dureza da água e garanta pratos e aço inox totalmente livres de resíduos.',
+    relatedCleanerTag: 'Segurança Química',
+    relatedCleanerTitle: 'Verificador de Perigo ao Misturar Produtos de Limpeza →',
+    relatedCleanerDesc: 'Confirme antes de combinar água sanitária, vinagre, detergente ou desengordurantes para evitar gases tóxicos.',
+    relatedFridgeTag: 'Armazenamento Seguro',
+    relatedFridgeTitle: 'Planejador de Zonas da Geladeira →',
+    relatedFridgeDesc: 'Guarde alimentos sem alérgenos vedados na prateleira superior longe de pingos e contato cruzado.',
+    methodologyStripTitle: 'Baseado na Lei FDA FASTER Act, FARE e Celiac Disease Foundation',
+    methodologyStripPrefix: 'Prazos de persistência de alérgenos, estudos sobre detergente vs. álcool (Perry et al., JACI) e protocolos seguem diretrizes da FDA, FARE e Celiac Disease Foundation. Veja nossa',
+    methodologyLabel: 'Metodologia',
+    cleanerQuickLabel: 'Mistura de Limpeza',
+    allToolsLabel: 'Todas as Ferramentas →',
+    faqTitle: 'Perguntas Frequentes: Alergia Alimentar e Contato Cruzado'
+  },
+  'zh-cn': {
+    ariaLabel: '厨房食物过敏原与交叉接触清洁安全检查器',
+    step1Badge: '第 1 步 · 美国 FDA 九大主要过敏原 + 休克级防护',
+    step1Title: '选择需要重点防护的食物过敏原',
+    step1Sub: '点选下方过敏原，即可查看其专属厨房残留特性（空气悬浮面粉、烹饪蒸汽或黏性油脂），再点击任意厨电或表面卡片查看 FDA/FARE 标准除敏清洁步骤。',
+    copyBtn: '复制待客过敏备餐清单',
+    copiedBtn: '备餐清单已复制 ✓',
+    printBtn: '打印过敏安全厨房方案',
+    resetBtn: '重置',
+    allergenAlertBadge: '特定过敏原风险预警',
+    airborneLabel: '空气 / 蒸汽传播风险',
+    oilFilmLabel: '黏性油脂 / 蛋白残留风险',
+    fdaTop9Tag: 'FDA 九大主要过敏原',
+    protocolMultiTag: '零容忍过敏性休克防护',
+    riskHigh: '高风险',
+    riskModerate: '中风险',
+    riskLow: '低风险',
+    precautionLabel: '厨房核心防护要点',
+    dashboardBadge: 'FDA / FARE 表面除敏清洁方案',
+    heatMythPill: '高温能破坏过敏原吗：不能',
+    whyRiskyLabel: '为何此厨具/表面风险高',
+    protocolStepsLabel: '标准分步清洁与防交叉接触操作指南',
+    dedicatedLabel: '专用 vs. 共用建议',
+    anaphylaxisCalloutLabel: '重度过敏 / 过敏性休克特别提醒',
+    catalogTitle: '10 类常见厨房共享电器与表面：交叉接触风险矩阵',
+    catalogSub: '点击任意卡片即可在上方查看完整除敏步骤，或按“严禁共用 / 须严格刷洗 / 洗净可共用”快速筛选。',
+    searchLabel: '搜索厨房电器或表面',
+    searchPlaceholder: '搜索烤面包机、空气炸锅、铸铁锅、木砧板、海绵、烤箱、洗手液...',
+    clearSearchBtn: '清除筛选',
+    filterAll: '全部',
+    filterNeverShare: '严禁共用 / 必须专用',
+    filterStrictScrub: '须严格洗洁精刷洗',
+    filterSafeWash: '彻底洗净后可共用',
+    showingPrefix: '当前显示',
+    showingOf: '/',
+    showingSuffix: '类厨房电器与表面',
+    noResultsTitle: '未找到匹配的厨房电器或表面',
+    noResultsSub: '试试更宽泛的关键词，如：烤面包机、炸锅、木砧板、铸铁锅、硅胶、海绵或烤箱。',
+    badgeNeverShare: '严禁共用 / 必须专用',
+    badgeStrictScrub: '须严格洗洁精刷洗',
+    badgeSafeWash: '彻底洗净后可共用',
+    shareNo: '仅限专人专用',
+    shareCaution: '谨慎：须彻底刷洗或隔绝',
+    shareYes: '洗洁精洗净后安全',
+    cardInspectHint: '点击查看完整 FDA/FARE 方案 ↑',
+    cardSelectedLabel: '正在查看此方案 ↑',
+    checklistHeader: 'IsItKitchenSafe — 待客过敏安全厨房备餐清单（FDA / FARE / 乳糜泻科学依据）',
+    checklistCoreRules: [
+      '1. 打破误区：高温（190–315°C）、煮沸、冷冻与酒精免洗洗手液均无法破坏食物过敏原——唯有洗洁精 + 热水 + 物理摩擦可清除。',
+      '2. 双手与台面：用肥皂/洗洁精 + 温水 + 全新一次性厨房纸彻底擦洗双手与操作台（严禁用普通海绵或旧抹布）。',
+      '3. 严禁共用：弹出式烤面包机、用过的油炸锅热油、多孔木砧板/木勺、日常水槽海绵。',
+      '4. 最先烹制安全餐：优先使用洗净的不锈钢/玻璃锅具烹制无过敏原餐食，共用烤箱须关热风、放最上层并用新锡纸密封。'
+    ],
+    checklistSurfacePrefix: '当前选中表面/电器方案',
+    checklistAllergenPrefix: '当前防护过敏原',
+    relatedHeading: '相关厨房清洁与食品安全工具',
+    relatedDishTag: '洗碗机去污力',
+    relatedDishTitle: '洗碗机洗涤剂精准用量计算器 →',
+    relatedDishDesc: '按水质硬度计算精准洗碗粉/洗碗块用量，确保盘碗和不锈钢锅具无食物膜残留。',
+    relatedCleanerTag: '清洁剂混用安全',
+    relatedCleanerTitle: '清洁剂混用危险检查器 →',
+    relatedCleanerDesc: '在搭配使用漂白水、白醋、洗洁精或去油剂前快速排查，避免产生有毒气体。',
+    relatedFridgeTag: '过敏安全分区储存',
+    relatedFridgeTitle: '冰箱分区收纳规划器 →',
+    relatedFridgeDesc: '将密封好的无过敏原食材置于上层安全区，远离生鲜汁液滴漏与交叉接触。',
+    methodologyStripTitle: '依据美国 FDA FASTER 法案、FARE 与乳糜泻基金会科学指南',
+    methodologyStripPrefix: '过敏原悬浮时长、表面活性剂对比酒精洗手液的临床证据（Perry 等，JACI）及除敏流程均对照 FDA、FARE 与 Celiac Disease Foundation 核验。查阅我们的',
+    methodologyLabel: '科学方法论',
+    cleanerQuickLabel: '清洁剂混用检查',
+    allToolsLabel: '全部厨房工具 →',
+    faqTitle: '常见问题：食物过敏交叉接触与厨房除敏清洁'
+  },
+  ja: {
+    ariaLabel: 'キッチン食物アレルギー・コンタミネーション防止＆洗浄チェッカー',
+    step1Badge: 'ステップ1 · 米国FDA主要9アレルゲン＋アナフィラキシー手順',
+    step1Title: '対策する食物アレルゲンを選択してください',
+    step1Sub: 'アレルゲンを選ぶと特有の残留リスク（小麦粉の空中浮遊・魚介の蒸気・粘着性油脂など）が表示され、下の調理器具・表面カードをクリックするとFDA/FARE準拠の除染手順が確認できます。',
+    copyBtn: '来客向けアレルギー調理チェックリストをコピー',
+    copiedBtn: 'チェックリストをコピーしました ✓',
+    printBtn: '安全キッチンプランを印刷',
+    resetBtn: 'リセット',
+    allergenAlertBadge: 'アレルゲン別リスク警告',
+    airborneLabel: '空中浮遊・蒸気リスク',
+    oilFilmLabel: '油脂膜・残留リスク',
+    fdaTop9Tag: 'FDA主要9大アレルゲン',
+    protocolMultiTag: 'ゼロ許容アナフィラキシー手順',
+    riskHigh: '高',
+    riskModerate: '中',
+    riskLow: '低',
+    precautionLabel: 'キッチンでの最重要対策',
+    dashboardBadge: 'FDA / FARE 表面除染プロトコル',
+    heatMythPill: '加熱でアレルゲンは壊れる？：いいえ',
+    whyRiskyLabel: 'この器具・表面が危険な理由',
+    protocolStepsLabel: 'FDA/FARE準拠 ステップ別洗浄・除染手順',
+    dedicatedLabel: '専用品 vs. 共用の推奨判定',
+    anaphylaxisCalloutLabel: '重度アレルギー・アナフィラキシー時の指針',
+    catalogTitle: '共用キッチン家電・表面10種：コンタミネーションリスク一覧',
+    catalogSub: '各カードをクリックすると上部の詳細プロトコルが切り替わります。共用可否のフィルターやキーワード検索も利用できます。',
+    searchLabel: '調理器具・表面を検索',
+    searchPlaceholder: 'トースター、エアフライヤー、鋳鉄、木製まな板、スポンジ、オーブン等を検索...',
+    clearSearchBtn: 'フィルターをクリア',
+    filterAll: 'すべて',
+    filterNeverShare: '共用厳禁・専用のみ',
+    filterStrictScrub: '厳格な洗剤洗浄が必要',
+    filterSafeWash: '適切な洗浄後は安全',
+    showingPrefix: '表示中：',
+    showingOf: '/',
+    showingSuffix: '件の器具・表面',
+    noResultsTitle: '一致する調理器具・表面が見つかりませんでした',
+    noResultsSub: 'トースター、揚げ油、まな板、鋳鉄、シリコン、スポンジ、オーブンなどで再検索してください。',
+    badgeNeverShare: '共用厳禁・専用のみ',
+    badgeStrictScrub: '厳格な洗剤洗浄が必要',
+    badgeSafeWash: '適切な洗浄後は安全',
+    shareNo: '専用品のみ',
+    shareCaution: '注意：徹底洗浄／隔離必須',
+    shareYes: '洗剤洗浄後に共用可',
+    cardInspectHint: 'クリックして詳細プロトコルを表示 ↑',
+    cardSelectedLabel: 'プロトコル表示中 ↑',
+    checklistHeader: 'IsItKitchenSafe — アレルギー対応キッチン事前チェックリスト（FDA / FARE / セリアック病準拠）',
+    checklistCoreRules: [
+      '1. 科学的事実：加熱（190〜315℃）・煮沸・冷凍・アルコール消毒ではアレルゲンは壊れません。温水＋洗剤＋物理的なこすり洗いのみが有効です。',
+      '2. 手と調理台：石けん／食器用洗剤＋温水＋新品ペーパータオルでこすり洗い・拭き上げ（共用スポンジ・布巾は使用禁止）。',
+      '3. 共用厳禁：ポップアップトースター、使用済み揚げ油、木製まな板・木べら、通常キッチンスポンジ。',
+      '4. 安全食を最初に調理：洗ったステンレス／ガラス鍋を使い、安全な食事を最初に調理。共用オーブンは熱風オフ・最上段で新品ホイル密閉。'
+    ],
+    checklistSurfacePrefix: '選択中の器具・表面手順',
+    checklistAllergenPrefix: '選択中のアレルゲン',
+    relatedHeading: '関連するキッチン衛生・清掃安全ツール',
+    relatedDishTag: '食洗機の洗浄最適化',
+    relatedDishTitle: '食洗機洗剤・適正使用量計算機 →',
+    relatedDishDesc: '水の硬度に合わせた洗剤量を算出し、食器やステンレス鍋の皮膜残りを防ぎます。',
+    relatedCleanerTag: '洗剤の混合危険チェック',
+    relatedCleanerTitle: 'キッチン洗剤・混ぜるな危険チェッカー →',
+    relatedCleanerDesc: '漂白剤・酢・食器用洗剤・油汚れ洗剤を組み合わせる前に有毒ガス発生リスクを即確認。',
+    relatedFridgeTag: '安全な冷蔵保管ゾーン',
+    relatedFridgeTitle: '冷蔵庫ゾーン整理プランナー →',
+    relatedFridgeDesc: '密閉したアレルゲンフリー食品を上段に配置し、液だれや交差接触を防ぎます。',
+    methodologyStripTitle: '米国FDA FASTER法・FARE・Celiac Disease Foundationの科学的知見に基づく設計',
+    methodologyStripPrefix: 'アレルゲン残留時間、洗剤とアルコール消毒の比較研究（Perryら, JACI）、除染手順はFDA・FARE・Celiac Disease Foundation指針と照合しています。詳細は',
+    methodologyLabel: '検証メソドロジー',
+    cleanerQuickLabel: '洗剤混合チェッカー',
+    allToolsLabel: 'すべてのツールを見る →',
+    faqTitle: 'よくある質問：食物アレルギーのコンタミネーションと洗浄'
+  }
+};
+
+const t = UI[lang] || UI.en;
+const defaultAllergen = localizedAllergens[0];
+const defaultSurface = localizedSurfaces[0];
+
+function getRiskPillClass(risk: RiskLevel): string {
+  if (risk === 'safe-after-wash') return 'badge-yes';
+  if (risk === 'high-risk-scrub') return 'badge-depends';
+  return 'badge-no';
+}
+
+function getRiskLabel(risk: RiskLevel): string {
+  if (risk === 'safe-after-wash') return t.badgeSafeWash;
+  if (risk === 'high-risk-scrub') return t.badgeStrictScrub;
+  return t.badgeNeverShare;
+}
+
+function getShareLabel(share: CanShareType): string {
+  if (share === 'yes-with-soap-wash') return t.shareYes;
+  if (share === 'caution-strict-wash') return t.shareCaution;
+  return t.shareNo;
+}
+
+function getSubRiskLabel(level: SubRiskLevel): string {
+  if (level === 'high') return t.riskHigh;
+  if (level === 'moderate') return t.riskModerate;
+  return t.riskLow;
+}
+
+function getSubRiskBadgeClass(level: SubRiskLevel): string {
+  if (level === 'high') return 'bg-red-500/15 text-red-800 dark:text-red-300 border-red-500/40';
+  if (level === 'moderate') return 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/40';
+  return 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border-emerald-500/35';
+}
+
+function getCardBorderAccent(risk: RiskLevel): string {
+  if (risk === 'safe-after-wash') return 'border-l-4 border-l-success-border';
+  if (risk === 'high-risk-scrub') return 'border-l-4 border-l-warning-border';
+  return 'border-l-4 border-l-error-border';
+}
+
+const clientPayload = {
+  totalCount: localizedSurfaces.length,
+  allergens: localizedAllergens,
+  surfaces: localizedSurfaces,
+  ui: {
+    copyBtn: t.copyBtn,
+    copiedBtn: t.copiedBtn,
+    showingPrefix: t.showingPrefix,
+    showingOf: t.showingOf,
+    showingSuffix: t.showingSuffix,
+    badgeNeverShare: t.badgeNeverShare,
+    badgeStrictScrub: t.badgeStrictScrub,
+    badgeSafeWash: t.badgeSafeWash,
+    fdaTop9Tag: t.fdaTop9Tag,
+    protocolMultiTag: t.protocolMultiTag,
+    riskHigh: t.riskHigh,
+    riskModerate: t.riskModerate,
+    riskLow: t.riskLow,
+    airborneLabel: t.airborneLabel,
+    oilFilmLabel: t.oilFilmLabel,
+    cardInspectHint: t.cardInspectHint,
+    cardSelectedLabel: t.cardSelectedLabel,
+    checklistHeader: t.checklistHeader,
+    checklistCoreRules: t.checklistCoreRules,
+    checklistSurfacePrefix: t.checklistSurfacePrefix,
+    checklistAllergenPrefix: t.checklistAllergenPrefix
+  }
+};
+---
+
+<div id="food-allergy-checker-root" class="space-y-12">
+  <!-- Critical Science Myth Banner -->
+  <aside
+    class="p-5 sm:p-6 rounded-2xl bg-error-bg/70 dark:bg-red-950/35 border-2 border-error-border/80 shadow-sm space-y-2"
+    role="note"
+    aria-label={mythBanner.badge}
+  >
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-error-border text-white">
+        ⚠️ {mythBanner.badge}
+      </span>
+      <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-canvas text-ink border border-hairline">
+        🔥 {t.heatMythPill}
+      </span>
+    </div>
+    <h2 class="text-base sm:text-lg font-extrabold text-ink leading-snug">
+      {mythBanner.headline}
+    </h2>
+    <p class="text-xs sm:text-[13.5px] text-body leading-relaxed">
+      {mythBanner.body}
+    </p>
+  </aside>
+
+  <!-- Main Interactive Checker Card -->
+  <section
+    id="food-allergy-cross-contact-checker"
+    class="bg-canvas border border-hairline rounded-2xl shadow-sm overflow-hidden"
+    aria-label={t.ariaLabel}
+  >
+    <script type="application/json" id="facc-payload" set:html={JSON.stringify(clientPayload)} />
+
+    <!-- PART 1: Allergen Selector + Dynamic Allergen Alert + Action Buttons -->
+    <div class="p-5 sm:p-6 border-b border-hairline bg-surface-soft/50 space-y-5">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div class="space-y-1 max-w-2xl">
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-signature-coral text-white">
+            🛡️ {t.step1Badge}
+          </span>
+          <h2 class="text-title-md font-bold text-ink">{t.step1Title}</h2>
+          <p class="text-xs sm:text-[13px] text-muted leading-relaxed">{t.step1Sub}</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 print:hidden">
+          <button
+            type="button"
+            id="facc-copy-btn"
+            class="min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors cursor-pointer shadow-sm"
+          >
+            <span id="facc-copy-label">📋 {t.copyBtn}</span>
+          </button>
+          <button
+            type="button"
+            id="facc-print-btn"
+            class="min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-semibold bg-canvas text-ink border border-hairline hover:border-signature-coral transition-colors cursor-pointer"
+          >
+            🖨️ {t.printBtn}
+          </button>
+          <button
+            type="button"
+            id="facc-reset-btn"
+            class="min-h-[40px] px-3 py-2 rounded-xl text-xs font-semibold bg-canvas text-muted border border-hairline hover:border-border-strong hover:text-ink transition-colors cursor-pointer"
+          >
+            {t.resetBtn}
+          </button>
+        </div>
+      </div>
+
+      <!-- 10 Allergen Profile Chips -->
+      <div
+        class="flex flex-wrap gap-2 print:hidden"
+        role="radiogroup"
+        aria-label={t.step1Title}
+      >
+        {localizedAllergens.map((allergen, idx) => (
+          <button
+            type="button"
+            role="radio"
+            aria-checked={idx === 0 ? 'true' : 'false'}
+            data-facc-allergen={allergen.id}
+            class={`facc-allergen-btn min-h-[38px] px-3.5 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer inline-flex items-center gap-1.5 ${
+              idx === 0
+                ? 'bg-primary text-on-primary border-primary shadow-sm'
+                : 'bg-canvas text-ink border-hairline hover:border-border-strong'
+            }`}
+          >
+            <span aria-hidden="true">{allergen.icon}</span>
+            <span>{allergen.shortName}</span>
+          </button>
+        ))}
+      </div>
+
+      <!-- 2-Column Live Readout: Allergen-Specific Risk Alert + Selected Surface Decontamination Protocol Dashboard -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+        <!-- Left (5 cols): Dynamic Allergen-Specific Risk Alert -->
+        <div class="lg:col-span-5 flex">
+          <div
+            id="facc-allergen-alert"
+            aria-live="polite"
+            class="w-full rounded-2xl bg-warning-bg/55 dark:bg-amber-950/25 border border-warning-border/80 p-5 space-y-3.5 flex flex-col justify-between"
+          >
+            <div class="space-y-2.5">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span class="inline-block px-2.5 py-0.5 rounded-full text-[10.5px] font-extrabold uppercase tracking-wider bg-ink text-canvas">
+                  {t.allergenAlertBadge}
+                </span>
+                <span
+                  id="facc-allergen-fda-tag"
+                  class="text-[11px] font-bold text-ink/80"
+                >
+                  {defaultAllergen.fdaTop9 ? t.fdaTop9Tag : t.protocolMultiTag}
+                </span>
+              </div>
+
+              <div class="flex items-start gap-2.5">
+                <span id="facc-allergen-icon" aria-hidden="true" class="text-2xl leading-none mt-0.5 shrink-0">
+                  {defaultAllergen.icon}
+                </span>
+                <div>
+                  <h3 id="facc-allergen-name" class="text-base font-extrabold text-ink leading-snug">
+                    {defaultAllergen.name}
+                  </h3>
+                  <p id="facc-allergen-tag" class="text-[11.5px] font-bold text-signature-coral mt-0.5">
+                    {defaultAllergen.persistenceTag}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Airborne & Oil-Film Badges -->
+              <div class="flex flex-wrap gap-1.5">
+                <span
+                  id="facc-allergen-airborne"
+                  class={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[11px] font-bold ${getSubRiskBadgeClass(defaultAllergen.airborneRisk)}`}
+                >
+                  💨 {t.airborneLabel}: {getSubRiskLabel(defaultAllergen.airborneRisk)}
+                </span>
+                <span
+                  id="facc-allergen-oil"
+                  class={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[11px] font-bold ${getSubRiskBadgeClass(defaultAllergen.oilFilmRisk)}`}
+                >
+                  🫧 {t.oilFilmLabel}: {getSubRiskLabel(defaultAllergen.oilFilmRisk)}
+                </span>
+              </div>
+
+              <p id="facc-allergen-headline" class="text-xs sm:text-[13px] font-bold text-ink leading-snug">
+                {defaultAllergen.riskHeadline}
+              </p>
+              <p id="facc-allergen-fact" class="text-xs sm:text-[13px] text-body leading-relaxed">
+                {defaultAllergen.persistenceFact}
+              </p>
+            </div>
+
+            <div class="p-3 rounded-xl bg-canvas border border-hairline">
+              <span class="block text-[10.5px] font-extrabold uppercase tracking-wider text-signature-coral">
+                🛡️ {t.precautionLabel}
+              </span>
+              <p id="facc-allergen-precaution" class="text-xs text-body leading-relaxed mt-1">
+                {defaultAllergen.specialPrecaution}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right (7 cols): High-Contrast Dark FDA/FARE Surface Decontamination Protocol Dashboard -->
+        <div class="lg:col-span-7 flex">
+          <div
+            id="facc-surface-dashboard"
+            aria-live="polite"
+            class={`w-full rounded-2xl bg-surface-dark text-on-dark p-5 sm:p-6 space-y-4 shadow-sm border-l-4 ${
+              defaultSurface.riskLevel === 'safe-after-wash'
+                ? 'border-success-border'
+                : defaultSurface.riskLevel === 'high-risk-scrub'
+                  ? 'border-warning-border'
+                  : 'border-error-border'
+            } flex flex-col justify-between`}
+          >
+            <div class="space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-signature-peach">
+                  {t.dashboardBadge}
+                </span>
+                <span id="facc-dash-pill" class={getRiskPillClass(defaultSurface.riskLevel)}>
+                  {getRiskLabel(defaultSurface.riskLevel)}
+                </span>
+              </div>
+
+              <div class="flex items-start gap-2.5">
+                <span id="facc-dash-icon" aria-hidden="true" class="text-2xl leading-none mt-0.5 shrink-0">
+                  {defaultSurface.icon}
+                </span>
+                <div>
+                  <h3 id="facc-dash-name" class="text-base sm:text-lg font-extrabold tracking-tight text-white leading-snug">
+                    {defaultSurface.name}
+                  </h3>
+                  <p id="facc-dash-verdict" class="text-xs sm:text-[13px] font-bold text-signature-yellow mt-0.5 leading-snug">
+                    {defaultSurface.verdictHeadline}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Why Risky -->
+              <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+                <span class="block text-[10.5px] font-bold uppercase tracking-wider text-white/70">
+                  🔬 {t.whyRiskyLabel}
+                </span>
+                <p id="facc-dash-why" class="text-xs sm:text-[13px] text-white/90 leading-relaxed mt-1">
+                  {defaultSurface.whyRisky}
+                </p>
+              </div>
+
+              <!-- Step-by-Step FDA/FARE Cleaning Protocol -->
+              <div class="space-y-1.5">
+                <span class="block text-[10.5px] font-bold uppercase tracking-wider text-signature-mint">
+                  🧼 {t.protocolStepsLabel}
+                </span>
+                <ol id="facc-dash-steps" class="space-y-1.5 text-xs sm:text-[13px] text-white/95 list-decimal list-outside pl-5">
+                  {defaultSurface.cleaningSteps.map((step) => (
+                    <li class="leading-relaxed">{step}</li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+
+            <!-- Dedicated Recommendation + Severe Allergy Callout -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+              <div class="p-3 rounded-xl bg-white/8 border border-white/15">
+                <span class="block text-[10.5px] font-bold uppercase tracking-wider text-signature-peach">
+                  ✅ {t.dedicatedLabel}
+                </span>
+                <p id="facc-dash-dedicated" class="text-xs text-white/95 leading-relaxed mt-1">
+                  {defaultSurface.dedicatedRecommendation}
+                </p>
+              </div>
+              <div class="p-3 rounded-xl bg-red-500/15 border border-red-400/35">
+                <span class="block text-[10.5px] font-bold uppercase tracking-wider text-red-200">
+                  🚨 {t.anaphylaxisCalloutLabel}
+                </span>
+                <p id="facc-dash-anaphylaxis" class="text-xs text-white/95 leading-relaxed mt-1">
+                  {defaultSurface.anaphylaxisNote}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PART 2: Filterable & Searchable 10-Surface Cross-Contact Cards -->
+    <div class="p-5 sm:p-6 space-y-5">
+      <div class="space-y-1">
+        <h2 class="text-title-md font-semibold text-ink">{t.catalogTitle}</h2>
+        <p class="text-xs sm:text-[13px] text-muted">{t.catalogSub}</p>
+      </div>
+
+      <!-- Search Input + Risk Filter Pills -->
+      <div class="space-y-3 print:hidden">
+        <div class="flex flex-col sm:flex-row gap-2.5">
+          <div class="relative flex-1">
+            <label for="facc-search-input" class="sr-only">{t.searchLabel}</label>
+            <span aria-hidden="true" class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-muted">
+              🔎
+            </span>
+            <input
+              id="facc-search-input"
+              type="search"
+              autocomplete="off"
+              placeholder={t.searchPlaceholder}
+              class="w-full min-h-[44px] pl-10 pr-4 py-2 rounded-xl bg-surface-soft border border-hairline text-sm text-ink placeholder:text-muted focus:outline-none focus:border-signature-coral focus:ring-2 focus:ring-signature-coral/25 transition-all"
+            />
+          </div>
+          <button
+            type="button"
+            id="facc-clear-btn"
+            class="min-h-[44px] px-4 py-2 rounded-xl text-xs font-semibold bg-canvas text-ink border border-hairline hover:border-signature-coral transition-colors cursor-pointer shrink-0"
+          >
+            {t.clearSearchBtn}
+          </button>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap gap-2" role="group" aria-label={t.catalogTitle}>
+            <button
+              type="button"
+              data-facc-filter="all"
+              aria-pressed="true"
+              class="facc-filter-btn px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-primary text-on-primary border-primary shadow-sm"
+            >
+              {t.filterAll} ({counts.all})
+            </button>
+            <button
+              type="button"
+              data-facc-filter="cannot-decontaminate"
+              aria-pressed="false"
+              class="facc-filter-btn px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-error-border"
+            >
+              🚫 {t.filterNeverShare} ({counts.cannotDecontaminate})
+            </button>
+            <button
+              type="button"
+              data-facc-filter="high-risk-scrub"
+              aria-pressed="false"
+              class="facc-filter-btn px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-warning-border"
+            >
+              ⚠️ {t.filterStrictScrub} ({counts.highRiskScrub})
+            </button>
+            <button
+              type="button"
+              data-facc-filter="safe-after-wash"
+              aria-pressed="false"
+              class="facc-filter-btn px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-success-border"
+            >
+              ✅ {t.filterSafeWash} ({counts.safeAfterWash})
+            </button>
+          </div>
+
+          <p id="facc-count-readout" aria-live="polite" class="text-xs font-semibold text-muted">
+            {t.showingPrefix} {counts.all} {t.showingOf} {counts.all} {t.showingSuffix}
+          </p>
+        </div>
+      </div>
+
+      <!-- Empty Search State -->
+      <div
+        id="facc-empty-state"
+        class="hidden p-8 rounded-2xl bg-surface-soft border border-hairline text-center space-y-2"
+      >
+        <p class="text-sm font-bold text-ink">{t.noResultsTitle}</p>
+        <p class="text-xs text-muted">{t.noResultsSub}</p>
+        <button
+          type="button"
+          id="facc-empty-reset-btn"
+          class="mt-2 px-4 py-2 rounded-xl text-xs font-bold bg-primary text-on-primary hover:bg-primary-active transition-colors cursor-pointer"
+        >
+          {t.clearSearchBtn}
+        </button>
+      </div>
+
+      <!-- 10 Clickable Appliance & Surface Cards -->
+      <div id="facc-cards-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {localizedSurfaces.map((surface, idx) => (
+          <button
+            type="button"
+            data-facc-card={surface.id}
+            data-facc-risk={surface.riskLevel}
+            data-facc-search={surface.keywords}
+            aria-pressed={idx === 0 ? 'true' : 'false'}
+            class={`facc-card text-left w-full p-4 sm:p-5 rounded-2xl bg-surface-soft/55 border border-hairline hover:border-signature-coral ${getCardBorderAccent(surface.riskLevel)} flex flex-col justify-between gap-3 transition-all cursor-pointer ${
+              idx === 0 ? 'ring-2 ring-signature-coral bg-canvas shadow-sm' : ''
+            }`}
+          >
+            <div class="space-y-2.5 w-full">
+              <div class="flex items-start justify-between gap-2.5">
+                <div class="flex items-start gap-2.5 min-w-0">
+                  <span aria-hidden="true" class="text-xl leading-none mt-0.5 shrink-0">{surface.icon}</span>
+                  <div class="min-w-0">
+                    <h3 class="text-sm sm:text-[15px] font-bold text-ink leading-snug">{surface.name}</h3>
+                    <p class="text-[11.5px] text-muted mt-0.5 leading-snug">{getShareLabel(surface.canShare)}</p>
+                  </div>
+                </div>
+                <span class={`shrink-0 ${getRiskPillClass(surface.riskLevel)}`}>
+                  {getRiskLabel(surface.riskLevel)}
+                </span>
+              </div>
+
+              <p class="text-xs sm:text-[13px] font-semibold text-ink leading-snug">
+                {surface.verdictHeadline}
+              </p>
+
+              <p class="text-xs text-body leading-relaxed">
+                {surface.dedicatedRecommendation}
+              </p>
+            </div>
+
+            <div class="w-full pt-2 border-t border-hairline/70 flex items-center justify-between gap-2">
+              <span class="text-[11px] font-semibold text-muted">
+                🔥 {t.heatMythPill}
+              </span>
+              <span
+                data-facc-card-hint
+                class={`text-[11px] font-bold ${idx === 0 ? 'text-signature-coral' : 'text-muted'}`}
+              >
+                {idx === 0 ? t.cardSelectedLabel : t.cardInspectHint}
+              </span>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Related Companion Tools -->
+  <section class="space-y-4 print:hidden">
+    <h2 class="text-title-md font-semibold text-ink">{t.relatedHeading}</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <a
+        href={dishwasherUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedDishTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedDishTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedDishDesc}</p>
+      </a>
+
+      <a
+        href={cleanerMixingUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedCleanerTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedCleanerTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedCleanerDesc}</p>
+      </a>
+
+      <a
+        href={fridgeZoneUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedFridgeTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedFridgeTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedFridgeDesc}</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- Methodology & Hub Strip -->
+  <section class="p-6 rounded-2xl bg-surface-soft border border-hairline print:hidden">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-title-sm font-semibold text-ink mb-1">{t.methodologyStripTitle}</h2>
+        <p class="text-[13px] text-muted">
+          {t.methodologyStripPrefix}{' '}
+          <a href={methodologyUrl} class="text-link underline hover:text-link-active">{t.methodologyLabel}</a>.
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a
+          href={cleanerMixingUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
+        >
+          {t.cleanerQuickLabel}
+        </a>
+        <a
+          href={methodologyUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
+        >
+          {t.methodologyLabel}
+        </a>
+        <a
+          href={allToolsUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors"
+        >
+          {t.allToolsLabel}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Visible FAQ Accordion (Matches JSON-LD 1:1) -->
+  <section class="print:hidden">
+    <h2 class="text-title-lg font-medium text-ink tracking-tight mb-6">
+      {t.faqTitle}
+    </h2>
+    <div class="space-y-4">
+      {localizedFaqs.map((faq) => (
+        <details class="group p-5 bg-surface-soft border border-hairline rounded-xl" open>
+          <summary class="text-title-sm font-semibold text-ink cursor-pointer list-none flex items-center justify-between gap-3">
+            <span>{faq.question}</span>
+            <span class="text-muted text-sm transition-transform group-open:rotate-180 shrink-0" aria-hidden="true">&#9662;</span>
+          </summary>
+          <p class="text-[14px] text-body leading-relaxed mt-3 pt-3 border-t border-hairline/70">
+            {faq.answer}
+          </p>
+        </details>
+      ))}
+    </div>
+  </section>
+</div>
+
+<script is:inline>
+  (function () {
+    var payloadEl = document.getElementById('facc-payload');
+    if (!payloadEl) return;
+
+    var payload;
+    try {
+      payload = JSON.parse(payloadEl.textContent || '{}');
+    } catch (_) {
+      return;
+    }
+
+    var allergens = Array.isArray(payload.allergens) ? payload.allergens : [];
+    var surfaces = Array.isArray(payload.surfaces) ? payload.surfaces : [];
+    var ui = payload.ui || {};
+    var totalCount = Number(payload.totalCount || surfaces.length || 10);
+
+    var allergenMap = {};
+    allergens.forEach(function (a) {
+      if (a && a.id) allergenMap[a.id] = a;
+    });
+
+    var surfaceMap = {};
+    surfaces.forEach(function (s) {
+      if (s && s.id) surfaceMap[s.id] = s;
+    });
+
+    // Allergen controls & outputs
+    var allergenBtns = Array.from(document.querySelectorAll('.facc-allergen-btn'));
+    var elAllergenFdaTag = document.getElementById('facc-allergen-fda-tag');
+    var elAllergenIcon = document.getElementById('facc-allergen-icon');
+    var elAllergenName = document.getElementById('facc-allergen-name');
+    var elAllergenTag = document.getElementById('facc-allergen-tag');
+    var elAllergenAirborne = document.getElementById('facc-allergen-airborne');
+    var elAllergenOil = document.getElementById('facc-allergen-oil');
+    var elAllergenHeadline = document.getElementById('facc-allergen-headline');
+    var elAllergenFact = document.getElementById('facc-allergen-fact');
+    var elAllergenPrecaution = document.getElementById('facc-allergen-precaution');
+
+    // Surface dashboard outputs
+    var elDash = document.getElementById('facc-surface-dashboard');
+    var elDashPill = document.getElementById('facc-dash-pill');
+    var elDashIcon = document.getElementById('facc-dash-icon');
+    var elDashName = document.getElementById('facc-dash-name');
+    var elDashVerdict = document.getElementById('facc-dash-verdict');
+    var elDashWhy = document.getElementById('facc-dash-why');
+    var elDashSteps = document.getElementById('facc-dash-steps');
+    var elDashDedicated = document.getElementById('facc-dash-dedicated');
+    var elDashAnaphylaxis = document.getElementById('facc-dash-anaphylaxis');
+
+    // Filter, search & card controls
+    var searchInput = document.getElementById('facc-search-input');
+    var clearBtn = document.getElementById('facc-clear-btn');
+    var emptyResetBtn = document.getElementById('facc-empty-reset-btn');
+    var filterBtns = Array.from(document.querySelectorAll('.facc-filter-btn'));
+    var cards = Array.from(document.querySelectorAll('.facc-card'));
+    var countReadout = document.getElementById('facc-count-readout');
+    var emptyState = document.getElementById('facc-empty-state');
+    var cardsGrid = document.getElementById('facc-cards-grid');
+
+    // Top action buttons
+    var copyBtn = document.getElementById('facc-copy-btn');
+    var copyLabel = document.getElementById('facc-copy-label');
+    var printBtn = document.getElementById('facc-print-btn');
+    var resetBtn = document.getElementById('facc-reset-btn');
+
+    var state = {
+      allergenId: allergens[0] ? allergens[0].id : 'peanut',
+      surfaceId: surfaces[0] ? surfaces[0].id : 'pop-up-toaster',
+      filter: 'all',
+      query: ''
+    };
+
+    function getRiskPillClass(risk) {
+      if (risk === 'safe-after-wash') return 'badge-yes';
+      if (risk === 'high-risk-scrub') return 'badge-depends';
+      return 'badge-no';
+    }
+
+    function getRiskLabel(risk) {
+      if (risk === 'safe-after-wash') return ui.badgeSafeWash || 'Safe After Proper Wash';
+      if (risk === 'high-risk-scrub') return ui.badgeStrictScrub || 'Strict Soap Scrub Required';
+      return ui.badgeNeverShare || 'Never Share / Dedicated Only';
+    }
+
+    function getSubRiskText(level) {
+      if (level === 'high') return ui.riskHigh || 'High';
+      if (level === 'moderate') return ui.riskModerate || 'Moderate';
+      return ui.riskLow || 'Low';
+    }
+
+    function setSubRiskClasses(el, level) {
+      if (!el) return;
+      el.classList.remove(
+        'bg-red-500/15',
+        'text-red-800',
+        'dark:text-red-300',
+        'border-red-500/40',
+        'bg-amber-500/15',
+        'text-amber-800',
+        'dark:text-amber-300',
+        'border-amber-500/40',
+        'bg-emerald-500/15',
+        'text-emerald-800',
+        'dark:text-emerald-300',
+        'border-emerald-500/35'
+      );
+      if (level === 'high') {
+        el.classList.add('bg-red-500/15', 'text-red-800', 'dark:text-red-300', 'border-red-500/40');
+      } else if (level === 'moderate') {
+        el.classList.add('bg-amber-500/15', 'text-amber-800', 'dark:text-amber-300', 'border-amber-500/40');
+      } else {
+        el.classList.add('bg-emerald-500/15', 'text-emerald-800', 'dark:text-emerald-300', 'border-emerald-500/35');
+      }
+    }
+
+    function renderAllergen() {
+      var allergen = allergenMap[state.allergenId] || allergens[0];
+      if (!allergen) return;
+
+      allergenBtns.forEach(function (btn) {
+        var active = btn.getAttribute('data-facc-allergen') === allergen.id;
+        btn.setAttribute('aria-checked', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('shadow-sm', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      if (elAllergenFdaTag) {
+        elAllergenFdaTag.textContent = allergen.fdaTop9
+          ? (ui.fdaTop9Tag || 'FDA Top 9 Major Allergen')
+          : (ui.protocolMultiTag || 'Zero-Tolerance Anaphylaxis Protocol');
+      }
+      if (elAllergenIcon) elAllergenIcon.textContent = allergen.icon || '';
+      if (elAllergenName) elAllergenName.textContent = allergen.name || '';
+      if (elAllergenTag) elAllergenTag.textContent = allergen.persistenceTag || '';
+      if (elAllergenHeadline) elAllergenHeadline.textContent = allergen.riskHeadline || '';
+      if (elAllergenFact) elAllergenFact.textContent = allergen.persistenceFact || '';
+      if (elAllergenPrecaution) elAllergenPrecaution.textContent = allergen.specialPrecaution || '';
+
+      if (elAllergenAirborne) {
+        elAllergenAirborne.textContent = '💨 ' + (ui.airborneLabel || 'Airborne / Steam Risk') + ': ' + getSubRiskText(allergen.airborneRisk);
+        setSubRiskClasses(elAllergenAirborne, allergen.airborneRisk);
+      }
+      if (elAllergenOil) {
+        elAllergenOil.textContent = '🫧 ' + (ui.oilFilmLabel || 'Sticky Oil / Residue Risk') + ': ' + getSubRiskText(allergen.oilFilmRisk);
+        setSubRiskClasses(elAllergenOil, allergen.oilFilmRisk);
+      }
+    }
+
+    function renderSurfaceDashboard() {
+      var surface = surfaceMap[state.surfaceId] || surfaces[0];
+      var allergen = allergenMap[state.allergenId] || allergens[0];
+      if (!surface) return;
+
+      if (elDashPill) {
+        elDashPill.className = getRiskPillClass(surface.riskLevel);
+        elDashPill.textContent = getRiskLabel(surface.riskLevel);
+      }
+      if (elDashIcon) elDashIcon.textContent = surface.icon || '';
+      if (elDashName) elDashName.textContent = surface.name || '';
+      if (elDashVerdict) elDashVerdict.textContent = surface.verdictHeadline || '';
+      if (elDashWhy) elDashWhy.textContent = surface.whyRisky || '';
+      if (elDashDedicated) elDashDedicated.textContent = surface.dedicatedRecommendation || '';
+
+      if (elDashAnaphylaxis) {
+        var combinedNote = surface.anaphylaxisNote || '';
+        if (allergen && allergen.shortName) {
+          combinedNote = '[' + allergen.shortName + '] ' + combinedNote;
+        }
+        elDashAnaphylaxis.textContent = combinedNote;
+      }
+
+      if (elDashSteps) {
+        while (elDashSteps.firstChild) {
+          elDashSteps.removeChild(elDashSteps.firstChild);
+        }
+        var steps = Array.isArray(surface.cleaningSteps) ? surface.cleaningSteps : [];
+        steps.forEach(function (stepText) {
+          var li = document.createElement('li');
+          li.className = 'leading-relaxed';
+          li.textContent = stepText;
+          elDashSteps.appendChild(li);
+        });
+      }
+
+      if (elDash) {
+        elDash.classList.remove('border-success-border', 'border-warning-border', 'border-error-border');
+        elDash.classList.add(
+          surface.riskLevel === 'safe-after-wash'
+            ? 'border-success-border'
+            : surface.riskLevel === 'high-risk-scrub'
+              ? 'border-warning-border'
+              : 'border-error-border'
+        );
+      }
+
+      cards.forEach(function (card) {
+        var active = card.getAttribute('data-facc-card') === surface.id;
+        card.setAttribute('aria-pressed', active ? 'true' : 'false');
+        card.classList.toggle('ring-2', active);
+        card.classList.toggle('ring-signature-coral', active);
+        card.classList.toggle('bg-canvas', active);
+        card.classList.toggle('shadow-sm', active);
+        card.classList.toggle('bg-surface-soft/55', !active);
+        var hint = card.querySelector('[data-facc-card-hint]');
+        if (hint) {
+          hint.textContent = active
+            ? (ui.cardSelectedLabel || 'Viewing Protocol ↑')
+            : (ui.cardInspectHint || 'Click to view full FDA/FARE protocol ↑');
+          hint.classList.toggle('text-signature-coral', active);
+          hint.classList.toggle('text-muted', !active);
+        }
+      });
+    }
+
+    function renderCatalog() {
+      var q = (state.query || '').trim().toLowerCase();
+      var visibleCount = 0;
+
+      filterBtns.forEach(function (btn) {
+        var fVal = btn.getAttribute('data-facc-filter');
+        var active = fVal === state.filter;
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('shadow-sm', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      cards.forEach(function (card) {
+        var risk = card.getAttribute('data-facc-risk') || '';
+        var haystack = card.getAttribute('data-facc-search') || '';
+        var filterMatch = state.filter === 'all' || risk === state.filter;
+        var queryMatch = !q || haystack.indexOf(q) !== -1;
+        var show = filterMatch && queryMatch;
+        card.classList.toggle('hidden', !show);
+        if (show) visibleCount += 1;
+      });
+
+      if (countReadout) {
+        countReadout.textContent =
+          (ui.showingPrefix || 'Showing') +
+          ' ' +
+          visibleCount +
+          ' ' +
+          (ui.showingOf || 'of') +
+          ' ' +
+          totalCount +
+          ' ' +
+          (ui.showingSuffix || 'surfaces & appliances');
+      }
+
+      var isEmpty = visibleCount === 0;
+      if (emptyState) emptyState.classList.toggle('hidden', !isEmpty);
+      if (cardsGrid) cardsGrid.classList.toggle('hidden', isEmpty);
+    }
+
+    function buildChecklistText() {
+      var allergen = allergenMap[state.allergenId] || allergens[0];
+      var surface = surfaceMap[state.surfaceId] || surfaces[0];
+      var lines = [];
+      lines.push(ui.checklistHeader || 'IsItKitchenSafe — Guest Allergy-Safe Kitchen Prep Checklist');
+      lines.push('');
+      if (allergen) {
+        lines.push((ui.checklistAllergenPrefix || 'Active Allergen Focus') + ': ' + allergen.name);
+        lines.push('- ' + allergen.checklistNote);
+        lines.push('');
+      }
+      if (surface) {
+        lines.push((ui.checklistSurfacePrefix || 'Selected Appliance/Surface Protocol') + ': ' + surface.name + ' (' + getRiskLabel(surface.riskLevel) + ')');
+        lines.push('- ' + surface.dedicatedRecommendation);
+        if (Array.isArray(surface.cleaningSteps)) {
+          surface.cleaningSteps.forEach(function (step, i) {
+            lines.push('  ' + (i + 1) + ') ' + step);
+          });
+        }
+        lines.push('');
+      }
+      if (Array.isArray(ui.checklistCoreRules)) {
+        ui.checklistCoreRules.forEach(function (rule) {
+          lines.push(rule);
+        });
+      }
+      return lines.join('\n');
+    }
+
+    function clearCatalogFilters() {
+      state.filter = 'all';
+      state.query = '';
+      if (searchInput) searchInput.value = '';
+      renderCatalog();
+    }
+
+    // Event listeners
+    allergenBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.getAttribute('data-facc-allergen');
+        if (id && allergenMap[id]) {
+          state.allergenId = id;
+          renderAllergen();
+          renderSurfaceDashboard();
+        }
+      });
+    });
+
+    cards.forEach(function (card) {
+      card.addEventListener('click', function () {
+        var id = card.getAttribute('data-facc-card');
+        if (id && surfaceMap[id]) {
+          state.surfaceId = id;
+          renderSurfaceDashboard();
+          if (elDash && typeof elDash.scrollIntoView === 'function') {
+            var rect = elDash.getBoundingClientRect();
+            if (rect.top < 0 || rect.top > window.innerHeight * 0.65) {
+              elDash.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+          }
+        }
+      });
+    });
+
+    filterBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var val = btn.getAttribute('data-facc-filter');
+        if (val) {
+          state.filter = val;
+          renderCatalog();
+        }
+      });
+    });
+
+    if (searchInput) {
+      searchInput.addEventListener('input', function () {
+        state.query = searchInput.value || '';
+        renderCatalog();
+      });
+    }
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', clearCatalogFilters);
+    }
+    if (emptyResetBtn) {
+      emptyResetBtn.addEventListener('click', clearCatalogFilters);
+    }
+
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        var checklistText = buildChecklistText();
+        var showCopied = function () {
+          if (copyLabel) copyLabel.textContent = ui.copiedBtn || 'Checklist Copied ✓';
+          window.setTimeout(function () {
+            if (copyLabel) copyLabel.textContent = '📋 ' + (ui.copyBtn || 'Copy Guest Allergy Prep Checklist');
+          }, 2200);
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(checklistText).then(showCopied).catch(showCopied);
+        } else {
+          var ta = document.createElement('textarea');
+          ta.value = checklistText;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'absolute';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          try {
+            document.execCommand('copy');
+          } catch (_) {
+            // ignore
+          }
+          document.body.removeChild(ta);
+          showCopied();
+        }
+      });
+    }
+
+    if (printBtn) {
+      printBtn.addEventListener('click', function () {
+        window.print();
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function () {
+        state.allergenId = allergens[0] ? allergens[0].id : 'peanut';
+        state.surfaceId = surfaces[0] ? surfaces[0].id : 'pop-up-toaster';
+        clearCatalogFilters();
+        renderAllergen();
+        renderSurfaceDashboard();
+      });
+    }
+
+    renderAllergen();
+    renderSurfaceDashboard();
+    renderCatalog();
+  })();
+</script>

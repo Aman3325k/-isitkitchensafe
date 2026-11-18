@@ -1,0 +1,162 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import FoodAllergyCrossContactChecker from '../../../components/FoodAllergyCrossContactChecker.astro';
+import rawData from '../../../data/food-allergy-cross-contact-data.json';
+import type { SupportedLanguage } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+
+interface LocalePageContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  heroSub: string;
+  breadcrumbs: Array<{ label: string; href?: string }>;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocalePageContent> = {
+  es: {
+    pageTitle: "Verificador de Alergias Alimentarias y Contacto Cruzado en Cocina | IsItKitchenSafe",
+    pageDescription: "Comprueba qué electrodomésticos, sartenes y superficies compartidas se pueden descontaminar con seguridad para los 9 alérgenos principales FDA y la enfermedad celíaca. Protocolos paso a paso FDA/FARE para tostadoras, freidoras de aire, aceite, hierro fundido, madera y encimeras.",
+    badge: "Top 9 Alérgenos FDA y Celiaquía · 10 Superficies · Protocolos FARE",
+    h1: "Verificador de Alergias Alimentarias y Contacto Cruzado en la Cocina",
+    heroSub: "Verifica al instante si tostadoras, freidoras de aire, aceite de fritura, tablas de madera, hierro fundido, acero inoxidable, esponjas y encimeras pueden descontaminarse frente a los 9 alérgenos FDA y gluten, con guías paso a paso y checklist imprimible.",
+    breadcrumbs: [
+      { label: "Inicio", href: "/es/" },
+      { label: "Herramientas", href: "/es/tools/" },
+      { label: "Alergias y Contacto Cruzado" }
+    ]
+  },
+  pt: {
+    pageTitle: "Verificador de Alergias Alimentares e Contato Cruzado na Cozinha | IsItKitchenSafe",
+    pageDescription: "Veja quais aparelhos, panelas e superfícies compartilhadas podem ser descontaminados com segurança para os 9 grandes alérgenos FDA e doença celíaca. Protocolos FDA/FARE passo a passo para torradeiras, air fryers, óleo, ferro fundido, tábuas de madeira e bancadas.",
+    badge: "Top 9 Alérgenos FDA e Celíacos · 10 Superfícies · Guia FARE",
+    h1: "Verificador de Alergias Alimentares e Contato Cruzado na Cozinha",
+    heroSub: "Descubra imediatamente se torradeiras, air fryers, óleo de fritura, tábuas de madeira, ferro fundido, aço inox, esponjas e bancadas podem ser descontaminados contra os 9 alérgenos FDA e glúten, com protocolos de lavagem e checklist para convidados.",
+    breadcrumbs: [
+      { label: "Início", href: "/pt/" },
+      { label: "Ferramentas", href: "/pt/tools/" },
+      { label: "Alergias e Contato Cruzado" }
+    ]
+  },
+  'zh-cn': {
+    pageTitle: "厨房食物过敏原与交叉接触清洁安全检查器 | IsItKitchenSafe",
+    pageDescription: "针对美国 FDA 九大主要食物过敏原与乳糜泻，一键核查烤面包机、空气炸锅、油炸锅热油、木砧板、铸铁锅、不锈钢锅、海绵及操作台能否安全共用与除敏，提供 FDA/FARE 分步清洁协议与待客备餐清单。",
+    badge: "FDA 九大过敏原与乳糜泻 · 10 类厨房表面 · FARE 除敏指南",
+    h1: "厨房食物过敏原与交叉接触清洁安全检查器",
+    heroSub: "快速排查烤面包机、空气炸锅、油炸热油、木砧板、铸铁锅、不锈钢锅具、海绵与台面能否针对花生、坚果、麸质、乳蛋、海鲜、芝麻等过敏原安全共用，并获取科学除敏步骤与可打印待客清单。",
+    breadcrumbs: [
+      { label: "首页", href: "/zh-cn/" },
+      { label: "实用工具", href: "/zh-cn/tools/" },
+      { label: "过敏原交叉接触检查器" }
+    ]
+  },
+  ja: {
+    pageTitle: "キッチン食物アレルギー＆コンタミネーション防止チェッカー | IsItKitchenSafe",
+    pageDescription: "米国FDA主要9大アレルゲン・セリアック病対応。トースター、エアフライヤー、揚げ油、木製まな板、鋳鉄スキレット、ステンレス鍋、スポンジ、調理台の共用可否とFDA/FARE準拠の除染手順を即座に確認できます。",
+    badge: "FDA主要9アレルゲン＆セリアック病 · 10器具・表面 · FARE除染手順",
+    h1: "キッチン食物アレルギー＆コンタミネーション防止チェッカー",
+    heroSub: "トースター、エアフライヤー、共用揚げ油、木製まな板、鋳鉄鍋、ステンレス鍋、スポンジ、調理台がピーナッツ・小麦グルテン・乳・卵・甲殻類・ごまのアレルゲンから安全に除染できるか即判定し、正確な洗浄手順と印刷用チェックリストを提供します。",
+    breadcrumbs: [
+      { label: "ホーム", href: "/ja/" },
+      { label: "ツール", href: "/ja/tools/" },
+      { label: "食物アレルギー接触チェッカー" }
+    ]
+  }
+};
+
+const c = CONTENT[lang as Exclude<SupportedLanguage, 'en'>] || CONTENT.es;
+const faqs = (rawData.faqs as Record<string, Array<{ question: string; answer: string }>>)[lang] || rawData.faqs.en;
+const localizedUrl = `https://isitkitchensafe.com/${lang}/tools/food-allergy-cross-contact-checker/`;
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": c.h1,
+  "url": localizedUrl,
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript.",
+  "description": c.pageDescription,
+  "inLanguage": lang === 'zh-cn' ? 'zh-CN' : lang,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IsItKitchenSafe",
+    "url": "https://isitkitchensafe.com"
+  }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map((faq) => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+};
+---
+
+<Layout
+  title={c.pageTitle}
+  description={c.pageDescription}
+  faqs={faqs}
+  excludeFaqSchema={true}
+  availableLocales={availableLocales}
+  lang={lang}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(webAppSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+  </Fragment>
+
+  <!-- Breadcrumbs -->
+  <div class="bg-surface-soft border-b border-hairline py-1 print:hidden">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <Breadcrumbs items={c.breadcrumbs} className="mb-0" />
+    </div>
+  </div>
+
+  <div class="max-w-[1140px] mx-auto px-6 py-10 md:py-14">
+    <!-- Hero Header -->
+    <header class="mb-10 text-center max-w-3xl mx-auto">
+      <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-signature-coral text-white mb-3">
+        {c.badge}
+      </span>
+      <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-4">
+        {c.h1}
+      </h1>
+      <p class="text-body text-[15px] md:text-[16px] leading-relaxed">
+        {c.heroSub}
+      </p>
+    </header>
+
+    <!-- Main Interactive Checker Component -->
+    <FoodAllergyCrossContactChecker lang={lang} />
+  </div>
+</Layout>

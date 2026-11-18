@@ -127,61 +127,100 @@ const primaryMaterialRiskDisplay = data.material && primaryRiskText
   : (data.material || primaryRiskText || formattedAppliance);
 const quickActionText = data.tip || (data.tips && data.tips[0]) || (data.instructions && data.instructions[0]) || data.shortAnswer;
 
-// Contextual Consumer Tool Recommendation
-const matchContext = `${data.slug || ''} ${data.item || ''} ${data.material || ''}`.toLowerCase();
+// Contextual Consumer Tool Recommendation (Smart 18-Tool Router across EN/ES/PT/ZH-CN/JA)
+const itemSlugLower = String(data.slug || '').toLowerCase();
+const itemNameLower = String(data.item || '').toLowerCase();
+const itemMatchText = `${itemSlugLower} ${itemNameLower}`;
+const itemApplianceLower = String(data.appliance || '').toLowerCase();
+
 type RecommendedToolKey =
-  | 'cleaner'
-  | 'descaling'
-  | 'pan'
-  | 'plastic'
-  | 'thawing'
-  | 'cookingTemp'
-  | 'powerOutage'
   | 'babyBottle'
-  | 'leftover'
-  | 'ovenTemp'
-  | 'airfryer'
+  | 'castIron'
+  | 'induction'
   | 'oil'
+  | 'dishwasherDosage'
+  | 'fridgeZone'
+  | 'leftover'
+  | 'descaling'
+  | 'cleaner'
+  | 'plastic'
+  | 'pan'
+  | 'airfryer'
+  | 'microwaveWattage'
+  | 'thawing'
+  | 'powerOutage'
+  | 'ovenTemp'
+  | 'cookingTemp'
   | 'symbol';
 
 let recommendedToolKey: RecommendedToolKey = 'symbol';
 
-if (/\b(bleach|vinegar|ammonia|peroxide|cleaners?|detergents?|baking[- ]soda|soaps?|sanitizers?|disinfectants?|drain[- ]cleaners?|lye|caustic|rinse[- ]aid|dishwasher[- ]pods?)\b/i.test(matchContext)) {
-  recommendedToolKey = 'cleaner';
-} else if (/\b(coffee|espresso|kettles?|keurig|nespresso|carafes?|ice[- ]makers?|steamers?|descal(?:e|ing))\b/i.test(matchContext)) {
-  recommendedToolKey = 'descaling';
-} else if (/\b(power[- ]outage|blackout|spoil(?:age|ed)|rot(?:ten)?|sour[- ]milk|bad[- ]meat|danger[- ]zone|warm[- ]fridge|warm[- ]freezer|power[- ]cut|storm)\b/i.test(matchContext)) {
-  recommendedToolKey = 'powerOutage';
-} else if (/\b(baby[- ]bottles?|sippy[- ]cups?|pacifiers?|teethers?|breast[- ]milk|formula|nipples?|steriliz(?:er|e)|infant|nursery|biber[oó]n|mamadeira|chupeta|奶瓶|学饮杯|安抚奶嘴|哺乳瓶|おしゃぶり)\b/i.test(matchContext)) {
+const isMeatOrProteinItem = /\b(chicken|turkey|beef|pork|steaks?|meats?|meatballs?|hamburger|burgers?|ham|lamb|duck|veal|organ|fish|salmon|tuna|cod|tilapia|shrimp|scallops?|lobster|crab|mussels?|clams?|seafood|bacon|sausages?|hot[- ]dogs?|ground|eggs?|casseroles?|lasagna)\b/i.test(itemSlugLower);
+const isCookedLeftoverItem = /\b(cooked|leftover|soup|broth|stew|chili|lasagna|casserole|stir[- ]fry|curry|macaroni[- ]and[- ]cheese|enchiladas|mashed[- ]potatoes|deli[- ]sliced|rotisserie|canned|opened|hummus|pesto|salsa|guacamole|jam|jelly|mayonnaise|ketchup|mustard|sauce|dressing|pickles|kimchi|sauerkraut|olives|capers|marinated|miso|gochujang|tahini|custard|cheesecake|tiramisu|tart|pie|frosting|salami|prosciutto|pepperoni|hot[- ]dogs|anchovy|sardines)\b/i.test(itemSlugLower);
+const isMicrowaveNonFoodItem = /\b(foil|metal|aluminum|fork|spoon|gold[- ]rimmed|silverware|ceramic[- ]mug|ceramic[- ]plate|fine[- ]china|glass[- ]bowl|wine[- ]glass|mason[- ]jar|travel[- ]mug|yeti|hydro[- ]flask|stanley|stainless|paper|cardboard|newspaper|wax[- ]paper|parchment|wood|silicone|muffin[- ]tin|baking[- ]sheet|bundt|instant[- ]pot|hand[- ]warmers|candle|memory[- ]foam|crocs|shoes|sweater)\b/i.test(itemSlugLower);
+
+if (/\b(baby[- ]bottles?|sippy[- ]cups?|pacifiers?|teethers?|breast[- ]?milk|baby[- ]food|formula|nipples?|steriliz(?:er|e)|kids[- ]plates?|bamboo[- ]kids|melamine[- ]kids|infant|nursery|biber[oó]n|mamadeira|chupeta|奶瓶|学饮杯|安抚奶嘴|哺乳瓶|おしゃぶり)\b/i.test(itemMatchText)) {
   recommendedToolKey = 'babyBottle';
-} else if (/\b(nonstick|non[- ]stick|teflon|ptfe|ceramic[- ]pans?|hexclad|caraway|fry(?:ing)?[- ]pans?|skillets?|cast[- ]iron|carbon[- ]steel|woks?)\b/i.test(matchContext)) {
+} else if (/\b(cast[- ]iron|carbon[- ]steel|dutch[- ]ovens?|le[- ]creuset|staub|lodge|skillets?|seasoning|rust)\b/i.test(itemSlugLower)) {
+  recommendedToolKey = 'castIron';
+} else if (
+  /\b(induction|moka[- ]pots?|copper|tri[- ]ply|magnetic|all[- ]clad|ferromagnetic|woks?)\b/i.test(itemSlugLower) ||
+  (itemApplianceLower !== 'oven' && /\b(stainless[- ]steel[- ]pans?|steel[- ]pans?)\b/i.test(itemSlugLower))
+) {
+  recommendedToolKey = 'induction';
+} else if (/\b(coffee[- ]pot|coffee[- ]maker|espresso|kettles?|keurig|nespresso|carafes?|ice[- ]makers?|steamers?|descal(?:e|ing))\b/i.test(itemSlugLower)) {
+  recommendedToolKey = 'descaling';
+} else if (
+  /\b(bleach|ammonia|peroxide|cleaners?|soaps?|sponges?|sanitizers?|disinfectants?|drain[- ]cleaners?|lye|caustic|acetone|paint[- ]thinner|gasoline|steel[- ]wool|baking[- ]soda)\b/i.test(itemSlugLower) ||
+  (/\bvinegar\b/i.test(itemSlugLower) && itemApplianceLower !== 'refrigerator' && !/\b(sauce|dressing|vinaigrette|pickle)\b/i.test(itemSlugLower))
+) {
+  recommendedToolKey = 'cleaner';
+} else if (
+  /\b(olive[- ]oil|vegetable[- ]oil|coconut[- ]oil|avocado[- ]oil|cooking[- ]oil|canola[- ]oil|sesame[- ]oil|sunflower[- ]oil|peanut[- ]oil|cooking[- ]spray|ghee|lard|tallow|shortening|grease|oil[- ]soaked)\b/i.test(itemSlugLower) ||
+  (/\bbutter\b/i.test(itemSlugLower) && !/\b(peanut[- ]butter|almond[- ]butter|butter[- ]paper|buttercream|butter[- ]stain)\b/i.test(itemSlugLower))
+) {
+  recommendedToolKey = 'oil';
+} else if (
+  itemApplianceLower === 'dishwasher' &&
+  /\b(glass(?:es|ware)?|crystal|wine[- ]glass(?:es)?|champagne[- ]flutes?|mason[- ]jars?|pyrex|silicone|stasher|owala|yeti|stanley|hydroflask|nalgene|contigo|swell|klean[- ]kanteen|camelbak|thermos|ninja[- ]creami|ninja[- ]blender|nutribullet|vitamix|instant[- ]pot|air[- ]fryer[- ]basket|cuisinart|aluminum|baking[- ]sheet|muffin[- ]tin|bundt|springform|pods?|detergents?|rinse[- ]aid|silverware|pewter|antique|corelle|acrylic|travel[- ]mug|knives|knife|shears)\b/i.test(itemSlugLower)
+) {
+  recommendedToolKey = 'dishwasherDosage';
+} else if (
+  itemApplianceLower !== 'oven' &&
+  /\b(nonstick|non[- ]stick|teflon|ptfe|ceramic[- ]pans?|hexclad|caraway|fry(?:ing)?[- ]pans?)\b/i.test(itemSlugLower)
+) {
   recommendedToolKey = 'pan';
-} else if (/\b(plastics?|tupperware|styrofoam|polystyrene|polypropylene|pet|hdpe|pvc|silicone[- ]bags?|ziploc|water[- ]bottles?|takeout|cling|wraps?)\b/i.test(matchContext)) {
-  recommendedToolKey = 'plastic';
 } else if (
-  data.appliance === 'freezer' &&
-  /\b(chicken|turkey|beef|pork|steaks?|meats?|ham|lamb|fish|salmon|shrimp|seafood|bacon|sausages?|ground)\b/i.test(matchContext)
-) {
-  recommendedToolKey = 'thawing';
-} else if (
-  (data.appliance === 'oven' || data.appliance === 'airfryer') &&
-  /\b(chicken|turkey|beef|pork|steaks?|meats?|ham|lamb|fish|salmon|shrimp|seafood|eggs?|casseroles?)\b/i.test(matchContext)
-) {
-  recommendedToolKey = 'cookingTemp';
-} else if (
-  (data.appliance === 'refrigerator' || data.appliance === 'freezer') &&
-  /\b(milk|cheese|yogurt|cream|eggs?|leftovers?|rice|pasta|pizza|soups?|stews?|bread|fruits?|avocados?|berr(?:y|ies)|potato(?:es)?|tomato(?:es)?|onions?|meats?|chicken|fish|broth|pies?|salads?)\b/i.test(matchContext)
-) {
-  recommendedToolKey = 'leftover';
-} else if (
-  data.appliance === 'oven' &&
-  /\b(pyrex|glass|ceramic|stoneware|cast[- ]iron|dutch[- ]ovens?|le[- ]creuset|lodge|stainless|parchment|wax[- ]paper|foil|silicone|bakeware|baking[- ]sheets?|pans?|pots?|lids?)\b/i.test(matchContext)
+  /\b(always[- ]pan)\b/i.test(itemSlugLower) ||
+  (itemApplianceLower === 'oven' && /\b(pyrex|glass|ceramic|stoneware|corningware|pampered[- ]chef|terracotta|china|porcelain|ramekin|non[- ]stick|nonstick|stainless|aluminum|steel[- ]pan|parchment|wax[- ]paper|foil|silicone|rubber|bakeware|baking[- ]sheet|baking[- ]stone|baking[- ]cups|cookie[- ]sheet|cookie[- ]cutters|muffin[- ]tin|bundt|springform|bread[- ]pan|pie[- ]pan|roasting[- ]pan|wire[- ]rack|skewers|twine|handles|paper|cardboard|pizza[- ]box|butcher[- ]block|cutting[- ]board|wooden[- ]spoon|mason[- ]jar|travel[- ]mug|yeti|hydro[- ]flask|stanley|instant[- ]pot|silverware|lids?|pots?|pans?|dishes?|bowls?|mugs?|plates?)\b/i.test(itemSlugLower)) ||
+  (itemApplianceLower !== 'dishwasher' && /\b(pyrex|corningware|stoneware)\b/i.test(itemSlugLower))
 ) {
   recommendedToolKey = 'ovenTemp';
-} else if (data.appliance === 'airfryer') {
+} else if (/\b(plastics?|tupperware|styrofoam|foam[- ]cup|polystyrene|polypropylene|pet|hdpe|pvc|tritan|ziploc|takeout|bento[- ]box|solo[- ]cup|deli[- ]container|vacuum[- ]seal|compostable[- ]pla|cling|protein[- ]shaker|silicone[- ]storage[- ]bag|silicone[- ]bag|melamine)\b/i.test(itemSlugLower)) {
+  recommendedToolKey = 'plastic';
+} else if (
+  /\b(power[- ]outage|blackout|spoil(?:age|ed)|rot(?:ten)?|sour[- ]milk|bad[- ]meat|danger[- ]zone|warm[- ]fridge|warm[- ]freezer|power[- ]cut|storm|refreez(?:e|ing)|ice[- ]cream[- ]refreezing)\b/i.test(itemSlugLower) ||
+  (itemApplianceLower === 'freezer' && /\b(milk|cream|yogurt|cheese|ice[- ]cream|mayonnaise|hummus|pesto|salsa|guacamole|deli[- ]meat)\b/i.test(itemSlugLower))
+) {
+  recommendedToolKey = 'powerOutage';
+} else if (
+  (itemApplianceLower === 'freezer' || /\bfrozen[- ](meat|raw[- ]chicken)\b/i.test(itemSlugLower) || /\bthaw/i.test(itemSlugLower)) &&
+  isMeatOrProteinItem
+) {
+  recommendedToolKey = 'thawing';
+} else if (itemApplianceLower === 'refrigerator') {
+  recommendedToolKey = isCookedLeftoverItem ? 'leftover' : 'fridgeZone';
+} else if (
+  itemApplianceLower === 'freezer' &&
+  (isCookedLeftoverItem || /\b(rice|pasta|bread|cake|cookies|muffin|pie|brownie|avocado|watermelon|pineapple|apple|banana|orange|strawberry|blueberry|raspberry|blackberry|grape|cantaloupe|honeydew|peach|plum|nectarine|cherry|mango|tomato|cucumber|pepper|spinach|lettuce|broccoli|celery|cabbage|zucchini|carrot|onion|garlic|potato|mushroom|tofu|tempeh|egg|nut|herb|honey|syrup|juice|wine|beer|coffee|tea|soda|kombucha|smoothie|shake|pizza|dough|ginger|lemon|lime|squash|eggplant|asparagus|peas|corn|quinoa|lentils|oatmeal|spaghetti|macaroni|croissant|bagel|tortilla|chocolate|maple|peanut|almond|nutella)\b/i.test(itemSlugLower))
+) {
+  recommendedToolKey = 'leftover';
+} else if ((itemApplianceLower === 'oven' || itemApplianceLower === 'airfryer') && isMeatOrProteinItem) {
+  recommendedToolKey = 'cookingTemp';
+} else if (itemApplianceLower === 'airfryer') {
   recommendedToolKey = 'airfryer';
-} else if (/\b(oils?|butter|ghee|lard|shortening)\b/i.test(matchContext)) {
-  recommendedToolKey = 'oil';
+} else if (itemApplianceLower === 'microwave' && !isMicrowaveNonFoodItem) {
+  recommendedToolKey = 'microwaveWattage';
 }
 
 const interactiveToolBadge =
@@ -391,6 +430,86 @@ const toolCatalog: Record<RecommendedToolKey, {
                  'Check USDA & AOCS smoke points, oxidative stability, and safe cooking temperatures across 28 culinary oils & fats with live temperature slider.',
     cta: lang === 'es' ? 'Buscar Puntos de Humo' : lang === 'pt' ? 'Consultar Ponto de Fumaça' : lang === 'zh-cn' ? '查询食用油烟点' : lang === 'ja' ? '煙点を調べる' : 'Find Safe Oil Heat'
   },
+  castIron: {
+    path: '/tools/cast-iron-seasoning-troubleshooter/',
+    icon: '🥘',
+    badge: interactiveToolBadge,
+    title: lang === 'es' ? 'Solucionador de Curado y Óxido para Hierro Fundido y Acero al Carbono' :
+           lang === 'pt' ? 'Solucionador de Cura e Ferrugem para Ferro Fundido e Aço Carbono' :
+           lang === 'zh-cn' ? '铸铁锅与碳钢锅开锅养护及除锈诊断工具' :
+           lang === 'ja' ? 'キャストアイアン＆鉄鍋 シーズニング・サビ診断ツール' :
+           'Cast Iron & Carbon Steel Seasoning & Rust Troubleshooter',
+    description: lang === 'es' ? 'Diagnostica sartenes pegajosas, óxido del lavavajillas, curado descascarado, residuo negro o manchas por tomate, con temperaturas exactas de horno y alerta para hierro esmaltado.' :
+                 lang === 'pt' ? 'Diagnostique panelas grudentas, ferrugem da lava-louças, cura descamando, resíduo preto ou manchas ácidas, com temperaturas exatas de forno e alerta para ferro esmaltado.' :
+                 lang === 'zh-cn' ? '一键诊断锅面发黏、洗碗机生锈、掉黑皮、擦出黑灰、煮番茄发灰或开裂，提供 6 种食用油精准烤箱聚合温度与珐琅铸铁锅避雷提示。' :
+                 lang === 'ja' ? 'ベタつき、食洗機後の赤サビ、被膜剥がれ、黒い汚れ、トマト変色や亀裂を即診断。6種オイルの最適オーブン温度とホーロー鍋警告付き。' :
+                 'Diagnose sticky surfaces, dishwasher rust, flaking seasoning, black residue, tomato discoloration, or cracks—with exact oven oil polymerization temps and enameled cast iron alerts.',
+    cta: lang === 'es' ? 'Diagnosticar Hierro Fundido' : lang === 'pt' ? 'Diagnosticar Ferro Fundido' : lang === 'zh-cn' ? '诊断养护方案' : lang === 'ja' ? '鉄鍋・鋳鉄を診断' : 'Troubleshoot Cast Iron'
+  },
+  induction: {
+    path: '/tools/induction-cookware-compatibility-checker/',
+    icon: '🧲',
+    badge: interactiveToolBadge,
+    title: lang === 'es' ? 'Verificador de Compatibilidad de Sartenes con Placa de Inducción' :
+           lang === 'pt' ? 'Verificador de Panelas Compatíveis com Fogão de Indução' :
+           lang === 'zh-cn' ? '电磁炉锅具兼容性与磁铁测试诊断工具' :
+           lang === 'ja' ? 'IHクッキングヒーター対応鍋＆マグネット判定チェッカー' :
+           'Induction Cookware Compatibility & Magnet Test Checker',
+    description: lang === 'es' ? 'Comprueba si 24 materiales y marcas populares funcionan en inducción con prueba del imán en 3 segundos, alertas de rayado en vidrio y distancia EMF para marcapasos.' :
+                 lang === 'pt' ? 'Descubra se 24 materiais e marcas populares funcionam no fogão de indução com teste do ímã em 3 segundos, alerta de riscos no vidro e distância segura para marca-passos.' :
+                 lang === 'zh-cn' ? '一键查询 24 种常见锅具材质与主流品牌是否兼容电磁炉，内置 3 秒磁铁吸附测试、微晶玻璃防刮花指南与心脏起搏器安全间距提醒。' :
+                 lang === 'ja' ? '主要24材質・人気ブランドがIHで使えるかを3秒磁石テストで即判定。ガラストップ傷防止対策やペースメーカー安全距離も確認できます。' :
+                 'Check whether 24 cookware materials and popular brands work on induction cooktops with a 3-second magnet test, glass-top scratch alerts, and pacemaker EMF guidance.',
+    cta: lang === 'es' ? 'Verificar Inducción' : lang === 'pt' ? 'Verificar Indução' : lang === 'zh-cn' ? '检测电磁炉兼容' : lang === 'ja' ? 'IH対応を判定' : 'Check Induction Fit'
+  },
+  dishwasherDosage: {
+    path: '/tools/dishwasher-detergent-dosage-calculator/',
+    icon: '🫧',
+    badge: interactiveToolBadge,
+    title: lang === 'es' ? 'Calculadora de Dosis de Detergente y Abrillantador para Lavavajillas' :
+           lang === 'pt' ? 'Calculadora de Dosagem de Sabão e Secante para Lava-Louças' :
+           lang === 'zh-cn' ? '洗碗机洗涤剂与漂洗剂精准用量计算器' :
+           lang === 'ja' ? '食洗機用洗剤・リンス剤・水硬度別 最適投与量計算機' :
+           'Dishwasher Detergent, Rinse Aid & Water Hardness Dosage Calculator',
+    description: lang === 'es' ? 'Calcula las cucharadas o mL exactos de detergente y ajuste del abrillantador según dureza del agua, con diagnóstico de vidrio opaco, sabor a jabón en silicona y rescate por espuma.' :
+                 lang === 'pt' ? 'Calcule a medida exata de sabão (colheres/mL) e regulagem do secante conforme a dureza da água, além de diagnóstico de copos esbranquiçados, gosto de sabão no silicone e resgate de espuma.' :
+                 lang === 'zh-cn' ? '按水质硬度与油污程度精准计算主洗与预洗剂量（汤匙/mL）及光亮剂档位，排查玻璃白雾腐蚀、硅胶吸附皂味与误放洗洁精溢泡急救。' :
+                 lang === 'ja' ? '水の硬度と汚れに合わせて主洗浄・予備洗浄の洗剤量とリンス剤設定を算出。グラスの白濁腐食診断やシリコンの洗剤臭・泡あふれ対策も網羅。' :
+                 'Calculate exact main-wash and pre-wash detergent doses (tbsp/mL) and rinse aid settings by water hardness—plus cloudy glass etching diagnostics, silicone soap taste fixes, and suds rescue.',
+    cta: lang === 'es' ? 'Calcular Dosis' : lang === 'pt' ? 'Calcular Dosagem' : lang === 'zh-cn' ? '计算洗涤剂用量' : lang === 'ja' ? '最適洗剤量を計算' : 'Calculate Dosage'
+  },
+  fridgeZone: {
+    path: '/tools/fridge-organization-zone-planner/',
+    icon: '🥬',
+    badge: interactiveToolBadge,
+    title: lang === 'es' ? 'Planificador de Organización de Nevera y Zonas Seguras (USDA y FDA)' :
+           lang === 'pt' ? 'Planejador de Organização da Geladeira e Zonas Seguras (USDA e FDA)' :
+           lang === 'zh-cn' ? '互动冰箱分区收纳与安全温区规划器 (USDA & FDA)' :
+           lang === 'ja' ? '冷蔵庫ゾーン別収納＆食品安全プランナー（USDA・FDA基準）' :
+           'Interactive Fridge Organization & Safe Temperature Zone Planner',
+    description: lang === 'es' ? 'Descubre en cuál de las 6 zonas de temperatura y humedad de la nevera (o despensa) va cada alimento para evitar goteos de carne cruda, deterioro en la puerta y gas etileno.' :
+                 lang === 'pt' ? 'Descubra em qual das 6 zonas de temperatura e umidade da geladeira (ou despensa) guardar 28 alimentos, evitando gotejamento de carne crua, porta quente e excesso de etileno.' :
+                 lang === 'zh-cn' ? '一目了然查看 28 类常见食材在冰箱 6 大温湿度分区（或常温阴凉处）的最佳摆放位置，严防生肉滴漏交叉污染、门架升温变质与果蔬乙烯催熟。' :
+                 lang === 'ja' ? '28食品カテゴリーに最適な冷蔵庫6ゾーン（または常温・冷暗所）を即確認。生肉ドリップ汚染、ドアポケットの温度上昇、エチレンによる鮮度劣化を防ぎます。' :
+                 'See which of the 6 USDA refrigerator temperature & humidity zones (or counter/pantry) fits 28 everyday foods—preventing raw meat drips, warm-door spoilage, and ethylene gas wilt.',
+    cta: lang === 'es' ? 'Planificar Nevera' : lang === 'pt' ? 'Organizar Geladeira' : lang === 'zh-cn' ? '规划冰箱分区' : lang === 'ja' ? '冷蔵ゾーンを確認' : 'Plan Fridge Zones'
+  },
+  microwaveWattage: {
+    path: '/tools/microwave-wattage-converter/',
+    icon: '⚡',
+    badge: interactiveToolBadge,
+    title: lang === 'es' ? 'Conversor de Potencia y Tiempo de Microondas (600W–1250W)' :
+           lang === 'pt' ? 'Conversor de Potência e Tempo de Micro-ondas (600W–1250W)' :
+           lang === 'zh-cn' ? '微波炉功率与加热时间换算器 (600W–1250W)' :
+           lang === 'ja' ? '電子レンジ ワット数・加熱時間変換ツール（600W–1250W）' :
+           'Microwave Wattage & Reheating Time Converter (600W–1250W)',
+    description: lang === 'es' ? 'Convierte al instante los tiempos de calentamiento entre microondas de 600W y 1250W Inverter con niveles de potencia (30%–100%), aviso de remover, reposo y seguridad USDA de 74°C.' :
+                 lang === 'pt' ? 'Adapte na hora o tempo de aquecimento entre micro-ondas de 600W e 1250W Inverter com ajuste de potência (30%–100%), aviso para mexer, descanso e segurança USDA de 74°C.' :
+                 lang === 'zh-cn' ? '将任意包装标称功率精准换算为 600W 至 1250W 变频微波炉的实际时长与火力档位（30%–100%），同步生成中途翻拌节点、静置回温与 USDA 74°C 冷点预警。' :
+                 lang === 'ja' ? '600W〜1250Wインバーター電子レンジの加熱時間を出力レベル（30%〜100%）別に瞬時換算。途中混ぜ目安・蒸らし時間・USDA 74°C安全基準に対応。' :
+                 'Convert package cooking and reheating times between 600W and 1250W Inverter microwaves with power levels (30%–100%), stir-halfway cues, standing time, and USDA 165°F cold-spot safety.',
+    cta: lang === 'es' ? 'Convertir Tiempo' : lang === 'pt' ? 'Converter Tempo' : lang === 'zh-cn' ? '换算微波时间' : lang === 'ja' ? 'レンジ時間を換算' : 'Convert Microwave Time'
+  },
   symbol: {
     path: '/tools/kitchen-symbol-decoder/',
     icon: '🔍',
@@ -474,9 +593,32 @@ const cardCopy = {
                    'Open Fridge Cheat Sheet →'
 };
 
+// Dynamic per-page OG social preview card (/api/og.svg)
+function truncateOgText(text: string, maxLen: number): string {
+  const clean = String(text || '').replace(/\s+/g, ' ').trim();
+  if (clean.length <= maxLen) return clean;
+  const sliced = clean.slice(0, maxLen - 1);
+  const lastSpace = sliced.lastIndexOf(' ');
+  const cut = lastSpace > Math.floor(maxLen * 0.6) ? sliced.slice(0, lastSpace) : sliced;
+  return `${cut.replace(/[\s,;:\-—–/]+$/, '')}…`;
+}
+
+const isCjkLocale = lang === 'zh-cn' || lang === 'ja';
+const ogTitle = truncateOgText(questionHeading, isCjkLocale ? 44 : 70);
+const ogVerdict = data.safe === 'yes' ? 'YES' : data.safe === 'no' ? 'NO' : 'DEPENDS';
+const ogAppliance = truncateOgText(formattedAppliance, isCjkLocale ? 18 : 32);
+const ogSummary = truncateOgText(data.shortAnswer || '', isCjkLocale ? 64 : 115);
+const ogParams = new URLSearchParams({
+  title: ogTitle,
+  verdict: ogVerdict,
+  appliance: ogAppliance,
+  summary: ogSummary,
+});
+const ogImage = `/api/og.svg?${ogParams.toString()}`;
+
 ---
 
-<Layout title={pageTitle} description={pageDescription} faqs={data.faqs} lang={lang} availableLocales={availableLocales}>
+<Layout title={pageTitle} description={pageDescription} faqs={data.faqs} lang={lang} availableLocales={availableLocales} ogImage={ogImage}>
   <Fragment slot="head">
     <script is:inline type="application/ld+json" set:html={JSON.stringify(speakableSchema)} />
     {howToSchema && (

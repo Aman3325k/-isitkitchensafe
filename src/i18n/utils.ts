@@ -224,6 +224,7 @@ const SPECIAL_PAGES = [
   'tools/kitchen-safety-iq-quiz',
   'tools/induction-cookware-compatibility-checker',
   'tools/dishwasher-detergent-dosage-calculator',
+  'tools/food-allergy-cross-contact-checker',
   'methodology',
   'saved'
 ];
