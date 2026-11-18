@@ -4,7 +4,7 @@ A static kitchen safety reference platform and interactive consumer tool suite a
 
 ## Overview
 
-IsItKitchenSafe delivers **10,937+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **196 interactive tools** (including **45 Google-indexed Everyday Consumer Kitchen Safety Tools**), **35 evergreen guides × 5 languages = 175 localized articles**, **68 comparisons × 5 languages = 340 localized pages**, **1,295 item pages per language (6,475 localized reference pages)**, **WCAG 2.1 AA accessibility**, and transparent E-E-A-T verification standards.
+IsItKitchenSafe delivers **10,957+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **197 interactive tools** (including **46 Google-indexed Everyday Consumer Kitchen Safety Tools**), **35 evergreen guides × 5 languages = 175 localized articles**, **68 comparisons × 5 languages = 340 localized pages**, **1,301 item pages per language (6,505 localized reference pages)**, **WCAG 2.1 AA accessibility**, and transparent E-E-A-T verification standards.
 
 ## Tech Stack
 - **Framework**: Astro.js (MPA static generation)
@@ -14,8 +14,9 @@ IsItKitchenSafe delivers **10,937+ static pages** across **11 verticals** and **
 
 ## Consumer Growth, E-E-A-T & Retention Architecture
 
-### Everyday Consumer Kitchen Safety Tools (45 Google-Indexed Tools)
-All 196 interactive tools are split cleanly between everyday consumer utilities and specialized commercial/lab simulators (**78 Home Kitchen Safety** + **118 Commercial & Industrial Engineering Lab**). **45 high-utility consumer tools** are explicitly allowlisted for search indexing in [`src/data/consumer-tools-allowlist.json`](src/data/consumer-tools-allowlist.json) across all 5 languages, including:
+### Everyday Consumer Kitchen Safety Tools (46 Google-Indexed Tools)
+All 197 interactive tools are split cleanly between everyday consumer utilities and specialized commercial/lab simulators (**79 Home Kitchen Safety** + **118 Commercial & Industrial Engineering Lab**). **46 high-utility consumer tools** are explicitly allowlisted for search indexing in [`src/data/consumer-tools-allowlist.json`](src/data/consumer-tools-allowlist.json) across all 5 languages, including:
+- **Oven Rack Position, Convection & Bakeware Material Heat Adjuster** (`oven-rack-bakeware-heat-adjuster`)
 - **USDA Moldy Food Cut-Around vs. Throw-Out Safety Checker** (`moldy-food-safety-checker`)
 - **Pantry, Spices & Dry Goods Shelf-Life & Safety Lookup** (`pantry-dry-goods-shelf-life-checker`)
 - **Kitchen Food Allergy & Cross-Contact Safety Checker** (`food-allergy-cross-contact-checker`)
@@ -109,10 +110,10 @@ npm run ops:engine
 ```
 
 ## Scale & Metrics
-- **10,937+ Static Pages** across 11 verticals and 5 languages (EN, ES, PT, ZH-CN, JA)
-- **196 Interactive Tools** across 5 languages (100% 5-language parity: 78 Home Kitchen Safety + 118 Commercial Engineering), including **45 Google-indexed Consumer Utilities** (`src/data/consumer-tools-allowlist.json`)
+- **10,957+ Static Pages** across 11 verticals and 5 languages (EN, ES, PT, ZH-CN, JA)
+- **197 Interactive Tools** across 5 languages (100% 5-language parity: 79 Home Kitchen Safety + 118 Commercial Engineering), including **46 Google-indexed Consumer Utilities** (`src/data/consumer-tools-allowlist.json`)
 - **35 Evergreen Guides × 5 Languages = 175 Articles** with 100% slug parity + **68 Comparisons × 5 Languages = 340 Pages**
-- **1,295 Items per Language (6,475 Localized Reference Pages)** with 100% slug parity including modern kitchenware (Owala FreeSip, Ninja Creami, Always Pan, Stasher, Instant Pot)
+- **1,301 Items per Language (6,505 Localized Reference Pages)** with 100% slug parity including modern kitchenware (Le Creuset, Yeti Rambler, HexClad, Caraway, Owala FreeSip, Ninja Creami, Always Pan, Stasher, Instant Pot)
 - **WCAG 2.1 AA Accessibility** (`:focus-visible`, `prefers-reduced-motion`, ARIA landmarks) + **Live Instant Search** across `/tools/`, `/blog/`, `/how-long/`, `/refreeze/`, `/compare/`, `/material/`, and `/what-happens/`
 - **1,309,849+ Audited Links / 0 Broken Links** (100% internal href resolution verified)
 - **Verified XML Sitemaps & Real-Time Indexing** (`sitemap-index.xml`, `sitemap-0.xml`, `scripts/ping-indexnow.cjs`)
