@@ -203,7 +203,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-continuous-uhps-mfs-modeler', name: 'Commercial Continuous Ultra-High Pressure Supercritical CO2 Fluid High-Shear Micro-Fluidizer Nano-Emulsion Sterilization (UHPS-MFS) Modeler', category: 'Supercritical High-Pressure Nano-Fluidics & Aseptic Emulsion Processing', component: 'CommercialContinuousUhpsMfsModeler.astro', dataFile: 'uhps-mfs-nano-emulsion-data.json' },
   { slug: 'commercial-continuous-hjc-sas-modeler', name: 'Commercial Continuous Hydrodynamic Jet Cavitation-Assisted Supercritical Antisolvent Micronization (HJC-SAS) Modeler', category: 'Cavitation Hydrodynamics & Supercritical Antisolvent Physics', component: 'CommercialContinuousHjcSasModeler.astro', dataFile: 'hjc-sas-micronization-data.json' },
   { slug: 'commercial-continuous-sfm-dip-modeler', name: 'Commercial Continuous Supercritical CO2 Foam Mat Drying & In-Line Porosimetry (SFM-DIP) Modeler', category: 'Supercritical Foam Physics & Aerated Food Matrix Preservation', component: 'CommercialContinuousSfmDipModeler.astro', dataFile: 'sfm-dip-foam-mat-drying-data.json' },
-  { slug: 'commercial-continuous-fm-acfd-modeler', name: 'Commercial Continuous Focused-Microwave Atmospheric Cold Freeze-Drying & In-Line Lyophilization (FM-ACFD) Modeler', category: 'Microwave Electromagnetics & Atmospheric Cryogenic Sublimation', component: 'CommercialContinuousFmAcfdModeler.astro', dataFile: 'fm-acfd-freeze-drying-data.json' }
+  { slug: 'commercial-continuous-fm-acfd-modeler', name: 'Commercial Continuous Focused-Microwave Atmospheric Cold Freeze-Drying & In-Line Lyophilization (FM-ACFD) Modeler', category: 'Microwave Electromagnetics & Atmospheric Cryogenic Sublimation', component: 'CommercialContinuousFmAcfdModeler.astro', dataFile: 'fm-acfd-freeze-drying-data.json' },
+  { slug: 'commercial-continuous-scw-mcc-modeler', name: 'Commercial Continuous Subcritical Water Dynamic Multi-Stage Counter-Current Extraction & In-Line Polyphenol Fractionation (SCW-MCC) Modeler', category: 'Subcritical Thermodynamics & Multi-Stage Green Fractionation', component: 'CommercialContinuousScwMccModeler.astro', dataFile: 'scw-mcc-extraction-fractionation-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -497,7 +498,8 @@ function auditDatasets() {
     'uhps-mfs-nano-emulsion-data.json',
     'hjc-sas-micronization-data.json',
     'sfm-dip-foam-mat-drying-data.json',
-    'fm-acfd-freeze-drying-data.json'
+    'fm-acfd-freeze-drying-data.json',
+    'scw-mcc-extraction-fractionation-data.json'
 ];
 
   const datasetStats = {};
@@ -808,32 +810,32 @@ function auditGrowthOpportunities() {
     // 4. Strategic Candidate Directives for Next High-Intent Tool Additions
   const candidateTools = [
     {
-      title: 'Commercial Continuous Subcritical Water Dynamic Multi-Stage Counter-Current Extraction & In-Line Polyphenol Fractionation (SCW-MCC) Modeler',
-      category: 'Subcritical Thermodynamics & Multi-Stage Green Fractionation',
-      intent: 'Models continuous pressurized hot subcritical water (T = 110–190°C, P = 25–60 bar) dynamic counter-current multi-stage column extraction for rapid, solvent-free recovery of high-purity polyphenols and thermolabile anthocyanins with in-line ceramic nanofiltration concentration.',
-      priority: 'CRITICAL_HIGH',
-      estimatedMonthlyVolume: '360+ US impressions'
-    },
-    {
       title: 'Commercial Continuous Acoustically-Coupled High-Pressure Supercritical CO2 Liposome Encapsulator & In-Line Ultrafiltration (ACHP-SCL) Modeler',
       category: 'Acousto-Fluidic Supercritical Encapsulation & Membrane Engineering',
       intent: 'Models continuous high-pressure supercritical CO2 micro-fluidic liposome formation coupled with megasonic acoustic standing wave focusing (1.2 MHz) and in-line ceramic tangential-flow ultrafiltration for high-entrapment (>96%) bioactive delivery.',
-      priority: 'HIGH',
-      estimatedMonthlyVolume: '320+ US impressions'
+      priority: 'CRITICAL_HIGH',
+      estimatedMonthlyVolume: '360+ US impressions'
     },
     {
       title: 'Commercial Continuous Electrostatic Spray Micro-Encapsulation & Atmospheric Cold Plasma Coating (ESM-CPC) Modeler',
       category: 'Electrohydrodynamics & Non-Thermal Bioactive Film Engineering',
       intent: 'Models continuous high-voltage electrostatic micro-atomization (18–35 kV) integrated with in-package dielectric barrier discharge cold plasma mist for instantaneous enteric biopolymer coating of probiotics and bioactive powders.',
-      priority: 'MEDIUM',
-      estimatedMonthlyVolume: '290+ US impressions'
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '310+ US impressions'
     },
     {
       title: 'Commercial Continuous Hydrodynamic Ultrasonic Cavitation & Low-Temperature Subcritical CO2 Micro-Atomization (HUC-SAC) Spray Chiller Modeler',
       category: 'Hydrodynamic Cavitation & Subcritical Cryogenic Spray Physics',
       intent: 'Models continuous high-shear hydrodynamic-ultrasonic cavitation (28 kHz, 15–30 bar) combined with liquefied subcritical CO2 expansion nozzle atomization (-35°C to -50°C) for instant spherical powder cryo-vitrification with zero volatile aroma loss and >97% bio-lipid encapsulation.',
+      priority: 'HIGH',
+      estimatedMonthlyVolume: '290+ US impressions'
+    },
+    {
+      title: 'Commercial Continuous Focused-Field High-Pressure Pulsed Arc Disruption & Subcritical Water Dynamic Biorefinery (PAD-SWD) Modeler',
+      category: 'Electrohydraulic Processing & Subcritical Biorefinery Physics',
+      intent: 'Models continuous electrohydraulic high-voltage pulsed arc shockwave pre-treatment (35–50 kV) coupled with dynamic subcritical water extraction (120–160°C, 30–50 bar) for ultra-rapid lignocellulosic biorefinery and high-purity hemicellulose/polyphenol recovery.',
       priority: 'MEDIUM',
-      estimatedMonthlyVolume: '280+ US impressions'
+      estimatedMonthlyVolume: '270+ US impressions'
     }
   ];
 
