@@ -54,7 +54,14 @@ const curatedTools: Array<{
     path: '/tools/meat-thawing-calculator/',
     title: 'USDA Meat & Turkey Safe Thawing Time Calculator',
     description:
-      'Calculate precise refrigerator, cold water, and microwave thawing countdowns for whole turkey, chicken, roasts, and steaks following official USDA FSIS food safety guidelines.',
+      'Calculate Fridge, Cold Water, Microwave, and Cook-From-Frozen schedules across 10 meat cuts with exact Start Thawing By dates and USDA FSIS safe internal temperatures.',
+    date: '2026-11-18',
+  },
+  {
+    path: '/tools/plastic-code-checker/',
+    title: 'Plastic Recycling Code (#1–#7) Kitchen Safety Checker',
+    description:
+      'Interactive kitchen safety lookup for PET, HDPE, PVC, LDPE, PP, PS, Polycarbonate, Tritan, and PLA plastic resin codes #1–#7 across microwave, dishwasher, freezer, and hot liquids.',
     date: '2026-11-18',
   },
   {

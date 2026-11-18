@@ -209,6 +209,7 @@ const SPECIAL_PAGES = [
   'tools/kitchen-symbol-decoder',
   'tools/leftover-shelf-life-calculator',
   'tools/meat-thawing-calculator',
+  'tools/plastic-code-checker',
   'methodology',
   'saved'
 ];

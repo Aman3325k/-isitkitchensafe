@@ -207,7 +207,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-continuous-scw-mcc-modeler', name: 'Commercial Continuous Subcritical Water Dynamic Multi-Stage Counter-Current Extraction & In-Line Polyphenol Fractionation (SCW-MCC) Modeler', category: 'Subcritical Thermodynamics & Multi-Stage Green Fractionation', component: 'CommercialContinuousScwMccModeler.astro', dataFile: 'scw-mcc-extraction-fractionation-data.json' },
   { slug: 'kitchen-symbol-decoder', name: 'Kitchen Bottom Symbol Decoder & Plastic Resin Code Lookup (#1-#7)', category: 'Consumer Kitchen Safety', component: 'KitchenSymbolDecoder.astro', dataFile: 'kitchen-symbol-decoder-data.json' },
   { slug: 'leftover-shelf-life-calculator', name: 'USDA Leftover & Fridge Shelf-Life Countdown Calculator', category: 'Consumer Kitchen Safety', component: 'LeftoverShelfLifeCalculator.astro', dataFile: 'leftover-shelf-life-data.json' },
-  { slug: 'meat-thawing-calculator', name: 'USDA Meat & Turkey Safe Thawing Time Calculator', category: 'Consumer Kitchen Safety', component: 'MeatThawingCalculator.astro', dataFile: 'meat-thawing-calculator-data.json' }
+  { slug: 'meat-thawing-calculator', name: 'USDA Meat & Turkey Safe Thawing Time Calculator', category: 'Consumer Kitchen Safety', component: 'MeatThawingCalculator.astro', dataFile: 'meat-thawing-calculator-data.json' },
+  { slug: 'plastic-code-checker', name: 'Plastic Recycling Code (#1-#7) Kitchen Safety Checker', category: 'Consumer Kitchen Safety', component: 'PlasticCodeChecker.astro', dataFile: 'plastic-code-checker-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -505,7 +506,8 @@ function auditDatasets() {
     'scw-mcc-extraction-fractionation-data.json',
     'kitchen-symbol-decoder-data.json',
     'leftover-shelf-life-data.json',
-    'meat-thawing-calculator-data.json'
+    'meat-thawing-calculator-data.json',
+    'plastic-code-checker-data.json'
 ];
 
   const datasetStats = {};
