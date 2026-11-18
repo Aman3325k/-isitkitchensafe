@@ -86,6 +86,13 @@ const curatedTools: Array<{
     date: '2026-11-18',
   },
   {
+    path: '/tools/microwave-wattage-converter/',
+    title: 'Microwave Wattage Time Converter (600W–1250W) & Food Safety Calculator',
+    description:
+      'Convert microwave cooking times across 600W, 700W, 800W, 900W, 1000W, 1100W, 1200W, and 1250W Inverter ovens with power-level adjustments (30%–100%), halfway stir checkpoints, standing time, and USDA 165°F (74°C) cold-spot safety rules.',
+    date: '2026-11-18',
+  },
+  {
     path: '/tools/cleaner-mixing-danger-checker/',
     title: 'Kitchen Cleaner Mixing Danger Checker: Bleach, Vinegar, Ammonia & Peroxide',
     description:

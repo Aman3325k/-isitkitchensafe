@@ -91,7 +91,7 @@ export default defineConfig({
   },
   build: {
     inlineStylesheets: 'auto',
-    concurrency: 2,
+    concurrency: 1,
   },
   i18n: {
     defaultLocale: 'en',

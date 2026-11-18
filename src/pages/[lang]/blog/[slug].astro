@@ -14,6 +14,7 @@ import comparisonsPt from '../../../data/comparisons.pt.json';
 import comparisonsZh from '../../../data/comparisons.zh-cn.json';
 import comparisonsJa from '../../../data/comparisons.ja.json';
 import { injectInlineLinks } from '../../../utils/linkingHelper.js';
+import { getDirectoryUrl, useTranslatedPath } from '../../../i18n/utils';
 import type { SupportedLanguage } from '../../../i18n/ui';
 
 export function getStaticPaths() {
@@ -159,6 +160,215 @@ const blogPostingSchema = {
     : "キッチンの安全性・食品衛生",
   "url": canonicalUrl
 };
+
+// Smart Contextual Interactive Calculator Recommendation (Localized)
+const translatePath = useTranslatedPath(lang);
+const methodologyUrl = getDirectoryUrl('methodology', lang);
+const contactUrl = getDirectoryUrl('contact', lang);
+
+const toolMatchContext = `${article.slug} ${article.title} ${(article as any).category || ''}`.toLowerCase();
+type RecommendedToolKey =
+  | 'descaling'
+  | 'cleaner'
+  | 'plastic'
+  | 'airfryer'
+  | 'microwave'
+  | 'thawing'
+  | 'cookingTemp'
+  | 'leftover'
+  | 'ovenTemp'
+  | 'symbol';
+
+let recommendedToolKey: RecommendedToolKey = 'symbol';
+if (/\b(descal(?:e|ing)|coffee|kettles?|espresso)\b/i.test(toolMatchContext)) {
+  recommendedToolKey = 'descaling';
+} else if (/\b(bleach|vinegar|ammonia|peroxide|cleaners?)\b/i.test(toolMatchContext)) {
+  recommendedToolKey = 'cleaner';
+} else if (/\b(plastics?|microplastics?|resin|styrofoam|tupperware|ziploc)\b/i.test(toolMatchContext)) {
+  recommendedToolKey = 'plastic';
+} else if (/\b(air[- ]?fryer)\b/i.test(toolMatchContext)) {
+  recommendedToolKey = 'airfryer';
+} else if (/\b(microwave|watt(?:age|s)?)\b/i.test(toolMatchContext)) {
+  recommendedToolKey = 'microwave';
+} else if (/\b(turkey|thaw(?:ing)?|holiday|refreeze)\b/i.test(toolMatchContext)) {
+  recommendedToolKey = 'thawing';
+} else if (/\b(internal[- ]cooking|cooking[- ]temp(?:erature)?s?|meat|poultry)\b/i.test(toolMatchContext)) {
+  recommendedToolKey = 'cookingTemp';
+} else if (/\b(leftovers?|store|storage|fridge|refrigerat(?:e|ion|or)|freezer)\b/i.test(toolMatchContext)) {
+  recommendedToolKey = 'leftover';
+} else if (/\b(cookware|oven|hexclad|pyrex|nonstick|stainless|cast[- ]iron|carbon[- ]steel|caraway|lodge|le[- ]creuset|bakeware|skillet|pan)\b/i.test(toolMatchContext)) {
+  recommendedToolKey = 'ovenTemp';
+}
+
+const interactiveToolBadge = isEs
+  ? 'Herramienta Interactiva'
+  : isPt
+  ? 'Ferramenta Interativa'
+  : isZh
+  ? '互动计算工具'
+  : 'インタラクティブツール';
+
+const toolCatalog: Record<RecommendedToolKey, {
+  path: string;
+  icon: string;
+  title: string;
+  description: string;
+  cta: string;
+}> = {
+  cleaner: {
+    path: '/tools/cleaner-mixing-danger-checker/',
+    icon: '🧪',
+    title: isEs ? 'Verificador de Peligro al Mezclar Limpiadores de Cocina' :
+           isPt ? 'Verificador de Perigo ao Misturar Produtos de Limpeza' :
+           isZh ? '厨房清洁剂混用危险检测器' :
+           'キッチン洗剤の危険な混合チェッカー',
+    description: isEs ? 'Comprueba dos limpiadores domésticos antes de mezclarlos para detectar al instante gas cloro tóxico, cloramina o reacciones peligrosas.' :
+                 isPt ? 'Verifique dois produtos de limpeza antes de misturá-los para detectar instantaneamente gás cloro tóxico, cloramina ou reações perigosas.' :
+                 isZh ? '混合清洁剂前一键排查两种化学成分，即时识别氯气、氯胺中毒与剧烈放热反应风险。' :
+                 '2種類の家庭用洗剤を混ぜる前にチェックし、有毒な塩素ガスやクロラミン発生、発熱反応の危険を瞬時に判定します。',
+    cta: isEs ? 'Verificar Mezcla' : isPt ? 'Verificar Mistura' : isZh ? '检测混用风险' : '混合の危険を確認'
+  },
+  descaling: {
+    path: '/tools/appliance-descaling-calculator/',
+    icon: '☕',
+    title: isEs ? 'Calculadora de Descalcificación para Cafeteras y Hervidores' :
+           isPt ? 'Calculadora de Descalcificação para Cafeteiras e Chaleiras' :
+           isZh ? '咖啡机与水壶除垢比例计算器' :
+           'コーヒーメーカー・ケトル水垢除去比率計算ツール',
+    description: isEs ? 'Calcula la proporción exacta de ácido cítrico o vinagre blanco y los ciclos de enjuague para tu cafetera, máquina de espresso o hervidor.' :
+                 isPt ? 'Calcule a proporção exata de ácido cítrico ou vinagre branco e ciclos de enxágue para sua cafeteira, máquina de espresso ou chaleira.' :
+                 isZh ? '根据咖啡机、意式机或电水壶容量，精准计算柠檬酸或白醋除垢配比与安全冲洗次数。' :
+                 'コーヒーメーカー・エスプレッソマシン・電気ケトルの容量に合わせて、クエン酸や酢の安全な配合比とすすぎ回数を計算します。',
+    cta: isEs ? 'Calcular Proporción' : isPt ? 'Calcular Proporção' : isZh ? '计算除垢比例' : '除垢比率を計算'
+  },
+  microwave: {
+    path: '/tools/microwave-wattage-converter/',
+    icon: '⏱️',
+    title: isEs ? 'Conversor de Potencia (Vatios) y Tiempo de Microondas' :
+           isPt ? 'Conversor de Potência (Watts) e Tempo de Micro-ondas' :
+           isZh ? '微波炉功率（瓦数）与加热时间换算器' :
+           '電子レンジ ワット数・加熱時間変換ツール',
+    description: isEs ? 'Adapta los tiempos de cocción de 700W, 900W, 1000W o 1100W a la potencia exacta de tu microondas para calentar sin zonas frías ni sobrecalentamiento.' :
+                 isPt ? 'Converta tempos de preparo de 700W, 900W, 1000W ou 1100W para a potência exata do seu micro-ondas, evitando pontos frios e superaquecimento.' :
+                 isZh ? '将 700W、900W、1000W 或 1100W 食谱与包装加热时间精准换算为您家中微波炉的实际瓦数，避免加热不均或过热焦糊。' :
+                 '500W・600W・700W・1000Wなどパッケージ記載の加熱時間を、ご自宅の電子レンジの出力に合わせて正確に換算し、加熱ムラや過熱を防ぎます。',
+    cta: isEs ? 'Convertir Potencia' : isPt ? 'Converter Potência' : isZh ? '换算微波炉时间' : 'ワット数を換算'
+  },
+  plastic: {
+    path: '/tools/plastic-code-checker/',
+    icon: '♻️',
+    title: isEs ? 'Verificador de Seguridad de Códigos de Plástico #1–#7' :
+           isPt ? 'Verificador de Segurança de Códigos de Plástico #1–#7' :
+           isZh ? '塑料回收编号 #1–#7 安全查询器' :
+           'プラスチック識別番号 #1〜#7 安全性チェッカー',
+    description: isEs ? 'Consulta cualquier código de resina #1–#7 (PET, HDPE, PVC, PP, PS) para comprobar si es apto para microondas, lavavajillas, congelador y libre de BPA.' :
+                 isPt ? 'Consulte qualquer código de resina #1–#7 (PET, HDPE, PVC, PP, PS) para verificar segurança em micro-ondas, lava-louças, freezer e risco de BPA.' :
+                 isZh ? '一键查询 #1–#7 塑料树脂代码（PET、HDPE、PVC、PP、PS 等），快速核对微波炉、洗碗机、冷冻耐受度与化学析出风险。' :
+                 '#1〜#7のプラスチック材質番号（PET・HDPE・PVC・PP・PS等）から電子レンジ・食洗機・冷凍適性と溶出リスクを瞬時に確認できます。',
+    cta: isEs ? 'Verificar Código #1–#7' : isPt ? 'Verificar Código #1–#7' : isZh ? '查询塑料编号' : 'プラ番号を確認'
+  },
+  airfryer: {
+    path: '/tools/air-fryer-oven-converter/',
+    icon: '🔥',
+    title: isEs ? 'Conversor de Freidora de Aire, Horno de Convección y Gas Mark' :
+           isPt ? 'Conversor de Air Fryer, Forno de Convecção e Gas Mark' :
+           isZh ? '空气炸锅、对流烤箱与燃气档位换算器' :
+           'ノンフライヤー・コンベクション・ガスマーク変換ツール',
+    description: isEs ? 'Convierte al instante cualquier receta de horno convencional a temperatura (°F/°C) y tiempo reducido para freidora de aire sin quemar la comida.' :
+                 isPt ? 'Converta na hora qualquer receita de forno convencional para temperatura (°F/°C) e tempo reduzido na air fryer evitando queimar os alimentos.' :
+                 isZh ? '将传统烤箱食谱一键换算为空气炸锅安全温度（°F/°C）与缩短后的烹饪时长，避免焦糊与过热。' :
+                 '通常のオーブンレシピをノンフライヤー用の安全な温度（°F/°C）と短縮時間に瞬時に変換し、焦げ付きを防ぎます。',
+    cta: isEs ? 'Convertir Temperatura' : isPt ? 'Converter Temperatura' : isZh ? '换算炸锅温时' : '温度・時間を変換'
+  },
+  thawing: {
+    path: '/tools/meat-thawing-calculator/',
+    icon: '❄️',
+    title: isEs ? 'Calculadora USDA de Descongelación Segura de Carne y Pavo' :
+           isPt ? 'Calculadora USDA de Descongelamento Seguro de Carne e Peru' :
+           isZh ? 'USDA 肉类与火鸡安全解冻时间计算器' :
+           'USDA 肉・七面鳥の安全な解凍時間計算ツール',
+    description: isEs ? 'Calcula los tiempos exactos del USDA para descongelar en refrigerador o agua fría según peso y corte, evitando la zona de peligro bacteriano.' :
+                 isPt ? 'Calcule os tempos exatos do USDA para descongelar na geladeira ou em água fria por peso e corte, mantendo carnes fora da zona de perigo.' :
+                 isZh ? '按重量与肉类部位精准计算 USDA 冷藏与冷水安全解冻时长，让禽肉、牛猪肉与海鲜远离细菌危险温区。' :
+                 '重量と部位からUSDA基準の冷蔵解凍・冷水解凍時間を正確に計算し、食中毒の危険温度帯を避けて安全に解凍できます。',
+    cta: isEs ? 'Calcular Descongelación' : isPt ? 'Calcular Descongelamento' : isZh ? '计算解冻时间' : '解凍時間を計算'
+  },
+  leftover: {
+    path: '/tools/leftover-shelf-life-calculator/',
+    icon: '🗓️',
+    title: isEs ? 'Calculadora USDA de Vida Útil de Sobras y Refrigerador' :
+           isPt ? 'Calculadora USDA de Validade de Sobras na Geladeira' :
+           isZh ? 'USDA 剩菜与冰箱保质期倒计时计算器' :
+           'USDA 残り物・冷蔵保存期限カウントダウン計算ツール',
+    description: isEs ? 'Ingresa cuándo cocinaste o abriste un alimento para obtener su fecha límite exacta del USDA en refrigerador y congelador.' :
+                 isPt ? 'Informe quando cozinhou ou abriu um alimento para obter a data limite exata do USDA na geladeira e no congelador.' :
+                 isZh ? '输入烹饪或开封日期，即时生成剩菜、乳制品、肉类与果蔬的 USDA 冰箱冷藏与冷冻安全食用截止日。' :
+                 '調理日や開封日を入力するだけで、残り物・乳製品・肉・野菜のUSDA基準による冷蔵・冷凍の安全消費期限を算出します。',
+    cta: isEs ? 'Calcular Caducidad' : isPt ? 'Calcular Validade' : isZh ? '计算保质期' : '保存期限を確認'
+  },
+  cookingTemp: {
+    path: '/tools/internal-cooking-temp-chart/',
+    icon: '🌡️',
+    title: isEs ? 'Tabla USDA de Temperaturas Internas Seguras de Cocción' :
+           isPt ? 'Tabela USDA de Temperaturas Internas Seguras de Cozimento' :
+           isZh ? 'USDA 安全烹饪中心温度速查表' :
+           'USDA 安全な調理中心温度チャート',
+    description: isEs ? 'Consulta las temperaturas internas mínimas oficiales del USDA (°F y °C) y tiempos de reposo para aves, res, cerdo, mariscos, huevos y cazuelas.' :
+                 isPt ? 'Confira as temperaturas internas mínimas oficiais do USDA (°F e °C) e tempos de descanso para aves, boi, porco, frutos do mar, ovos e assados.' :
+                 isZh ? '查阅 USDA 官方最低安全中心温度（°F 与 °C）及静置时间，覆盖禽肉、牛羊猪肉、海鲜、蛋类与烘焙砂锅菜。' :
+                 '鶏肉・牛肉・豚肉・魚介・卵・キャセロールのUSDA公式最低中心温度（°F・°C）と休ませ時間を一覧で確認できます。',
+    cta: isEs ? 'Ver Temperaturas' : isPt ? 'Ver Temperaturas' : isZh ? '查看安全温度' : '中心温度を確認'
+  },
+  ovenTemp: {
+    path: '/tools/cookware-oven-temp-lookup/',
+    icon: '♨️',
+    title: isEs ? 'Buscador de Temperatura Segura de Horno para Ollas y Moldes' :
+           isPt ? 'Consulta de Temperatura Segura no Forno para Panelas e Formas' :
+           isZh ? '厨具与烤盘烤箱耐热上限查询器' :
+           '調理器具・耐熱皿のオーブン耐熱温度検索ツール',
+    description: isEs ? 'Comprueba los límites exactos de temperatura en horno y grill para Pyrex, vidrio, hierro fundido, HexClad, Caraway, antiadherente, acero inoxidable y tapas.' :
+                 isPt ? 'Verifique os limites exatos de temperatura no forno e grill para Pyrex, vidro, ferro fundido, HexClad, Caraway, antiaderente, aço inox e tampas.' :
+                 isZh ? '速查 Pyrex 玻璃、铸铁锅、HexClad、Caraway、不粘锅、不锈钢与锅盖的烤箱及炙烤最高安全耐热温度。' :
+                 'Pyrex・ガラス・鋳鉄・HexClad・Caraway・フッ素樹脂・ステンレス・蓋のオーブンおよびグリル耐熱上限を検索できます。',
+    cta: isEs ? 'Buscar Límite de Horno' : isPt ? 'Consultar Limite no Forno' : isZh ? '查询耐热上限' : '耐熱上限を調べる'
+  },
+  symbol: {
+    path: '/tools/kitchen-symbol-decoder/',
+    icon: '🔍',
+    title: isEs ? 'Decodificador de Símbolos de Cocina' :
+           isPt ? 'Decodificador de Símbolos de Cozinha' :
+           isZh ? '厨具底部安全标志识别器' :
+           'キッチン用品マーク解読ツール',
+    description: isEs ? '¿No estás seguro de los íconos en la base de tu recipiente o termo? Identifica al instante los símbolos de lavavajillas, microondas y plásticos.' :
+                 isPt ? 'Não tem certeza sobre os ícones no fundo do recipiente ou copo térmico? Identifique na hora símbolos de lava-louças, micro-ondas e plásticos.' :
+                 isZh ? '不确定容器、保温杯或锅具底部的符号含义？即时识别洗碗机、微波炉、耐热与塑料回收标志。' :
+                 '容器・タンブラー・調理器具の底にあるマークの意味がわからない時は、食洗機・電子レンジ・耐熱マークを瞬時に判定できます。',
+    cta: isEs ? 'Abrir Decodificador' : isPt ? 'Abrir Decodificador' : isZh ? '打开标志识别器' : 'マークを調べる'
+  }
+};
+
+const recommendedTool = toolCatalog[recommendedToolKey];
+const recommendedToolUrl = translatePath(recommendedTool.path);
+
+const uxCopy = {
+  copyLink: isEs ? 'Copiar Enlace' : isPt ? 'Copiar Link' : isZh ? '复制链接' : 'リンクをコピー',
+  copyAria: isEs ? 'Copiar enlace de esta guía de seguridad' : isPt ? 'Copiar link deste guia de segurança' : isZh ? '复制本安全指南链接' : 'この安全ガイドのリンクをコピー',
+  copied: isEs ? 'Enlace Copiado' : isPt ? 'Link Copiado' : isZh ? '链接已复制' : 'コピーしました',
+  toastCopied: isEs ? 'Enlace de la guía copiado al portapapeles' : isPt ? 'Link do guia copiado para a área de transferência' : isZh ? '指南链接已复制到剪贴板' : 'ガイドのリンクをクリップボードにコピーしました',
+  printGuide: isEs ? 'Imprimir Guía' : isPt ? 'Imprimir Guia' : isZh ? '打印指南' : 'ガイドを印刷',
+  printAria: isEs ? 'Imprimir esta guía de seguridad' : isPt ? 'Imprimir este guia de segurança' : isZh ? '打印本安全指南' : 'この安全ガイドを印刷',
+  badgeVerified: isEs ? '✓ Verificado USDA FSIS / FDA / NSF' : isPt ? '✓ Verificado USDA FSIS / FDA / NSF' : isZh ? '✓ 依据 USDA FSIS / FDA / NSF 核验' : '✓ USDA FSIS・FDA・NSF 基準検証済み',
+  trustHeading: isEs ? 'Verificado según los estándares USDA FSIS, FDA 21 CFR y NSF de seguridad en cocina' :
+                isPt ? 'Verificado conforme os padrões USDA FSIS, FDA 21 CFR e NSF de segurança na cozinha' :
+                isZh ? '严格依据 USDA FSIS、FDA 21 CFR 及 NSF 食品接触安全标准交叉核验' :
+                'USDA FSIS・FDA 21 CFR・NSF キッチン安全基準に基づき検証済み',
+  methodologyCta: isEs ? 'Leer Metodología de Verificación' : isPt ? 'Ler Metodologia de Verificação' : isZh ? '查看安全核验方法论' : '安全検証メソドロジーを見る',
+  reportCorrection: isEs ? 'Reportar una corrección' : isPt ? 'Relatar uma correção' : isZh ? '反馈纠错或更新' : '修正・更新を報告',
+  trustFoot: isEs ? 'Recomendaciones cotejadas con el Servicio de Inspección e Inocuidad Alimentaria (USDA FSIS), normativas FDA de contacto con alimentos, directrices NSF International y manuales OEM.' :
+             isPt ? 'Recomendações conferidas com o Serviço de Inspeção e Segurança Alimentar (USDA FSIS), normas FDA de contato com alimentos, diretrizes NSF International e manuais OEM.' :
+             isZh ? '所有建议均对照美国农业部食品安全检验局（USDA FSIS）、FDA 食品接触法规、NSF International 准则与家电原厂手册核验。' :
+             'すべてのガイドラインはUSDA食品安全検査局（FSIS）、FDA食品接触規制、NSF International基準および各家電メーカー公式マニュアルと照合しています。'
+};
 ---
 
 <Layout title={pageTitle} description={pageDescription} faqs={article.faqs} excludeArticleSchema={true} availableLocales={availableLocales} lang={lang} ogType="article">
@@ -189,22 +399,49 @@ const blogPostingSchema = {
       </h1>
       
       <!-- Trust Signals and Metadata -->
-      <div class="flex flex-wrap items-center gap-4 text-xs text-muted border-b border-hairline pb-6">
+      <div class="flex flex-wrap items-center gap-4 text-xs text-muted border-b border-hairline pb-5">
         <span>{isEs || isPt ? "Por" : isZh ? "作者：" : "著者："} <strong>{article.author}</strong></span>
         <span class="hidden sm:inline">•</span>
         <span>{isEs || isPt ? "Publicado:" : isZh ? "发布日期：" : "公開日："} <strong>{article.date}</strong></span>
         <span class="hidden sm:inline">•</span>
         <span>{isEs ? "Lectura:" : isPt ? "Tempo de leitura:" : isZh ? "预计阅读：" : "所要時間："} <strong>{article.readTime}</strong></span>
         <span class="hidden sm:inline">•</span>
-        <span class="inline-flex items-center gap-1 text-success font-medium bg-success-bg px-2.5 py-0.5 rounded-full">
-          {isEs
-            ? "✓ Respaldo Científico (USDA/FDA)"
-            : isPt
-            ? "✓ Base Científica (USDA/FDA)"
-            : isZh
-            ? "✓ 权威科学背书（USDA/FDA标准）"
-            : "✓ 科学的根拠（USDA/FDA基準準拠）"}
-        </span>
+        <a
+          href={methodologyUrl}
+          class="inline-flex items-center gap-1 text-success font-medium bg-success-bg border border-success-border/30 px-2.5 py-0.5 rounded-full hover:underline"
+        >
+          {uxCopy.badgeVerified}
+        </a>
+      </div>
+
+      <!-- Quick-Share & Print Action Bar -->
+      <div class="mt-4 flex flex-wrap items-center gap-2.5 no-print">
+        <button
+          id="copy-link-btn"
+          type="button"
+          aria-label={uxCopy.copyAria}
+          data-default-text={uxCopy.copyLink}
+          data-copied-text={uxCopy.copied}
+          data-toast-text={uxCopy.toastCopied}
+          class="min-h-[40px] px-3.5 py-2 bg-canvas hover:bg-surface-soft active:scale-[0.98] text-ink border border-hairline rounded-md text-xs font-medium inline-flex items-center gap-2 shadow-xs transition-all cursor-pointer"
+        >
+          <svg class="w-4 h-4 text-muted shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+          </svg>
+          <span id="copy-link-btn-text">{uxCopy.copyLink}</span>
+        </button>
+
+        <button
+          id="print-guide-btn"
+          type="button"
+          aria-label={uxCopy.printAria}
+          class="min-h-[40px] px-3.5 py-2 bg-canvas hover:bg-surface-soft active:scale-[0.98] text-ink border border-hairline rounded-md text-xs font-medium inline-flex items-center gap-2 shadow-xs transition-all cursor-pointer"
+        >
+          <svg class="w-4 h-4 text-muted shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+          </svg>
+          <span>{uxCopy.printGuide}</span>
+        </button>
       </div>
     </header>
 
@@ -296,6 +533,59 @@ const blogPostingSchema = {
           <p class="text-body-md text-body leading-relaxed" set:html={linkedConclusion}></p>
         </section>
 
+        <!-- Smart Contextual Interactive Calculator CTA Card -->
+        <section id="recommended-tool-card" class="bg-surface-soft border border-hairline rounded-lg p-5 sm:p-6 shadow-xs no-print">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                <span class="text-base" aria-hidden="true">{recommendedTool.icon}</span>
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-signature-coral">{interactiveToolBadge}</span>
+              </div>
+              <h2 class="text-title-sm text-ink font-semibold mb-1.5 leading-snug">
+                {recommendedTool.title}
+              </h2>
+              <p class="text-[13px] text-body leading-relaxed">
+                {recommendedTool.description}
+              </p>
+            </div>
+            <div class="shrink-0">
+              <a
+                href={recommendedToolUrl}
+                class="min-h-[42px] px-4 py-2.5 bg-primary hover:bg-primary-active active:scale-[0.98] text-on-primary rounded-md text-xs font-medium inline-flex items-center gap-1.5 transition-all whitespace-nowrap"
+              >
+                <span>{recommendedTool.cta}</span>
+                <span aria-hidden="true">&rarr;</span>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <!-- E-E-A-T Verification & Citations Bar -->
+        <section id="editorial-trust-bar" class="bg-surface-soft border border-hairline rounded-lg p-5 text-xs text-muted leading-relaxed">
+          <div class="flex items-start gap-2.5 pb-3 border-b border-hairline">
+            <svg class="w-4 h-4 text-success shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+            <div class="min-w-0 flex-1">
+              <p class="text-ink font-medium text-[13px] leading-snug">
+                {uxCopy.trustHeading}
+              </p>
+              <div class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px]">
+                <a href={methodologyUrl} class="text-link hover:underline font-medium">
+                  {uxCopy.methodologyCta} &rarr;
+                </a>
+                <span class="text-hairline hidden sm:inline">•</span>
+                <a href={contactUrl} class="text-muted hover:text-ink hover:underline">
+                  {uxCopy.reportCorrection}
+                </a>
+              </div>
+            </div>
+          </div>
+          <p class="pt-3 text-[12px] text-muted">
+            {uxCopy.trustFoot}
+          </p>
+        </section>
+
         <!-- FAQ Section -->
         <section class="border-t border-hairline pt-10">
           <h2 class="text-2xl md:text-3xl font-bold text-ink mb-6">
@@ -360,7 +650,7 @@ const blogPostingSchema = {
             {article.relatedTools.map((tool) => (
               <li>
                 <a 
-                  href={tool.url} 
+                  href={tool.url.endsWith('/') ? tool.url : `${tool.url}/`} 
                   class="text-[13px] text-link hover:underline font-medium leading-normal block"
                 >
                   {tool.name} &rarr;
@@ -410,16 +700,17 @@ const blogPostingSchema = {
           </h4>
           <p class="text-xs text-muted leading-relaxed mb-3">
             {isEs
-              ? "Cada guía es investigada minuciosamente con recomendaciones oficiales del USDA, FDA y fabricantes."
+              ? "Cada guía es verificada con estándares oficiales del USDA FSIS, FDA 21 CFR, NSF International y manuales OEM."
               : isPt
-              ? "Cada artigo é cuidadosamente pesquisado com recomendações oficiais do USDA, FDA e fabricantes."
+              ? "Cada artigo é verificado conforme padrões oficiais do USDA FSIS, FDA 21 CFR, NSF International e manuais OEM."
               : isZh
-              ? "本站所有指南均由编辑团队深入研究，严格对照USDA、FDA及家电制造商官方规范撰写。"
-              : "当サイトの全記事は、USDA、FDA、および各主要家電メーカーの公式基準に基づいて厳格に執筆・監修されています。"}
+              ? "本站所有指南均对照 USDA FSIS、FDA 21 CFR、NSF International 规范及家电原厂手册严格核验。"
+              : "当サイトの全記事は、USDA FSIS・FDA 21 CFR・NSF International基準および各家電メーカー公式仕様に基づいて検証されています。"}
           </p>
-          <span class="text-[10px] text-muted block">
-            {isEs ? "Actualizado: Junio 2026" : isPt ? "Atualizado: Junho 2026" : isZh ? "最近更新：2026年6月" : "最終更新：2026年6月"}
-          </span>
+          <a href={methodologyUrl} class="text-xs text-link hover:underline font-medium inline-flex items-center gap-1">
+            <span>{uxCopy.methodologyCta}</span>
+            <span aria-hidden="true">&rarr;</span>
+          </a>
         </div>
       </aside>
     </div>
@@ -458,4 +749,98 @@ const blogPostingSchema = {
       </div>
     </section>
   </article>
+
+  <!-- Accessible Copy-Link Toast -->
+  <div
+    id="copy-toast"
+    role="status"
+    aria-live="polite"
+    class="fixed bottom-5 right-5 z-50 px-4 py-2.5 rounded-lg bg-surface-dark text-on-dark text-xs font-medium shadow-lg border border-hairline/20 opacity-0 translate-y-2 pointer-events-none transition-all duration-200 no-print"
+  ></div>
+
+  <script is:inline>
+    (function() {
+      var toastTimer = null;
+      var btnTimer = null;
+
+      function showToast(message) {
+        var toast = document.getElementById('copy-toast');
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.remove('opacity-0', 'translate-y-2', 'pointer-events-none');
+        toast.classList.add('opacity-100', 'translate-y-0');
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(function() {
+          toast.classList.remove('opacity-100', 'translate-y-0');
+          toast.classList.add('opacity-0', 'translate-y-2', 'pointer-events-none');
+        }, 2500);
+      }
+
+      function fallbackCopy(text) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = false;
+        try {
+          ok = document.execCommand('copy');
+        } catch (e) {}
+        document.body.removeChild(ta);
+        return ok;
+      }
+
+      function initArticleActions() {
+        var copyBtn = document.getElementById('copy-link-btn');
+        var copyBtnText = document.getElementById('copy-link-btn-text');
+        if (copyBtn && copyBtnText) {
+          copyBtn.onclick = async function() {
+            var url = window.location.href;
+            var defaultText = copyBtn.getAttribute('data-default-text') || 'Copy Link';
+            var copiedText = copyBtn.getAttribute('data-copied-text') || 'Copied';
+            var toastText = copyBtn.getAttribute('data-toast-text') || 'Link copied';
+            var copied = false;
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              try {
+                await navigator.clipboard.writeText(url);
+                copied = true;
+              } catch (e) {
+                copied = fallbackCopy(url);
+              }
+            } else {
+              copied = fallbackCopy(url);
+            }
+
+            if (copied) {
+              copyBtnText.textContent = '✓ ' + copiedText;
+              copyBtn.classList.add('bg-success-bg', 'text-success', 'border-success-border/40');
+              showToast(toastText);
+              if (btnTimer) clearTimeout(btnTimer);
+              btnTimer = setTimeout(function() {
+                copyBtnText.textContent = defaultText;
+                copyBtn.classList.remove('bg-success-bg', 'text-success', 'border-success-border/40');
+              }, 2500);
+            }
+          };
+        }
+
+        var printBtn = document.getElementById('print-guide-btn');
+        if (printBtn) {
+          printBtn.onclick = function() {
+            window.print();
+          };
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initArticleActions);
+      } else {
+        initArticleActions();
+      }
+      document.addEventListener('astro:page-load', initArticleActions);
+    })();
+  </script>
 </Layout>
