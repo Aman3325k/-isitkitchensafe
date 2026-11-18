@@ -44,6 +44,20 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/food-allergy-cross-contact-checker/',
+    title: 'Kitchen Food Allergy & Cross-Contact Cleaning/Cookware Safety Checker',
+    description:
+      'Check which shared kitchen appliances, cookware, and surfaces can be safely decontaminated for Top 9 FDA food allergens & Celiac disease. Step-by-step FDA/FARE cleaning protocols for toasters, air fryers, fryer oil, cast iron, wooden boards, sponges, and counters.',
+    date: '2026-11-18',
+  },
+  {
+    path: '/tools/pantry-dry-goods-shelf-life-checker/',
+    title: 'Pantry, Spices & Dry Goods Shelf-Life & Safety Lookup (USDA Standards)',
+    description:
+      'Look up food safety expiration rules across 30 pantry staples (rice, flours, spices, honey, canned goods, leaveners). Includes USDA FSIS dented can botulism triage and 30-second baking powder fizz tests.',
+    date: '2026-11-18',
+  },
+  {
     path: '/tools/kitchen-symbol-decoder/',
     title: 'Kitchen Bottom Symbol Decoder — Plastic Codes #1–#7 & Appliance Icons',
     description:

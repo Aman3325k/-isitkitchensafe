@@ -225,6 +225,7 @@ const SPECIAL_PAGES = [
   'tools/induction-cookware-compatibility-checker',
   'tools/dishwasher-detergent-dosage-calculator',
   'tools/food-allergy-cross-contact-checker',
+  'tools/pantry-dry-goods-shelf-life-checker',
   'methodology',
   'saved'
 ];

@@ -1,0 +1,922 @@
+---
+import rawData from '../data/pantry-dry-goods-shelf-life-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+import { useTranslatedPath } from '../i18n/utils';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+const translatePath = useTranslatedPath(lang);
+
+const leftoverUrl = translatePath('/tools/leftover-shelf-life-calculator/');
+const powerOutageUrl = translatePath('/tools/power-outage-food-safety-checker/');
+const fridgeZoneUrl = translatePath('/tools/fridge-organization-zone-planner/');
+const methodologyUrl = translatePath('/methodology/');
+
+type VerdictType = 'indefinite' | 'quality-only' | 'refrigerate-opened' | 'spoils-easily';
+
+interface LocalizedStaple {
+  id: string;
+  icon: string;
+  category: string;
+  categoryLabel: string;
+  verdictType: VerdictType;
+  riskFlags: string[];
+  keywords: string;
+  name: string;
+  unopened: string;
+  opened: string;
+  verdict: string;
+  redFlags: string;
+  storageTip: string;
+}
+
+interface LocalizedCanTriage {
+  id: string;
+  icon: string;
+  verdictLevel: 'safe' | 'danger';
+  label: string;
+  shortLabel: string;
+  verdict: string;
+  rule: string;
+  action: string;
+}
+
+interface LocalizedFreshnessTest {
+  id: string;
+  icon: string;
+  duration: string;
+  name: string;
+  shortName: string;
+  ratio: string;
+  steps: string[];
+  passSign: string;
+  failSign: string;
+}
+
+const mythBanner =
+  (rawData.mythBanner as Record<string, { badge: string; headline: string; body: string }>)[lang] ||
+  rawData.mythBanner.en;
+
+const localizedCategories: Array<{ id: string; label: string }> =
+  (rawData.categories as Record<string, Array<{ id: string; label: string }>>)[lang] ||
+  rawData.categories.en;
+
+const categoryLabelMap: Record<string, string> = {};
+for (const cat of localizedCategories) {
+  categoryLabelMap[cat.id] = cat.label;
+}
+
+const localizedStaples: LocalizedStaple[] = rawData.staples.map((item) => {
+  const tr = (item.i18n as Record<string, any>)[lang] || item.i18n.en;
+  return {
+    id: item.id,
+    icon: item.icon,
+    category: item.category,
+    categoryLabel: categoryLabelMap[item.category] || item.category.replace('-', ' '),
+    verdictType: item.verdictType as VerdictType,
+    riskFlags: item.riskFlags || [],
+    keywords: `${item.keywords} ${tr.name} ${tr.unopened} ${tr.opened} ${tr.verdict}`.toLowerCase(),
+    name: tr.name,
+    unopened: tr.unopened,
+    opened: tr.opened,
+    verdict: tr.verdict,
+    redFlags: tr.redFlags,
+    storageTip: tr.storageTip
+  };
+});
+
+const localizedCanTriage: LocalizedCanTriage[] = rawData.canTriage.map((item) => {
+  const tr = (item.i18n as Record<string, any>)[lang] || item.i18n.en;
+  return {
+    id: item.id,
+    icon: item.icon,
+    verdictLevel: item.verdictLevel as 'safe' | 'danger',
+    label: tr.label,
+    shortLabel: tr.shortLabel,
+    verdict: tr.verdict,
+    rule: tr.rule,
+    action: tr.action
+  };
+});
+
+const localizedFreshnessTests: LocalizedFreshnessTest[] = rawData.freshnessTests.map((item) => {
+  const tr = (item.i18n as Record<string, any>)[lang] || item.i18n.en;
+  return {
+    id: item.id,
+    icon: item.icon,
+    duration: item.duration,
+    name: tr.name,
+    shortName: tr.shortName,
+    ratio: tr.ratio,
+    steps: tr.steps as string[],
+    passSign: tr.passSign,
+    failSign: tr.failSign
+  };
+});
+
+const localizedFaqs: Array<{ question: string; answer: string }> =
+  (rawData.faqs as Record<string, Array<{ question: string; answer: string }>>)[lang] ||
+  rawData.faqs.en;
+
+const uiStrings = {
+  en: {
+    searchPlaceholder: 'Search rice, flour, spices, honey, canned goods, baking powder...',
+    viewModeStaples: '30 Pantry Staples',
+    viewModeCanTriage: 'Dented Can & Botulism Triage',
+    viewModeFreshness: 'Kitchen Freshness Tests (30s)',
+    showingPrefix: 'Showing ',
+    showingSuffix: ' staples',
+    unopenedLabel: 'Unopened Shelf Life',
+    openedLabel: 'Opened Shelf Life',
+    verdictLabel: 'Verdict:',
+    redFlagsLabel: 'When to Discard (Red Flags)',
+    storageTipLabel: 'USDA Storage Tip',
+    verdictIndefinite: 'Never Spoils (Indefinite)',
+    verdictQualityOnly: 'Safe Past Date (Quality)',
+    verdictRefrigerateOpened: 'Refrigerate After Opening',
+    verdictSpoilsEasily: 'Degrades Fast Once Opened',
+    noResultsTitle: 'No staples match your search',
+    noResultsSub: 'Try another keyword like "rice", "flour", "vinegar" or reset the category filter.',
+    canTriageHeading: 'Dented Can Botulism Risk Inspector',
+    canTriageSub: 'Select the dent damage type below to review the official USDA FSIS food safety rule and safe containment protocol.',
+    safeBadge: 'SAFE',
+    dangerBadge: 'DANGER',
+    canRuleLabel: 'USDA FSIS Safety Rule:',
+    canActionLabel: 'Mandatory Action / Protocol:',
+    freshnessHeading: 'Fast 15s–30s Kitchen Leavener & Oil Freshness Tests',
+    freshnessSub: 'Before baking or cooking, test if your baking powder, baking soda, yeast, or cooking oils are still active and safe without tasting.',
+    testRatioLabel: 'Test Ratio',
+    stepsLabel: 'Steps:',
+    passLabel: 'PASS (Active & Fresh)',
+    failLabel: 'FAIL (Replace / Expired)',
+    shareBtn: 'Copy Link & Summary',
+    copiedLabel: '✓ Copied!',
+    copySummaryPrefix: 'IsItKitchenSafe: Pantry & Dry Goods Shelf-Life & Botulism Dent Safety Guide (USDA Standard): ',
+    printBtn: 'Print Pantry Guide',
+    relatedHeading: 'Related Kitchen Food Safety Calculators',
+    relatedLeftoverTitle: 'USDA Leftover Countdown',
+    relatedLeftoverSub: 'Cooked meats & 4-day fridge rule',
+    relatedPowerTitle: 'Power Outage Food Safety',
+    relatedPowerSub: '4h fridge & 48h freezer triage',
+    relatedFridgeTitle: 'Fridge Zone Planner',
+    relatedFridgeSub: '7 USDA/FDA temperature zones',
+    relatedMethodTitle: 'Safety Standards & E-E-A-T',
+    relatedMethodSub: 'USDA FSIS, FDA CFR & CDC',
+    openCalcCta: 'Open Calculator',
+    readMethodCta: 'Read Methodology',
+    faqHeading: 'Frequently Asked Questions: Pantry Shelf Life, Dented Cans & Spices',
+    sourcesHeading: 'Scientific Citations & Regulatory Standards'
+  },
+  es: {
+    searchPlaceholder: 'Buscar arroz, harina, especias, miel, conservas, polvo de hornear...',
+    viewModeStaples: '30 Básicos de Despensa',
+    viewModeCanTriage: 'Triaje de Latas y Botulismo',
+    viewModeFreshness: 'Pruebas de Frescura (30 seg)',
+    showingPrefix: 'Mostrando ',
+    showingSuffix: ' alimentos básicos',
+    unopenedLabel: 'Vida Útil Sin Abrir',
+    openedLabel: 'Vida Útil Abierto',
+    verdictLabel: 'Veredicto:',
+    redFlagsLabel: 'Señales de Alerta para Desechar',
+    storageTipLabel: 'Consejo de Almacenaje USDA',
+    verdictIndefinite: 'No Caduca (Indefinido)',
+    verdictQualityOnly: 'Seguro tras la Fecha (Calidad)',
+    verdictRefrigerateOpened: 'Refrigerar al Abrir',
+    verdictSpoilsEasily: 'Degrada Rápido Abierto',
+    noResultsTitle: 'Ningún alimento coincide con tu búsqueda',
+    noResultsSub: 'Prueba otra palabra clave como "arroz", "harina" o "vinagre", o restablece el filtro.',
+    canTriageHeading: 'Inspector de Riesgo de Botulismo en Latas Abolladas',
+    canTriageSub: 'Selecciona el tipo de golpe para consultar la norma oficial del USDA FSIS y el protocolo de seguridad.',
+    safeBadge: 'SEGURO',
+    dangerBadge: 'PELIGRO',
+    canRuleLabel: 'Norma de Seguridad USDA FSIS:',
+    canActionLabel: 'Acción / Protocolo Obligatorio:',
+    freshnessHeading: 'Pruebas Rápidas de 15s–30s para Leudantes y Aceites',
+    freshnessSub: 'Comprueba si tu polvo de hornear, bicarbonato, levadura o aceites siguen activos y frescos sin probarlos.',
+    testRatioLabel: 'Proporción de Prueba',
+    stepsLabel: 'Pasos:',
+    passLabel: 'APTO (Activo y Fresco)',
+    failLabel: 'FALLO (Inactivo / Reemplazar)',
+    shareBtn: 'Copiar Enlace y Resumen',
+    copiedLabel: '✓ ¡Copiado!',
+    copySummaryPrefix: 'IsItKitchenSafe: Guía USDA de Caducidad de Despensa, Especias y Latas Abolladas: ',
+    printBtn: 'Imprimir Guía de Despensa',
+    relatedHeading: 'Calculadoras Relacionadas de Seguridad Alimentaria',
+    relatedLeftoverTitle: 'Calculadora de Sobras USDA',
+    relatedLeftoverSub: 'Carnes cocidas y regla de 4 días',
+    relatedPowerTitle: 'Seguridad tras Corte de Luz',
+    relatedPowerSub: 'Triaje 4h nevera y 48h congelador',
+    relatedFridgeTitle: 'Planificador de Zonas de Nevera',
+    relatedFridgeSub: '7 zonas de temperatura USDA/FDA',
+    relatedMethodTitle: 'Estándares Científicos y E-E-A-T',
+    relatedMethodSub: 'USDA FSIS, FDA CFR y CDC',
+    openCalcCta: 'Abrir Calculadora',
+    readMethodCta: 'Ver Metodología',
+    faqHeading: 'Preguntas Frecuentes: Vida Útil de Despensa, Latas Abolladas y Especias',
+    sourcesHeading: 'Citas Científicas y Normas Sanitarias'
+  },
+  pt: {
+    searchPlaceholder: 'Buscar arroz, farinha, temperos, mel, enlatados, fermento em pó...',
+    viewModeStaples: '30 Itens da Despensa',
+    viewModeCanTriage: 'Triagem de Latas e Botulismo',
+    viewModeFreshness: 'Testes de Frescura (30 seg)',
+    showingPrefix: 'Mostrando ',
+    showingSuffix: ' itens básicos',
+    unopenedLabel: 'Validade Fechado',
+    openedLabel: 'Validade Aberto',
+    verdictLabel: 'Veredito:',
+    redFlagsLabel: 'Sinais de Descarte (Perigo)',
+    storageTipLabel: 'Dica de Conservação USDA',
+    verdictIndefinite: 'Nunca Estraga (Indefinido)',
+    verdictQualityOnly: 'Seguro Após a Data (Qualidade)',
+    verdictRefrigerateOpened: 'Refrigerar Após Abrir',
+    verdictSpoilsEasily: 'Degrada Rápido Aberto',
+    noResultsTitle: 'Nenhum item encontrado para sua busca',
+    noResultsSub: 'Tente outra palavra como "arroz", "farinha" ou "vinagre", ou limpe o filtro de categoria.',
+    canTriageHeading: 'Inspetor de Risco de Botulismo em Latas Amassadas',
+    canTriageSub: 'Escolha o tipo de dano na lata para conferir as diretrizes oficiais do USDA FSIS e descarte seguro.',
+    safeBadge: 'SEGURO',
+    dangerBadge: 'PERIGO',
+    canRuleLabel: 'Regra de Segurança USDA FSIS:',
+    canActionLabel: 'Ação / Protocolo Obrigatório:',
+    freshnessHeading: 'Testes de Cozinha de 15s–30s para Fermentos e Óleos',
+    freshnessSub: 'Descubra em segundos se fermento químico, bicarbonato ou azeites continuam ativos sem precisar provar.',
+    testRatioLabel: 'Proporção do Teste',
+    stepsLabel: 'Passo a passo:',
+    passLabel: 'APROVADO (Ativo e Fresco)',
+    failLabel: 'REPROVADO (Sem Ação / Descarte)',
+    shareBtn: 'Copiar Link e Resumo',
+    copiedLabel: '✓ Copiado!',
+    copySummaryPrefix: 'IsItKitchenSafe: Guia USDA de Validade da Despensa, Especiarias e Latas Amassadas: ',
+    printBtn: 'Imprimir Guia de Despensa',
+    relatedHeading: 'Calculadoras de Segurança Alimentar',
+    relatedLeftoverTitle: 'Calculadora de Sobras USDA',
+    relatedLeftoverSub: 'Carnes prontas e regra dos 4 dias',
+    relatedPowerTitle: 'Segurança na Queda de Energia',
+    relatedPowerSub: 'Triagem 4h geladeira e 48h freezer',
+    relatedFridgeTitle: 'Zonas de Temperatura da Geladeira',
+    relatedFridgeSub: '7 zonas oficiais USDA/FDA',
+    relatedMethodTitle: 'Padrões Científicos e E-E-A-T',
+    relatedMethodSub: 'USDA FSIS, FDA CFR e CDC',
+    openCalcCta: 'Abrir Calculadora',
+    readMethodCta: 'Ler Metodologia',
+    faqHeading: 'Perguntas Frequentes: Validade na Despensa, Latas Amassadas e Temperos',
+    sourcesHeading: 'Fontes Científicas e Normas Sanitárias'
+  },
+  'zh-cn': {
+    searchPlaceholder: '搜索大米、面粉、香草香料、蜂蜜、罐头、泡打粉、小苏打...',
+    viewModeStaples: '30 种常备干货',
+    viewModeCanTriage: '凹罐与肉毒杆菌排查',
+    viewModeFreshness: '30 秒新鲜度速测实验',
+    showingPrefix: '正在显示 ',
+    showingSuffix: ' 种常备食材',
+    unopenedLabel: '未开封保质期限',
+    openedLabel: '开封后保质期限',
+    verdictLabel: '安全结论：',
+    redFlagsLabel: '变质警示特征（何时必须丢弃）',
+    storageTipLabel: '美国农业部 USDA 科学储存诀窍',
+    verdictIndefinite: '永不变质（长期安全）',
+    verdictQualityOnly: '过期仍安全（仅品质口感衰减）',
+    verdictRefrigerateOpened: '开封后须冷藏保存',
+    verdictSpoilsEasily: '开封后极易氧化变质',
+    noResultsTitle: '未找到匹配的常备干货',
+    noResultsSub: '请尝试搜索“大米”、“面粉”、“蜂蜜”或重置分类筛选。',
+    canTriageHeading: '马口铁罐头凹痕破损与肉毒梭菌风险评估器',
+    canTriageSub: '点击下方对应的罐头磕碰受损类型，查看美国农业部 USDA FSIS 权威安全裁定与应急处理消毒流程。',
+    safeBadge: '安全',
+    dangerBadge: '高危',
+    canRuleLabel: 'USDA FSIS 安全裁定规则：',
+    canActionLabel: '强制处理 / 应急方案：',
+    freshnessHeading: '15 秒–30 秒膨松剂活性与食用油哈喇味速测试验',
+    freshnessSub: '在下锅烹调或烘焙前，无需冒险品尝，即可快速检验泡打粉、小苏打、酵母或植物油是否失效或氧化。',
+    testRatioLabel: '测试配比',
+    stepsLabel: '操作步骤：',
+    passLabel: '测试合格（活性充沛、新鲜）',
+    failLabel: '测试失败（活性失效 / 建议更换）',
+    shareBtn: '复制链接与安全总结',
+    copiedLabel: '✓ 已复制！',
+    copySummaryPrefix: 'IsItKitchenSafe：USDA 常备干货保质期与凹陷罐头肉毒杆菌排查指南：',
+    printBtn: '打印干货安全指南',
+    relatedHeading: '相关厨房食品安全实用工具',
+    relatedLeftoverTitle: 'USDA 剩菜保质倒计时',
+    relatedLeftoverSub: '熟肉与冰箱 4 天安全原则',
+    relatedPowerTitle: '停电冰箱食品安全筛查',
+    relatedPowerSub: '冷藏 4 小时 / 冷冻 48 小时判定',
+    relatedFridgeTitle: '冰箱温度分区规划器',
+    relatedFridgeSub: '7 大 USDA/FDA 温区科学摆放',
+    relatedMethodTitle: '科学标准与审核方法论',
+    relatedMethodSub: 'USDA FSIS、FDA CFR 与 CDC',
+    openCalcCta: '打开计算器',
+    readMethodCta: '阅读方法论',
+    faqHeading: '常见问题：干货保质期、凹陷罐头与香料安全',
+    sourcesHeading: '权威科学标准与监管指引'
+  },
+  ja: {
+    searchPlaceholder: '米、小麦粉、スパイス、はちみつ、缶詰、ベーキングパウダーを検索...',
+    viewModeStaples: '乾物・常備品 30種',
+    viewModeCanTriage: '缶詰へこみ・ボツリヌス菌診断',
+    viewModeFreshness: '30秒 鮮度・活性判定テスト',
+    showingPrefix: '表示中：',
+    showingSuffix: ' 件の常備品',
+    unopenedLabel: '未開封の賞味期限',
+    openedLabel: '開封後の安全期限',
+    verdictLabel: '判定：',
+    redFlagsLabel: '廃棄すべき危険サイン',
+    storageTipLabel: '米国農務省 USDA 保管アドバイス',
+    verdictIndefinite: '腐敗なし（半永久的安全）',
+    verdictQualityOnly: '期限後も安全（品質目安のみ）',
+    verdictRefrigerateOpened: '開封後は要冷蔵',
+    verdictSpoilsEasily: '開封後は急速に酸化・劣化',
+    noResultsTitle: '一致する常備品が見つかりませんでした',
+    noResultsSub: '「米」「小麦粉」「酢」などの別キーワードを試すか、カテゴリをリセットしてください。',
+    canTriageHeading: '缶詰のへこみ・ボツリヌス菌リスク診断器',
+    canTriageSub: 'へこみや破損の状況を選択して、米国農務省 USDA FSISの公式基準と安全な廃棄・消毒手順を確認してください。',
+    safeBadge: '安全',
+    dangerBadge: '危険',
+    canRuleLabel: 'USDA FSIS 安全基準：',
+    canActionLabel: '必須の対処・廃棄手順：',
+    freshnessHeading: '15秒〜30秒 膨張剤の活性＆食用油の酸化テスト',
+    freshnessSub: '調理やお菓子作りの前に、味見をすることなく重曹・BP・イースト・油の鮮度と発泡力を一瞬で判定。',
+    testRatioLabel: 'テスト配合比',
+    stepsLabel: '手順：',
+    passLabel: '合格（活性十分・新鮮）',
+    failLabel: '失効（膨らまない・交換推奨）',
+    shareBtn: 'リンクと要約をコピー',
+    copiedLabel: '✓ コピー完了！',
+    copySummaryPrefix: 'IsItKitchenSafe：USDA基準 乾物・スパイス賞味期限＆缶詰へこみ安全ガイド：',
+    printBtn: '乾物安全ガイドを印刷',
+    relatedHeading: '関連する食品安全計算ツール',
+    relatedLeftoverTitle: 'USDA 残り物安全タイマー',
+    relatedLeftoverSub: '加熱済み肉類と冷蔵4日ルール',
+    relatedPowerTitle: '停電時の冷蔵庫安全チェッカー',
+    relatedPowerSub: '冷蔵4時間・冷凍48時間判定',
+    relatedFridgeTitle: '冷蔵庫温度ゾーン配置プランナー',
+    relatedFridgeSub: 'USDA/FDA準拠の7温度エリア',
+    relatedMethodTitle: '安全基準と検証メソッド',
+    relatedMethodSub: 'USDA FSIS・FDA CFR・CDC',
+    openCalcCta: 'ツールを開く',
+    readMethodCta: '基準を読む',
+    faqHeading: 'よくある質問：乾物の賞味期限、へこんだ缶詰、スパイスの安全性',
+    sourcesHeading: '参照科学基準・公式ガイドライン'
+  }
+};
+
+const str = uiStrings[lang as keyof typeof uiStrings] || uiStrings.en;
+---
+
+<div class="pantry-checker-container max-w-5xl mx-auto" data-lang={lang}>
+  <!-- Myth Fact Banner -->
+  <section class="bg-amber-500/10 border-2 border-amber-600/40 rounded-xl p-5 mb-8 shadow-sm">
+    <div class="flex items-start gap-3.5">
+      <span class="text-2xl shrink-0" aria-hidden="true">💡</span>
+      <div class="space-y-1.5">
+        <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-bold tracking-wide uppercase bg-amber-600 text-white">
+          {mythBanner.badge}
+        </div>
+        <h2 class="text-base sm:text-lg font-bold text-ink leading-snug">
+          {mythBanner.headline}
+        </h2>
+        <p class="text-xs sm:text-sm text-muted leading-relaxed">
+          {mythBanner.body}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- View Mode Tabs -->
+  <div class="flex flex-wrap items-center justify-center gap-2 mb-8 print:hidden" role="tablist" aria-label="Pantry Safety Tool Views">
+    <button
+      type="button"
+      id="tab-staples"
+      class="tab-btn active px-4 py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer border border-signature-coral bg-signature-coral text-white shadow-sm flex items-center gap-2"
+      role="tab"
+      aria-selected="true"
+      aria-controls="view-staples"
+    >
+      <span aria-hidden="true">🌾</span>
+      <span>{str.viewModeStaples}</span>
+    </button>
+    <button
+      type="button"
+      id="tab-can-triage"
+      class="tab-btn px-4 py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer border border-hairline bg-surface-soft text-ink hover:bg-surface-strong/50 flex items-center gap-2"
+      role="tab"
+      aria-selected="false"
+      aria-controls="view-can-triage"
+    >
+      <span aria-hidden="true">🥫</span>
+      <span>{str.viewModeCanTriage}</span>
+    </button>
+    <button
+      type="button"
+      id="tab-freshness"
+      class="tab-btn px-4 py-2.5 rounded-lg text-sm font-semibold transition-all cursor-pointer border border-hairline bg-surface-soft text-ink hover:bg-surface-strong/50 flex items-center gap-2"
+      role="tab"
+      aria-selected="false"
+      aria-controls="view-freshness"
+    >
+      <span aria-hidden="true">🫧</span>
+      <span>{str.viewModeFreshness}</span>
+    </button>
+  </div>
+
+  <!-- VIEW 1: STAPLES DIRECTORY -->
+  <div id="view-staples" class="tool-view block" role="tabpanel" aria-labelledby="tab-staples">
+    <!-- Search & Filter Controls -->
+    <div class="bg-surface-soft border border-hairline rounded-xl p-4 sm:p-5 mb-6 shadow-2xs space-y-4 print:hidden">
+      <div class="relative">
+        <input
+          type="search"
+          id="pantry-search-input"
+          class="w-full pl-10 pr-4 py-2.5 bg-canvas border border-hairline rounded-lg text-sm text-ink placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+          placeholder={str.searchPlaceholder}
+          aria-label={str.searchPlaceholder}
+        />
+        <svg class="w-5 h-5 text-muted absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="flex flex-wrap items-center gap-2" role="group" aria-label="Category Filters">
+        {localizedCategories.map((cat, idx) => (
+          <button
+            type="button"
+            class={`category-filter-btn px-3 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
+              idx === 0
+                ? 'bg-ink text-white border-ink'
+                : 'bg-canvas text-ink border-hairline hover:border-border-strong'
+            }`}
+            data-category={cat.id}
+          >
+            {cat.label}
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <!-- Active Count -->
+    <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-muted mb-4 px-1 print:hidden">
+      <span
+        id="results-count-text"
+        data-prefix={str.showingPrefix}
+        data-suffix={str.showingSuffix}
+      >
+        {str.showingPrefix}{localizedStaples.length}{str.showingSuffix}
+      </span>
+      <div class="flex items-center gap-3">
+        <button
+          id="copy-summary-btn"
+          type="button"
+          class="text-link hover:underline font-medium inline-flex items-center gap-1 cursor-pointer"
+          data-copy-prefix={str.copySummaryPrefix}
+          data-copied-label={str.copiedLabel}
+        >
+          📋 {str.shareBtn}
+        </button>
+        <button id="print-pantry-btn" type="button" class="text-link hover:underline font-medium inline-flex items-center gap-1 cursor-pointer">
+          🖨️ {str.printBtn}
+        </button>
+      </div>
+    </div>
+
+    <!-- Staples Grid -->
+    <div id="staples-cards-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {localizedStaples.map((staple) => (
+        <article
+          class="staple-card bg-surface-soft border border-hairline hover:border-border-strong rounded-xl p-5 flex flex-col justify-between transition-all shadow-2xs"
+          data-category={staple.category}
+          data-keywords={staple.keywords}
+        >
+          <div>
+            <div class="flex items-start justify-between gap-3 mb-3">
+              <div class="flex items-center gap-2.5">
+                <span class="text-2xl p-2 rounded-lg bg-canvas border border-hairline" aria-hidden="true">{staple.icon}</span>
+                <div>
+                  <h3 class="text-base font-bold text-ink leading-snug">{staple.name}</h3>
+                  <span class="text-xs text-muted block">{staple.categoryLabel}</span>
+                </div>
+              </div>
+
+              {staple.verdictType === 'indefinite' && (
+                <span class="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-700 text-white">
+                  ✓ {str.verdictIndefinite}
+                </span>
+              )}
+              {staple.verdictType === 'quality-only' && (
+                <span class="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-sky-700 text-white">
+                  ℹ {str.verdictQualityOnly}
+                </span>
+              )}
+              {staple.verdictType === 'refrigerate-opened' && (
+                <span class="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-700 text-white">
+                  ❄️ {str.verdictRefrigerateOpened}
+                </span>
+              )}
+              {staple.verdictType === 'spoils-easily' && (
+                <span class="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-700 text-white">
+                  ⚠ {str.verdictSpoilsEasily}
+                </span>
+              )}
+            </div>
+
+            <!-- Shelf Life Box -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-canvas border border-hairline rounded-lg p-3 text-xs mb-3">
+              <div>
+                <span class="font-bold text-ink block mb-0.5">{str.unopenedLabel}:</span>
+                <span class="text-muted leading-relaxed">{staple.unopened}</span>
+              </div>
+              <div>
+                <span class="font-bold text-ink block mb-0.5">{str.openedLabel}:</span>
+                <span class="text-muted leading-relaxed">{staple.opened}</span>
+              </div>
+            </div>
+
+            <!-- Verdict Note -->
+            <p class="text-xs text-ink/90 leading-relaxed mb-3">
+              <strong class="text-ink font-semibold">{str.verdictLabel}</strong> {staple.verdict}
+            </p>
+
+            <!-- Red Flags & Storage Tip -->
+            <div class="space-y-2 border-t border-hairline/80 pt-3 text-xs">
+              <div class="flex items-start gap-1.5 text-error leading-relaxed">
+                <span class="shrink-0" aria-hidden="true">🚩</span>
+                <span><strong>{str.redFlagsLabel}:</strong> {staple.redFlags}</span>
+              </div>
+              <div class="flex items-start gap-1.5 text-muted leading-relaxed">
+                <span class="shrink-0" aria-hidden="true">💡</span>
+                <span><strong>{str.storageTipLabel}:</strong> {staple.storageTip}</span>
+              </div>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+
+    <!-- Empty Results -->
+    <div id="no-staples-found" class="hidden text-center py-12 bg-surface-soft border border-hairline rounded-xl">
+      <span class="text-3xl block mb-2" aria-hidden="true">🔍</span>
+      <p class="text-sm font-semibold text-ink">{str.noResultsTitle}</p>
+      <p class="text-xs text-muted mt-1">{str.noResultsSub}</p>
+    </div>
+  </div>
+
+  <!-- VIEW 2: DENTED CAN BOTULISM TRIAGE -->
+  <div id="view-can-triage" class="tool-view hidden" role="tabpanel" aria-labelledby="tab-can-triage">
+    <div class="bg-surface-soft border border-hairline rounded-xl p-5 mb-6 text-center max-w-2xl mx-auto">
+      <h2 class="text-lg font-bold text-ink mb-1">{str.canTriageHeading}</h2>
+      <p class="text-xs sm:text-sm text-muted leading-relaxed">{str.canTriageSub}</p>
+    </div>
+
+    <!-- Triage Selection Chips -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 mb-8">
+      {localizedCanTriage.map((item, idx) => (
+        <button
+          type="button"
+          class={`can-triage-selector p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-1.5 ${
+            idx === 0
+              ? 'border-primary bg-primary/10 shadow-sm'
+              : 'border-hairline bg-surface-soft hover:bg-surface-strong/40'
+          }`}
+          data-can-id={item.id}
+        >
+          <span class="text-2xl" aria-hidden="true">{item.icon}</span>
+          <span class="text-xs font-bold text-ink leading-tight">{item.shortLabel}</span>
+          <span class={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+            item.verdictLevel === 'safe' ? 'bg-emerald-700 text-white' : 'bg-red-700 text-white'
+          }`}>
+            {item.verdictLevel === 'safe' ? str.safeBadge : str.dangerBadge}
+          </span>
+        </button>
+      ))}
+    </div>
+
+    <!-- Triage Detail Cards -->
+    <div id="can-triage-details-container">
+      {localizedCanTriage.map((item, idx) => (
+        <div
+          class={`can-triage-card border-2 rounded-xl p-6 transition-all ${
+            item.verdictLevel === 'safe'
+              ? 'border-emerald-600/50 bg-emerald-500/5'
+              : 'border-red-600/60 bg-red-500/5'
+          } ${idx === 0 ? 'block' : 'hidden'}`}
+          data-can-card-id={item.id}
+        >
+          <div class="flex items-start gap-4 mb-4">
+            <span class="text-4xl p-3 bg-canvas border border-hairline rounded-xl shadow-xs" aria-hidden="true">{item.icon}</span>
+            <div>
+              <div
+                class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide text-white mb-2"
+                style={{ backgroundColor: item.verdictLevel === 'safe' ? '#047857' : '#b91c1c' }}
+              >
+                {item.verdict}
+              </div>
+              <h3 class="text-lg sm:text-xl font-bold text-ink leading-tight">{item.label}</h3>
+            </div>
+          </div>
+
+          <div class="space-y-4 border-t border-hairline/80 pt-4 text-sm">
+            <div class="bg-canvas border border-hairline rounded-lg p-4">
+              <strong class="text-ink font-bold block mb-1">📜 {str.canRuleLabel}</strong>
+              <p class="text-xs sm:text-sm text-muted leading-relaxed">{item.rule}</p>
+            </div>
+
+            <div class="bg-canvas border border-hairline rounded-lg p-4">
+              <strong class="text-ink font-bold block mb-1">🛡️ {str.canActionLabel}</strong>
+              <p class="text-xs sm:text-sm text-muted leading-relaxed">{item.action}</p>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <!-- VIEW 3: KITCHEN FRESHNESS TESTS -->
+  <div id="view-freshness" class="tool-view hidden" role="tabpanel" aria-labelledby="tab-freshness">
+    <div class="bg-surface-soft border border-hairline rounded-xl p-5 mb-8 text-center max-w-2xl mx-auto">
+      <h2 class="text-lg font-bold text-ink mb-1">{str.freshnessHeading}</h2>
+      <p class="text-xs sm:text-sm text-muted leading-relaxed">{str.freshnessSub}</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {localizedFreshnessTests.map((test) => (
+        <div class="bg-surface-soft border border-hairline hover:border-border-strong rounded-xl p-5 flex flex-col justify-between shadow-2xs">
+          <div>
+            <div class="flex items-center justify-between gap-3 mb-3">
+              <div class="flex items-center gap-2.5">
+                <span class="text-2xl p-2 rounded-lg bg-canvas border border-hairline" aria-hidden="true">{test.icon}</span>
+                <div>
+                  <h3 class="text-base font-bold text-ink leading-snug">{test.name}</h3>
+                  <span class="text-xs text-muted block font-mono">⏱️ {test.duration}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-canvas border border-hairline rounded-lg p-3 text-xs mb-3">
+              <span class="font-bold text-ink block mb-1">🧪 {str.testRatioLabel}:</span>
+              <p class="text-muted leading-relaxed font-mono">{test.ratio}</p>
+            </div>
+
+            <div class="space-y-1.5 mb-4 text-xs text-ink/90">
+              <strong class="text-ink font-bold block">{str.stepsLabel}</strong>
+              <ol class="list-decimal pl-5 space-y-1 text-muted leading-relaxed">
+                {test.steps.map((st) => (
+                  <li>{st}</li>
+                ))}
+              </ol>
+            </div>
+          </div>
+
+          <div class="space-y-2 border-t border-hairline pt-3 text-xs">
+            <div class="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-600/30 text-emerald-900 dark:text-emerald-200">
+              <span class="font-bold block mb-0.5">{str.passLabel}:</span>
+              <span class="leading-relaxed">{test.passSign}</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-rose-500/10 border border-rose-600/30 text-rose-900 dark:text-rose-200">
+              <span class="font-bold block mb-0.5">{str.failLabel}:</span>
+              <span class="leading-relaxed">{test.failSign}</span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <!-- Related Tools Navigation Strip -->
+  <section class="mt-12 bg-surface-soft border border-hairline rounded-xl p-6 print:hidden">
+    <h2 class="text-base font-bold text-ink mb-4">{str.relatedHeading}</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <a href={leftoverUrl} class="p-3.5 rounded-lg bg-canvas border border-hairline hover:border-border-strong transition-all flex flex-col justify-between">
+        <div>
+          <span class="text-xl block mb-1" aria-hidden="true">🍲</span>
+          <span class="text-xs font-bold text-ink block leading-snug">{str.relatedLeftoverTitle}</span>
+          <span class="text-[11px] text-muted block mt-1">{str.relatedLeftoverSub}</span>
+        </div>
+        <span class="text-xs font-semibold text-link mt-3 block">{str.openCalcCta} &rarr;</span>
+      </a>
+      <a href={powerOutageUrl} class="p-3.5 rounded-lg bg-canvas border border-hairline hover:border-border-strong transition-all flex flex-col justify-between">
+        <div>
+          <span class="text-xl block mb-1" aria-hidden="true">⚡</span>
+          <span class="text-xs font-bold text-ink block leading-snug">{str.relatedPowerTitle}</span>
+          <span class="text-[11px] text-muted block mt-1">{str.relatedPowerSub}</span>
+        </div>
+        <span class="text-xs font-semibold text-link mt-3 block">{str.openCalcCta} &rarr;</span>
+      </a>
+      <a href={fridgeZoneUrl} class="p-3.5 rounded-lg bg-canvas border border-hairline hover:border-border-strong transition-all flex flex-col justify-between">
+        <div>
+          <span class="text-xl block mb-1" aria-hidden="true">❄️</span>
+          <span class="text-xs font-bold text-ink block leading-snug">{str.relatedFridgeTitle}</span>
+          <span class="text-[11px] text-muted block mt-1">{str.relatedFridgeSub}</span>
+        </div>
+        <span class="text-xs font-semibold text-link mt-3 block">{str.openCalcCta} &rarr;</span>
+      </a>
+      <a href={methodologyUrl} class="p-3.5 rounded-lg bg-canvas border border-hairline hover:border-border-strong transition-all flex flex-col justify-between">
+        <div>
+          <span class="text-xl block mb-1" aria-hidden="true">🛡️</span>
+          <span class="text-xs font-bold text-ink block leading-snug">{str.relatedMethodTitle}</span>
+          <span class="text-[11px] text-muted block mt-1">{str.relatedMethodSub}</span>
+        </div>
+        <span class="text-xs font-semibold text-link mt-3 block">{str.readMethodCta} &rarr;</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Visible FAQ Accordion (Matches JSON-LD 1:1) -->
+  <section class="mt-12 print:hidden">
+    <h2 class="text-title-lg font-medium text-ink tracking-tight mb-6">
+      {str.faqHeading}
+    </h2>
+    <div class="space-y-4">
+      {localizedFaqs.map((faq) => (
+        <details class="group p-5 bg-surface-soft border border-hairline rounded-xl" open>
+          <summary class="text-title-sm font-semibold text-ink cursor-pointer list-none flex items-center justify-between gap-3">
+            <span>{faq.question}</span>
+            <span class="text-muted text-sm transition-transform group-open:rotate-180 shrink-0" aria-hidden="true">&#9662;</span>
+          </summary>
+          <p class="text-[14px] text-body leading-relaxed mt-3 pt-3 border-t border-hairline/70">
+            {faq.answer}
+          </p>
+        </details>
+      ))}
+    </div>
+  </section>
+
+  <!-- Scientific Sources Strip -->
+  <footer class="mt-10 pt-6 border-t border-hairline text-xs text-muted space-y-2">
+    <p class="font-bold text-ink">{str.sourcesHeading}:</p>
+    <ul class="list-disc pl-5 space-y-1">
+      {rawData.meta.sources.map((src) => (
+        <li>{src}</li>
+      ))}
+    </ul>
+  </footer>
+</div>
+
+<script is:inline>
+  (function () {
+    function initPantryChecker() {
+      var tabStaples = document.getElementById('tab-staples');
+      var tabCanTriage = document.getElementById('tab-can-triage');
+      var tabFreshness = document.getElementById('tab-freshness');
+
+      var viewStaples = document.getElementById('view-staples');
+      var viewCanTriage = document.getElementById('view-can-triage');
+      var viewFreshness = document.getElementById('view-freshness');
+
+      function switchTab(activeTab, activeView) {
+        [tabStaples, tabCanTriage, tabFreshness].forEach(function (tab) {
+          if (!tab) return;
+          tab.classList.remove('bg-signature-coral', 'text-white', 'border-signature-coral');
+          tab.classList.add('bg-surface-soft', 'text-ink', 'border-hairline');
+          tab.setAttribute('aria-selected', 'false');
+        });
+
+        [viewStaples, viewCanTriage, viewFreshness].forEach(function (view) {
+          if (!view) return;
+          view.classList.add('hidden');
+          view.classList.remove('block');
+        });
+
+        if (activeTab && activeView) {
+          activeTab.classList.remove('bg-surface-soft', 'text-ink', 'border-hairline');
+          activeTab.classList.add('bg-signature-coral', 'text-white', 'border-signature-coral');
+          activeTab.setAttribute('aria-selected', 'true');
+          activeView.classList.remove('hidden');
+          activeView.classList.add('block');
+        }
+      }
+
+      if (tabStaples && viewStaples) {
+        tabStaples.onclick = function () { switchTab(tabStaples, viewStaples); };
+      }
+      if (tabCanTriage && viewCanTriage) {
+        tabCanTriage.onclick = function () { switchTab(tabCanTriage, viewCanTriage); };
+      }
+      if (tabFreshness && viewFreshness) {
+        tabFreshness.onclick = function () { switchTab(tabFreshness, viewFreshness); };
+      }
+
+      var triageSelectors = document.querySelectorAll('.can-triage-selector');
+      var triageCards = document.querySelectorAll('.can-triage-card');
+
+      triageSelectors.forEach(function (btn) {
+        btn.onclick = function () {
+          var targetId = btn.getAttribute('data-can-id');
+          triageSelectors.forEach(function (s) {
+            s.classList.remove('border-primary', 'bg-primary/10', 'shadow-sm');
+            s.classList.add('border-hairline', 'bg-surface-soft');
+          });
+          btn.classList.remove('border-hairline', 'bg-surface-soft');
+          btn.classList.add('border-primary', 'bg-primary/10', 'shadow-sm');
+
+          triageCards.forEach(function (card) {
+            if (card.getAttribute('data-can-card-id') === targetId) {
+              card.classList.remove('hidden');
+              card.classList.add('block');
+            } else {
+              card.classList.add('hidden');
+              card.classList.remove('block');
+            }
+          });
+        };
+      });
+
+      var searchInput = document.getElementById('pantry-search-input');
+      var filterButtons = document.querySelectorAll('.category-filter-btn');
+      var stapleCards = document.querySelectorAll('.staple-card');
+      var resultsCountText = document.getElementById('results-count-text');
+      var emptyNotice = document.getElementById('no-staples-found');
+
+      var currentCat = 'all';
+
+      function applyFilters() {
+        var query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        var visibleCount = 0;
+
+        stapleCards.forEach(function (card) {
+          var cat = card.getAttribute('data-category') || '';
+          var kw = card.getAttribute('data-keywords') || '';
+
+          var matchesCat = currentCat === 'all' || cat === currentCat;
+          var matchesQuery = !query || kw.indexOf(query) !== -1;
+
+          if (matchesCat && matchesQuery) {
+            card.style.display = '';
+            visibleCount++;
+          } else {
+            card.style.display = 'none';
+          }
+        });
+
+        if (resultsCountText) {
+          var prefix = resultsCountText.getAttribute('data-prefix') || 'Showing ';
+          var suffix = resultsCountText.getAttribute('data-suffix') || ' staples';
+          resultsCountText.textContent = prefix + String(visibleCount) + suffix;
+        }
+
+        if (emptyNotice) {
+          if (visibleCount === 0) {
+            emptyNotice.classList.remove('hidden');
+            emptyNotice.classList.add('block');
+          } else {
+            emptyNotice.classList.add('hidden');
+            emptyNotice.classList.remove('block');
+          }
+        }
+      }
+
+      if (searchInput) {
+        searchInput.oninput = applyFilters;
+      }
+
+      filterButtons.forEach(function (btn) {
+        btn.onclick = function () {
+          filterButtons.forEach(function (b) {
+            b.classList.remove('bg-ink', 'text-white', 'border-ink');
+            b.classList.add('bg-canvas', 'text-ink', 'border-hairline');
+          });
+          btn.classList.remove('bg-canvas', 'border-hairline');
+          btn.classList.add('bg-ink', 'text-white', 'border-ink');
+
+          currentCat = btn.getAttribute('data-category') || 'all';
+          applyFilters();
+        };
+      });
+
+      var copyBtn = document.getElementById('copy-summary-btn');
+      if (copyBtn) {
+        var originalCopyText = copyBtn.textContent || '';
+        copyBtn.onclick = function () {
+          var copyPrefix = copyBtn.getAttribute('data-copy-prefix') || 'IsItKitchenSafe: ';
+          var copiedLabel = copyBtn.getAttribute('data-copied-label') || '✓ Copied!';
+          var shareText = copyPrefix + window.location.href;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(shareText).then(function () {
+              copyBtn.textContent = copiedLabel;
+              setTimeout(function () {
+                copyBtn.textContent = originalCopyText;
+              }, 2500);
+            });
+          }
+        };
+      }
+
+      var printBtn = document.getElementById('print-pantry-btn');
+      if (printBtn) {
+        printBtn.onclick = function () {
+          window.print();
+        };
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPantryChecker);
+    } else {
+      initPantryChecker();
+    }
+    document.addEventListener('astro:page-load', initPantryChecker);
+  })();
+</script>

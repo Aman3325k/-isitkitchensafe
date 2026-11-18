@@ -1,0 +1,162 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import PantryDryGoodsShelfLifeChecker from '../../../components/PantryDryGoodsShelfLifeChecker.astro';
+import rawData from '../../../data/pantry-dry-goods-shelf-life-data.json';
+import type { SupportedLanguage } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+
+interface LocalePageContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  heroSub: string;
+  breadcrumbs: Array<{ label: string; href?: string }>;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocalePageContent> = {
+  es: {
+    pageTitle: "Buscador de Caducidad y Seguridad de Despensa, Especias y Secos | IsItKitchenSafe",
+    pageDescription: "Consulta la vida útil USDA de 30 básicos de despensa: arroz, harina, especias, polvo de hornear, levadura, miel, aceites y conservas. Incluye inspector de botulismo en latas abolladas y pruebas de frescura en 30 segundos.",
+    badge: "30 Básicos USDA · Triaje de Latas y Botulismo · Pruebas de 30 seg",
+    h1: "Buscador de Caducidad y Seguridad de Despensa, Especias y Secos",
+    heroSub: "Consulta al instante la vida útil sin abrir y abierto según USDA FoodKeeper para 30 básicos —arroz, harinas, polvo de hornear, levadura, especias, miel, aceites y latas— además de evaluar latas abolladas y hacer pruebas rápidas de efervescencia.",
+    breadcrumbs: [
+      { label: "Inicio", href: "/es/" },
+      { label: "Herramientas", href: "/es/tools/" },
+      { label: "Caducidad de Despensa y Secos" }
+    ]
+  },
+  pt: {
+    pageTitle: "Guia de Validade e Segurança para Despensa, Especiarias e Grãos | IsItKitchenSafe",
+    pageDescription: "Consulte a validade USDA de 30 itens de despensa: arroz, farinha, especiarias, fermento em pó, mel, óleos e enlatados. Inclui inspetor de risco de botulismo em latas amassadas e testes de frescura de 30 segundos.",
+    badge: "30 Itens USDA · Triagem de Latas Amassadas · Testes em 30 seg",
+    h1: "Guia de Validade e Segurança para Despensa, Especiarias e Grãos",
+    heroSub: "Verifique na hora a validade fechado e aberto pelo padrão USDA FoodKeeper para 30 itens — arroz, farinhas, fermento químico, fermento biológico, temperos, mel, óleos e conservas — mais triagem de botulismo em latas e testes rápidos de ativação.",
+    breadcrumbs: [
+      { label: "Início", href: "/pt/" },
+      { label: "Ferramentas", href: "/pt/tools/" },
+      { label: "Validade de Despensa e Secos" }
+    ]
+  },
+  'zh-cn': {
+    pageTitle: "常备干货、香料调料与罐头保质期及食品安全速查器 | IsItKitchenSafe",
+    pageDescription: "按美国农业部 USDA FoodKeeper 标准速查 30 种常备干货与调味品（大米、面粉、泡打粉、酵母、香料、蜂蜜、食用油、罐头）开封前后保质期，附凹陷罐头肉毒杆菌排查与 30 秒膨松剂活性实验。",
+    badge: "30 种 USDA 常备干货 · 凹罐肉毒杆菌排查 · 30 秒新鲜度速测",
+    h1: "常备干货、香料调料与罐头保质期及食品安全速查器",
+    heroSub: "一键检索 30 种厨房常备食材（大米、面粉、泡打粉、小苏打、干酵母、香草香料、蜂蜜、食用油及马口铁罐头）未开封与开封后的 USDA 保质期限，科学评估凹罐肉毒杆菌风险并进行 30 秒活性与酸败速测。",
+    breadcrumbs: [
+      { label: "首页", href: "/zh-cn/" },
+      { label: "实用工具", href: "/zh-cn/tools/" },
+      { label: "干货香料与罐头保质期速查" }
+    ]
+  },
+  ja: {
+    pageTitle: "乾物・スパイス・粉類・缶詰の賞味期限＆安全性判定チェッカー | IsItKitchenSafe",
+    pageDescription: "米国農務省 USDA FoodKeeper 基準で米・小麦粉・ベーキングパウダー・イースト・スパイス・はちみつ・油・缶詰など30種の乾物賞味期限を即検索。へこんだ缶詰のボツリヌス菌診断と30秒発泡テスト付き。",
+    badge: "USDA基準 乾物30種 · 缶詰ボツリヌス菌診断 · 30秒鮮度テスト",
+    h1: "乾物・スパイス・粉類・缶詰の賞味期限＆安全性判定チェッカー",
+    heroSub: "米、小麦粉、ベーキングパウダー、イースト、スパイス、はちみつ、食用油、缶詰など30種類の未開封・開封後の安全期限をUSDA基準で即確認。へこんだ缶詰のボツリヌス菌リスク診断や30秒の発泡・酸化テストも利用できます。",
+    breadcrumbs: [
+      { label: "ホーム", href: "/ja/" },
+      { label: "ツール", href: "/ja/tools/" },
+      { label: "乾物・スパイス賞味期限チェッカー" }
+    ]
+  }
+};
+
+const c = CONTENT[lang as Exclude<SupportedLanguage, 'en'>] || CONTENT.es;
+const faqs = (rawData.faqs as Record<string, Array<{ question: string; answer: string }>>)[lang] || rawData.faqs.en;
+const localizedUrl = `https://isitkitchensafe.com/${lang}/tools/pantry-dry-goods-shelf-life-checker/`;
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": c.h1,
+  "url": localizedUrl,
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript.",
+  "description": c.pageDescription,
+  "inLanguage": lang === 'zh-cn' ? 'zh-CN' : lang,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IsItKitchenSafe",
+    "url": "https://isitkitchensafe.com"
+  }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map((faq) => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+};
+---
+
+<Layout
+  title={c.pageTitle}
+  description={c.pageDescription}
+  faqs={faqs}
+  excludeFaqSchema={true}
+  availableLocales={availableLocales}
+  lang={lang}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(webAppSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+  </Fragment>
+
+  <!-- Breadcrumbs -->
+  <div class="bg-surface-soft border-b border-hairline py-1 print:hidden">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <Breadcrumbs items={c.breadcrumbs} className="mb-0" />
+    </div>
+  </div>
+
+  <div class="max-w-[1140px] mx-auto px-6 py-10 md:py-14">
+    <!-- Hero Header -->
+    <header class="mb-10 text-center max-w-3xl mx-auto">
+      <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-signature-coral text-white mb-3">
+        {c.badge}
+      </span>
+      <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-4">
+        {c.h1}
+      </h1>
+      <p class="text-body text-[15px] md:text-[16px] leading-relaxed">
+        {c.heroSub}
+      </p>
+    </header>
+
+    <!-- Main Interactive Checker Component -->
+    <PantryDryGoodsShelfLifeChecker lang={lang} />
+  </div>
+</Layout>
