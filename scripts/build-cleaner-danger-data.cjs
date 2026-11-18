@@ -1,0 +1,1038 @@
+const fs = require('fs');
+const path = require('path');
+
+const chemicals = [
+  {
+    id: "bleach",
+    commonName: {
+      en: "Chlorine Bleach",
+      es: "Lejía / Cloro Líquido",
+      pt: "Água Sanitária / Cloro",
+      "zh-cn": "含氯漂白水（次氯酸钠）",
+      ja: "塩素系漂白剤（次亜塩素酸ナトリウム）"
+    },
+    formula: "NaClO (Sodium Hypochlorite)",
+    ph: "11 – 13 (Strong Alkaline)",
+    commonUses: {
+      en: "Sanitizing cutting boards, whitening whites, mold eradication",
+      es: "Desinfección de superficies, blanqueo de telas, erradicación de moho",
+      pt: "Desinfecção de superfícies, alvejamento de tecidos, eliminação de mofo",
+      "zh-cn": "砧板消毒、衣物漂白、除霉消杀",
+      ja: "まな板の除菌・台所の漂白・カビ取り"
+    },
+    dangerSummary: {
+      en: "Extremely reactive oxidizer. NEVER mix with acids, ammonia, or alcohol.",
+      es: "Oxidante altamente reactivo. NUNCA mezclar con ácidos, amoníaco ni alcohol.",
+      pt: "Oxidante altamente reativo. NUNCA misturar com ácidos, amônia ou álcool.",
+      "zh-cn": "极活泼的强氧化剂。切勿与任何酸性清洁剂、氨水或酒精混用！",
+      ja: "非常に反応性の高い強酸化剤。酸性洗剤・アンモニア・アルコールとの混合は厳禁です。"
+    }
+  },
+  {
+    id: "vinegar",
+    commonName: {
+      en: "White Vinegar / Cleaning Vinegar",
+      es: "Vinagre Blanco / Vinagre de Limpieza",
+      pt: "Vinagre Branco / Vinagre de Limpeza",
+      "zh-cn": "食用白醋 / 清洁白醋（醋酸）",
+      ja: "ホワイトビネガー / お酢（酢酸）"
+    },
+    formula: "CH₃COOH (Acetic Acid 5%–10%)",
+    ph: "2.4 – 3.0 (Acidic)",
+    commonUses: {
+      en: "Descaling kettles, dissolving hard water deposits, cutting soap scum",
+      es: "Descalcificar hervidores, eliminar sarro de agua dura, disolver restos de jabón",
+      pt: "Descalcificar chaleiras, remover manchas de água dura, limpar gordura leve",
+      "zh-cn": "电水壶除水垢、溶解矿物质硬水水渍、清洁水槽皂垢",
+      ja: "ケトルの水垢取り、シンクのカルキ除去、石鹸カスの分解"
+    },
+    dangerSummary: {
+      en: "Acidic liquid. Mixing with bleach releases poisonous chlorine gas instantly.",
+      es: "Líquido ácido. Mezclarlo con lejía libera gas cloro tóxico al instante.",
+      pt: "Líquido ácido. Misturar com água sanitária libera gás cloro tóxico imediatamente.",
+      "zh-cn": "强酸性液体。若与漂白水混合会瞬间释放剧毒氯气！",
+      ja: "酸性液体。塩素系漂白剤と混ぜると瞬時に有毒な塩素ガスが発生します。"
+    }
+  },
+  {
+    id: "ammonia",
+    commonName: {
+      en: "Household Ammonia",
+      es: "Amoníaco Doméstico",
+      pt: "Amônia Doméstica",
+      "zh-cn": "家用氨水（氢氧化铵）",
+      ja: "アンモニア水（家庭用）"
+    },
+    formula: "NH₄OH / NH₃ (Ammonium Hydroxide)",
+    ph: "11.5 – 12.0 (Alkaline)",
+    commonUses: {
+      en: "Streak-free glass cleaning, cutting heavy baked-on grease on ovens and range hoods",
+      es: "Limpieza de vidrios sin marcas, eliminación de grasa quemada en hornos y campanas",
+      pt: "Limpeza de vidros sem manchas, remoção de gordura pesada em fornos e coifas",
+      "zh-cn": "擦拭玻璃无水痕、分解烤箱与油烟机重度焦糊油垢",
+      ja: "窓ガラス・鏡の筋なし清掃、換気扇やオーブンの頑固な油汚れ分解"
+    },
+    dangerSummary: {
+      en: "Strong base. Mixing with bleach synthesizes deadly, lung-destroying chloramine vapor.",
+      es: "Base fuerte. Al mezclarse con lejía sintetiza vapor de cloramina letal para los pulmones.",
+      pt: "Base forte. Ao misturar com água sanitária produz vapores mortais de cloramina.",
+      "zh-cn": "强碱性挥发液体。若与漂白水混合会生成致命的氯胺毒气，严重损伤肺泡与呼吸道！",
+      ja: "強いアルカリ性。漂白剤と混ざると肺を破壊する猛毒のクロラミンガスを生成します。"
+    }
+  },
+  {
+    id: "hydrogen-peroxide",
+    commonName: {
+      en: "Hydrogen Peroxide (3%)",
+      es: "Agua Oxigenada (Peróxido de Hidrógeno 3%)",
+      pt: "Água Oxigenada (Peróxido de Hidrogênio 3%)",
+      "zh-cn": "3% 双氧水（过氧化氢）",
+      ja: "オキシドール（過酸化水素水 3%）"
+    },
+    formula: "H₂O₂ (Hydrogen Peroxide)",
+    ph: "4.5 – 5.5 (Slightly Acidic)",
+    commonUses: {
+      en: "Disinfecting wooden cutting boards, stain lifting on tile grout, non-chlorine whitening",
+      es: "Desinfección de tablas de cortar de madera, blanqueo de juntas, quitamanchas",
+      pt: "Desinfecção de tábuas de corte de madeira, clareamento de rejuntes, remoção de manchas",
+      "zh-cn": "木砧板温和消毒杀菌、瓷砖缝除霉去渍、无氯漂白",
+      ja: "木製まな板の除菌、タイルの目地漂白、色柄物のシミ抜き"
+    },
+    dangerSummary: {
+      en: "Combines with vinegar to make peracetic acid, a dangerous corrosive that burns lungs and skin.",
+      es: "Al unirse con vinagre produce ácido peracético, un corrosivo que quema piel y vías respiratorias.",
+      pt: "Ao combinar com vinagre gera ácido peracético, um corrosivo perigoso para pele e pulmões.",
+      "zh-cn": "若与白醋混在一起会合成过氧乙酸，具有极强的挥发腐蚀性，灼伤皮肤与眼肺粘膜！",
+      ja: "お酢と混ざると過酢酸が生成され、皮膚や気道粘膜を激しく腐食します。"
+    }
+  },
+  {
+    id: "rubbing-alcohol",
+    commonName: {
+      en: "Rubbing Alcohol (70% Isopropyl)",
+      es: "Alcohol Isopropílico / Alcohol de Frotar (70%)",
+      pt: "Álcool Isopropílico / Álcool 70%",
+      "zh-cn": "70% 医用酒精（异丙醇 / 乙醇）",
+      ja: "消毒用エタノール / イソプロピルアルコール (70%)"
+    },
+    formula: "C₃H₈O (Isopropanol) / C₂H₅OH (Ethanol)",
+    ph: "7.0 (Neutral)",
+    commonUses: {
+      en: "Fast-evaporating countertop sanitizing, stainless steel shine, electronics cleaning",
+      es: "Desinfección de encimeras sin residuo, abrillantador de acero, limpieza de pantallas",
+      pt: "Desinfecção rápida de bancadas, brilho em inox, higienização sem resíduos",
+      "zh-cn": "台面快速挥发杀菌消毒、不锈钢去指纹光亮、数码与开关清洁",
+      ja: "キッチントップの速乾除菌、ステンレスの艶出し、手垢・油分の脱脂"
+    },
+    dangerSummary: {
+      en: "Mixing with bleach triggers the haloform reaction, synthesizing toxic chloroform and chloroacetone.",
+      es: "Mezclar con lejía desencadena la reacción haloformo, sintetizando cloroformo tóxico.",
+      pt: "Misturar com água sanitária gera a reação do halofórmio, sintetizando clorofórmio tóxico.",
+      "zh-cn": "与含氯漂白水混合会发生卤仿反应，迅速合成剧毒氯仿（哥罗芳）麻醉毒物！",
+      ja: "塩素系漂白剤と混ぜるとハロホルム反応を起こし、有毒なクロロホルムを生成します。"
+    }
+  },
+  {
+    id: "baking-soda",
+    commonName: {
+      en: "Baking Soda",
+      es: "Bicarbonato de Sodio",
+      pt: "Bicarbonato de Sódio",
+      "zh-cn": "小苏打（碳酸氢钠）",
+      ja: "重曹（炭酸水素ナトリウム）"
+    },
+    formula: "NaHCO₃ (Sodium Bicarbonate)",
+    ph: "8.3 – 8.5 (Mild Alkaline)",
+    commonUses: {
+      en: "Non-scratch scouring paste for sinks and burnt pans, deodorizing refrigerators",
+      es: "Pasta limpiadora suave para fregaderos y sartenes quemadas, desodorizar frigoríficos",
+      pt: "Pasta de limpeza não abrasiva para pias e panelas queimadas, desodorizador de geladeira",
+      "zh-cn": "无划痕研磨清洁水槽与焦黑锅底、冰箱吸附异味",
+      ja: "シンクや焦げ付き鍋の研磨ペースト、冷蔵庫の脱臭消臭"
+    },
+    dangerSummary: {
+      en: "Mild base. Safe with dish soap. Mixing with vinegar neutralizes both into useless saltwater.",
+      es: "Base suave. Seguro con lavavajillas. Mezclar con vinagre anula ambos convirtiéndolos en agua con sal.",
+      pt: "Base suave. Seguro com detergente. Misturar com vinagre anula ambos em água salgada.",
+      "zh-cn": "弱碱性粉末。与洗洁精混用安全；但与白醋混合会剧烈中和失效，生成无清洁力的醋酸钠和水！",
+      ja: "弱アルカリ性。食器用洗剤とは安全ですが、お酢と混ぜると中和して効果を相殺してしまいます。"
+    }
+  },
+  {
+    id: "dish-soap",
+    commonName: {
+      en: "Liquid Dish Soap",
+      es: "Jabón Líquido Lavavajillas",
+      pt: "Detergente Líquido de Louça",
+      "zh-cn": "普通洗洁精（中性表面活性剂）",
+      ja: "台所用液体洗剤（中性洗剤）"
+    },
+    formula: "Surfactants (Neutral Syndet)",
+    ph: "6.5 – 7.5 (Neutral)",
+    commonUses: {
+      en: "Daily hand-washing cookware, emulsifying kitchen oils, cutting grease on counters",
+      es: "Lavado manual diario de vajilla, emulsionar aceites de cocina, quitar grasa de encimeras",
+      pt: "Lavagem manual diária de louças, emulsionar óleos, remover gordura de bancadas",
+      "zh-cn": "日常手工清洗餐具锅碗、乳化油脂油污、温和擦拭台面",
+      ja: "毎日の食器・鍋の手洗い、油分の乳化分解、台所周りの軽度な油汚れ落とし"
+    },
+    dangerSummary: {
+      en: "Generally safe. Avoid mixing with concentrated bleach if formula contains amine surfactants.",
+      es: "Generalmente seguro. Evitar mezclar con lejía pura si la fórmula contiene tensioactivos de amina.",
+      pt: "Geralmente seguro. Evite misturar com cloro puro se a fórmula contiver tensoativos amínicos.",
+      "zh-cn": "性质温和稳定。但若洗洁精含有胺类表面活性剂，不可直接倒入浓漂白水以防微量氯胺析出。",
+      ja: "基本的に安全。ただしアミン系界面活性剤入りの洗剤は塩素系漂白剤と直接混ぜないでください。"
+    }
+  },
+  {
+    id: "toilet-bowl-cleaner",
+    commonName: {
+      en: "Acidic Toilet / Limescale Cleaner",
+      es: "Limpiador Antical / Desincrustante Ácido",
+      pt: "Desincrustante Ácido / Limpa Limo Forte",
+      "zh-cn": "强酸性洁厕灵 / 强效除垢除锈剂",
+      ja: "強酸性トイレ用洗剤 / 強力水垢・尿石除去剤"
+    },
+    formula: "HCl (Hydrochloric Acid) / H₃PO₄ (Phosphoric Acid)",
+    ph: "0.5 – 1.5 (Strong Acid)",
+    commonUses: {
+      en: "Dissolving heavy calcium, rust stains, mineral crust in non-food porcelain plumbing",
+      es: "Disolver cal pesada, manchas de óxido y costras minerales en porcelana no alimentaria",
+      pt: "Dissolver calcário incrustado, manchas de ferrugem e crostas em louças sanitárias",
+      "zh-cn": "强力溶解马桶尿垢、重度瓷质水垢水锈（严禁用于任何食品接触炊具）",
+      ja: "頑固な尿石・カルシウム・錆の強力溶解（食品用器具には絶対使用禁止）"
+    },
+    dangerSummary: {
+      en: "EXTREME HAZARD: High concentration mineral acid. Mixing with bleach releases massive clouds of lethal chlorine gas.",
+      es: "PELIGRO EXTREMO: Ácido mineral concentrado. Mezclarlo con lejía genera nubes masivas de gas cloro mortal.",
+      pt: "PERIGO EXTREMO: Ácido mineral concentrado. Misturar com água sanitária libera nuvens de gás cloro letal.",
+      "zh-cn": "极度危险：高浓度无机强酸！若与含氯漂白水相遇会发生剧烈暴沸并释放大量致死级浓氯气！",
+      ja: "極めて危険：高濃度無機酸！塩素系漂白剤と混ざると致死レベルの大量の塩素ガスが噴出します。"
+    }
+  },
+  {
+    id: "drain-cleaner",
+    commonName: {
+      en: "Caustic Drain Opener (Lye)",
+      es: "Desatascador Cáustico (Sosa Cáustica)",
+      pt: "Desentupidor Cáustico (Soda Cáustica)",
+      "zh-cn": "强碱管道疏通剂（苛性钠/烧碱）",
+      ja: "パイプクリーナー（高濃度苛性ソーダ/水酸化ナトリウム）"
+    },
+    formula: "NaOH / KOH (Sodium / Potassium Hydroxide)",
+    ph: "13 – 14 (Extremely Caustic Base)",
+    commonUses: {
+      en: "Saponifying hair and solid cooking grease trapped inside kitchen and sink drains",
+      es: "Saponificar pelos y grasa de cocina acumulada dentro de tuberías de desagüe",
+      pt: "Saponificar cabelos e gordura acumulada nos canos e ralos de cozinha",
+      "zh-cn": "强力皂化水槽下水管道内的凝固动物油脂、食物残渣与毛发堵塞物",
+      ja: "排水管に詰まった動物性油脂やヘドロ、髪の毛のタンパク質を強力分解"
+    },
+    dangerSummary: {
+      en: "DEADLY SPLASHBACK: Never mix with acids, bleach, or boiling water. Causes violent boiling eruptions that blind and disfigure.",
+      es: "SALPICADURAS LETALES: Nunca mezclar con ácidos, lejía ni agua hirviendo. Erupciones hirvientes que causan ceguera.",
+      pt: "RESPINGOS LETALMENTE CORROSIVOS: Nunca misture com ácidos, cloro ou água fervente. Erupções que cegam.",
+      "zh-cn": "极度危险：强放热腐蚀剂！严禁与洁厕灵、白醋或开水混用，会引发剧烈沸腾飞溅造成瞬间失明与严重毁容！",
+      ja: "失明・重度熱傷の危機：酸性洗剤やお湯と絶対に混ぜないでください。突沸して跳ね返り失明や大火傷を負います。"
+    }
+  },
+  {
+    id: "oven-cleaner",
+    commonName: {
+      en: "Heavy-Duty Oven Cleaner",
+      es: "Limpiador Fuerte para Hornos",
+      pt: "Limpa-Fornos Pesado",
+      "zh-cn": "强力烤箱喷雾清洁剂（氢氧化钾）",
+      ja: "強力オーブンクリーナー（業務用苛性アルカリ）"
+    },
+    formula: "NaOH / KOH + Glycol Ethers",
+    ph: "12.5 – 13.5 (Highly Alkaline)",
+    commonUses: {
+      en: "Stripping polymerised carbonized fat and baked-on oil off porcelain enamel oven walls",
+      es: "Eliminar grasa carbonizada y aceites horneados en paredes esmaltadas de hornos",
+      pt: "Remover gordura carbonizada e crostas queimadas das paredes de fornos",
+      "zh-cn": "乳化剥离烤箱内胆瓷釉壁上的碳化固化陈年油渍与焦黑油垢",
+      ja: "オーブン庫内の焦げ付いた炭化油汚れや頑固なベタつきの強力剥離"
+    },
+    dangerSummary: {
+      en: "Severe caustic burns. Never mix with bleach, vinegar, or apply to raw aluminum cookware.",
+      es: "Quemaduras cáusticas severas. Nunca mezclar con lejía ni vinagre, ni aplicar en aluminio crudo.",
+      pt: "Queimaduras cáusticas graves. Nunca misture com cloro nem vinagre, nem aplique em alumínio cru.",
+      "zh-cn": "强碱腐蚀风险。严禁与漂白水或白醋混合，亦不可喷在未经阳极氧化的生铝炊具上（会剧烈腐蚀产氢）！",
+      ja: "強アルカリによる腐食性。漂白剤やお酢と混ぜないこと。アルミ鍋にかけると急速に溶けて水素が発生します。"
+    }
+  },
+  {
+    id: "castile-soap",
+    commonName: {
+      en: "Castile Soap / True Natural Soap",
+      es: "Jabón de Castilla / Jabón Puro Potásico",
+      pt: "Sabão de Castela / Sabão Natural",
+      "zh-cn": "天然卡斯提尔皂（纯植物油皂）",
+      ja: "カスチール石鹸（純植物性オリーブ石鹸）"
+    },
+    formula: "Potassium Olivate / Cocoate",
+    ph: "8.9 – 9.5 (Alkaline)",
+    commonUses: {
+      en: "Eco-friendly non-toxic kitchen surface wiping, floor washing, produce washing",
+      es: "Limpieza ecológica no tóxica de encimeras, lavado de suelos y frutas",
+      pt: "Limpeza ecológica não tóxica de bancadas, pisos e lavagem de alimentos",
+      "zh-cn": "环保无害厨房台面清洁、地板擦洗、蔬菜水果外表皮清洁",
+      ja: "エコ志向のキッチン天板拭き、床掃除、果物・野菜の汚れ落とし"
+    },
+    dangerSummary: {
+      en: "Non-toxic, but mixing with vinegar breaks saponification, creating greasy coagulated curds.",
+      es: "No tóxico, pero mezclarlo con vinagre descompone la saponificación creando grumos aceitosos.",
+      pt: "Não tóxico, mas misturar com vinagre quebra a saponificação gerando uma pasta gordurosa inútil.",
+      "zh-cn": "无毒环保。但若与白醋混在一起会破坏皂化结构，析出粘稠油腻的游离脂肪酸沉淀破坏清洁！",
+      ja: "無毒ですが、お酢と混ぜると石鹸成分が分解され、ベタベタの油性カス（脂肪酸）に分離してしまいます。"
+    }
+  },
+  {
+    id: "quats",
+    commonName: {
+      en: "Quaternary Disinfectant (Antibacterial Sprays / Wipes)",
+      es: "Desinfectante de Amonio Cuaternario (Toallitas Antibacterianas)",
+      pt: "Desinfetante de Amônio Quaternário (Lenços Antibacterianos)",
+      "zh-cn": "季铵盐类除菌喷雾 / 杀菌湿巾",
+      ja: "第4級アンモニウム塩系除菌スプレー / アルコールフリー除菌シート"
+    },
+    formula: "Benzalkonium Chloride (Alkyl Dimethyl Benzyl Ammonium)",
+    ph: "6.5 – 8.0 (Neutral to Mild Base)",
+    commonUses: {
+      en: "Hospital-grade touch-point sanitizing, kitchen counters, high-touch cabinet handles",
+      es: "Desinfección de contacto frecuente, encimeras de cocina, tiradores de armarios",
+      pt: "Desinfecção de pontos de toque, bancadas de cozinha, puxadores de armários",
+      "zh-cn": "厨房高频接触点除菌、橱柜门把手擦拭、食品台面残留杀菌",
+      ja: "ドアノブ・冷蔵庫取っ手の除菌、調理台の衛生管理、除菌シート"
+    },
+    dangerSummary: {
+      en: "Do not mix with bleach or regular dish soap. Anionic soaps completely deactivate quats.",
+      es: "No mezclar con lejía ni jabón lavavajillas común. Los jabones aniónicos desactivan por completo los cuaternarios.",
+      pt: "Não misture com cloro nem detergente comum. Sabões aniônicos anulam a ação dos quaternários.",
+      "zh-cn": "切勿与含氯漂白水或普通阴离子洗洁精混用，阴离子表面活性剂会彻底中和并使季铵盐除菌效力失效！",
+      ja: "塩素系漂白剤や一般的な台所洗剤と混ぜないでください。陰イオン界面活性剤が除菌成分を失活させます。"
+    }
+  }
+];
+
+const pairwiseReactions = [
+  // 1. Bleach + Vinegar
+  {
+    pair: ["bleach", "vinegar"],
+    severity: "DEADLY",
+    gasOrByproduct: "Chlorine Gas (Cl₂)",
+    reactionFormula: "NaClO + 2 CH₃COOH → Cl₂↑ + 2 CH₃COONa + H₂O",
+    title: {
+      en: "DEADLY HAZARD: Produces Toxic Chlorine Gas (Cl₂)",
+      es: "PELIGRO MORTAL: Produce Gas Cloro Tóxico (Cl₂)",
+      pt: "PERIGO MORTAL: Produz Gás Cloro Tóxico (Cl₂)",
+      "zh-cn": "致死级危险：瞬间释放剧毒氯气 (Cl₂)",
+      ja: "致死級の危険：猛毒の塩素ガス (Cl₂) が発生！"
+    },
+    explanation: {
+      en: "When sodium hypochlorite reacts with acetic acid, it liberates dense yellowish-green chlorine gas. Chlorine gas reacts with moisture in your respiratory tract to form hydrochloric and hypochlorous acids, causing immediate chemical burning of lung tissue, severe coughing, fluid buildup (pulmonary edema), and potentially fatal asphyxiation.",
+      es: "Al mezclar hipoclorito de sodio con ácido acético, se desprende gas cloro gas verdoso denso. Al entrar en contacto con el agua de las vías respiratorias forma ácido clorhídrico y ácido hipocloroso, causando quemaduras químicas agudas en los pulmones, edema pulmonar y asfixia potencialmente mortal.",
+      pt: "Quando o hipoclorito de sódio reage com ácido acético, libera gás cloro densamente tóxico. O cloro reage com a umidade dos pulmões formando ácido clorídrico, provocando tosse violenta, queimadura interna das vias aéreas e edema pulmonar potencialmente fatal.",
+      "zh-cn": "次氯酸钠遇到弱酸（醋酸）会立刻酸化并发生歧化氧化还原反应，大量释放具有强烈窒息性刺激气味的黄绿色氯气。氯气吸入肺部后与粘膜水分结合生成盐酸和次氯酸，快速灼伤肺泡导致化学性肺炎与急性肺水肿，严重者可在短时间内窒息致死！",
+      ja: "次亜塩素酸ナトリウムとお酢（酢酸）が混ざると、酸性化により黄緑色の有毒な塩素ガスが激しく気化します。肺内の水分と反応して塩酸と次亜塩素酸を生じ、気道粘膜を激しく火傷させ、激しい咳・呼吸困難・急性肺水腫を引き起こし、最悪の場合は命に関わります。"
+    },
+    symptoms: {
+      en: ["Violent coughing and choking sensation", "Burning pain in throat, nose, and eyes", "Chest tightness and wheezing", "Shortness of breath / severe airway spasms"],
+      es: ["Ataques violentos de tos y sensación de asfixia", "Ardor agudo en garganta, nariz y ojos", "Opresión torácica y silbidos al respirar", "Dificultad respiratoria severa / espasmo traqueal"],
+      pt: ["Tosse violenta e sensação imediata de sufocamento", "Ardência nos olhos, nariz e garganta", "Aperto no peito e respiração ofegante", "Falta de ar aguda e espasmos pulmonares"],
+      "zh-cn": ["剧烈呛咳、剧烈咽喉灼痛与窒息感", "眼睛红肿充血、流泪刺痛", "胸闷胸痛、呼吸急促伴随哮鸣音", "急性呼吸道痉挛与严重缺氧"],
+      ja: ["激しい咳き込みと喉の焼けるような痛み", "目の強い痛みと涙が止まらない症状", "胸の圧迫感とゼーゼーする喘鳴", "息苦しさと急性気管支痙攣"]
+    },
+    emergencyAction: {
+      en: "EVACUATE IMMEDIATELY. Leave the room, close the door behind you to contain the fumes, and step outside into fresh air. Do NOT attempt to wipe it up or neutralize with other chemicals. Open windows from a safe vantage point only if safe. Call Poison Control (1-800-222-1222) or emergency services (911) if coughing persists.",
+      es: "EVACÚA INMEDIATAMENTE. Sal de la estancia, cierra la puerta para contener los vapores y respira aire fresco afuera. NUNCA intentes neutralizarlo echando más productos. Abre ventanas solo si es seguro. Llama al Centro de Toxicología o al 112 / 911 si la tos no cesa.",
+      pt: "EVACUE IMEDIATAMENTE. Saia do cômodo, feche a porta para conter o gás e vá para o ar livre. NÃO tente limpar ou neutralizar com outros produtos químicos. Ligue para o SAMU (192) ou Centro de Controle de Intoxicações caso a tosse persista.",
+      "zh-cn": "立即撤离现场！立刻屏住呼吸离开房间，反手关上房门以防止毒气扩散，迅速到室外通风处呼吸新鲜空气。千万不要试图用其他化学品去中和！若有明显胸闷呛咳，立即拨打急救电话（120）或前往急诊就医。",
+      ja: "直ちにその場から避難してください！息を止めて部屋を出て、ドアを閉めて煙を閉じ込め、速やかに新鮮な外気の吸える屋外へ移動してください。絶対に他の薬品をかけて中和しようとしないでください。症状が続く場合は直ちに救急車（119番）を呼んでください。"
+    },
+    safeAlternative: {
+      en: "Use either cleaner separately: use vinegar first for hard water scale, rinse thoroughly with fresh tap water, let completely dry, then apply dilute bleach only if disinfection is required.",
+      es: "Úsalos siempre por separado: aplica vinagre primero para disolver la cal, enjuaga con abundante agua, deja secar por completo y solo después aplica lejía diluida si precisas desinfectar.",
+      pt: "Use sempre separadamente: use vinagre primeiro para remover o calcário, enxágue com água abundante, deixe secar e só depois use água sanitária diluída se precisar desinfetar.",
+      "zh-cn": "两者绝对不可同时或在同一盆水中混用！如需除垢请单独使用白醋，彻底用大量清水冲洗干净并完全晾干后，再单独使用稀释漂白水进行除菌。",
+      ja: "必ず別々に使用してください。水垢にはまずお酢を使い、大量の水で完全にすすぎ流して乾燥させた後に、除菌が必要な場合のみ塩素系漂白剤を単独で使用します。"
+    }
+  },
+
+  // 2. Bleach + Ammonia
+  {
+    pair: ["bleach", "ammonia"],
+    severity: "DEADLY",
+    gasOrByproduct: "Toxic Chloramine Vapors (NH₂Cl, NHCl₂)",
+    reactionFormula: "NaClO + NH₃ → NH₂Cl↑ + NaOH",
+    title: {
+      en: "DEADLY HAZARD: Produces Toxic Chloramine Vapors",
+      es: "PELIGRO MORTAL: Produce Vapores Tóxicos de Cloramina",
+      pt: "PERIGO MORTAL: Produz Vapores Tóxicos de Cloramina",
+      "zh-cn": "致死级危险：生成剧毒氯胺气体 (NH₂Cl)",
+      ja: "致死級の危険：猛毒のクロラミンガスが発生！"
+    },
+    explanation: {
+      en: "Mixing sodium hypochlorite with ammonia produces monochloramine, dichloramine, and potentially nitrogen trichloride (which is shock-sensitive and explosive). Chloramine vapors cause rapid chemical pneumonitis, fluid buildup in the lungs, and extreme damage to the respiratory tract.",
+      es: "Al mezclar lejía con amoníaco se sintetizan monocloramina, dicloramina y tricloruro de nitrógeno (altamente inestable y explosivo). Los vapores de cloramina causan neumonitis química aguda, edema pulmonar y daños irreversibles en el epitelio respiratorio.",
+      pt: "A mistura de água sanitária com amônia produz cloraminas e tricloreto de nitrogênio (potencialmente explosivo). Os vapores penetram profundamente nos alvéolos pulmonares, provocando queimaduras químicas e risco grave de óbito.",
+      "zh-cn": "次氯酸钠与氨水发生亲电取代反应，快速生成一氯胺、二氯胺以及极易爆炸的三氯化氮。氯胺气体会深度侵入下呼吸道及肺泡，造成急性化学性肺炎、肺水肿并伴随剧烈肺组织水肿穿孔！",
+      ja: "次亜塩素酸ナトリウムとアンモニアが混ざると、モノクロラミン、ジクロラミン、爆発性のある三塩化窒素が合成されます。呼吸器の奥深くまで侵入し、急性化学肺炎や肺水腫を引き起こす極めて危険な猛毒反応です。"
+    },
+    symptoms: {
+      en: ["Severe coughing, wheezing, and shortness of breath", "Throat swelling and burning in trachea", "Watery, burning eyes and dizziness", "Nausea and delayed onset pulmonary edema"],
+      es: ["Tos seca incontrolable y dificultad respiratoria", "Inflamación y ardor intenso en la tráquea", "Irritación ocular severa, lagrimeo y mareos", "Náuseas y riesgo de edema pulmonar retardado"],
+      pt: ["Tosse incontrolável e falta de ar", "Ardência e inchaço na traqueia", "Olhos lacrimejando com dor aguda e tontura", "Náuseas e edema pulmonar tardio"],
+      "zh-cn": ["剧烈干咳、胸骨后灼痛、呼吸极度窘迫", "气管痉挛肿胀、喉头水肿窒息感", "双眼刺痛发红、流泪伴眩晕恶心", "吸入后数小时可能诱发迟发性重度肺水肿"],
+      ja: ["激しい咳、呼吸困難、息苦しさ", "気管の激しい痛みと喉の腫れ", "目の強い刺激・流涙と目眩・吐き気", "数時間後に悪化する遅発性肺水腫の危険"]
+    },
+    emergencyAction: {
+      en: "EVACUATE IMMEDIATELY. Chloramine symptoms can worsen over several hours even after exposure stops. Move outside into fresh air immediately. Do NOT touch or stay near the mixture. Seek emergency medical attention (Call 911 / Poison Control).",
+      es: "EVACÚA DE INMEDIATO. Los efectos de la cloramina pueden empeorar con las horas. Sal al aire libre. No intentes limpiar la mezcla. Busca atención médica urgente llamando al 112 / 911.",
+      pt: "EVACUE O LOCAL IMEDIATAMENTE. Os sintomas podem se agravar horas depois. Vá para o ar puro. Não tente neutralizar a mistura. Chame socorro médico de emergência.",
+      "zh-cn": "立即撤离！氯胺中毒常有数小时的潜伏期加重期，不可大意。立即移步至室外通风处并保持平静。切勿靠近清理！立刻前往医院急诊或拨打120急救电话。",
+      ja: "直ちに避難してください！クロラミンによる肺損傷は数時間後に急変する場合があります。屋外へ退避し安静にして、速やかに救急車または医師の診察を受けてください。"
+    },
+    safeAlternative: {
+      en: "Choose ONE product for the task: use ammonia for heavy degreasing (range hood, oven glass), rinse clean with water. Use dilute bleach only for germ sanitization on thoroughly washed surfaces.",
+      es: "Usa un solo producto según la tarea: amoníaco para desengrasar a fondo (campanas, cristales de horno) y enjuaga bien. Usa lejía diluida solo para desinfectar superficies limpias.",
+      pt: "Use apenas um produto: amônia para desengordurar pesado (coifas, vidros de forno) e enxágue bem. Use cloro apenas para desinfetar superfícies já lavadas.",
+      "zh-cn": "根据任务二选一单独使用：重油污（油烟机滤网、烤箱）单独使用稀释氨水或油污清洁剂；除菌单独使用稀释漂白水，绝不可同场混合。",
+      ja: "目的に応じて必ずどちらか一方のみを単独使用してください。換気扇の頑固な油汚れにはアンモニア水を用い、除菌には単独の塩素系漂白剤を使用します。"
+    }
+  },
+
+  // 3. Bleach + Rubbing Alcohol
+  {
+    pair: ["bleach", "rubbing-alcohol"],
+    severity: "DEADLY",
+    gasOrByproduct: "Chloroform (CHCl₃) & Chloroacetone",
+    reactionFormula: "CH₃CH(OH)CH₃ + NaClO → CHCl₃↑ + CH₃COONa + corrosive vapors",
+    title: {
+      en: "DEADLY HAZARD: Produces Chloroform & Chloroacetone",
+      es: "PELIGRO MORTAL: Produce Cloroformo y Cloroacetona",
+      pt: "PERIGO MORTAL: Produz Clorofórmio e Cloroacetona",
+      "zh-cn": "致死级危险：生成剧毒麻醉剂氯仿 (CHCl₃) 与氯丙酮",
+      ja: "致死級の危険：有毒なクロロホルムとクロロアセトンが発生！"
+    },
+    explanation: {
+      en: "Mixing household bleach with isopropanol or ethanol triggers the haloform reaction, rapidly yielding chloroform (CHCl₃), hydrochloric acid fumes, and chloroacetone. Chloroform is a potent central nervous system depressant and known carcinogen that causes rapid loss of consciousness, dizziness, respiratory depression, and severe liver/kidney toxicity.",
+      es: "La combinación de lejía con alcohol isopropílico o etanol desata la reacción del haloformo, generando cloroformo (CHCl₃), vapores de ácido clorhídrico y cloroacetona. El cloroformo deprime el sistema nervioso central, causando desmayos rápidos, mareos y toxicidad hepatorrenal aguda.",
+      pt: "A mistura de água sanitária com álcool gera a reação do halofórmio, produzindo clorofórmio e cloroacetona. Provoca forte efeito narcótico, tontura instantânea, desmaio e danos severos ao fígado e rins.",
+      "zh-cn": "漂白水与异丙醇或酒精混合会立即触发卤仿反应（Haloform Reaction），迅速生成麻醉性氯仿（三氯甲烷）、盐酸酸雾以及具有强烈催泪性的氯丙酮。大量吸入会导致中枢神经抑制、头晕昏迷、呼吸麻痹以及不可逆的肝肾损伤！",
+      ja: "塩素系漂白剤と消毒用アルコールが混ざるとハロホルム反応が起き、有毒なクロロホルムと催泪性のクロロアセトンが生成されます。強力な中枢神経抑制作用により、意識混濁、目眩、昏睡、急性肝障害を引き起こします。"
+    },
+    symptoms: {
+      en: ["Extreme dizziness and lightheadedness", "Sudden headache and loss of coordination", "Loss of consciousness / fainting in enclosed kitchens", "Eye tearing and nausea"],
+      es: ["Mareo súbito y sensación de desvanecimiento", "Dolor de cabeza agudo y pérdida de coordinación", "Pérdida de conciencia / desmayo en cocinas cerradas", "Irritación ocular intensa y náuseas"],
+      pt: ["Tontura súbita e sensação de desmaio", "Dor de cabeça forte e confusão mental", "Perda de consciência e sonolência repentina", "Ardência nos olhos e náuseas"],
+      "zh-cn": ["突发极度头晕、步态不稳与定向力障碍", "剧烈头痛、视物模糊与恶心", "在密闭厨房内迅速失去知觉或昏迷倒地", "眼睛强烈刺痛催泪与咽喉灼烧"],
+      ja: ["突然の激しい目眩と立ちくらみ", "頭痛、手足の脱力感とふらつき", "密閉空間での意識喪失・失神", "催涙感と激しい吐き気"]
+    },
+    emergencyAction: {
+      en: "EVACUATE TO FRESH AIR IMMEDIATELY. Assist anyone feeling dizzy out of the kitchen into an open-air area immediately. Do not stay to clean up the spill. Call emergency medical personnel (911) if anyone loses consciousness or cannot breathe normally.",
+      es: "SAL AL AIRE LIBRE INMEDIATAMENTE. Ayuda a cualquier persona mareada a salir a una zona abierta. No te quedes a fregar el suelo. Llama a urgencias (112 / 911) si alguien se desmaya.",
+      pt: "VÁ PARA O AR PURO IMEDIATAMENTE. Retire qualquer pessoa zonza do local de imediato. Não fique para tentar limpar. Chame socorro médico de emergência.",
+      "zh-cn": "立刻撤离到户外空气流通处！如有人出现眩晕无力，迅速将其搀扶出厨房转移至室外平卧。切勿留于室内清理废液！若有人昏迷不醒，立刻拨打120急救电话求助。",
+      ja: "直ちに新鮮な外気の吸える場所へ避難してください！目眩を訴える人を速やかに屋外へ誘導し、無理に拭き取ろうとせず、意識を失った場合は直ちに119番通報してください。"
+    },
+    safeAlternative: {
+      en: "Use rubbing alcohol (70%) on its own for quick surface sanitizing and electronics. Use dilute bleach on completely separate non-porous surfaces with proper ventilation.",
+      es: "Usa el alcohol de frotar al 70% solo para desinfectar encimeras y dispositivos. Usa la lejía diluida de forma independiente sobre superficies no porosas.",
+      pt: "Use álcool 70% sozinho para higienização rápida de bancadas e metais. Use água sanitária diluída de forma separada em pisos e pias.",
+      "zh-cn": "二者应完全独立使用：70% 酒精单独用于水龙头、把手等小范围快速挥发消毒；漂白水单独按比例稀释用于地面与水槽大面积消毒，切勿混倒在一起！",
+      ja: "消毒用エタノールは単独でキッチントップや手元の除菌に使い、塩素系漂白剤は完全に分けて別工程で使用してください。"
+    }
+  },
+
+  // 4. Hydrogen Peroxide + Vinegar
+  {
+    pair: ["hydrogen-peroxide", "vinegar"],
+    severity: "DANGEROUS",
+    gasOrByproduct: "Peracetic Acid (CH₃COOOH)",
+    reactionFormula: "CH₃COOH + H₂O₂ ⇌ CH₃COOOH + H₂O",
+    title: {
+      en: "DANGEROUS HAZARD: Produces Corrosive Peracetic Acid",
+      es: "PELIGRO QUÍMICO: Produce Ácido Peracético Altamente Corrosivo",
+      pt: "PERIGO QUÍMICO: Produz Ácido Peracético Altamente Corrosivo",
+      "zh-cn": "强腐蚀危险：生成高挥发性过氧乙酸 (CH₃COOOH)",
+      ja: "腐食の危険：刺激性の高い過酢酸が発生！"
+    },
+    explanation: {
+      en: "Combining hydrogen peroxide and vinegar in the same container creates peracetic acid. In concentrated amounts, peracetic acid is extremely corrosive and irritating to skin, eyes, nose, throat, and lungs, and can damage countertop sealants and etch metal cookware.",
+      es: "Combinar agua oxigenada y vinagre en el mismo recipiente sintetiza ácido peracético. Este compuesto es altamente corrosivo e irrita gravemente piel, ojos, garganta y pulmones, además de corroer encimeras y utensilios de cocina.",
+      pt: "Misturar água oxigenada e vinagre no mesmo frasco forma ácido peracético. É um composto altamente corrosivo que provoca irritação química nos olhos, pele e vias respiratórias, além de danificar bancadas de pedra.",
+      "zh-cn": "将双氧水与白醋倒在同一喷雾瓶或容器中，会发生化学平衡反应生成过氧乙酸（Peracetic Acid）。过氧乙酸具有强烈的挥发性与酸性腐蚀力，吸入其酸雾会严重灼伤喉部与呼吸道，接触皮肤会引起剧烈刺痛白斑，并会腐蚀厨房大理石台面及金属锅具！",
+      ja: "オキシドールとお酢を同じスプレーボトル等で混ぜると過酢酸が合成されます。揮発性の高い強い腐食作用を持ち、皮膚のただれ、目や喉の粘膜の強い痛み、キッチンの石材や金属の腐食を引き起こします。"
+    },
+    symptoms: {
+      en: ["Burning skin and blanching (white spots)", "Eye redness, stinging, and profuse tearing", "Nose and throat irritation", "Wheezing and cough"],
+      es: ["Ardor en la piel y manchas blanquecinas por quemadura", "Enrojecimiento ocular agudo y lagrimeo", "Irritación dolorosa en nariz y garganta", "Tos seca y silbidos"],
+      pt: ["Ardência na pele e manchas brancas", "Irritação ocular intensa com lágrimas", "Queimação nas narinas e garganta", "Tosse e desconforto pulmonar"],
+      "zh-cn": ["皮肤发白伴随刺痛（过氧乙酸灼伤）", "双眼灼痛充血、流泪不止", "鼻腔、咽喉与支气管强烈酸呛刺激", "咳嗽与胸骨后隐痛"],
+      ja: ["皮膚のチクチクした痛みや白化（化学火傷）", "目の激しい痛みと涙", "鼻腔や喉の強い刺激感", "咳き込みや気管支の違和感"]
+    },
+    emergencyAction: {
+      en: "Rinse affected skin immediately with copious cold running water for at least 15 minutes. Flush eyes if exposed. Open windows to vent the fumes. Do NOT keep closed bottles of this mixture, as pressure buildup can burst spray bottles.",
+      es: "Lava la piel afectada con abundante agua fría durante al menos 15 minutos. Enjuaga los ojos si hubo salpicaduras. Ventila la habitación y nunca guardes esta mezcla en botes cerrados por riesgo de sobrepresión.",
+      pt: "Lave a pele com água corrente fria por 15 minutos. Lave os olhos se houver contato. Abra as janelas para ventilar. Nunca armazene essa mistura em frascos fechados pelo risco de explosão.",
+      "zh-cn": "如沾染皮肤或眼睛，立即用大量流动冷水冲洗至少15分钟！迅速开窗通风驱散酸雾。切勿将二者混在一起装入密闭喷壶存放，化学反应释放气体极易导致喷壶膨胀甚至爆炸飞溅！",
+      ja: "皮膚についた場合は直ちに冷たい流水で15分以上洗い流してください。目に入った場合は流水でよく洗眼してください。窓を開けて換気し、密閉容器に入れて放置すると破裂する恐れがあります。"
+    },
+    safeAlternative: {
+      en: "Clean surfaces in separate stages: apply vinegar to clean and break down mineral residue, wipe clean, then spray hydrogen peroxide separately to sanitize. (Two-step consecutive method is safe; mixing in one bottle is NOT).",
+      es: "Aplica en dos pasos separados: usa vinagre primero para desincrustar, pasa un paño húmedo, y luego pulveriza el agua oxigenada por separado para desinfectar. (Dos pasos sucesivos es seguro; mezclar en un bote no).",
+      pt: "Use em etapas separadas: aplique vinagre para limpar a sujeira, enxágue ou passe pano úmido, e em seguida aplique a água oxigenada separadamente para desinfetar.",
+      "zh-cn": "采用安全的分步喷涂法：先喷白醋擦拭清洁水渍油污，擦干后再单独喷洒3%双氧水进行除菌。（分步前后使用是食品级安全的，但绝对不能混倒在同一个瓶子里！）",
+      ja: "必ず「2段階」で使い分けてください。まずお酢をスプレーして汚れを拭き取った後、別のボトルからオキシドールを単独で吹きかけて除菌します（1つのボトルに混ぜてはいけません）。"
+    }
+  },
+
+  // 5. Baking Soda + Vinegar
+  {
+    pair: ["baking-soda", "vinegar"],
+    severity: "INEFFECTIVE",
+    gasOrByproduct: "Carbon Dioxide (CO₂) & Sodium Acetate",
+    reactionFormula: "NaHCO₃ + CH₃COOH → CH₃COONa + H₂O + CO₂↑",
+    title: {
+      en: "COUNTERPRODUCTIVE MYTH: Neutralizes into Salty Water & CO₂",
+      es: "MITO CONTRAPRODUCENTE: Se Neutralizan en Agua Salada y CO₂",
+      pt: "MITO CONTRAPRODUTENTE: Neutralizam-se em Água com Sal e CO₂",
+      "zh-cn": "无效中和误区：剧烈冒泡但最终中和为盐水与二氧化碳",
+      ja: "効果相殺の誤解：シュワシュワ泡立つだけで無力な塩水に中和！"
+    },
+    explanation: {
+      en: "While the dramatic bubbling looks impressive on social media, baking soda (an alkaline base, pH ~8.3) and vinegar (an acid, pH ~2.5) chemically neutralize each other upon contact. The fizzing bubbles are simply harmless carbon dioxide gas escaping. Once the fizzing stops, you are left with water and sodium acetate salt, which has virtually zero degreasing or antimicrobial power.",
+      es: "Aunque el burbujeo resulte vistoso en vídeos de redes sociales, el bicarbonato (base, pH ~8.3) y el vinagre (ácido, pH ~2.5) se neutralizan mutuamente al mezclarse. La espuma no es más que dióxido de carbono inofensivo. Al apagarse, solo queda agua salada con acetato de sodio, sin poder desengrasante ni desinfectante.",
+      pt: "Apesar de fazer muita espuma e parecer poderoso, o bicarbonato (alcalino) e o vinagre (ácido) anulam a eficácia um do outro. O borbulhar é apenas gás carbônico inofensivo sendo liberado. O resultado final é apenas água salgada com acetato de sódio, que limpa quase nada.",
+      "zh-cn": "虽然在短视频上产生大量泡沫看似很有清洁威力，但实际上弱碱性小苏打（pH 约8.3）与弱酸性白醋（pH 约2.5）会发生剧烈的中和反应。翻滚的泡沫仅仅是无毒的二氧化碳气体。中和完毕后，容器里剩下的只是一盆微弱的醋酸钠盐水，既失去了小苏打的微研磨乳化力，也失去了白醋的溶解水垢力！",
+      ja: "SNSで話題のシュワシュワした泡立ちは見た目こそ派手ですが、アルカリ性の重曹とお酢（酸性）が瞬時に中和反応を起こしているだけです。発生する気泡は無害な炭酸ガス（CO2）であり、反応が終わった後はただの酢酸ナトリウム水溶液（塩水）になり、洗浄力も除菌力も失われます。"
+    },
+    symptoms: {
+      en: ["No physical harm under normal conditions", "Slight CO₂ accumulation if mixed in a tiny closed space", "Wasted cleaning supplies"],
+      es: ["Sin daños para la salud en condiciones normales", "Leve acumulación de CO₂ en espacios muy cerrados", "Gasto inútil de productos"],
+      pt: ["Sem riscos à saúde em condições normais", "Pequena liberação de CO₂", "Desperdício de produtos de limpeza"],
+      "zh-cn": ["正常使用无直接人体毒性伤害", "在密闭小空间内会产生微量二氧化碳", "极大的清洁剂资源浪费"],
+      ja: ["通常の使用環境では人体への毒性はありません", "密閉容器に入れると炭酸ガスの内圧で蓋が飛ぶ恐れ", "洗剤が無駄になるだけ"]
+    },
+    emergencyAction: {
+      en: "Not an emergency. Just wash down the drain. Do NOT cap the mixture in a rigid sealed bottle, as carbon dioxide pressure can cause plastic bottles to burst or spray.",
+      es: "No requiere atención de emergencia. Aclara con agua. No tapes la mezcla en botes herméticos para evitar que la presión del CO₂ haga reventar el recipiente.",
+      pt: "Não é uma emergência. Basta enxaguar com água. Não tampe a mistura em garrafas fechadas para evitar explosão por pressão de gás.",
+      "zh-cn": "无需医疗急救，用清水冲入下水道即可。切勿将刚混合冒泡的小苏打醋水倒入拧紧盖子的密闭塑料瓶中，膨胀的气体可能导致塑料瓶爆裂！",
+      ja: "健康被害の心配はありません。水で洗い流してください。密閉容器に蓋をして放置すると内圧で容器が破裂することがあるためご注意ください。"
+    },
+    safeAlternative: {
+      en: "Use their distinct chemical properties separately: use baking soda powder with a damp sponge as a gentle alkaline abrasive to scrub burnt grease. Use vinegar separately to dissolve calcium crust and kettle scale.",
+      es: "Aprovecha sus propiedades químicas por separado: usa el bicarbonato con una esponja húmeda como abrasivo suave para desincrustar grasa. Usa el vinagre por separado para disolver la cal.",
+      pt: "Use suas propriedades químicas de forma independente: use o bicarbonato com esponja para esfregar gordura queimada. Use o vinagre sozinho para dissolver crostas de calcário.",
+      "zh-cn": "分别利用它们特有的化学特性：小苏打配合湿海绵作为温和弱碱性摩擦剂，用来去除灶台焦黑油脂；白醋则单独用于浸泡水龙头水垢、电水壶除钙，分工明确才有效！",
+      ja: "それぞれの特性を単独で活かしましょう。油汚れや焦げ付きの研磨には重曹ペーストを単独で使用し、カルキや水垢の溶解にはお酢を単独で使います。"
+    }
+  },
+
+  // 6. Bleach + Toilet Bowl Cleaner
+  {
+    pair: ["bleach", "toilet-bowl-cleaner"],
+    severity: "DEADLY",
+    gasOrByproduct: "Massive Chlorine Gas Clouds (Cl₂)",
+    reactionFormula: "NaClO + 2 HCl → Cl₂↑ + NaCl + H₂O",
+    title: {
+      en: "DEADLY HAZARD: Rapid Massive Chlorine Gas Eruption",
+      es: "PELIGRO MORTAL: Desprendimiento Masivo y Violento de Gas Cloro",
+      pt: "PERIGO MORTAL: Liberação Maciça e Rápida de Gás Cloro",
+      "zh-cn": "致死级危险：强酸引发超大量剧毒浓氯气暴发",
+      ja: "致死級の危険：超高濃度の塩素ガスが急速噴出！"
+    },
+    explanation: {
+      en: "Toilet bowl cleaners contain high concentrations of strong mineral acids (such as 10% hydrochloric acid or phosphoric acid). Pouring chlorine bleach into an acid cleaner causes an instantaneous, violent reaction releasing massive clouds of pure, concentrated chlorine gas.",
+      es: "Los desincrustantes de inodoro contienen ácidos minerales fuertes concentrados (como ácido clorhídrico al 10%). Echar lejía sobre ellos provoca una reacción instantánea e implacable que genera densas nubes de gas cloro puro.",
+      pt: "Os limpadores de vaso contêm ácidos minerais fortes (como ácido clorídrico a 10%). Jogar água sanitária sobre eles causa uma reação explosiva e liberação instantânea de nuvens densas de cloro puro.",
+      "zh-cn": "洁厕灵中普遍含有高达10%左右的高浓度无机强酸（盐酸）。当次氯酸钠（漂白水）与盐酸混合，属于典型的强酸氧化还原置换，瞬间激增剧毒纯氯气，浓度极高，几秒内即可致人呼吸道灼伤、窒息瘫软！",
+      ja: "トイレ用洗剤の多くには約10%の高濃度塩酸（強酸）が含まれています。そこに塩素系漂白剤を注ぐと、一瞬で超高濃度の猛毒塩素ガスが沸騰するように立ち上り、直ちに窒息の危険に晒されます。"
+    },
+    symptoms: {
+      en: ["Instant suffocation and throat closing", "Severe chemical lung burns and blood-streaked sputum", "Immediate loss of breath, vomiting, collapse", "Severe ocular burning and blindness risk"],
+      es: ["Asfixia inmediata y cierre espasmódico de la garganta", "Quemaduras pulmonares severas y esputos con sangre", "Incapacidad inmediata para respirar, vómitos y colapso", "Quemaduras químicas oculares graves"],
+      pt: ["Sufocamento instantâneo e espasmo de garganta", "Queimaduras químicas graves nos pulmões e sangue ao tossir", "Falta de ar imediata, náuseas e desmaio", "Ardência extrema nos olhos"],
+      "zh-cn": ["瞬间喉头水肿剧烈窒息、呼吸中断", "下呼吸道严重化学灼伤、咳血丝痰", "剧烈呛咳、喷射状呕吐、站立不稳甚至瞬间昏厥", "角膜化学灼伤与强烈刺痛"],
+      ja: ["瞬時の喉の閉塞と激しい窒息感", "肺の激しい化学熱傷と血痰", "息ができなくなる激しいパニック、嘔吐、転倒", "目の激痛と角膜損傷"]
+    },
+    emergencyAction: {
+      en: "RUN TO FRESH AIR IMMEDIATELY. Do NOT hesitate. Do NOT try to flush the toilet or pour water into the bowl, as water will cause steam and splatter. Evacuate the house, warn all occupants, and call 911 or emergency services immediately.",
+      es: "CORRE AL AIRE LIBRE DE INMEDIATO. No lo dudes ni un segundo. No intentes tirar de la cadena ni echar agua para no salpicar. Evacúa a todos los miembros de la casa y llama al 112 / 911 ya.",
+      pt: "SAIA DO LOCAL CORRENDO IMEDIATAMENTE. Não perca nenhum segundo. Não tente dar descarga nem jogar água para não espirrar ácido. Evacue a casa e ligue para o 192 / 193 agora.",
+      "zh-cn": "屏住呼吸立刻飞奔离开！不要有丝毫迟疑！千万不要试图去冲水或用抹布擦洗，遇水激化会进一步飞溅出强酸液。立刻撤出卫生间并带家人全部离开室内，立即拨打120急救与119求助！",
+      ja: "直ちに走って新鮮な外気のある屋外へ逃げてください！一瞬のためらいも命取りになります。水を流そうとしないでください（蒸気でガスが部屋中に充満します）。家族全員を屋外へ避難させ、直ちに119番通報してください。"
+    },
+    safeAlternative: {
+      en: "NEVER combine. Use ONLY one product at a time. If using an acidic cleaner, flush and rinse multiple times, and never introduce chlorine bleach into the same plumbing on the same day.",
+      es: "NUNCA los mezcles. Usa solo un producto a la vez. Si aplicas un desincrustante ácido, tira de la cadena varias veces y no uses lejía en la misma taza ese mismo día.",
+      pt: "NUNCA misture. Use um único produto por vez. Se usar limpador ácido, dê várias descargas antes e nunca use água sanitária no mesmo vaso no mesmo dia.",
+      "zh-cn": "切记：洁厕灵与84漂白水「生死不相见」！日常清洁二者绝对不能同用。使用洁厕灵后需用大量清水冲洗干净数次，同日不可在同一管道追加漂白水。",
+      ja: "絶対に「混ぜるな危険」の筆頭です。どちらか片方のみを使用し、酸性洗剤を使った後は何度も水で洗い流し、同じ日に塩素系漂白剤を使ってはいけません。"
+    }
+  },
+
+  // 7. Drain Cleaner + Bleach or Acid
+  {
+    pair: ["drain-cleaner", "bleach"],
+    severity: "DEADLY",
+    gasOrByproduct: "Chlorine Gas & Violent Boiling Splatter",
+    reactionFormula: "NaOH + Bleach + organic matter → Violent thermal boiling & toxic vapors",
+    title: {
+      en: "DEADLY HAZARD: Violent Exothermic Eruption & Splatter",
+      es: "PELIGRO MORTAL: Erupción Hirviente Violenta y Salpicaduras Cáusticas",
+      pt: "PERIGO MORTAL: Erupção Fervente Violenta e Respingos Cáusticos",
+      "zh-cn": "致死级危险：剧烈放热暴沸喷溅与腐蚀性毒雾",
+      ja: "致死級の危険：激しい突沸・腐食性液体の跳ね返り！"
+    },
+    explanation: {
+      en: "Lye-based drain cleaners are concentrated caustic alkalis that generate immense heat when dissolving clogs. Adding bleach or acids causes an extreme exothermic flash reaction that can boil instantly, blowing caustic chemicals straight up out of the sink drain onto the user's face, eyes, and skin.",
+      es: "Los desatascadores a base de sosa cáustica generan un calor brutal al disolver atascos. Echar lejía o ácidos provoca una reacción exotérmica violenta que puede expulsar líquido hirviente fuera del desagüe hacia cara y ojos.",
+      pt: "Desentupidores à base de soda cáustica geram calor extremo nos canos. Adicionar cloro ou ácido causa fervura instantânea que espirra líquido corrosivo fervente para fora da pia, atingindo rosto e olhos.",
+      "zh-cn": "烧碱类管道疏通剂在遇水与管道油脂反应时本身就会释放剧烈高温。若在此刻倒入漂白水或强酸，会引发剧烈的瞬时放热暴沸反应，管道内的灼热强碱与强腐蚀混合液会如喷泉般向上倒喷出来，直接造成面部严重毁容与双目失明！",
+      ja: "苛性ソーダ系パイプクリーナーは油脂を溶かす際に激しい発熱を伴います。そこに塩素系漂白剤や酸性洗剤を注ぐと瞬時に突沸し、高温の強アルカリ液が排水口から噴水のように吹き上がり、顔や目に直撃して失明を招きます。"
+    },
+    symptoms: {
+      en: ["Severe caustic third-degree chemical burns to skin", "Permanent corneal melting and blindness", "Inhalation burns from boiling chemical aerosol"],
+      es: ["Quemaduras químicas de tercer grado en la piel", "Destrucción corneal y ceguera permanente", "Quemaduras respiratorias por aerosol hirviente"],
+      pt: ["Queimaduras químicas de terceiro grau na pele", "Lesões graves na córnea e risco iminente de cegueira", "Inalação de vapores cáusticos ferventes"],
+      "zh-cn": ["三度化学热灼伤、皮肤深层溃烂", "角膜溶解与永久性双目失明", "吸入沸腾腐蚀性气溶胶导致声门水肿窒息"],
+      ja: ["皮膚の重度化学熱傷（III度熱傷）", "角膜の融解と不可逆的な失明", "沸騰した化学ミストの吸入による気道熱傷"]
+    },
+    emergencyAction: {
+      en: "FLUSH SKIN AND EYES IMMEDIATELY with continuous lukewarm water for at least 20 minutes without pausing. Strip off contaminated clothing immediately. Call 911 / EMS immediately for emergency burn care.",
+      es: "LAVA OJOS Y PIEL DE INMEDIATO con agua corriente tibia durante al menos 20 minutos sin interrupción. Quítate la ropa salpicada y llama al 112 / 911 de urgencia.",
+      pt: "LAVE OS OLHOS E PELE IMEDIATAMENTE com água corrente morna ou fria por pelo menos 20 minutos contínuos. Retire roupas contaminadas e ligue 192 / 193.",
+      "zh-cn": "极度紧急：立即用大量流动温冷水冲洗眼部或受伤皮肤至少20-30分钟，不得中断！迅速脱掉被污染的衣物，立刻拨打120急救，向医生明确说明是烧碱暴沸化学灼伤！",
+      ja: "直ちに流水で目や皮膚を最低20分間洗い続けてください。汚染された衣服を脱ぎ捨て、直ちに119番通報して重度化学熱傷の救急搬送を求めてください。"
+    },
+    safeAlternative: {
+      en: "Never mix chemical drain openers. If a chemical drain cleaner fails to clear a kitchen sink, call a professional plumber with a mechanical auger (snake). Never pour bleach down a blocked, chemically treated drain.",
+      es: "Nunca mezcles productos de desatasco. Si un desatascador químico falla, recurre a un fontanero profesional con desatascador de muelle mecánico. Jamás viertas lejía en un desagüe atascado ya tratado.",
+      pt: "Nunca misture desentupidores químicos. Se o produto não desobstruir, chame um encanador com desentupidor mecânico. Jamais jogue água sanitária em um ralo já entupido e com química.",
+      "zh-cn": "绝不可混合疏通剂！若第一次使用化学疏通剂未通，严禁再次倒入漂白水或其他药剂，应改用机械手摇管道疏通弹簧钢丝物理疏通，或请专业水管工处理。",
+      ja: "化学系パイプクリーナー同士の混合は厳禁です。流れない場合は塩素系漂白剤を追加せず、ワイヤー式パイプクリーナーなどの物理的器具を使うか、専門業者へ依頼してください。"
+    }
+  },
+
+  // 8. Bleach + Hydrogen Peroxide
+  {
+    pair: ["bleach", "hydrogen-peroxide"],
+    severity: "DANGEROUS",
+    gasOrByproduct: "Rapid Oxygen Gas (O₂) & Thermal Splatter",
+    reactionFormula: "NaClO + H₂O₂ → O₂↑ + NaCl + H₂O (Highly Exothermic)",
+    title: {
+      en: "DANGEROUS HAZARD: Rapid Oxygen Gas Release & Container Bursting",
+      es: "PELIGRO DE PRESIÓN: Rápida Liberación de Oxígeno y Riesgo de Explosión",
+      pt: "PERIGO DE PRESSÃO: Liberação Rápida de Oxigênio e Risco de Ruptura",
+      "zh-cn": "膨胀暴沸危险：剧烈放热分解产氧与喷壶容器爆裂",
+      ja: "破裂の危険：急激な酸素ガス発生による容器の破裂・飛散！"
+    },
+    explanation: {
+      en: "Mixing sodium hypochlorite with hydrogen peroxide causes a violent, foaming oxidation-reduction reaction that rapidly releases pure oxygen gas (O₂) and heat. Both chemicals mutually destroy each other's sanitizing power while generating intense foam that can burst spray bottles or cause alkaline spatter into the eyes.",
+      es: "Mezclar lejía con agua oxigenada produce una reacción redox violenta que genera calor y desprende oxígeno puro rápidamente. Ambos compuestos se anulan mutuamente perdiendo todo poder desinfectante y produciendo una espuma que puede reventar botellas.",
+      pt: "Misturar água sanitária com água oxigenada causa uma reação de oxirredução vigorosa, liberando oxigênio e calor rapidamente. Ambos se anulam, perdem o poder germicida e a espuma pode romper frascos.",
+      "zh-cn": "次氯酸钠与双氧水相遇会发生剧烈的氧化还原反应，次氯酸根被瞬间还原，剧烈放热并以极快速度释放纯氧气与大量热泡沫。两者相互消耗导致完全失去除菌消毒效力，若在密封瓶中混合会迅速使瓶身胀裂甚至炸飞！",
+      ja: "次亜塩素酸ナトリウムとオキシドールを混ぜると、激しい酸化還元反応により急激な発熱と酸素ガス（O2）が大量発生します。互いの除菌効果を完全に打ち消し合うだけでなく、密閉容器が破裂して強アルカリの泡が飛び散る危険があります。"
+    },
+    symptoms: {
+      en: ["Splattering into eyes or face", "Eye and skin irritation from alkaline foam", "Pressure rupture of bottles"],
+      es: ["Salpicaduras en cara u ojos por espuma hirviente", "Irritación ocular y cutánea por la espuma alcalina", "Estallido de botellas y envases"],
+      pt: ["Respingos no rosto e olhos", "Irritação por espuma alcalina", "Ruptura de frascos por pressão interna"],
+      "zh-cn": ["高温碱性泡沫喷溅至面部或眼睛", "眼结膜充血刺激、皮肤发红灼痛", "密闭喷雾瓶盖崩飞或瓶体爆裂破损"],
+      ja: ["アルカリ性の泡が顔や目に飛び散る危険", "皮膚や目の痛み・充血", "スプレーボトルの急激な膨張破裂"]
+    },
+    emergencyAction: {
+      en: "Do NOT cap the container. If already capped, carefully release pressure from a safe angle with safety glasses, or evacuate until bubbling subsides. Flush skin and eyes with clean water if splattered.",
+      es: "NO tapes el recipiente. Si ya está tapado, libera la presión con precaución apuntando lejos de la cara o sal de la habitación hasta que la espuma remita. Aclara piel y ojos con agua limpia si te salpicó.",
+      pt: "NÃO tampe o frasco. Se já estiver fechado, abra com cuidado virando para longe do rosto. Lave a pele e olhos com água corrente se houver respingos.",
+      "zh-cn": "绝不可拧紧容器盖！若已盖严，请佩戴护目镜在保持距离的安全角度小心缓慢泄压。若已飞溅至皮肤或眼部，立即用大量清水冲洗。",
+      ja: "絶対に容器の蓋を閉めないでください。既に閉まっている場合は顔から離して慎重に圧力を逃がすか、泡立ちが収まるまで近づかないでください。飛散した場合は流水で洗眼・洗浄してください。"
+    },
+    safeAlternative: {
+      en: "Use hydrogen peroxide for porous wood cutting boards and grout. Use diluted bleach for non-porous food contact surfaces (sink, stainless counters). Never mix together.",
+      es: "Usa agua oxigenada para tablas de madera y juntas. Usa lejía diluida para encimeras no porosas de acero inoxidable. Nunca las juntes.",
+      pt: "Use água oxigenada para tábuas de corte de madeira e rejuntes. Use água sanitária diluída para bancadas de inox e pias. Nunca misture.",
+      "zh-cn": "分别使用：3% 双氧水适合木质砧板与瓷砖缝隙去霉；漂白水适合不锈钢水槽与光滑瓷质台面消毒。二者各自有效，切勿混搭。",
+      ja: "用途に応じて分担しましょう。木製まな板の除菌にはオキシドールを単独で使い、シンクやステンレスの除菌には薄めた塩素系漂白剤を単独で使います。"
+    }
+  },
+
+  // 9. Castile Soap + Vinegar
+  {
+    pair: ["castile-soap", "vinegar"],
+    severity: "INEFFECTIVE",
+    gasOrByproduct: "Precipitated Fatty Acids (Greasy Curds)",
+    reactionFormula: "Potassium Soap + CH₃COOH → Free Fatty Acid Curds (Insoluble Scum)",
+    title: {
+      en: "INEFFECTIVE CURDLING: Breaks Saponification into Oily Scum",
+      es: "INEFICAZ: Descompone el Jabón Creando Grumos Aceitosos",
+      pt: "INEFICAZ: Quebra a Saponificação Gerando Crosta Gordurosa",
+      "zh-cn": "无效分层：皂化水解失效析出油腻酸败浮油沉淀",
+      ja: "効果消失：石鹸が分解してベタつく油分カスに分離！"
+    },
+    explanation: {
+      en: "Castile soap is made from saponified plant oils and is naturally alkaline. When combined with acidic vinegar, the acid strips the potassium or sodium ions, breaking the soap back down into its raw insoluble free fatty acids. Instead of cleaning, this leaves a sticky, cloudy white grease film all over sinks and dishes.",
+      es: "El jabón de Castilla está hecho de aceites saponificados y es naturalmente alcalino. Al mezclarlo con vinagre ácido, este rompe la saponificación, devolviendo el jabón a ácidos grasos libres insolubles. En lugar de limpiar, deja una película blanca pegajosa y grasienta.",
+      pt: "O sabão de Castela é alcalino feito de óleos saponificados. Quando misturado ao vinagre ácido, o sabão se decompõe de volta em ácidos graxos livres insolúveis, deixando uma película pegajosa e esbranquiçada sobre as superfícies.",
+      "zh-cn": "卡斯提尔皂是由植物油皂化而成，呈弱碱性。当遇到酸性的白醋时，酸会瞬间夺取结合离子破坏皂化胶体结构，使其逆反应析出不溶于水的高级游离脂肪酸。混合物不但彻底失去去油除垢能力，还会在水槽和餐具表面附着一层黏糊糊、泛白的油腻胶状浮渣！",
+      ja: "純石鹸（カスチール石鹸）は弱アルカリ性です。酸性のお酢を加えるとケン化構造が壊れ、水に溶けない遊離脂肪酸（ベタベタの油性カス）に戻ってしまいます。汚れが落ちるどころか、食器やシンクに白いベタつき膜を付着させてしまいます。"
+    },
+    symptoms: {
+      en: ["Sticky white curds floating in cleaning water", "Greasy residue left on countertops and dishes", "Clogged spray bottle nozzles"],
+      es: ["Grumos blancos pegajosos flotando en el agua", "Película grasienta en encimeras y vajilla", "Boquillas de pulverizador atascadas"],
+      pt: ["Grumos brancos e viscosos na água", "Resíduo oleoso em bancadas e louças", "Bicos de pulverizador entupidos"],
+      "zh-cn": ["水中漂浮白色胶状粘稠油渣凝块", "餐具台面摸上去黏腻打滑有油膜", "喷雾瓶喷嘴被析出的油脂糊住堵塞"],
+      ja: ["水の中に白いベタベタしたカスが浮遊", "洗ったはずの食器や天板に油膜が残る", "スプレーボトルのノズル詰まり"]
+    },
+    emergencyAction: {
+      en: "No toxic fumes or medical emergency. Wash the greasy film away with standard liquid dish soap (which uses synthetic surfactants that tolerate acidity) and warm water.",
+      es: "No genera humos tóxicos ni es una urgencia médica. Limpia la película grasienta con jabón lavavajillas común y agua caliente.",
+      pt: "Não gera gases tóxicos. Remova a película oleosa usando detergente neutro comum e água morna.",
+      "zh-cn": "无毒气产生，不属于医疗急救范畴。使用普通洗洁精配合温热水即可将析出的油垢乳化冲洗干净。",
+      ja: "毒性ガスは出ません。通常の台所用中性洗剤とぬるま湯を使って油分を洗い流してください。"
+    },
+    safeAlternative: {
+      en: "Wash first with castile soap solution and warm water, wipe down completely with clean water, then follow with a light vinegar spray rinse if water spot removal is desired.",
+      es: "Limpia primero con la solución de jabón de Castilla y agua templada, aclara con agua limpia y, si quieres evitar marcas de agua, aplica un pulverizado ligero de vinagre después.",
+      pt: "Lave primeiro com sabão de Castela e água morna, enxágue com pano úmido e, só então, finalize com vinagre diluído para dar brilho.",
+      "zh-cn": "分步处理：先用稀释卡斯提尔皂温水擦洗去油，用清水擦拭一遍；若想去除水渍印记，再单独喷洒稀释白醋轻轻擦亮。",
+      ja: "必ず別々に使いましょう。まずカスチール石鹸水で汚れを拭き取って水拭きし、水垢防止の艶出しにお酢スプレーを後から軽く吹きかけます。"
+    }
+  },
+
+  // 10. Baking Soda + Dish Soap (SAFE COMBO!)
+  {
+    pair: ["baking-soda", "dish-soap"],
+    severity: "SAFE",
+    gasOrByproduct: "None (Safe Synergistic Scouring Paste)",
+    reactionFormula: "No Chemical Reaction (Physical Blend: Surfactant + Mild Abrasive)",
+    title: {
+      en: "SAFE & EFFECTIVE: High-Performance Non-Toxic Scouring Paste",
+      es: "SEGURO Y EFICAZ: Pasta Limpiadora Desengrasante de Alto Rendimiento",
+      pt: "SEGURO E EFICAZ: Pasta de Limpeza Desengordurante Excelente",
+      "zh-cn": "安全高效推荐：强效温和去焦黑无划痕研磨清洁膏",
+      ja: "安全＆おすすめ：頑固な焦げ付きを落とす万能クレンザーペースト！"
+    },
+    explanation: {
+      en: "Combining liquid dish soap with baking soda creates a safe, non-toxic scouring paste. The dish soap surfactants cut and emulsify grease, while the gentle baking soda crystals (Mohs hardness ~2.5) mechanically scrub away burnt-on crust without scratching stainless steel, ceramic enamel, or porcelain sinks.",
+      es: "Mezclar lavavajillas con bicarbonato crea una pasta limpiadora no tóxica y muy eficaz. El jabón disuelve la grasa mientras los cristales de bicarbonato (dureza ~2.5) rascan la comida quemada sin rayar el acero inoxidable ni la cerámica.",
+      pt: "Misturar detergente com bicarbonato cria uma pasta de limpeza excelente. O detergente emulsiona a gordura e os cristais suaves de bicarbonato removem crostas queimadas sem riscar inox ou cerâmica.",
+      "zh-cn": "将洗洁精与小苏打粉调和成糊状，是非常安全且清洁力极强的厨房天然自制去污膏！中性洗洁精能迅速乳化分解重油污，而小苏打微细晶体（莫氏硬度仅约2.5）能在不刮伤不锈钢、不粘涂层与搪瓷的前提下，物理摩擦瓦解陈年焦糊污渍，零毒性产生！",
+      ja: "食器用洗剤と重曹を練り合わせてペースト状にすると、安全で強力な油汚れ落としクレンザーになります。洗剤の界面活性剤が油分を分解し、重曹の微細粒子（モース硬度約2.5）がステンレスやホーローを傷つけずに焦げ付きを優しく削り落とします。"
+    },
+    symptoms: {
+      en: ["None. Completely safe for human contact (gentle on hands)."],
+      es: ["Ninguno. Totalmente seguro para la piel (suave para las manos)."],
+      pt: ["Nenhum. Totalmente seguro para contato com a pele."],
+      "zh-cn": ["无任何毒性或刺激症状，性质温和不伤手。"],
+      ja: ["なし。手肌にも優しく安心して使用できます。"]
+    },
+    emergencyAction: {
+      en: "No emergency action required. Rinse thoroughly with clean warm water.",
+      es: "No requiere ninguna acción de emergencia. Aclara con agua limpia templada.",
+      pt: "Não requer nenhuma ação de emergência. Apenas enxágue com água morna.",
+      "zh-cn": "无需任何急救。用温水彻底冲洗干净即可。",
+      ja: "応急処置は不要です。ぬるま湯で洗い流してください。"
+    },
+    safeAlternative: {
+      en: "Mix 3 tablespoons baking soda with 1 tablespoon liquid dish soap and a splash of warm water. Apply with a non-scratch sponge to burnt Dutch ovens, stainless pans, baking sheets, and porcelain sinks.",
+      es: "Mezcla 3 cucharadas de bicarbonato con 1 de lavavajillas y unas gotas de agua tibia. Aplica con esponja en cazuelas de hierro esmaltado, sartenes de acero y fregaderos.",
+      pt: "Misture 3 colheres de sopa de bicarbonato com 1 de detergente e um fio de água morna. Aplique em panelas de inox, assadeiras e pias.",
+      "zh-cn": "黄金配比：3勺小苏打粉 + 1勺中性洗洁精 + 少许温水搅拌成乳状。涂抹在烧焦的铸铁锅外壁、不锈钢锅底、烤盘与水槽，静置10分钟后用海绵轻轻擦洗即光亮如新！",
+      ja: "黄金比：重曹大さじ3＋食器用洗剤大さじ1＋少量のぬるま湯。焦げたステンレス鍋、ホーロー鍋、天板、シンクに塗布し、スポンジで擦るとピカピカになります。"
+    }
+  },
+
+  // 11. Ammonia + Vinegar
+  {
+    pair: ["ammonia", "vinegar"],
+    severity: "INEFFECTIVE",
+    gasOrByproduct: "Ammonium Acetate (Neutralization Reaction)",
+    reactionFormula: "NH₃ + CH₃COOH → CH₃COONH₄ (Exothermic Neutralization)",
+    title: {
+      en: "COUNTERPRODUCTIVE: Neutralizes Both into Ineffective Salt",
+      es: "CONTRAPRODUCENTE: Se Neutralizan Mutuamente en Sal Ineficaz",
+      pt: "CONTRAPRODUTENTE: Neutralizam-se Mutuamente em Sal Inútil",
+      "zh-cn": "无效中和：酸碱剧烈中和失去去油与除垢能力",
+      ja: "効果相殺：酸とアルカリが中和して洗浄力を完全に失う！"
+    },
+    explanation: {
+      en: "Mixing ammonia (alkaline base) with vinegar (acetic acid) triggers an acid-base neutralization. Ammonia's alkaline grease-cutting properties and vinegar's acidic mineral-dissolving ability cancel each other out completely, producing ammonium acetate salt water with mild heat.",
+      es: "Mezclar amoníaco con vinagre provoca una neutralización ácido-base. La capacidad del amoníaco para disolver grasa y la del vinagre para desincrustar cal se anulan mutuamente, dejando solo agua tibia con acetato de amonio sin poder limpiador.",
+      pt: "Misturar amônia com vinagre provoca uma neutralização ácido-base imediata. A amônia perde o poder de cortar gordura e o vinagre perde a capacidade de remover tártaro, virando apenas acetato de amônio inútil.",
+      "zh-cn": "氨水（弱碱）与白醋（弱酸）相遇会发生剧烈的中和反应，两者酸碱性瞬间抵消，生成乙酸铵盐溶液并轻微放热。氨水完全丧失了皂化去重油污的能力，白醋也完全丧失了溶解水垢的能力，除了浪费清洁剂外毫无清洁增效！",
+      ja: "アンモニア（アルカリ性）とお酢（酸性）を混ぜると酸塩基中和が起きます。アンモニアの油分分解力とお酢のカルキ分解力が完全に相殺され、微熱を帯びた無力な酢酸アンモニウム水溶液になるだけです。"
+    },
+    symptoms: {
+      en: ["Mild ammonia vapor if concentrated", "Warm container from heat of neutralization", "Zero cleaning power"],
+      es: ["Ligero olor acre si el amoníaco era concentrado", "El recipiente se calienta por la reacción", "Pérdida total de eficacia"],
+      pt: ["Leve odor irritante se muito concentrado", "Frasco morno pela reação exotérmica", "Perda total de poder de limpeza"],
+      "zh-cn": ["若浓度较高可能有轻微刺鼻氨味", "容器微热（中和放热反应）", "清洁效果归零"],
+      ja: ["高濃度の場合ツンとするアンモニア臭", "中和熱による容器のわずかな発熱", "洗浄力が全くなくなる"]
+    },
+    emergencyAction: {
+      en: "No toxic gas emergency under normal dilution. Flush down the drain with cold tap water.",
+      es: "No genera gas tóxico letal en dilución normal. Aclara por el desagüe con agua fría.",
+      pt: "Não gera gases letais. Enxágue no ralo com água fria corrente.",
+      "zh-cn": "非剧毒气体紧急状况。直接用大量冷水冲入下水道即可。",
+      ja: "致死的な有毒ガスは発生しません。冷たい水道水で洗い流してください。"
+    },
+    safeAlternative: {
+      en: "Use ammonia strictly for degreasing range hoods and oven glass. Use vinegar strictly for kettle descaling and water-spot removal on windows. Never combine.",
+      es: "Usa amoníaco solo para desengrasar campanas y hornos. Usa vinagre solo para descalcificar hervidores y quitar cal de ventanas. Nunca los juntes.",
+      pt: "Use amônia apenas para desengordurar fornos e grelhas. Use vinagre apenas para descalcificar e limpar manchas de água. Nunca misture.",
+      "zh-cn": "分类单独使用：氨水专门用来擦拭油烟机和烤箱重油污；白醋专门用来电水壶除垢和水槽光亮，切勿混在同一个桶里！",
+      ja: "別々に使用してください。油汚れにはアンモニア水を、水垢にはお酢を単独で使用します。"
+    }
+  },
+
+  // 12. Rubbing Alcohol + Vinegar (SAFE & EFFECTIVE GLASS CLEANER)
+  {
+    pair: ["rubbing-alcohol", "vinegar"],
+    severity: "SAFE",
+    gasOrByproduct: "None (Safe Synergistic Streak-Free Cleaner)",
+    reactionFormula: "No Reaction (Miscible Solvents: Volatile Alcohol + Mild Acetic Acid)",
+    title: {
+      en: "SAFE & EFFECTIVE: Streak-Free Glass, Mirror & Countertop Spray",
+      es: "SEGURO Y EFICAZ: Limpiador Antihuellas para Cristales, Espejos y Acero",
+      pt: "SEGURO E EFICAZ: Limpa-Vidros sem Manchas para Espelhos e Inox",
+      "zh-cn": "安全高效推荐：无水痕快速挥发玻璃、镜面与不锈钢抛光喷雾",
+      ja: "安全＆おすすめ：拭き跡が残らない窓ガラス・鏡・ステンレス用光沢クリーナー！"
+    },
+    explanation: {
+      en: "Combining 70% isopropyl alcohol with white vinegar and distilled water is a proven, safe homemade recipe for streak-free cleaning. The alcohol speeds evaporation so surfaces dry without water spots, while the acetic acid cuts through light mineral deposits and fingerprints.",
+      es: "Mezclar alcohol isopropílico con vinagre blanco y agua destilada es una fórmula casera segura y muy eficaz. El alcohol acelera el secado sin dejar marcas y el ácido acético disuelve huellas dactilares y depósitos de cal.",
+      pt: "Misturar álcool isopropílico com vinagre branco e água destilada é uma solução caseira clássica e segura. O álcool acelera a secagem sem marcas e o vinagre remove impressões digitais e manchas leves.",
+      "zh-cn": "将70%异丙醇酒精与白醋、蒸馏水混合，是欧美家庭非常流行的安全经典无水痕清洁配方！酒精的极速挥发性能防止干燥时留下水渍，而白醋中的醋酸能轻柔瓦解轻度水锈与指纹油脂，两者互溶不发生化学反应，安全无害！",
+      ja: "消毒用エタノールとお酢、精製水を混ぜる組み合わせは、プロも推奨する安全な速乾ガラスクリーナーです。アルコールが瞬時に蒸発して水滴跡を防ぎ、お酢の酸が手垢や薄いカルキ膜を綺麗に落とします。"
+    },
+    symptoms: {
+      en: ["None under normal ventilation. Mild vinegar and alcohol scent."],
+      es: ["Ninguno con ventilación normal. Olor característico a alcohol y vinagre."],
+      pt: ["Nenhum em ambiente ventilado. Odor leve característico."],
+      "zh-cn": ["正常通风下无任何不良反应，仅有轻微醋味与酒精清香。"],
+      ja: ["良好な換気下では症状なし。お酢とアルコールの爽やかな香り。"]
+    },
+    emergencyAction: {
+      en: "No emergency action required. Keep spray away from open flames (alcohol is flammable).",
+      es: "No requiere ninguna medida de urgencia. Mantén alejado de llamas abiertas (el alcohol arde).",
+      pt: "Não requer ação de emergência. Mantenha longe de fogo ou chamas.",
+      "zh-cn": "无需任何急救。注意远离明火（酒精具有易燃性）。",
+      ja: "応急処置は不要です。火気の近くで使用しないでください（引火性注意）。"
+    },
+    safeAlternative: {
+      en: "Recipe: Mix 1 cup distilled water, 1/2 cup 70% rubbing alcohol, and 2 tablespoons white vinegar in a spray bottle. Spray on windows, mirrors, microwave touchscreens, and stainless refrigerator doors, wiping with a microfiber cloth.",
+      es: "Receta: Mezcla 1 taza de agua destilada, 1/2 taza de alcohol al 70% y 2 cucharadas de vinagre en un pulverizador. Limpia cristales, espejos y acero inoxidable con paño de microfibra.",
+      pt: "Receita: Misture 1 xícara de água destilada, 1/2 xícara de álcool 70% e 2 colheres de sopa de vinagre em um borrifador. Limpe vidros, espelhos e inox com pano de microfibra.",
+      "zh-cn": "经典DIY配方：1杯蒸馏水 + 半杯70%医用酒精 + 2汤匙白醋装入喷雾瓶中。喷洒在窗户、镜子、微波炉触控屏与不锈钢冰箱门表面，用超细纤维布一擦即亮，绝无擦痕！",
+      ja: "黄金レシピ：精製水200ml＋消毒用エタノール100ml＋ホワイトビネガー大さじ1をスプレー容器へ。窓、鏡、電子レンジ操作パネル、冷蔵庫のドアをマイクロファイバークロスで拭き上げます。"
+    }
+  },
+
+  // 13. Liquid Dish Soap + Vinegar (SAFE & EFFECTIVE SOAP SCUM CUTTER)
+  {
+    pair: ["dish-soap", "vinegar"],
+    severity: "SAFE",
+    gasOrByproduct: "None (Safe Synergistic Degreasing & Descaling Blend)",
+    reactionFormula: "No Reaction (Synthetic Surfactants Stable in Mild Acid)",
+    title: {
+      en: "SAFE & EFFECTIVE: Kitchen Sink & Counter Descaling Grease-Cutter",
+      es: "SEGURO Y EFICAZ: Desengrasante Antical para Fregaderos y Azulejos",
+      pt: "SEGURO E EFICAZ: Desengordurante e Anticalcário para Pias e Azulejos",
+      "zh-cn": "安全高效推荐：水槽、瓷砖去油污与水渍水垢双效清洁液",
+      ja: "安全＆おすすめ：油汚れと水垢を同時に落とすシンク・タイル用W効果洗剤！"
+    },
+    explanation: {
+      en: "Unlike traditional plant-oil castile soap, modern liquid dish soaps use synthetic syndet surfactants (like sodium laureth sulfate) that remain completely chemically stable in mild acidic environments. Combining dish soap with warm vinegar creates an outstanding dual-action cleaner: the surfactant lifts oil while the acid dissolves hard water scale.",
+      es: "A diferencia del jabón de Castilla tradicional, los lavavajillas modernos usan tensioactivos sintéticos que son totalmente estables en medios ácidos. Mezclarlos con vinagre templado crea un limpiador dual insuperable: el jabón corta la grasa y el vinagre disuelve la cal de fregaderos y grifos.",
+      pt: "Diferente do sabão de Castela, os detergentes líquidos modernos usam tensoativos sintéticos que funcionam perfeitamente no meio ácido. Misturar detergente com vinagre morno gera um limpador excelente: corta gordura e dissolve calcário ao mesmo tempo.",
+      "zh-cn": "与天然卡斯提尔皂不同，现代洗洁精使用的是耐酸合成表面活性剂（如月桂醇聚醚硫酸酯钠等），在弱酸环境中极其稳定不会析出沉淀！将洗洁精与温白醋混合，能发挥完美的「去油+溶垢」双重功效，既能乳化油渍，又能溶解水龙头水锈与水渍！",
+      ja: "純石鹸とは異なり、現代の台所用中性洗剤に使われている合成界面活性剤は酸性環境でも非常に安定しています。ぬるま湯で温めたお酢と洗剤を混ぜると、油分の乳化とカルキの溶解を同時にこなす万能クリーナーになります。"
+    },
+    symptoms: {
+      en: ["None. Mild vinegar scent."],
+      es: ["Ninguno. Olor característico a vinagre."],
+      pt: ["Nenhum. Leve cheiro de vinagre."],
+      "zh-cn": ["无任何症状，带有正常的淡白醋香气。"],
+      ja: ["症状なし。安全に使用できます。"]
+    },
+    emergencyAction: {
+      en: "No emergency action required. Rinse clean with tap water.",
+      es: "No requiere atención de emergencia. Aclara con agua limpia.",
+      pt: "Não requer ação de emergência. Apenas enxágue com água.",
+      "zh-cn": "无需急救。用清水冲洗干净即可。",
+      ja: "応急処置不要。水で流してください。"
+    },
+    safeAlternative: {
+      en: "Warm 1 cup of white vinegar, stir in 2 tablespoons of liquid dish soap, pour into a spray bottle. Spray on stainless kitchen sinks, faucet bases, and backsplash tile, let sit for 10 minutes, and wipe clean.",
+      es: "Calienta 1 taza de vinagre blanco, añade 2 cucharadas de lavavajillas y pasa a un pulverizador. Rocía en fregaderos de inox, grifos y azulejos, deja actuar 10 minutos y pasa una bayeta.",
+      pt: "Aqueça 1 xícara de vinagre branco, adicione 2 colheres de detergente líquido e coloque em um borrifador. Aplique na pia de inox, torneiras e azulejos, aguarde 10 minutos e limpe.",
+      "zh-cn": "配方：将1杯白醋微波微热，加入2汤匙洗洁精摇匀装瓶。喷洒在不锈钢水槽、水龙头底座水垢与防溅瓷砖墙面，静置10分钟后用海绵轻轻擦拭冲水，干净透亮！",
+      ja: "温めたお酢1カップに台所用洗剤大さじ2を混ぜてスプレー容器へ。ステンレスシンクや蛇口の根元、キッチンのタイルに吹きかけて10分放置し、スポンジで擦り流します。"
+    }
+  },
+
+  // 14. Drain Cleaner + Acid (Vinegar / Toilet Cleaner)
+  {
+    pair: ["drain-cleaner", "toilet-bowl-cleaner"],
+    severity: "DEADLY",
+    gasOrByproduct: "Massive Boiling Acid/Base Flash Eruption & Chlorine Vapors",
+    reactionFormula: "NaOH + HCl → NaCl + H₂O + Explosive Exothermic Boiling",
+    title: {
+      en: "DEADLY HAZARD: Explosive Caustic/Acidic Boiling Eruption",
+      es: "PELIGRO MORTAL: Erupción Química Explosiva de Ácido y Sosa Hirviente",
+      pt: "PERIGO MORTAL: Erupção Química Explosiva de Ácido e Soda Fervente",
+      "zh-cn": "致死级危险：极度剧烈的酸碱爆轰式沸腾喷溅",
+      ja: "致死級の危険：強酸と強アルカリの中和熱による爆発的沸騰噴出！"
+    },
+    explanation: {
+      en: "Pouring an acidic cleaner into a drain already containing caustic lye (sodium hydroxide) causes an explosive acid-base neutralization. The reaction releases hundreds of kilojoules of heat in milliseconds, violently boiling the liquid and launching corrosive acid-alkali mixture meters into the air, blinding and disfiguring anyone nearby.",
+      es: "Echar un desincrustante ácido en una tubería con sosa cáustica desata una neutralización explosiva. La reacción libera un calor inmenso en milisegundos, haciendo hervir la mezcla y proyectando líquido hirviente a metros de altura contra ojos y piel.",
+      pt: "Jogar limpador ácido em canos com soda cáustica causa neutralização violenta e explosiva. O calor gerado ferve a mistura em milissegundos, lançando ácido e soda ferventes para o alto em direção ao rosto.",
+      "zh-cn": "在刚刚倒过强碱烧碱疏通剂的管道中倒入强酸洁厕灵，属于高浓度的强酸强碱对抗中和！反应在毫秒级内释放巨大的中和热，使水分子瞬间超临界暴沸，产生高压蒸汽如同火山爆发般将高腐蚀性的滚烫混合酸碱液喷射数米之高，导致面部与眼部瞬间严重烧毁！",
+      ja: "苛性ソーダが入った排水管に強酸性洗剤を注ぐと、猛烈な中和熱により一瞬で水分が沸騰し、爆発音とともに高熱の腐食性液体が天井や顔面へ吹き上がります。失明および重度熱傷の最も危険な事故原因です。"
+    },
+    symptoms: {
+      en: ["Catastrophic face and eye chemical burns", "Total corneal destruction / permanent blindness", "Severe inhalation injury from boiling caustic steam"],
+      es: ["Quemaduras químicas devastadoras en cara y ojos", "Destrucción total de la córnea y ceguera permanente", "Daño respiratorio agudo por vapor ácido hirviente"],
+      pt: ["Queimaduras químicas devastadoras no rosto e olhos", "Destruição da córnea e cegueira permanente", "Lesão respiratória aguda por vapor fervente corrosivo"],
+      "zh-cn": ["灾难性面部与眼部三度化学热灼伤", "角膜融化穿孔与不可逆永久失明", "吸入沸腾腐蚀性蒸汽导致急性声门下水肿窒息"],
+      ja: ["顔面および眼球の破滅的な重度化学熱傷", "角膜の融解と不可逆的な全盲", "高温の腐食性蒸気の吸入による急性窒息"]
+    },
+    emergencyAction: {
+      en: "RUN FOR WATER IMMEDIATELY. Flush eyes under a continuous stream of tap water for 30 minutes without blinking. Strip off all clothes. Scream for family members to dial 911 / emergency services immediately.",
+      es: "CORRE AL GRIFO DE INMEDIATO. Lava los ojos con agua corriente continua durante 30 minutos sin pestañear. Quítate toda la ropa y pide a alguien que llame al 112 / 911 ya.",
+      pt: "CORRA PARA A ÁGUA IMEDIATAMENTE. Lave os olhos sob água corrente contínua por 30 minutos sem parar. Retire as roupas e chame socorro médico (192 / 193) urgente.",
+      "zh-cn": "立刻冲向水龙头！用大量持续流动的温凉清水全力冲洗眼部至少30分钟不要闭眼！脱掉所有沾染衣物，立刻大声呼救让家人拨打120急救送医！",
+      ja: "直ちに水道へ走り目を洗ってください！流水で眼球を最低30分間洗い続け、絶対に目を閉じないでください。衣服を脱ぎ、直ちに119番で救急隊を要請してください。"
+    },
+    safeAlternative: {
+      en: "NEVER use two chemical drain openers together or consecutively. If one fails, use a plumbing snake or call a professional drain specialist. Never mix acids with lye.",
+      es: "NUNCA uses dos desatascadores químicos juntos ni seguidos. Si uno no funciona, usa un muelle desatascador manual o llama a un profesional. Jamás mezcles ácidos con sosa.",
+      pt: "NUNCA use dois desentupidores químicos juntos. Se um falhar, use um desentupidor mecânico de manivela ou chame um encanador. Jamais junte ácido com soda.",
+      "zh-cn": "切记铁律：任何化学疏通剂绝不能前后连用！若一种疏通剂无效，必须等待数小时完全排空后改用手摇钢丝机械疏通器，绝不可再灌入相反酸碱性的试剂！",
+      ja: "絶対に種類の異なるパイプクリーナーを続けて使わないでください。流れない場合は化学薬品を諦め、ラバーカップやワイヤー等の物理的方法に切り替えてください。"
+    }
+  }
+];
+
+const kitchenSurfaces = [
+  {
+    id: "stainless-steel",
+    name: {
+      en: "Stainless Steel (Sinks, Cookware, Appliances)",
+      es: "Acero Inoxidable (Fregaderos, Baterías, Electrodomésticos)",
+      pt: "Aço Inox (Pias, Panelas, Eletrodomésticos)",
+      "zh-cn": "不锈钢材质（水槽、锅具、冰箱面板）",
+      ja: "ステンレス鋼（シンク、鍋、家電扉）"
+    },
+    safeAgents: {
+      en: "Liquid dish soap, diluted white vinegar (rinse quickly), baking soda paste, rubbing alcohol for polishing.",
+      es: "Lavavajillas suave, vinagre diluido (aclarar rápido), pasta de bicarbonato, alcohol de frotar para abrillantar.",
+      pt: "Detergente neutro, vinagre diluído (enxaguar logo), pasta de bicarbonato, álcool 70% para polir.",
+      "zh-cn": "中性洗洁精、小苏打研磨膏、稀释白醋（需迅速冲净）、70%酒精擦拭光亮去指纹。",
+      ja: "台所用中性洗剤、重曹ペースト、薄めたお酢（直ぐに水洗い）、仕上げの消毒用エタノール。"
+    },
+    forbiddenAgents: {
+      en: "UNDILUTED BLEACH (causes pitting and permanent rust), harsh hydrochloric toilet acids, steel wool.",
+      es: "LEJÍA PURA (provoca picaduras y óxido permanente), ácidos fuertes de inodoro, estropajos metálicos.",
+      pt: "ÁGUA SANITÁRIA PURA (causa corrosão por pite e manchas de ferrugem), ácidos fortes, palha de aço grossa.",
+      "zh-cn": "高浓度未稀释漂白水（极易导致点蚀性永久锈蚀穿孔）、强酸洁厕灵、粗硬钢丝球划伤。",
+      ja: "原液の塩素系漂白剤（孔食・サビの原因になります）、強酸性洗剤、金属たわし。"
+    }
+  },
+  {
+    id: "granite-marble",
+    name: {
+      en: "Natural Stone (Granite, Marble, Quartzite Counters)",
+      es: "Piedra Natural (Encimeras de Granito, Mármol, Cuarcita)",
+      pt: "Pedra Natural (Bancadas de Granito, Mármore, Quartzito)",
+      "zh-cn": "天然石材（大理石、花岗岩台面）",
+      ja: "天然石・大理石・御影石のキッチントップ"
+    },
+    safeAgents: {
+      en: "pH-neutral liquid dish soap, warm water, 70% isopropyl alcohol for rapid sanitizing.",
+      es: "Jabón lavavajillas de pH neutro, agua tibia, alcohol isopropílico al 70% para desinfectar.",
+      pt: "Detergente neutro com pH balanceado, água morna, álcool 70% para desinfetar sem manchar.",
+      "zh-cn": "pH中性洗洁精温水擦拭、70%异丙醇酒精喷雾快速挥发除菌。",
+      ja: "中性洗剤、ぬるま汤の水拭き、消毒用エタノールの軽いスプレー除菌。"
+    },
+    forbiddenAgents: {
+      en: "VINEGAR, lemon juice, acidic descalers, and harsh bleach (dissolves calcium carbonate and permanently etches dull spots into polished stone).",
+      es: "VINAGRE, zumo de limón, desincrustantes y lejía fuerte (disuelven el carbonato cálcico y dejan manchas mates irreversibles).",
+      pt: "VINAGRE, limão, desincrustantes ácidos e cloro forte (corroem o carbonato de cálcio e deixam a pedra opaca e manchada para sempre).",
+      "zh-cn": "白醋、柠檬汁、酸性除垢剂与浓漂白水（酸性会溶解大理石中的碳酸钙，导致天然光泽永久腐蚀发乌且无法擦除！）。",
+      ja: "お酢、クエン酸、レモン汁、酸性洗剤（カルシウム分を溶かして表面のツヤを永久に失わせます）。"
+    }
+  },
+  {
+    id: "cutting-boards",
+    name: {
+      en: "Wood & Plastic Cutting Boards",
+      es: "Tablas de Cortar de Madera y Plástico",
+      pt: "Tábuas de Corte de Madeira e Plástico",
+      "zh-cn": "木质与塑料菜板砧板",
+      ja: "木製およびプラスチック製まな板"
+    },
+    safeAgents: {
+      en: "Wood: Hydrogen peroxide 3% spray, followed by food-grade mineral oil. Plastic: Dilute bleach (1 tbsp per gallon cool water) or dishwasher heat sanitize.",
+      es: "Madera: Agua oxigenada al 3% pulverizada, seguida de aceite mineral alimentario. Plástico: Lejía muy diluida (1 cucharada por 4L) o lavavajillas a alta temperatura.",
+      pt: "Madeira: Água oxigenada 3%, seguida de óleo mineral alimentício. Plástico: Cloro diluído (1 colher de sopa por 4L de água) ou lava-louças quente.",
+      "zh-cn": "木砧板：3%双氧水喷雾杀菌擦干，定期涂抹食品级矿物油保养。塑料菜板：1汤匙漂白水兑4升冷水超低浓度消毒后冲净，或洗碗机高温清洗。",
+      ja: "木製：3%オキシドールをスプレーして乾燥、定期的に食品用ミネラルオイルで保湿。プラ製：薄めた塩素系漂白剤で浸け置き洗い、または食洗機。"
+    },
+    forbiddenAgents: {
+      en: "Soaking wooden boards in water, combining bleach + vinegar together on the board surface.",
+      es: "Poner a remojo tablas de madera, o juntar lejía con vinagre directamente sobre la tabla.",
+      pt: "Deixar tábuas de madeira de molho em água, ou misturar cloro com vinagre na tábua.",
+      "zh-cn": "木菜板长期泡水（开裂发霉变黑）、直接在板面上同时倒漂白水和白醋！",
+      ja: "木製まな板の長時間の水没放置、まな板の上で漂白剤とお酢を同時に使用すること。"
+    }
+  },
+  {
+    id: "cast-iron",
+    name: {
+      en: "Cast Iron & Carbon Steel Skillets",
+      es: "Sartenes de Hierro Fundido y Acero al Carbono",
+      pt: "Frigideiras de Ferro Fundido e Aço Carbono",
+      "zh-cn": "生铁铸铁锅与熟铁碳钢锅",
+      ja: "鋳鉄（スキレット）および中華鍋・鉄フライパン"
+    },
+    safeAgents: {
+      en: "Hot water, stiff nylon brush, mild liquid dish soap (safe on modern cured seasoning!), chainmail scrubber, dry heat + oil coating.",
+      es: "Agua caliente, cepillo de cerdas duras de nailon, jabón lavavajillas suave (¡seguro para el curado actual!), secar al fuego y engrasar.",
+      pt: "Água quente, escova de cerdas firmes, detergente neutro suave (seguro para o óleo curado!), secagem imediata na chama e óleo.",
+      "zh-cn": "热水、硬质尼龙刷、少量中性洗洁精（现代中性洗洁精不含强碱苛性钠，不会破坏已固化的聚合油膜！）、洗后立即小火烘干涂油防锈。",
+      ja: "お湯、ナイロンブラシ、中性洗剤（しっかり油膜が焼き付いていれば洗剤使用OK！）、直火での完全乾燥と薄い油の塗布。"
+    },
+    forbiddenAgents: {
+      en: "DISHWASHER CYCLES (strips seasoning completely and causes flash rust), vinegar/acid soaks (destroys seasoning layer), oven cleaner lye.",
+      es: "METER EN EL LAVAVAJILLAS (destruye el curado por completo y provoca óxido instantáneo), remojo en vinagre, limpiadores cáusticos de horno.",
+      pt: "LAVA-LOUÇAS (arranca o tempero por completo e oxida na hora), deixar de molho no vinagre, limpa-fornos cáustico.",
+      "zh-cn": "严禁放入洗碗机清洗（强碱洗碗粉与强力水流会在一小时内彻底剥离油膜并导致全锅生锈！）、白醋浸泡（酸液会溶解氧化铁油膜层）。",
+      ja: "食洗機の使用（強アルカリ洗剤により一瞬で油膜が剥げてサビだらけになります）、お酢への浸け置き（油膜が溶けます）。"
+    }
+  }
+];
+
+const fullData = {
+  chemicals,
+  pairwiseReactions,
+  kitchenSurfaces,
+  emergencyHotlines: [
+    { country: "United States & Canada", phone: "1-800-222-1222", agency: "American Association of Poison Control Centers (AAPCC)" },
+    { country: "United Kingdom", phone: "111 / 999", agency: "National Health Service (NHS 111 / Emergency 999)" },
+    { country: "European Union & Spain", phone: "112 / +34 91 562 04 20", agency: "Emergency 112 / Instituto Nacional de Toxicología" },
+    { country: "Brazil & Latin America", phone: "0800 722 6001 / 192", agency: "Disque-Intoxicação (ANVISA / SAMU 192)" },
+    { country: "Japan", phone: "119 / 072-727-2499", agency: "Japan Poison Information Center (JPIC / 119 Emergency)" },
+    { country: "China", phone: "120 / 010-83162266", agency: "National Poison Control Center (120 急救 / 中毒控制中心)" }
+  ]
+};
+
+const outputPath = path.join(__dirname, '../src/data/cleaner-mixing-danger-checker-data.json');
+fs.writeFileSync(outputPath, JSON.stringify(fullData, null, 2), 'utf8');
+console.log('Successfully written cleaner mixing danger checker data to:', outputPath);
