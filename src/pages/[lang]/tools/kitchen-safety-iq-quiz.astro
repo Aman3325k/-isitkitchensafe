@@ -1,0 +1,162 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import KitchenSafetyQuiz from '../../../components/KitchenSafetyQuiz.astro';
+import rawData from '../../../data/kitchen-safety-iq-quiz-data.json';
+import type { SupportedLanguage } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+
+interface LocalePageContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  heroSub: string;
+  breadcrumbs: Array<{ label: string; href?: string }>;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocalePageContent> = {
+  es: {
+    pageTitle: "Cuestionario de Seguridad en la Cocina (Test de QI) | IsItKitchenSafe",
+    pageDescription: "Pon a prueba tus conocimientos de seguridad alimentaria frente a la ciencia empírica del USDA, FDA y CDC. Descubre si tus hábitos de cocina son mitos peligrosos o prácticas seguras.",
+    badge: "Desafío Científico USDA · FDA · CDC",
+    h1: "Cuestionario Interactivo de Seguridad en la Cocina (Test de QI)",
+    heroSub: "¿Sabes identificar las trampas cotidianas de intoxicación alimentaria y los mitos sobre electrodomésticos? Responde a 12 preguntas reales sobre lavado de aves, refrigeración de sobras, tostadoras y microondas para obtener tu tarjeta de puntuación oficial.",
+    breadcrumbs: [
+      { label: "Inicio", href: "/es/" },
+      { label: "Herramientas", href: "/es/tools/" },
+      { label: "Cuestionario de Seguridad en la Cocina" }
+    ]
+  },
+  pt: {
+    pageTitle: "Teste de QI de Segurança na Cozinha | IsItKitchenSafe",
+    pageDescription: "Avalie seus hábitos de cozinha contra a ciência do USDA, FDA e CDC. Descubra se costumes como lavar frango cru ou cheirar comida estragada são mitos perigosos.",
+    badge: "Desafio Científico USDA · FDA · CDC",
+    h1: "Teste Interativo de QI de Segurança na Cozinha",
+    heroSub: "Você consegue identificar armadilhas diárias de contaminação alimentar e mitos de eletrodomésticos? Responda a 12 perguntas práticas sobre lavagem de aves, refrigeração de sobras, tostadores e choque térmico para conquistar seu distintivo oficial.",
+    breadcrumbs: [
+      { label: "Início", href: "/pt/" },
+      { label: "Ferramentas", href: "/pt/tools/" },
+      { label: "Teste de QI de Segurança na Cozinha" }
+    ]
+  },
+  'zh-cn': {
+    pageTitle: "厨房食品与器具安全IQ测评工具 | IsItKitchenSafe",
+    pageDescription: "依据美国农业部（USDA）、FDA与CDC权威实验数据，全方位检测你的食品与厨房电器安全直觉，识破水洗生鸡肉、闻气味验变质、炒饭综合征等常见致命民间误区。",
+    badge: "USDA · FDA · CDC 权威科学测评",
+    h1: "厨房食品与器具安全IQ测评工具",
+    heroSub: "你能识破日常生活中流传甚广的食源性中毒陷阱与厨房电器安全谣言吗？通过12道涵盖生禽清洗、剩菜冷藏、烤面包机触电与微波过热爆沸的高难度实战考题，即刻获取你的官方安全评估证书与战绩徽章。",
+    breadcrumbs: [
+      { label: "首页", href: "/zh-cn/" },
+      { label: "实用工具", href: "/zh-cn/tools/" },
+      { label: "厨房安全IQ测评工具" }
+    ]
+  },
+  ja: {
+    pageTitle: "キッチン衛生・安全IQ診断クイズ | IsItKitchenSafe",
+    pageDescription: "米農務省（USDA）、FDA、CDCの科学的知見に基づき、あなたの食中毒予防＆調理器具の安全知識を測定。生肉の水洗い、においによる腐敗判断、電子レンジの突沸など12の重要迷信を検証。",
+    badge: "USDA · FDA · CDC 科学的エビデンス検証",
+    h1: "キッチン衛生・安全IQ診断クイズ",
+    heroSub: "日常に潜む食中毒の罠や家電の誤った迷信を見抜けますか？「鶏肉の水洗い」「残りご飯の常温放置」「トースターの詰まり」「ガラスの熱衝撃」など実践的な12問に挑戦し、あなたの公式安全マスター認定バッジを獲得しましょう。",
+    breadcrumbs: [
+      { label: "ホーム", href: "/ja/" },
+      { label: "ツール", href: "/ja/tools/" },
+      { label: "キッチン安全IQ診断クイズ" }
+    ]
+  }
+};
+
+const c = CONTENT[lang as Exclude<SupportedLanguage, 'en'>] || CONTENT.es;
+const faqs = (rawData.faqs as Record<string, Array<{ question: string; answer: string }>>)[lang] || rawData.faqs.en;
+const localizedUrl = `https://isitkitchensafe.com/${lang}/tools/kitchen-safety-iq-quiz/`;
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": c.h1,
+  "url": localizedUrl,
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript.",
+  "description": c.pageDescription,
+  "inLanguage": lang === 'zh-cn' ? 'zh-CN' : lang,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IsItKitchenSafe",
+    "url": "https://isitkitchensafe.com"
+  }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map((faq) => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+};
+---
+
+<Layout
+  title={c.pageTitle}
+  description={c.pageDescription}
+  faqs={faqs}
+  excludeFaqSchema={true}
+  availableLocales={availableLocales}
+  lang={lang}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(webAppSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+  </Fragment>
+
+  <!-- Breadcrumbs -->
+  <div class="bg-surface-soft border-b border-hairline py-1 print:hidden">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <Breadcrumbs items={c.breadcrumbs} className="mb-0" />
+    </div>
+  </div>
+
+  <div class="max-w-[1140px] mx-auto px-6 py-10 md:py-14">
+    <!-- Hero Header -->
+    <header class="mb-10 text-center max-w-3xl mx-auto">
+      <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-signature-coral text-white mb-3">
+        {c.badge}
+      </span>
+      <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-4">
+        {c.h1}
+      </h1>
+      <p class="text-body text-[15px] md:text-[16px] leading-relaxed">
+        {c.heroSub}
+      </p>
+    </header>
+
+    <!-- Main Interactive Quiz Component -->
+    <KitchenSafetyQuiz lang={lang} />
+  </div>
+</Layout>

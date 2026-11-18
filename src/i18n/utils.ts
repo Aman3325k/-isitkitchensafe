@@ -221,6 +221,9 @@ const SPECIAL_PAGES = [
   'tools/cooking-oil-smoke-point-finder',
   'tools/cast-iron-seasoning-troubleshooter',
   'tools/fridge-organization-zone-planner',
+  'tools/kitchen-safety-iq-quiz',
+  'tools/induction-cookware-compatibility-checker',
+  'tools/dishwasher-detergent-dosage-calculator',
   'methodology',
   'saved'
 ];

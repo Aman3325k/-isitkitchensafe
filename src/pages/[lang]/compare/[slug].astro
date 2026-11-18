@@ -583,9 +583,38 @@ const uxCopy = {
              isZh ? '所有对比数据均对照美国农业部食品安全检验局（USDA FSIS）、FDA 食品接触法规、NSF International 标准与家电原厂手册核验。' :
              'すべての比較データはUSDA食品安全検査局（FSIS）、FDA食品接触規制、NSF International基準および各家電メーカー公式マニュアルと照合しています。'
 };
+
+// Dynamic per-page OG social preview card (/api/og.svg)
+function truncateOgText(text: string, maxLen: number): string {
+  const clean = String(text || '').replace(/\s+/g, ' ').trim();
+  if (clean.length <= maxLen) return clean;
+  const sliced = clean.slice(0, maxLen - 1);
+  const lastSpace = sliced.lastIndexOf(' ');
+  const cut = lastSpace > Math.floor(maxLen * 0.6) ? sliced.slice(0, lastSpace) : sliced;
+  return `${cut.replace(/[\s,;:\-—–/]+$/, '')}…`;
+}
+
+const isCjk = isZh || lang === 'ja';
+const ogCategoryMap: Record<string, string> = {
+  ...categoryNames,
+  "cleaning": isEs ? "Limpieza de Cocina" : isPt ? "Limpeza na Cozinha" : isZh ? "厨房清洁安全" : "キッチン掃除の安全",
+  "cookware": isEs ? "Utensilios de Cocina" : isPt ? "Panelas e Utensílios" : isZh ? "锅具安全对比" : "調理器具の比較"
+};
+const ogCategoryFallback = isEs ? "Comparación" : isPt ? "Comparação" : isZh ? "安全对比" : "安全性比較";
+const ogTitle = truncateOgText(`${item1} vs ${item2}`, isCjk ? 44 : 70);
+const ogVerdict = winner === 'depends' ? 'DEPENDS' : 'YES';
+const ogAppliance = truncateOgText(ogCategoryMap[category] || ogCategoryFallback, isCjk ? 18 : 32);
+const ogSummary = truncateOgText(verdict, isCjk ? 64 : 115);
+const ogParams = new URLSearchParams({
+  title: ogTitle,
+  verdict: ogVerdict,
+  appliance: ogAppliance,
+  summary: ogSummary,
+});
+const ogImage = `/api/og.svg?${ogParams.toString()}`;
 ---
 
-<Layout title={pageTitle} description={pageDescription} excludeBreadcrumbSchema={true} excludeArticleSchema={true} excludeFaqSchema={true} availableLocales={availableLocales} lang={lang} ogType="article">
+<Layout title={pageTitle} description={pageDescription} excludeBreadcrumbSchema={true} excludeArticleSchema={true} excludeFaqSchema={true} availableLocales={availableLocales} lang={lang} ogType="article" ogImage={ogImage}>
   <!-- Inject Schemas into Head Slot -->
   <Fragment slot="head">
     <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />

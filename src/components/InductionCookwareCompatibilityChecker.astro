@@ -1,0 +1,1884 @@
+---
+import rawData from '../data/induction-cookware-compatibility-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+import { useTranslatedPath } from '../i18n/utils';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+const translatePath = useTranslatedPath(lang);
+
+const cookwareOvenUrl = translatePath('/tools/cookware-oven-temp-lookup/');
+const castIronUrl = translatePath('/tools/cast-iron-seasoning-troubleshooter/');
+const inductionEmfUrl = translatePath('/tools/induction-cooktop-emf-safety-modeler/');
+const methodologyUrl = translatePath('/methodology/');
+const allToolsUrl = translatePath('/tools/');
+
+type StatusType = 'works-great' | 'model-dependent' | 'incompatible';
+type MagnetType = 'strong' | 'check-base' | 'none';
+type EfficiencyType = 'high' | 'medium' | 'none';
+type ScratchRiskType = 'low' | 'medium' | 'high';
+
+interface LocalizedCookware {
+  id: string;
+  icon: string;
+  status: StatusType;
+  magnetTest: MagnetType;
+  heatingEfficiency: EfficiencyType;
+  glassScratchRisk: ScratchRiskType;
+  keywords: string;
+  name: string;
+  brands: string;
+  maxPowerTip: string;
+  verdict: string;
+  buyerTip: string;
+}
+
+const localizedCookware: LocalizedCookware[] = rawData.cookware.map((item) => {
+  const tr = (item.i18n as Record<string, any>)[lang] || item.i18n.en;
+  return {
+    id: item.id,
+    icon: item.icon,
+    status: item.status as StatusType,
+    magnetTest: item.magnetTest as MagnetType,
+    heatingEfficiency: item.heatingEfficiency as EfficiencyType,
+    glassScratchRisk: item.glassScratchRisk as ScratchRiskType,
+    keywords: `${item.keywords} ${tr.name} ${tr.brands} ${tr.verdict}`.toLowerCase(),
+    name: tr.name,
+    brands: tr.brands,
+    maxPowerTip: tr.maxPowerTip,
+    verdict: tr.verdict,
+    buyerTip: tr.buyerTip
+  };
+});
+
+const localizedFaqs: Array<{ question: string; answer: string }> =
+  (rawData.faqs as Record<string, Array<{ question: string; answer: string }>>)[lang] ||
+  rawData.faqs.en;
+
+const counts = {
+  all: localizedCookware.length,
+  worksGreat: localizedCookware.filter((c) => c.status === 'works-great').length,
+  modelDependent: localizedCookware.filter((c) => c.status === 'model-dependent').length,
+  incompatible: localizedCookware.filter((c) => c.status === 'incompatible').length,
+  scratchRisk: localizedCookware.filter((c) => c.glassScratchRisk === 'high' || c.glassScratchRisk === 'medium').length
+};
+
+interface SimVerdict {
+  status: StatusType;
+  pill: string;
+  headline: string;
+  summary: string;
+  efficiency: string;
+  powerLimit: string;
+  tip: string;
+}
+
+interface UiDict {
+  ariaLabel: string;
+  simBadge: string;
+  simTitle: string;
+  simSub: string;
+  q1Label: string;
+  q1Strong: string;
+  q1StrongSub: string;
+  q1Weak: string;
+  q1WeakSub: string;
+  q1None: string;
+  q1NoneSub: string;
+  q2Label: string;
+  q2FlatWide: string;
+  q2FlatWideSub: string;
+  q2Small: string;
+  q2SmallSub: string;
+  q2Uneven: string;
+  q2UnevenSub: string;
+  simEfficiencyLabel: string;
+  simPowerLabel: string;
+  simTipLabel: string;
+  copyBtn: string;
+  copiedBtn: string;
+  printBtn: string;
+  resetBtn: string;
+  catalogTitle: string;
+  catalogSub: string;
+  searchLabel: string;
+  searchPlaceholder: string;
+  clearSearchBtn: string;
+  filterAll: string;
+  filterWorks: string;
+  filterCheck: string;
+  filterNo: string;
+  filterScratch: string;
+  showingPrefix: string;
+  showingOf: string;
+  showingSuffix: string;
+  noResultsTitle: string;
+  noResultsSub: string;
+  statusWorks: string;
+  statusCheck: string;
+  statusNo: string;
+  magnetStrong: string;
+  magnetCheck: string;
+  magnetNone: string;
+  effHigh: string;
+  effMed: string;
+  effNone: string;
+  scratchLow: string;
+  scratchMed: string;
+  scratchHigh: string;
+  cardMagnetPrefix: string;
+  cardEffPrefix: string;
+  cardScratchPrefix: string;
+  cardBoostTitle: string;
+  cardBuyerTitle: string;
+  safetySectionTitle: string;
+  safetySectionSub: string;
+  emfCardBadge: string;
+  emfCardTitle: string;
+  emfCardBody: string;
+  emfCardPoints: string[];
+  emfCardCta: string;
+  glassCardBadge: string;
+  glassCardTitle: string;
+  glassCardBody: string;
+  glassCardPoints: string[];
+  relatedHeading: string;
+  relatedOvenTag: string;
+  relatedOvenTitle: string;
+  relatedOvenDesc: string;
+  relatedCastTag: string;
+  relatedCastTitle: string;
+  relatedCastDesc: string;
+  relatedEmfTag: string;
+  relatedEmfTitle: string;
+  relatedEmfDesc: string;
+  methodologyStripTitle: string;
+  methodologyStripPrefix: string;
+  methodologyLabel: string;
+  emfQuickLabel: string;
+  allToolsLabel: string;
+  faqTitle: string;
+  copyChecklistText: string;
+  simResults: Record<string, SimVerdict>;
+}
+
+const UI: Record<SupportedLanguage, UiDict> = {
+  en: {
+    ariaLabel: 'Induction Cookware Compatibility and 3-Second Magnet Test Checker',
+    simBadge: '3-Second Fridge Magnet Test Simulator',
+    simTitle: 'Test Any Pan in Your Kitchen Right Now',
+    simSub: 'Press a regular refrigerator magnet flat against the outside bottom center of your pot, then pick what happens below.',
+    q1Label: '1. Does a magnet stick firmly to the pan’s bottom?',
+    q1Strong: 'Sticks Strongly',
+    q1StrongSub: 'Snaps on & holds its weight',
+    q1Weak: 'Weakly / Center Only',
+    q1WeakSub: 'Slips easily or tiny pull',
+    q1None: 'Falls Right Off',
+    q1NoneSub: 'Zero magnetic pull',
+    q2Label: '2. Is the bottom completely flat & ≥ 4.5 in (11 cm) wide?',
+    q2FlatWide: 'Flat & ≥ 4.5 in (11 cm)',
+    q2FlatWideSub: 'Sits flush, matches coil',
+    q2Small: 'Flat, Under 4.5 in (11 cm)',
+    q2SmallSub: 'Moka pot, butter warmer',
+    q2Uneven: 'Warped / Curved / Ringed',
+    q2UnevenSub: 'Wobbles or raised heat ring',
+    simEfficiencyLabel: 'Expected Heating Efficiency',
+    simPowerLabel: 'Safe Max Power Strategy',
+    simTipLabel: 'Actionable Safety & Buying Tip',
+    copyBtn: 'Copy Buying Checklist',
+    copiedBtn: 'Checklist Copied ✓',
+    printBtn: 'Print Induction Guide',
+    resetBtn: 'Reset',
+    catalogTitle: '24 Popular Cookware Materials & Brands: Induction Compatibility Database',
+    catalogSub: 'Search by brand (Le Creuset, All-Clad, Caraway, HexClad, Bialetti, T-fal, Pyrex) or filter by verdict & glass scratch risk.',
+    searchLabel: 'Search cookware material or brand',
+    searchPlaceholder: 'Search brand or material (e.g. Le Creuset, Caraway, Bialetti, 304, cast iron)...',
+    clearSearchBtn: 'Clear Filters',
+    filterAll: 'All',
+    filterWorks: 'Works Great',
+    filterCheck: 'Check Model / Magnet',
+    filterNo: 'Incompatible',
+    filterScratch: 'Glass Scratch Risk',
+    showingPrefix: 'Showing',
+    showingOf: 'of',
+    showingSuffix: 'cookware types',
+    noResultsTitle: 'No matching cookware found',
+    noResultsSub: 'Try searching a broader term like stainless, ceramic, aluminum, copper, or cast iron.',
+    statusWorks: 'Works Great',
+    statusCheck: 'Check Model / Magnet',
+    statusNo: 'Incompatible',
+    magnetStrong: 'Strong Pull',
+    magnetCheck: 'Test Base',
+    magnetNone: 'No Pull',
+    effHigh: 'High Efficiency',
+    effMed: 'Medium Efficiency',
+    effNone: 'No Heating',
+    scratchLow: 'Low Scratch Risk',
+    scratchMed: 'Medium Scratch Risk',
+    scratchHigh: 'High Scratch Risk — Lift!',
+    cardMagnetPrefix: 'Magnet',
+    cardEffPrefix: 'Efficiency',
+    cardScratchPrefix: 'Glass Risk',
+    cardBoostTitle: 'Boost & Heat Control Tip',
+    cardBuyerTitle: 'Buyer & Testing Tip',
+    safetySectionTitle: 'Cardiac Pacemaker / ICD Clearance & Induction Glass Cooktop Protection',
+    safetySectionSub: 'Two critical real-world safety rules every induction owner should keep near the range.',
+    emfCardBadge: 'Medical Device EMF Guidance',
+    emfCardTitle: 'Pacemaker & ICD Clearance (30–60 cm / 12–24 in)',
+    emfCardBody: 'Induction coils generate localized medium-frequency magnetic fields (20–50 kHz) that decay steeply with distance. Modern shielded pacemakers and ICDs rarely experience interference when clearance rules are respected:',
+    emfCardPoints: [
+      'Maintain at least 30–60 cm (12–24 inches) between your chest/implant and active induction burners (avoid leaning over simmering pots).',
+      'Always use flat, ferromagnetic cookware sized to match the coil—oversized gaps leak more stray magnetic flux.',
+      'Prefer rear burners when practical, keep metal spoons out of active coils, and confirm specific clearance limits with your cardiologist.'
+    ],
+    emfCardCta: 'Model Exact Distance & Exposure in Our Induction EMF Safety Modeler →',
+    glassCardBadge: 'Glass-Ceramic Cooktop Care',
+    glassCardTitle: 'Lift-Don’t-Slide & Silicone Induction Mat Rules',
+    glassCardBody: 'Schott Ceran and EuroKera induction tops handle extreme heat shock, yet scratches and impact cracks are permanent:',
+    glassCardPoints: [
+      'Lift—never slide bare cast iron, enameled Dutch ovens, or ceramic pots across glass. One trapped salt grain or rough iron burr leaves a deep scratch.',
+      'Silicone induction mats (fiberglass-reinforced, rated to ~450°F / 232°C) are great under cast iron for Low–Medium cooking, but NEVER use them on Boost/High searing or on radiant electric coils.',
+      'Avoid dry Boost preheating on enameled cast iron, thin carbon steel, and nonstick—and keep induction converter discs on Medium-Low to prevent thermal glass cracks.'
+    ],
+    relatedHeading: 'Related Induction & Cookware Safety Tools',
+    relatedOvenTag: 'Handle & Lid Limits',
+    relatedOvenTitle: 'Cookware Oven Temperature Lookup →',
+    relatedOvenDesc: 'Check exact max oven temps for All-Clad, Le Creuset knobs, Caraway, HexClad, De Buyer, and glass lids.',
+    relatedCastTag: 'Skillet Care & Rust Fix',
+    relatedCastTitle: 'Cast Iron & Carbon Steel Troubleshooter →',
+    relatedCastDesc: 'Fix sticky pans, dishwasher rust, flaking seasoning, or warped bottoms with exact oil polymerization temps.',
+    relatedEmfTag: 'Pacemaker & Distance Tool',
+    relatedEmfTitle: 'Induction Cooktop EMF Safety Modeler →',
+    relatedEmfDesc: 'Estimate magnetic field decay by distance, pan alignment, and power level for pacemaker, ICD, and pregnancy peace of mind.',
+    methodologyStripTitle: 'Grounded in Ferromagnetic Metallurgy & Appliance Engineering Specs',
+    methodologyStripPrefix: 'Compatibility verdicts, 430 vs. 304 steel alloys, converter-disc warnings, and pacemaker clearance ranges are cross-checked against manufacturer manuals. Read our',
+    methodologyLabel: 'Methodology',
+    emfQuickLabel: 'Induction EMF Modeler',
+    allToolsLabel: 'All Kitchen Tools →',
+    faqTitle: 'Frequently Asked Questions: Induction Cookware & Magnet Test',
+    copyChecklistText: 'IsItKitchenSafe — Induction Cookware Buying & Testing Checklist\n1. 3-Second Magnet Test: Stick a fridge magnet to the OUTSIDE BOTTOM CENTER (not the walls). Must snap on firmly.\n2. Flatness & Width: Base must sit completely flat (no wobble/heat ring) and measure >= 4.5 in (11 cm) for standard burners.\n3. Stainless Steel Rule: Look for 430 ferritic magnetic outer layer (Tri-Ply/5-Ply). Single-ply 304 (18/10) will NOT work.\n4. Glass Protection: Always LIFT (never slide) bare/enameled cast iron; wipe bottoms clean of grit before cooking.\n5. Boost Safety: Never use Power/Boost on empty enameled cast iron, thin carbon steel, nonstick, or converter discs.\n6. Pacemaker / ICD Clearance: Keep 30–60 cm (12–24 in) from active coils, center matched pans, and consult your cardiologist.',
+    simResults: {
+      'strong|flat-wide': {
+        status: 'works-great',
+        pill: 'Works Great on Induction',
+        headline: '100% Induction Ready — Fast, Efficient & Full Coil Coupling',
+        summary: 'Your pan passed both tests: strong ferromagnetic mass plus a flat, wide contact surface means rapid, even heating across standard induction burners.',
+        efficiency: 'High (85–90% Energy Transfer)',
+        powerLimit: 'Boost OK for boiling water; Medium (4–6/10) for dry searing or enamel.',
+        tip: 'Check bottom smoothness before sliding—if it is bare cast iron, always lift vertically or use a silicone induction mat at medium heat.'
+      },
+      'strong|flat-small': {
+        status: 'model-dependent',
+        pill: 'Check Smallest Burner Diameter',
+        headline: 'Magnetic Metal Passed — But Base May Be Too Narrow for Some Coils',
+        summary: 'The metal is induction-ready, yet bases narrower than 4.5 in (11 cm)—like 2-cup Moka pots or butter warmers—can fail pan detection on larger zones.',
+        efficiency: 'Medium (Depends on Coil Sensor)',
+        powerLimit: 'Low to Medium-Low (3–4/10) on the smallest marked zone.',
+        tip: 'Center it on your cooktop’s smallest burner (many accept down to 3.5 in / 9 cm). If the burner blinks an error, use a small stainless induction plate at low heat.'
+      },
+      'strong|uneven': {
+        status: 'model-dependent',
+        pill: 'Poor Contact / Uneven Base',
+        headline: 'Magnetic, But Warped or Raised-Ring Base Reduces Efficiency & Risks Glass',
+        summary: 'An air gap of even 2–3 mm weakens induction coupling, causes buzzing or cycling off, and concentrates pressure on high spots of the glass ceramic top.',
+        efficiency: 'Low to Medium (Air-Gap Loss)',
+        powerLimit: 'Medium (4–5/10) max; avoid Boost which worsens warping.',
+        tip: 'Avoid placing deep-ridged cast iron griddles or spinning warped skillets on glass cooktops. Flat-bottom replacement pans heat far more evenly.'
+      },
+      'weak|flat-wide': {
+        status: 'model-dependent',
+        pill: 'Weak Pull — Marginal Heating',
+        headline: 'Low Magnetic Mass — May Heat Slowly, Buzz Loudly, or Trip Errors',
+        summary: 'A weak pull usually indicates a very thin sprayed-steel induction disc, partial-coverage dots, or lightly cold-worked 304 steel rather than true 430 ferritic steel.',
+        efficiency: 'Low to Medium (Slow Ramp)',
+        powerLimit: 'Medium (4–6/10); Boost often causes loud humming or power throttling.',
+        tip: 'Try boiling 1 cup of water on medium power first. For daily searing or fast boils, upgrading to a full-clad 430 magnetic base saves significant time.'
+      },
+      'weak|flat-small': {
+        status: 'incompatible',
+        pill: 'Likely Fails Detection',
+        headline: 'Weak Magnetism + Small Footprint Usually Triggers Pan-Missing Error',
+        summary: 'Induction sensors need enough ferromagnetic metal inside the coil field to activate; weak pull on a tiny base almost always flashes a "U" or "E0" code.',
+        efficiency: 'Very Low / Error Shutdown',
+        powerLimit: 'Not reliable for direct induction use.',
+        tip: 'Switch to a strongly magnetic stainless steel version (4-cup+ base width) instead of fighting intermittent coil shutoffs.'
+      },
+      'weak|uneven': {
+        status: 'incompatible',
+        pill: 'Not Recommended',
+        headline: 'Weak Magnetism Plus Air Gap Prevents Reliable Induction Heating',
+        summary: 'Combining weak ferromagnetic content with a curved or warped bottom prevents the induction coil from locking onto the cookware.',
+        efficiency: 'None / Intermittent Cutoff',
+        powerLimit: 'Do not force on High/Boost.',
+        tip: 'Retire this pan for oven use or replace it with a flat-bottom tri-ply stainless or cast iron piece.'
+      },
+      'none|flat-wide': {
+        status: 'incompatible',
+        pill: 'Incompatible with Induction',
+        headline: 'Non-Magnetic Cookware — Will Not Heat on Induction',
+        summary: 'Because the magnet fell right off, the base is aluminum, copper, 304 stainless steel, titanium, glass, or ceramic—invisible to standard induction coils.',
+        efficiency: '0% (No Magnetic Coupling)',
+        powerLimit: 'Stove will flash a pan-missing code and stay cold.',
+        tip: 'Replace everyday aluminum/copper/304 pots with magnetic cookware. Only use a converter disc occasionally on Low–Medium (never with glass or clay pots!).'
+      },
+      'none|flat-small': {
+        status: 'incompatible',
+        pill: 'Incompatible with Induction',
+        headline: 'Non-Magnetic Small Pot (e.g., Classic Aluminum Moka Pot)',
+        summary: 'Zero magnetic pull means it cannot generate eddy currents directly on an induction cooktop.',
+        efficiency: '0% (No Magnetic Coupling)',
+        powerLimit: 'Requires steel replacement or Low–Medium adapter disc.',
+        tip: 'For espresso lovers, upgrade to a magnetic stainless steel Moka pot (4-cup+) or use Bialetti’s stainless Induction Plate strictly on Low–Medium heat.'
+      },
+      'none|uneven': {
+        status: 'incompatible',
+        pill: 'Incompatible with Induction',
+        headline: 'Non-Magnetic & Uneven Base — Keep Off Induction Burners',
+        summary: 'This pot lacks ferromagnetic metal and lacks flat glass contact, so it will neither heat nor sit safely on an induction range.',
+        efficiency: '0% (No Magnetic Coupling)',
+        powerLimit: 'Do not use with converter discs if glass, ceramic, or clay.',
+        tip: 'Reserve for gas, oven, or microwave use depending on the material, and choose flat-bottom magnetic cookware for your induction stove.'
+      }
+    }
+  },
+  es: {
+    ariaLabel: 'Verificador de Compatibilidad de Ollas para Inducción y Prueba del Imán',
+    simBadge: 'Simulador de Prueba del Imán en 3 Segundos',
+    simTitle: 'Prueba Cualquier Olla o Sartén de Tu Cocina Ahora Mismo',
+    simSub: 'Apoya un imán común de nevera plano contra el centro exterior del fondo de tu sartén y selecciona lo que ocurre:',
+    q1Label: '1. ¿El imán se pega con fuerza al fondo de la olla?',
+    q1Strong: 'Se Pega Fuerte',
+    q1StrongSub: 'Se adhiere y aguanta su peso',
+    q1Weak: 'Débil / Solo al Centro',
+    q1WeakSub: 'Resbala fácil o poca fuerza',
+    q1None: 'Se Cae al Instante',
+    q1NoneSub: 'Cero atracción magnética',
+    q2Label: '2. ¿El fondo es totalmente plano y ≥ 11 cm (4,5") de ancho?',
+    q2FlatWide: 'Plano y ≥ 11 cm',
+    q2FlatWideSub: 'Apoya raso en la zona',
+    q2Small: 'Plano, Menor de 11 cm',
+    q2SmallSub: 'Cafetera Moka, cazo mini',
+    q2Uneven: 'Alabeado / Curvo / Con Aro',
+    q2UnevenSub: 'Baila o tiene reborde',
+    simEfficiencyLabel: 'Eficiencia de Calentamiento Esperada',
+    simPowerLabel: 'Estrategia Segura de Potencia',
+    simTipLabel: 'Consejo Práctico de Seguridad y Compra',
+    copyBtn: 'Copiar Checklist de Compra',
+    copiedBtn: 'Checklist Copiada ✓',
+    printBtn: 'Imprimir Guía de Inducción',
+    resetBtn: 'Restablecer',
+    catalogTitle: '24 Materiales y Marcas Populares: Base de Datos de Compatibilidad Inducción',
+    catalogSub: 'Busca por marca (Le Creuset, All-Clad, Caraway, HexClad, Bialetti, Tefal, Pyrex) o filtra por veredicto y riesgo de rayar el vidrio.',
+    searchLabel: 'Buscar material o marca de olla',
+    searchPlaceholder: 'Busca marca o material (ej. Le Creuset, Caraway, Bialetti, 304, hierro)...',
+    clearSearchBtn: 'Limpiar Filtros',
+    filterAll: 'Todos',
+    filterWorks: 'Funciona Genial',
+    filterCheck: 'Revisar Modelo / Imán',
+    filterNo: 'Incompatible',
+    filterScratch: 'Riesgo de Rayar Vidrio',
+    showingPrefix: 'Mostrando',
+    showingOf: 'de',
+    showingSuffix: 'tipos de utensilios',
+    noResultsTitle: 'No encontramos coincidencias',
+    noResultsSub: 'Prueba con un término más amplio como acero, cerámica, aluminio, cobre o hierro.',
+    statusWorks: 'Funciona Genial',
+    statusCheck: 'Revisar Modelo / Imán',
+    statusNo: 'Incompatible',
+    magnetStrong: 'Imán Fuerte',
+    magnetCheck: 'Probar Base',
+    magnetNone: 'Sin Imán',
+    effHigh: 'Alta Eficiencia',
+    effMed: 'Eficiencia Media',
+    effNone: 'Sin Calentamiento',
+    scratchLow: 'Bajo Riesgo de Rayado',
+    scratchMed: 'Riesgo Medio de Rayado',
+    scratchHigh: 'Alto Riesgo — ¡Levantar!',
+    cardMagnetPrefix: 'Imán',
+    cardEffPrefix: 'Eficiencia',
+    cardScratchPrefix: 'Riesgo Vidrio',
+    cardBoostTitle: 'Consejo de Potencia / Boost',
+    cardBuyerTitle: 'Consejo de Compra y Prueba',
+    safetySectionTitle: 'Distancia para Marcapasos / DAI y Cuidado del Cristal de Inducción',
+    safetySectionSub: 'Dos normas clave de seguridad real que todo usuario de cocina de inducción debe recordar.',
+    emfCardBadge: 'Guía EMF para Dispositivos Médicos',
+    emfCardTitle: 'Distancia con Marcapasos y DAI (30–60 cm / 12–24")',
+    emfCardBody: 'Las bobinas de inducción generan campos magnéticos localizados (20–50 kHz) que caen drásticamente con la distancia. Los marcapasos modernos tienen gran blindaje si respetas estas medidas:',
+    emfCardPoints: [
+      'Mantén al menos 30–60 cm (12–24 pulgadas) entre el pecho/implante y las zonas activas (evita inclinarte sobre la placa).',
+      'Usa siempre ollas ferromagnéticas planas centradas del tamaño de la bobina para reducir campos dispersos.',
+      'Prefiere las zonas traseras, no dejes cucharas metálicas sobre la placa encendida y confirma las indicaciones con tu cardiólogo.'
+    ],
+    emfCardCta: 'Calcula Tu Distancia y Exposición en el Modelador EMF de Inducción →',
+    glassCardBadge: 'Protección de Vitrocerámica',
+    glassCardTitle: 'Regla "Levanta, No Arrastres" y Tapetes de Silicona',
+    glassCardBody: 'El vidrio Schott Ceran / EuroKera soporta cambios de temperatura, pero los arañazos y golpes por caída son permanentes:',
+    glassCardPoints: [
+      'Levanta SIEMPRE el hierro fundido, ollas esmaltadas y cerámica en vez de deslizarlos; un solo grano de sal atrapado raya el vidrio.',
+      'Los tapetes finos de silicona con fibra de vidrio (hasta ~232°C / 450°F) protegen bajo hierro fundido a fuego bajo–medio, pero NUNCA los uses en Boost ni en vitrocerámicas radiantes.',
+      'Evita Boost en seco en hierro esmaltado, acero al carbono fino y antiadherente; usa discos adaptadores solo en fuego medio-bajo.'
+    ],
+    relatedHeading: 'Herramientas Relacionadas de Inducción y Ollas',
+    relatedOvenTag: 'Límites de Mangos y Tapas',
+    relatedOvenTitle: 'Temperatura Máxima de Ollas en Horno →',
+    relatedOvenDesc: 'Consulta los límites exactos de horno para All-Clad, Le Creuset, Caraway, HexClad, De Buyer y tapas de vidrio.',
+    relatedCastTag: 'Cuidado y Óxido',
+    relatedCastTitle: 'Solucionador de Hierro Fundido y Acero →',
+    relatedCastDesc: 'Arregla sartenes pegajosas, óxido, curado descascarado o fondos doblados con temperaturas exactas.',
+    relatedEmfTag: 'Marcapasos y Distancia',
+    relatedEmfTitle: 'Modelador de Seguridad EMF en Inducción →',
+    relatedEmfDesc: 'Estima la caída del campo magnético según distancia, centrado de olla y potencia para marcapasos y embarazo.',
+    methodologyStripTitle: 'Verificado con Metalurgia Ferromagnética y Manuales de Fabricantes',
+    methodologyStripPrefix: 'Veredictos de aleación 430 vs. 304, alertas de discos difusores y pautas de marcapasos verificados con documentación técnica. Consulta nuestra',
+    methodologyLabel: 'Metodología',
+    emfQuickLabel: 'Modelador EMF',
+    allToolsLabel: 'Todas las Herramientas →',
+    faqTitle: 'Preguntas Frecuentes: Compatibilidad de Ollas e Inducción',
+    copyChecklistText: 'IsItKitchenSafe — Checklist de Compra para Cocina de Inducción\n1. Prueba del Imán (3 s): Apoya un imán en el CENTRO EXTERIOR DEL FONDO (no en paredes). Debe agarrar fuerte.\n2. Base Plana y Ancha: Sin tambaleo ni reborde y >= 11 cm (4,5") para quemadores estándar.\n3. Acero Inox: Exige capa exterior magnética 430 (tricapa/fondo difusor). El 304 (18/10) monocapa NO sirve.\n4. Cuida el Vidrio: LEVANTA siempre el hierro fundido sin arrastrarlo y limpia el fondo antes de apoyar.\n5. Cuidado con Boost: Nunca uses Boost en seco sobre esmaltado, acero al carbono fino, antiadherente ni discos adaptadores.\n6. Marcapasos / DAI: Mantén 30–60 cm de distancia de las zonas activas, centra la olla y consulta a tu cardiólogo.',
+    simResults: {
+      'strong|flat-wide': {
+        status: 'works-great',
+        pill: 'Funciona Genial en Inducción',
+        headline: '100% Apta para Inducción — Calentamiento Rápido y Completo',
+        summary: 'Tu olla pasó ambas pruebas: metal ferromagnético fuerte y base plana amplia garantizan máxima eficiencia en placas de inducción.',
+        efficiency: 'Alta (85–90% de Transferencia)',
+        powerLimit: 'Boost apto para hervir agua; Medio (4–6/10) para sellar en seco o esmaltado.',
+        tip: 'Comprueba que la base esté lisa y limpia antes de apoyarla; si es hierro fundido crudo, levántala siempre sin deslizar.'
+      },
+      'strong|flat-small': {
+        status: 'model-dependent',
+        pill: 'Revisar Diámetro Mínimo',
+        headline: 'El Metal Sirve — Pero la Base Puede Ser Demasiado Pequeña',
+        summary: 'El material es magnético, pero los fondos menores de 11 cm (como cafeteras Moka de 2 tazas) a veces no activan el sensor en zonas grandes.',
+        efficiency: 'Media (Según Sensor de Bobina)',
+        powerLimit: 'Bajo a Medio-Bajo (3–4/10) en el fuego más pequeño.',
+        tip: 'Céntrala en la zona más pequeña (muchas detectan desde 9 cm). Si parpadea error, usa un pequeño adaptador de acero a fuego suave.'
+      },
+      'strong|uneven': {
+        status: 'model-dependent',
+        pill: 'Contacto Irregular / Base Alabeada',
+        headline: 'Es Magnética, Pero la Base Curva o con Aro Reduce Eficiencia y Raya el Vidrio',
+        summary: 'Un espacio de aire de 2–3 mm debilita el campo, provoca zumbidos o apagados y concentra presión sobre puntos del vidrio.',
+        efficiency: 'Baja a Media (Pérdida por Aire)',
+        powerLimit: 'Medio (4–5/10) máximo; evita Boost porque empeora el pandeo.',
+        tip: 'No apoyes planchas con crestas profundas ni sartenes torcidas sobre la placa; una base plana cocina mucho más parejo.'
+      },
+      'weak|flat-wide': {
+        status: 'model-dependent',
+        pill: 'Imán Débil — Rendimiento Bajo',
+        headline: 'Poca Masa Magnética — Puede Calentar Lento o Zumbar',
+        summary: 'Un agarre flojo suele deberse a discos muy finos perforados o acero 304 ligeramente imantado en lugar de auténtico acero ferrítico 430.',
+        efficiency: 'Baja a Media (Subida Lenta)',
+        powerLimit: 'Medio (4–6/10); Boost suele generar zumbido fuerte o limitar potencia.',
+        tip: 'Prueba hirviendo 1 taza de agua a potencia media. Para uso diario intenso, una base completa de acero 430 rinde mucho mejor.'
+      },
+      'weak|flat-small': {
+        status: 'incompatible',
+        pill: 'Probable Error de Detección',
+        headline: 'Imán Débil + Base Pequeña Suele Activar Error de Recipiente',
+        summary: 'El sensor necesita suficiente masa ferromagnética dentro de la bobina; una base diminuta con imán flojo casi siempre marca error.',
+        efficiency: 'Muy Baja / Apagado Automático',
+        powerLimit: 'No fiable para uso directo en inducción.',
+        tip: 'Cambia a una versión de acero inoxidable magnético de al menos 4 tazas de base.'
+      },
+      'weak|uneven': {
+        status: 'incompatible',
+        pill: 'No Recomendada',
+        headline: 'Magnetismo Débil Más Espacio de Aire Impiden Calentar Bien',
+        summary: 'Combinar poca atracción magnética con un fondo curvo impide que la placa mantenga acoplamiento estable.',
+        efficiency: 'Nula / Cortes Constantes',
+        powerLimit: 'No forzar en potencia alta.',
+        tip: 'Resérvala para horno o reemplázala por una sartén tricapa o de hierro de fondo plano.'
+      },
+      'none|flat-wide': {
+        status: 'incompatible',
+        pill: 'Incompatible con Inducción',
+        headline: 'Recipiente No Magnético — No Calentará en Inducción',
+        summary: 'Si el imán cayó, la base es aluminio, cobre, acero 304, titanio, vidrio o cerámica: invisible para una placa de inducción.',
+        efficiency: '0% (Sin Acoplamiento)',
+        powerLimit: 'La placa mostrará error y permanecerá fría.',
+        tip: 'Reemplaza ollas diarias por modelos magnéticos. Solo usa un disco adaptador ocasionalmente a fuego bajo–medio (¡jamás con vidrio o barro!).'
+      },
+      'none|flat-small': {
+        status: 'incompatible',
+        pill: 'Incompatible con Inducción',
+        headline: 'Recipiente Pequeño No Magnético (ej. Moka de Aluminio)',
+        summary: 'Sin atracción magnética no se inducen corrientes en la base.',
+        efficiency: '0% (Sin Acoplamiento)',
+        powerLimit: 'Requiere versión de acero o placa adaptadora a fuego bajo–medio.',
+        tip: 'Para café Moka, pásate a la Bialetti Venus de acero (4+ tazas) o usa la placa oficial de acero a fuego medio-bajo.'
+      },
+      'none|uneven': {
+        status: 'incompatible',
+        pill: 'Incompatible con Inducción',
+        headline: 'Base No Magnética e Irregular — Mantén Fuera de la Placa',
+        summary: 'No contiene metal magnético ni apoya plano sobre el cristal.',
+        efficiency: '0% (Sin Acoplamiento)',
+        powerLimit: 'Nunca usar sobre discos adaptadores si es vidrio, cerámica o barro.',
+        tip: 'Úsala solo en gas, horno o microondas según su material.'
+      }
+    }
+  },
+  pt: {
+    ariaLabel: 'Verificador de Compatibilidade de Panelas para Indução e Teste do Imã',
+    simBadge: 'Simulador do Teste do Imã em 3 Segundos',
+    simTitle: 'Teste Qualquer Panela da Sua Cozinha Agora Mesmo',
+    simSub: 'Encoste um imã comum de geladeira bem plano no centro do fundo externo da panela e selecione o resultado abaixo:',
+    q1Label: '1. O imã gruda com firmeza no fundo da panela?',
+    q1Strong: 'Gruda Forte',
+    q1StrongSub: 'Puxa firme e sustenta o peso',
+    q1Weak: 'Fraco / Só no Centro',
+    q1WeakSub: 'Escorrega ou puxa pouco',
+    q1None: 'Cai na Hora',
+    q1NoneSub: 'Nenhuma atração magnética',
+    q2Label: '2. O fundo é totalmente plano e ≥ 11 cm (4,5") de diâmetro?',
+    q2FlatWide: 'Plano e ≥ 11 cm',
+    q2FlatWideSub: 'Apoia reto na boca',
+    q2Small: 'Plano, Menor que 11 cm',
+    q2SmallSub: 'Cafeteira Moka, fervedor mini',
+    q2Uneven: 'Empenado / Curvo / Com Friso',
+    q2UnevenSub: 'Balança ou tem anel elevado',
+    simEfficiencyLabel: 'Eficiência de Aquecimento Esperada',
+    simPowerLabel: 'Estratégia Segura de Potência',
+    simTipLabel: 'Dica Prática de Segurança e Compra',
+    copyBtn: 'Copiar Checklist de Compra',
+    copiedBtn: 'Checklist Copiada ✓',
+    printBtn: 'Imprimir Guia de Indução',
+    resetBtn: 'Redefinir',
+    catalogTitle: '24 Materiais e Marcas Populares: Banco de Compatibilidade Indução',
+    catalogSub: 'Busque por marca (Le Creuset, All-Clad, Tramontina, Caraway, HexClad, Bialetti, Tefal, Pyrex) ou filtre por risco de risco no vidro.',
+    searchLabel: 'Buscar material ou marca de panela',
+    searchPlaceholder: 'Busque marca ou material (ex: Le Creuset, Tramontina, Bialetti, 304, ferro)...',
+    clearSearchBtn: 'Limpar Filtros',
+    filterAll: 'Todos',
+    filterWorks: 'Funciona Ótimo',
+    filterCheck: 'Conferir Modelo / Imã',
+    filterNo: 'Incompatível',
+    filterScratch: 'Risco de Riscar Vidro',
+    showingPrefix: 'Mostrando',
+    showingOf: 'de',
+    showingSuffix: 'tipos de panelas',
+    noResultsTitle: 'Nenhuma panela encontrada',
+    noResultsSub: 'Tente um termo mais amplo como inox, cerâmica, alumínio, cobre ou ferro.',
+    statusWorks: 'Funciona Ótimo',
+    statusCheck: 'Conferir Modelo / Imã',
+    statusNo: 'Incompatível',
+    magnetStrong: 'Imã Forte',
+    magnetCheck: 'Testar Fundo',
+    magnetNone: 'Sem Imã',
+    effHigh: 'Alta Eficiência',
+    effMed: 'Eficiência Média',
+    effNone: 'Não Aquece',
+    scratchLow: 'Baixo Risco de Risco',
+    scratchMed: 'Risco Médio no Vidro',
+    scratchHigh: 'Alto Risco — Levante!',
+    cardMagnetPrefix: 'Imã',
+    cardEffPrefix: 'Eficiência',
+    cardScratchPrefix: 'Risco Vidro',
+    cardBoostTitle: 'Dica de Potência / Boost',
+    cardBuyerTitle: 'Dica de Compra e Teste',
+    safetySectionTitle: 'Distância para Marcapasso / CDI e Proteção do Vidro de Indução',
+    safetySectionSub: 'Duas regras essenciais de segurança prática para quem cozinha em cooktop de indução.',
+    emfCardBadge: 'Orientação EMF para Dispositivos Médicos',
+    emfCardTitle: 'Distância com Marcapasso e CDI (30–60 cm)',
+    emfCardBody: 'Bobinas de indução emitem campos magnéticos localizados (20–50 kHz) que caem rapidamente com a distância. Marcapassos modernos têm excelente blindagem seguindo cuidados simples:',
+    emfCardPoints: [
+      'Mantenha pelo menos 30–60 cm entre o tórax/implante e as zonas ligadas (evite apoiar o corpo sobre o cooktop).',
+      'Use panelas ferromagnéticas planas do tamanho certo e bem centralizadas para minimizar dispersão do campo.',
+      'Dê preferência às bocas traseiras, não deixe colheres de metal sobre zonas ativas e confirme orientações com seu cardiologista.'
+    ],
+    emfCardCta: 'Simule Distância e Exposição no Nosso Modelador EMF de Indução →',
+    glassCardBadge: 'Cuidados com Vitrocerâmica',
+    glassCardTitle: 'Regra "Levante, Não Arraste" e Tapete de Silicone',
+    glassCardBody: 'Vidros Schott Ceran / EuroKera aguentam choque térmico, mas riscos profundos e trincas por impacto são permanentes:',
+    glassCardPoints: [
+      'SEMPRE levante ferro fundido, panelas esmaltadas e cerâmica em vez de deslizar — um único grão de sal preso risca o vidro.',
+      'Tapetes finos de silicone com fibra de vidro (até ~232°C / 450°F) ajudam sob ferro fundido em fogo baixo–médio, mas NUNCA use no Boost nem em fogões elétricos radiantes.',
+      'Evite pré-aquecer no Boost com ferro esmaltado, aço carbono fino ou antiaderente vazios — e limite discos adaptadores ao fogo baixo–médio.'
+    ],
+    relatedHeading: 'Ferramentas Relacionadas de Indução e Panelas',
+    relatedOvenTag: 'Limites de Cabos e Tampas',
+    relatedOvenTitle: 'Temperatura Máxima de Panelas no Forno →',
+    relatedOvenDesc: 'Veja os limites exatos de forno para All-Clad, Le Creuset, Caraway, HexClad, De Buyer e tampas de vidro.',
+    relatedCastTag: 'Cura e Ferrugem',
+    relatedCastTitle: 'Solucionador de Ferro Fundido e Aço →',
+    relatedCastDesc: 'Recupere panelas grudentas, ferrugem, lascas na cura ou fundos empenados com temperaturas exatas.',
+    relatedEmfTag: 'Marcapasso e Distância',
+    relatedEmfTitle: 'Modelador de Segurança EMF na Indução →',
+    relatedEmfDesc: 'Calcule a queda do campo magnético por distância, centralização e potência para marcapasso e gestação.',
+    methodologyStripTitle: 'Baseado em Metalurgia Ferromagnética e Manuais de Engenharia',
+    methodologyStripPrefix: 'Vereditos de aço 430 vs. 304, alertas de discos conversores e diretrizes para marcapassos verificados contra especificações dos fabricantes. Veja nossa',
+    methodologyLabel: 'Metodologia',
+    emfQuickLabel: 'Modelador EMF',
+    allToolsLabel: 'Todas as Ferramentas →',
+    faqTitle: 'Perguntas Frequentes: Panelas para Indução e Teste do Imã',
+    copyChecklistText: 'IsItKitchenSafe — Checklist de Compra para Cooktop de Indução\n1. Teste do Imã (3 s): Encoste no CENTRO DO FUNDO EXTERNO (não nas laterais). Precisa grudar firme.\n2. Fundo Plano e Largo: Sem balançar nem anel elevado, com >= 11 cm (4,5") para bocas comuns.\n3. Regra do Inox: Exija fundo magnético de aço 430 (fundo triplo/multicamadas). Inox 304 (18/10) simples NÃO funciona.\n4. Proteção do Vidro: LEVANTE sempre o ferro fundido sem arrastar e limpe o fundo antes de apoiar.\n5. Segurança no Boost: Nunca use Boost vazio em ferro esmaltado, aço carbono fino, antiaderente ou discos adaptadores.\n6. Marcapasso / CDI: Mantenha 30–60 cm das bocas ligadas, centralize a panela e confirme com seu cardiologista.',
+    simResults: {
+      'strong|flat-wide': {
+        status: 'works-great',
+        pill: 'Funciona Ótimo na Indução',
+        headline: '100% Pronta para Indução — Aquecimento Rápido e Uniforme',
+        summary: 'Sua panela passou nos dois testes: forte massa ferromagnética e fundo plano largo garantem acoplamento total nas bobinas.',
+        efficiency: 'Alta (85–90% de Transferência)',
+        powerLimit: 'Boost OK para ferver água; Médio (4–6/10) para selar ou ferro esmaltado.',
+        tip: 'Se for ferro fundido cru, levante sempre em vez de arrastar ou use um tapete fino de silicone próprio para indução em fogo médio.'
+      },
+      'strong|flat-small': {
+        status: 'model-dependent',
+        pill: 'Conferir Diâmetro Mínimo',
+        headline: 'Metal Compatível — Mas o Fundo Pode Ser Pequeno Demais para Algumas Bocas',
+        summary: 'O metal aquece na indução, mas bases menores que 11 cm (cafeteiras Moka de 2 xícaras, leiteiras mini) podem não disparar o sensor em zonas maiores.',
+        efficiency: 'Média (Depende do Sensor)',
+        powerLimit: 'Baixo a Médio-Baixo (3–4/10) na menor boca marcada.',
+        tip: 'Centralize na menor zona do cooktop (muitos aceitam até 9 cm). Se piscar erro, use um pequeno disco adaptador de inox em fogo baixo.'
+      },
+      'strong|uneven': {
+        status: 'model-dependent',
+        pill: 'Contato Irregular / Empenada',
+        headline: 'É Magnética, Mas Fundo Curvo ou Elevado Perde Eficiência e Risca o Vidro',
+        summary: 'Uma folga de 2–3 mm enfraquece o acoplamento magnético, gera zumbido ou desligamentos e concentra peso no vidro.',
+        efficiency: 'Baixa a Média (Perda por Folga)',
+        powerLimit: 'Médio (4–5/10) máximo; evite Boost pois agrava o empenamento.',
+        tip: 'Evite apoiar chapas com frisos salientes ou frigideiras tortas no tampo de vidro; fundos planos aquecem muito mais rápido.'
+      },
+      'weak|flat-wide': {
+        status: 'model-dependent',
+        pill: 'Imã Fraco — Desempenho Limitado',
+        headline: 'Baixa Massa Magnética — Pode Aquecer Devagar ou Zumbir Alto',
+        summary: 'Atração fraca costuma indicar chapa de aço fina estampada ou inox 304 levemente magnetizado em vez de aço ferrítico 430 completo.',
+        efficiency: 'Baixa a Média (Aquecimento Lento)',
+        powerLimit: 'Médio (4–6/10); Boost costuma provocar zumbido ou corte de potência.',
+        tip: 'Teste fervendo 1 xícara de água no médio. Para uso diário rápido, uma panela com base completa de inox 430 faz grande diferença.'
+      },
+      'weak|flat-small': {
+        status: 'incompatible',
+        pill: 'Provável Erro de Detecção',
+        headline: 'Imã Fraco + Base Pequena Quase Sempre Dá Erro no Cooktop',
+        summary: 'O sensor precisa de massa ferromagnética mínima sobre a bobina; imã fraco em base pequena normalmente dispara erro "U" ou "E0".',
+        efficiency: 'Muito Baixa / Desligamento',
+        powerLimit: 'Não confiável para uso direto.',
+        tip: 'Prefira uma versão de inox magnético com base mais larga (4+ xícaras).'
+      },
+      'weak|uneven': {
+        status: 'incompatible',
+        pill: 'Não Recomendada',
+        headline: 'Magnetismo Fraco com Folga Impede Aquecimento Estável',
+        summary: 'Pouca atração magnética somada ao fundo curvo impede que a bobina reconheça a panela com estabilidade.',
+        efficiency: 'Nula / Cortes Frequentes',
+        powerLimit: 'Não force em potência alta.',
+        tip: 'Use apenas no forno ou substitua por uma panela de fundo plano magnético.'
+      },
+      'none|flat-wide': {
+        status: 'incompatible',
+        pill: 'Incompatível com Indução',
+        headline: 'Panela Não Magnética — Não Vai Aquecer na Indução',
+        summary: 'Se o imã caiu, o fundo é alumínio, cobre, inox 304, titânio, vidro ou cerâmica — invisível para cooktops de indução.',
+        efficiency: '0% (Sem Acoplamento)',
+        powerLimit: 'O cooktop piscará erro de panela ausente e ficará frio.',
+        tip: 'Troque panelas diárias por modelos magnéticos. Use disco adaptador só eventualmente em fogo baixo–médio (nunca com vidro ou barro!).'
+      },
+      'none|flat-small': {
+        status: 'incompatible',
+        pill: 'Incompatível com Indução',
+        headline: 'Utensílio Pequeno Não Magnético (ex: Moka de Alumínio)',
+        summary: 'Sem atração magnética, não há geração de corrente induzida na base.',
+        efficiency: '0% (Sem Acoplamento)',
+        powerLimit: 'Exige versão em aço ou placa adaptadora em fogo baixo–médio.',
+        tip: 'Para café expresso de fogão, escolha uma Bialetti Venus de inox (4+ xícaras) ou placa oficial em fogo baixo.'
+      },
+      'none|uneven': {
+        status: 'incompatible',
+        pill: 'Incompatível com Indução',
+        headline: 'Fundo Não Magnético e Irregular — Não Coloque na Indução',
+        summary: 'Não possui metal ferromagnético nem apoio plano seguro no vidro.',
+        efficiency: '0% (Sem Acoplamento)',
+        powerLimit: 'Nunca use com disco conversor se for vidro, cerâmica ou barro.',
+        tip: 'Reserve para fogão a gás, forno ou micro-ondas conforme o material.'
+      }
+    }
+  },
+  'zh-cn': {
+    ariaLabel: '电磁炉锅具兼容性查询与 3 秒磁铁测试工具',
+    simBadge: '3 秒冰箱贴磁铁测试模拟器',
+    simTitle: '立刻测试你手边任意一口锅能不能上电磁炉',
+    simSub: '拿一块普通冰箱磁铁平贴在锅底外侧正中央（不是锅壁），在下方选择测试结果即可获取即时判定：',
+    q1Label: '1. 磁铁能牢牢吸在锅底外侧吗？',
+    q1Strong: '吸力强劲',
+    q1StrongSub: '啪一声吸牢、自重不掉',
+    q1Weak: '微弱 / 仅吸中心',
+    q1WeakSub: '一滑就掉或吸力很弱',
+    q1None: '直接掉落',
+    q1NoneSub: '完全没有吸力',
+    q2Label: '2. 锅底完全平整且直径 ≥ 11 厘米 (4.5 英寸) 吗？',
+    q2FlatWide: '全平且 ≥ 11 cm',
+    q2FlatWideSub: '贴合台面、匹配炉圈',
+    q2Small: '全平但小于 11 cm',
+    q2SmallSub: '迷你摩卡壶、小奶锅',
+    q2Uneven: '鼓底 / 圆底 / 带凸圈',
+    q2UnevenSub: '放上会晃或有聚热环',
+    simEfficiencyLabel: '预计加热效率',
+    simPowerLabel: '安全火力策略',
+    simTipLabel: '实操安全与选购建议',
+    copyBtn: '复制电磁炉买锅清单',
+    copiedBtn: '清单已复制 ✓',
+    printBtn: '打印电磁炉安全指南',
+    resetBtn: '重置',
+    catalogTitle: '24 大热门锅具材质与知名品牌：电磁炉兼容性速查库',
+    catalogSub: '支持按品牌搜索（Le Creuset、All-Clad、Caraway、HexClad、Bialetti、特福、Pyrex）或按状态与刮花风险一键筛选。',
+    searchLabel: '搜索锅具材质或品牌',
+    searchPlaceholder: '输入品牌或材质（如 Le Creuset、铸铁、304、摩卡壶、Caraway、砂锅）...',
+    clearSearchBtn: '清除筛选',
+    filterAll: '全部',
+    filterWorks: '完美兼容',
+    filterCheck: '看型号 / 测磁铁',
+    filterNo: '不兼容',
+    filterScratch: '面板刮花风险',
+    showingPrefix: '当前显示',
+    showingOf: '/',
+    showingSuffix: '类锅具',
+    noResultsTitle: '未找到匹配的锅具',
+    noResultsSub: '试试更宽泛的关键词，例如 不锈钢、铸铁、陶瓷、铝、铜 或 摩卡壶。',
+    statusWorks: '完美兼容',
+    statusCheck: '看型号 / 测磁铁',
+    statusNo: '不兼容',
+    magnetStrong: '强吸力',
+    magnetCheck: '需测锅底',
+    magnetNone: '无吸力',
+    effHigh: '高效导热',
+    effMed: '中等效率',
+    effNone: '无法加热',
+    scratchLow: '低刮花风险',
+    scratchMed: '中刮花风险',
+    scratchHigh: '高刮花风险 — 勿拖拉！',
+    cardMagnetPrefix: '磁铁测试',
+    cardEffPrefix: '加热效率',
+    cardScratchPrefix: '面板风险',
+    cardBoostTitle: '猛火 / Boost 防变形提示',
+    cardBuyerTitle: '选购与避坑建议',
+    safetySectionTitle: '心脏起搏器 / ICD 安全距离与微晶玻璃面板防护卡片',
+    safetySectionSub: '每一位电磁炉用户都应牢记的两大核心安全准则。',
+    emfCardBadge: '医疗植入设备 EMF 指南',
+    emfCardTitle: '心脏起搏器与 ICD 安全间距（30–60 厘米 / 12–24 英寸）',
+    emfCardBody: '电磁炉线圈会在极近距离产生 20–50 kHz 中频交变磁场，且随距离增加迅速衰减。现代植入设备屏蔽良好，遵守以下习惯即可大幅降低干扰风险：',
+    emfCardPoints: [
+      '保持胸口植入部位距离开启中的炉圈至少 30–60 厘米（12–24 英寸），切勿俯身紧贴锅沿。',
+      '使用锅底平整、尺寸与炉圈匹配的导磁锅并居中放置，减少外泄杂散磁通。',
+      '优先使用靠后炉眼，切勿将金属勺遗留在工作炉面上，并向主治心内科医生确认具体距离要求。'
+    ],
+    emfCardCta: '使用我们的电磁炉 EMF 安全距离模拟器测算实时磁场 →',
+    glassCardBadge: '微晶玻璃台面养护',
+    glassCardTitle: '“端起轻放”铁律与硅胶电磁炉防刮垫说明',
+    glassCardBody: '肖特赛兰等微晶玻璃面板耐高温冲击，但一旦刮花或砸裂便无法修复：',
+    glassCardPoints: [
+      '移动裸铸铁锅、珐琅炖锅或厚重锅具时务必垂直端起——哪怕锅底粘了一粒粗盐或毛刺，拖拉也会留下永久划痕。',
+      '玻璃纤维增强食品级硅胶电磁炉保护垫（耐温约 232°C / 450°F）非常适合中小火铸铁烹饪，但严禁用于 Boost 猛火干煎，也绝对不能用在电陶炉/红外光波炉上！',
+      '切忌空锅对珐琅锅、薄碳钢锅和不粘锅开 Boost；导热转换盘必须限用中低火，防止烤裂玻璃面板。'
+    ],
+    relatedHeading: '相关电磁炉与锅具安全工具',
+    relatedOvenTag: '锅柄与锅盖耐温上限',
+    relatedOvenTitle: '锅具烤箱耐高温速查表 →',
+    relatedOvenDesc: '一键核对 All-Clad、Le Creuset 盖钮、Caraway、HexClad、De Buyer 及玻璃盖的烤箱安全温度。',
+    relatedCastTag: '开锅与除锈诊断',
+    relatedCastTitle: '铸铁锅与碳钢锅诊断排查工具 →',
+    relatedCastDesc: '解决锅面发黏、洗碗机生锈、掉黑皮与底鼓变形，内置 6 种食用油精准聚合烤温计算器。',
+    relatedEmfTag: '起搏器与距离测算',
+    relatedEmfTitle: '电磁炉 EMF 磁场安全模拟器 →',
+    relatedEmfDesc: '按站立距离、锅具对中偏差与火力档位估算磁场衰减，专为心脏起搏器与孕期安心设计。',
+    methodologyStripTitle: '基于铁磁金属材料学与主流灶具工程规范',
+    methodologyStripPrefix: '所有 430/304 牌号判定、导热盘裂板预警与起搏器距离建议均核对家电技术手册，详见',
+    methodologyLabel: '评估方法论',
+    emfQuickLabel: 'EMF 磁场模拟器',
+    allToolsLabel: '全部实用工具 →',
+    faqTitle: '常见问题解答：电磁炉锅具兼容与磁铁测试',
+    copyChecklistText: 'IsItKitchenSafe — 电磁炉买锅与自测安全清单\n1. 3 秒磁铁测试：用冰箱贴贴锅底外侧正中央（非锅壁），必须吸牢不滑落。\n2. 平整与直径：锅底须完全平贴不晃动，标准炉圈锅底直径建议 >= 11 厘米 (4.5 英寸)。\n3. 不锈钢避坑：必须带 430 铁素体导磁外底（多层复底）；单层 304（18/10）不能用。\n4. 防刮玻璃：铸铁锅与珐琅锅务必“端起轻放”严禁拖拉，放锅前擦净底部盐粒灰尘。\n5. 慎用 Boost 猛火：严禁空锅对珐琅锅、薄碳钢锅、不粘锅或导热盘开最大火。\n6. 起搏器/ICD 防护：胸口距开启炉圈保持 30–60 厘米，锅具居中，并遵心内科医嘱。',
+    simResults: {
+      'strong|flat-wide': {
+        status: 'works-great',
+        pill: '电磁炉完美兼容',
+        headline: '100% 适配电磁炉 — 导磁高效、贴合紧密',
+        summary: '双项测试全部通过：强铁磁锅底配合足够宽大的平整接触面，可在标准电磁炉上发挥最佳加热速度与均热表现。',
+        efficiency: '高（约 85–90% 能量转换）',
+        powerLimit: '烧水可用 Boost；干锅煎炒、珐琅或薄铁锅建议中火（4–6档）起锅。',
+        tip: '若为粗糙无涂层铸铁底，移动时请务必端起轻放，或在中火炖煮时垫一片耐高温硅胶电磁炉防刮垫。'
+      },
+      'strong|flat-small': {
+        status: 'model-dependent',
+        pill: '需核对最小炉圈直径',
+        headline: '材质完全导磁 — 但锅底偏小，部分炉眼可能拒检',
+        summary: '锅底金属本身没问题，但直径小于 11 厘米（如 2 杯摩卡壶、迷你热油锅）在大炉圈上容易触发无锅报错。',
+        efficiency: '中（取决于小炉眼识别下限）',
+        powerLimit: '放在最小的标注炉眼上用中小火（3–4档）加热。',
+        tip: '请居中放在最小炉圈测试（不少灶具支持小至 9 厘米）；若仍闪烁报错，可配小号不锈钢导磁板低火使用。'
+      },
+      'strong|uneven': {
+        status: 'model-dependent',
+        pill: '贴合不良 / 锅底不平',
+        headline: '虽能吸磁，但鼓底或凸起聚热环会降效并有刮伤风险',
+        summary: '哪怕 2–3 毫米的空气间隙也会明显削弱磁耦合，引起蜂鸣噪音、间歇断火，并让重量压在玻璃面板局部凸点上。',
+        efficiency: '低至中（气隙损耗大）',
+        powerLimit: '最高中火（4–5档）；切勿开 Boost，否则锅底会进一步变形。',
+        tip: '避免把底部带深沟槽的烤板或打转的变形锅放在微晶玻璃上，换用平底复底锅体验好得多。'
+      },
+      'weak|flat-wide': {
+        status: 'model-dependent',
+        pill: '吸力偏弱 — 加热可能偏慢',
+        headline: '导磁层偏薄或含磁量低 — 易慢热、高频嗡鸣或限功率',
+        summary: '吸力微弱通常意味着锅底只有极薄的喷涂导磁层、点状复底片，或轻度冷加工微磁 304 钢而非真正 430 导磁钢。',
+        efficiency: '低至中（升温偏慢）',
+        powerLimit: '建议中火（4–6档）；开 Boost 往往噪音刺耳或被电磁炉自动降频。',
+        tip: '先加一杯水用中火试烧观察速度；如高频日常烹饪，升级整片 430 复底不锈钢锅省时得多。'
+      },
+      'weak|flat-small': {
+        status: 'incompatible',
+        pill: '极易触发无锅报错',
+        headline: '弱磁性叠加过小底径 — 电磁炉大概率无法启动',
+        summary: '电磁炉传感器需要一定量的铁磁金属覆盖线圈才能通电，又小又弱磁的锅底几乎必然报 E0 / U 故障。',
+        efficiency: '极低 / 自动断电',
+        powerLimit: '无法可靠直接加热。',
+        tip: '建议直接更换强磁性、底径 11 厘米以上（如 4 杯装及以上）的不锈钢款。'
+      },
+      'weak|uneven': {
+        status: 'incompatible',
+        pill: '不建议使用',
+        headline: '吸力弱且底面悬空 — 无法建立稳定电磁耦合',
+        summary: '弱导磁材料叠加弯曲气隙，炉灶无法持续锁定锅具。',
+        efficiency: '无 / 频繁跳停',
+        powerLimit: '切勿高火强行试烧。',
+        tip: '建议改作烤箱使用或更换平底强导磁锅具。'
+      },
+      'none|flat-wide': {
+        status: 'incompatible',
+        pill: '不兼容电磁炉',
+        headline: '非磁性锅具 — 电磁炉完全无法加热',
+        summary: '磁铁直接掉落说明锅底为纯铝、纯铜、单层 304 不锈钢、纯钛、玻璃或陶瓷，家用电磁炉无法感应生热。',
+        efficiency: '0%（无磁耦合）',
+        powerLimit: '炉灶会直接报无锅代码并保持冷却。',
+        tip: '日常锅具建议直接更换导磁款；若偶尔用导磁转换盘仅限低中火（绝对不能用来烧玻璃锅或砂锅！）。'
+      },
+      'none|flat-small': {
+        status: 'incompatible',
+        pill: '不兼容电磁炉',
+        headline: '非磁性小锅（如经典铝制摩卡壶）',
+        summary: '零磁力意味着无法直接在电磁炉上激发涡流发热。',
+        efficiency: '0%（无磁耦合）',
+        powerLimit: '需换不锈钢电磁炉款，或配小号导磁板低中火使用。',
+        tip: '摩卡壶爱好者推荐直接换 4 杯装以上的 Bialetti Venus 不锈钢款，省心又护台面。'
+      },
+      'none|uneven': {
+        status: 'incompatible',
+        pill: '不兼容电磁炉',
+        headline: '既不导磁又不平整 — 请勿放上电磁炉',
+        summary: '无铁磁金属且底部无法平贴微晶玻璃，既不发热又存在倾倒或刮伤风险。',
+        efficiency: '0%（无磁耦合）',
+        powerLimit: '玻璃/陶瓷/砂锅严禁配合导热盘强行加热。',
+        tip: '按材质改用于燃气灶、烤箱或微波炉。'
+      }
+    }
+  },
+  ja: {
+    ariaLabel: 'IH対応鍋・フライパン互換性チェッカー＆3秒磁石テスト',
+    simBadge: '3秒冷蔵庫マグネットテスト・シミュレーター',
+    simTitle: '手元の鍋・フライパンがIHで使えるか今すぐ判定',
+    simSub: '冷蔵庫の磁石を鍋の「底面の外側中央」に平らに当て、当てはまる状態を選んでください。',
+    q1Label: '1. 磁石は鍋底にしっかり付きますか？',
+    q1Strong: '強く付く',
+    q1StrongSub: 'パチッと吸着し落ちない',
+    q1Weak: '弱い / 中央のみ',
+    q1WeakSub: '滑りやすい・微弱な吸着',
+    q1None: 'すぐ落ちる',
+    q1NoneSub: 'まったく付かない',
+    q2Label: '2. 鍋底は完全に平らで直径 11 cm（4.5インチ）以上？',
+    q2FlatWide: '平ら＆11cm以上',
+    q2FlatWideSub: '密着しコイル径に適合',
+    q2Small: '平らだが11cm未満',
+    q2SmallSub: '極小マキネッタ・ミルクパン',
+    q2Uneven: '反り・湾曲・リング底',
+    q2UnevenSub: 'カタつく・底に段差がある',
+    simEfficiencyLabel: '想定される加熱効率',
+    simPowerLabel: '安全な火力コントロール',
+    simTipLabel: '実用アドバイス＆安全ポイント',
+    copyBtn: '買い替えチェックリストをコピー',
+    copiedBtn: 'コピーしました ✓',
+    printBtn: 'IH対応ガイドを印刷',
+    resetBtn: 'リセット',
+    catalogTitle: '人気調理器具24種・定番ブランド：IH対応データベース',
+    catalogSub: 'ブランド名（ル・クルーゼ、All-Clad、Caraway、HexClad、ビアレッティ、ティファール、Pyrex等）で検索、または傷リスクで絞り込み。',
+    searchLabel: '鍋の素材またはブランドを検索',
+    searchPlaceholder: 'ブランド・素材を検索（例：ル・クルーゼ、ティファール、ビアレッティ、304、鋳鉄）...',
+    clearSearchBtn: '条件をクリア',
+    filterAll: 'すべて',
+    filterWorks: 'IH快適対応',
+    filterCheck: 'モデル確認 / 磁石',
+    filterNo: '非対応',
+    filterScratch: '天板傷リスクあり',
+    showingPrefix: '表示中:',
+    showingOf: '/',
+    showingSuffix: '件',
+    noResultsTitle: '一致する調理器具が見つかりません',
+    noResultsSub: 'ステンレス、鋳鉄、アルミ、銅、ガラス、セラミックなど広めの語で試してください。',
+    statusWorks: 'IH快適対応',
+    statusCheck: 'モデル確認 / 磁石',
+    statusNo: '非対応',
+    magnetStrong: '強吸着',
+    magnetCheck: '底面確認',
+    magnetNone: '吸着なし',
+    effHigh: '高効率加熱',
+    effMed: '中効率',
+    effNone: '加熱不可',
+    scratchLow: '天板傷リスク低',
+    scratchMed: '天板傷リスク中',
+    scratchHigh: '傷リスク高 — 持ち上げて移動！',
+    cardMagnetPrefix: '磁石',
+    cardEffPrefix: '効率',
+    cardScratchPrefix: '天板リスク',
+    cardBoostTitle: 'ブースト＆火力管理のコツ',
+    cardBuyerTitle: '購入・確認のヒント',
+    safetySectionTitle: '心臓ペースメーカー／ICD離隔距離＆ガラストップ保護ガイド',
+    safetySectionSub: 'IHクッキングヒーターを安全に長く使うための2大必須ルール。',
+    emfCardBadge: '医療機器EMF安全ガイド',
+    emfCardTitle: 'ペースメーカー・ICDの推奨距離（30〜60 cm）',
+    emfCardBody: 'IHコイルは近距離に20〜50kHzの局所磁界を発生しますが、距離とともに急激に減衰します。最新のシールド機器でも以下を心がけましょう：',
+    emfCardPoints: [
+      '作動中のIHコイルから胸部（植込み部位）を少なくとも30〜60cm離し、鍋に覆いかぶさる姿勢を避ける。',
+      'コイル径に合った平底の磁性鍋を中央に正しく置き、漏洩磁界を最小限に抑える。',
+      '奥側のヒーターを優先し、金属製スプーン等をIH面上に放置せず、必ず担当循環器医に確認する。'
+    ],
+    emfCardCta: '距離と磁界減衰をIH EMF安全シミュレーターで確認 →',
+    glassCardBadge: 'ガラストップ天板ケア',
+    glassCardTitle: '「引きずらない」鉄則＆IH保護マットの正しい使い方',
+    glassCardBody: '結晶化ガラス天板は熱衝撃に強い反面、引っかき傷や落下割れは元に戻りません：',
+    glassCardPoints: [
+      '無塗装キャストアイアン・ホーロー鍋・土鍋は絶対に引きずらず垂直に持ち上げる。底の塩粒1つでも深い傷になります。',
+      'IH用シリコーン保護マット（耐熱約232°C / 450°F）は鋳鉄鍋の弱〜中火調理に有効ですが、ブースト強火・空焚き・ラジエントヒーターでは絶対に使用禁止。',
+      'ホーロー鋳鉄・薄手鉄フライパン・フッ素加工の空焚きブースト厳禁。IH変換プレートも中弱火以下に限ってください。'
+    ],
+    relatedHeading: '関連するIH・調理器具安全ツール',
+    relatedOvenTag: 'ハンドル・蓋の耐熱上限',
+    relatedOvenTitle: '調理器具オーブン耐熱温度検索 →',
+    relatedOvenDesc: 'All-Clad、ル・クルーゼつまみ、Caraway、HexClad、デバイヤー、ガラス蓋の耐熱温度を確認。',
+    relatedCastTag: '鉄鍋ケア＆サビ修復',
+    relatedCastTitle: 'キャストアイアン＆鉄鍋 診断ツール →',
+    relatedCastDesc: 'ベタつき・赤サビ・油膜剥がれ・底の反りを6種オイルの最適焼成温度でリカバリー。',
+    relatedEmfTag: 'ペースメーカー＆距離モデル',
+    relatedEmfTitle: 'IHコンロ EMF電磁波安全モデラー →',
+    relatedEmfDesc: '距離・鍋ズレ・出力別の磁界減衰を可視化し、ペースメーカーや妊娠中の安全目安を確認。',
+    methodologyStripTitle: '強磁性金属工学＆主要家電メーカー仕様書に基づく検証',
+    methodologyStripPrefix: '430 vs 304ステンレス判定・変換プレート警告・医療機器離隔指針は一次資料と照合しています。詳細は',
+    methodologyLabel: '検証メソドロジー',
+    emfQuickLabel: 'IH EMFモデラー',
+    allToolsLabel: '全ツール一覧 →',
+    faqTitle: 'よくある質問：IH対応鍋と磁石テスト',
+    copyChecklistText: 'IsItKitchenSafe — IH対応鍋の選び方＆テストチェックリスト\n1. 3秒磁石テスト：側面ではなく「底面の外側中央」に磁石を当て、強く吸着することを確認。\n2. 平坦さと底径：カタつきやリングがなく平らで、標準ヒーターなら直径11cm以上を推奨。\n3. ステンレスの注意：外底に磁性430ステンレスがある多層鍋を選ぶ（単層304 / 18-10は不可）。\n4. ガラストップ保護：鋳鉄・ホーロー鍋は引きずらず持ち上げ、底面の粒汚れを拭く。\n5. ブースト注意：ホーロー鍋・薄手鉄鍋・ノンスティック・変換プレートでの空焚きブースト厳禁。\n6. ペースメーカー/ICD：作動コイルから30〜60cm離れ、鍋を中央に置き、担当医へ確認。',
+    simResults: {
+      'strong|flat-wide': {
+        status: 'works-great',
+        pill: 'IHで快適に使用可能',
+        headline: 'IH完全適合 — 高効率・素早く均一に加熱できます',
+        summary: '強い強磁性＋平らで十分な底径の両条件をクリア。家庭用IHの性能を最大限に引き出せます。',
+        efficiency: '高効率（エネルギー伝達 85〜90%）',
+        powerLimit: '湯沸かしはブーストOK。焼き付けやホーロー鍋は中火（4〜6/10）推奨。',
+        tip: '無塗装キャストアイアンなど底がざらつく場合は、必ず持ち上げて移動するか中火以下でIH保護マットを使用してください。'
+      },
+      'strong|flat-small': {
+        status: 'model-dependent',
+        pill: '最小鍋底径を確認',
+        headline: '素材はIH対応 — ただし底が小さくエラーになる場合あり',
+        summary: '磁性は十分ですが、直径11cm未満（2カップ用マキネッタ等）は大・中ヒーターの鍋検知センサーに引っかかることがあります。',
+        efficiency: '中（コイル最小径に依存）',
+        powerLimit: '一番小さいヒーターの中央で弱〜中弱火（3〜4/10）。',
+        tip: '最小ヒーター（9cm対応機種あり）で試してください。検知しない場合は小型IHサポートプレートを弱火で併用します。'
+      },
+      'strong|uneven': {
+        status: 'model-dependent',
+        pill: '密着不良 / 反り・段差注意',
+        headline: '磁性はあるが、反り・湾曲・段差で効率低下＆傷リスク大',
+        summary: 'わずか2〜3mmの浮きでも磁束が弱まり、異音・加熱ムラ・エラー停止やガラストップへの一点集中傷の原因になります。',
+        efficiency: '低〜中（空隙ロスあり）',
+        powerLimit: '中火（4〜5/10）まで。ブーストは反りを悪化させます。',
+        tip: '裏面に溝のある鉄板や回転するほど反ったフライパンはIHでは避け、平底鍋への買い替えが安全です。'
+      },
+      'weak|flat-wide': {
+        status: 'model-dependent',
+        pill: '吸着弱め — 加熱に制限あり',
+        headline: '磁性層が薄い可能性 — 昇温が遅い・共振音が大きい場合あり',
+        summary: '吸着が弱い鍋は薄い吹き付け磁性底や加工誘起磁性の304鋼が多く、本来の430磁性底より出力が落ちがちです。',
+        efficiency: '低〜中（立ち上がり緩慢）',
+        powerLimit: '中火（4〜6/10）推奨。ブースト時は大きな唸り音や出力制限が起きやすいです。',
+        tip: 'まずカップ1杯の水を中火で沸かして反応を確認してください。日常使いなら本格的な430多層底の鍋が快適です。'
+      },
+      'weak|flat-small': {
+        status: 'incompatible',
+        pill: '検知エラーの可能性大',
+        headline: '弱い磁性＋極小底径はほとんどIHエラーで停止します',
+        summary: 'コイル上に十分な強磁性金属量がないため、鍋なしエラー（U表示等）が出やすい組み合わせです。',
+        efficiency: '極低 / 自動停止',
+        powerLimit: '直接加熱は不安定です。',
+        tip: '底径11cm以上かつ磁石が強く付くIH対応モデルへの変更をおすすめします。'
+      },
+      'weak|uneven': {
+        status: 'incompatible',
+        pill: '使用非推奨',
+        headline: '弱い磁性＋底面の浮きにより安定加熱できません',
+        summary: '磁性不足と空気隙間の両方が重なり、IHコイルが鍋を正常に認識できません。',
+        efficiency: '加熱不可 / 頻繁な遮断',
+        powerLimit: '強火での無理な使用は避けてください。',
+        tip: 'オーブン専用にするか、平底のIH対応鍋に置き換えましょう。'
+      },
+      'none|flat-wide': {
+        status: 'incompatible',
+        pill: 'IH非対応',
+        headline: '非磁性素材のため家庭用IHでは加熱できません',
+        summary: '磁石が落ちた場合、底面はアルミ・純銅・単層304ステンレス・純チタン・ガラス・陶器であり標準IHには反応しません。',
+        efficiency: '0%（磁気結合なし）',
+        powerLimit: '鍋なしエラーが表示され加熱されません。',
+        tip: '普段使いはIH対応鍋へ移行を。変換プレートは短時間・弱火限定（ガラス鍋・土鍋には絶対使用不可）。'
+      },
+      'none|flat-small': {
+        status: 'incompatible',
+        pill: 'IH非対応',
+        headline: '非磁性の小型容器（アルミ製マキネッタ等）',
+        summary: '磁性がゼロのため、IH天板上で直接渦電流を発生させることができません。',
+        efficiency: '0%（磁気結合なし）',
+        powerLimit: 'ステンレス製IH対応品への買い替え、または純正プレート弱火運用が必要。',
+        tip: 'マキネッタなら4カップ以上のステンレス製（ビアレッティ ヴィーナス等）が一番手軽で安全です。'
+      },
+      'none|uneven': {
+        status: 'incompatible',
+        pill: 'IH非対応',
+        headline: '非磁性＆底面不整 — IH天板では使用しないでください',
+        summary: '強磁性金属を含まず、ガラストップに安定して接地することもできません。',
+        efficiency: '0%（磁気結合なし）',
+        powerLimit: 'ガラス・陶器・土鍋は変換プレート上でも使用厳禁。',
+        tip: '素材に応じてガスコンロ・オーブン・電子レンジ専用としてご使用ください。'
+      }
+    }
+  }
+};
+
+const t = UI[lang] || UI.en;
+const defaultSim = t.simResults['strong|flat-wide'];
+
+function getStatusPillClass(status: StatusType): string {
+  if (status === 'works-great') return 'badge-yes';
+  if (status === 'model-dependent') return 'badge-depends';
+  return 'badge-no';
+}
+
+function getStatusLabel(status: StatusType): string {
+  if (status === 'works-great') return t.statusWorks;
+  if (status === 'model-dependent') return t.statusCheck;
+  return t.statusNo;
+}
+
+function getMagnetLabel(m: MagnetType): string {
+  if (m === 'strong') return t.magnetStrong;
+  if (m === 'check-base') return t.magnetCheck;
+  return t.magnetNone;
+}
+
+function getEffLabel(e: EfficiencyType): string {
+  if (e === 'high') return t.effHigh;
+  if (e === 'medium') return t.effMed;
+  return t.effNone;
+}
+
+function getScratchLabel(s: ScratchRiskType): string {
+  if (s === 'high') return t.scratchHigh;
+  if (s === 'medium') return t.scratchMed;
+  return t.scratchLow;
+}
+
+function getScratchBadgeClass(s: ScratchRiskType): string {
+  if (s === 'high') return 'bg-red-500/15 text-red-800 dark:text-red-300 border-red-500/40';
+  if (s === 'medium') return 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/40';
+  return 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border-emerald-500/35';
+}
+
+function getCardBorderAccent(status: StatusType): string {
+  if (status === 'works-great') return 'border-l-4 border-l-success-border';
+  if (status === 'model-dependent') return 'border-l-4 border-l-warning-border';
+  return 'border-l-4 border-l-error-border';
+}
+
+const clientPayload = {
+  totalCount: localizedCookware.length,
+  simResults: t.simResults,
+  ui: {
+    copyBtn: t.copyBtn,
+    copiedBtn: t.copiedBtn,
+    copyChecklistText: t.copyChecklistText,
+    showingPrefix: t.showingPrefix,
+    showingOf: t.showingOf,
+    showingSuffix: t.showingSuffix
+  }
+};
+---
+
+<div id="induction-compatibility-checker-root" class="space-y-12">
+  <!-- Main Interactive Checker Card -->
+  <section
+    id="induction-cookware-compatibility-checker"
+    class="bg-canvas border border-hairline rounded-2xl shadow-sm overflow-hidden"
+    aria-label={t.ariaLabel}
+  >
+    <script type="application/json" id="icc-payload" set:html={JSON.stringify(clientPayload)} />
+
+    <!-- PART 1: Interactive 3-Second Magnet Test Simulator -->
+    <div class="p-5 sm:p-6 border-b border-hairline bg-surface-soft/50 space-y-5">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div class="space-y-1 max-w-2xl">
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-signature-coral text-white">
+            🧲 {t.simBadge}
+          </span>
+          <h2 class="text-title-md font-bold text-ink">{t.simTitle}</h2>
+          <p class="text-xs sm:text-[13px] text-muted leading-relaxed">{t.simSub}</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 print:hidden">
+          <button
+            type="button"
+            id="icc-copy-btn"
+            class="min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors cursor-pointer shadow-sm"
+          >
+            <span id="icc-copy-label">📋 {t.copyBtn}</span>
+          </button>
+          <button
+            type="button"
+            id="icc-print-btn"
+            class="min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-semibold bg-canvas text-ink border border-hairline hover:border-signature-coral transition-colors cursor-pointer"
+          >
+            🖨️ {t.printBtn}
+          </button>
+          <button
+            type="button"
+            id="icc-reset-btn"
+            class="min-h-[40px] px-3 py-2 rounded-xl text-xs font-semibold bg-canvas text-muted border border-hairline hover:border-border-strong hover:text-ink transition-colors cursor-pointer"
+          >
+            {t.resetBtn}
+          </button>
+        </div>
+      </div>
+
+      <!-- 2-Column Simulator Controls + Live Verdict Banner -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+        <!-- Left Controls: Magnet Pull + Flat/Width -->
+        <div class="lg:col-span-6 space-y-4 print:hidden">
+          <!-- Question 1: Magnet Stick -->
+          <div class="space-y-2">
+            <p class="text-xs sm:text-[13px] font-bold text-ink">{t.q1Label}</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2" role="radiogroup" aria-label={t.q1Label}>
+              <button
+                type="button"
+                role="radio"
+                aria-checked="true"
+                data-icc-magnet="strong"
+                class="icc-magnet-btn p-3 rounded-xl border text-left transition-all cursor-pointer bg-primary text-on-primary border-primary shadow-sm"
+              >
+                <span class="block text-xs font-bold leading-snug">🧲 {t.q1Strong}</span>
+                <span class="block text-[11px] opacity-85 mt-0.5 leading-tight">{t.q1StrongSub}</span>
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked="false"
+                data-icc-magnet="weak"
+                class="icc-magnet-btn p-3 rounded-xl border text-left transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-border-strong"
+              >
+                <span class="block text-xs font-bold leading-snug">〰️ {t.q1Weak}</span>
+                <span class="block text-[11px] opacity-80 mt-0.5 leading-tight">{t.q1WeakSub}</span>
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked="false"
+                data-icc-magnet="none"
+                class="icc-magnet-btn p-3 rounded-xl border text-left transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-border-strong"
+              >
+                <span class="block text-xs font-bold leading-snug">🚫 {t.q1None}</span>
+                <span class="block text-[11px] opacity-80 mt-0.5 leading-tight">{t.q1NoneSub}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Question 2: Flatness & Diameter -->
+          <div class="space-y-2">
+            <p class="text-xs sm:text-[13px] font-bold text-ink">{t.q2Label}</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2" role="radiogroup" aria-label={t.q2Label}>
+              <button
+                type="button"
+                role="radio"
+                aria-checked="true"
+                data-icc-base="flat-wide"
+                class="icc-base-btn p-3 rounded-xl border text-left transition-all cursor-pointer bg-primary text-on-primary border-primary shadow-sm"
+              >
+                <span class="block text-xs font-bold leading-snug">✅ {t.q2FlatWide}</span>
+                <span class="block text-[11px] opacity-85 mt-0.5 leading-tight">{t.q2FlatWideSub}</span>
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked="false"
+                data-icc-base="flat-small"
+                class="icc-base-btn p-3 rounded-xl border text-left transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-border-strong"
+              >
+                <span class="block text-xs font-bold leading-snug">📏 {t.q2Small}</span>
+                <span class="block text-[11px] opacity-80 mt-0.5 leading-tight">{t.q2SmallSub}</span>
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked="false"
+                data-icc-base="uneven"
+                class="icc-base-btn p-3 rounded-xl border text-left transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-border-strong"
+              >
+                <span class="block text-xs font-bold leading-snug">⚠️ {t.q2Uneven}</span>
+                <span class="block text-[11px] opacity-80 mt-0.5 leading-tight">{t.q2UnevenSub}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Output: High-Contrast Dark Instant Verdict Card -->
+        <div class="lg:col-span-6 flex">
+          <div
+            id="icc-sim-banner"
+            aria-live="polite"
+            class="w-full rounded-2xl bg-surface-dark text-on-dark p-5 sm:p-6 space-y-4 shadow-sm border-l-4 border-success-border flex flex-col justify-between"
+          >
+            <div class="space-y-2.5">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-signature-peach">
+                  {t.simBadge}
+                </span>
+                <span id="icc-sim-pill" class={getStatusPillClass(defaultSim.status)}>
+                  {defaultSim.pill}
+                </span>
+              </div>
+
+              <h3 id="icc-sim-headline" class="text-base sm:text-lg font-extrabold tracking-tight text-white leading-snug">
+                {defaultSim.headline}
+              </h3>
+              <p id="icc-sim-summary" class="text-xs sm:text-[13px] text-white/90 leading-relaxed">
+                {defaultSim.summary}
+              </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+                <span class="block text-[10.5px] font-medium text-white/70">{t.simEfficiencyLabel}</span>
+                <span id="icc-sim-efficiency" class="block text-xs font-bold text-signature-mint mt-0.5 leading-snug">
+                  {defaultSim.efficiency}
+                </span>
+              </div>
+              <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+                <span class="block text-[10.5px] font-medium text-white/70">{t.simPowerLabel}</span>
+                <span id="icc-sim-power" class="block text-xs font-bold text-signature-yellow mt-0.5 leading-snug">
+                  {defaultSim.powerLimit}
+                </span>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-xl bg-white/8 border border-white/15">
+              <span class="block text-[10.5px] font-bold uppercase tracking-wider text-signature-peach">
+                💡 {t.simTipLabel}
+              </span>
+              <p id="icc-sim-tip" class="text-xs text-white/95 leading-relaxed mt-1">
+                {defaultSim.tip}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PART 2: Searchable & Filterable 24-Item Cookware & Brand Database -->
+    <div class="p-5 sm:p-6 space-y-5">
+      <div class="space-y-1">
+        <h2 class="text-title-md font-semibold text-ink">{t.catalogTitle}</h2>
+        <p class="text-xs sm:text-[13px] text-muted">{t.catalogSub}</p>
+      </div>
+
+      <!-- Search Input + Filter Pills -->
+      <div class="space-y-3 print:hidden">
+        <div class="flex flex-col sm:flex-row gap-2.5">
+          <div class="relative flex-1">
+            <label for="icc-search-input" class="sr-only">{t.searchLabel}</label>
+            <span aria-hidden="true" class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-muted">
+              🔎
+            </span>
+            <input
+              id="icc-search-input"
+              type="search"
+              autocomplete="off"
+              placeholder={t.searchPlaceholder}
+              class="w-full min-h-[44px] pl-10 pr-4 py-2 rounded-xl bg-surface-soft border border-hairline text-sm text-ink placeholder:text-muted focus:outline-none focus:border-signature-coral focus:ring-2 focus:ring-signature-coral/25 transition-all"
+            />
+          </div>
+          <button
+            type="button"
+            id="icc-clear-btn"
+            class="min-h-[44px] px-4 py-2 rounded-xl text-xs font-semibold bg-canvas text-ink border border-hairline hover:border-signature-coral transition-colors cursor-pointer shrink-0"
+          >
+            {t.clearSearchBtn}
+          </button>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap gap-2" role="group" aria-label={t.catalogTitle}>
+            <button
+              type="button"
+              data-icc-filter="all"
+              aria-pressed="true"
+              class="icc-filter-btn px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-primary text-on-primary border-primary shadow-sm"
+            >
+              {t.filterAll} ({counts.all})
+            </button>
+            <button
+              type="button"
+              data-icc-filter="works-great"
+              aria-pressed="false"
+              class="icc-filter-btn px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-success-border"
+            >
+              ✅ {t.filterWorks} ({counts.worksGreat})
+            </button>
+            <button
+              type="button"
+              data-icc-filter="model-dependent"
+              aria-pressed="false"
+              class="icc-filter-btn px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-warning-border"
+            >
+              🔍 {t.filterCheck} ({counts.modelDependent})
+            </button>
+            <button
+              type="button"
+              data-icc-filter="incompatible"
+              aria-pressed="false"
+              class="icc-filter-btn px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-error-border"
+            >
+              🚫 {t.filterNo} ({counts.incompatible})
+            </button>
+            <button
+              type="button"
+              data-icc-filter="scratch-risk"
+              aria-pressed="false"
+              class="icc-filter-btn px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer bg-warning-bg/50 dark:bg-amber-950/25 text-ink border-warning-border/80 hover:border-error-border"
+            >
+              ⚠️ {t.filterScratch} ({counts.scratchRisk})
+            </button>
+          </div>
+
+          <p id="icc-count-readout" aria-live="polite" class="text-xs font-semibold text-muted">
+            {t.showingPrefix} {counts.all} {t.showingOf} {counts.all} {t.showingSuffix}
+          </p>
+        </div>
+      </div>
+
+      <!-- Empty Search State -->
+      <div
+        id="icc-empty-state"
+        class="hidden p-8 rounded-2xl bg-surface-soft border border-hairline text-center space-y-2"
+      >
+        <p class="text-sm font-bold text-ink">{t.noResultsTitle}</p>
+        <p class="text-xs text-muted">{t.noResultsSub}</p>
+        <button
+          type="button"
+          id="icc-empty-reset-btn"
+          class="mt-2 px-4 py-2 rounded-xl text-xs font-bold bg-primary text-on-primary hover:bg-primary-active transition-colors cursor-pointer"
+        >
+          {t.clearSearchBtn}
+        </button>
+      </div>
+
+      <!-- 24 Color-Coded Cookware / Brand Cards -->
+      <div id="icc-cards-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {localizedCookware.map((item) => (
+          <article
+            data-icc-card={item.id}
+            data-icc-status={item.status}
+            data-icc-scratch={item.glassScratchRisk}
+            data-icc-search={item.keywords}
+            class={`icc-card p-4 sm:p-5 rounded-2xl bg-surface-soft/55 border border-hairline ${getCardBorderAccent(item.status)} flex flex-col justify-between gap-3.5 transition-all`}
+          >
+            <div class="space-y-3">
+              <!-- Card Header -->
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-start gap-2.5 min-w-0">
+                  <span aria-hidden="true" class="text-xl leading-none mt-0.5 shrink-0">{item.icon}</span>
+                  <div class="min-w-0">
+                    <h3 class="text-sm sm:text-[15px] font-bold text-ink leading-snug">{item.name}</h3>
+                    <p class="text-[11.5px] text-muted mt-0.5 leading-snug">{item.brands}</p>
+                  </div>
+                </div>
+                <span class={`shrink-0 ${getStatusPillClass(item.status)}`}>
+                  {getStatusLabel(item.status)}
+                </span>
+              </div>
+
+              <!-- Spec Badges Strip: Magnet / Efficiency / Scratch Risk -->
+              <div class="flex flex-wrap gap-1.5">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md border border-hairline bg-canvas text-[11px] font-semibold text-ink">
+                  🧲 {t.cardMagnetPrefix}: {getMagnetLabel(item.magnetTest)}
+                </span>
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md border border-hairline bg-canvas text-[11px] font-semibold text-ink">
+                  ⚡ {t.cardEffPrefix}: {getEffLabel(item.heatingEfficiency)}
+                </span>
+                <span class={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[11px] font-bold ${getScratchBadgeClass(item.glassScratchRisk)}`}>
+                  🛡️ {t.cardScratchPrefix}: {getScratchLabel(item.glassScratchRisk)}
+                </span>
+              </div>
+
+              <!-- Verdict -->
+              <p class="text-xs sm:text-[13px] text-body leading-relaxed">
+                {item.verdict}
+              </p>
+            </div>
+
+            <!-- Boost / Warping Tip + Buyer Tip -->
+            <div class="space-y-2 pt-2 border-t border-hairline/70">
+              <div class="p-2.5 rounded-xl bg-warning-bg/45 dark:bg-amber-950/25 border border-warning-border/60">
+                <span class="block text-[10.5px] font-extrabold uppercase tracking-wider text-ink">
+                  🔥 {t.cardBoostTitle}
+                </span>
+                <p class="text-[12px] text-body leading-relaxed mt-0.5">{item.maxPowerTip}</p>
+              </div>
+              <div class="p-2.5 rounded-xl bg-canvas border border-hairline">
+                <span class="block text-[10.5px] font-extrabold uppercase tracking-wider text-muted">
+                  💡 {t.cardBuyerTitle}
+                </span>
+                <p class="text-[12px] text-body leading-relaxed mt-0.5">{item.buyerTip}</p>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+
+    <!-- PART 3: Dedicated Pacemaker / ICD EMF Clearance & Glass Cooktop Protection Card -->
+    <div class="border-t border-hairline p-5 sm:p-6 bg-surface-soft/50 space-y-4">
+      <div>
+        <h2 class="text-title-md font-semibold text-ink">{t.safetySectionTitle}</h2>
+        <p class="text-xs sm:text-[13px] text-muted mt-0.5">{t.safetySectionSub}</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- Pacemaker / ICD EMF Clearance Card -->
+        <article class="p-5 rounded-2xl bg-canvas border border-hairline space-y-3 flex flex-col justify-between">
+          <div class="space-y-2.5">
+            <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-primary text-on-primary">
+              ❤️ {t.emfCardBadge}
+            </span>
+            <h3 class="text-title-sm font-bold text-ink leading-snug">{t.emfCardTitle}</h3>
+            <p class="text-xs sm:text-[13px] text-body leading-relaxed">{t.emfCardBody}</p>
+            <ul class="space-y-1.5 text-xs sm:text-[13px] text-body list-disc list-outside pl-5">
+              {t.emfCardPoints.map((pt) => (
+                <li class="leading-relaxed">{pt}</li>
+              ))}
+            </ul>
+          </div>
+          <div class="pt-2 print:hidden">
+            <a
+              href={inductionEmfUrl}
+              class="inline-flex items-center text-xs font-bold text-signature-coral hover:underline"
+            >
+              {t.emfCardCta}
+            </a>
+          </div>
+        </article>
+
+        <!-- Glass Cooktop Protection Card -->
+        <article class="p-5 rounded-2xl bg-warning-bg/50 dark:bg-amber-950/25 border border-warning-border/80 space-y-2.5">
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-error-border text-white">
+            🛡️ {t.glassCardBadge}
+          </span>
+          <h3 class="text-title-sm font-bold text-ink leading-snug">{t.glassCardTitle}</h3>
+          <p class="text-xs sm:text-[13px] text-body leading-relaxed">{t.glassCardBody}</p>
+          <ul class="space-y-1.5 text-xs sm:text-[13px] text-body list-disc list-outside pl-5">
+            {t.glassCardPoints.map((pt) => (
+              <li class="leading-relaxed">{pt}</li>
+            ))}
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Related Companion Tools -->
+  <section class="space-y-4 print:hidden">
+    <h2 class="text-title-md font-semibold text-ink">{t.relatedHeading}</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <a
+        href={cookwareOvenUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedOvenTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedOvenTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedOvenDesc}</p>
+      </a>
+
+      <a
+        href={castIronUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedCastTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedCastTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedCastDesc}</p>
+      </a>
+
+      <a
+        href={inductionEmfUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedEmfTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedEmfTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedEmfDesc}</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- Methodology & Hub Strip -->
+  <section class="p-6 rounded-2xl bg-surface-soft border border-hairline print:hidden">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-title-sm font-semibold text-ink mb-1">{t.methodologyStripTitle}</h2>
+        <p class="text-[13px] text-muted">
+          {t.methodologyStripPrefix}{' '}
+          <a href={methodologyUrl} class="text-link underline hover:text-link-active">{t.methodologyLabel}</a>.
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a
+          href={inductionEmfUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
+        >
+          {t.emfQuickLabel}
+        </a>
+        <a
+          href={methodologyUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
+        >
+          {t.methodologyLabel}
+        </a>
+        <a
+          href={allToolsUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors"
+        >
+          {t.allToolsLabel}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Visible FAQ Accordion (Matches JSON-LD 1:1) -->
+  <section class="print:hidden">
+    <h2 class="text-title-lg font-medium text-ink tracking-tight mb-6">
+      {t.faqTitle}
+    </h2>
+    <div class="space-y-4">
+      {localizedFaqs.map((faq) => (
+        <details class="group p-5 bg-surface-soft border border-hairline rounded-xl" open>
+          <summary class="text-title-sm font-semibold text-ink cursor-pointer list-none flex items-center justify-between gap-3">
+            <span>{faq.question}</span>
+            <span class="text-muted text-sm transition-transform group-open:rotate-180 shrink-0" aria-hidden="true">&#9662;</span>
+          </summary>
+          <p class="text-[14px] text-body leading-relaxed mt-3 pt-3 border-t border-hairline/70">
+            {faq.answer}
+          </p>
+        </details>
+      ))}
+    </div>
+  </section>
+</div>
+
+<script is:inline>
+  (function () {
+    const payloadEl = document.getElementById('icc-payload');
+    if (!payloadEl) return;
+
+    let payload;
+    try {
+      payload = JSON.parse(payloadEl.textContent || '{}');
+    } catch (_) {
+      return;
+    }
+
+    const simResults = payload.simResults || {};
+    const ui = payload.ui || {};
+    const totalCount = Number(payload.totalCount || 24);
+
+    // Simulator controls & outputs
+    const magnetBtns = Array.from(document.querySelectorAll('.icc-magnet-btn'));
+    const baseBtns = Array.from(document.querySelectorAll('.icc-base-btn'));
+    const simBanner = document.getElementById('icc-sim-banner');
+    const simPill = document.getElementById('icc-sim-pill');
+    const simHeadline = document.getElementById('icc-sim-headline');
+    const simSummary = document.getElementById('icc-sim-summary');
+    const simEfficiency = document.getElementById('icc-sim-efficiency');
+    const simPower = document.getElementById('icc-sim-power');
+    const simTip = document.getElementById('icc-sim-tip');
+
+    // Catalog search & filter controls
+    const searchInput = document.getElementById('icc-search-input');
+    const clearBtn = document.getElementById('icc-clear-btn');
+    const emptyResetBtn = document.getElementById('icc-empty-reset-btn');
+    const filterBtns = Array.from(document.querySelectorAll('.icc-filter-btn'));
+    const cards = Array.from(document.querySelectorAll('.icc-card'));
+    const countReadout = document.getElementById('icc-count-readout');
+    const emptyState = document.getElementById('icc-empty-state');
+    const cardsGrid = document.getElementById('icc-cards-grid');
+
+    // Top action buttons
+    const copyBtn = document.getElementById('icc-copy-btn');
+    const copyLabel = document.getElementById('icc-copy-label');
+    const printBtn = document.getElementById('icc-print-btn');
+    const resetBtn = document.getElementById('icc-reset-btn');
+
+    const state = {
+      magnet: 'strong',
+      base: 'flat-wide',
+      filter: 'all',
+      query: ''
+    };
+
+    function getStatusPillClass(status) {
+      if (status === 'works-great') return 'badge-yes';
+      if (status === 'model-dependent') return 'badge-depends';
+      return 'badge-no';
+    }
+
+    function renderSimulator() {
+      const key = state.magnet + '|' + state.base;
+      const res = simResults[key] || simResults['strong|flat-wide'];
+      if (!res) return;
+
+      magnetBtns.forEach(function (btn) {
+        const active = btn.getAttribute('data-icc-magnet') === state.magnet;
+        btn.setAttribute('aria-checked', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('shadow-sm', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      baseBtns.forEach(function (btn) {
+        const active = btn.getAttribute('data-icc-base') === state.base;
+        btn.setAttribute('aria-checked', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('shadow-sm', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      if (simPill) {
+        simPill.className = getStatusPillClass(res.status);
+        simPill.textContent = res.pill || '';
+      }
+      if (simHeadline) simHeadline.textContent = res.headline || '';
+      if (simSummary) simSummary.textContent = res.summary || '';
+      if (simEfficiency) simEfficiency.textContent = res.efficiency || '';
+      if (simPower) simPower.textContent = res.powerLimit || '';
+      if (simTip) simTip.textContent = res.tip || '';
+
+      if (simBanner) {
+        simBanner.classList.remove('border-success-border', 'border-warning-border', 'border-error-border');
+        simBanner.classList.add(
+          res.status === 'works-great'
+            ? 'border-success-border'
+            : res.status === 'model-dependent'
+              ? 'border-warning-border'
+              : 'border-error-border'
+        );
+      }
+    }
+
+    function renderCatalog() {
+      const q = (state.query || '').trim().toLowerCase();
+      let visibleCount = 0;
+
+      filterBtns.forEach(function (btn) {
+        const fVal = btn.getAttribute('data-icc-filter');
+        const active = fVal === state.filter;
+        const isScratchPill = fVal === 'scratch-risk';
+
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        btn.classList.remove(
+          'bg-primary',
+          'text-on-primary',
+          'border-primary',
+          'shadow-sm',
+          'bg-canvas',
+          'text-ink',
+          'border-hairline',
+          'bg-warning-bg/50',
+          'dark:bg-amber-950/25',
+          'border-warning-border/80'
+        );
+
+        if (active) {
+          btn.classList.add('bg-primary', 'text-on-primary', 'border-primary', 'shadow-sm');
+        } else if (isScratchPill) {
+          btn.classList.add('bg-warning-bg/50', 'dark:bg-amber-950/25', 'text-ink', 'border-warning-border/80');
+        } else {
+          btn.classList.add('bg-canvas', 'text-ink', 'border-hairline');
+        }
+      });
+
+      cards.forEach(function (card) {
+        const status = card.getAttribute('data-icc-status') || '';
+        const scratch = card.getAttribute('data-icc-scratch') || '';
+        const haystack = card.getAttribute('data-icc-search') || '';
+
+        let filterMatch = true;
+        if (state.filter === 'works-great' || state.filter === 'model-dependent' || state.filter === 'incompatible') {
+          filterMatch = status === state.filter;
+        } else if (state.filter === 'scratch-risk') {
+          filterMatch = scratch === 'high' || scratch === 'medium';
+        }
+
+        const queryMatch = !q || haystack.indexOf(q) !== -1;
+        const show = filterMatch && queryMatch;
+
+        card.classList.toggle('hidden', !show);
+        if (show) visibleCount += 1;
+      });
+
+      if (countReadout) {
+        countReadout.textContent =
+          (ui.showingPrefix || 'Showing') +
+          ' ' +
+          visibleCount +
+          ' ' +
+          (ui.showingOf || 'of') +
+          ' ' +
+          totalCount +
+          ' ' +
+          (ui.showingSuffix || 'cookware types');
+      }
+
+      const isEmpty = visibleCount === 0;
+      if (emptyState) emptyState.classList.toggle('hidden', !isEmpty);
+      if (cardsGrid) cardsGrid.classList.toggle('hidden', isEmpty);
+    }
+
+    function clearCatalogFilters() {
+      state.filter = 'all';
+      state.query = '';
+      if (searchInput) searchInput.value = '';
+      renderCatalog();
+    }
+
+    // Event listeners
+    magnetBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const val = btn.getAttribute('data-icc-magnet');
+        if (val === 'strong' || val === 'weak' || val === 'none') {
+          state.magnet = val;
+          renderSimulator();
+        }
+      });
+    });
+
+    baseBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const val = btn.getAttribute('data-icc-base');
+        if (val === 'flat-wide' || val === 'flat-small' || val === 'uneven') {
+          state.base = val;
+          renderSimulator();
+        }
+      });
+    });
+
+    filterBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const val = btn.getAttribute('data-icc-filter');
+        if (val) {
+          state.filter = val;
+          renderCatalog();
+        }
+      });
+    });
+
+    if (searchInput) {
+      searchInput.addEventListener('input', function () {
+        state.query = searchInput.value || '';
+        renderCatalog();
+      });
+    }
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', clearCatalogFilters);
+    }
+    if (emptyResetBtn) {
+      emptyResetBtn.addEventListener('click', clearCatalogFilters);
+    }
+
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        const checklistText = ui.copyChecklistText || '';
+        const showCopied = function () {
+          if (copyLabel) copyLabel.textContent = ui.copiedBtn || 'Checklist Copied ✓';
+          window.setTimeout(function () {
+            if (copyLabel) copyLabel.textContent = '📋 ' + (ui.copyBtn || 'Copy Buying Checklist');
+          }, 2200);
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(checklistText).then(showCopied).catch(showCopied);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = checklistText;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'absolute';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          try {
+            document.execCommand('copy');
+          } catch (_) {
+            // ignore
+          }
+          document.body.removeChild(ta);
+          showCopied();
+        }
+      });
+    }
+
+    if (printBtn) {
+      printBtn.addEventListener('click', function () {
+        window.print();
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function () {
+        state.magnet = 'strong';
+        state.base = 'flat-wide';
+        clearCatalogFilters();
+        renderSimulator();
+      });
+    }
+
+    renderSimulator();
+    renderCatalog();
+  })();
+</script>

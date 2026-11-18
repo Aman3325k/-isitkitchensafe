@@ -343,9 +343,36 @@ const toolCatalog: Record<RecommendedToolKey, {
 
 const recommendedTool = toolCatalog[recommendedToolKey];
 const recommendedToolUrl = translatePath(recommendedTool.path);
+
+// Dynamic per-page OG social preview card (/api/og.svg)
+function truncateOgText(text: string, maxLen: number): string {
+  const clean = String(text || '').replace(/\s+/g, ' ').trim();
+  if (clean.length <= maxLen) return clean;
+  const sliced = clean.slice(0, maxLen - 1);
+  const lastSpace = sliced.lastIndexOf(' ');
+  const cut = lastSpace > Math.floor(maxLen * 0.6) ? sliced.slice(0, lastSpace) : sliced;
+  return `${cut.replace(/[\s,;:\-—–/]+$/, '')}…`;
+}
+
+const ogCategoryMap: Record<string, string> = {
+  ...categoryNames,
+  "cleaning": "Kitchen Cleaning",
+  "cookware": "Cookware Safety"
+};
+const ogTitle = truncateOgText(`${item1} vs ${item2}`, 70);
+const ogVerdict = winner === 'depends' ? 'DEPENDS' : 'YES';
+const ogAppliance = truncateOgText(ogCategoryMap[category] || 'Safety Comparison', 32);
+const ogSummary = truncateOgText(verdict, 115);
+const ogParams = new URLSearchParams({
+  title: ogTitle,
+  verdict: ogVerdict,
+  appliance: ogAppliance,
+  summary: ogSummary,
+});
+const ogImage = `/api/og.svg?${ogParams.toString()}`;
 ---
 
-<Layout title={pageTitle} description={pageDescription} excludeBreadcrumbSchema={true} excludeArticleSchema={true} excludeFaqSchema={true} availableLocales={['en', 'es', 'pt', 'zh-cn', 'ja']} ogType="article">
+<Layout title={pageTitle} description={pageDescription} excludeBreadcrumbSchema={true} excludeArticleSchema={true} excludeFaqSchema={true} availableLocales={['en', 'es', 'pt', 'zh-cn', 'ja']} ogType="article" ogImage={ogImage}>
   <!-- Inject Schemas into Head Slot -->
   <Fragment slot="head">
     <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />

@@ -236,9 +236,31 @@ const toolCatalog: Record<RecommendedToolKey, {
 
 const recommendedTool = toolCatalog[recommendedToolKey];
 const recommendedToolUrl = translatePath(recommendedTool.path);
+
+// Dynamic per-page OG social preview card (/api/og.svg)
+function truncateOgText(text: string, maxLen: number): string {
+  const clean = String(text || '').replace(/\s+/g, ' ').trim();
+  if (clean.length <= maxLen) return clean;
+  const sliced = clean.slice(0, maxLen - 1);
+  const lastSpace = sliced.lastIndexOf(' ');
+  const cut = lastSpace > Math.floor(maxLen * 0.6) ? sliced.slice(0, lastSpace) : sliced;
+  return `${cut.replace(/[\s,;:\-—–/]+$/, '')}…`;
+}
+
+const ogTitle = truncateOgText(article.title, 70);
+const ogVerdict = /\b(never|dont-need-refrigeration)\b/i.test(article.slug) ? 'NO' : 'DEPENDS';
+const ogAppliance = truncateOgText((article as any).category || 'Kitchen Safety Guide', 32);
+const ogSummary = truncateOgText(article.excerpt, 115);
+const ogParams = new URLSearchParams({
+  title: ogTitle,
+  verdict: ogVerdict,
+  appliance: ogAppliance,
+  summary: ogSummary,
+});
+const ogImage = `/api/og.svg?${ogParams.toString()}`;
 ---
 
-<Layout title={pageTitle} description={pageDescription} faqs={article.faqs} excludeArticleSchema={true} availableLocales={['en', 'es', 'pt', 'zh-cn', 'ja']} ogType="article">
+<Layout title={pageTitle} description={pageDescription} faqs={article.faqs} excludeArticleSchema={true} availableLocales={['en', 'es', 'pt', 'zh-cn', 'ja']} ogType="article" ogImage={ogImage}>
   <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(blogPostingSchema)} />
   <article class="max-w-[1280px] mx-auto px-6 py-12">
     <!-- Breadcrumbs -->

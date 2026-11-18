@@ -369,9 +369,39 @@ const uxCopy = {
              isZh ? '所有建议均对照美国农业部食品安全检验局（USDA FSIS）、FDA 食品接触法规、NSF International 准则与家电原厂手册核验。' :
              'すべてのガイドラインはUSDA食品安全検査局（FSIS）、FDA食品接触規制、NSF International基準および各家電メーカー公式マニュアルと照合しています。'
 };
+
+// Dynamic per-page OG social preview card (/api/og.svg)
+function truncateOgText(text: string, maxLen: number): string {
+  const clean = String(text || '').replace(/\s+/g, ' ').trim();
+  if (clean.length <= maxLen) return clean;
+  const sliced = clean.slice(0, maxLen - 1);
+  const lastSpace = sliced.lastIndexOf(' ');
+  const cut = lastSpace > Math.floor(maxLen * 0.6) ? sliced.slice(0, lastSpace) : sliced;
+  return `${cut.replace(/[\s,;:\-—–/]+$/, '')}…`;
+}
+
+const isCjk = isZh || lang === 'ja';
+const ogTitle = truncateOgText(article.title, isCjk ? 44 : 70);
+const ogVerdict = /\b(never|dont-need-refrigeration)\b/i.test(article.slug) ? 'NO' : 'DEPENDS';
+const ogCategoryFallback = isEs
+  ? 'Guía de Seguridad'
+  : isPt
+  ? 'Guia de Segurança'
+  : isZh
+  ? '厨房安全深度指南'
+  : 'キッチン安全ガイド';
+const ogAppliance = truncateOgText((article as any).category || ogCategoryFallback, isCjk ? 18 : 32);
+const ogSummary = truncateOgText(article.excerpt, isCjk ? 64 : 115);
+const ogParams = new URLSearchParams({
+  title: ogTitle,
+  verdict: ogVerdict,
+  appliance: ogAppliance,
+  summary: ogSummary,
+});
+const ogImage = `/api/og.svg?${ogParams.toString()}`;
 ---
 
-<Layout title={pageTitle} description={pageDescription} faqs={article.faqs} excludeArticleSchema={true} availableLocales={availableLocales} lang={lang} ogType="article">
+<Layout title={pageTitle} description={pageDescription} faqs={article.faqs} excludeArticleSchema={true} availableLocales={availableLocales} lang={lang} ogType="article" ogImage={ogImage}>
   <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(blogPostingSchema)} />
   <article class="max-w-[1280px] mx-auto px-6 py-12">
     <!-- Breadcrumbs -->

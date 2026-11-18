@@ -34,12 +34,8 @@ const {
   is404 = false,
   noindex = false,
   ogType = 'website',
-  ogImage = 'https://isitkitchensafe.com/og-image.png'
+  ogImage
 } = Astro.props;
-
-const resolvedOgImage = ogImage.startsWith('http://') || ogImage.startsWith('https://')
-  ? ogImage
-  : new URL(ogImage, 'https://isitkitchensafe.com').href;
 
 const currentLang = lang || getLangFromUrl(Astro.url);
 const t = useTranslations(currentLang);
@@ -79,6 +75,52 @@ function formatAppliance(app: string) {
   if (app === 'methodology') return 'Methodology';
   const appKey = `appliance.${app}` as any;
   return t(appKey) || (app.charAt(0).toUpperCase() + app.slice(1));
+}
+
+// Dynamic Cloudflare Edge SVG Preview Card Resolution
+const isDynamicOgCandidate = pathSegments.length > 0 && !is404 && !isErrorPage;
+
+let resolvedOgImage = ogImage;
+let resolvedPinImage = ogImage;
+
+if (!resolvedOgImage) {
+  if (isDynamicOgCandidate) {
+    const cleanTitle = (title || 'Is It Kitchen Safe?').split(' | ')[0].trim();
+    const cleanSummary = (description || '').slice(0, 140).trim();
+    let categoryLabel = 'Kitchen Safety';
+    if (pathSegments[0] === 'blog') categoryLabel = 'Safety Guide';
+    else if (pathSegments[0] === 'compare') categoryLabel = 'Comparison';
+    else if (pathSegments[0] === 'tools') categoryLabel = 'Safety Tool';
+    else if (pathSegments[0] === 'how-long') categoryLabel = 'Shelf Life';
+    else if (pathSegments[0] === 'refreeze') categoryLabel = 'Refreeze Guide';
+    else if (pathSegments[0] === 'what-happens') categoryLabel = 'Emergency Triage';
+    else if (pathSegments[0]) categoryLabel = formatAppliance(pathSegments[0]) || pathSegments[0];
+
+    const ogParams = new URLSearchParams({
+      title: cleanTitle,
+      appliance: categoryLabel,
+      format: 'og'
+    });
+    if (cleanSummary) ogParams.set('summary', cleanSummary);
+
+    const pinParams = new URLSearchParams({
+      title: cleanTitle,
+      appliance: categoryLabel,
+      format: 'pin'
+    });
+    if (cleanSummary) pinParams.set('summary', cleanSummary);
+
+    resolvedOgImage = `https://isitkitchensafe.com/api/og.svg?${ogParams.toString()}`;
+    resolvedPinImage = `https://isitkitchensafe.com/api/og.svg?${pinParams.toString()}`;
+  } else {
+    resolvedOgImage = 'https://isitkitchensafe.com/og-image.png';
+    resolvedPinImage = 'https://isitkitchensafe.com/og-image.png';
+  }
+} else {
+  resolvedOgImage = resolvedOgImage.startsWith('http://') || resolvedOgImage.startsWith('https://')
+    ? resolvedOgImage
+    : new URL(resolvedOgImage, 'https://isitkitchensafe.com').href;
+  resolvedPinImage = resolvedOgImage;
 }
 
 // Generate FAQ JSON-LD Schema only when page provides visible FAQs
@@ -401,6 +443,7 @@ const appliances = [
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Is It Kitchen Safe - Kitchen Safety Reference Guides" />
+    <meta name="pinterest:image" content={resolvedPinImage} />
     <meta property="og:locale" content={currentLang === 'es' ? 'es_ES' : currentLang === 'pt' ? 'pt_BR' : currentLang === 'zh-cn' ? 'zh_CN' : currentLang === 'ja' ? 'ja_JP' : 'en_US'} />
     {currentLang !== 'en' && <meta property="og:locale:alternate" content="en_US" />}
     {currentLang !== 'es' && <meta property="og:locale:alternate" content="es_ES" />}

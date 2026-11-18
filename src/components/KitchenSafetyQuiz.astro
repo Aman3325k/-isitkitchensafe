@@ -1,0 +1,693 @@
+---
+import rawData from '../data/kitchen-safety-iq-quiz-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+import { useTranslatedPath } from '../i18n/utils';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+const translatePath = useTranslatedPath(lang);
+
+const methodologyUrl = translatePath('/methodology/');
+const allToolsUrl = translatePath('/tools/');
+
+interface LocalizedQuestion {
+  id: number;
+  category: string;
+  icon: string;
+  citation: string;
+  relatedToolSlug: string;
+  correctOptionId: string;
+  question: string;
+  options: Array<{ id: string; text: string }>;
+  verdict: string;
+  explanation: string;
+}
+
+interface LocalizedTier {
+  minScore: number;
+  maxScore: number;
+  badge: string;
+  icon: string;
+  percentile: string;
+  colorClass: string;
+  title: string;
+  summary: string;
+  advice: string;
+}
+
+const localizedQuestions: LocalizedQuestion[] = rawData.questions.map((q) => {
+  const tr = (q.i18n as Record<string, any>)[lang] || q.i18n.en;
+  return {
+    id: q.id,
+    category: q.category,
+    icon: q.icon,
+    citation: q.citation,
+    relatedToolSlug: q.relatedToolSlug,
+    correctOptionId: q.correctOptionId,
+    question: tr.question,
+    options: tr.options,
+    verdict: tr.verdict,
+    explanation: tr.explanation
+  };
+});
+
+const localizedTiers: LocalizedTier[] = rawData.tiers.map((tier) => {
+  const tr = (tier.i18n as Record<string, any>)[lang] || tier.i18n.en;
+  return {
+    minScore: tier.minScore,
+    maxScore: tier.maxScore,
+    badge: tier.badge,
+    icon: tier.icon,
+    percentile: tier.percentile,
+    colorClass: tier.colorClass,
+    title: tr.title,
+    summary: tr.summary,
+    advice: tr.advice
+  };
+});
+
+const faqs = (rawData.faqs as Record<string, any>)[lang] || rawData.faqs.en;
+
+const UI_STRINGS = {
+  en: {
+    badge: '12-Question Scientific Challenge',
+    heading: 'Kitchen Safety IQ Quiz',
+    sub: 'Test your food safety instincts against official USDA, FDA, and CDC empirical science. Discover how many common household myths you unknowingly follow.',
+    progressLabel: 'Question',
+    of: 'of',
+    scoreLabel: 'Current Score',
+    nextBtn: 'Next Question →',
+    finishBtn: 'View Final Score & Analysis →',
+    restartBtn: 'Retake Quiz ↻',
+    copyBadgeBtn: 'Copy Score Badge 📋',
+    copiedText: 'Copied to Clipboard! 🎉',
+    printBtn: 'Print / Save Report 🖨️',
+    correctBadge: 'CORRECT! +1 pt',
+    incorrectBadge: 'INCORRECT',
+    citationLabel: 'Scientific Authority:',
+    relatedToolLabel: 'Related Safe Tool:',
+    exploreToolBtn: 'Open Tool &rarr;',
+    resultsHeading: 'Your Kitchen Safety IQ Assessment',
+    scoreSummary: 'You scored',
+    outOf: 'out of',
+    percentileLabel: 'Percentile Rank',
+    reviewHeading: 'Detailed Question Breakdown',
+    missedTitle: 'Recommended Safety Upgrades',
+    missedSub: 'Based on the questions you missed, brush up on these verified diagnostic calculators:',
+    faqHeading: 'Frequently Asked Kitchen Safety Questions',
+    methodologyNote: 'All question verdicts are validated against USDA FSIS, FDA Food Code, and CDC standards. Learn about our verification methodology in the ',
+    methodologyLink: 'IsItKitchenSafe Methodology Hub',
+    shareTextPrefix: '🍳 My Kitchen Safety IQ Score:'
+  },
+  es: {
+    badge: 'Desafío Científico de 12 Preguntas',
+    heading: 'Cuestionario de Inteligencia y Seguridad en la Cocina',
+    sub: 'Pon a prueba tus hábitos alimentarios y de electrodomésticos frente a las directrices empíricas del USDA, FDA y CDC. Descubre qué mitos sigues sin saberlo.',
+    progressLabel: 'Pregunta',
+    of: 'de',
+    scoreLabel: 'Puntuación actual',
+    nextBtn: 'Siguiente Pregunta →',
+    finishBtn: 'Ver Resultados y Análisis →',
+    restartBtn: 'Repetir Cuestionario ↻',
+    copyBadgeBtn: 'Copiar Insignia de Puntuación 📋',
+    copiedText: '¡Copiado al portapapeles! 🎉',
+    printBtn: 'Imprimir / Guardar Informe 🖨️',
+    correctBadge: '¡CORRECTO! +1 pt',
+    incorrectBadge: 'INCORRECTO',
+    citationLabel: 'Autoridad Científica:',
+    relatedToolLabel: 'Herramienta Relacionada:',
+    exploreToolBtn: 'Abrir Herramienta &rarr;',
+    resultsHeading: 'Evaluación de tu Seguridad en la Cocina',
+    scoreSummary: 'Has acertado',
+    outOf: 'de',
+    percentileLabel: 'Rango Percentil',
+    reviewHeading: 'Desglose Detallado de Preguntas',
+    missedTitle: 'Herramientas Recomendadas para Ti',
+    missedSub: 'Según las preguntas falladas, refuerza tus conocimientos con estas calculadoras:',
+    faqHeading: 'Preguntas Frecuentes sobre Seguridad en la Cocina',
+    methodologyNote: 'Todas las respuestas están validadas según las normativas del USDA, FDA y CDC. Conoce nuestro método de revisión en la ',
+    methodologyLink: 'Metodología de IsItKitchenSafe',
+    shareTextPrefix: '🍳 Mi Puntuación de Seguridad en la Cocina:'
+  },
+  pt: {
+    badge: 'Desafio Científico de 12 Perguntas',
+    heading: 'Teste de QI de Segurança na Cozinha',
+    sub: 'Avalie seus hábitos culinários contra dados empíricos do USDA, FDA e CDC. Descubra quantos mitos populares você segue sem perceber.',
+    progressLabel: 'Pergunta',
+    of: 'de',
+    scoreLabel: 'Pontuação atual',
+    nextBtn: 'Próxima Pergunta →',
+    finishBtn: 'Ver Resultado Final e Análise →',
+    restartBtn: 'Refazer Teste ↻',
+    copyBadgeBtn: 'Copiar Distintivo 📋',
+    copiedText: 'Copiado para a área de transferência! 🎉',
+    printBtn: 'Imprimir / Salvar Relatório 🖨️',
+    correctBadge: 'CORRETO! +1 pt',
+    incorrectBadge: 'INCORRETO',
+    citationLabel: 'Autoridade Científica:',
+    relatedToolLabel: 'Ferramenta Relacionada:',
+    exploreToolBtn: 'Abrir Ferramenta &rarr;',
+    resultsHeading: 'Sua Avaliação de Segurança na Cozinha',
+    scoreSummary: 'Você acertou',
+    outOf: 'de',
+    percentileLabel: 'Percentil',
+    reviewHeading: 'Detalhamento das Questões',
+    missedTitle: 'Ferramentas Recomendadas para Estudo',
+    missedSub: 'Com base nas perguntas erradas, explore estas calculadoras diagnósticas:',
+    faqHeading: 'Perguntas Frequentes sobre Segurança na Cozinha',
+    methodologyNote: 'Todas as respostas são validadas pelas normas do USDA, FDA e CDC. Conheça nossos critérios na ',
+    methodologyLink: 'Metodologia IsItKitchenSafe',
+    shareTextPrefix: '🍳 Meu QI de Segurança na Cozinha:'
+  },
+  'zh-cn': {
+    badge: '12道高难度科学实战测评',
+    heading: '厨房卫生与器具安全IQ测评',
+    sub: '依据美国农业部（USDA）、FDA与CDC权威实验数据，全方位检测你的食品与厨房电器安全直觉，识破身边潜藏的民间危险偏方。',
+    progressLabel: '题目',
+    of: '/',
+    scoreLabel: '当前得分',
+    nextBtn: '下一道题目 →',
+    finishBtn: '查看测评报告与全景分析 →',
+    restartBtn: '重新挑战 ↻',
+    copyBadgeBtn: '复制成绩徽章 📋',
+    copiedText: '成绩徽章已复制到剪贴板！🎉',
+    printBtn: '打印 / 保存测评证书 🖨️',
+    correctBadge: '回答正确！+1分',
+    incorrectBadge: '回答错误',
+    citationLabel: '科学权威依据：',
+    relatedToolLabel: '推荐专业诊断工具：',
+    exploreToolBtn: '进入工具 &rarr;',
+    resultsHeading: '你的厨房安全健康评级',
+    scoreSummary: '你的最终得分为',
+    outOf: '总分',
+    percentileLabel: '水平位阶',
+    reviewHeading: '12道核心安全考题逐题精析',
+    missedTitle: '专属安全提升工具推荐',
+    missedSub: '根据你的错题领域，建议立即使用以下经USDA/FDA验证的计算工具：',
+    faqHeading: '厨房食品安全常识答疑',
+    methodologyNote: '本测试全部结论均经过美国USDA FSIS与FDA Food Code验证。详细技术标准请参阅',
+    methodologyLink: 'IsItKitchenSafe 审查方法学标准',
+    shareTextPrefix: '🍳 我的厨房安全IQ测评分数：'
+  },
+  ja: {
+    badge: '全12問・科学的エビデンス検証',
+    heading: 'キッチン衛生・安全IQ診断クイズ',
+    sub: '米農務省（USDA）、FDA、CDCの科学的知見に基づき、あなたの食中毒予防＆調理器具の安全知識を徹底測定。無意識に信じていた危険な迷信を見抜きます。',
+    progressLabel: '第',
+    of: '問 / 全',
+    scoreLabel: '現在のスコア',
+    nextBtn: '次の問題へ →',
+    finishBtn: '最終スコアと詳細解説を見る →',
+    restartBtn: 'もう一度挑戦する ↻',
+    copyBadgeBtn: 'スコアバッジをコピー 📋',
+    copiedText: 'クリップボードにコピーしました！🎉',
+    printBtn: '診断シートを印刷・PDF保存 🖨️',
+    correctBadge: '正解！ +1点',
+    incorrectBadge: '不正解（危険）',
+    citationLabel: '科学的公的基準：',
+    relatedToolLabel: '関連する安全診断ツール：',
+    exploreToolBtn: 'ツールを開く &rarr;',
+    resultsHeading: 'あなたのキッチン安全診断結果',
+    scoreSummary: '正答数：',
+    outOf: '問中',
+    percentileLabel: '知識ランク',
+    reviewHeading: '全12問の科学的根拠と解説',
+    missedTitle: '復習におすすめの診断ツール',
+    missedSub: '間違えた項目に合わせて、以下のUSDA/FDA公認計算ツールを活用してください：',
+    faqHeading: 'キッチン安全に関するよくある質問（FAQ）',
+    methodologyNote: 'すべての問題の解答と解説は、USDA FSISおよびFDA Food Code基準に準拠しています。詳しくは ',
+    methodologyLink: 'IsItKitchenSafe 科学的検証基準',
+    shareTextPrefix: '🍳 私のキッチン安全IQ診断スコア：'
+  }
+};
+
+const ui = UI_STRINGS[lang] || UI_STRINGS.en;
+---
+
+<div id="quiz-root" class="w-full">
+  <!-- Progress Header -->
+  <div id="quiz-header-bar" class="bg-surface rounded-2xl border border-hairline p-5 mb-8 shadow-sm">
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-3">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-signature-coral/10 text-signature-coral font-bold text-sm">
+          IQ
+        </span>
+        <span class="text-xs md:text-sm font-semibold uppercase tracking-wider text-ink" id="progress-indicator">
+          {ui.progressLabel} 1 {ui.of} {localizedQuestions.length}
+        </span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-xs md:text-sm text-body">{ui.scoreLabel}:</span>
+        <span id="current-score-pill" class="px-3 py-1 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold text-sm rounded-full">
+          0 / {localizedQuestions.length}
+        </span>
+      </div>
+    </div>
+    <!-- Progress Bar Track -->
+    <div class="w-full bg-surface-soft h-2.5 rounded-full overflow-hidden border border-hairline">
+      <div id="progress-fill" class="h-full bg-signature-coral transition-all duration-300 rounded-full" style="width: 8.33%;"></div>
+    </div>
+  </div>
+
+  <!-- Interactive Question Container -->
+  <div id="questions-viewport" class="space-y-6">
+    {localizedQuestions.map((q, idx) => (
+      <div 
+        class={`question-card bg-surface rounded-3xl border border-hairline p-6 md:p-8 shadow-sm transition-all duration-300 ${idx === 0 ? 'block' : 'hidden'}`}
+        data-question-idx={idx}
+        data-correct-id={q.correctOptionId}
+        data-related-slug={q.relatedToolSlug}
+        data-category={q.category}
+      >
+        <!-- Top Category & Icon Bar -->
+        <div class="flex items-center justify-between gap-3 mb-5 pb-4 border-b border-hairline">
+          <div class="flex items-center gap-2.5">
+            <span class="text-2xl" aria-hidden="true">{q.icon}</span>
+            <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-surface-soft border border-hairline text-ink">
+              {q.category}
+            </span>
+          </div>
+          <span class="text-xs text-body font-mono">
+            #{q.id}
+          </span>
+        </div>
+
+        <!-- Question Prompt -->
+        <h2 class="text-lg md:text-xl font-bold text-ink leading-snug mb-6">
+          {q.question}
+        </h2>
+
+        <!-- Interactive Options -->
+        <div class="grid grid-cols-1 gap-3.5 mb-6" role="radiogroup" aria-label={q.question}>
+          {q.options.map((opt) => (
+            <button
+              type="button"
+              class="option-btn text-left p-4 md:p-5 rounded-2xl border-2 border-hairline hover:border-signature-coral/50 bg-surface-soft hover:bg-surface focus:outline-none focus:ring-2 focus:ring-signature-coral transition-all group flex items-start gap-4 cursor-pointer"
+              data-opt-id={opt.id}
+            >
+              <span class="opt-indicator flex-shrink-0 w-7 h-7 rounded-full border border-hairline bg-surface text-ink font-bold text-xs flex items-center justify-center group-hover:border-signature-coral">
+                {opt.id}
+              </span>
+              <span class="text-sm md:text-base text-ink font-medium leading-relaxed">
+                {opt.text}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <!-- Scientific Feedback Drawer (Hidden until answered) -->
+        <div class="feedback-drawer hidden mt-6 pt-6 border-t border-hairline rounded-2xl p-5 bg-surface-soft animate-fade-in">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="feedback-verdict-badge px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-white"></span>
+            <span class="feedback-status-pill text-xs font-semibold"></span>
+          </div>
+          <p class="feedback-text text-sm md:text-[15px] text-body leading-relaxed mb-4">
+            {q.explanation}
+          </p>
+          <div class="flex flex-wrap items-center justify-between gap-3 text-xs text-body pt-3 border-t border-hairline">
+            <div class="flex items-center gap-1.5 font-medium">
+              <span>{ui.citationLabel}</span>
+              <strong class="text-ink">{q.citation}</strong>
+            </div>
+            {q.relatedToolSlug && (
+              <a 
+                href={translatePath(`/tools/${q.relatedToolSlug}/`)}
+                class="inline-flex items-center gap-1 font-semibold text-signature-coral hover:underline"
+                target="_blank"
+                rel="noopener"
+              >
+                <span>{ui.relatedToolLabel}</span>
+                <span class="underline">{q.relatedToolSlug}</span> &rarr;
+              </a>
+            )}
+          </div>
+        </div>
+
+        <!-- Next / Finish Action Row -->
+        <div class="card-action-row hidden mt-6 flex justify-end">
+          <button
+            type="button"
+            class="next-step-btn px-6 py-3 rounded-xl bg-signature-coral text-white font-bold text-sm shadow hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-signature-coral transition-all"
+          >
+            {idx === localizedQuestions.length - 1 ? ui.finishBtn : ui.nextBtn}
+          </button>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <!-- Final Results & Analysis Screen (Initially Hidden) -->
+  <div id="results-screen" class="hidden bg-surface rounded-3xl border border-hairline p-6 md:p-10 shadow-lg animate-fade-in">
+    <!-- Top Result Banner -->
+    <div class="text-center max-w-2xl mx-auto mb-10">
+      <div id="result-icon-container" class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-surface-soft border border-hairline text-4xl mb-4 shadow-inner">
+        🏅
+      </div>
+      <div class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3" id="result-tier-pill">
+        Tier Pill
+      </div>
+      <h2 id="result-tier-title" class="text-2xl md:text-3xl font-bold text-ink tracking-tight mb-3">
+        Result Title
+      </h2>
+      <p id="result-tier-summary" class="text-sm md:text-base text-body leading-relaxed mb-6">
+        Summary description goes here.
+      </p>
+
+      <!-- Scoreboard Display -->
+      <div class="grid grid-cols-2 gap-4 max-w-md mx-auto p-4 rounded-2xl bg-surface-soft border border-hairline mb-8">
+        <div class="p-3">
+          <div class="text-xs uppercase tracking-wider text-body font-semibold mb-1">{ui.scoreSummary}</div>
+          <div class="text-3xl font-black text-ink" id="final-score-display">0 / 12</div>
+        </div>
+        <div class="p-3 border-l border-hairline">
+          <div class="text-xs uppercase tracking-wider text-body font-semibold mb-1">{ui.percentileLabel}</div>
+          <div class="text-3xl font-black text-signature-coral" id="final-percentile-display">Top 2%</div>
+        </div>
+      </div>
+
+      <!-- Action Buttons Row -->
+      <div class="flex flex-wrap items-center justify-center gap-3">
+        <button
+          type="button"
+          id="copy-badge-btn"
+          class="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow transition-all flex items-center gap-2 cursor-pointer"
+        >
+          <span>{ui.copyBadgeBtn}</span>
+        </button>
+        <button
+          type="button"
+          id="print-report-btn"
+          class="px-5 py-3 rounded-xl bg-surface-soft border border-hairline text-ink font-semibold text-sm hover:bg-surface transition-all flex items-center gap-2 cursor-pointer"
+        >
+          <span>{ui.printBtn}</span>
+        </button>
+        <button
+          type="button"
+          id="restart-quiz-btn"
+          class="px-5 py-3 rounded-xl bg-surface-soft border border-hairline text-ink font-semibold text-sm hover:bg-surface transition-all cursor-pointer"
+        >
+          <span>{ui.restartBtn}</span>
+        </button>
+      </div>
+      <div id="copy-toast" class="hidden mt-3 text-xs font-bold text-emerald-600 dark:text-emerald-400 animate-pulse">
+        {ui.copiedText}
+      </div>
+    </div>
+
+    <!-- Targeted Tool Recommendations Based on Missed Topics -->
+    <div id="missed-recommendations-block" class="mb-10 p-6 rounded-2xl bg-signature-coral/5 border border-signature-coral/20">
+      <h3 class="text-base font-bold text-ink mb-1 flex items-center gap-2">
+        <span>💡</span> {ui.missedTitle}
+      </h3>
+      <p class="text-xs text-body mb-4">{ui.missedSub}</p>
+      <div id="recommended-tools-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+
+    <!-- Full 12-Question Review List -->
+    <div class="border-t border-hairline pt-8">
+      <h3 class="text-lg font-bold text-ink mb-6 flex items-center gap-2">
+        <span>📋</span> {ui.reviewHeading}
+      </h3>
+      <div id="questions-review-list" class="space-y-4">
+        <!-- Rendered via JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Trust Methodology Banner -->
+  <div class="mt-10 p-5 rounded-2xl bg-surface-soft border border-hairline text-xs text-body leading-relaxed flex items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <span class="text-xl">🛡️</span>
+      <p>
+        {ui.methodologyNote}
+        <a href={methodologyUrl} class="text-signature-coral font-semibold hover:underline">
+          {ui.methodologyLink} &rarr;
+        </a>
+      </p>
+    </div>
+    <a href={allToolsUrl} class="flex-shrink-0 font-bold text-ink hover:underline">
+      All 191 Tools &rarr;
+    </a>
+  </div>
+
+  <!-- 5 Visible Static FAQs -->
+  <section class="mt-14 pt-10 border-t border-hairline">
+    <h2 class="text-xl md:text-2xl font-bold text-ink tracking-tight mb-6">
+      {ui.faqHeading}
+    </h2>
+    <div class="space-y-4">
+      {faqs.map((faq: { question: string; answer: string }) => (
+        <details class="group bg-surface rounded-2xl border border-hairline p-5 transition-all">
+          <summary class="font-bold text-ink text-sm md:text-base cursor-pointer list-none flex items-center justify-between gap-4">
+            <span>{faq.question}</span>
+            <span class="text-xs px-2 py-1 rounded bg-surface-soft text-body group-open:rotate-180 transition-transform">
+              ▼
+            </span>
+          </summary>
+          <p class="mt-3 text-body text-xs md:text-sm leading-relaxed border-t border-hairline pt-3">
+            {faq.answer}
+          </p>
+        </details>
+      ))}
+    </div>
+  </section>
+</div>
+
+<!-- Dynamic Client Script -->
+<script define:vars={{ localizedQuestions, localizedTiers, ui, lang }}>
+  (function() {
+    let currentIdx = 0;
+    const userAnswers = new Array(localizedQuestions.length).fill(null);
+    let totalScore = 0;
+
+    const root = document.getElementById('quiz-root');
+    if (!root) return;
+
+    const cards = root.querySelectorAll('.question-card');
+    const headerBar = document.getElementById('quiz-header-bar');
+    const progressIndicator = document.getElementById('progress-indicator');
+    const progressFill = document.getElementById('progress-fill');
+    const currentScorePill = document.getElementById('current-score-pill');
+    const resultsScreen = document.getElementById('results-screen');
+    const questionsViewport = document.getElementById('questions-viewport');
+
+    function updateProgressUI() {
+      if (progressIndicator) {
+        progressIndicator.textContent = `${ui.progressLabel} ${currentIdx + 1} ${ui.of} ${localizedQuestions.length}`;
+      }
+      if (progressFill) {
+        const pct = ((currentIdx + 1) / localizedQuestions.length) * 100;
+        progressFill.style.width = `${pct}%`;
+      }
+      if (currentScorePill) {
+        currentScorePill.textContent = `${totalScore} / ${localizedQuestions.length}`;
+      }
+    }
+
+    cards.forEach((card, idx) => {
+      const optionButtons = card.querySelectorAll('.option-btn');
+      const drawer = card.querySelector('.feedback-drawer');
+      const actionRow = card.querySelector('.card-action-row');
+      const nextBtn = card.querySelector('.next-step-btn');
+      const correctId = card.getAttribute('data-correct-id');
+      const verdictBadge = card.querySelector('.feedback-verdict-badge');
+      const statusPill = card.querySelector('.feedback-status-pill');
+
+      optionButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          if (userAnswers[idx] !== null) return; // already answered
+
+          const chosenId = btn.getAttribute('data-opt-id');
+          const isCorrect = (chosenId === correctId);
+          userAnswers[idx] = {
+            chosenId,
+            isCorrect,
+            question: localizedQuestions[idx]
+          };
+
+          if (isCorrect) {
+            totalScore++;
+            btn.classList.add('bg-emerald-500/15', 'border-emerald-500', 'text-emerald-900');
+            const ind = btn.querySelector('.opt-indicator');
+            if (ind) {
+              ind.classList.add('bg-emerald-600', 'text-white', 'border-emerald-600');
+              ind.textContent = '✓';
+            }
+            if (verdictBadge) {
+              verdictBadge.textContent = ui.correctBadge;
+              verdictBadge.className = 'feedback-verdict-badge px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-600 text-white';
+            }
+          } else {
+            btn.classList.add('bg-rose-500/15', 'border-rose-500', 'text-rose-900');
+            const ind = btn.querySelector('.opt-indicator');
+            if (ind) {
+              ind.classList.add('bg-rose-600', 'text-white', 'border-rose-600');
+              ind.textContent = '✗';
+            }
+            // Highlight the correct one
+            optionButtons.forEach((otherBtn) => {
+              if (otherBtn.getAttribute('data-opt-id') === correctId) {
+                otherBtn.classList.add('border-emerald-500', 'bg-emerald-500/10');
+                const otherInd = otherBtn.querySelector('.opt-indicator');
+                if (otherInd) otherInd.classList.add('bg-emerald-500', 'text-white');
+              }
+            });
+            if (verdictBadge) {
+              verdictBadge.textContent = ui.incorrectBadge;
+              verdictBadge.className = 'feedback-verdict-badge px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-600 text-white';
+            }
+          }
+
+          if (statusPill) {
+            statusPill.textContent = localizedQuestions[idx].verdict;
+          }
+
+          if (drawer) drawer.classList.remove('hidden');
+          if (actionRow) actionRow.classList.remove('hidden');
+          updateProgressUI();
+        });
+      });
+
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          if (currentIdx < localizedQuestions.length - 1) {
+            card.classList.add('hidden');
+            currentIdx++;
+            const nextCard = cards[currentIdx];
+            if (nextCard) {
+              nextCard.classList.remove('hidden');
+              nextCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            updateProgressUI();
+          } else {
+            showFinalResults();
+          }
+        });
+      }
+    });
+
+    function showFinalResults() {
+      if (questionsViewport) questionsViewport.classList.add('hidden');
+      if (headerBar) headerBar.classList.add('hidden');
+      if (!resultsScreen) return;
+
+      resultsScreen.classList.remove('hidden');
+      resultsScreen.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      // Determine Tier
+      let matchedTier = localizedTiers[localizedTiers.length - 1];
+      for (const t of localizedTiers) {
+        if (totalScore >= t.minScore && totalScore <= t.maxScore) {
+          matchedTier = t;
+          break;
+        }
+      }
+
+      const iconElem = document.getElementById('result-icon-container');
+      const tierPill = document.getElementById('result-tier-pill');
+      const titleElem = document.getElementById('result-tier-title');
+      const summaryElem = document.getElementById('result-tier-summary');
+      const scoreElem = document.getElementById('final-score-display');
+      const percentileElem = document.getElementById('final-percentile-display');
+
+      if (iconElem) iconElem.textContent = matchedTier.icon;
+      if (tierPill) {
+        tierPill.textContent = matchedTier.badge;
+        tierPill.className = `inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3 ${matchedTier.colorClass}`;
+      }
+      if (titleElem) titleElem.textContent = matchedTier.title;
+      if (summaryElem) summaryElem.textContent = `${matchedTier.summary} ${matchedTier.advice}`;
+      if (scoreElem) scoreElem.textContent = `${totalScore} / ${localizedQuestions.length}`;
+      if (percentileElem) percentileElem.textContent = matchedTier.percentile;
+
+      // Populate Recommendations
+      const missedToolsContainer = document.getElementById('recommended-tools-grid');
+      const missedSlugs = new Set();
+      userAnswers.forEach((ans) => {
+        if (ans && !ans.isCorrect && ans.question.relatedToolSlug) {
+          missedSlugs.add(ans.question.relatedToolSlug);
+        }
+      });
+
+      // Default to top calculators if scored high
+      if (missedSlugs.size === 0) {
+        missedSlugs.add('leftover-shelf-life-calculator');
+        missedSlugs.add('meat-thawing-calculator');
+        missedSlugs.add('cooking-oil-smoke-point-finder');
+      }
+
+      if (missedToolsContainer) {
+        missedToolsContainer.innerHTML = '';
+        missedSlugs.forEach((slug) => {
+          const a = document.createElement('a');
+          a.href = `/${lang === 'en' ? '' : lang + '/'}tools/${slug}/`;
+          a.className = 'p-3 rounded-xl bg-surface border border-hairline hover:border-signature-coral text-ink font-semibold text-xs flex items-center justify-between shadow-sm transition-all';
+          a.innerHTML = `<span class="truncate">${slug}</span> <span class="text-signature-coral">&rarr;</span>`;
+          missedToolsContainer.appendChild(a);
+        });
+      }
+
+      // Populate Review List
+      const reviewList = document.getElementById('questions-review-list');
+      if (reviewList) {
+        reviewList.innerHTML = '';
+        userAnswers.forEach((ans, i) => {
+          if (!ans) return;
+          const row = document.createElement('div');
+          row.className = `p-4 rounded-2xl border ${ans.isCorrect ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-rose-500/30 bg-rose-500/5'}`;
+          row.innerHTML = `
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <span class="text-xs font-bold text-ink">#${i + 1} · ${ans.question.category}</span>
+              <span class="text-xs font-bold ${ans.isCorrect ? 'text-emerald-700' : 'text-rose-700'}">${ans.isCorrect ? '✓ ' + ui.correctBadge : '✗ ' + ui.incorrectBadge}</span>
+            </div>
+            <p class="text-sm font-semibold text-ink mb-1.5">${ans.question.question}</p>
+            <p class="text-xs text-body leading-relaxed">${ans.question.explanation}</p>
+          `;
+          reviewList.appendChild(row);
+        });
+      }
+    }
+
+    // Share Badge Action
+    const copyBadgeBtn = document.getElementById('copy-badge-btn');
+    const copyToast = document.getElementById('copy-toast');
+    if (copyBadgeBtn) {
+      copyBadgeBtn.addEventListener('click', () => {
+        let matchedTier = localizedTiers[localizedTiers.length - 1];
+        for (const t of localizedTiers) {
+          if (totalScore >= t.minScore && totalScore <= t.maxScore) {
+            matchedTier = t;
+            break;
+          }
+        }
+        const currentUrl = window.location.href.split('?')[0];
+        const shareText = `${ui.shareTextPrefix} ${totalScore}/${localizedQuestions.length} (${matchedTier.title}) ${matchedTier.icon}\n${matchedTier.summary}\nTake the official challenge: ${currentUrl}`;
+        navigator.clipboard.writeText(shareText).then(() => {
+          if (copyToast) {
+            copyToast.classList.remove('hidden');
+            setTimeout(() => copyToast.classList.add('hidden'), 3500);
+          }
+        });
+      });
+    }
+
+    // Print Action
+    const printBtn = document.getElementById('print-report-btn');
+    if (printBtn) {
+      printBtn.addEventListener('click', () => window.print());
+    }
+
+    // Restart Action
+    const restartBtn = document.getElementById('restart-quiz-btn');
+    if (restartBtn) {
+      restartBtn.addEventListener('click', () => {
+        window.location.reload();
+      });
+    }
+  })();
+</script>

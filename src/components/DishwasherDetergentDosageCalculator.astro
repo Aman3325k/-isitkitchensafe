@@ -1,0 +1,1901 @@
+---
+import rawData from '../data/dishwasher-detergent-dosage-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+import { useTranslatedPath } from '../i18n/utils';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+const translatePath = useTranslatedPath(lang);
+
+const descalingUrl = translatePath('/tools/appliance-descaling-calculator/');
+const symbolDecoderUrl = translatePath('/tools/kitchen-symbol-decoder/');
+const babyBottleUrl = translatePath('/tools/baby-bottle-safety-checker/');
+const dishwasherHubUrl = translatePath('/dishwasher/');
+const methodologyUrl = translatePath('/methodology/');
+const allToolsUrl = translatePath('/tools/');
+
+type HardnessId = 'soft' | 'medium' | 'hard' | 'very-hard';
+type SoilId = 'light' | 'normal' | 'heavy';
+type DetergentId = 'powder' | 'pod' | 'liquid-gel' | 'fragrance-free';
+type DelicateId = 'silicone-baby' | 'crystal-glass' | 'aluminum' | 'nonstick-knives';
+
+interface LocalizedHardness {
+  id: HardnessId;
+  icon: string;
+  gpg: string;
+  ppm: string;
+  etchingRisk: string;
+  defaultRinseAid: number;
+  citricBoost: boolean;
+  label: string;
+  shortRange: string;
+  summary: string;
+}
+
+interface LocalizedSoil {
+  id: SoilId;
+  icon: string;
+  label: string;
+  sub: string;
+}
+
+interface LocalizedDetergent {
+  id: DetergentId;
+  icon: string;
+  isFixedDose: boolean;
+  isFragranceFree: boolean;
+  recommended: boolean;
+  label: string;
+  badge: string;
+  note: string;
+}
+
+interface LocalizedDelicate {
+  id: DelicateId;
+  icon: string;
+  severity: 'warning' | 'danger';
+  label: string;
+  short: string;
+  alertTitle: string;
+  alertBody: string;
+}
+
+interface LocalizedVinegarResult {
+  status: 'reversible' | 'irreversible';
+  icon: string;
+  buttonLabel: string;
+  buttonSub: string;
+  verdictBadge: string;
+  title: string;
+  explanation: string;
+  fixes: string[];
+}
+
+interface LocalizedEmergency {
+  badge: string;
+  title: string;
+  subtitle: string;
+  steps: string[];
+  warning: string;
+}
+
+const localizedHardness: LocalizedHardness[] = rawData.waterHardness.map((h) => {
+  const tr = (h.i18n as Record<string, any>)[lang] || h.i18n.en;
+  return {
+    id: h.id as HardnessId,
+    icon: h.icon,
+    gpg: h.gpg,
+    ppm: h.ppm,
+    etchingRisk: h.etchingRisk,
+    defaultRinseAid: h.defaultRinseAid,
+    citricBoost: Boolean(h.citricBoost),
+    label: tr.label,
+    shortRange: tr.shortRange,
+    summary: tr.summary
+  };
+});
+
+const localizedSoil: LocalizedSoil[] = rawData.soilLevels.map((s) => {
+  const tr = (s.i18n as Record<string, any>)[lang] || s.i18n.en;
+  return {
+    id: s.id as SoilId,
+    icon: s.icon,
+    label: tr.label,
+    sub: tr.sub
+  };
+});
+
+const localizedDetergents: LocalizedDetergent[] = rawData.detergentTypes.map((d) => {
+  const tr = (d.i18n as Record<string, any>)[lang] || d.i18n.en;
+  return {
+    id: d.id as DetergentId,
+    icon: d.icon,
+    isFixedDose: Boolean(d.isFixedDose),
+    isFragranceFree: Boolean(d.isFragranceFree),
+    recommended: Boolean(d.recommended),
+    label: tr.label,
+    badge: tr.badge,
+    note: tr.note
+  };
+});
+
+const localizedDelicates: LocalizedDelicate[] = rawData.delicateToggles.map((item) => {
+  const tr = (item.i18n as Record<string, any>)[lang] || item.i18n.en;
+  return {
+    id: item.id as DelicateId,
+    icon: item.icon,
+    severity: item.severity as 'warning' | 'danger',
+    label: tr.label,
+    short: tr.short,
+    alertTitle: tr.alertTitle,
+    alertBody: tr.alertBody
+  };
+});
+
+const vinegarWipedTr = (rawData.vinegarDiagnostic['wiped-clear'].i18n as Record<string, any>)[lang] || rawData.vinegarDiagnostic['wiped-clear'].i18n.en;
+const vinegarCloudyTr = (rawData.vinegarDiagnostic['stayed-cloudy'].i18n as Record<string, any>)[lang] || rawData.vinegarDiagnostic['stayed-cloudy'].i18n.en;
+
+const localizedVinegar: Record<'wiped-clear' | 'stayed-cloudy', LocalizedVinegarResult> = {
+  'wiped-clear': {
+    status: 'reversible',
+    icon: rawData.vinegarDiagnostic['wiped-clear'].icon,
+    buttonLabel: vinegarWipedTr.buttonLabel,
+    buttonSub: vinegarWipedTr.buttonSub,
+    verdictBadge: vinegarWipedTr.verdictBadge,
+    title: vinegarWipedTr.title,
+    explanation: vinegarWipedTr.explanation,
+    fixes: vinegarWipedTr.fixes
+  },
+  'stayed-cloudy': {
+    status: 'irreversible',
+    icon: rawData.vinegarDiagnostic['stayed-cloudy'].icon,
+    buttonLabel: vinegarCloudyTr.buttonLabel,
+    buttonSub: vinegarCloudyTr.buttonSub,
+    verdictBadge: vinegarCloudyTr.verdictBadge,
+    title: vinegarCloudyTr.title,
+    explanation: vinegarCloudyTr.explanation,
+    fixes: vinegarCloudyTr.fixes
+  }
+};
+
+const localizedEmergency: LocalizedEmergency =
+  (rawData.emergencySoapRescue.i18n as Record<string, LocalizedEmergency>)[lang] ||
+  rawData.emergencySoapRescue.i18n.en;
+
+const localizedFaqs: Array<{ question: string; answer: string }> =
+  (rawData.faqs as Record<string, Array<{ question: string; answer: string }>>)[lang] ||
+  rawData.faqs.en;
+
+interface UiDict {
+  ariaLabel: string;
+  step1Title: string;
+  step1Sub: string;
+  step2Title: string;
+  step3Title: string;
+  step4Title: string;
+  step4Sub: string;
+  dashboardKicker: string;
+  statusSafe: string;
+  statusCaution: string;
+  statusStop: string;
+  mainWashLabel: string;
+  preWashLabel: string;
+  rinseAidLabel: string;
+  cycleTempLabel: string;
+  tbspUnit: string;
+  tspUnit: string;
+  mlUnit: string;
+  dialOfSix: string;
+  podMainText: string;
+  podMainSub: string;
+  podPreSkip: string;
+  podPreAddPrefix: string;
+  podPreAddSuffix: string;
+  powderMainSub: string;
+  gelMainSub: string;
+  ffMainSub: string;
+  crystalCutNote: string;
+  preWashNoneNote: string;
+  preWashWhy: string;
+  citricBoosterNote: string;
+  rinseAidSiliconeNote: string;
+  rinseAidStandardNote: string;
+  rinseAidMaxNote: string;
+  cycleNormal: string;
+  cycleNormalSub: string;
+  cycleLight: string;
+  cycleLightSub: string;
+  cycleHeavy: string;
+  cycleHeavySub: string;
+  cycleDelicate: string;
+  cycleDelicateSub: string;
+  hotTapTipTitle: string;
+  hotTapTipBody: string;
+  alertsSectionTitle: string;
+  noAlertsText: string;
+  softEtchTitle: string;
+  softEtchBody: string;
+  softPodTitle: string;
+  softPodBody: string;
+  podQuickWashTitle: string;
+  podQuickWashBody: string;
+  gelStabilityTitle: string;
+  gelStabilityBody: string;
+  veryHardFilmTitle: string;
+  veryHardFilmBody: string;
+  siliconeSafeConfirmTitle: string;
+  siliconeSafeConfirmBody: string;
+  copyBtn: string;
+  copiedBtn: string;
+  printBtn: string;
+  resetBtn: string;
+  vinegarTitle: string;
+  vinegarSub: string;
+  vinegarStepsTitle: string;
+  emergencyToggleHint: string;
+  rulesTitle: string;
+  rulesSub: string;
+  rule1Title: string;
+  rule1Body: string;
+  rule2Title: string;
+  rule2Body: string;
+  rule3Title: string;
+  rule3Body: string;
+  relatedHeading: string;
+  relatedDescaleTag: string;
+  relatedDescaleTitle: string;
+  relatedDescaleDesc: string;
+  relatedSymbolTag: string;
+  relatedSymbolTitle: string;
+  relatedSymbolDesc: string;
+  relatedBabyTag: string;
+  relatedBabyTitle: string;
+  relatedBabyDesc: string;
+  methodologyStripTitle: string;
+  methodologyStripPrefix: string;
+  methodologyLabel: string;
+  dishwasherHubLabel: string;
+  allToolsLabel: string;
+  faqTitle: string;
+  copyHeader: string;
+  copyProfileLine: string;
+  copyMainLine: string;
+  copyPreLine: string;
+  copyRinseLine: string;
+  copyCycleLine: string;
+  copyAlertsHeader: string;
+}
+
+const UI: Record<SupportedLanguage, UiDict> = {
+  en: {
+    ariaLabel: 'Dishwasher Detergent, Rinse Aid and Hard Water Safety Calculator',
+    step1Title: '1. Select Your Water Hardness',
+    step1Sub: 'Check your municipal water report, test strip, or look for white kettle scale (Hard/Very Hard) vs. slippery soap feel (Soft).',
+    step2Title: '2. Dish Soil Level',
+    step3Title: '3. Detergent Format',
+    step4Title: '4. Delicate Items in This Load (Optional Safety Toggles)',
+    step4Sub: 'Check any sensitive materials in the rack for instant chemical, temperature, and hand-wash alerts.',
+    dashboardKicker: 'Live Dishwasher Chemistry & Dosage Recipe',
+    statusSafe: 'OPTIMAL DOSE',
+    statusCaution: 'ADJUSTMENT REQUIRED',
+    statusStop: 'REMOVE HAND-WASH ITEMS',
+    mainWashLabel: 'Main-Wash Dispenser',
+    preWashLabel: 'Pre-Wash Cup',
+    rinseAidLabel: 'Rinse Aid Dial (1–6)',
+    cycleTempLabel: 'Cycle & Water Temp',
+    tbspUnit: 'tbsp',
+    tspUnit: 'tsp',
+    mlUnit: 'mL',
+    dialOfSix: '/ 6',
+    podMainText: '1 Pod',
+    podMainSub: 'Closed dispenser cup ONLY — NEVER loose in tub',
+    podPreSkip: '0 tsp (Skip — pod already overdoses soft water)',
+    podPreAddPrefix: '+ ',
+    podPreAddSuffix: ' loose powder in pre-wash (NEVER a 2nd pod)',
+    powderMainSub: 'Fill main cup cleanly & snap lid shut',
+    gelMainSub: 'Adjusted +25% for liquid dilution vs. dry powder',
+    ffMainSub: 'Unscented formula — ideal for silicone & baby gear',
+    crystalCutNote: 'Reduced ~25% for fine crystal etching protection',
+    preWashNoneNote: 'Skip pre-wash dose on light loads in soft water to prevent etching.',
+    preWashWhy: 'Why pre-wash matters: Dishwashers drain the first 10–15 min wash BEFORE opening the main cup—pre-wash detergent breaks down grease early.',
+    citricBoosterNote: '+ Add 1–2 tsp (5–10 mL) food-grade citric acid booster to neutralize heavy calcium.',
+    rinseAidSiliconeNote: 'Lowered 1 notch (or skip on silicone-only loads) so rinse aid film does not cling to baby gear.',
+    rinseAidStandardNote: 'Sheets water off glass and plastics so dishes dry spotless.',
+    rinseAidMaxNote: 'Max dial + check built-in water softener salt to stop chalky white spots.',
+    cycleNormal: 'Auto / Normal (125–140°F / 52–60°C)',
+    cycleNormalSub: 'Scrape chunks only—do NOT pre-rinse plates so enzymes have soil to bind.',
+    cycleLight: 'Light / Eco (115–130°F / 45–55°C)',
+    cycleLightSub: 'Skip Express/Quick cycles if using pods so film dissolves & rinses completely.',
+    cycleHeavy: 'Heavy / Pots & Pans (140–155°F / 60–68°C)',
+    cycleHeavySub: 'Extra wash time + hotter final rinse cuts baked-on grease and dried starch.',
+    cycleDelicate: 'Delicate / China (105–115°F / 40–45°C) · Heated Dry OFF',
+    cycleDelicateSub: 'Heated Dry & Sanitize OFF protects thin crystal from etching and silicone from soap absorption.',
+    hotTapTipTitle: 'Pro Tip — Run Kitchen Hot Tap 30–60s First:',
+    hotTapTipBody: 'Most dishwashers pull from your sink hot line. Running the kitchen tap until piping hot (~120°F / 49°C) before pressing Start ensures the pre-wash fills with hot water instead of cold pipe water.',
+    alertsSectionTitle: 'Active Material & Chemistry Safety Alerts',
+    noAlertsText: 'No chemical hazards detected for this load profile. Scrape solids, load bowls angled downward, and verify spray arms spin freely.',
+    softEtchTitle: 'Soft Water Glass Etching Risk (0–3 gpg)',
+    softEtchBody: 'Soft water has almost no calcium minerals to buffer alkaline detergent. Never exceed the exact low dose above, and never pre-rinse dishes spotless before loading—excess alkalinity attacks glass silica permanently.',
+    softPodTitle: 'Warning: Fixed-Dose Pods Overdose Soft Water',
+    softPodBody: 'Single-dose pods pack ~20–25 g of heavy-duty hard-water detergent. In soft water (0–3 gpg), pods dramatically accelerate permanent cloudy glass etching and leave slippery soap residue. Switch to adjustable Powder.',
+    podQuickWashTitle: 'Pod Placement & Quick-Wash Rule',
+    podQuickWashBody: 'ALWAYS place pods inside the dry main dispenser cup—tossing a pod loose in the tub flushes most of it down the drain during the first pre-wash. Avoid Quick/Express cycles (<45 min) where PVA pods may not dissolve or rinse fully.',
+    gelStabilityTitle: 'Liquid Gel Stability Limitation',
+    gelStabilityBody: 'Liquid gels cannot hold active oxygen bleach and stain-fighting enzymes together in water without degrading, so we increased volume ~25%. For tea/coffee stains or baked-on pots, dry Powder cleans significantly better.',
+    veryHardFilmTitle: 'Very Hard Water Calcium Film Risk (15+ gpg)',
+    veryHardFilmBody: 'Water above 250 ppm leaves chalky white mineral film on glassware and spray arms. Keep Rinse Aid at 6, add 1–2 tsp citric acid booster to pre-wash, refill built-in dishwasher salt if equipped, and descale monthly.',
+    siliconeSafeConfirmTitle: 'Fragrance-Free Silicone Setup Verified ✓',
+    siliconeSafeConfirmBody: 'Great choice using Fragrance-Free detergent for silicone baby gear! Remember to keep Heated Dry & Sanitize OFF and lower Rinse Aid so porous silicone stays completely odor- and taste-free.',
+    copyBtn: 'Copy Dosage Settings',
+    copiedBtn: 'Dosage Copied ✓',
+    printBtn: 'Print Dishwasher Cheat Sheet',
+    resetBtn: 'Reset',
+    vinegarTitle: 'Cloudy Glass Diagnostic: 5-Minute White Vinegar Wipe Test',
+    vinegarSub: 'Wipe or soak one cloudy glass with 5% white vinegar for 5 minutes, rinse, and select what happened:',
+    vinegarStepsTitle: 'Exact Action Plan',
+    emergencyToggleHint: 'Click to open 4-step Foam Overflow Rescue',
+    rulesTitle: '3 Engineering Rules for Spotless, Etch-Free Dishes',
+    rulesSub: 'Based on modern dishwasher valve timing, water chemistry, and detergent enzyme science.',
+    rule1Title: 'Purge Your Hot Tap Before Pressing Start',
+    rule1Body: 'Running your kitchen faucet until hot takes 30 seconds and makes the 10-minute pre-wash actually dissolve grease instead of rinsing with cold pipe water.',
+    rule2Title: 'Scrape Solids — Never Pre-Rinse Clean',
+    rule2Body: 'Turbidity sensors shorten cycles when water looks clean, and alkaline detergent etches glassware when there is no food oil left to neutralize it.',
+    rule3Title: 'Always Dose the Pre-Wash (Not Just Main Cup)',
+    rule3Body: 'The main dispenser stays locked during pre-wash. Adding 0.5–2 tsp loose powder to the pre-wash cup boosts real cleaning power more than expensive premium pods.',
+    relatedHeading: 'Related Dishwasher, Appliance & Baby Safety Tools',
+    relatedDescaleTag: 'Citric Acid & Vinegar Ratios',
+    relatedDescaleTitle: 'Appliance Descaling Ratio Calculator →',
+    relatedDescaleDesc: 'Calculate exact citric acid grams and safe descaling cycles for coffee makers, kettles, espresso machines, and hard-water appliances.',
+    relatedSymbolTag: 'Dishwasher-Safe Icons',
+    relatedSymbolTitle: 'Kitchen Appliance & Dish Symbol Decoder →',
+    relatedSymbolDesc: 'Decode top-rack only icons, dishwasher-safe wine glass stamps, plastic resin codes, and cookware base symbols.',
+    relatedBabyTag: 'Silicone, Glass & Plastic',
+    relatedBabyTitle: 'Baby Bottle & Silicone Safety Checker →',
+    relatedBabyDesc: 'Verify BPA-free plastics, silicone soap-taste removal, steam sterilizer temps, and dishwasher heat limits for infant feeding gear.',
+    methodologyStripTitle: 'Backed by Appliance Chemistry & Manufacturer Care Standards',
+    methodologyStripPrefix: 'Our hardness thresholds, alkaline pH limits, and rinse aid calibrations follow appliance engineering specs. Explore our',
+    methodologyLabel: 'Methodology',
+    dishwasherHubLabel: 'Dishwasher Safety Hub',
+    allToolsLabel: 'All Kitchen Tools →',
+    faqTitle: 'Frequently Asked Questions: Dishwasher Detergent, Rinse Aid & Hard Water',
+    copyHeader: 'IsItKitchenSafe — Dishwasher Dosage & Safety Settings',
+    copyProfileLine: 'Load Profile',
+    copyMainLine: 'Main-Wash Dose',
+    copyPreLine: 'Pre-Wash Dose',
+    copyRinseLine: 'Rinse Aid Dial',
+    copyCycleLine: 'Cycle & Temp',
+    copyAlertsHeader: 'Active Alerts:'
+  },
+  es: {
+    ariaLabel: 'Calculadora de Dosis de Detergente, Abrillantador y Dureza del Agua para Lavavajillas',
+    step1Title: '1. Selecciona la Dureza de Tu Agua',
+    step1Sub: 'Consulta el informe de agua local o fíjate si el hervidor acumula cal blanca (Dura/Muy Dura) o si el jabón cuesta enjuagar (Blanda).',
+    step2Title: '2. Nivel de Suciedad de la Carga',
+    step3Title: '3. Formato de Detergente',
+    step4Title: '4. Artículos Delicados en Esta Carga (Alertas Opcionales)',
+    step4Sub: 'Marca cualquier material sensible en las bandejas para alertas químicas, de temperatura o lavado a mano.',
+    dashboardKicker: 'Receta Exacta de Química y Dosificación',
+    statusSafe: 'DOSIS ÓPTIMA',
+    statusCaution: 'AJUSTE NECESARIO',
+    statusStop: 'RETIRA ARTÍCULOS DE LAVADO A MANO',
+    mainWashLabel: 'Cajetín Principal',
+    preWashLabel: 'Compartimento Prelavado',
+    rinseAidLabel: 'Selector Abrillantador (1–6)',
+    cycleTempLabel: 'Ciclo y Temperatura',
+    tbspUnit: 'cda',
+    tspUnit: 'cdta',
+    mlUnit: 'mL',
+    dialOfSix: '/ 6',
+    podMainText: '1 Cápsula',
+    podMainSub: 'SOLO en el cajetín cerrado — NUNCA suelta en la cuba',
+    podPreSkip: '0 cdta (Omitir — la cápsula ya sobredosifica agua blanda)',
+    podPreAddPrefix: '+ ',
+    podPreAddSuffix: ' polvo suelto en prelavado (NUNCA una 2.ª cápsula)',
+    powderMainSub: 'Llena el cajetín principal y cierra bien la tapa',
+    gelMainSub: 'Ajustado +25% por dilución líquida frente a polvo seco',
+    ffMainSub: 'Fórmula sin perfume — ideal para silicona y bebés',
+    crystalCutNote: 'Reducido ~25% para proteger cristal fino de corrosión',
+    preWashNoneNote: 'Omite el prelavado en agua blanda con poca suciedad para evitar corrosión.',
+    preWashWhy: 'Por qué importa el prelavado: El lavavajillas vacía el agua inicial tras 10–15 min ANTES de abrir el cajetín principal; el prelavado despega la grasa desde el inicio.',
+    citricBoosterNote: '+ Añade 1–2 cdtas (5–10 mL) de ácido cítrico alimentario para neutralizar la cal intensa.',
+    rinseAidSiliconeNote: 'Bajado 1 punto (u omitir si solo hay silicona) para evitar película en artículos de bebé.',
+    rinseAidStandardNote: 'Rompe la tensión del agua para que vasos y plásticos sequen sin marcas.',
+    rinseAidMaxNote: 'Nivel máximo + revisa la sal regeneradora del lavavajillas para evitar manchas blancas.',
+    cycleNormal: 'Auto / Normal (52–60°C / 125–140°F)',
+    cycleNormalSub: 'Retira solo restos sólidos; NO preenjuagues los platos para que las enzimas actúen.',
+    cycleLight: 'Ligero / Eco (45–55°C / 115–130°F)',
+    cycleLightSub: 'Evita programas Rápidos si usas cápsulas para que se disuelvan y enjuaguen del todo.',
+    cycleHeavy: 'Intensivo / Ollas (60–68°C / 140–155°F)',
+    cycleHeavySub: 'Mayor duración y agua más caliente disuelven grasa horneada y almidón seco.',
+    cycleDelicate: 'Delicado / Copas (40–45°C / 105–115°F) · Secado Calor OFF',
+    cycleDelicateSub: 'Apagar Secado con Calor y Sanitize protege el cristal fino y evita olor a jabón en silicona.',
+    hotTapTipTitle: 'Truco Pro — Abre el Grifo de Agua Caliente 30–60 s Antes:',
+    hotTapTipBody: 'Muchos lavavajillas toman agua de la línea caliente del fregadero. Dejar correr el agua caliente (~49°C / 120°F) antes de dar a Inicio hace que el prelavado arranque caliente y no con agua fría de tubería.',
+    alertsSectionTitle: 'Alertas Activas de Seguridad Química y Materiales',
+    noAlertsText: 'Sin alertas químicas de riesgo para esta configuración. Retira restos sólidos y comprueba que los brazos giren libremente.',
+    softEtchTitle: 'Riesgo de Corrosión de Cristal en Agua Blanda (0–3 gpg)',
+    softEtchBody: 'El agua blanda casi no tiene calcio para amortiguar el detergente alcalino. Nunca superes la dosis baja indicada ni preenjuagues los platos impolutos, o corroerá permanentemente el vidrio.',
+    softPodTitle: 'Aviso: Las Cápsulas Sobredosifican el Agua Blanda',
+    softPodBody: 'Las cápsulas traen ~20–25 g pensados para agua dura. En agua blanda (0–3 gpg) aceleran el velo turbio permanente en vasos y dejan residuo jabonoso. Cambia a Polvo dosificable.',
+    podQuickWashTitle: 'Regla de Ubicación de Cápsulas y Ciclos Rápidos',
+    podQuickWashBody: 'Coloca SIEMPRE la cápsula en el cajetín seco: tirarla al fondo hace que se pierda en el drenaje del prelavado. Evita ciclos Rápidos (<45 min) donde la película soluble puede no aclararse bien.',
+    gelStabilityTitle: 'Limitación de Estabilidad del Gel Líquido',
+    gelStabilityBody: 'El gel líquido no puede mantener estables blanqueador de oxígeno y enzimas a la vez, por lo que aumentamos ~25% el volumen. Para manchas de té o fuentes horneadas, el Polvo rinde mucho mejor.',
+    veryHardFilmTitle: 'Alto Riesgo de Película de Cal en Agua Muy Dura (15+ gpg)',
+    veryHardFilmBody: 'Con más de 250 ppm se deposita cal blanca en vasos y filtros. Mantén el Abrillantador en 6, añade 1–2 cdtas de ácido cítrico en prelavado, rellena la sal del descalcificador y descalcifica cada mes.',
+    siliconeSafeConfirmTitle: 'Configuración Sin Fragancia para Silicona Verificada ✓',
+    siliconeSafeConfirmBody: '¡Excelente elección usar detergente Sin Fragancia para silicona de bebé! Recuerda mantener apagados Secado con Calor/Sanitize y bajar el abrillantador para evitar sabor a jabón.',
+    copyBtn: 'Copiar Ajustes de Dosis',
+    copiedBtn: 'Ajustes Copiados ✓',
+    printBtn: 'Imprimir Chuleta de Lavavajillas',
+    resetBtn: 'Restablecer',
+    vinegarTitle: 'Diagnóstico de Vasos Turbios: Prueba del Vinagre de 5 Minutos',
+    vinegarSub: 'Frota o remoja un vaso turbio con vinagre blanco al 5% durante 5 minutos, enjuaga y elige qué ocurrió:',
+    vinegarStepsTitle: 'Plan de Acción Exacto',
+    emergencyToggleHint: 'Haz clic para abrir el rescate de espuma en 4 pasos',
+    rulesTitle: '3 Reglas de Ingeniería para Vajilla Brillante Sin Corrosión',
+    rulesSub: 'Basadas en válvulas reales de lavavajillas, química del agua y estabilidad enzimática.',
+    rule1Title: 'Purga el Grifo Caliente Antes de Iniciar',
+    rule1Body: 'Abrir el agua caliente 30 segundos antes de encender el lavavajillas garantiza un prelavado caliente capaz de disolver grasa desde el minuto 1.',
+    rule2Title: 'Raspa Sólidos — No Preenjuagues Impoluto',
+    rule2Body: 'Los sensores de turbidez acortan el ciclo si el agua sale limpia, y el detergente alcalino ataca tus vasos cuando no hay grasa que neutralizar.',
+    rule3Title: 'Usa Siempre el Prelavado (No Solo el Cajetín)',
+    rule3Body: 'La tapa principal permanece cerrada en el prelavado. Añadir 0.5–2 cdtas de polvo en el prelavado mejora más la limpieza que cápsulas caras.',
+    relatedHeading: 'Herramientas Relacionadas de Lavavajillas y Seguridad',
+    relatedDescaleTag: 'Ratios de Ácido Cítrico y Vinagre',
+    relatedDescaleTitle: 'Calculadora de Descalcificación de Electrodomésticos →',
+    relatedDescaleDesc: 'Calcula gramos exactos de ácido cítrico y ciclos seguros para cafeteras, hervidores y equipos con agua dura.',
+    relatedSymbolTag: 'Iconos Aptos para Lavavajillas',
+    relatedSymbolTitle: 'Decodificador de Símbolos de Cocina →',
+    relatedSymbolDesc: 'Identifica iconos de bandeja superior, copas aptas para lavavajillas, códigos de plástico y marcas en ollas.',
+    relatedBabyTag: 'Silicona, Vidrio y Plástico',
+    relatedBabyTitle: 'Verificador de Biberones y Silicona →',
+    relatedBabyDesc: 'Comprueba plásticos sin BPA, eliminación del sabor a jabón en silicona y temperaturas seguras de esterilización.',
+    methodologyStripTitle: 'Verificado con Estándares de Química de Electrodomésticos',
+    methodologyStripPrefix: 'Nuestros rangos de dureza, pH alcalino y abrillantador siguen especificaciones técnicas de fabricantes. Lee nuestra',
+    methodologyLabel: 'Metodología',
+    dishwasherHubLabel: 'Guía de Lavavajillas',
+    allToolsLabel: 'Todas las Herramientas →',
+    faqTitle: 'Preguntas Frecuentes: Detergente, Abrillantador y Agua Dura',
+    copyHeader: 'IsItKitchenSafe — Ajustes de Dosis y Seguridad de Lavavajillas',
+    copyProfileLine: 'Perfil de Carga',
+    copyMainLine: 'Dosis Principal',
+    copyPreLine: 'Dosis Prelavado',
+    copyRinseLine: 'Selector Abrillantador',
+    copyCycleLine: 'Ciclo y Temp.',
+    copyAlertsHeader: 'Alertas Activas:'
+  },
+  pt: {
+    ariaLabel: 'Calculadora de Dose de Detergente, Secante e Dureza da Água para Lava-Louças',
+    step1Title: '1. Selecione a Dureza da Sua Água',
+    step1Sub: 'Consulte o laudo da água ou observe se a chaleira cria crosta branca (Dura/Muito Dura) ou se o sabão parece escorregadio (Mole).',
+    step2Title: '2. Nível de Sujeira da Louça',
+    step3Title: '3. Formato do Detergente',
+    step4Title: '4. Itens Delicados Nesta Carga (Alertas Opcionais)',
+    step4Sub: 'Marque materiais sensíveis na lava-louças para alertas químicos, de temperatura ou lavagem manual.',
+    dashboardKicker: 'Receita Exata de Dosagem e Química da Lava-Louças',
+    statusSafe: 'DOSE IDEAL',
+    statusCaution: 'AJUSTE NECESSÁRIO',
+    statusStop: 'RETIRE ITENS DE LAVAGEM MANUAL',
+    mainWashLabel: 'Compartimento Principal',
+    preWashLabel: 'Compartimento Pré-Lavagem',
+    rinseAidLabel: 'Regulador Secante (1–6)',
+    cycleTempLabel: 'Ciclo e Temperatura',
+    tbspUnit: 'colh. sopa',
+    tspUnit: 'colh. chá',
+    mlUnit: 'mL',
+    dialOfSix: '/ 6',
+    podMainText: '1 Cápsula',
+    podMainSub: 'SOMENTE no dispenser fechado — NUNCA solta no fundo',
+    podPreSkip: '0 colh. chá (Pular — cápsula já excede dose em água mole)',
+    podPreAddPrefix: '+ ',
+    podPreAddSuffix: ' pó solto na pré-lavagem (NUNCA uma 2ª cápsula)',
+    powderMainSub: 'Coloque no compartimento principal e feche bem a tampa',
+    gelMainSub: 'Ajustado +25% devido à diluição líquida vs. pó seco',
+    ffMainSub: 'Fórmula sem perfume — ideal para silicone e bebês',
+    crystalCutNote: 'Reduzido ~25% para proteger cristal fino contra corrosão',
+    preWashNoneNote: 'Pule a pré-lavagem em água mole com sujeira leve para evitar corrosão.',
+    preWashWhy: 'Por que a pré-lavagem importa: A máquina drena a água dos primeiros 10–15 min ANTES de abrir o dispenser principal; o sabão na pré-lavagem solta gordura cedo.',
+    citricBoosterNote: '+ Adicione 1–2 colh. chá (5–10 mL) de ácido cítrico alimentício para neutralizar o cálcio.',
+    rinseAidSiliconeNote: 'Reduzido em 1 nível (ou pule em cargas só de silicone) para evitar filme em itens de bebê.',
+    rinseAidStandardNote: 'Faz a água escorrer de vidros e plásticos para secar sem manchas.',
+    rinseAidMaxNote: 'Nível máximo + confira o sal regenerador para impedir manchas brancas de calcário.',
+    cycleNormal: 'Auto / Normal (52–60°C / 125–140°F)',
+    cycleNormalSub: 'Raspe apenas restos sólidos — NÃO pré-enxágue para que as enzimas tenham sujeira para agir.',
+    cycleLight: 'Leve / Eco (45–55°C / 115–130°F)',
+    cycleLightSub: 'Evite ciclos Rápidos se usar cápsulas para garantir dissolução e enxágue completos.',
+    cycleHeavy: 'Pesado / Panelas (60–68°C / 140–155°F)',
+    cycleHeavySub: 'Mais tempo e água mais quente removem gordura assada e amido ressecado.',
+    cycleDelicate: 'Delicado / Taças (40–45°C / 105–115°F) · Secagem Quente OFF',
+    cycleDelicateSub: 'Desligar Secagem Quente e Sanitize evita corrosão de taças e gosto de sabão no silicone.',
+    hotTapTipTitle: 'Dica Pro — Abra a Torneira Quente 30–60 s Antes:',
+    hotTapTipBody: 'Se sua lava-louças usa entrada de água quente da pia, abra a torneira até aquecer (~49°C / 120°F) antes de apertar Iniciar para que a pré-lavagem comece quente.',
+    alertsSectionTitle: 'Alertas Ativos de Segurança Química e Materiais',
+    noAlertsText: 'Nenhum risco químico detectado para este perfil. Raspe restos sólidos e verifique se as hélices giram livres.',
+    softEtchTitle: 'Risco de Corrosão de Vidros em Água Mole (0–3 gpg)',
+    softEtchBody: 'Água mole quase não tem cálcio para amortecer o detergente alcalino. Nunca ultrapasse a dose baixa indicada nem pré-enxágue demais, ou o vidro ficará turvo para sempre.',
+    softPodTitle: 'Atenção: Cápsulas Sobredosam em Água Mole',
+    softPodBody: 'Cápsulas têm dose fixa pesada (~20–25 g) para água dura. Em água mole (0–3 gpg), aceleram o embaçamento permanente de copos e deixam resíduo. Troque por Pó dosável.',
+    podQuickWashTitle: 'Regra de Posição da Cápsula e Ciclos Rápidos',
+    podQuickWashBody: 'Coloque SEMPRE a cápsula no dispenser seco — jogá-la solta na cuba faz desperdiçar quase tudo no dreno da pré-lavagem. Evite ciclos Rápidos (<45 min).',
+    gelStabilityTitle: 'Limite de Estabilidade do Gel Líquido',
+    gelStabilityBody: 'Géis líquidos não mantêm alvejante de oxigênio e enzimas estáveis juntos, por isso aumentamos o volume em ~25%. Para chá/café e assadeiras, o Pó limpa muito melhor.',
+    veryHardFilmTitle: 'Alto Risco de Película de Calcário em Água Muito Dura (15+ gpg)',
+    veryHardFilmBody: 'Água acima de 250 ppm deixa camada branca fosca em copos e filtros. Mantenha Secante no 6, use 1–2 colh. chá de ácido cítrico na pré-lavagem e descalcifique todo mês.',
+    siliconeSafeConfirmTitle: 'Configuração Sem Fragrância para Silicone Confirmada ✓',
+    siliconeSafeConfirmBody: 'Ótima escolha usar detergente Sem Fragrância para silicone infantil! Mantenha Secagem Quente/Sanitize DESLIGADOS e reduza o secante para zero gosto de sabão.',
+    copyBtn: 'Copiar Configurações de Dose',
+    copiedBtn: 'Configurações Copiadas ✓',
+    printBtn: 'Imprimir Guia Rápido',
+    resetBtn: 'Redefinir',
+    vinegarTitle: 'Diagnóstico de Copo Embaçado: Teste do Vinagre de 5 Minutos',
+    vinegarSub: 'Esfregue ou deixe de molho um copo embaçado em vinagre branco 5% por 5 minutos, enxágue e selecione o resultado:',
+    vinegarStepsTitle: 'Plano de Ação Exato',
+    emergencyToggleHint: 'Clique para abrir o resgate de espuma em 4 passos',
+    rulesTitle: '3 Regras de Engenharia para Louça Brilhante Sem Danos',
+    rulesSub: 'Baseadas no ciclo real de válvulas, química da água e ação enzimática.',
+    rule1Title: 'Aqueça a Linha de Água Antes de Iniciar',
+    rule1Body: 'Abrir a torneira quente por 30 segundos antes de ligar garante que a pré-lavagem já comece quente e dissolva gordura de verdade.',
+    rule2Title: 'Raspe Sólidos — Não Pré-Enxágue Limpo',
+    rule2Body: 'Sensores de turbidez encurtam ciclos se a água estiver limpa, e o detergente alcalino ataca seus vidros quando falta gordura para reagir.',
+    rule3Title: 'Sempre Dose a Pré-Lavagem (Não Só o Dispenser)',
+    rule3Body: 'O dispenser principal fica fechado na pré-lavagem. Colocar 0,5–2 colh. chá de pó na pré-lavagem aumenta muito o poder de limpeza.',
+    relatedHeading: 'Ferramentas Relacionadas de Lava-Louças e Segurança',
+    relatedDescaleTag: 'Proporções de Ácido Cítrico e Vinagre',
+    relatedDescaleTitle: 'Calculadora de Descalcificação de Eletrodomésticos →',
+    relatedDescaleDesc: 'Calcule gramas exatas de ácido cítrico e ciclos seguros para cafeteiras, chaleiras e aparelhos em água dura.',
+    relatedSymbolTag: 'Ícones de Lava-Louças',
+    relatedSymbolTitle: 'Decodificador de Símbolos de Cozinha →',
+    relatedSymbolDesc: 'Identifique ícones de prateleira superior, taças seguras, códigos de plástico e símbolos no fundo de panelas.',
+    relatedBabyTag: 'Silicone, Vidro e Plástico',
+    relatedBabyTitle: 'Verificador de Mamadeiras e Silicone →',
+    relatedBabyDesc: 'Verifique plásticos sem BPA, remoção de gosto de sabão em silicone e limites térmicos para itens infantis.',
+    methodologyStripTitle: 'Verificado Segundo Padrões de Química de Eletrodomésticos',
+    methodologyStripPrefix: 'Limites de dureza, pH alcalino e regulagem de secante seguem especificações técnicas dos fabricantes. Leia nossa',
+    methodologyLabel: 'Metodologia',
+    dishwasherHubLabel: 'Central de Lava-Louças',
+    allToolsLabel: 'Todas as Ferramentas →',
+    faqTitle: 'Perguntas Frequentes: Detergente, Secante e Água Dura na Lava-Louças',
+    copyHeader: 'IsItKitchenSafe — Dosagem e Segurança na Lava-Louças',
+    copyProfileLine: 'Perfil da Carga',
+    copyMainLine: 'Dose Principal',
+    copyPreLine: 'Dose Pré-Lavagem',
+    copyRinseLine: 'Regulador Secante',
+    copyCycleLine: 'Ciclo e Temp.',
+    copyAlertsHeader: 'Alertas Ativos:'
+  },
+  'zh-cn': {
+    ariaLabel: '洗碗机洗涤剂剂量、亮碟剂档位与水质硬度安全计算器',
+    step1Title: '1. 选择自来水硬度等级',
+    step1Sub: '可查当地水质报告，或观察电水壶：易结白垢为硬水/极硬水，肥皂滑腻难冲净多为软水。',
+    step2Title: '2. 餐具油污程度',
+    step3Title: '3. 洗碗剂形态选择',
+    step4Title: '4. 本次是否混洗敏感/娇贵材质（可选安全开关）',
+    step4Sub: '勾选同机餐具中的特殊材质，实时触发化学腐蚀、串味与禁机洗警示。',
+    dashboardKicker: '精准洗碗机化学配比与投放方案',
+    statusSafe: '配比安全最佳',
+    statusCaution: '需按提示调整',
+    statusStop: '立即移出禁机洗物品',
+    mainWashLabel: '主洗分配盒用量',
+    preWashLabel: '预洗槽用量',
+    rinseAidLabel: '亮碟剂档位 (1–6)',
+    cycleTempLabel: '推荐程序与水温',
+    tbspUnit: '汤匙',
+    tspUnit: '茶匙',
+    mlUnit: 'mL',
+    dialOfSix: '/ 6 档',
+    podMainText: '1 颗凝珠',
+    podMainSub: '仅放主洗密闭盒 — 严禁直接丢在机槽底部',
+    podPreSkip: '0 茶匙（跳过 — 凝珠在软水中本身已超量）',
+    podPreAddPrefix: '+ 预洗加 ',
+    podPreAddSuffix: ' 散装洗碗粉（严禁放第 2 颗凝珠）',
+    powderMainSub: '倒入主洗槽并扣紧滑盖',
+    gelMainSub: '因液态稀释已较干粉自动上调约 25% 体积',
+    ffMainSub: '无香精配方 — 母婴硅胶餐具安心之选',
+    crystalCutNote: '已为水晶玻璃自动减量 ~25% 防碱蚀雾化',
+    preWashNoneNote: '软水轻污跳过预洗投放，防止过量碱液蚀刻玻璃杯。',
+    preWashWhy: '为何预洗槽很关键：洗碗机先运行 10–15 分钟预洗排走脏水后才打开主洗盒；加一点预洗粉可提前乳化油脂并软化硬水。',
+    citricBoosterNote: '+ 建议在预洗槽加 1–2 茶匙（5–10 mL）食品级柠檬酸粉中和重度水垢。',
+    rinseAidSiliconeNote: '已自动下调 1 档（纯硅胶专洗可暂关）以防亮碟剂附着硅胶微孔。',
+    rinseAidStandardNote: '降低水表面张力，让玻璃与塑料速干无水渍。',
+    rinseAidMaxNote: '调至最高档，并检查加满洗碗机专用软水盐防白色钙膜。',
+    cycleNormal: '智能 / 标准洗 (52–60°C / 125–140°F)',
+    cycleNormalSub: '刮掉大块食物残渣即可，切勿把盘子冲得一干二净，否则酶和碱液无油可中和。',
+    cycleLight: '轻柔 / 节能洗 (45–55°C / 115–130°F)',
+    cycleLightSub: '若用洗碗凝珠请避开 30 分钟超快洗，以免水溶膜溶解漂洗不彻底。',
+    cycleHeavy: '强力 / 锅具洗 (60–68°C / 140–155°F)',
+    cycleHeavySub: '更长洗涤时长与高温漂洗，瓦解烤焦芝士、重油与干结米饭。',
+    cycleDelicate: '玻璃 / 轻柔档 (40–45°C / 105–115°F) · 关闭高温烘干',
+    cycleDelicateSub: '关闭高温烘干与消毒档，防止薄水晶永久蚀刻与硅胶吸香串味。',
+    hotTapTipTitle: '工程师秘籍 — 开机前先放 30–60 秒厨房热水：',
+    hotTapTipBody: '多数接热水管的洗碗机与水槽共用进水管。按下启动前先把厨房水龙头放至出热水（约 49°C / 120°F），可让预洗从第 1 分钟就用热水去油，而非冷水空转。',
+    alertsSectionTitle: '当前材质与化学安全预警',
+    noAlertsText: '当前洗涤配置未触发化学风险。刮除大块残渣、碗口朝下倾斜摆放并确认喷臂旋转无遮挡即可。',
+    softEtchTitle: '软水玻璃永久蚀刻风险 (0–3 gpg)',
+    softEtchBody: '软水几乎不含钙镁离子来中和洗碗剂碱性。严格控制上述低剂量，且切勿提前把盘子冲干净，否则强碱会永久腐蚀玻璃表面。',
+    softPodTitle: '警告：固定剂量凝珠在软水中严重过量',
+    softPodBody: '单颗凝珠通常含 20–25 克针对硬水满载的高碱配方。在软水 (0–3 gpg) 中使用会大幅加速玻璃永久白雾蚀刻并残留滑腻皂膜，建议改用洗碗粉精准控量。',
+    podQuickWashTitle: '凝珠投放位置与快洗避坑提醒',
+    podQuickWashBody: '务必放入干燥的主洗盒内——直接丢进槽底会在预洗排水阶段被白白冲走。同时避开短于 45 分钟的超快洗程序，防止水溶膜与浓缩块漂洗残留。',
+    gelStabilityTitle: '洗碗液 / 凝胶去污稳定性说明',
+    gelStabilityBody: '液态配方无法同时稳定保留氧漂因子与多种生物酶，因此系统已上调 ~25% 体积用量。面对茶渍、咖啡渍或重油烤盘，干粉洗碗粉表现显著更优。',
+    veryHardFilmTitle: '极硬水白色钙垢结膜警告 (15+ gpg)',
+    veryHardFilmBody: '超过 250 ppm 的极硬水会在玻璃杯和喷臂形成白霜水垢。请将亮碟剂设为 6 档、预洗加 1–2 茶匙柠檬酸、及时加满软水盐，并每月做一次柠檬酸自洁。',
+    siliconeSafeConfirmTitle: '母婴硅胶无香精方案已校验 ✓',
+    siliconeSafeConfirmBody: '选用无香精配方清洗硅胶非常正确！请同步关闭高温烘干与高温消毒并调低亮碟剂，即可彻底告别硅胶肥皂味。',
+    copyBtn: '复制投放方案',
+    copiedBtn: '方案已复制 ✓',
+    printBtn: '打印洗碗机速查卡',
+    resetBtn: '重置',
+    vinegarTitle: '玻璃杯发雾一键鉴别：5 分钟白醋擦拭测试',
+    vinegarSub: '用 5% 食用白醋湿敷或擦拭雾面玻璃杯 5 分钟后清水冲净，选择你看到的结果：',
+    vinegarStepsTitle: '精准处理方案',
+    emergencyToggleHint: '点击展开 4 步泡沫溢流紧急抢救',
+    rulesTitle: '洗碗机洗得透亮不伤杯的 3 条工程黄金法则',
+    rulesSub: '源自洗碗机水路时序、水质化学与生物酶作用机制。',
+    rule1Title: '启动前先放热厨房水龙头',
+    rule1Body: '花 30 秒把水槽冷水管水排空，让前 10 分钟预洗直接注入热水，油脂乳化效率瞬间翻倍。',
+    rule2Title: '只刮大残渣，切忌提前冲太干净',
+    rule2Body: '浊度传感器误判餐具干净会缩短程序，且缺少食物油脂中和时强碱洗碗剂会转而腐蚀玻璃杯。',
+    rule3Title: '别空着预洗槽（不只放主洗盒）',
+    rule3Body: '预洗阶段主洗盒处于锁闭状态。在预洗槽补 0.5–2 茶匙洗碗粉的洁净提升远超购买昂贵高价凝珠。',
+    relatedHeading: '相关洗碗机、除垢与母婴餐具安全工具',
+    relatedDescaleTag: '柠檬酸与白醋配比',
+    relatedDescaleTitle: '厨房电器除水垢比例计算器 →',
+    relatedDescaleDesc: '精准计算咖啡机、电水壶与硬水家电所需的食品级柠檬酸克数与安全酸洗流程。',
+    relatedSymbolTag: '洗碗机适用标志速查',
+    relatedSymbolTitle: '厨房电器与餐具图标解码器 →',
+    relatedSymbolDesc: '秒懂仅限上层机洗、玻璃杯机洗标志、塑料回收码与锅底兼容符号。',
+    relatedBabyTag: '硅胶、玻璃与塑料',
+    relatedBabyTitle: '婴儿奶瓶与硅胶安全检测器 →',
+    relatedBabyDesc: '核查无 BPA 塑料、硅胶去肥皂味方法、蒸汽消毒温度与洗碗机耐热上限。',
+    methodologyStripTitle: '依据家电水化学与主流洗碗机工程标准核验',
+    methodologyStripPrefix: '所有水质硬度分档、碱度安全阈值与亮碟剂设置均遵循家电技术规范，详见',
+    methodologyLabel: '评估方法论',
+    dishwasherHubLabel: '洗碗机安全专区',
+    allToolsLabel: '全部实用工具 →',
+    faqTitle: '常见问题解答：洗碗机洗涤剂、亮碟剂与硬水防护',
+    copyHeader: 'IsItKitchenSafe — 洗碗机洗涤剂与水质安全配比',
+    copyProfileLine: '洗涤配置',
+    copyMainLine: '主洗用量',
+    copyPreLine: '预洗用量',
+    copyRinseLine: '亮碟剂档位',
+    copyCycleLine: '推荐程序与水温',
+    copyAlertsHeader: '安全提醒：'
+  },
+  ja: {
+    ariaLabel: '食洗機洗剤・リンス剤・水硬度 安全計量計算機',
+    step1Title: '1. ご自宅の水道水硬度を選択',
+    step1Sub: '自治体の水質データを確認するか、ケトルに白い水アカが付くか（硬水）、石鹸がぬるつくか（軟水）を目安にしてください。',
+    step2Title: '2. 食器の汚れレベル',
+    step3Title: '3. 洗剤タイプ',
+    step4Title: '4. 一緒に入れるデリケート素材（任意チェック）',
+    step4Sub: '該当するアイテムにチェックを入れると、化学変色・臭い移り・手洗い必須の警告を即表示します。',
+    dashboardKicker: '食洗機 洗剤・リンス剤 最適処方レシピ',
+    statusSafe: '最適なバランス',
+    statusCaution: '設定の調整が必要',
+    statusStop: '食洗機NG品を取り出してください',
+    mainWashLabel: '本洗い投入口',
+    preWashLabel: '予洗いポケット',
+    rinseAidLabel: 'リンス剤ダイヤル (1–6)',
+    cycleTempLabel: '推奨コース＆水温',
+    tbspUnit: '大さじ',
+    tspUnit: '小さじ',
+    mlUnit: 'mL',
+    dialOfSix: '/ 6',
+    podMainText: 'タブレット1個',
+    podMainSub: '必ず洗剤投入口へ — 庫内底への直置き厳禁',
+    podPreSkip: '小さじ0（省略 — 軟水では1個で既に過多）',
+    podPreAddPrefix: '+ 予洗いに粉末 ',
+    podPreAddSuffix: ' を追加（2個目のタブレット投入厳禁）',
+    powderMainSub: '本洗いポケットへ入れフタをしっかり閉める',
+    gelMainSub: '液体希釈分を補正し粉末比で約25%増量済み',
+    ffMainSub: '無香料処方 — シリコン・ベビー食器に最適',
+    crystalCutNote: '薄手グラス保護のため約25%減量済み',
+    preWashNoneNote: '軟水＋軽い汚れではエッチング防止のため予洗い洗剤を省きます。',
+    preWashWhy: '予洗いが効く理由：食洗機は本洗いフタが開く前に10〜15分の予洗い排水を行います。少量の予洗い洗剤で初期の油分解力が劇的に上がります。',
+    citricBoosterNote: '+ 硬水カルシウム対策に食品用クエン酸を小さじ1〜2（5〜10 mL）予洗いへ追加推奨。',
+    rinseAidSiliconeNote: 'シリコンへの皮膜付着を防ぐため1段下げ（シリコンのみ洗う際はOFFも推奨）。',
+    rinseAidStandardNote: '水切れを良くし、グラスやプラ容器の水滴跡を防ぎます。',
+    rinseAidMaxNote: '最大設定＋内蔵軟水器がある場合は専用塩の残量を確認してください。',
+    cycleNormal: '標準／オート (52–60°C / 125–140°F)',
+    cycleNormalSub: '固形物だけ落とし、洗い流しすぎないことで酵素とアルカリが適切に作用します。',
+    cycleLight: '弱／エコ (45–55°C / 115–130°F)',
+    cycleLightSub: 'タブレット使用時は溶け残り防止のため時短・スピードコースを避けてください。',
+    cycleHeavy: '念入り／強力 (60–68°C / 140–155°F)',
+    cycleHeavySub: '長時間の高温洗浄で焼き付き脂や乾いたデンプンをしっかり分解します。',
+    cycleDelicate: 'グラス／低温 (40–45°C / 105–115°F) ・高温乾燥OFF',
+    cycleDelicateSub: '高温乾燥と除菌をOFFにし、グラスのエッチングやシリコンの石鹸臭移りを防ぎます。',
+    hotTapTipTitle: 'プロのコツ — 運転前にキッチンのお湯を30〜60秒流す：',
+    hotTapTipBody: '給湯接続の食洗機はシンクと同じ配管から取水します。スタート前に蛇口が十分熱くなる（約49°C / 120°F）まで流すと、予洗いが冷水ではなく温水で始まり洗浄力が激変します。',
+    alertsSectionTitle: '稼働中の素材・化学安全アラート',
+    noAlertsText: 'この設定で特別な化学リスクはありません。固形物を落とし、ノズルが干渉しないよう並べて開始してください。',
+    softEtchTitle: '軟水グラス白濁（エッチング）注意 (0–3 gpg)',
+    softEtchBody: '日本の多くの水道水など軟水はカルシウムが少なくアルカリ洗剤が余りやすいです。上記の低用量を守り、食器を事前にピカピカに洗い流しすぎないでください。',
+    softPodTitle: '警告：タブレット／ジェルボールは軟水で過剰投与になります',
+    softPodBody: '固定量のタブレット（約20〜25g）は硬水向けに設計されています。軟水(0–3 gpg)ではグラスの永久白濁を早め洗剤残りの原因になるため、計量できる粉末洗剤をおすすめします。',
+    podQuickWashTitle: 'タブレット投入位置＆時短コースの注意点',
+    podQuickWashBody: '必ず乾いた本洗いポケットへ入れてください（庫内直置きは予洗いで流失します）。また45分未満のスピードコースでは溶け残り・すすぎ残しが起きやすいため避けてください。',
+    gelStabilityTitle: '液体・ジェル洗剤の漂白安定性について',
+    gelStabilityBody: '液体処方では酸素系漂白剤と酵素を同時に安定保持しにくいため容量を約25%増やしています。茶渋や焦げ汚れには粉末洗剤が圧倒的に強力です。',
+    veryHardFilmTitle: '超硬水カルシウム白膜リスク (15+ gpg)',
+    veryHardFilmBody: '250 ppm超の超硬水では白い水アカが蓄積します。リンス剤を6に設定し、予洗いにクエン酸小さじ1〜2を追加、軟水塩の補充と月1回の庫内洗浄を行ってください。',
+    siliconeSafeConfirmTitle: 'シリコン向け無香料設定を確認済み ✓',
+    siliconeSafeConfirmBody: '無香料洗剤の選択は完璧です！高温乾燥・除菌をOFFにしリンス剤も控えめにすれば、ベビー用シリコンへの石鹸味移りを防げます。',
+    copyBtn: '計量設定をコピー',
+    copiedBtn: 'コピーしました ✓',
+    printBtn: '食洗機ガイドを印刷',
+    resetBtn: 'リセット',
+    vinegarTitle: '曇ったグラス診断：5分間ホワイトビネガー拭き取りテスト',
+    vinegarSub: '5%食酢を含ませたペーパーで曇ったグラスを5分拭く（または浸す）→ すすいだ結果を選択：',
+    vinegarStepsTitle: '具体的な対処プラン',
+    emergencyToggleHint: 'クリックして泡あふれ緊急レスキュー4手順を開く',
+    rulesTitle: 'グラスを守りピカピカに洗う3つの工学ルール',
+    rulesSub: '食洗機の給排水タイミング・水質化学・酵素反応の原則に基づきます。',
+    rule1Title: 'スタート前にキッチンのお湯を流す',
+    rule1Body: '給湯配管の冷水を30秒抜くだけで、最初の10分予洗いが温水になり油落ちが格段に向上します。',
+    rule2Title: '固形物だけ落とし、洗いすぎない',
+    rule2Body: '汚れゼロで入れると濁度センサーが時短運転し、余ったアルカリ成分がグラス表面を攻撃します。',
+    rule3Title: '予洗いポケットにも洗剤を入れる',
+    rule3Body: '予洗い中は本洗いフタが閉じたままです。予洗いへ粉末小さじ0.5〜2足すだけで高級タブレット以上に洗浄力が上がります。',
+    relatedHeading: '関連する食洗機・除垢・ベビー安全ツール',
+    relatedDescaleTag: 'クエン酸・食酢の最適比率',
+    relatedDescaleTitle: '家電製品・ケトル除垢比率計算機 →',
+    relatedDescaleDesc: 'コーヒーメーカーや電気ケトル、硬水家電に安全なクエン酸グラム数と洗浄サイクルを算出。',
+    relatedSymbolTag: '食洗機対応マーク解読',
+    relatedSymbolTitle: 'キッチン家電・食器マークデコーダー →',
+    relatedSymbolDesc: '上段のみ食洗機可・ワイングラスマーク・プラ材質表示・鍋底アイコンを瞬時に判別。',
+    relatedBabyTag: 'シリコン・ガラス・プラ',
+    relatedBabyTitle: '哺乳瓶＆ベビーシリコン安全チェッカー →',
+    relatedBabyDesc: 'BPAフリー樹脂・シリコンの石鹸臭除去・スチーム消毒温度・食洗機耐熱上限を確認。',
+    methodologyStripTitle: '家電水質化学とメーカー仕様書に基づく検証基準',
+    methodologyStripPrefix: '硬度区分・アルカリpH上限・リンス剤基準は主要食洗機メーカー技術資料に準拠しています。詳細は',
+    methodologyLabel: '検証メソドロジー',
+    dishwasherHubLabel: '食洗機安全ハブ',
+    allToolsLabel: '全ツール一覧 →',
+    faqTitle: '食洗機洗剤・リンス剤・硬水に関するよくある質問',
+    copyHeader: 'IsItKitchenSafe — 食洗機 洗剤・リンス剤 安全計量レシピ',
+    copyProfileLine: '洗浄条件',
+    copyMainLine: '本洗い洗剤量',
+    copyPreLine: '予洗い洗剤量',
+    copyRinseLine: 'リンス剤ダイヤル',
+    copyCycleLine: '推奨コース＆水温',
+    copyAlertsHeader: '安全アラート：'
+  }
+};
+
+const t = UI[lang] || UI.en;
+
+// Default SSR state: medium hardness, normal soil, powder detergent, no delicates, vinegar = wiped-clear
+const defaultHardness = localizedHardness[1]; // medium
+const defaultSoil = localizedSoil[1]; // normal
+const defaultDetergent = localizedDetergents[0]; // powder
+const defaultMatrixEntry = rawData.dosageMatrix.medium.normal;
+const defaultVinegar = localizedVinegar['wiped-clear'];
+
+const clientPayload = {
+  lang,
+  waterHardness: localizedHardness,
+  soilLevels: localizedSoil,
+  detergentTypes: localizedDetergents,
+  dosageMatrix: rawData.dosageMatrix,
+  delicateToggles: localizedDelicates,
+  vinegarDiagnostic: localizedVinegar,
+  ui: t
+};
+---
+
+<div id="dishwasher-dosage-root" class="space-y-12">
+  <!-- Main Interactive Calculator Card -->
+  <section
+    id="dishwasher-detergent-dosage-calculator"
+    class="bg-canvas border border-hairline rounded-2xl shadow-sm overflow-hidden"
+    aria-label={t.ariaLabel}
+  >
+    <script type="application/json" id="ddd-payload" set:html={JSON.stringify(clientPayload)} />
+
+    <!-- Top Controls Panel: Steps 1–4 -->
+    <div class="p-5 sm:p-6 md:p-8 border-b border-hairline bg-surface-soft/50 space-y-6 print:hidden">
+      <!-- Step 1: Water Hardness (4 Tiers) -->
+      <div class="space-y-2.5">
+        <div>
+          <h2 class="text-title-sm font-semibold text-ink">{t.step1Title}</h2>
+          <p class="text-xs text-muted mt-0.5">{t.step1Sub}</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5" role="radiogroup" aria-label={t.step1Title}>
+          {localizedHardness.map((h) => {
+            const isSelected = h.id === defaultHardness.id;
+            return (
+              <button
+                type="button"
+                role="radio"
+                aria-checked={isSelected ? 'true' : 'false'}
+                data-ddd-hardness={h.id}
+                class={`ddd-hardness-btn p-3.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 ${
+                  isSelected
+                    ? 'bg-primary text-on-primary border-primary shadow-sm'
+                    : 'bg-canvas text-ink border-hairline hover:border-border-strong'
+                }`}
+              >
+                <div class="flex items-center justify-between gap-2 w-full">
+                  <span class="text-sm font-bold leading-snug">
+                    {h.icon} {h.label}
+                  </span>
+                </div>
+                <span class="text-[11px] font-mono opacity-85">{h.shortRange}</span>
+              </button>
+            );
+          })}
+        </div>
+        <p id="ddd-hardness-note" class="text-xs text-body bg-canvas border border-hairline rounded-xl px-3.5 py-2.5 leading-relaxed">
+          {defaultHardness.summary}
+        </p>
+      </div>
+
+      <!-- Step 2 (Soil Level) & Step 3 (Detergent Format) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Step 2: Soil Level -->
+        <div class="lg:col-span-5 space-y-2.5">
+          <h2 class="text-title-sm font-semibold text-ink">{t.step2Title}</h2>
+          <div class="grid grid-cols-1 gap-2" role="radiogroup" aria-label={t.step2Title}>
+            {localizedSoil.map((s) => {
+              const isSelected = s.id === defaultSoil.id;
+              return (
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected ? 'true' : 'false'}
+                  data-ddd-soil={s.id}
+                  class={`ddd-soil-btn p-3 rounded-xl border text-left transition-all cursor-pointer flex items-start gap-2.5 ${
+                    isSelected
+                      ? 'bg-surface-soft border-signature-coral ring-2 ring-signature-coral shadow-sm'
+                      : 'bg-canvas border-hairline hover:border-border-strong'
+                  }`}
+                >
+                  <span aria-hidden="true" class="text-lg leading-none mt-0.5 shrink-0">{s.icon}</span>
+                  <span class="min-w-0">
+                    <span class="block text-xs sm:text-[13px] font-bold text-ink">{s.label}</span>
+                    <span class="block text-[11px] text-muted leading-snug mt-0.5">{s.sub}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <!-- Step 3: Detergent Format -->
+        <div class="lg:col-span-7 space-y-2.5">
+          <h2 class="text-title-sm font-semibold text-ink">{t.step3Title}</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5" role="radiogroup" aria-label={t.step3Title}>
+            {localizedDetergents.map((d) => {
+              const isSelected = d.id === defaultDetergent.id;
+              return (
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected ? 'true' : 'false'}
+                  data-ddd-detergent={d.id}
+                  class={`ddd-detergent-btn p-3.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
+                    isSelected
+                      ? 'bg-surface-soft border-signature-coral ring-2 ring-signature-coral shadow-sm'
+                      : 'bg-canvas border-hairline hover:border-border-strong'
+                  }`}
+                >
+                  <div class="flex items-start justify-between gap-2 w-full">
+                    <span class="text-xs sm:text-[13px] font-bold text-ink leading-snug">
+                      {d.icon} {d.label}
+                    </span>
+                    <span class={d.recommended || d.isFragranceFree ? 'badge-yes !px-2 !py-0.5 !text-[10px]' : 'badge-depends !px-2 !py-0.5 !text-[10px]'}>
+                      {d.badge}
+                    </span>
+                  </div>
+                  <span class="text-[11px] text-muted leading-relaxed">{d.note}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: 4 Delicate Load Safety Checkboxes -->
+      <div class="space-y-2.5 pt-1 border-t border-hairline">
+        <div>
+          <h2 class="text-title-sm font-semibold text-ink">{t.step4Title}</h2>
+          <p class="text-xs text-muted mt-0.5">{t.step4Sub}</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          {localizedDelicates.map((item) => (
+            <label
+              data-ddd-delicate-card={item.id}
+              class="ddd-delicate-label flex items-start gap-3 p-3.5 rounded-xl border bg-canvas border-hairline hover:border-border-strong transition-all cursor-pointer select-none"
+            >
+              <input
+                type="checkbox"
+                value={item.id}
+                class="ddd-delicate-checkbox mt-0.5 w-4 h-4 rounded accent-signature-coral cursor-pointer shrink-0"
+              />
+              <span class="min-w-0 flex-1">
+                <span class="block text-xs sm:text-[13px] font-bold text-ink leading-snug">
+                  {item.icon} {item.label}
+                </span>
+              </span>
+            </label>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Calculation Dashboard -->
+    <div class="p-5 sm:p-6 md:p-8 space-y-6 bg-surface-soft/30">
+      <!-- High-Contrast Dark Header Banner + 4 Core Metrics -->
+      <div
+        id="ddd-result-banner"
+        aria-live="polite"
+        class="rounded-2xl bg-surface-dark text-on-dark p-5 sm:p-6 space-y-5 shadow-sm border-l-4 border-success-border"
+      >
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="space-y-0.5">
+            <span class="block text-[11px] font-bold uppercase tracking-wider text-signature-peach">
+              {t.dashboardKicker}
+            </span>
+            <p id="ddd-profile-summary" class="text-xs sm:text-[13px] text-white/85 font-medium">
+              {defaultHardness.label} ({defaultHardness.gpg}) · {defaultSoil.label} · {defaultDetergent.label}
+            </p>
+          </div>
+          <span id="ddd-status-pill" class="badge-yes">
+            {t.statusSafe}
+          </span>
+        </div>
+
+        <!-- 4 Live Dosage & Setting Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <!-- 1. Main-Wash Dosage -->
+          <div class="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col justify-between gap-2">
+            <div>
+              <span class="block text-[11px] font-semibold uppercase tracking-wider text-white/70">
+                {t.mainWashLabel}
+              </span>
+              <div id="ddd-main-dose" class="text-xl sm:text-2xl font-extrabold font-mono text-signature-yellow mt-1 leading-tight">
+                {defaultMatrixEntry.mainTbsp} {t.tbspUnit} ({Math.round(defaultMatrixEntry.mainTbsp * 15)} {t.mlUnit})
+              </div>
+            </div>
+            <p id="ddd-main-sub" class="text-[11.5px] text-white/80 leading-snug pt-2 border-t border-white/10">
+              {t.powderMainSub}
+            </p>
+          </div>
+
+          <!-- 2. Pre-Wash Dosage -->
+          <div class="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col justify-between gap-2">
+            <div>
+              <span class="block text-[11px] font-semibold uppercase tracking-wider text-white/70">
+                {t.preWashLabel}
+              </span>
+              <div id="ddd-pre-dose" class="text-xl sm:text-2xl font-extrabold font-mono text-signature-mint mt-1 leading-tight">
+                {defaultMatrixEntry.preTsp} {t.tspUnit} ({Math.round(defaultMatrixEntry.preTsp * 5)} {t.mlUnit})
+              </div>
+            </div>
+            <p id="ddd-pre-sub" class="text-[11.5px] text-white/80 leading-snug pt-2 border-t border-white/10">
+              {t.preWashWhy}
+            </p>
+          </div>
+
+          <!-- 3. Rinse Aid Dial Setting (1-6) -->
+          <div class="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col justify-between gap-2">
+            <div>
+              <span class="block text-[11px] font-semibold uppercase tracking-wider text-white/70">
+                {t.rinseAidLabel}
+              </span>
+              <div class="flex items-baseline gap-1.5 mt-1">
+                <span id="ddd-rinse-val" class="text-2xl sm:text-3xl font-extrabold font-mono text-white leading-none">
+                  {defaultMatrixEntry.rinseAid}
+                </span>
+                <span class="text-xs font-bold text-white/70">{t.dialOfSix}</span>
+              </div>
+              <!-- 6-step visual dial bar -->
+              <div id="ddd-rinse-bar" class="grid grid-cols-6 gap-1 mt-2.5" aria-hidden="true">
+                {[1, 2, 3, 4, 5, 6].map((step) => (
+                  <span
+                    data-ddd-dial-step={step}
+                    class={`h-2 rounded-full transition-colors ${
+                      step <= defaultMatrixEntry.rinseAid ? 'bg-signature-mint' : 'bg-white/15'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+            <p id="ddd-rinse-sub" class="text-[11.5px] text-white/80 leading-snug pt-2 border-t border-white/10">
+              {t.rinseAidStandardNote}
+            </p>
+          </div>
+
+          <!-- 4. Cycle & Water Temp -->
+          <div class="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col justify-between gap-2">
+            <div>
+              <span class="block text-[11px] font-semibold uppercase tracking-wider text-white/70">
+                {t.cycleTempLabel}
+              </span>
+              <div id="ddd-cycle-title" class="text-sm sm:text-[15px] font-bold text-white mt-1 leading-snug">
+                {t.cycleNormal}
+              </div>
+            </div>
+            <p id="ddd-cycle-sub" class="text-[11.5px] text-white/80 leading-snug pt-2 border-t border-white/10">
+              {t.cycleNormalSub}
+            </p>
+          </div>
+        </div>
+
+        <!-- Hot Tap Pro-Tip Strip -->
+        <div class="p-3.5 rounded-xl bg-white/8 border border-white/15 flex items-start gap-2.5">
+          <span aria-hidden="true" class="text-lg leading-none mt-0.5 shrink-0">🔥</span>
+          <p class="text-xs text-white/90 leading-relaxed">
+            <strong class="text-signature-peach">{t.hotTapTipTitle}</strong>{' '}
+            {t.hotTapTipBody}
+          </p>
+        </div>
+      </div>
+
+      <!-- Active Risk & Material Safety Alerts -->
+      <div class="space-y-3">
+        <h3 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-ink flex items-center gap-1.5">
+          <span aria-hidden="true">🛡️</span> {t.alertsSectionTitle}
+        </h3>
+        <div id="ddd-alerts-container" class="space-y-2.5" aria-live="polite">
+          <div class="p-4 rounded-xl bg-canvas border border-hairline flex items-start gap-3">
+            <span aria-hidden="true" class="text-lg leading-none mt-0.5 shrink-0">✅</span>
+            <p class="text-xs sm:text-[13px] text-body leading-relaxed">{t.noAlertsText}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Copy / Print / Reset Actions -->
+      <div class="flex flex-wrap items-center gap-2.5 pt-1 print:hidden">
+        <button
+          type="button"
+          id="ddd-copy-btn"
+          class="min-h-[44px] flex-1 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors cursor-pointer shadow-sm"
+        >
+          <span id="ddd-copy-label">📋 {t.copyBtn}</span>
+        </button>
+        <button
+          type="button"
+          id="ddd-print-btn"
+          class="min-h-[44px] px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-canvas text-ink border border-hairline hover:border-signature-coral transition-colors cursor-pointer"
+        >
+          🖨️ {t.printBtn}
+        </button>
+        <button
+          type="button"
+          id="ddd-reset-btn"
+          class="min-h-[44px] px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-canvas text-muted border border-hairline hover:border-border-strong hover:text-ink transition-colors cursor-pointer"
+        >
+          {t.resetBtn}
+        </button>
+      </div>
+    </div>
+
+    <!-- Interactive Cloudy Glass Vinegar Wipe Test Diagnostic -->
+    <div class="border-t border-hairline p-5 sm:p-6 md:p-8 space-y-5">
+      <div>
+        <h2 class="text-title-md font-semibold text-ink">{t.vinegarTitle}</h2>
+        <p class="text-xs sm:text-[13px] text-muted mt-1">{t.vinegarSub}</p>
+      </div>
+
+      <!-- 2-Way Toggle Buttons -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 print:hidden" role="radiogroup" aria-label={t.vinegarTitle}>
+        <button
+          type="button"
+          role="radio"
+          aria-checked="true"
+          data-ddd-vinegar="wiped-clear"
+          class="ddd-vinegar-btn p-4 rounded-xl border text-left transition-all cursor-pointer flex items-start gap-3 bg-surface-soft border-signature-coral ring-2 ring-signature-coral shadow-sm"
+        >
+          <span aria-hidden="true" class="text-2xl leading-none shrink-0">{localizedVinegar['wiped-clear'].icon}</span>
+          <span class="min-w-0">
+            <span class="block text-sm font-bold text-ink">{localizedVinegar['wiped-clear'].buttonLabel}</span>
+            <span class="block text-xs text-muted mt-0.5 leading-snug">{localizedVinegar['wiped-clear'].buttonSub}</span>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          role="radio"
+          aria-checked="false"
+          data-ddd-vinegar="stayed-cloudy"
+          class="ddd-vinegar-btn p-4 rounded-xl border text-left transition-all cursor-pointer flex items-start gap-3 bg-canvas border-hairline hover:border-error-border"
+        >
+          <span aria-hidden="true" class="text-2xl leading-none shrink-0">{localizedVinegar['stayed-cloudy'].icon}</span>
+          <span class="min-w-0">
+            <span class="block text-sm font-bold text-ink">{localizedVinegar['stayed-cloudy'].buttonLabel}</span>
+            <span class="block text-xs text-muted mt-0.5 leading-snug">{localizedVinegar['stayed-cloudy'].buttonSub}</span>
+          </span>
+        </button>
+      </div>
+
+      <!-- Live Vinegar Diagnostic Output -->
+      <div
+        id="ddd-vinegar-panel"
+        aria-live="polite"
+        class="p-5 rounded-2xl border bg-emerald-500/10 dark:bg-emerald-950/30 border-success-border/70 space-y-3.5"
+      >
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <span id="ddd-vinegar-badge" class="badge-yes">
+            {defaultVinegar.verdictBadge}
+          </span>
+        </div>
+        <h3 id="ddd-vinegar-title" class="text-title-sm font-bold text-ink leading-snug">
+          {defaultVinegar.title}
+        </h3>
+        <p id="ddd-vinegar-explanation" class="text-xs sm:text-[13.5px] text-body leading-relaxed">
+          {defaultVinegar.explanation}
+        </p>
+        <div class="p-4 rounded-xl bg-canvas border border-hairline space-y-2">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-ink">{t.vinegarStepsTitle}</h4>
+          <ol id="ddd-vinegar-fixes" class="space-y-2 text-xs sm:text-[13px] text-body list-decimal list-outside pl-5">
+            {defaultVinegar.fixes.map((fix) => (
+              <li class="leading-relaxed pl-1">{fix}</li>
+            ))}
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expandable Emergency Dish Soap (Dawn) Foam Overflow Rescue Card -->
+    <div class="border-t-2 border-error-border bg-error-bg/55 dark:bg-red-950/30 p-5 sm:p-6 md:p-8">
+      <details id="ddd-emergency-details" class="group">
+        <summary class="cursor-pointer list-none flex flex-wrap items-center justify-between gap-3">
+          <div class="space-y-1 max-w-3xl">
+            <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-error text-white">
+              🚨 {localizedEmergency.badge}
+            </span>
+            <h2 class="text-title-sm sm:text-title-md font-extrabold text-ink leading-snug">
+              {localizedEmergency.title}
+            </h2>
+          </div>
+          <span class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-canvas text-ink border border-error-border shadow-xs shrink-0">
+            <span>{t.emergencyToggleHint}</span>
+            <span class="transition-transform group-open:rotate-180" aria-hidden="true">&#9662;</span>
+          </span>
+        </summary>
+
+        <div class="mt-4 pt-4 border-t border-error-border/50 space-y-4">
+          <p class="text-xs sm:text-[13.5px] text-body leading-relaxed">
+            {localizedEmergency.subtitle}
+          </p>
+          <div class="p-4 sm:p-5 rounded-xl bg-canvas border border-error-border/60">
+            <ol class="space-y-3 text-xs sm:text-[13.5px] text-body list-decimal list-outside pl-5">
+              {localizedEmergency.steps.map((step) => (
+                <li class="leading-relaxed pl-1">{step}</li>
+              ))}
+            </ol>
+          </div>
+          <div class="p-3.5 rounded-xl bg-warning-bg/80 dark:bg-amber-950/40 border border-warning-border text-xs font-bold text-ink leading-relaxed">
+            ⚡ {localizedEmergency.warning}
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <!-- 3 Science-Backed Dishwasher Rules Strip -->
+    <div class="border-t border-hairline p-5 sm:p-6 md:p-8 bg-surface-soft/50 space-y-4">
+      <div>
+        <h2 class="text-title-md font-semibold text-ink">{t.rulesTitle}</h2>
+        <p class="text-xs text-muted mt-0.5">{t.rulesSub}</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <article class="p-4 rounded-xl border bg-canvas border-hairline space-y-1.5">
+          <div class="flex items-center gap-2">
+            <span aria-hidden="true" class="text-lg">🚰</span>
+            <h3 class="text-xs sm:text-sm font-bold text-ink leading-snug">{t.rule1Title}</h3>
+          </div>
+          <p class="text-xs text-body leading-relaxed">{t.rule1Body}</p>
+        </article>
+        <article class="p-4 rounded-xl border bg-warning-bg/55 dark:bg-amber-950/25 border-warning-border/70 space-y-1.5">
+          <div class="flex items-center gap-2">
+            <span aria-hidden="true" class="text-lg">🍽️</span>
+            <h3 class="text-xs sm:text-sm font-bold text-ink leading-snug">{t.rule2Title}</h3>
+          </div>
+          <p class="text-xs text-body leading-relaxed">{t.rule2Body}</p>
+        </article>
+        <article class="p-4 rounded-xl border bg-canvas border-hairline space-y-1.5">
+          <div class="flex items-center gap-2">
+            <span aria-hidden="true" class="text-lg">🥄</span>
+            <h3 class="text-xs sm:text-sm font-bold text-ink leading-snug">{t.rule3Title}</h3>
+          </div>
+          <p class="text-xs text-body leading-relaxed">{t.rule3Body}</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Related Companion Tools -->
+  <section class="space-y-4 print:hidden">
+    <h2 class="text-title-md font-semibold text-ink">{t.relatedHeading}</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <a
+        href={descalingUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedDescaleTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedDescaleTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedDescaleDesc}</p>
+      </a>
+
+      <a
+        href={symbolDecoderUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedSymbolTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedSymbolTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedSymbolDesc}</p>
+      </a>
+
+      <a
+        href={babyBottleUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedBabyTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedBabyTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedBabyDesc}</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- Methodology & Hub Strip -->
+  <section class="p-6 rounded-2xl bg-surface-soft border border-hairline print:hidden">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-title-sm font-semibold text-ink mb-1">{t.methodologyStripTitle}</h2>
+        <p class="text-[13px] text-muted">
+          {t.methodologyStripPrefix}{' '}
+          <a href={methodologyUrl} class="text-link underline hover:text-link-active">{t.methodologyLabel}</a>.
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a
+          href={dishwasherHubUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
+        >
+          {t.dishwasherHubLabel}
+        </a>
+        <a
+          href={methodologyUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
+        >
+          {t.methodologyLabel}
+        </a>
+        <a
+          href={allToolsUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors"
+        >
+          {t.allToolsLabel}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Visible FAQ Accordion (Matches FAQPage JSON-LD 1:1) -->
+  <section class="print:hidden">
+    <h2 class="text-title-lg font-medium text-ink tracking-tight mb-6">
+      {t.faqTitle}
+    </h2>
+    <div class="space-y-4">
+      {localizedFaqs.map((faq) => (
+        <details class="group p-5 bg-surface-soft border border-hairline rounded-xl" open>
+          <summary class="text-title-sm font-semibold text-ink cursor-pointer list-none flex items-center justify-between gap-3">
+            <span>{faq.question}</span>
+            <span class="text-muted text-sm transition-transform group-open:rotate-180 shrink-0" aria-hidden="true">&#9662;</span>
+          </summary>
+          <p class="text-[14px] text-body leading-relaxed mt-3 pt-3 border-t border-hairline/70">
+            {faq.answer}
+          </p>
+        </details>
+      ))}
+    </div>
+  </section>
+</div>
+
+<script is:inline>
+  (function () {
+    var payloadEl = document.getElementById('ddd-payload');
+    if (!payloadEl) return;
+
+    var payload;
+    try {
+      payload = JSON.parse(payloadEl.textContent || '{}');
+    } catch (_) {
+      return;
+    }
+
+    var hardnessList = payload.waterHardness || [];
+    var soilList = payload.soilLevels || [];
+    var detergentList = payload.detergentTypes || [];
+    var matrix = payload.dosageMatrix || {};
+    var delicateList = payload.delicateToggles || [];
+    var vinegarData = payload.vinegarDiagnostic || {};
+    var ui = payload.ui || {};
+
+    if (!hardnessList.length || !soilList.length || !detergentList.length) return;
+
+    var hardnessById = new Map();
+    hardnessList.forEach(function (h) { hardnessById.set(h.id, h); });
+
+    var soilById = new Map();
+    soilList.forEach(function (s) { soilById.set(s.id, s); });
+
+    var detergentById = new Map();
+    detergentList.forEach(function (d) { detergentById.set(d.id, d); });
+
+    var delicateById = new Map();
+    delicateList.forEach(function (item) { delicateById.set(item.id, item); });
+
+    // Controls
+    var hardnessBtns = Array.from(document.querySelectorAll('.ddd-hardness-btn'));
+    var soilBtns = Array.from(document.querySelectorAll('.ddd-soil-btn'));
+    var detergentBtns = Array.from(document.querySelectorAll('.ddd-detergent-btn'));
+    var delicateCheckboxes = Array.from(document.querySelectorAll('.ddd-delicate-checkbox'));
+    var vinegarBtns = Array.from(document.querySelectorAll('.ddd-vinegar-btn'));
+
+    // Outputs
+    var hardnessNoteEl = document.getElementById('ddd-hardness-note');
+    var resultBanner = document.getElementById('ddd-result-banner');
+    var profileSummaryEl = document.getElementById('ddd-profile-summary');
+    var statusPillEl = document.getElementById('ddd-status-pill');
+    var mainDoseEl = document.getElementById('ddd-main-dose');
+    var mainSubEl = document.getElementById('ddd-main-sub');
+    var preDoseEl = document.getElementById('ddd-pre-dose');
+    var preSubEl = document.getElementById('ddd-pre-sub');
+    var rinseValEl = document.getElementById('ddd-rinse-val');
+    var rinseSubEl = document.getElementById('ddd-rinse-sub');
+    var dialSteps = Array.from(document.querySelectorAll('[data-ddd-dial-step]'));
+    var cycleTitleEl = document.getElementById('ddd-cycle-title');
+    var cycleSubEl = document.getElementById('ddd-cycle-sub');
+    var alertsContainer = document.getElementById('ddd-alerts-container');
+
+    // Vinegar outputs
+    var vinegarPanel = document.getElementById('ddd-vinegar-panel');
+    var vinegarBadge = document.getElementById('ddd-vinegar-badge');
+    var vinegarTitle = document.getElementById('ddd-vinegar-title');
+    var vinegarExplanation = document.getElementById('ddd-vinegar-explanation');
+    var vinegarFixes = document.getElementById('ddd-vinegar-fixes');
+
+    // Action buttons
+    var copyBtn = document.getElementById('ddd-copy-btn');
+    var copyLabel = document.getElementById('ddd-copy-label');
+    var printBtn = document.getElementById('ddd-print-btn');
+    var resetBtn = document.getElementById('ddd-reset-btn');
+
+    var state = {
+      hardnessId: 'medium',
+      soilId: 'normal',
+      detergentId: 'powder',
+      delicates: new Set(),
+      vinegarId: 'wiped-clear'
+    };
+
+    var lastCopyText = '';
+
+    function roundHalf(val) {
+      return Math.round(val * 2) / 2;
+    }
+
+    function fmtNum(val) {
+      return Number.isInteger(val) ? String(val) : String(val);
+    }
+
+    function clearChildren(el) {
+      while (el && el.firstChild) {
+        el.removeChild(el.firstChild);
+      }
+    }
+
+    function createAlertCard(severity, icon, title, body) {
+      var card = document.createElement('div');
+      var baseClasses = 'p-4 rounded-xl border flex items-start gap-3 ';
+      if (severity === 'danger') {
+        card.className = baseClasses + 'bg-error-bg/65 dark:bg-red-950/35 border-error-border';
+      } else if (severity === 'warning') {
+        card.className = baseClasses + 'bg-warning-bg/70 dark:bg-amber-950/30 border-warning-border';
+      } else if (severity === 'success') {
+        card.className = baseClasses + 'bg-emerald-500/10 dark:bg-emerald-950/30 border-success-border/70';
+      } else {
+        card.className = baseClasses + 'bg-canvas border-hairline';
+      }
+
+      var iconSpan = document.createElement('span');
+      iconSpan.setAttribute('aria-hidden', 'true');
+      iconSpan.className = 'text-lg leading-none mt-0.5 shrink-0';
+      iconSpan.textContent = icon;
+
+      var textWrap = document.createElement('div');
+      textWrap.className = 'min-w-0 space-y-1';
+
+      if (title) {
+        var heading = document.createElement('h4');
+        heading.className = 'text-xs sm:text-[13px] font-bold text-ink leading-snug';
+        heading.textContent = title;
+        textWrap.appendChild(heading);
+      }
+
+      var para = document.createElement('p');
+      para.className = 'text-xs sm:text-[13px] text-body leading-relaxed';
+      para.textContent = body;
+      textWrap.appendChild(para);
+
+      card.appendChild(iconSpan);
+      card.appendChild(textWrap);
+      return card;
+    }
+
+    function renderVinegar() {
+      var result = vinegarData[state.vinegarId] || vinegarData['wiped-clear'];
+      if (!result) return;
+
+      vinegarBtns.forEach(function (btn) {
+        var vid = btn.getAttribute('data-ddd-vinegar');
+        var active = vid === state.vinegarId;
+        btn.setAttribute('aria-checked', active ? 'true' : 'false');
+        btn.classList.remove(
+          'bg-surface-soft',
+          'border-signature-coral',
+          'ring-2',
+          'ring-signature-coral',
+          'shadow-sm',
+          'bg-canvas',
+          'border-hairline'
+        );
+        if (active) {
+          btn.classList.add('bg-surface-soft', 'border-signature-coral', 'ring-2', 'ring-signature-coral', 'shadow-sm');
+        } else {
+          btn.classList.add('bg-canvas', 'border-hairline');
+        }
+      });
+
+      var isReversible = result.status === 'reversible';
+      if (vinegarPanel) {
+        vinegarPanel.className = isReversible
+          ? 'p-5 rounded-2xl border bg-emerald-500/10 dark:bg-emerald-950/30 border-success-border/70 space-y-3.5'
+          : 'p-5 rounded-2xl border bg-error-bg/60 dark:bg-red-950/35 border-error-border space-y-3.5';
+      }
+      if (vinegarBadge) {
+        vinegarBadge.className = isReversible ? 'badge-yes' : 'badge-no';
+        vinegarBadge.textContent = result.verdictBadge;
+      }
+      if (vinegarTitle) vinegarTitle.textContent = result.title;
+      if (vinegarExplanation) vinegarExplanation.textContent = result.explanation;
+
+      if (vinegarFixes) {
+        clearChildren(vinegarFixes);
+        (result.fixes || []).forEach(function (stepText) {
+          var li = document.createElement('li');
+          li.className = 'leading-relaxed pl-1';
+          li.textContent = stepText;
+          vinegarFixes.appendChild(li);
+        });
+      }
+    }
+
+    function render() {
+      var hObj = hardnessById.get(state.hardnessId) || hardnessList[1];
+      var sObj = soilById.get(state.soilId) || soilList[1];
+      var dObj = detergentById.get(state.detergentId) || detergentList[0];
+
+      var hasSilicone = state.delicates.has('silicone-baby');
+      var hasCrystal = state.delicates.has('crystal-glass');
+      var hasAluminum = state.delicates.has('aluminum');
+      var hasNonstick = state.delicates.has('nonstick-knives');
+
+      // Update Hardness buttons
+      hardnessBtns.forEach(function (btn) {
+        var active = btn.getAttribute('data-ddd-hardness') === state.hardnessId;
+        btn.setAttribute('aria-checked', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('shadow-sm', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+      if (hardnessNoteEl) hardnessNoteEl.textContent = hObj.summary;
+
+      // Update Soil buttons
+      soilBtns.forEach(function (btn) {
+        var active = btn.getAttribute('data-ddd-soil') === state.soilId;
+        btn.setAttribute('aria-checked', active ? 'true' : 'false');
+        btn.classList.toggle('bg-surface-soft', active);
+        btn.classList.toggle('border-signature-coral', active);
+        btn.classList.toggle('ring-2', active);
+        btn.classList.toggle('ring-signature-coral', active);
+        btn.classList.toggle('shadow-sm', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      // Update Detergent buttons
+      detergentBtns.forEach(function (btn) {
+        var active = btn.getAttribute('data-ddd-detergent') === state.detergentId;
+        btn.setAttribute('aria-checked', active ? 'true' : 'false');
+        btn.classList.toggle('bg-surface-soft', active);
+        btn.classList.toggle('border-signature-coral', active);
+        btn.classList.toggle('ring-2', active);
+        btn.classList.toggle('ring-signature-coral', active);
+        btn.classList.toggle('shadow-sm', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      // Update Delicate cards styling
+      delicateCheckboxes.forEach(function (cb) {
+        var checked = state.delicates.has(cb.value);
+        cb.checked = checked;
+        var card = cb.closest('.ddd-delicate-label');
+        if (!card) return;
+        var itemObj = delicateById.get(cb.value);
+        var isDanger = Boolean(itemObj && itemObj.severity === 'danger');
+
+        card.classList.remove(
+          'bg-canvas',
+          'border-hairline',
+          'bg-warning-bg/65',
+          'dark:bg-amber-950/30',
+          'border-warning-border',
+          'bg-error-bg/65',
+          'dark:bg-red-950/35',
+          'border-error-border'
+        );
+
+        if (checked && isDanger) {
+          card.classList.add('bg-error-bg/65', 'dark:bg-red-950/35', 'border-error-border');
+        } else if (checked) {
+          card.classList.add('bg-warning-bg/65', 'dark:bg-amber-950/30', 'border-warning-border');
+        } else {
+          card.classList.add('bg-canvas', 'border-hairline');
+        }
+      });
+
+      // Lookup base dosage
+      var row = (matrix[state.hardnessId] && matrix[state.hardnessId][state.soilId]) || {
+        mainTbsp: 1.5,
+        preTsp: 1.0,
+        rinseAid: 3
+      };
+
+      var mainTbsp = row.mainTbsp;
+      var preTsp = row.preTsp;
+      var rinseDial = row.rinseAid;
+
+      // Liquid gel dilution adjustment (+25%, capped at 3 tbsp)
+      if (state.detergentId === 'liquid-gel') {
+        mainTbsp = Math.min(3, roundHalf(mainTbsp * 1.25));
+      }
+
+      // Fine crystal etching protection (-25% dose on adjustable detergents, min 0.5 tbsp)
+      if (hasCrystal && state.detergentId !== 'pod') {
+        mainTbsp = Math.max(0.5, roundHalf(mainTbsp * 0.75));
+        preTsp = Math.max(0, roundHalf(preTsp * 0.75));
+      }
+
+      // Silicone rinse aid notch down
+      if (hasSilicone && rinseDial > 1) {
+        rinseDial = rinseDial - 1;
+      }
+
+      var mainMl = Math.round(mainTbsp * 15);
+      var preMl = Math.round(preTsp * 5);
+
+      // Format Main-Wash output
+      var mainText = '';
+      var mainSub = '';
+      if (state.detergentId === 'pod') {
+        mainText = ui.podMainText || '1 Pod';
+        mainSub = ui.podMainSub || '';
+      } else {
+        mainText = fmtNum(mainTbsp) + ' ' + (ui.tbspUnit || 'tbsp') + ' (' + mainMl + ' ' + (ui.mlUnit || 'mL') + ')';
+        if (state.detergentId === 'liquid-gel') {
+          mainSub = ui.gelMainSub || '';
+        } else if (state.detergentId === 'fragrance-free') {
+          mainSub = ui.ffMainSub || '';
+        } else {
+          mainSub = ui.powderMainSub || '';
+        }
+        if (hasCrystal && ui.crystalCutNote) {
+          mainSub = mainSub + ' · ' + ui.crystalCutNote;
+        }
+      }
+
+      // Format Pre-Wash output
+      var preText = '';
+      var preSub = '';
+      if (state.detergentId === 'pod') {
+        if (state.hardnessId === 'soft' && state.soilId !== 'heavy') {
+          preText = '0 ' + (ui.tspUnit || 'tsp');
+          preSub = ui.podPreSkip || '';
+        } else {
+          var podPreTsp = preTsp > 0 ? preTsp : 1;
+          var podPreMl = Math.round(podPreTsp * 5);
+          preText = (ui.podPreAddPrefix || '+ ') + fmtNum(podPreTsp) + ' ' + (ui.tspUnit || 'tsp') + ' (' + podPreMl + ' ' + (ui.mlUnit || 'mL') + ')';
+          preSub = (ui.podPreAddSuffix || '') + (hObj.citricBoost && ui.citricBoosterNote ? ' ' + ui.citricBoosterNote : '');
+        }
+      } else {
+        preText = fmtNum(preTsp) + ' ' + (ui.tspUnit || 'tsp') + ' (' + preMl + ' ' + (ui.mlUnit || 'mL') + ')';
+        if (preTsp === 0) {
+          preSub = ui.preWashNoneNote || '';
+        } else {
+          preSub = (ui.preWashWhy || '') + (hObj.citricBoost && ui.citricBoosterNote ? ' ' + ui.citricBoosterNote : '');
+        }
+      }
+
+      // Format Rinse Aid note
+      var rinseSub = ui.rinseAidStandardNote || '';
+      if (hasSilicone) {
+        rinseSub = ui.rinseAidSiliconeNote || rinseSub;
+      } else if (rinseDial >= 6) {
+        rinseSub = ui.rinseAidMaxNote || rinseSub;
+      }
+
+      // Cycle & Temp recommendation
+      var cycleTitle = ui.cycleNormal || '';
+      var cycleSub = ui.cycleNormalSub || '';
+      if (hasCrystal || hasSilicone) {
+        cycleTitle = ui.cycleDelicate || cycleTitle;
+        cycleSub = ui.cycleDelicateSub || cycleSub;
+      } else if (state.soilId === 'heavy') {
+        cycleTitle = ui.cycleHeavy || cycleTitle;
+        cycleSub = ui.cycleHeavySub || cycleSub;
+      } else if (state.soilId === 'light') {
+        cycleTitle = ui.cycleLight || cycleTitle;
+        cycleSub = ui.cycleLightSub || cycleSub;
+      }
+
+      // Build Active Risk Alerts
+      var alerts = [];
+      var highestSeverity = 'safe';
+
+      function pushAlert(sev, icon, title, body) {
+        alerts.push({ severity: sev, icon: icon, title: title, body: body });
+        if (sev === 'danger') {
+          highestSeverity = 'danger';
+        } else if (sev === 'warning' && highestSeverity !== 'danger') {
+          highestSeverity = 'warning';
+        }
+      }
+
+      // Critical Hand-Wash-Only Alerts first
+      if (hasAluminum) {
+        var alObj = delicateById.get('aluminum');
+        if (alObj) pushAlert('danger', '🚨', alObj.alertTitle, alObj.alertBody);
+      }
+      if (hasNonstick) {
+        var nkObj = delicateById.get('nonstick-knives');
+        if (nkObj) pushAlert('danger', '🚨', nkObj.alertTitle, nkObj.alertBody);
+      }
+
+      // Soft water + Pod critical etching warning
+      if (state.hardnessId === 'soft' && state.detergentId === 'pod') {
+        pushAlert('danger', '⚠️', ui.softPodTitle, ui.softPodBody);
+      } else if (state.hardnessId === 'soft') {
+        pushAlert('warning', '💧', ui.softEtchTitle, ui.softEtchBody);
+      }
+
+      // Silicone baby gear alerts
+      if (hasSilicone) {
+        var silObj = delicateById.get('silicone-baby');
+        if (state.detergentId !== 'fragrance-free') {
+          if (silObj) pushAlert('danger', '🍼', silObj.alertTitle, silObj.alertBody);
+        } else {
+          pushAlert('success', '🌿', ui.siliconeSafeConfirmTitle, ui.siliconeSafeConfirmBody);
+        }
+      }
+
+      // Fine crystal alert
+      if (hasCrystal) {
+        var cryObj = delicateById.get('crystal-glass');
+        if (cryObj) pushAlert('warning', '🍷', cryObj.alertTitle, cryObj.alertBody);
+      }
+
+      // Pod general rule
+      if (state.detergentId === 'pod') {
+        pushAlert('warning', '💊', ui.podQuickWashTitle, ui.podQuickWashBody);
+      }
+
+      // Liquid gel note
+      if (state.detergentId === 'liquid-gel') {
+        pushAlert('info', '🧴', ui.gelStabilityTitle, ui.gelStabilityBody);
+      }
+
+      // Very hard water film alert
+      if (state.hardnessId === 'very-hard') {
+        pushAlert('warning', '⛰️', ui.veryHardFilmTitle, ui.veryHardFilmBody);
+      }
+
+      // Update DOM outputs
+      if (profileSummaryEl) {
+        profileSummaryEl.textContent = hObj.label + ' (' + hObj.gpg + ') · ' + sObj.label + ' · ' + dObj.label;
+      }
+      if (mainDoseEl) mainDoseEl.textContent = mainText;
+      if (mainSubEl) mainSubEl.textContent = mainSub;
+      if (preDoseEl) preDoseEl.textContent = preText;
+      if (preSubEl) preSubEl.textContent = preSub;
+      if (rinseValEl) rinseValEl.textContent = String(rinseDial);
+      if (rinseSubEl) rinseSubEl.textContent = rinseSub;
+      if (cycleTitleEl) cycleTitleEl.textContent = cycleTitle;
+      if (cycleSubEl) cycleSubEl.textContent = cycleSub;
+
+      // Update 6-step Rinse Aid bar
+      dialSteps.forEach(function (stepEl) {
+        var n = Number(stepEl.getAttribute('data-ddd-dial-step') || '0');
+        var lit = n <= rinseDial;
+        stepEl.classList.toggle('bg-signature-mint', lit);
+        stepEl.classList.toggle('bg-white/15', !lit);
+      });
+
+      // Update Banner Status Pill & Accent Border
+      if (statusPillEl) {
+        if (highestSeverity === 'danger') {
+          statusPillEl.className = 'badge-no';
+          statusPillEl.textContent = (hasAluminum || hasNonstick) ? (ui.statusStop || 'STOP') : (ui.statusCaution || 'CAUTION');
+        } else if (highestSeverity === 'warning') {
+          statusPillEl.className = 'badge-depends';
+          statusPillEl.textContent = ui.statusCaution || 'ADJUST';
+        } else {
+          statusPillEl.className = 'badge-yes';
+          statusPillEl.textContent = ui.statusSafe || 'OPTIMAL';
+        }
+      }
+
+      if (resultBanner) {
+        resultBanner.classList.remove('border-success-border', 'border-warning-border', 'border-error-border');
+        resultBanner.classList.add(
+          highestSeverity === 'danger'
+            ? 'border-error-border'
+            : highestSeverity === 'warning'
+              ? 'border-warning-border'
+              : 'border-success-border'
+        );
+      }
+
+      // Render alerts via pure DOM
+      if (alertsContainer) {
+        clearChildren(alertsContainer);
+        if (!alerts.length) {
+          alertsContainer.appendChild(createAlertCard('info', '✅', '', ui.noAlertsText || ''));
+        } else {
+          alerts.forEach(function (al) {
+            alertsContainer.appendChild(createAlertCard(al.severity, al.icon, al.title, al.body));
+          });
+        }
+      }
+
+      // Build plain-text copy buffer
+      var copyLines = [
+        ui.copyHeader || 'Dishwasher Dosage Settings',
+        (ui.copyProfileLine || 'Profile') + ': ' + hObj.label + ' (' + hObj.gpg + ') | ' + sObj.label + ' | ' + dObj.label,
+        (ui.copyMainLine || 'Main-Wash') + ': ' + mainText + ' (' + mainSub + ')',
+        (ui.copyPreLine || 'Pre-Wash') + ': ' + preText,
+        (ui.copyRinseLine || 'Rinse Aid') + ': ' + rinseDial + ' ' + (ui.dialOfSix || '/ 6'),
+        (ui.copyCycleLine || 'Cycle & Temp') + ': ' + cycleTitle
+      ];
+      if (alerts.length) {
+        copyLines.push('');
+        copyLines.push(ui.copyAlertsHeader || 'Alerts:');
+        alerts.forEach(function (al) {
+          copyLines.push('  - ' + al.title + ': ' + al.body);
+        });
+      }
+      lastCopyText = copyLines.join('\n');
+    }
+
+    // Event bindings
+    hardnessBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var hid = btn.getAttribute('data-ddd-hardness');
+        if (hid && hardnessById.has(hid)) {
+          state.hardnessId = hid;
+          render();
+        }
+      });
+    });
+
+    soilBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var sid = btn.getAttribute('data-ddd-soil');
+        if (sid && soilById.has(sid)) {
+          state.soilId = sid;
+          render();
+        }
+      });
+    });
+
+    detergentBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var did = btn.getAttribute('data-ddd-detergent');
+        if (did && detergentById.has(did)) {
+          state.detergentId = did;
+          render();
+        }
+      });
+    });
+
+    delicateCheckboxes.forEach(function (cb) {
+      cb.addEventListener('change', function () {
+        if (cb.checked) {
+          state.delicates.add(cb.value);
+        } else {
+          state.delicates.delete(cb.value);
+        }
+        render();
+      });
+    });
+
+    vinegarBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var vid = btn.getAttribute('data-ddd-vinegar');
+        if (vid && vinegarData[vid]) {
+          state.vinegarId = vid;
+          renderVinegar();
+        }
+      });
+    });
+
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        var showCopied = function () {
+          if (copyLabel) copyLabel.textContent = ui.copiedBtn || 'Dosage Copied ✓';
+          window.setTimeout(function () {
+            if (copyLabel) copyLabel.textContent = '📋 ' + (ui.copyBtn || 'Copy Dosage Settings');
+          }, 2200);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(lastCopyText).then(showCopied).catch(showCopied);
+        } else {
+          var ta = document.createElement('textarea');
+          ta.value = lastCopyText;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          try { document.execCommand('copy'); } catch (_) {}
+          document.body.removeChild(ta);
+          showCopied();
+        }
+      });
+    }
+
+    if (printBtn) {
+      printBtn.addEventListener('click', function () {
+        window.print();
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function () {
+        state.hardnessId = 'medium';
+        state.soilId = 'normal';
+        state.detergentId = 'powder';
+        state.delicates.clear();
+        state.vinegarId = 'wiped-clear';
+        render();
+        renderVinegar();
+      });
+    }
+
+    render();
+    renderVinegar();
+  })();
+</script>

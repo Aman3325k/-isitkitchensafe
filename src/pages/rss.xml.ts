@@ -114,6 +114,27 @@ const curatedTools: Array<{
     date: '2026-11-18',
   },
   {
+    path: '/tools/induction-cookware-compatibility-checker/',
+    title: 'Induction Cookware Compatibility & 3-Second Magnet Test Checker',
+    description:
+      'Check if 24 popular cookware materials and brands work on induction cooktops. Includes a 3-second magnet test simulator, glass scratch-risk warnings, and pacemaker safety clearance tips.',
+    date: '2026-11-18',
+  },
+  {
+    path: '/tools/dishwasher-detergent-dosage-calculator/',
+    title: 'Dishwasher Detergent, Rinse Aid & Hard Water Safety Calculator',
+    description:
+      'Calculate exact main-wash and pre-wash detergent doses (tbsp/mL), calibrate rinse aid dials (1–6), differentiate removable hard-water film from permanent glass etching, and triage Dawn dish soap foam emergencies.',
+    date: '2026-11-18',
+  },
+  {
+    path: '/tools/kitchen-safety-iq-quiz/',
+    title: 'Interactive Kitchen Safety IQ Quiz (USDA, FDA & CDC Scientific Challenge)',
+    description:
+      'Test your food safety instincts against empirical science across 12 high-stakes household myths (poultry washing, sniff test, toaster jams, microwave flash boiling, fried rice toxin) with shareable emoji score card.',
+    date: '2026-11-18',
+  },
+  {
     path: '/tools/cast-iron-seasoning-troubleshooter/',
     title: 'Cast Iron & Carbon Steel Seasoning & Rust Troubleshooter',
     description:

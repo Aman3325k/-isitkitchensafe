@@ -1,0 +1,162 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import DishwasherDetergentDosageCalculator from '../../../components/DishwasherDetergentDosageCalculator.astro';
+import rawData from '../../../data/dishwasher-detergent-dosage-data.json';
+import type { SupportedLanguage } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+
+interface LocalePageContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  heroSub: string;
+  breadcrumbs: Array<{ label: string; href?: string }>;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocalePageContent> = {
+  es: {
+    pageTitle: "Calculadora de Dosis de Detergente y Abrillantador de Lavavajillas | IsItKitchenSafe",
+    pageDescription: "Calcula la dosis exacta de detergente (cucharadas/mL), ajuste del abrillantador (1–6) y límites de dureza del agua. Incluye alerta de corrosión del vidrio, sabor a jabón en silicona y rescate por espuma de Fairy/Dawn.",
+    badge: "Dosificación según Dureza del Agua · Diagnóstico de Cristal Turbio",
+    h1: "Calculadora de Dosis de Detergente y Abrillantador para Lavavajillas",
+    heroSub: "Calcula las cucharadas o mililitros exactos de detergente para el lavado principal y el prelavado, ajusta el dial del abrillantador y soluciona vasos blancos opacos: prueba del vinagre para diferenciar cal de corrosión permanente y solución a la espuma desbordada.",
+    breadcrumbs: [
+      { label: "Inicio", href: "/es/" },
+      { label: "Herramientas", href: "/es/tools/" },
+      { label: "Dosis de Detergente de Lavavajillas" }
+    ]
+  },
+  pt: {
+    pageTitle: "Calculadora de Dosagem de Sabão e Secante para Lava-Louças | IsItKitchenSafe",
+    pageDescription: "Calcule a dose exata de sabão (colheres/mL), regulagem do líquido secante (1–6) e dureza da água. Inclui alerta de corrosão do vidro, cheiro de sabão no silicone e solução para transbordamento de espuma.",
+    badge: "Dosagem por Dureza da Água · Diagnóstico de Copos Esbranquiçados",
+    h1: "Calculadora de Dosagem de Sabão e Líquido Secante para Lava-Louças",
+    heroSub: "Acerte a quantidade exata de sabão em pó, líquido ou pastilha para lavagem e pré-lavagem, regule o secante e resolva copos opacos: teste do vinagre para diferenciar calcário de corrosão irreversível e resgate de espuma transbordada.",
+    breadcrumbs: [
+      { label: "Início", href: "/pt/" },
+      { label: "Ferramentas", href: "/pt/tools/" },
+      { label: "Dosagem de Sabão para Lava-Louças" }
+    ]
+  },
+  'zh-cn': {
+    pageTitle: "洗碗机洗涤剂与漂洗剂精准用量计算器 | IsItKitchenSafe",
+    pageDescription: "根据水质硬度（软水/硬水）与餐具油污程度，精准计算主洗与预洗洗碗粉/凝胶毫升数、光亮剂旋钮档位（1–6档）。排查玻璃杯白雾发白腐蚀、硅胶吸附洗洁精气味与误放洗洁精泡沫溢出急救。",
+    badge: "水质硬度与油污剂量换算 · 玻璃白雾发毛诊断",
+    h1: "洗碗机洗涤剂与漂洗剂精准用量计算器",
+    heroSub: "精准计算洗碗粉、洗碗液主洗与预洗用量（汤匙/毫升），智能调节漂洗光亮剂档位：用白醋测试一秒辨别水垢残留与永久玻璃腐蚀蚀刻（Glass Etching），并提供误加普通洗洁精严重溢泡紧急清险方案。",
+    breadcrumbs: [
+      { label: "首页", href: "/zh-cn/" },
+      { label: "实用工具", href: "/zh-cn/tools/" },
+      { label: "洗碗机洗涤剂用量计算器" }
+    ]
+  },
+  ja: {
+    pageTitle: "食洗機用洗剤・リンス剤・水硬度別 最適投与量計算機 | IsItKitchenSafe",
+    pageDescription: "水の硬度や汚れ具合に合わせて、主洗浄＆予備洗浄の洗剤量（スプーン杯・mL）とリンス剤ダイヤル（1〜6）を正確に計算。グラスの白く曇るガラス腐食の診断や、手洗い洗剤の誤投入による泡あふれ対処法を搭載。",
+    badge: "水の硬度・汚れ別 最適量判定 · グラス白濁診断",
+    h1: "食洗機用洗剤・リンス剤・水硬度別 最適投与量計算機",
+    heroSub: "粉末・ジェル・タブレット洗剤の適正量を即座に算出。グラスが白くなる「水垢」と「ガラス腐食（エッチング）」を酢で見分ける方法、シリコン製品に洗剤臭が残る原因、台所用洗剤を誤投入した際の泡パニック救助法を網羅。",
+    breadcrumbs: [
+      { label: "ホーム", href: "/ja/" },
+      { label: "ツール", href: "/ja/tools/" },
+      { label: "食洗機洗剤 投与量計算機" }
+    ]
+  }
+};
+
+const c = CONTENT[lang as Exclude<SupportedLanguage, 'en'>] || CONTENT.es;
+const faqs = (rawData.faqs as Record<string, Array<{ question: string; answer: string }>>)[lang] || rawData.faqs.en;
+const localizedUrl = `https://isitkitchensafe.com/${lang}/tools/dishwasher-detergent-dosage-calculator/`;
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": c.h1,
+  "url": localizedUrl,
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript.",
+  "description": c.pageDescription,
+  "inLanguage": lang === 'zh-cn' ? 'zh-CN' : lang,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IsItKitchenSafe",
+    "url": "https://isitkitchensafe.com"
+  }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map((faq) => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+};
+---
+
+<Layout
+  title={c.pageTitle}
+  description={c.pageDescription}
+  faqs={faqs}
+  excludeFaqSchema={true}
+  availableLocales={availableLocales}
+  lang={lang}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(webAppSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+  </Fragment>
+
+  <!-- Breadcrumbs -->
+  <div class="bg-surface-soft border-b border-hairline py-1 print:hidden">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <Breadcrumbs items={c.breadcrumbs} className="mb-0" />
+    </div>
+  </div>
+
+  <div class="max-w-[1140px] mx-auto px-6 py-10 md:py-14">
+    <!-- Hero Header -->
+    <header class="mb-10 text-center max-w-3xl mx-auto">
+      <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-700 text-white mb-3">
+        {c.badge}
+      </span>
+      <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-4">
+        {c.h1}
+      </h1>
+      <p class="text-body text-[15px] md:text-[16px] leading-relaxed">
+        {c.heroSub}
+      </p>
+    </header>
+
+    <!-- Main Interactive Calculator Component -->
+    <DishwasherDetergentDosageCalculator lang={lang} />
+  </div>
+</Layout>
