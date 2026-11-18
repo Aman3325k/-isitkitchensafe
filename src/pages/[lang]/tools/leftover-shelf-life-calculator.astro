@@ -1,0 +1,526 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import LeftoverShelfLifeCalculator from '../../../components/LeftoverShelfLifeCalculator.astro';
+import type { SupportedLanguage } from '../../../i18n/ui';
+import { getApplianceUrl, getDirectoryUrl } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+
+interface CheatRow {
+  food: string;
+  fridge: string;
+  freezer: string;
+  reheat: string;
+  risk: string;
+}
+
+interface LocaleContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  heroSub: string;
+  cheatTitle: string;
+  cheatIntro: string;
+  methodologyLabel: string;
+  cheatHeaders: [string, string, string, string, string];
+  cheatRows: CheatRow[];
+  relatedDirTag: string;
+  relatedHowLongTitle: string;
+  relatedHowLongDesc: string;
+  relatedToolTag: string;
+  relatedSymbolTitle: string;
+  relatedSymbolDesc: string;
+  hubsTitle: string;
+  hubsDesc: string;
+  hubLabels: {
+    howLong: string;
+    refreeze: string;
+    refrigerator: string;
+    freezer: string;
+    methodology: string;
+    allTools: string;
+  };
+  faqTitle: string;
+  faqs: Array<{ question: string; answer: string }>;
+  breadcrumbs: Array<{ label: string; href?: string }>;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocaleContent> = {
+  es: {
+    pageTitle: "Calculadora USDA de Vida Útil de Sobras y Nevera | Cuenta Regresiva | IsItKitchenSafe",
+    pageDescription: "Comprueba cuántos días duran el pollo cocido, arroz, pizza, sopas, huevos y lácteos en el refrigerador o congelador. Veredicto USDA FSIS al instante, regla de 2 horas y temperatura de recalentado.",
+    badge: "Herramienta USDA FSIS FoodKeeper",
+    h1: "Calculadora de Vida Útil de Sobras y Refrigerador",
+    heroSub: "¿Dudas si ese pollo sobrante, arroz cocido, pizza o guiso sigue siendo seguro? Indica cuándo se cocinó o abrió y cuánto estuvo fuera de la nevera para obtener el veredicto USDA, cuenta regresiva y temperatura de recalentado.",
+    cheatTitle: "Tabla Rápida USDA: Conservación en Frío y Recalentado",
+    cheatIntro: "Límites de referencia para un refrigerador a 4°C (40°F) o menos y congelador a -18°C (0°F). Consulta nuestra verificación científica en",
+    methodologyLabel: "Metodología",
+    cheatHeaders: ["Alimento / Sobra", "Nevera (≤4°C)", "Congelador (-18°C)", "Recalentado Seguro", "Patógeno Principal"],
+    cheatRows: [
+      { food: "Pollo o Pavo Cocido", fridge: "3–4 días", freezer: "2–6 meses", reheat: "74°C / 165°F", risk: "Salmonella, C. perfringens" },
+      { food: "Arroz y Pasta Cocidos", fridge: "3–4 días", freezer: "2–6 meses", reheat: "74°C / 165°F", risk: "Bacillus cereus (toxina termorresistente)" },
+      { food: "Pizza Sobrante", fridge: "3–4 días", freezer: "1–2 meses", reheat: "74°C / 165°F", risk: "Staph aureus, B. cereus" },
+      { food: "Sopas, Guisos y Chili", fridge: "3–4 días", freezer: "2–3 meses", reheat: "74°C / Hervor fuerte", risk: "Clostridium perfringens" },
+      { food: "Salsa Gravy de Carne/Ave", fridge: "1–2 días", freezer: "2–3 meses", reheat: "74°C / Hervor fuerte", risk: "C. perfringens, Salmonella" },
+      { food: "Ave Cruda y Carne Molida", fridge: "1–2 días", freezer: "4–9 meses", reheat: "71–74°C (160–165°F)", risk: "Salmonella, E. coli O157:H7" },
+      { food: "Embutidos Abiertos", fridge: "3–5 días", freezer: "1–2 meses", reheat: "74°C si hay riesgo", risk: "Listeria monocytogenes" },
+      { food: "Huevos Duros (Con Cáscara)", fridge: "7 días (3–5 pelados)", freezer: "No congelar", reheat: "Servir frío", risk: "Salmonella, Listeria" }
+    ],
+    relatedDirTag: "Directorio de Duración de Alimentos",
+    relatedHowLongTitle: "¿Cuánto Duran los Alimentos en el Refrigerador? →",
+    relatedHowLongDesc: "Consulta guías detalladas alimento por alimento sobre carnes, sobras, salsas, lácteos y frutas.",
+    relatedToolTag: "Herramienta Interactiva Relacionada",
+    relatedSymbolTitle: "Decodificador de Símbolos en Táperes y Envases →",
+    relatedSymbolDesc: "Verifica si tu recipiente de plástico es realmente apto para congelador y microondas antes de recalentar sobras.",
+    hubsTitle: "Explorar Guías Verificadas de Conservación y Congelación",
+    hubsDesc: "Comprueba reglas de recongelación, zonas frías de la nevera y envases seguros.",
+    hubLabels: {
+      howLong: "Cuánto Duran",
+      refreeze: "¿Se Puede Recongelar?",
+      refrigerator: "Guía de Nevera",
+      freezer: "Guía de Congelador",
+      methodology: "Metodología",
+      allTools: "Todas las Herramientas →"
+    },
+    faqTitle: "Preguntas Frecuentes sobre la Seguridad de las Sobras",
+    faqs: [
+      {
+        question: "¿Cuántos días duran las sobras cocidas en el refrigerador según el USDA?",
+        answer: "Según las directrices USDA FSIS FoodKeeper, la mayoría de las sobras cocidas —como pollo asado, carne molida cocida, pasta, arroz, pizza, sopas y verduras— se mantienen seguras entre 3 y 4 días en una nevera a ≤4°C (40°F). Las salsas gravy de carne duran solo 1–2 días y la carne cruda molida o aves crudas 1–2 días."
+      },
+      {
+        question: "¿Qué es la Regla de las 2 Horas (y 1 Hora) del USDA para comida fuera de la nevera?",
+        answer: "Los alimentos perecederos nunca deben permanecer en la Zona de Peligro (4°C a 60°C / 40°F–140°F) más de 2 horas acumuladas. Si la temperatura ambiente supera los 32°C (90°F), el límite seguro se reduce a solo 1 hora porque las bacterias se duplican cada 20 minutos."
+      },
+      {
+        question: "¿Recalentar arroz o sobras a 74°C (165°F) elimina el riesgo si estuvieron fuera toda la noche?",
+        answer: "No. Alcanzar 74°C elimina bacterias vivas, pero NO destruye toxinas resistentes al calor producidas por Bacillus cereus (muy común en arroz y pasta dejados a temperatura ambiente) o Staphylococcus aureus. Si superó las 2 horas fuera de la nevera, deséchalo."
+      },
+      {
+        question: "Si la comida huele y se ve bien tras 5 o 6 días en la nevera, ¿puedo comerla?",
+        answer: "No es fiable guiarse solo por el olfato. Las bacterias que causan mal olor son distintas de patógenos peligrosos como Listeria monocytogenes o Salmonella, que no alteran el olor ni el sabor y pueden crecer lentamente incluso a 4°C. Respeta siempre el límite de 3–4 días."
+      },
+      {
+        question: "¿Puedo congelar sobras el día 3 o 4 y cuánto duran congeladas?",
+        answer: "Sí. Congelar las sobras antes de cumplir los 3–4 días detiene por completo el crecimiento bacteriano. A -18°C (0°F) continuos, el alimento sigue siendo seguro indefinidamente; su mejor sabor y textura se conservan entre 2 y 4 meses (hasta 6 meses en arroz y legumbres)."
+      }
+    ],
+    breadcrumbs: [
+      { label: "Inicio", href: "/es/" },
+      { label: "Herramientas", href: "/es/tools/" },
+      { label: "Calculadora de Vida Útil de Sobras" }
+    ]
+  },
+  pt: {
+    pageTitle: "Calculadora USDA de Validade de Sobras e Geladeira | Contagem Regressiva | IsItKitchenSafe",
+    pageDescription: "Veja quantos dias frango cozido, arroz, pizza, sopas, ovos e laticínios duram na geladeira ou freezer. Veredito USDA FSIS na hora, regra das 2 horas e temperatura segura de reaquecimento.",
+    badge: "Ferramenta USDA FSIS FoodKeeper",
+    h1: "Calculadora de Validade de Sobras na Geladeira",
+    heroSub: "Em dúvida se aquele frango, arroz cozido, pizza ou ensopado ainda está seguro para comer? Informe quando foi preparado ou aberto e quanto tempo ficou fora da geladeira para ver o veredito USDA, contagem regressiva e riscos.",
+    cheatTitle: "Tabela Rápida USDA: Geladeira, Freezer e Reaquecimento",
+    cheatIntro: "Limites recomendados para geladeira a 4°C (40°F) ou menos e freezer a -18°C (0°F). Saiba como auditamos nossas fontes em",
+    methodologyLabel: "Metodologia",
+    cheatHeaders: ["Alimento / Sobra", "Geladeira (≤4°C)", "Freezer (-18°C)", "Reaquecimento Seguro", "Patógeno Principal"],
+    cheatRows: [
+      { food: "Frango ou Peru Cozido", fridge: "3–4 dias", freezer: "2–6 meses", reheat: "74°C / 165°F", risk: "Salmonella, C. perfringens" },
+      { food: "Arroz e Macarrão Cozidos", fridge: "3–4 dias", freezer: "2–6 meses", reheat: "74°C / 165°F", risk: "Bacillus cereus (toxina termoestável)" },
+      { food: "Pizza (Sobras)", fridge: "3–4 dias", freezer: "1–2 meses", reheat: "74°C / 165°F", risk: "Staph aureus, B. cereus" },
+      { food: "Sopas, Ensopados e Chili", fridge: "3–4 dias", freezer: "2–3 meses", reheat: "74°C / Ferver bem", risk: "Clostridium perfringens" },
+      { food: "Molho de Carne (Gravy)", fridge: "1–2 dias", freezer: "2–3 meses", reheat: "74°C / Ferver bem", risk: "C. perfringens, Salmonella" },
+      { food: "Aves Cruas e Carne Moída", fridge: "1–2 dias", freezer: "4–9 meses", reheat: "71–74°C (160–165°F)", risk: "Salmonella, E. coli O157:H7" },
+      { food: "Frios Fatiados Abertos", fridge: "3–5 dias", freezer: "1–2 meses", reheat: "74°C para gestantes", risk: "Listeria monocytogenes" },
+      { food: "Ovos Cozidos (Com Casca)", fridge: "7 dias (3–5 s/ casca)", freezer: "Não congelar", reheat: "Servir frio", risk: "Salmonella, Listeria" }
+    ],
+    relatedDirTag: "Diretório de Duração de Alimentos",
+    relatedHowLongTitle: "Quanto Tempo os Alimentos Duram na Geladeira? →",
+    relatedHowLongDesc: "Consulte guias detalhados por alimento sobre carnes, sobras, molhos, queijos e frutas.",
+    relatedToolTag: "Ferramenta Interativa Relacionada",
+    relatedSymbolTitle: "Decodificador de Símbolos em Potes e Plásticos →",
+    relatedSymbolDesc: "Descubra se o seu pote plástico pode mesmo ir ao freezer e ao micro-ondas antes de reaquecer sobras.",
+    hubsTitle: "Explorar Guias Verificados de Armazenamento e Congelamento",
+    hubsDesc: "Confira regras para recongelar alimentos, temperaturas da geladeira e potes seguros.",
+    hubLabels: {
+      howLong: "Quanto Tempo Dura",
+      refreeze: "Pode Recongelar?",
+      refrigerator: "Guia da Geladeira",
+      freezer: "Guia do Freezer",
+      methodology: "Metodologia",
+      allTools: "Todas as Ferramentas →"
+    },
+    faqTitle: "Perguntas Frequentes sobre Segurança de Sobras",
+    faqs: [
+      {
+        question: "Quantos dias sobras cozidas duram na geladeira segundo o USDA?",
+        answer: "Pelas diretrizes USDA FSIS FoodKeeper, a maioria das sobras cozidas — frango, carne moída cozida, arroz, macarrão, pizza, sopas e legumes — permanece segura por 3 a 4 dias em geladeira a ≤4°C (40°F). Molhos de carne (gravy) e carnes cruas moídas ou aves cruas têm limite de apenas 1–2 dias."
+      },
+      {
+        question: "O que é a Regra das 2 Horas (e de 1 Hora) para comida fora da geladeira?",
+        answer: "Alimentos perecíveis não devem ficar na Zona de Perigo (4°C a 60°C / 40°F–140°F) por mais de 2 horas somadas. Em dias quentes acima de 32°C (90°F), o limite cai para apenas 1 hora, pois bactérias se multiplicam exponencialmente."
+      },
+      {
+        question: "Reaquecer arroz ou sobras a 74°C (165°F) torna segura uma comida deixada fora à noite?",
+        answer: "Não. O reaquecimento a 74°C mata bactérias ativas, mas NÃO destrói toxinas resistentes ao calor já produzidas por Bacillus cereus (comum em arroz e massas fora da geladeira) ou Staphylococcus aureus. Se passou de 2 horas fora da geladeira, descarte."
+      },
+      {
+        question: "Se a sobra parece boa e não tem cheiro ruim após 5 ou 6 dias, posso comer?",
+        answer: "O teste do cheiro não garante segurança. Bactérias causadoras de intoxicação alimentar como Listeria monocytogenes e Salmonella não alteram odor ou aparência, e a Listeria consegue crescer lentamente mesmo dentro da geladeira. Siga o limite de 3–4 dias."
+      },
+      {
+        question: "Posso congelar sobras no 3º ou 4º dia e quanto tempo duram no freezer?",
+        answer: "Sim! Congelar dentro do prazo de 3–4 dias interrompe completamente o crescimento microbiano. A -18°C (0°F) constantes, o alimento permanece seguro indefinidamente, com melhor qualidade por 2–4 meses (e até 6 meses para arroz e feijão)."
+      }
+    ],
+    breadcrumbs: [
+      { label: "Início", href: "/pt/" },
+      { label: "Ferramentas", href: "/pt/tools/" },
+      { label: "Calculadora de Validade de Sobras" }
+    ]
+  },
+  'zh-cn': {
+    pageTitle: "USDA 剩菜与冰箱保质期安全倒计时计算器 | 2小时危险温区检测 | IsItKitchenSafe",
+    pageDescription: "一键查询熟鸡肉、剩米饭、披萨、炖汤、水煮蛋及牛奶在冰箱冷藏与冷冻室的安全天数。基于美国农业部 USDA FSIS FoodKeeper 准则，实时计算安全截止时间、复热温度与致病菌警示。",
+    badge: "USDA FSIS 权威保鲜工具",
+    h1: "剩菜与冰箱保质期安全倒计时计算器",
+    heroSub: "拿不准冰箱里的剩鸡肉、隔夜米饭、披萨或汤还能不能吃？选择食物种类、烹饪/开封时间及室温放置时长，立即获得 USDA 安全判定、实时截止倒计时、致病菌预警与复热温度目标。",
+    cheatTitle: "USDA 冷藏冷冻保质期与安全复热温度速查表",
+    cheatIntro: "以下标准适用于温度校准在 4°C (40°F) 及以下的冷藏室与 -18°C (0°F) 冷冻室。查阅我们的科学文献审核标准：",
+    methodologyLabel: "研究方法论",
+    cheatHeaders: ["常见食物 / 剩菜", "冷藏上限 (≤4°C)", "冷冻保鲜 (-18°C)", "安全复热/烹熟温度", "核心致病菌风险"],
+    cheatRows: [
+      { food: "熟鸡肉 / 烤鸡 / 火鸡", fridge: "3–4 天", freezer: "2–6 个月", reheat: "74°C / 165°F", risk: "沙门氏菌、产气荚膜梭菌" },
+      { food: "熟米饭 / 熟意面", fridge: "3–4 天", freezer: "2–6 个月", reheat: "74°C / 165°F", risk: "蜡样芽孢杆菌（耐热毒素）" },
+      { food: "剩披萨", fridge: "3–4 天", freezer: "1–2 个月", reheat: "74°C / 165°F", risk: "金黄色葡萄球菌、蜡样芽孢杆菌" },
+      { food: "炖汤 / 炖菜 / 咖喱", fridge: "3–4 天", freezer: "2–3 个月", reheat: "74°C / 彻底煮沸", risk: "产气荚膜梭菌" },
+      { food: "肉汁 / 禽肉浓汁 (Gravy)", fridge: "1–2 天", freezer: "2–3 个月", reheat: "74°C / 彻底煮沸", risk: "产气荚膜梭菌、沙门氏菌" },
+      { food: "生禽肉与生肉馅", fridge: "1–2 天", freezer: "4–9 个月", reheat: "71–74°C (160–165°F)", risk: "沙门氏菌、大肠杆菌 O157:H7" },
+      { food: "已开封冷切火腿/熟肉", fridge: "3–5 天", freezer: "1–2 个月", reheat: "高危人群需74°C热透", risk: "单核细胞增生李斯特菌" },
+      { food: "白煮蛋（带壳）", fridge: "7 天（去壳3–5天）", freezer: "不建议冷冻", reheat: "冷食即可", risk: "沙门氏菌、李斯特菌" }
+    ],
+    relatedDirTag: "食材保质期百科索引",
+    relatedHowLongTitle: "各类食物在冰箱里究竟能放几天？→",
+    relatedHowLongDesc: "按具体食材浏览肉类、剩饭菜、调味酱、乳制品与切块水果的 USDA 储存指南。",
+    relatedToolTag: "关联交互式安全工具",
+    relatedSymbolTitle: "保鲜盒与餐具底部塑料符号解码器 →",
+    relatedSymbolDesc: "复热或冷冻剩菜前，一键查明您的塑料保鲜盒底部三角标号是否真正耐微波、耐冷冻。",
+    hubsTitle: "浏览权威食材储存与复冻安全专栏",
+    hubsDesc: "快速查阅复冻安全准则、冷藏分区技巧与冷冻容器推荐。",
+    hubLabels: {
+      howLong: "能放多久指南",
+      refreeze: "能否复冻指南",
+      refrigerator: "冰箱冷藏专栏",
+      freezer: "冷冻室专栏",
+      methodology: "审核方法论",
+      allTools: "全部实用工具 →"
+    },
+    faqTitle: "关于剩菜与冰箱食品安全的常见问题",
+    faqs: [
+      {
+        question: "按照美国农业部 USDA 标准，熟剩菜在冰箱里最多可以放几天？",
+        answer: "根据 USDA FSIS FoodKeeper 指导规范，绝大多数熟剩菜（熟鸡肉、熟牛肉、米饭、意面、披萨、炖汤与熟蔬菜）在 4°C（40°F）以下的冰箱冷藏室可安全存放 3 至 4 天。肉汁浓汤仅限 1–2 天，生鸡肉和生肉馅同样为 1–2 天。如第4天仍吃不完，应立刻密封转入冷冻室。"
+      },
+      {
+        question: "什么是食品安全的“2小时危险温区规则”（高温天为1小时）？",
+        answer: "易腐食物绝不应在 4°C 至 60°C（40°F–140°F）的细菌危险温区累计停留超过 2 小时；若环境气温超过 32°C（90°F），安全上限骤降至仅 1 小时。在此温区内致病菌每 20 分钟即可翻倍繁殖。"
+      },
+      {
+        question: "常温过夜的剩米饭或剩菜，彻底加热到 74°C（165°F）就能安全吃了吗？",
+        answer: "不能！将食物中心加热至 74°C 虽能杀死活菌，但无法破坏已经产生的耐高温毒素——例如室温放置的熟米饭极易滋生蜡样芽孢杆菌（Bacillus cereus）呕吐毒素，即便回锅爆炒或煮沸也无法解毒。超过室温2小时上限请直接丢弃。"
+      },
+      {
+        question: "冰箱放了五六天的剩菜闻着没馊、看着也没坏，还能吃吗？",
+        answer: "不要仅靠“闻一闻、看一看”来判断安全。导致发臭发霉的是腐败菌，而真正引发严重食物中毒的李斯特菌、沙门氏菌和大肠杆菌无色无味，且李斯特菌在 4°C 冰箱里依然会缓慢增殖。务必遵循 3–4 天时间上限。"
+      },
+      {
+        question: "第 3 或第 4 天再把剩菜放进冷冻室还来得及吗？能冻多久？",
+        answer: "完全来得及。只要在 3–4 天冷藏安全期内转入 -18°C（0°F）冷冻室，细菌就会停止繁殖。恒定 -18°C 条件下食物在微生物层面可无限期保持安全，其中熟肉、披萨、炖汤最佳风味期为 2–4 个月，熟米饭与豆类可达 6 个月。"
+      }
+    ],
+    breadcrumbs: [
+      { label: "首页", href: "/zh-cn/" },
+      { label: "实用工具", href: "/zh-cn/tools/" },
+      { label: "剩菜保质期倒计时计算器" }
+    ]
+  },
+  ja: {
+    pageTitle: "USDA 残り物・冷蔵庫日持ちカウントダウン計算機 | 危険温度帯チェック | IsItKitchenSafe",
+    pageDescription: "鶏肉・ご飯・ピザ・スープ・ゆで卵・乳製品の冷蔵・冷凍安全期限を即時判定。USDA FSIS FoodKeeper 基準に基づき、常温2時間ルール、食中毒菌リスク、安全な再加熱温度をリアルタイム算出します。",
+    badge: "USDA FSIS FoodKeeper 基準ツール",
+    h1: "残り物・冷蔵庫の日持ちカウントダウン計算機",
+    heroSub: "冷蔵庫の鶏肉・炊いたご飯・ピザ・シチューがまだ食べられるか迷っていませんか？調理・開封時期と常温放置時間を入力するだけで、USDA基準の安全判定、残り時間カウントダウン、再加熱温度を瞬時に確認できます。",
+    cheatTitle: "USDA 冷蔵・冷凍保存期間と再加熱温度 早見表",
+    cheatIntro: "冷蔵庫4℃以下（40°F以下）、冷凍庫-18℃（0°F）を前提とした安全基準です。科学的検証方針については以下をご覧ください：",
+    methodologyLabel: "検証メソドロジー",
+    cheatHeaders: ["食品・残り物", "冷蔵上限 (4℃以下)", "冷凍品質目安 (-18℃)", "安全な再加熱温度", "主な食中毒菌リスク"],
+    cheatRows: [
+      { food: "加熱済み鶏肉・ターキー", fridge: "3〜4日", freezer: "2〜6ヶ月", reheat: "74℃ / 165°F", risk: "サルモネラ菌・ウェルシュ菌" },
+      { food: "炊いたご飯・茹でパスタ", fridge: "3〜4日", freezer: "2〜6ヶ月", reheat: "74℃ / 165°F", risk: "セレウス菌（耐熱性毒素）" },
+      { food: "残りのピザ", fridge: "3〜4日", freezer: "1〜2ヶ月", reheat: "74℃ / 165°F", risk: "黄色ブドウ球菌・セレウス菌" },
+      { food: "スープ・シチュー・カレー", fridge: "3〜4日", freezer: "2〜3ヶ月", reheat: "74℃ / 十分沸騰", risk: "ウェルシュ菌" },
+      { food: "グレービーソース", fridge: "1〜2日", freezer: "2〜3ヶ月", reheat: "74℃ / 十分沸騰", risk: "ウェルシュ菌・サルモネラ菌" },
+      { food: "生鶏肉・生ひき肉", fridge: "1〜2日", freezer: "4〜9ヶ月", reheat: "71〜74℃ (160〜165°F)", risk: "サルモネラ菌・腸管出血性大腸菌" },
+      { food: "開封済みハム・デリミート", fridge: "3〜5日", freezer: "1〜2ヶ月", reheat: "ハイリスク層は74℃", risk: "リステリア菌" },
+      { food: "ゆで卵（殻付き）", fridge: "7日（むき卵3〜5日）", freezer: "冷凍不可", reheat: "冷蔵のまま", risk: "サルモネラ菌・リステリア菌" }
+    ],
+    relatedDirTag: "食品別の日持ちディレクトリ",
+    relatedHowLongTitle: "食品ごとの冷蔵庫での保存期間ガイド →",
+    relatedHowLongDesc: "肉・魚・残り物・チーズ・カットフルーツまで、品目別のUSDA保存期限を確認できます。",
+    relatedToolTag: "関連インタラクティブツール",
+    relatedSymbolTitle: "保存容器・タッパー底面マーク辞典 →",
+    relatedSymbolDesc: "残り物を冷凍・電子レンジ再加熱する前に、プラ番号（#1〜#7）と耐熱マークをチェックしましょう。",
+    hubsTitle: "検証済みの食品保存・再冷凍ガイド一覧",
+    hubsDesc: "安全な再冷凍ルール、冷蔵庫の適温管理、冷凍保存ガイドをまとめて確認できます。",
+    hubLabels: {
+      howLong: "食品の日持ち一覧",
+      refreeze: "再冷凍できる？",
+      refrigerator: "冷蔵庫ガイド",
+      freezer: "冷凍庫ガイド",
+      methodology: "検証基準",
+      allTools: "ツール一覧 →"
+    },
+    faqTitle: "残り物の消費期限・食品安全に関するよくある質問",
+    faqs: [
+      {
+        question: "USDA基準では、調理済みの残り物は冷蔵庫で何日まで安全ですか？",
+        answer: "USDA FSIS FoodKeeper 基準では、鶏肉・牛肉料理・ご飯・パスタ・ピザ・スープ・加熱済み野菜などの一般的な残り物は4℃以下の冷蔵庫で3〜4日が安全上限です。肉汁グレービーや生の鶏肉・ひき肉は1〜2日とより厳格です。4日以内に食べ切れない場合は冷凍保存してください。"
+      },
+      {
+        question: "常温放置の「2時間ルール（猛暑時は1時間ルール）」とは何ですか？",
+        answer: "傷みやすい食品を4℃〜60℃（危険温度帯）に累計2時間以上放置してはいけないというUSDA原則です。室温・外気温が32℃（90°F）を超える環境では細菌増殖が極めて速くなるため、安全上限はわずか1時間に短縮されます。"
+      },
+      {
+        question: "一晩常温放置したご飯やカレーを74℃以上まで再加熱すれば安全ですか？",
+        answer: "いいえ。74℃（165°F）まで再加熱すると生きた菌は死滅しますが、セレウス菌（ご飯・パスタ）や黄色ブドウ球菌がすでに産生した耐熱性毒素は100℃で煮沸しても分解されません。常温上限（2時間／高温時1時間）を超えた食品は必ず廃棄してください。"
+      },
+      {
+        question: "冷蔵庫で5〜6日経っても臭いや見た目に異常がなければ食べられますか？",
+        answer: "臭いチェックだけでは危険です。腐敗臭を出す菌と、リステリア菌・サルモネラ菌などの食中毒菌は別物であり、病原菌は無臭・無味のまま増殖します（特にリステリア菌は4℃の冷蔵環境でも増えます）。必ず日数上限を守ってください。"
+      },
+      {
+        question: "冷蔵3〜4日目の残り物を冷凍しても大丈夫ですか？どれくらい持ちますか？",
+        answer: "はい。冷蔵安全期間（3〜4日以内）のうちに-18℃（0°F）で冷凍すれば細菌の増殖は完全に停止します。-18℃を維持すれば安全面は無期限、おいしさの品質目安は肉料理・スープ・ピザで2〜4ヶ月、ご飯や豆類で最大6ヶ月です。"
+      }
+    ],
+    breadcrumbs: [
+      { label: "ホーム", href: "/ja/" },
+      { label: "ツール", href: "/ja/tools/" },
+      { label: "残り物日持ち計算機" }
+    ]
+  }
+};
+
+const c = CONTENT[lang as Exclude<SupportedLanguage, 'en'>] || CONTENT.es;
+const localizedUrl = `https://isitkitchensafe.com/${lang}/tools/leftover-shelf-life-calculator/`;
+
+const howLongUrl = getDirectoryUrl('how-long', lang);
+const refreezeUrl = getDirectoryUrl('refreeze', lang);
+const refrigeratorUrl = getApplianceUrl('refrigerator', lang);
+const freezerUrl = getApplianceUrl('freezer', lang);
+const toolsUrl = getDirectoryUrl('tools', lang);
+const symbolDecoderUrl = `/${lang}/tools/kitchen-symbol-decoder/`;
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": c.h1,
+  "url": localizedUrl,
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript.",
+  "description": c.pageDescription,
+  "inLanguage": lang === 'zh-cn' ? 'zh-CN' : lang,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IsItKitchenSafe",
+    "url": "https://isitkitchensafe.com"
+  }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": c.faqs.map((faq) => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+};
+---
+
+<Layout
+  title={c.pageTitle}
+  description={c.pageDescription}
+  excludeFaqSchema={true}
+  availableLocales={availableLocales}
+  lang={lang}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(webAppSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+  </Fragment>
+
+  <!-- Breadcrumbs -->
+  <div class="bg-surface-soft border-b border-hairline py-1">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <Breadcrumbs items={c.breadcrumbs} className="mb-0" />
+    </div>
+  </div>
+
+  <div class="max-w-[1140px] mx-auto px-6 py-10 md:py-14">
+    <!-- Hero Header -->
+    <header class="mb-10 text-center max-w-3xl mx-auto">
+      <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-signature-coral text-white mb-3">
+        {c.badge}
+      </span>
+      <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-4">
+        {c.h1}
+      </h1>
+      <p class="text-body text-[15px] md:text-[16px] leading-relaxed">
+        {c.heroSub}
+      </p>
+    </header>
+
+    <!-- Main Interactive Calculator -->
+    <div class="mb-14">
+      <LeftoverShelfLifeCalculator lang={lang} />
+    </div>
+
+    <!-- USDA Quick Reference Cheat Sheet -->
+    <section class="mb-14 space-y-5">
+      <div>
+        <h2 class="text-title-lg font-medium text-ink tracking-tight mb-2">
+          {c.cheatTitle}
+        </h2>
+        <p class="text-body text-[14.5px] leading-relaxed">
+          {c.cheatIntro} <a href="/methodology/" class="text-link underline hover:text-link-active">{c.methodologyLabel}</a>.
+        </p>
+      </div>
+
+      <div class="border border-hairline rounded-xl overflow-hidden bg-canvas">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-surface-strong border-b border-hairline text-ink font-semibold">
+              <tr>
+                <th class="p-3.5">{c.cheatHeaders[0]}</th>
+                <th class="p-3.5">{c.cheatHeaders[1]}</th>
+                <th class="p-3.5">{c.cheatHeaders[2]}</th>
+                <th class="p-3.5">{c.cheatHeaders[3]}</th>
+                <th class="p-3.5">{c.cheatHeaders[4]}</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-hairline">
+              {c.cheatRows.map((row, idx) => (
+                <tr class={idx % 2 === 0 ? 'bg-canvas' : 'bg-surface-soft'}>
+                  <td class="p-3.5 font-semibold text-ink whitespace-nowrap">{row.food}</td>
+                  <td class="p-3.5 text-body whitespace-nowrap font-medium">{row.fridge}</td>
+                  <td class="p-3.5 text-body whitespace-nowrap">{row.freezer}</td>
+                  <td class="p-3.5 text-body whitespace-nowrap">{row.reheat}</td>
+                  <td class="p-3.5 text-body text-[13px]">{row.risk}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Related Storage Hubs & Tools -->
+    <section class="mb-14 grid grid-cols-1 md:grid-cols-2 gap-5">
+      <a
+        href={howLongUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {c.relatedDirTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {c.relatedHowLongTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">
+          {c.relatedHowLongDesc}
+        </p>
+      </a>
+
+      <a
+        href={symbolDecoderUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {c.relatedToolTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {c.relatedSymbolTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">
+          {c.relatedSymbolDesc}
+        </p>
+      </a>
+    </section>
+
+    <!-- Core Storage Hub Strip -->
+    <section class="mb-14 p-6 rounded-2xl bg-surface-soft border border-hairline">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-title-sm font-semibold text-ink mb-1">
+            {c.hubsTitle}
+          </h2>
+          <p class="text-[13px] text-muted">
+            {c.hubsDesc}
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <a href={howLongUrl} class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors">{c.hubLabels.howLong}</a>
+          <a href={refreezeUrl} class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors">{c.hubLabels.refreeze}</a>
+          <a href={refrigeratorUrl} class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors">{c.hubLabels.refrigerator}</a>
+          <a href={freezerUrl} class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors">{c.hubLabels.freezer}</a>
+          <a href="/methodology/" class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors">{c.hubLabels.methodology}</a>
+          <a href={toolsUrl} class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors">{c.hubLabels.allTools}</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Section (5 Consumer-Friendly FAQs) -->
+    <section class="mb-8">
+      <h2 class="text-title-lg font-medium text-ink tracking-tight mb-6">
+        {c.faqTitle}
+      </h2>
+      <div class="space-y-4">
+        {c.faqs.map((faq) => (
+          <details class="group p-5 bg-surface-soft border border-hairline rounded-xl" open>
+            <summary class="text-title-sm font-semibold text-ink cursor-pointer list-none flex items-center justify-between gap-3">
+              <span>{faq.question}</span>
+              <span class="text-muted text-sm transition-transform group-open:rotate-180 shrink-0" aria-hidden="true">&#9662;</span>
+            </summary>
+            <p class="text-[14px] text-body leading-relaxed mt-3 pt-3 border-t border-hairline/70">
+              {faq.answer}
+            </p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+</Layout>

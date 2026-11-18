@@ -1,0 +1,1772 @@
+---
+import rawData from '../data/leftover-shelf-life-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+import { getApplianceUrl, getDirectoryUrl } from '../i18n/utils';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+type CategoryKey = 'all' | 'poultry-meat' | 'seafood' | 'cooked-leftovers' | 'dairy-eggs' | 'produce-bakery';
+
+function resolveHubUrl(hubPath: string, currentLang: SupportedLanguage): string {
+  const clean = (hubPath || '').replace(/^\/+|\/+$/g, '');
+  if (clean === 'how-long' || clean === 'refreeze' || clean === 'tools') {
+    return getDirectoryUrl(clean, currentLang);
+  }
+  if (clean === 'refrigerator' || clean === 'freezer') {
+    return getApplianceUrl(clean, currentLang);
+  }
+  return hubPath || '/';
+}
+
+interface LocalizedFood {
+  id: string;
+  name: string;
+  category: Exclude<CategoryKey, 'all'>;
+  fridgeDaysMin: number;
+  fridgeDaysMax: number;
+  freezerMonths: number;
+  counterMaxHours: number;
+  reheatTempF: number;
+  reheatTempC: number;
+  canRefreeze: string;
+  keyPathogenRisk: string;
+  spoilageSigns: string[];
+  storageTip: string;
+  relatedHub: string;
+  searchText: string;
+}
+
+const localizedFoods: LocalizedFood[] = rawData.foods.map((item) => {
+  const tr = lang !== 'en' && item.i18n && (item.i18n as Record<string, any>)[lang]
+    ? (item.i18n as Record<string, any>)[lang]
+    : null;
+
+  const name = tr?.name || item.name;
+  const canRefreeze = tr?.canRefreeze || item.canRefreeze;
+  const keyPathogenRisk = tr?.keyPathogenRisk || item.keyPathogenRisk;
+  const spoilageSigns = tr?.spoilageSigns || item.spoilageSigns;
+  const storageTip = tr?.storageTip || item.storageTip;
+
+  return {
+    id: item.id,
+    name,
+    category: item.category as Exclude<CategoryKey, 'all'>,
+    fridgeDaysMin: item.fridgeDaysMin,
+    fridgeDaysMax: item.fridgeDaysMax,
+    freezerMonths: item.freezerMonths,
+    counterMaxHours: item.counterMaxHours,
+    reheatTempF: item.reheatTempF,
+    reheatTempC: item.reheatTempC,
+    canRefreeze,
+    keyPathogenRisk,
+    spoilageSigns,
+    storageTip,
+    relatedHub: resolveHubUrl(item.relatedHub, lang),
+    searchText: [item.name, name, item.id, keyPathogenRisk].join(' ').toLowerCase()
+  };
+});
+
+const categoryCounts: Record<CategoryKey, number> = {
+  all: localizedFoods.length,
+  'poultry-meat': localizedFoods.filter((f) => f.category === 'poultry-meat').length,
+  seafood: localizedFoods.filter((f) => f.category === 'seafood').length,
+  'cooked-leftovers': localizedFoods.filter((f) => f.category === 'cooked-leftovers').length,
+  'dairy-eggs': localizedFoods.filter((f) => f.category === 'dairy-eggs').length,
+  'produce-bakery': localizedFoods.filter((f) => f.category === 'produce-bakery').length
+};
+
+const quickPresets = rawData.quickPresets
+  .map((id) => localizedFoods.find((f) => f.id === id))
+  .filter((f): f is LocalizedFood => Boolean(f));
+
+interface UiDict {
+  localeCode: string;
+  step1Title: string;
+  quickPresetsLabel: string;
+  searchPlaceholder: string;
+  searchAria: string;
+  selectFoodLabel: string;
+  noMatchOption: string;
+  categories: Record<CategoryKey, string>;
+  step2Title: string;
+  storageLabel: string;
+  storageOptions: {
+    fridge: { title: string; sub: string };
+    freezer: { title: string; sub: string };
+    counter: { title: string; sub: string };
+  };
+  whenCookedLabel: string;
+  ageChips: Array<{ label: string; days: number }>;
+  freezerChips: Array<{ label: string; days: number }>;
+  roomTempLabel: string;
+  roomTempHint: string;
+  above90Label: string;
+  above90Hint: string;
+  dashboardBadge: string;
+  verdicts: {
+    safe: { badge: string; headline: string };
+    warn: { badge: string; headline: string };
+    discard: { badge: string; headline: string };
+  };
+  reasons: {
+    spoilageDetected: string;
+    dangerZoneBreach: string;
+    counterLimitNear: string;
+    counterSafe: string;
+    fridgeExpired: string;
+    fridgeFinalWindow: string;
+    fridgeSafe: string;
+    freezerNotRecommended: string;
+    freezerPastQuality: string;
+    freezerSafe: string;
+  };
+  safeUntilLabel: string;
+  timeRemainingLabel: string;
+  expiredText: string;
+  indefiniteSafeText: string;
+  qualityUntilPrefix: string;
+  gaugeLabel: string;
+  metrics: {
+    reheatTitle: string;
+    reheatCold: string;
+    freezerTitle: string;
+    freezerNo: string;
+    fridgeWindowTitle: string;
+    dangerZoneTitle: string;
+    refreezeTitle: string;
+  };
+  pathogenHeading: string;
+  spoilageHeading: string;
+  spoilageSub: string;
+  storageTipHeading: string;
+  readHubBtn: string;
+  copyBtn: string;
+  copiedBtn: string;
+  resetBtn: string;
+  units: {
+    day: string;
+    days: string;
+    hour: string;
+    hours: string;
+    min: string;
+    mins: string;
+    month: string;
+    months: string;
+    today: string;
+    yesterday: string;
+    agoSuffix: string;
+    leftSuffix: string;
+    overSuffix: string;
+    fridgeShort: string;
+    hoursPlus: string;
+    standardRule: string;
+    hotRule: string;
+  };
+}
+
+const UI: Record<SupportedLanguage, UiDict> = {
+  en: {
+    localeCode: 'en-US',
+    step1Title: '1. Choose Your Food or Leftover',
+    quickPresetsLabel: 'Top Checks:',
+    searchPlaceholder: 'Search 30+ foods (e.g. chicken, rice, pizza, eggs, milk, soup)...',
+    searchAria: 'Filter foods by name',
+    selectFoodLabel: 'Selected Food Item',
+    noMatchOption: 'No foods match your filter — try clearing search',
+    categories: {
+      all: 'All Foods',
+      'poultry-meat': 'Poultry & Meat',
+      seafood: 'Seafood',
+      'cooked-leftovers': 'Cooked Leftovers',
+      'dairy-eggs': 'Dairy & Eggs',
+      'produce-bakery': 'Produce & Bakery'
+    },
+    step2Title: '2. Enter Storage & Time Conditions',
+    storageLabel: 'Where has it been stored?',
+    storageOptions: {
+      fridge: { title: 'Refrigerator', sub: '35–40°F / 2–4°C' },
+      freezer: { title: 'Freezer', sub: '0°F / -18°C' },
+      counter: { title: 'Countertop', sub: 'Room Temp' }
+    },
+    whenCookedLabel: 'When was it cooked or opened?',
+    ageChips: [
+      { label: 'Today', days: 0 },
+      { label: 'Yesterday', days: 1 },
+      { label: '2 days ago', days: 2 },
+      { label: '3 days ago', days: 3 },
+      { label: '4 days ago', days: 4 },
+      { label: '5+ days ago', days: 5 }
+    ],
+    freezerChips: [
+      { label: 'Today', days: 0 },
+      { label: '1 week', days: 7 },
+      { label: '1 month', days: 30 },
+      { label: '3 months', days: 90 },
+      { label: '6 months', days: 180 }
+    ],
+    roomTempLabel: 'How long did it sit at room temperature?',
+    roomTempHint: 'USDA Danger Zone: 40°F–140°F (4°C–60°C)',
+    above90Label: 'Room / Outdoor temp above 90°F (32°C)?',
+    above90Hint: 'Triggers strict USDA 1-hour Danger Zone rule',
+    dashboardBadge: 'USDA FSIS Live Safety Verdict',
+    verdicts: {
+      safe: { badge: 'SAFE TO EAT ✅', headline: 'Within USDA Safe Storage Window' },
+      warn: { badge: 'EAT TODAY / FREEZE NOW ⚠️', headline: 'Final Safe Window — Act Now' },
+      discard: { badge: 'DISCARD IMMEDIATELY ❌', headline: 'Unsafe — When in Doubt, Throw It Out' }
+    },
+    reasons: {
+      spoilageDetected: 'You checked one or more spoilage warning signs. Never taste-test questionable food — discard immediately.',
+      dangerZoneBreach: 'Exceeded the USDA room-temperature Danger Zone limit ({limit}h). Bacteria multiply rapidly between 40°F–140°F (4°C–60°C) and heat-stable toxins cannot be cooked away.',
+      counterLimitNear: 'At or near the room-temperature safety limit ({limit}h). Eat right now or move immediately to the refrigerator in a shallow container.',
+      counterSafe: 'Still inside the brief room-temperature window ({limit}h max), but refrigerate as soon as possible to prevent pathogen growth.',
+      fridgeExpired: 'Past the USDA maximum refrigerator shelf life of {max} days. Even if it smells normal, harmful pathogens like Listeria can grow invisibly.',
+      fridgeFinalWindow: 'In its final USDA refrigerator window ({min}–{max} days). Eat today after reheating thoroughly, or freeze immediately.',
+      fridgeSafe: 'Safely inside the USDA refrigerator storage guideline ({min}–{max} days at ≤40°F / 4°C).',
+      freezerNotRecommended: 'Food kept continuously at 0°F (-18°C) stays microbiologically safe, but freezing severely degrades this item’s texture or emulsion.',
+      freezerPastQuality: 'Still USDA-safe if held continuously at 0°F (-18°C), but past its {months}-month peak quality window. Inspect for freezer burn and use soon.',
+      freezerSafe: 'Within peak freezer quality ({months} months). Food held constantly at 0°F (-18°C) stays safe indefinitely.'
+    },
+    safeUntilLabel: 'Safe Until',
+    timeRemainingLabel: 'Time Remaining',
+    expiredText: 'Expired — Discard',
+    indefiniteSafeText: 'Safe indefinitely at 0°F (-18°C)',
+    qualityUntilPrefix: 'Peak quality until',
+    gaugeLabel: 'Shelf-Life Elapsed',
+    metrics: {
+      reheatTitle: 'Safe Reheating Target',
+      reheatCold: 'Serve Cold (No Reheat)',
+      freezerTitle: 'Freezer Extension',
+      freezerNo: 'Not Recommended',
+      fridgeWindowTitle: 'USDA Fridge Limit',
+      dangerZoneTitle: 'Room Temp Max',
+      refreezeTitle: 'Can You Refreeze?'
+    },
+    pathogenHeading: 'Primary Pathogen Risk',
+    spoilageHeading: 'Spoilage Inspection Checklist (Tap if noticed)',
+    spoilageSub: 'Checking any warning sign immediately overrides verdict to DISCARD.',
+    storageTipHeading: 'USDA Storage Best Practice',
+    readHubBtn: 'Explore Full Storage Guide',
+    copyBtn: 'Copy Verdict',
+    copiedBtn: 'Copied!',
+    resetBtn: 'Reset',
+    units: {
+      day: 'day',
+      days: 'days',
+      hour: 'hr',
+      hours: 'hrs',
+      min: 'min',
+      mins: 'mins',
+      month: 'month',
+      months: 'months',
+      today: 'Today (0 days)',
+      yesterday: 'Yesterday (1 day)',
+      agoSuffix: 'ago',
+      leftSuffix: 'remaining',
+      overSuffix: 'past limit',
+      fridgeShort: 'fridge',
+      hoursPlus: '4+ hrs',
+      standardRule: '2 hrs max',
+      hotRule: '1 hr max (>90°F)'
+    }
+  },
+  es: {
+    localeCode: 'es-ES',
+    step1Title: '1. Elige tu Alimento o Sobra',
+    quickPresetsLabel: 'Más Consultados:',
+    searchPlaceholder: 'Busca entre 30+ alimentos (ej. pollo, arroz, pizza, huevo, leche)...',
+    searchAria: 'Filtrar alimentos por nombre',
+    selectFoodLabel: 'Alimento Seleccionado',
+    noMatchOption: 'Sin coincidencias — limpia la búsqueda',
+    categories: {
+      all: 'Todos',
+      'poultry-meat': 'Aves y Carnes',
+      seafood: 'Mariscos y Pescado',
+      'cooked-leftovers': 'Sobras Cocidas',
+      'dairy-eggs': 'Lácteos y Huevos',
+      'produce-bakery': 'Frutas y Repostería'
+    },
+    step2Title: '2. Indica Almacenamiento y Tiempo',
+    storageLabel: '¿Dónde ha estado guardado?',
+    storageOptions: {
+      fridge: { title: 'Refrigerador', sub: '2–4°C / 35–40°F' },
+      freezer: { title: 'Congelador', sub: '-18°C / 0°F' },
+      counter: { title: 'Encimera', sub: 'Temp. Ambiente' }
+    },
+    whenCookedLabel: '¿Cuándo se cocinó o abrió?',
+    ageChips: [
+      { label: 'Hoy', days: 0 },
+      { label: 'Ayer', days: 1 },
+      { label: 'Hace 2 días', days: 2 },
+      { label: 'Hace 3 días', days: 3 },
+      { label: 'Hace 4 días', days: 4 },
+      { label: '5+ días', days: 5 }
+    ],
+    freezerChips: [
+      { label: 'Hoy', days: 0 },
+      { label: '1 semana', days: 7 },
+      { label: '1 mes', days: 30 },
+      { label: '3 meses', days: 90 },
+      { label: '6 meses', days: 180 }
+    ],
+    roomTempLabel: '¿Cuánto tiempo estuvo a temperatura ambiente?',
+    roomTempHint: 'Zona de Peligro USDA: 4°C–60°C (40°F–140°F)',
+    above90Label: '¿Ambiente exterior o cocina sobre 32°C (90°F)?',
+    above90Hint: 'Activa la regla estricta USDA de 1 hora máxima',
+    dashboardBadge: 'Veredicto en Vivo USDA FSIS',
+    verdicts: {
+      safe: { badge: 'SEGURO PARA COMER ✅', headline: 'Dentro del Plazo Seguro USDA' },
+      warn: { badge: 'COMER HOY / CONGELAR YA ⚠️', headline: 'Último Margen Seguro — Actúa Hoy' },
+      discard: { badge: 'DESCARTAR INMEDIATAMENTE ❌', headline: 'Inseguro — Ante la Duda, Deséchalo' }
+    },
+    reasons: {
+      spoilageDetected: 'Marcaste señales de deterioro. Nunca pruebes comida dudosa: deséchala de inmediato.',
+      dangerZoneBreach: 'Superó el límite de la Zona de Peligro ({limit} h) a temperatura ambiente. Las toxinas termorresistentes no desaparecen al recalentar.',
+      counterLimitNear: 'En el límite de tiempo a temperatura ambiente ({limit} h). Consúmelo ya o refrigéralo de inmediato.',
+      counterSafe: 'Aún dentro del margen breve a temperatura ambiente ({limit} h máx.), pero refrigera cuanto antes.',
+      fridgeExpired: 'Superó el máximo de {max} días en refrigerador según USDA. Patógenos como Listeria crecen sin alterar el olor.',
+      fridgeFinalWindow: 'En su último margen de refrigeración ({min}–{max} días). Cómelo hoy bien caliente o congélalo ahora.',
+      fridgeSafe: 'Dentro del periodo seguro de refrigeración USDA ({min}–{max} días a ≤4°C).',
+      freezerNotRecommended: 'A -18°C se mantiene microbiológicamente seguro, pero congelar daña gravemente su textura o emulsión.',
+      freezerPastQuality: 'Sigue siendo seguro a -18°C continuos, pero superó su calidad óptima de {months} meses. Revisa si tiene quemadura por frío.',
+      freezerSafe: 'Dentro del periodo de calidad óptima ({months} meses). A -18°C continuos es seguro indefinidamente.'
+    },
+    safeUntilLabel: 'Seguro Hasta',
+    timeRemainingLabel: 'Tiempo Restante',
+    expiredText: 'Vencido — Descartar',
+    indefiniteSafeText: 'Seguro indefinidamente a -18°C',
+    qualityUntilPrefix: 'Calidad óptima hasta',
+    gaugeLabel: 'Vida Útil Consumida',
+    metrics: {
+      reheatTitle: 'Temp. de Recalentado',
+      reheatCold: 'Servir Frío (No Recalentar)',
+      freezerTitle: 'Extensión en Congelador',
+      freezerNo: 'No Recomendado',
+      fridgeWindowTitle: 'Límite en Nevera',
+      dangerZoneTitle: 'Máx. Temp. Ambiente',
+      refreezeTitle: '¿Se Puede Recongelar?'
+    },
+    pathogenHeading: 'Riesgo Patógeno Principal',
+    spoilageHeading: 'Lista de Señales de Deterioro (Marca si notas alguna)',
+    spoilageSub: 'Marcar cualquier señal cambia el veredicto automáticamente a DESCARTAR.',
+    storageTipHeading: 'Mejor Práctica de Almacenamiento USDA',
+    readHubBtn: 'Ver Guía Completa de Conservación',
+    copyBtn: 'Copiar Veredicto',
+    copiedBtn: '¡Copiado!',
+    resetBtn: 'Reiniciar',
+    units: {
+      day: 'día',
+      days: 'días',
+      hour: 'h',
+      hours: 'h',
+      min: 'min',
+      mins: 'min',
+      month: 'mes',
+      months: 'meses',
+      today: 'Hoy (0 días)',
+      yesterday: 'Ayer (1 día)',
+      agoSuffix: 'atrás',
+      leftSuffix: 'restantes',
+      overSuffix: 'excedido',
+      fridgeShort: 'nevera',
+      hoursPlus: '4+ h',
+      standardRule: '2 h máx.',
+      hotRule: '1 h máx. (>32°C)'
+    }
+  },
+  pt: {
+    localeCode: 'pt-BR',
+    step1Title: '1. Escolha o Alimento ou Sobra',
+    quickPresetsLabel: 'Mais Buscados:',
+    searchPlaceholder: 'Busque 30+ alimentos (ex: frango, arroz, pizza, ovo, leite)...',
+    searchAria: 'Filtrar alimentos por nome',
+    selectFoodLabel: 'Alimento Selecionado',
+    noMatchOption: 'Nenhum resultado — limpe a busca',
+    categories: {
+      all: 'Todos',
+      'poultry-meat': 'Aves e Carnes',
+      seafood: 'Peixes e Frutos do Mar',
+      'cooked-leftovers': 'Sobras Cozidas',
+      'dairy-eggs': 'Laticínios e Ovos',
+      'produce-bakery': 'Frutas e Tortas'
+    },
+    step2Title: '2. Informe Armazenamento e Tempo',
+    storageLabel: 'Onde ficou guardado?',
+    storageOptions: {
+      fridge: { title: 'Geladeira', sub: '2–4°C / 35–40°F' },
+      freezer: { title: 'Freezer', sub: '-18°C / 0°F' },
+      counter: { title: 'Bancada', sub: 'Temp. Ambiente' }
+    },
+    whenCookedLabel: 'Quando foi cozido ou aberto?',
+    ageChips: [
+      { label: 'Hoje', days: 0 },
+      { label: 'Ontem', days: 1 },
+      { label: 'Há 2 dias', days: 2 },
+      { label: 'Há 3 dias', days: 3 },
+      { label: 'Há 4 dias', days: 4 },
+      { label: '5+ dias', days: 5 }
+    ],
+    freezerChips: [
+      { label: 'Hoje', days: 0 },
+      { label: '1 semana', days: 7 },
+      { label: '1 mês', days: 30 },
+      { label: '3 meses', days: 90 },
+      { label: '6 meses', days: 180 }
+    ],
+    roomTempLabel: 'Quanto tempo ficou em temperatura ambiente?',
+    roomTempHint: 'Zona de Perigo USDA: 4°C–60°C (40°F–140°F)',
+    above90Label: 'Temperatura ambiente acima de 32°C (90°F)?',
+    above90Hint: 'Ativa a regra rigorosa do USDA de apenas 1 hora',
+    dashboardBadge: 'Veredito USDA FSIS em Tempo Real',
+    verdicts: {
+      safe: { badge: 'SEGURO PARA COMER ✅', headline: 'Dentro do Prazo Seguro USDA' },
+      warn: { badge: 'COMA HOJE / CONGELE JÁ ⚠️', headline: 'Janela Final Segura — Aja Hoje' },
+      discard: { badge: 'DESCARTE IMEDIATAMENTE ❌', headline: 'Inseguro — Na Dúvida, Jogue Fora' }
+    },
+    reasons: {
+      spoilageDetected: 'Você marcou sinais de deterioração. Nunca prove alimentos suspeitos — descarte imediatamente.',
+      dangerZoneBreach: 'Ultrapassou o limite da Zona de Perigo ({limit}h) em temperatura ambiente. Toxinas resistentes ao calor não somem ao reaquecer.',
+      counterLimitNear: 'No limite do tempo seguro fora da geladeira ({limit}h). Coma agora ou refrigere imediatamente.',
+      counterSafe: 'Ainda dentro do prazo breve fora da geladeira ({limit}h máx.), mas leve à geladeira o quanto antes.',
+      fridgeExpired: 'Ultrapassou o limite máximo de {max} dias na geladeira segundo o USDA. Bactérias como Listeria crescem sem cheiro.',
+      fridgeFinalWindow: 'No último período seguro na geladeira ({min}–{max} dias). Coma hoje bem reaquecido ou congele agora.',
+      fridgeSafe: 'Dentro do prazo seguro de geladeira recomendado pelo USDA ({min}–{max} dias a ≤4°C).',
+      freezerNotRecommended: 'Mantido a -18°C permanece seguro contra bactérias, mas o congelamento estraga a textura ou emulsão.',
+      freezerPastQuality: 'Ainda seguro se mantido a -18°C constantes, mas passou da qualidade ideal de {months} meses. Use em breve.',
+      freezerSafe: 'Dentro do período de qualidade máxima ({months} meses). A -18°C constantes permanece seguro indefinidamente.'
+    },
+    safeUntilLabel: 'Seguro Até',
+    timeRemainingLabel: 'Tempo Restante',
+    expiredText: 'Vencido — Descartar',
+    indefiniteSafeText: 'Seguro indefinidamente a -18°C',
+    qualityUntilPrefix: 'Qualidade ideal até',
+    gaugeLabel: 'Prazo Consumido',
+    metrics: {
+      reheatTitle: 'Temp. de Reaquecimento',
+      reheatCold: 'Servir Frio (Sem Aquecer)',
+      freezerTitle: 'Extensão no Freezer',
+      freezerNo: 'Não Recomendado',
+      fridgeWindowTitle: 'Limite na Geladeira',
+      dangerZoneTitle: 'Máx. Temp. Ambiente',
+      refreezeTitle: 'Pode Recongelar?'
+    },
+    pathogenHeading: 'Principal Risco de Patógeno',
+    spoilageHeading: 'Checklist de Sinais de Deterioração (Marque se notar)',
+    spoilageSub: 'Marcar qualquer sinal altera o veredito automaticamente para DESCARTAR.',
+    storageTipHeading: 'Melhor Prática de Armazenamento USDA',
+    readHubBtn: 'Ver Guia Completo de Conservação',
+    copyBtn: 'Copiar Veredito',
+    copiedBtn: 'Copiado!',
+    resetBtn: 'Limpar',
+    units: {
+      day: 'dia',
+      days: 'dias',
+      hour: 'h',
+      hours: 'h',
+      min: 'min',
+      mins: 'min',
+      month: 'mês',
+      months: 'meses',
+      today: 'Hoje (0 dias)',
+      yesterday: 'Ontem (1 dia)',
+      agoSuffix: 'atrás',
+      leftSuffix: 'restantes',
+      overSuffix: 'além do limite',
+      fridgeShort: 'geladeira',
+      hoursPlus: '4+ h',
+      standardRule: '2h máx.',
+      hotRule: '1h máx. (>32°C)'
+    }
+  },
+  'zh-cn': {
+    localeCode: 'zh-CN',
+    step1Title: '1. 选择食物或剩菜类型',
+    quickPresetsLabel: '高频速查:',
+    searchPlaceholder: '搜索 30+ 种日常食材（如：鸡肉、米饭、披萨、鸡蛋、牛奶、炖汤）...',
+    searchAria: '按名称筛选食物',
+    selectFoodLabel: '当前选择食材',
+    noMatchOption: '未找到匹配食材 — 请清空搜索词',
+    categories: {
+      all: '全部食材',
+      'poultry-meat': '禽肉与肉类',
+      seafood: '海鲜与鱼类',
+      'cooked-leftovers': '熟食与剩菜',
+      'dairy-eggs': '乳制品与蛋类',
+      'produce-bakery': '果蔬与烘焙'
+    },
+    step2Title: '2. 设定存放位置与时间',
+    storageLabel: '目前存放在哪里？',
+    storageOptions: {
+      fridge: { title: '冰箱冷藏室', sub: '2–4°C / 35–40°F' },
+      freezer: { title: '冰箱冷冻室', sub: '-18°C / 0°F' },
+      counter: { title: '常温桌面', sub: '室温放置' }
+    },
+    whenCookedLabel: '何时烹饪或开封？',
+    ageChips: [
+      { label: '今天', days: 0 },
+      { label: '昨天', days: 1 },
+      { label: '2天前', days: 2 },
+      { label: '3天前', days: 3 },
+      { label: '4天前', days: 4 },
+      { label: '5天以上', days: 5 }
+    ],
+    freezerChips: [
+      { label: '今天', days: 0 },
+      { label: '1周', days: 7 },
+      { label: '1个月', days: 30 },
+      { label: '3个月', days: 90 },
+      { label: '6个月', days: 180 }
+    ],
+    roomTempLabel: '在室温下总共放置了多久？',
+    roomTempHint: 'USDA 细菌危险温区：4°C–60°C (40°F–140°F)',
+    above90Label: '室内或户外温度高于 32°C (90°F)？',
+    above90Hint: '触发 USDA 严苛的“1小时危险区上限”',
+    dashboardBadge: 'USDA FSIS 实时安全判定',
+    verdicts: {
+      safe: { badge: '可安全食用 ✅', headline: '处于 USDA 安全保存期内' },
+      warn: { badge: '今日吃完 / 立即冷冻 ⚠️', headline: '已进入最后安全窗口期' },
+      discard: { badge: '立即丢弃 ❌', headline: '存在食源性中毒风险 — 宁扔勿吃' }
+    },
+    reasons: {
+      spoilageDetected: '您勾选了腐败变质征兆。切勿“尝一口试试”，请立即丢弃！',
+      dangerZoneBreach: '已超过 USDA 室温危险温区上限（{limit}小时）。致病菌在 4°C–60°C 呈指数繁殖，且耐热毒素无法靠复热破坏。',
+      counterLimitNear: '已接近或达到室温安全极限（{limit}小时）。请立刻食用或用浅盒迅速放入冰箱冷藏。',
+      counterSafe: '仍在短暂室温窗口内（最多 {limit} 小时），建议尽快密封放入冰箱。',
+      fridgeExpired: '已超过 USDA 规定的冰箱冷藏上限（{max}天）。即便闻起来没异味，李斯特菌等致病菌也可能已悄然繁殖。',
+      fridgeFinalWindow: '处于冷藏安全末期（{min}–{max}天）。请今天彻底复热吃完，或立即密封转入冷冻室。',
+      fridgeSafe: '处于 USDA 建议的冷藏保鲜期内（≤4°C 条件下 {min}–{max} 天）。',
+      freezerNotRecommended: '持续 -18°C 冷冻虽能抑制细菌，但冷冻会严重破坏该食材的口感或乳化结构。',
+      freezerPastQuality: '若全程保持 -18°C 仍符合食品安全，但已超过 {months} 个月最佳风味期，请检查冻烧并尽快食用。',
+      freezerSafe: '处于冷冻最佳风味期（{months}个月）内。全程保持 -18°C 微生物层面可长期安全保存。'
+    },
+    safeUntilLabel: '安全截止时间',
+    timeRemainingLabel: '剩余安全倒计时',
+    expiredText: '已过期 — 建议丢弃',
+    indefiniteSafeText: '-18°C 持续冷冻安全不限期',
+    qualityUntilPrefix: '最佳风味期至',
+    gaugeLabel: '已消耗保鲜进度',
+    metrics: {
+      reheatTitle: '安全复热中心温度',
+      reheatCold: '冷食（无需复热）',
+      freezerTitle: '冷冻保鲜延展期',
+      freezerNo: '不建议冷冻',
+      fridgeWindowTitle: 'USDA 冷藏上限',
+      dangerZoneTitle: '室温危险区上限',
+      refreezeTitle: '能否再次复冻？'
+    },
+    pathogenHeading: '主要致病菌风险警示',
+    spoilageHeading: '变质自查清单（发现任意一项请勾选）',
+    spoilageSub: '勾选任何变质征兆，结果将立即转为“立即丢弃”。',
+    storageTipHeading: 'USDA 最佳实践储存建议',
+    readHubBtn: '查看完整储藏安全指南',
+    copyBtn: '复制判定结果',
+    copiedBtn: '已复制！',
+    resetBtn: '重置',
+    units: {
+      day: '天',
+      days: '天',
+      hour: '小时',
+      hours: '小时',
+      min: '分钟',
+      mins: '分钟',
+      month: '个月',
+      months: '个月',
+      today: '今天（0天）',
+      yesterday: '昨天（1天）',
+      agoSuffix: '前',
+      leftSuffix: '剩余',
+      overSuffix: '已超期',
+      fridgeShort: '冷藏',
+      hoursPlus: '4+ 小时',
+      standardRule: '最多 2 小时',
+      hotRule: '最多 1 小时 (>32°C)'
+    }
+  },
+  ja: {
+    localeCode: 'ja-JP',
+    step1Title: '1. 食品・残り物を選択',
+    quickPresetsLabel: 'よく調べる食品:',
+    searchPlaceholder: '30品目以上から検索（例：鶏肉、ご飯、ピザ、ゆで卵、牛乳）...',
+    searchAria: '食品名で絞り込み',
+    selectFoodLabel: '選択中の食品',
+    noMatchOption: '該当なし — 検索語をクリアしてください',
+    categories: {
+      all: 'すべて',
+      'poultry-meat': '肉類・鶏肉',
+      seafood: '魚介類',
+      'cooked-leftovers': '調理済み残り物',
+      'dairy-eggs': '乳製品・卵',
+      'produce-bakery': '果物・パイ等'
+    },
+    step2Title: '2. 保存場所と経過時間を入力',
+    storageLabel: 'どこで保存していますか？',
+    storageOptions: {
+      fridge: { title: '冷蔵庫', sub: '2〜4℃ / 35〜40°F' },
+      freezer: { title: '冷凍庫', sub: '-18℃ / 0°F' },
+      counter: { title: '常温放置', sub: 'キッチン・室温' }
+    },
+    whenCookedLabel: 'いつ調理・開封しましたか？',
+    ageChips: [
+      { label: '今日', days: 0 },
+      { label: '昨日', days: 1 },
+      { label: '2日前', days: 2 },
+      { label: '3日前', days: 3 },
+      { label: '4日前', days: 4 },
+      { label: '5日以上前', days: 5 }
+    ],
+    freezerChips: [
+      { label: '今日', days: 0 },
+      { label: '1週間', days: 7 },
+      { label: '1ヶ月', days: 30 },
+      { label: '3ヶ月', days: 90 },
+      { label: '6ヶ月', days: 180 }
+    ],
+    roomTempLabel: '室温に合計どれくらい置いていましたか？',
+    roomTempHint: 'USDA危険温度帯：4℃〜60℃ (40°F〜140°F)',
+    above90Label: '室温・外気温が 32℃ (90°F) を超えていますか？',
+    above90Hint: '厳格な USDA 1時間ルールが適用されます',
+    dashboardBadge: 'USDA FSIS リアルタイム安全判定',
+    verdicts: {
+      safe: { badge: '安全に食べられます ✅', headline: 'USDA安全保存期間内です' },
+      warn: { badge: '今日中に食べる / 今すぐ冷凍 ⚠️', headline: '安全期間の最終段階です' },
+      discard: { badge: '今すぐ廃棄してください ❌', headline: '食中毒リスク高 — 迷ったら捨てる' }
+    },
+    reasons: {
+      spoilageDetected: '腐敗・変質のサインがチェックされました。味見はせず直ちに廃棄してください。',
+      dangerZoneBreach: 'USDAの常温危険温度帯ルール（上限{limit}時間）を超過しました。耐熱性毒素は再加熱しても無毒化できません。',
+      counterLimitNear: '常温放置の上限（{limit}時間）に達しています。今すぐ食べるか、直ちに冷蔵庫へ移してください。',
+      counterSafe: '短い常温許容時間（最大{limit}時間）内ですが、食中毒菌増殖を防ぐため速やかに冷蔵してください。',
+      fridgeExpired: 'USDAの冷蔵保存上限（{max}日）を超えています。臭いに異常がなくてもリステリア菌等が増殖する恐れがあります。',
+      fridgeFinalWindow: '冷蔵保存の最終目安（{min}〜{max}日）に入っています。今日中に十分再加熱して食べるか、今すぐ冷凍してください。',
+      fridgeSafe: 'USDAの冷蔵安全ガイドライン（4℃以下で{min}〜{max}日）の範囲内です。',
+      freezerNotRecommended: '-18℃維持なら細菌面は安全ですが、冷凍により食感や乳化状態が大きく損なわれます。',
+      freezerPastQuality: '-18℃維持なら安全ですが、品質目安の{months}ヶ月を超えています。冷凍焼けを確認し早めに消費してください。',
+      freezerSafe: '冷凍の品質保持目安（{months}ヶ月）内です。-18℃を保てば安全面は長期維持されます。'
+    },
+    safeUntilLabel: '安全期限の目安',
+    timeRemainingLabel: '残り安全時間',
+    expiredText: '期限超過 — 廃棄推奨',
+    indefiniteSafeText: '-18℃維持で安全面は無期限',
+    qualityUntilPrefix: 'おいしさの目安:',
+    gaugeLabel: '保存期間の経過率',
+    metrics: {
+      reheatTitle: '安全な再加熱温度',
+      reheatCold: 'そのまま冷蔵で消費',
+      freezerTitle: '冷凍による延長目安',
+      freezerNo: '冷凍非推奨',
+      fridgeWindowTitle: 'USDA冷蔵上限',
+      dangerZoneTitle: '常温放置の上限',
+      refreezeTitle: '再冷凍できる？'
+    },
+    pathogenHeading: '主な食中毒菌リスク',
+    spoilageHeading: '腐敗・変質チェック（該当すればタップ）',
+    spoilageSub: '1つでも該当すると判定が自動的に「廃棄」へ切り替わります。',
+    storageTipHeading: 'USDA推奨の保存テクニック',
+    readHubBtn: '詳しい保存ガイドを見る',
+    copyBtn: '判定をコピー',
+    copiedBtn: 'コピーしました！',
+    resetBtn: 'リセット',
+    units: {
+      day: '日',
+      days: '日',
+      hour: '時間',
+      hours: '時間',
+      min: '分',
+      mins: '分',
+      month: 'ヶ月',
+      months: 'ヶ月',
+      today: '今日（0日）',
+      yesterday: '昨日（1日）',
+      agoSuffix: '前',
+      leftSuffix: '残り',
+      overSuffix: '超過',
+      fridgeShort: '冷蔵',
+      hoursPlus: '4時間以上',
+      standardRule: '最大2時間',
+      hotRule: '最大1時間 (>32℃)'
+    }
+  }
+};
+
+const t = UI[lang] || UI.en;
+const defaultFood = localizedFoods[0];
+const clientPayload = JSON.stringify({
+  lang,
+  foods: localizedFoods,
+  ui: t
+});
+---
+
+<section
+  id="leftover-shelf-life-calculator"
+  class="rounded-2xl border border-hairline bg-canvas shadow-sm overflow-hidden"
+  aria-label={t.dashboardBadge}
+>
+  <script type="application/json" id="lsl-payload" is:inline set:html={clientPayload} />
+
+  <div class="grid grid-cols-1 lg:grid-cols-12">
+    <!-- LEFT COLUMN: INTERACTIVE CONTROLS -->
+    <div class="lg:col-span-6 p-5 sm:p-7 bg-surface-soft border-b lg:border-b-0 lg:border-r border-hairline space-y-6">
+      <!-- STEP 1: FOOD SELECTION -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between gap-2">
+          <h2 class="text-[15px] font-semibold text-ink tracking-tight">{t.step1Title}</h2>
+          <button
+            type="button"
+            id="lsl-reset-btn"
+            class="text-xs font-semibold text-muted hover:text-signature-coral transition-colors cursor-pointer"
+          >
+            {t.resetBtn}
+          </button>
+        </div>
+
+        <!-- Quick Presets (Top 6 Queries) -->
+        <div>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-muted block mb-2">
+            {t.quickPresetsLabel}
+          </span>
+          <div class="flex flex-wrap gap-1.5">
+            {quickPresets.map((preset) => (
+              <button
+                type="button"
+                data-lsl-preset={preset.id}
+                class={`lsl-preset-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                  preset.id === defaultFood.id
+                    ? 'bg-primary text-on-primary border-primary shadow-xs'
+                    : 'bg-canvas text-ink border-hairline hover:border-signature-coral'
+                }`}
+              >
+                {preset.name.split('(')[0].trim()}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <!-- Category Tabs -->
+        <div class="flex flex-wrap gap-1.5" role="tablist" aria-label="Food Categories">
+          {(['all', 'poultry-meat', 'seafood', 'cooked-leftovers', 'dairy-eggs', 'produce-bakery'] as CategoryKey[]).map((cat) => (
+            <button
+              type="button"
+              role="tab"
+              aria-selected={cat === 'all' ? 'true' : 'false'}
+              data-lsl-cat={cat}
+              class={`lsl-cat-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
+                cat === 'all'
+                  ? 'bg-signature-coral text-white border-signature-coral'
+                  : 'bg-canvas text-body border-hairline hover:border-border-strong'
+              }`}
+            >
+              <span>{t.categories[cat]}</span>
+              <span class={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${cat === 'all' ? 'bg-white/20 text-white' : 'bg-surface-soft text-muted'}`}>
+                {categoryCounts[cat]}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <!-- Search + Select Dropdown -->
+        <div class="space-y-2.5">
+          <div class="relative">
+            <svg
+              class="w-4 h-4 text-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+            <input
+              id="lsl-search-input"
+              type="search"
+              placeholder={t.searchPlaceholder}
+              aria-label={t.searchAria}
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-canvas border border-hairline text-ink text-sm placeholder:text-muted/70 focus:outline-none focus:ring-2 focus:ring-signature-coral/40 focus:border-signature-coral transition-all"
+            />
+          </div>
+
+          <div>
+            <label for="lsl-food-select" class="block text-xs font-semibold text-muted mb-1">
+              {t.selectFoodLabel}
+            </label>
+            <select
+              id="lsl-food-select"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-canvas border border-hairline text-ink text-sm font-medium focus:outline-none focus:ring-2 focus:ring-signature-coral/40 focus:border-signature-coral cursor-pointer"
+            >
+              {localizedFoods.map((food) => (
+                <option value={food.id} selected={food.id === defaultFood.id}>
+                  {food.name} ({food.fridgeDaysMin}–{food.fridgeDaysMax}{t.units.days} {t.units.fridgeShort})
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <hr class="border-hairline" />
+
+      <!-- STEP 2: STORAGE & TIME CONDITIONS -->
+      <div class="space-y-5">
+        <h2 class="text-[15px] font-semibold text-ink tracking-tight">{t.step2Title}</h2>
+
+        <!-- Storage Location Cards -->
+        <div>
+          <span class="block text-xs font-semibold text-muted mb-2">{t.storageLabel}</span>
+          <div class="grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              data-lsl-storage="fridge"
+              aria-pressed="true"
+              class="lsl-storage-btn p-3 rounded-xl border text-left transition-all cursor-pointer bg-primary text-on-primary border-primary shadow-xs"
+            >
+              <div class="text-lg leading-none mb-1" aria-hidden="true">🧊</div>
+              <div class="text-xs font-bold leading-tight">{t.storageOptions.fridge.title}</div>
+              <div class="text-[10.5px] opacity-80 mt-0.5">{t.storageOptions.fridge.sub}</div>
+            </button>
+            <button
+              type="button"
+              data-lsl-storage="freezer"
+              aria-pressed="false"
+              class="lsl-storage-btn p-3 rounded-xl border text-left transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-signature-coral"
+            >
+              <div class="text-lg leading-none mb-1" aria-hidden="true">❄️</div>
+              <div class="text-xs font-bold leading-tight">{t.storageOptions.freezer.title}</div>
+              <div class="text-[10.5px] text-muted mt-0.5">{t.storageOptions.freezer.sub}</div>
+            </button>
+            <button
+              type="button"
+              data-lsl-storage="counter"
+              aria-pressed="false"
+              class="lsl-storage-btn p-3 rounded-xl border text-left transition-all cursor-pointer bg-canvas text-ink border-hairline hover:border-signature-coral"
+            >
+              <div class="text-lg leading-none mb-1" aria-hidden="true">🍽️</div>
+              <div class="text-xs font-bold leading-tight">{t.storageOptions.counter.title}</div>
+              <div class="text-[10.5px] text-muted mt-0.5">{t.storageOptions.counter.sub}</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- When Cooked / Opened -->
+        <div class="p-4 rounded-xl bg-canvas border border-hairline space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <label for="lsl-age-slider" class="text-xs font-semibold text-ink">
+              {t.whenCookedLabel}
+            </label>
+            <span id="lsl-age-readout" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-surface-soft border border-hairline text-ink">
+              {t.units.yesterday}
+            </span>
+          </div>
+
+          <!-- Quick Age Chips -->
+          <div id="lsl-age-chips" class="flex flex-wrap gap-1.5">
+            {t.ageChips.map((chip) => (
+              <button
+                type="button"
+                data-lsl-age={chip.days}
+                class={`lsl-age-chip px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                  chip.days === 1
+                    ? 'bg-primary text-on-primary border-primary'
+                    : 'bg-surface-soft text-body border-hairline hover:border-signature-coral'
+                }`}
+              >
+                {chip.label}
+              </button>
+            ))}
+          </div>
+
+          <input
+            id="lsl-age-slider"
+            type="range"
+            min="0"
+            max="10"
+            step="0.5"
+            value="1"
+            class="w-full accent-signature-coral cursor-pointer"
+          />
+          <div class="flex justify-between text-[11px] text-muted font-medium">
+            <span id="lsl-age-min-label">0 {t.units.days}</span>
+            <span id="lsl-age-mid-label">5 {t.units.days}</span>
+            <span id="lsl-age-max-label">10 {t.units.days}</span>
+          </div>
+        </div>
+
+        <!-- Room Temperature Exposure + >90°F Rule -->
+        <div class="p-4 rounded-xl bg-canvas border border-hairline space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <label for="lsl-room-slider" class="text-xs font-semibold text-ink">
+              {t.roomTempLabel}
+            </label>
+            <span id="lsl-room-readout" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-surface-soft border border-hairline text-ink">
+              0.5 {t.units.hours}
+            </span>
+          </div>
+
+          <input
+            id="lsl-room-slider"
+            type="range"
+            min="0"
+            max="4.5"
+            step="0.5"
+            value="0.5"
+            class="w-full accent-signature-coral cursor-pointer"
+          />
+          <div class="flex justify-between text-[11px] text-muted font-medium">
+            <span>0 {t.units.hours}</span>
+            <span class="text-warning font-semibold">1 {t.units.hour}</span>
+            <span class="text-error font-semibold">2 {t.units.hours}</span>
+            <span>3 {t.units.hours}</span>
+            <span>{t.units.hoursPlus}</span>
+          </div>
+          <p class="text-[11.5px] text-muted">{t.roomTempHint}</p>
+
+          <!-- >90°F / 32°C Checkbox -->
+          <label class="flex items-start gap-2.5 p-2.5 rounded-lg bg-surface-soft border border-hairline cursor-pointer hover:border-signature-coral transition-colors">
+            <input
+              id="lsl-hot-checkbox"
+              type="checkbox"
+              class="mt-0.5 w-4 h-4 rounded accent-signature-coral cursor-pointer shrink-0"
+            />
+            <span class="text-xs leading-snug">
+              <strong class="text-ink block">{t.above90Label}</strong>
+              <span class="text-muted text-[11px]">{t.above90Hint}</span>
+            </span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: LIVE VERDICT & COUNTDOWN DASHBOARD -->
+    <div id="lsl-dashboard" class="lg:col-span-6 p-5 sm:p-7 bg-canvas flex flex-col justify-between space-y-5">
+      <div class="space-y-5">
+        <!-- Prominent Verdict Banner -->
+        <div
+          id="lsl-verdict-banner"
+          class="p-5 rounded-2xl border-2 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 transition-colors"
+          role="status"
+          aria-live="polite"
+        >
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <span class="text-[10.5px] font-bold uppercase tracking-wider text-muted">
+              {t.dashboardBadge}
+            </span>
+            <span
+              id="lsl-verdict-pill"
+              class="inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold tracking-wide bg-emerald-600 text-white"
+            >
+              {t.verdicts.safe.badge}
+            </span>
+          </div>
+
+          <h3 id="lsl-verdict-food" class="text-xl sm:text-2xl font-semibold text-ink leading-tight mb-1">
+            {defaultFood.name}
+          </h3>
+          <p id="lsl-verdict-reason" class="text-[13.5px] text-body leading-relaxed">
+            {t.reasons.fridgeSafe
+              .replace('{min}', String(defaultFood.fridgeDaysMin))
+              .replace('{max}', String(defaultFood.fridgeDaysMax))}
+          </p>
+        </div>
+
+        <!-- Safe Until & Live Countdown Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="p-4 rounded-xl bg-surface-soft border border-hairline">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-muted mb-1">
+              {t.safeUntilLabel}
+            </div>
+            <div id="lsl-safe-until" class="text-[15px] font-bold text-ink leading-snug">
+              —
+            </div>
+          </div>
+          <div class="p-4 rounded-xl bg-surface-soft border border-hairline">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-muted mb-1">
+              {t.timeRemainingLabel}
+            </div>
+            <div id="lsl-countdown" class="text-[15px] font-bold text-ink leading-snug tabular-nums">
+              —
+            </div>
+          </div>
+        </div>
+
+        <!-- Visual Shelf-Life Elapsed Bar -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-semibold text-muted">{t.gaugeLabel}</span>
+            <span id="lsl-gauge-pct" class="font-bold text-ink tabular-nums">25%</span>
+          </div>
+          <div class="w-full h-2.5 rounded-full bg-surface-strong overflow-hidden">
+            <div
+              id="lsl-gauge-fill"
+              class="h-full rounded-full bg-emerald-500 transition-all duration-300"
+              style="width: 25%"
+            />
+          </div>
+        </div>
+
+        <!-- 4 Key Safety Metric Cards -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="p-3.5 rounded-xl bg-surface-soft border border-hairline">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-muted mb-1">
+              {t.metrics.reheatTitle}
+            </div>
+            <div id="lsl-reheat-val" class="text-sm font-bold text-ink">
+              {defaultFood.reheatTempF}°F / {defaultFood.reheatTempC}°C
+            </div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-surface-soft border border-hairline">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-muted mb-1">
+              {t.metrics.freezerTitle}
+            </div>
+            <div id="lsl-freezer-val" class="text-sm font-bold text-ink">
+              {defaultFood.freezerMonths} {t.units.months}
+            </div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-surface-soft border border-hairline">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-muted mb-1">
+              {t.metrics.fridgeWindowTitle}
+            </div>
+            <div id="lsl-fridge-val" class="text-sm font-bold text-ink">
+              {defaultFood.fridgeDaysMin}–{defaultFood.fridgeDaysMax} {t.units.days}
+            </div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-surface-soft border border-hairline">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-muted mb-1">
+              {t.metrics.dangerZoneTitle}
+            </div>
+            <div id="lsl-danger-val" class="text-sm font-bold text-ink">
+              {t.units.standardRule}
+            </div>
+          </div>
+        </div>
+
+        <!-- Primary Pathogen Risk -->
+        <div class="p-4 rounded-xl bg-warning-bg border border-warning-border/60 space-y-1">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-warning">
+            🦠 {t.pathogenHeading}
+          </div>
+          <p id="lsl-pathogen-val" class="text-[13.5px] font-semibold text-ink leading-snug">
+            {defaultFood.keyPathogenRisk}
+          </p>
+        </div>
+
+        <!-- Refreeze Guidance -->
+        <div class="p-4 rounded-xl bg-surface-soft border border-hairline space-y-1">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-muted">
+            ❄️ {t.metrics.refreezeTitle}
+          </div>
+          <p id="lsl-refreeze-val" class="text-[13px] text-body leading-relaxed">
+            {defaultFood.canRefreeze}
+          </p>
+        </div>
+
+        <!-- Interactive Spoilage Checklist -->
+        <div class="p-4 rounded-xl bg-surface-soft border border-hairline space-y-2.5">
+          <div>
+            <div class="text-[11px] font-bold uppercase tracking-wider text-ink">
+              👃 {t.spoilageHeading}
+            </div>
+            <p class="text-[11.5px] text-muted mt-0.5">{t.spoilageSub}</p>
+          </div>
+          <div id="lsl-spoilage-list" class="space-y-1.5">
+            {defaultFood.spoilageSigns.map((sign) => (
+              <label class="flex items-start gap-2 text-[13px] text-body cursor-pointer">
+                <input type="checkbox" class="lsl-spoilage-chk mt-0.5 w-4 h-4 rounded accent-error cursor-pointer shrink-0" />
+                <span>{sign}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <!-- Storage Best Practice -->
+        <div class="p-4 rounded-xl bg-surface-soft border border-hairline space-y-1">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-signature-coral">
+            💡 {t.storageTipHeading}
+          </div>
+          <p id="lsl-tip-val" class="text-[13px] text-body leading-relaxed">
+            {defaultFood.storageTip}
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Footer -->
+      <div class="pt-4 border-t border-hairline flex flex-wrap items-center justify-between gap-2.5">
+        <a
+          id="lsl-hub-link"
+          href={defaultFood.relatedHub}
+          class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-primary text-on-primary hover:bg-primary-active transition-colors"
+        >
+          <span>{t.readHubBtn}</span>
+          <span aria-hidden="true">&rarr;</span>
+        </a>
+
+        <button
+          type="button"
+          id="lsl-copy-btn"
+          class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-surface-soft border border-hairline text-ink hover:border-signature-coral transition-colors cursor-pointer"
+        >
+          <span id="lsl-copy-label">{t.copyBtn}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  (function () {
+    const payloadEl = document.getElementById('lsl-payload');
+    if (!payloadEl) return;
+
+    let payload;
+    try {
+      payload = JSON.parse(payloadEl.textContent || '{}');
+    } catch (_) {
+      return;
+    }
+
+    const foods = payload.foods || [];
+    const ui = payload.ui || {};
+    const byId = new Map(foods.map((f) => [f.id, f]));
+    if (!foods.length) return;
+
+    const searchInput = document.getElementById('lsl-search-input');
+    const foodSelect = document.getElementById('lsl-food-select');
+    const ageSlider = document.getElementById('lsl-age-slider');
+    const ageReadout = document.getElementById('lsl-age-readout');
+    const ageChipsWrap = document.getElementById('lsl-age-chips');
+    const ageMinLabel = document.getElementById('lsl-age-min-label');
+    const ageMidLabel = document.getElementById('lsl-age-mid-label');
+    const ageMaxLabel = document.getElementById('lsl-age-max-label');
+    const roomSlider = document.getElementById('lsl-room-slider');
+    const roomReadout = document.getElementById('lsl-room-readout');
+    const hotCheckbox = document.getElementById('lsl-hot-checkbox');
+    const resetBtn = document.getElementById('lsl-reset-btn');
+    const copyBtn = document.getElementById('lsl-copy-btn');
+    const copyLabel = document.getElementById('lsl-copy-label');
+
+    const catButtons = Array.from(document.querySelectorAll('.lsl-cat-btn'));
+    const presetButtons = Array.from(document.querySelectorAll('.lsl-preset-btn'));
+    const storageButtons = Array.from(document.querySelectorAll('.lsl-storage-btn'));
+
+    const verdictBanner = document.getElementById('lsl-verdict-banner');
+    const verdictPill = document.getElementById('lsl-verdict-pill');
+    const verdictFood = document.getElementById('lsl-verdict-food');
+    const verdictReason = document.getElementById('lsl-verdict-reason');
+    const safeUntilEl = document.getElementById('lsl-safe-until');
+    const countdownEl = document.getElementById('lsl-countdown');
+    const gaugePctEl = document.getElementById('lsl-gauge-pct');
+    const gaugeFillEl = document.getElementById('lsl-gauge-fill');
+    const reheatValEl = document.getElementById('lsl-reheat-val');
+    const freezerValEl = document.getElementById('lsl-freezer-val');
+    const fridgeValEl = document.getElementById('lsl-fridge-val');
+    const dangerValEl = document.getElementById('lsl-danger-val');
+    const pathogenValEl = document.getElementById('lsl-pathogen-val');
+    const refreezeValEl = document.getElementById('lsl-refreeze-val');
+    const spoilageListEl = document.getElementById('lsl-spoilage-list');
+    const tipValEl = document.getElementById('lsl-tip-val');
+    const hubLinkEl = document.getElementById('lsl-hub-link');
+
+    let state = {
+      category: 'all',
+      search: '',
+      foodId: foods[0].id,
+      storage: 'fridge',
+      ageDays: 1,
+      roomHours: 0.5,
+      above90F: false,
+      spoilageChecked: false
+    };
+
+    function normalizeText(str) {
+      return (str || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+    }
+
+    function formatDate(dateObj) {
+      try {
+        return new Intl.DateTimeFormat(ui.localeCode || 'en-US', {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit'
+        }).format(dateObj);
+      } catch (_) {
+        return dateObj.toLocaleString();
+      }
+    }
+
+    function formatDayOnly(dateObj) {
+      try {
+        return new Intl.DateTimeFormat(ui.localeCode || 'en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        }).format(dateObj);
+      } catch (_) {
+        return dateObj.toLocaleDateString();
+      }
+    }
+
+    function formatDurationMs(ms) {
+      const absMs = Math.abs(ms);
+      const totalMins = Math.round(absMs / 60000);
+      const days = Math.floor(totalMins / 1440);
+      const hours = Math.floor((totalMins % 1440) / 60);
+      const mins = totalMins % 60;
+      const u = ui.units;
+      const parts = [];
+      if (days > 0) parts.push(`${days} ${days === 1 ? u.day : u.days}`);
+      if (hours > 0) parts.push(`${hours} ${hours === 1 ? u.hour : u.hours}`);
+      if (days === 0 && mins > 0) parts.push(`${mins} ${mins === 1 ? u.min : u.mins}`);
+      if (!parts.length) parts.push(`0 ${u.mins}`);
+      return parts.join(' ');
+    }
+
+    function formatAgeReadout(daysVal) {
+      const u = ui.units;
+      if (daysVal === 0) return u.today;
+      if (daysVal === 1) return u.yesterday;
+      if (daysVal >= 30 && daysVal % 30 === 0) {
+        const mo = daysVal / 30;
+        return `${mo} ${mo === 1 ? u.month : u.months} ${u.agoSuffix}`;
+      }
+      const dLabel = daysVal === 1 ? u.day : u.days;
+      return `${daysVal} ${dLabel} ${u.agoSuffix}`;
+    }
+
+    function rebuildFoodOptions() {
+      const q = normalizeText(state.search.trim());
+      const filtered = foods.filter((f) => {
+        const catOk = state.category === 'all' || f.category === state.category;
+        const qOk = !q || normalizeText(f.searchText).includes(q);
+        return catOk && qOk;
+      });
+
+      if (!foodSelect) return;
+      foodSelect.innerHTML = '';
+
+      if (!filtered.length) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = ui.noMatchOption || 'No match';
+        opt.disabled = true;
+        foodSelect.appendChild(opt);
+        return;
+      }
+
+      const stillExists = filtered.some((f) => f.id === state.foodId);
+      if (!stillExists) {
+        state.foodId = filtered[0].id;
+        rebuildSpoilageChecklist();
+      }
+
+      filtered.forEach((f) => {
+        const opt = document.createElement('option');
+        opt.value = f.id;
+        opt.textContent = `${f.name} (${f.fridgeDaysMin}–${f.fridgeDaysMax}${ui.units.days} ${ui.units.fridgeShort})`;
+        if (f.id === state.foodId) opt.selected = true;
+        foodSelect.appendChild(opt);
+      });
+    }
+
+    function rebuildAgeChipsAndSlider() {
+      const food = byId.get(state.foodId) || foods[0];
+      const isFreezer = state.storage === 'freezer';
+      const chips = isFreezer ? ui.freezerChips : ui.ageChips;
+      const maxDays = isFreezer ? Math.max(180, (food.freezerMonths || 6) * 30 + 30) : Math.max(10, food.fridgeDaysMax + 4);
+      const stepVal = isFreezer ? 1 : 0.5;
+
+      if (ageSlider) {
+        ageSlider.max = String(maxDays);
+        ageSlider.step = String(stepVal);
+        if (state.ageDays > maxDays) state.ageDays = maxDays;
+        ageSlider.value = String(state.ageDays);
+      }
+
+      if (ageMinLabel) ageMinLabel.textContent = `0 ${ui.units.days}`;
+      if (ageMidLabel) ageMidLabel.textContent = `${Math.round(maxDays / 2)} ${ui.units.days}`;
+      if (ageMaxLabel) ageMaxLabel.textContent = `${maxDays} ${ui.units.days}`;
+
+      if (ageChipsWrap) {
+        ageChipsWrap.innerHTML = '';
+        chips.forEach((chip) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.setAttribute('data-lsl-age', String(chip.days));
+          const isAct = state.ageDays === chip.days;
+          btn.className = isAct
+            ? 'lsl-age-chip px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer bg-primary text-on-primary border-primary'
+            : 'lsl-age-chip px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer bg-surface-soft text-body border-hairline hover:border-signature-coral';
+          btn.textContent = chip.label;
+          btn.addEventListener('click', () => {
+            state.ageDays = chip.days;
+            if (ageSlider) ageSlider.value = String(chip.days);
+            updateAgeChipHighlight();
+            computeAndRender();
+          });
+          ageChipsWrap.appendChild(btn);
+        });
+      }
+    }
+
+    function updateAgeChipHighlight() {
+      if (!ageChipsWrap) return;
+      Array.from(ageChipsWrap.querySelectorAll('.lsl-age-chip')).forEach((btn) => {
+        const val = parseFloat(btn.getAttribute('data-lsl-age') || '-1');
+        const isAct = val === state.ageDays;
+        if (isAct) {
+          btn.classList.add('bg-primary', 'text-on-primary', 'border-primary');
+          btn.classList.remove('bg-surface-soft', 'text-body', 'border-hairline');
+        } else {
+          btn.classList.remove('bg-primary', 'text-on-primary', 'border-primary');
+          btn.classList.add('bg-surface-soft', 'text-body', 'border-hairline');
+        }
+      });
+    }
+
+    function rebuildSpoilageChecklist() {
+      const food = byId.get(state.foodId) || foods[0];
+      state.spoilageChecked = false;
+      if (!spoilageListEl) return;
+      spoilageListEl.innerHTML = '';
+      (food.spoilageSigns || []).forEach((sign) => {
+        const label = document.createElement('label');
+        label.className = 'flex items-start gap-2 text-[13px] text-body cursor-pointer';
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.className = 'lsl-spoilage-chk mt-0.5 w-4 h-4 rounded accent-error cursor-pointer shrink-0';
+        input.addEventListener('change', () => {
+          const allChks = Array.from(spoilageListEl.querySelectorAll('.lsl-spoilage-chk'));
+          state.spoilageChecked = allChks.some((el) => el.checked);
+          computeAndRender();
+        });
+        const span = document.createElement('span');
+        span.textContent = sign;
+        label.appendChild(input);
+        label.appendChild(span);
+        spoilageListEl.appendChild(label);
+      });
+    }
+
+    function updatePresetButtons() {
+      presetButtons.forEach((btn) => {
+        const isAct = btn.getAttribute('data-lsl-preset') === state.foodId;
+        if (isAct) {
+          btn.classList.add('bg-primary', 'text-on-primary', 'border-primary', 'shadow-xs');
+          btn.classList.remove('bg-canvas', 'text-ink', 'border-hairline');
+        } else {
+          btn.classList.remove('bg-primary', 'text-on-primary', 'border-primary', 'shadow-xs');
+          btn.classList.add('bg-canvas', 'text-ink', 'border-hairline');
+        }
+      });
+    }
+
+    function updateStorageButtons() {
+      storageButtons.forEach((btn) => {
+        const isAct = btn.getAttribute('data-lsl-storage') === state.storage;
+        btn.setAttribute('aria-pressed', isAct ? 'true' : 'false');
+        const subEl = btn.querySelector('div:last-child');
+        if (isAct) {
+          btn.classList.add('bg-primary', 'text-on-primary', 'border-primary', 'shadow-xs');
+          btn.classList.remove('bg-canvas', 'text-ink', 'border-hairline');
+          if (subEl) {
+            subEl.classList.add('opacity-80');
+            subEl.classList.remove('text-muted');
+          }
+        } else {
+          btn.classList.remove('bg-primary', 'text-on-primary', 'border-primary', 'shadow-xs');
+          btn.classList.add('bg-canvas', 'text-ink', 'border-hairline');
+          if (subEl) {
+            subEl.classList.remove('opacity-80');
+            subEl.classList.add('text-muted');
+          }
+        }
+      });
+    }
+
+    function applyBannerTheme(level) {
+      if (!verdictBanner || !verdictPill || !gaugeFillEl) return;
+      verdictBanner.className = 'p-5 rounded-2xl border-2 transition-colors ';
+      verdictPill.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold tracking-wide ';
+      gaugeFillEl.className = 'h-full rounded-full transition-all duration-300 ';
+
+      if (level === 'discard') {
+        verdictBanner.className += 'bg-red-50 dark:bg-red-950/40 border-red-600';
+        verdictPill.className += 'bg-red-600 text-white';
+        gaugeFillEl.className += 'bg-red-600';
+      } else if (level === 'warn') {
+        verdictBanner.className += 'bg-amber-50 dark:bg-amber-950/40 border-amber-500';
+        verdictPill.className += 'bg-amber-500 text-slate-950';
+        gaugeFillEl.className += 'bg-amber-500';
+      } else {
+        verdictBanner.className += 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500';
+        verdictPill.className += 'bg-emerald-600 text-white';
+        gaugeFillEl.className += 'bg-emerald-500';
+      }
+    }
+
+    let lastVerdictSummary = '';
+
+    function computeAndRender() {
+      const food = byId.get(state.foodId) || foods[0];
+      if (!food) return;
+
+      // Update readouts
+      if (ageReadout) ageReadout.textContent = formatAgeReadout(state.ageDays);
+      if (roomReadout) {
+        roomReadout.textContent = state.roomHours >= 4.5
+          ? ui.units.hoursPlus
+          : `${state.roomHours} ${state.roomHours === 1 ? ui.units.hour : ui.units.hours}`;
+      }
+
+      // Danger Zone effective limit
+      const baseCounterHrs = food.counterMaxHours || 2;
+      const effectiveCounterLimit = baseCounterHrs <= 2
+        ? (state.above90F ? 1 : baseCounterHrs)
+        : (state.above90F ? Math.round(baseCounterHrs / 2) : baseCounterHrs);
+
+      const effectiveRoomHrs = state.storage === 'counter'
+        ? Math.max(state.roomHours, state.ageDays * 24)
+        : state.roomHours;
+
+      const nowMs = Date.now();
+      let level = 'safe';
+      let reason = '';
+      let safeUntilText = '—';
+      let countdownText = '—';
+      let pct = 0;
+
+      if (state.spoilageChecked) {
+        level = 'discard';
+        reason = ui.reasons.spoilageDetected;
+        safeUntilText = ui.expiredText;
+        countdownText = ui.expiredText;
+        pct = 100;
+      } else if (effectiveRoomHrs > effectiveCounterLimit) {
+        level = 'discard';
+        reason = ui.reasons.dangerZoneBreach.replace('{limit}', String(effectiveCounterLimit));
+        safeUntilText = ui.expiredText;
+        const overMs = (effectiveRoomHrs - effectiveCounterLimit) * 3600000;
+        countdownText = `${formatDurationMs(overMs)} ${ui.units.overSuffix}`;
+        pct = 100;
+      } else if (state.storage === 'counter') {
+        const remHrs = Math.max(0, effectiveCounterLimit - effectiveRoomHrs);
+        const remMs = remHrs * 3600000;
+        pct = Math.min(100, Math.round((effectiveRoomHrs / effectiveCounterLimit) * 100));
+        const deadline = new Date(nowMs + remMs);
+        safeUntilText = formatDate(deadline);
+        countdownText = `${formatDurationMs(remMs)} ${ui.units.leftSuffix}`;
+
+        if (remHrs <= (effectiveCounterLimit <= 2 ? 0.5 : 6)) {
+          level = 'warn';
+          reason = ui.reasons.counterLimitNear.replace('{limit}', String(effectiveCounterLimit));
+        } else {
+          level = 'safe';
+          reason = ui.reasons.counterSafe.replace('{limit}', String(effectiveCounterLimit));
+        }
+      } else if (state.storage === 'fridge') {
+        const maxDays = food.fridgeDaysMax;
+        const minDays = food.fridgeDaysMin;
+        const remDays = maxDays - state.ageDays;
+        pct = Math.min(100, Math.max(0, Math.round((state.ageDays / maxDays) * 100)));
+
+        if (state.ageDays > maxDays) {
+          level = 'discard';
+          reason = ui.reasons.fridgeExpired.replace('{max}', String(maxDays));
+          safeUntilText = ui.expiredText;
+          countdownText = `${formatDurationMs((state.ageDays - maxDays) * 86400000)} ${ui.units.overSuffix}`;
+          pct = 100;
+        } else {
+          const remMs = remDays * 86400000;
+          const deadline = new Date(nowMs + remMs);
+          safeUntilText = formatDate(deadline);
+          countdownText = remDays === 0
+            ? ui.verdicts.warn.badge
+            : `${formatDurationMs(remMs)} ${ui.units.leftSuffix}`;
+
+          if (remDays <= 1 || state.ageDays >= minDays) {
+            level = 'warn';
+            reason = ui.reasons.fridgeFinalWindow
+              .replace('{min}', String(minDays))
+              .replace('{max}', String(maxDays));
+          } else {
+            level = 'safe';
+            reason = ui.reasons.fridgeSafe
+              .replace('{min}', String(minDays))
+              .replace('{max}', String(maxDays));
+          }
+        }
+      } else {
+        // Freezer mode (0°F / -18°C)
+        const freezerDays = (food.freezerMonths || 0) * 30;
+        if (!food.freezerMonths || food.freezerMonths === 0) {
+          level = 'warn';
+          reason = ui.reasons.freezerNotRecommended;
+          safeUntilText = ui.metrics.freezerNo;
+          countdownText = ui.indefiniteSafeText;
+          pct = 100;
+        } else {
+          pct = Math.min(100, Math.max(0, Math.round((state.ageDays / freezerDays) * 100)));
+          const remDays = freezerDays - state.ageDays;
+          if (state.ageDays > freezerDays) {
+            level = 'warn';
+            reason = ui.reasons.freezerPastQuality.replace('{months}', String(food.freezerMonths));
+            safeUntilText = ui.indefiniteSafeText;
+            countdownText = `${formatDurationMs((state.ageDays - freezerDays) * 86400000)} ${ui.units.overSuffix}`;
+          } else {
+            level = 'safe';
+            reason = ui.reasons.freezerSafe.replace('{months}', String(food.freezerMonths));
+            const deadline = new Date(nowMs + remDays * 86400000);
+            safeUntilText = `${ui.qualityUntilPrefix} ${formatDayOnly(deadline)}`;
+            countdownText = `${formatDurationMs(remDays * 86400000)} ${ui.units.leftSuffix}`;
+          }
+        }
+      }
+
+      applyBannerTheme(level);
+      if (verdictPill) verdictPill.textContent = ui.verdicts[level].badge;
+      if (verdictFood) verdictFood.textContent = food.name;
+      if (verdictReason) verdictReason.textContent = reason;
+      if (safeUntilEl) safeUntilEl.textContent = safeUntilText;
+      if (countdownEl) countdownEl.textContent = countdownText;
+      if (gaugePctEl) gaugePctEl.textContent = `${pct}%`;
+      if (gaugeFillEl) gaugeFillEl.style.width = `${pct}%`;
+
+      if (reheatValEl) {
+        reheatValEl.textContent = food.reheatTempF > 0
+          ? `${food.reheatTempF}°F / ${food.reheatTempC}°C`
+          : ui.metrics.reheatCold;
+      }
+      if (freezerValEl) {
+        freezerValEl.textContent = food.freezerMonths > 0
+          ? `${food.freezerMonths} ${food.freezerMonths === 1 ? ui.units.month : ui.units.months}`
+          : ui.metrics.freezerNo;
+      }
+      if (fridgeValEl) {
+        fridgeValEl.textContent = `${food.fridgeDaysMin}–${food.fridgeDaysMax} ${ui.units.days}`;
+      }
+      if (dangerValEl) {
+        if (baseCounterHrs > 2) {
+          dangerValEl.textContent = `${effectiveCounterLimit} ${ui.units.hours}`;
+        } else {
+          dangerValEl.textContent = state.above90F ? ui.units.hotRule : ui.units.standardRule;
+        }
+      }
+
+      if (pathogenValEl) pathogenValEl.textContent = food.keyPathogenRisk;
+      if (refreezeValEl) refreezeValEl.textContent = food.canRefreeze;
+      if (tipValEl) tipValEl.textContent = food.storageTip;
+      if (hubLinkEl) hubLinkEl.setAttribute('href', food.relatedHub || '/how-long/');
+
+      updatePresetButtons();
+
+      lastVerdictSummary = `${food.name} — ${ui.verdicts[level].badge}\n` +
+        `${ui.safeUntilLabel}: ${safeUntilText} | ${ui.timeRemainingLabel}: ${countdownText}\n` +
+        `${ui.metrics.reheatTitle}: ${reheatValEl ? reheatValEl.textContent : ''}\n` +
+        `${reason}\n${window.location.href}`;
+    }
+
+    // Event bindings
+    catButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const cat = btn.getAttribute('data-lsl-cat') || 'all';
+        state.category = cat;
+        catButtons.forEach((b) => {
+          const isAct = b.getAttribute('data-lsl-cat') === cat;
+          b.setAttribute('aria-selected', isAct ? 'true' : 'false');
+          const badge = b.querySelector('span:last-child');
+          if (isAct) {
+            b.classList.add('bg-signature-coral', 'text-white', 'border-signature-coral');
+            b.classList.remove('bg-canvas', 'text-body', 'border-hairline');
+            if (badge) {
+              badge.classList.add('bg-white/20', 'text-white');
+              badge.classList.remove('bg-surface-soft', 'text-muted');
+            }
+          } else {
+            b.classList.remove('bg-signature-coral', 'text-white', 'border-signature-coral');
+            b.classList.add('bg-canvas', 'text-body', 'border-hairline');
+            if (badge) {
+              badge.classList.remove('bg-white/20', 'text-white');
+              badge.classList.add('bg-surface-soft', 'text-muted');
+            }
+          }
+        });
+        rebuildFoodOptions();
+        rebuildAgeChipsAndSlider();
+        computeAndRender();
+      });
+    });
+
+    presetButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-lsl-preset');
+        if (!id || !byId.has(id)) return;
+        state.category = 'all';
+        state.search = '';
+        if (searchInput) searchInput.value = '';
+        catButtons.forEach((b) => {
+          const isAct = b.getAttribute('data-lsl-cat') === 'all';
+          b.setAttribute('aria-selected', isAct ? 'true' : 'false');
+          const badge = b.querySelector('span:last-child');
+          if (isAct) {
+            b.classList.add('bg-signature-coral', 'text-white', 'border-signature-coral');
+            b.classList.remove('bg-canvas', 'text-body', 'border-hairline');
+            if (badge) {
+              badge.classList.add('bg-white/20', 'text-white');
+              badge.classList.remove('bg-surface-soft', 'text-muted');
+            }
+          } else {
+            b.classList.remove('bg-signature-coral', 'text-white', 'border-signature-coral');
+            b.classList.add('bg-canvas', 'text-body', 'border-hairline');
+            if (badge) {
+              badge.classList.remove('bg-white/20', 'text-white');
+              badge.classList.add('bg-surface-soft', 'text-muted');
+            }
+          }
+        });
+        state.foodId = id;
+        rebuildFoodOptions();
+        rebuildAgeChipsAndSlider();
+        rebuildSpoilageChecklist();
+        computeAndRender();
+      });
+    });
+
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        state.search = e.target.value || '';
+        rebuildFoodOptions();
+        rebuildAgeChipsAndSlider();
+        computeAndRender();
+      });
+    }
+
+    if (foodSelect) {
+      foodSelect.addEventListener('change', (e) => {
+        const val = e.target.value;
+        if (val && byId.has(val)) {
+          state.foodId = val;
+          rebuildAgeChipsAndSlider();
+          rebuildSpoilageChecklist();
+          computeAndRender();
+        }
+      });
+    }
+
+    storageButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const st = btn.getAttribute('data-lsl-storage');
+        if (!st) return;
+        state.storage = st;
+        if (st === 'counter' && state.ageDays > 2) {
+          state.ageDays = 0;
+        }
+        updateStorageButtons();
+        rebuildAgeChipsAndSlider();
+        computeAndRender();
+      });
+    });
+
+    if (ageSlider) {
+      ageSlider.addEventListener('input', (e) => {
+        state.ageDays = parseFloat(e.target.value || '0');
+        updateAgeChipHighlight();
+        computeAndRender();
+      });
+    }
+
+    if (roomSlider) {
+      roomSlider.addEventListener('input', (e) => {
+        state.roomHours = parseFloat(e.target.value || '0');
+        computeAndRender();
+      });
+    }
+
+    if (hotCheckbox) {
+      hotCheckbox.addEventListener('change', (e) => {
+        state.above90F = Boolean(e.target.checked);
+        computeAndRender();
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        state = {
+          category: 'all',
+          search: '',
+          foodId: foods[0].id,
+          storage: 'fridge',
+          ageDays: 1,
+          roomHours: 0.5,
+          above90F: false,
+          spoilageChecked: false
+        };
+        if (searchInput) searchInput.value = '';
+        if (roomSlider) roomSlider.value = '0.5';
+        if (hotCheckbox) hotCheckbox.checked = false;
+        catButtons.forEach((b) => {
+          const isAct = b.getAttribute('data-lsl-cat') === 'all';
+          b.setAttribute('aria-selected', isAct ? 'true' : 'false');
+          const badge = b.querySelector('span:last-child');
+          if (isAct) {
+            b.classList.add('bg-signature-coral', 'text-white', 'border-signature-coral');
+            b.classList.remove('bg-canvas', 'text-body', 'border-hairline');
+            if (badge) {
+              badge.classList.add('bg-white/20', 'text-white');
+              badge.classList.remove('bg-surface-soft', 'text-muted');
+            }
+          } else {
+            b.classList.remove('bg-signature-coral', 'text-white', 'border-signature-coral');
+            b.classList.add('bg-canvas', 'text-body', 'border-hairline');
+            if (badge) {
+              badge.classList.remove('bg-white/20', 'text-white');
+              badge.classList.add('bg-surface-soft', 'text-muted');
+            }
+          }
+        });
+        updateStorageButtons();
+        rebuildFoodOptions();
+        rebuildAgeChipsAndSlider();
+        rebuildSpoilageChecklist();
+        computeAndRender();
+      });
+    }
+
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        if (!lastVerdictSummary || !navigator.clipboard || !navigator.clipboard.writeText) return;
+        navigator.clipboard.writeText(lastVerdictSummary).then(() => {
+          if (copyLabel) {
+            copyLabel.textContent = ui.copiedBtn;
+            setTimeout(() => {
+              copyLabel.textContent = ui.copyBtn;
+            }, 2000);
+          }
+        }).catch(() => {});
+      });
+    }
+
+    // URL query support (?food=cooked-rice)
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const qFood = params.get('food');
+      if (qFood && byId.has(qFood)) {
+        state.foodId = qFood;
+      }
+    } catch (_) {}
+
+    rebuildFoodOptions();
+    rebuildAgeChipsAndSlider();
+    rebuildSpoilageChecklist();
+    computeAndRender();
+
+    // Live countdown refresh every 60s
+    setInterval(computeAndRender, 60000);
+  })();
+</script>

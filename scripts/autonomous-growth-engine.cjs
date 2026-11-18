@@ -205,7 +205,8 @@ const TOOLS_REGISTRY = [
   { slug: 'commercial-continuous-sfm-dip-modeler', name: 'Commercial Continuous Supercritical CO2 Foam Mat Drying & In-Line Porosimetry (SFM-DIP) Modeler', category: 'Supercritical Foam Physics & Aerated Food Matrix Preservation', component: 'CommercialContinuousSfmDipModeler.astro', dataFile: 'sfm-dip-foam-mat-drying-data.json' },
   { slug: 'commercial-continuous-fm-acfd-modeler', name: 'Commercial Continuous Focused-Microwave Atmospheric Cold Freeze-Drying & In-Line Lyophilization (FM-ACFD) Modeler', category: 'Microwave Electromagnetics & Atmospheric Cryogenic Sublimation', component: 'CommercialContinuousFmAcfdModeler.astro', dataFile: 'fm-acfd-freeze-drying-data.json' },
   { slug: 'commercial-continuous-scw-mcc-modeler', name: 'Commercial Continuous Subcritical Water Dynamic Multi-Stage Counter-Current Extraction & In-Line Polyphenol Fractionation (SCW-MCC) Modeler', category: 'Subcritical Thermodynamics & Multi-Stage Green Fractionation', component: 'CommercialContinuousScwMccModeler.astro', dataFile: 'scw-mcc-extraction-fractionation-data.json' },
-  { slug: 'kitchen-symbol-decoder', name: 'Kitchen Bottom Symbol Decoder & Plastic Resin Code Lookup (#1-#7)', category: 'Consumer Kitchen Safety', component: 'KitchenSymbolDecoder.astro', dataFile: 'kitchen-symbol-decoder-data.json' }
+  { slug: 'kitchen-symbol-decoder', name: 'Kitchen Bottom Symbol Decoder & Plastic Resin Code Lookup (#1-#7)', category: 'Consumer Kitchen Safety', component: 'KitchenSymbolDecoder.astro', dataFile: 'kitchen-symbol-decoder-data.json' },
+  { slug: 'leftover-shelf-life-calculator', name: 'USDA Leftover & Fridge Shelf-Life Countdown Calculator', category: 'Consumer Kitchen Safety', component: 'LeftoverShelfLifeCalculator.astro', dataFile: 'leftover-shelf-life-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -501,7 +502,8 @@ function auditDatasets() {
     'sfm-dip-foam-mat-drying-data.json',
     'fm-acfd-freeze-drying-data.json',
     'scw-mcc-extraction-fractionation-data.json',
-    'kitchen-symbol-decoder-data.json'
+    'kitchen-symbol-decoder-data.json',
+    'leftover-shelf-life-data.json'
 ];
 
   const datasetStats = {};

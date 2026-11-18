@@ -363,6 +363,496 @@ if (lang === 'es') {
   metaTitle = "キッチン安全チェッカー - 家電ごとの安全性クイック早見表 | Is It Kitchen Safe";
   metaDesc = "2,000以上のキッチン用品、容器、食材が食洗機、電子レンジ、冷凍庫、オーブンで使えるかを即座に判定。";
 }
+
+// ============================================================================
+// 1. Interactive "Can I Put This In...?" 7-Appliance Matrix Lookup Data
+// ============================================================================
+const MATRIX_APPLIANCES = ['dishwasher', 'microwave', 'oven', 'freezer', 'airfryer', 'refrigerator', 'dryer'] as const;
+type MatrixAppliance = (typeof MATRIX_APPLIANCES)[number];
+
+const CURATED_MATRIX_SLUGS: string[] = [
+  // Top 8 quick-pick chips
+  'cast-iron-skillet',
+  'aluminum-foil',
+  'parchment-paper',
+  'glass-bowl',
+  'plastic-container',
+  'silicone-spatula',
+  'wooden-cutting-board',
+  'stainless-steel-pan',
+  // Next 24 everyday kitchen containers, wraps, cookware & staple foods (total 32)
+  'styrofoam-cup',
+  'paper-plate',
+  'ziploc-bag',
+  'ceramic-plate',
+  'tupperware',
+  'mason-jar',
+  'wooden-spoon',
+  'wax-paper',
+  'plastic-wrap',
+  'silicone-baking-mat',
+  'enameled-cast-iron',
+  'baking-sheet',
+  'chicken-breast',
+  'egg',
+  'milk',
+  'butter',
+  'potato',
+  'bread',
+  'honey',
+  'avocado',
+  'olive-oil',
+  'tomato',
+  'coffee',
+  'memory-foam'
+];
+
+interface MatrixApplianceEntry {
+  safe: 'yes' | 'no' | 'depends';
+  url: string;
+}
+
+interface MatrixItemGroup {
+  slug: string;
+  label: string;
+  search: string;
+  count: number;
+  appliances: Partial<Record<MatrixAppliance, MatrixApplianceEntry>>;
+}
+
+function cleanMatrixLabel(names: string[]): string {
+  const cleaned = Array.from(
+    new Set(
+      names
+        .map((n) => {
+          const trimmed = (n || '').trim();
+          const stripped = trimmed.replace(/\s*[（(][^）)]*[）)]\s*$/, '').trim();
+          return stripped.length >= 2 ? stripped : trimmed;
+        })
+        .filter(Boolean)
+    )
+  );
+  if (cleaned.length === 0) return '';
+  cleaned.sort((a, b) => a.length - b.length);
+  return cleaned[0];
+}
+
+const matrixApplianceSet = new Set<string>(MATRIX_APPLIANCES);
+const groupedMatrixMap = new Map<string, { names: string[]; appliances: Partial<Record<MatrixAppliance, MatrixApplianceEntry>> }>();
+
+for (const row of currentItemsDataset as any[]) {
+  if (!row || !row.slug || !row.appliance || !matrixApplianceSet.has(row.appliance)) continue;
+  const app = row.appliance as MatrixAppliance;
+  const safeVal: 'yes' | 'no' | 'depends' = row.safe === 'yes' || row.safe === 'no' || row.safe === 'depends' ? row.safe : 'depends';
+  let bucket = groupedMatrixMap.get(row.slug);
+  if (!bucket) {
+    bucket = { names: [], appliances: {} };
+    groupedMatrixMap.set(row.slug, bucket);
+  }
+  if (row.item) bucket.names.push(String(row.item));
+  if (!bucket.appliances[app]) {
+    const baseAppUrl = getApplianceUrl(app, lang);
+    const normalizedBase = baseAppUrl.endsWith('/') ? baseAppUrl : `${baseAppUrl}/`;
+    bucket.appliances[app] = {
+      safe: safeVal,
+      url: `${normalizedBase}${row.slug}/`
+    };
+  }
+}
+
+const curatedMatrixRank = new Map<string, number>(CURATED_MATRIX_SLUGS.map((s, idx) => [s, idx]));
+const eligibleMatrixItems: MatrixItemGroup[] = [];
+
+for (const [slug, bucket] of groupedMatrixMap.entries()) {
+  const count = Object.keys(bucket.appliances).length;
+  if (count < 3) continue;
+  const label = cleanMatrixLabel(bucket.names) || slug;
+  const search = [slug.replace(/-/g, ' '), label, ...bucket.names].join(' ').toLowerCase();
+  eligibleMatrixItems.push({
+    slug,
+    label,
+    search,
+    count,
+    appliances: bucket.appliances
+  });
+}
+
+eligibleMatrixItems.sort((a, b) => {
+  const aRank = curatedMatrixRank.has(a.slug) ? curatedMatrixRank.get(a.slug)! : 9999;
+  const bRank = curatedMatrixRank.has(b.slug) ? curatedMatrixRank.get(b.slug)! : 9999;
+  if (aRank !== bRank) return aRank - bRank;
+  if (b.count !== a.count) return b.count - a.count;
+  return a.label.localeCompare(b.label);
+});
+
+const matrixItems = eligibleMatrixItems.slice(0, 32);
+const matrixQuickChips = matrixItems.slice(0, 8);
+const defaultMatrixItem = matrixItems[0];
+
+const matrixApplianceMeta = MATRIX_APPLIANCES.map((slug) => ({
+  slug,
+  name: formatAppliance(slug)
+}));
+
+const matrixCopyMap: Record<SupportedLanguage, {
+  badge: string;
+  title: string;
+  subtitle: string;
+  searchLabel: string;
+  searchPlaceholder: string;
+  quickPickLabel: string;
+  showAllLabel: string;
+  hideAllLabel: string;
+  verdictsFor: string;
+  guidesSuffix: string;
+  naLabel: string;
+  naSubtext: string;
+  readGuide: string;
+  noMatches: string;
+  footerHint: string;
+  clearSearch: string;
+}> = {
+  en: {
+    badge: '7-Appliance Safety Matrix',
+    title: 'Can I Put This In...?',
+    subtitle: 'Pick any everyday kitchen item to compare instant YES, NO, and DEPENDS verdicts across all 7 appliances.',
+    searchLabel: 'Filter everyday kitchen items',
+    searchPlaceholder: 'Type an item (e.g., foil, glass, cast iron, milk, parchment)...',
+    quickPickLabel: 'Quick pick:',
+    showAllLabel: 'Browse all 32 items',
+    hideAllLabel: 'Show top 8 only',
+    verdictsFor: '7-Appliance Safety Row for',
+    guidesSuffix: 'verified guides',
+    naLabel: 'N/A',
+    naSubtext: 'Not applicable',
+    readGuide: t('page.readGuide'),
+    noMatches: 'No matching matrix item. Try another keyword or pick a chip below.',
+    footerHint: 'Click any color-coded appliance card to jump directly to its full safety guide.',
+    clearSearch: 'Clear filter'
+  },
+  es: {
+    badge: 'Matriz de Seguridad · 7 Electrodomésticos',
+    title: '¿Puedo Meter Esto En...?',
+    subtitle: 'Elige cualquier utensilio o alimento cotidiano para ver al instante su veredicto SÍ, NO o DEPENDE en 7 electrodomésticos.',
+    searchLabel: 'Filtrar artículos cotidianos de cocina',
+    searchPlaceholder: 'Escribe un artículo (ej. aluminio, vidrio, hierro, leche, silicona)...',
+    quickPickLabel: 'Selección rápida:',
+    showAllLabel: 'Ver los 32 artículos',
+    hideAllLabel: 'Mostrar solo 8',
+    verdictsFor: 'Veredictos en 7 electrodomésticos para',
+    guidesSuffix: 'guías verificadas',
+    naLabel: 'N/A',
+    naSubtext: 'No aplica',
+    readGuide: t('page.readGuide'),
+    noMatches: 'Sin coincidencias en la matriz. Prueba otra palabra o elige una etiqueta.',
+    footerHint: 'Haz clic en cualquier tarjeta de electrodoméstico para abrir la guía completa.',
+    clearSearch: 'Limpiar búsqueda'
+  },
+  pt: {
+    badge: 'Matriz de Segurança · 7 Eletrodomésticos',
+    title: 'Posso Colocar Isso No...?',
+    subtitle: 'Escolha qualquer item do dia a dia na cozinha para ver vereditos SIM, NÃO e DEPENDE em 7 eletrodomésticos.',
+    searchLabel: 'Filtrar itens cotidianos da cozinha',
+    searchPlaceholder: 'Digite um item (ex.: alumínio, vidro, ferro, leite, silicone)...',
+    quickPickLabel: 'Escolha rápida:',
+    showAllLabel: 'Ver todos os 32 itens',
+    hideAllLabel: 'Mostrar apenas 8',
+    verdictsFor: 'Vereditos nos 7 eletrodomésticos para',
+    guidesSuffix: 'guias verificados',
+    naLabel: 'N/A',
+    naSubtext: 'Não aplicável',
+    readGuide: t('page.readGuide'),
+    noMatches: 'Nenhum item encontrado na matriz. Tente outro termo ou escolha uma tag.',
+    footerHint: 'Clique em qualquer cartão colorido para abrir o guia completo de segurança.',
+    clearSearch: 'Limpar filtro'
+  },
+  'zh-cn': {
+    badge: '7 大厨房电器安全矩阵',
+    title: '这件物品能放进哪些电器？',
+    subtitle: '点选或搜索日常厨具与食材，一键对比洗碗机、微波炉、烤箱、冷冻室、空气炸锅、冰箱与烘干机的安全结论。',
+    searchLabel: '筛选常见厨房物品',
+    searchPlaceholder: '输入物品名（如：铝箔纸、铸铁锅、玻璃碗、牛奶、烘焙纸）...',
+    quickPickLabel: '热门速查：',
+    showAllLabel: '展开全部 32 项',
+    hideAllLabel: '仅显示前 8 项',
+    verdictsFor: '7 大电器安全总览：',
+    guidesSuffix: '篇已核验指南',
+    naLabel: '不适用',
+    naSubtext: '暂无对应场景',
+    readGuide: t('page.readGuide'),
+    noMatches: '未找到匹配项，请尝试其他关键词或直接点击下方标签。',
+    footerHint: '点击任意有结论的电器卡片，即可直达该物品的完整安全指南。',
+    clearSearch: '清除筛选'
+  },
+  ja: {
+    badge: '7大家電 安全性マトリクス',
+    title: 'これって家電に入れて大丈夫？',
+    subtitle: 'よく使うキッチン用品や食材を選ぶだけで、食洗機・電子レンジ・オーブンなど7家電の可否を一目で比較できます。',
+    searchLabel: '定番キッチンアイテムを絞り込む',
+    searchPlaceholder: 'アイテム名を入力（例：アルミホイル、ガラス、鉄フライパン、牛乳）...',
+    quickPickLabel: '定番から選ぶ：',
+    showAllLabel: '全32アイテムを表示',
+    hideAllLabel: '上位8件のみ表示',
+    verdictsFor: '7家電の判定一覧：',
+    guidesSuffix: '件の検証済みガイド',
+    naLabel: '対象外',
+    naSubtext: '該当ガイドなし',
+    readGuide: t('page.readGuide'),
+    noMatches: '一致する項目がありません。別のキーワードまたは下のチップをお選びください。',
+    footerHint: '判定のある家電カードをクリックすると詳細ガイドへ移動します。',
+    clearSearch: '入力をクリア'
+  }
+};
+const matrixCopy = matrixCopyMap[lang] || matrixCopyMap.en;
+
+const matrixClientPayload = {
+  appliances: matrixApplianceMeta,
+  items: matrixItems,
+  labels: {
+    yes: t('verdict.yes'),
+    no: t('verdict.no'),
+    depends: t('verdict.depends'),
+    na: matrixCopy.naLabel,
+    naSubtext: matrixCopy.naSubtext,
+    readGuide: matrixCopy.readGuide,
+    guidesSuffix: matrixCopy.guidesSuffix,
+    noMatches: matrixCopy.noMatches
+  }
+};
+
+// ============================================================================
+// 2. Consumer Kitchen Tools Spotlight Grid Data
+// ============================================================================
+interface SpotlightToolDef {
+  slug: string;
+  icon: 'symbol' | 'pan' | 'brand' | 'oil' | 'airfryer' | 'viral';
+  accentClass: string;
+  tag: Record<SupportedLanguage, string>;
+  title: Record<SupportedLanguage, string>;
+  desc: Record<SupportedLanguage, string>;
+}
+
+const spotlightToolsRaw: SpotlightToolDef[] = [
+  {
+    slug: 'kitchen-symbol-decoder',
+    icon: 'symbol',
+    accentClass: 'bg-signature-forest/10 text-signature-forest dark:bg-success/15 dark:text-success',
+    tag: {
+      en: 'Visual Decoder',
+      es: 'Decodificador Visual',
+      pt: 'Decodificador Visual',
+      'zh-cn': '图标识读',
+      ja: 'マーク解読'
+    },
+    title: {
+      en: 'Kitchen Bottom Symbol Decoder',
+      es: 'Decodificador de Símbolos de Cocina',
+      pt: 'Decodificador de Símbolos de Cozinha',
+      'zh-cn': '厨具底部安全标志解码器',
+      ja: 'キッチン用品・底面マーク解読ツール'
+    },
+    desc: {
+      en: 'Match cryptic stamped icons on bowls, Tupperware, and cookware bottoms to instant microwave, oven, and dishwasher verdicts.',
+      es: 'Identifica los iconos grabados en la base de tápers, vajillas y ollas para confirmar si resisten microondas, horno o lavavajillas.',
+      pt: 'Identifique os ícones gravados no fundo de potes, louças e panelas para confirmar se vão ao micro-ondas, forno ou lava-louças.',
+      'zh-cn': '对照识别饭盒、碗盘与锅具底部的神秘刻印图标，秒懂是否支持微波炉、烤箱与洗碗机。',
+      ja: '保存容器や食器・鍋の底に刻印された記号を照合し、電子レンジ・オーブン・食洗機の可否を即判定します。'
+    }
+  },
+  {
+    slug: 'pan-scratch-inspector',
+    icon: 'pan',
+    accentClass: 'bg-error/10 text-error',
+    tag: {
+      en: 'Cookware Safety',
+      es: 'Seguridad de Sartenes',
+      pt: 'Segurança de Panelas',
+      'zh-cn': '锅具健康',
+      ja: '調理器具の安全'
+    },
+    title: {
+      en: 'AI Pan Scratch & Coating Inspector',
+      es: 'Inspector de Rayones y Recubrimientos',
+      pt: 'Inspetor de Riscos e Revestimentos',
+      'zh-cn': '不粘锅划痕与涂层安全检测器',
+      ja: 'フライパン傷・コーティング診断ツール'
+    },
+    desc: {
+      en: 'Assess scratched nonstick Teflon, ceramic, and anodized pans to know whether to keep cooking safely or replace immediately.',
+      es: 'Evalúa el desgaste de sartenes antiadherentes de teflón o cerámica para decidir si aún son seguros o conviene reemplazarlos.',
+      pt: 'Avalie riscos em panelas antiaderentes de teflon ou cerâmica para saber se ainda é seguro cozinhar ou hora de trocar.',
+      'zh-cn': '评估特氟龙、陶瓷等不粘锅涂层的划痕与剥落程度，科学判断是否仍可安全使用或需立即更换。',
+      ja: 'テフロンやセラミック加工の傷・剥がれ具合を診断し、使い続けて安全か買い替えるべきかを判定します。'
+    }
+  },
+  {
+    slug: 'cookware-brand-transparency-index',
+    icon: 'brand',
+    accentClass: 'bg-info/10 text-info',
+    tag: {
+      en: 'Brand Ratings',
+      es: 'Ranking de Marcas',
+      pt: 'Ranking de Marcas',
+      'zh-cn': '品牌评测',
+      ja: 'ブランド評価'
+    },
+    title: {
+      en: 'Cookware Brand Transparency Index',
+      es: 'Índice de Transparencia de Marcas',
+      pt: 'Índice de Transparência de Marcas',
+      'zh-cn': '厨具品牌成分透明度指数榜',
+      ja: '調理器具ブランド透明性インデックス'
+    },
+    desc: {
+      en: 'Compare 30+ major cookware brands on PFAS/PFOA disclosure, heavy-metal testing, and independent third-party safety data.',
+      es: 'Compara más de 30 marcas de utensilios según su divulgación de PFAS/PFOA, pruebas de metales pesados y transparencia.',
+      pt: 'Compare mais de 30 marcas de panelas quanto à divulgação de PFAS/PFOA, testes de metais pesados e transparência.',
+      'zh-cn': '横向对比 30+ 主流厨具品牌的 PFAS/PFOA 成分披露、重金属检测与第三方安全透明评级。',
+      ja: '30以上の主要調理器具ブランドをPFAS/PFOA開示状況や重金属検査データで比較できます。'
+    }
+  },
+  {
+    slug: 'culinary-oil-smoke-point-simulator',
+    icon: 'oil',
+    accentClass: 'bg-warning/15 text-warning',
+    tag: {
+      en: 'Heat Science',
+      es: 'Ciencia del Calor',
+      pt: 'Ciência do Calor',
+      'zh-cn': '烹饪热力学',
+      ja: '加熱の科学'
+    },
+    title: {
+      en: 'Culinary Oil Smoke Point Simulator',
+      es: 'Simulador de Punto de Humo de Aceites',
+      pt: 'Simulador de Ponto de Fumaça de Óleos',
+      'zh-cn': '食用油烟点与高温安全模拟器',
+      ja: '食用油・発煙点シミュレーター'
+    },
+    desc: {
+      en: 'Check safe pan temperatures for olive, avocado, butter, and seed oils before toxic smoke and oxidized aldehydes form.',
+      es: 'Comprueba la temperatura segura para aceite de oliva, aguacate o mantequilla antes de que liberen humo tóxico.',
+      pt: 'Veja a temperatura segura para azeite, óleo de abacate e manteiga antes da formação de fumaça tóxica.',
+      'zh-cn': '实时测算橄榄油、牛油果油、黄油及植物油的安全煎炸温度，避开有害油烟与氧化醛类物质。',
+      ja: 'オリーブ油やアボカド油、バターの安全な調理温度を確認し、有害な煙や油の酸化を防ぎます。'
+    }
+  },
+  {
+    slug: 'air-fryer-acrylamide-calculator',
+    icon: 'airfryer',
+    accentClass: 'bg-signature-coral/10 text-signature-coral',
+    tag: {
+      en: 'Air Fryer Safety',
+      es: 'Freidora de Aire',
+      pt: 'Air Fryer',
+      'zh-cn': '空气炸锅安全',
+      ja: 'ノンフライヤー'
+    },
+    title: {
+      en: 'Air Fryer Acrylamide Calculator',
+      es: 'Calculadora de Acrilamida en Freidora',
+      pt: 'Calculadora de Acrilamida na Air Fryer',
+      'zh-cn': '空气炸锅丙烯酰胺风险计算器',
+      ja: 'ノンフライヤー・アクリルアミド計算機'
+    },
+    desc: {
+      en: 'Estimate acrylamide formation in fries, toast, and starchy foods by temperature and time—with safer crisping adjustments.',
+      es: 'Estima la formación de acrilamida en papas y almidones según temperatura y tiempo, con ajustes más saludables.',
+      pt: 'Estime a formação de acrilamida em batatas e massas por temperatura e tempo, com ajustes mais seguros.',
+      'zh-cn': '按温度与时长估算薯条、面包等淀粉食物的丙烯酰胺生成风险，并给出更健康的脆烤方案。',
+      ja: 'ポテトやトーストの加熱温度・時間からアクリルアミド生成リスクを試算し、安全な調理法を提案します。'
+    }
+  },
+  {
+    slug: 'viral-trend-debunker',
+    icon: 'viral',
+    accentClass: 'bg-success/10 text-success',
+    tag: {
+      en: 'Fact Check',
+      es: 'Verificación',
+      pt: 'Checagem',
+      'zh-cn': '科学辟谣',
+      ja: 'ファクトチェック'
+    },
+    title: {
+      en: 'Viral TikTok Kitchen Trend Debunker',
+      es: 'Verificador de Trucos Virales de Cocina',
+      pt: 'Verificador de Tendências Virais na Cozinha',
+      'zh-cn': '网红厨房妙招真伪粉碎机',
+      ja: 'SNSバズりキッチン裏ワザ検証ツール'
+    },
+    desc: {
+      en: 'Science-backed verdicts on viral kitchen hacks—from foil balls in dishwashers to toaster-bag grilled cheese and air fryer liners.',
+      es: 'Veredictos científicos sobre trucos virales de TikTok: desde bolas de aluminio en el lavavajillas hasta sándwiches en tostadora.',
+      pt: 'Vereditos científicos sobre truques virais do TikTok: de bola de alumínio na lava-louças a sanduíche na torradeira.',
+      'zh-cn': '用物理与食品安全原理解读爆火短视频厨房偏方：洗碗机放锡纸球、烤面包机煎芝士究竟安不安全？',
+      ja: '食洗機にアルミホイル球やトースター調理など、SNSで話題の裏ワザを科学的根拠で安全判定します。'
+    }
+  }
+];
+
+const spotlightTools = spotlightToolsRaw.map((tool) => ({
+  slug: tool.slug,
+  icon: tool.icon,
+  accentClass: tool.accentClass,
+  url: translatePath(`/tools/${tool.slug}/`),
+  tag: tool.tag[lang] || tool.tag.en,
+  title: tool.title[lang] || tool.title.en,
+  desc: tool.desc[lang] || tool.desc.en
+}));
+
+const toolsSpotlightCopyMap: Record<SupportedLanguage, {
+  badge: string;
+  title: string;
+  subtitle: string;
+  launchTool: string;
+  allToolsCta: string;
+  cheatSheetCta: string;
+}> = {
+  en: {
+    badge: 'Interactive Consumer Labs',
+    title: 'Free Interactive Kitchen Safety Tools',
+    subtitle: 'Instant calculators, visual symbol decoders, and cookware evaluators built to prevent kitchen hazards in seconds.',
+    launchTool: 'Open free tool',
+    allToolsCta: 'Explore All Interactive Tools',
+    cheatSheetCta: 'Printable Fridge Cheat Sheet'
+  },
+  es: {
+    badge: 'Herramientas Interactivas Gratuitas',
+    title: 'Herramientas Interactivas de Seguridad en la Cocina',
+    subtitle: 'Calculadoras instantáneas, decodificadores visuales y evaluadores de utensilios para evitar riesgos en segundos.',
+    launchTool: 'Abrir herramienta',
+    allToolsCta: 'Explorar Todas las Herramientas',
+    cheatSheetCta: 'Guía Imprimible para la Nevera'
+  },
+  pt: {
+    badge: 'Ferramentas Interativas Gratuitas',
+    title: 'Ferramentas Interativas de Segurança na Cozinha',
+    subtitle: 'Calculadoras instantâneas, decodificadores visuais e avaliadores de panelas para evitar acidentes em segundos.',
+    launchTool: 'Abrir ferramenta',
+    allToolsCta: 'Explorar Todas as Ferramentas',
+    cheatSheetCta: 'Guia Imprimível para Geladeira'
+  },
+  'zh-cn': {
+    badge: '免费互动安全实验室',
+    title: '免费交互式厨房安全实用工具',
+    subtitle: '无需下载，即时使用图标解码器、涂层划痕自查、油温烟点与空气炸锅风险计算器，快速排查厨房隐患。',
+    launchTool: '免费使用工具',
+    allToolsCta: '浏览全部交互式工具',
+    cheatSheetCta: '可打印冰箱贴速查表'
+  },
+  ja: {
+    badge: '無料インタラクティブツール',
+    title: '無料で使えるキッチン安全診断ツール',
+    subtitle: '底面マーク解読、フライパンの傷診断、発煙点やアクリルアミド計算機まで、キッチン事故を防ぐ実用ツール集。',
+    launchTool: '無料ツールを開く',
+    allToolsCta: 'すべての診断ツールを見る',
+    cheatSheetCta: '印刷用・冷蔵庫チートシート'
+  }
+};
+const toolsSpotlightCopy = toolsSpotlightCopyMap[lang] || toolsSpotlightCopyMap.en;
+const toolsHubUrl = getDirectoryUrl('tools', lang);
+const savedCheatSheetUrl = getDirectoryUrl('saved', lang);
 ---
 
 <Layout 
@@ -495,6 +985,266 @@ if (lang === 'es') {
           </span>
         </a>
       ))}
+    </div>
+  </section>
+
+  <!-- Interactive "Can I Put This In...?" 7-Appliance Matrix Lookup -->
+  {defaultMatrixItem && (
+    <section id="home-matrix-section" class="bg-surface-soft border-t border-b border-hairline py-16 md:py-20">
+      <div class="max-w-[1280px] mx-auto px-6">
+        <div class="mb-8 max-w-3xl">
+          <div class="flex items-center gap-2 mb-2.5">
+            <span class="inline-flex items-center justify-center bg-signature-forest/10 text-signature-forest dark:bg-success/15 dark:text-success w-5 h-5 rounded-full font-bold text-xs" aria-hidden="true">⚡</span>
+            <span class="text-xs uppercase tracking-wider text-muted font-bold">{matrixCopy.badge}</span>
+          </div>
+          <h2 class="text-display-md text-ink tracking-tight mb-3">{matrixCopy.title}</h2>
+          <p class="text-body-md text-muted leading-relaxed">{matrixCopy.subtitle}</p>
+        </div>
+
+        <!-- Search + Quick-Pick Controls -->
+        <div class="bg-canvas border border-hairline rounded-lg p-5 md:p-6 shadow-xs mb-5">
+          <div class="relative max-w-xl mb-4" id="home-matrix-search-wrap">
+            <label for="home-matrix-search" class="sr-only">{matrixCopy.searchLabel}</label>
+            <div class="relative">
+              <svg class="w-4 h-4 text-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                id="home-matrix-search"
+                autocomplete="off"
+                placeholder={matrixCopy.searchPlaceholder}
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded="false"
+                aria-controls="home-matrix-dropdown"
+                class="w-full min-h-[44px] pl-10 pr-10 py-2.5 bg-surface-soft text-ink text-[15px] md:text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border focus:bg-canvas transition-colors"
+              />
+              <button
+                type="button"
+                id="home-matrix-clear"
+                aria-label={matrixCopy.clearSearch}
+                class="hidden absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-sm text-muted hover:text-ink hover:bg-surface-strong/50 flex items-center justify-center cursor-pointer transition-colors"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div
+              id="home-matrix-dropdown"
+              role="listbox"
+              aria-label={matrixCopy.searchLabel}
+              class="hidden absolute top-full left-0 right-0 mt-1 max-h-64 overflow-y-auto bg-canvas border border-hairline rounded-md shadow-lg z-40 py-1 text-left"
+            ></div>
+          </div>
+
+          <!-- Top 8 Quick-Pick Chips -->
+          <div class="flex flex-wrap items-center gap-2" id="home-matrix-chips" role="group" aria-label={matrixCopy.quickPickLabel}>
+            <span class="text-xs font-semibold uppercase tracking-wider text-muted mr-1">{matrixCopy.quickPickLabel}</span>
+            {matrixQuickChips.map((item, idx) => (
+              <button
+                type="button"
+                data-matrix-slug={item.slug}
+                aria-pressed={idx === 0 ? 'true' : 'false'}
+                class={`matrix-chip min-h-[36px] px-3.5 py-1.5 rounded-full text-[13px] font-medium border transition-colors cursor-pointer select-none ${
+                  idx === 0
+                    ? 'bg-primary text-on-primary border-primary'
+                    : 'bg-surface-soft text-ink border-hairline hover:border-border-strong'
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+            {matrixItems.length > 8 && (
+              <button
+                type="button"
+                id="home-matrix-toggle-all"
+                aria-expanded="false"
+                aria-controls="home-matrix-all-chips"
+                data-label-show={matrixCopy.showAllLabel}
+                data-label-hide={matrixCopy.hideAllLabel}
+                class="min-h-[36px] px-3 py-1.5 rounded-full text-[13px] font-medium text-link hover:text-link-active bg-transparent border border-dashed border-hairline hover:border-info-border transition-colors cursor-pointer select-none"
+              >
+                {matrixCopy.showAllLabel} +
+              </button>
+            )}
+          </div>
+
+          <!-- Collapsible Tray for Remaining Matrix Items (9-32) -->
+          {matrixItems.length > 8 && (
+            <div id="home-matrix-all-chips" class="hidden mt-3 pt-3 border-t border-hairline/70 flex flex-wrap gap-2">
+              {matrixItems.slice(8).map((item) => (
+                <button
+                  type="button"
+                  data-matrix-slug={item.slug}
+                  aria-pressed="false"
+                  class="matrix-chip min-h-[34px] px-3 py-1 rounded-full text-[12.5px] font-medium border bg-surface-soft text-ink border-hairline hover:border-border-strong transition-colors cursor-pointer select-none"
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <!-- 7-Appliance Safety Row Output -->
+        <div class="bg-canvas border border-hairline rounded-lg p-5 md:p-6 shadow-xs" aria-live="polite">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5 pb-4 border-b border-hairline/70">
+            <h3 class="text-title-sm text-ink font-semibold flex flex-wrap items-center gap-1.5">
+              <span class="text-muted font-normal">{matrixCopy.verdictsFor}</span>
+              <span id="home-matrix-active-name" class="text-ink font-semibold">{defaultMatrixItem.label}</span>
+            </h3>
+            <span id="home-matrix-active-count" class="text-xs font-semibold text-muted bg-surface-soft border border-hairline px-2.5 py-1 rounded-full self-start sm:self-auto">
+              {defaultMatrixItem.count}/7 {matrixCopy.guidesSuffix}
+            </span>
+          </div>
+
+          <div id="home-matrix-grid" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+            {matrixApplianceMeta.map((app) => {
+              const entry = defaultMatrixItem.appliances[app.slug];
+              if (entry) {
+                const cardClass =
+                  entry.safe === 'yes'
+                    ? 'border-success/35 bg-success/5 hover:border-success'
+                    : entry.safe === 'no'
+                    ? 'border-error/35 bg-error/5 hover:border-error'
+                    : 'border-warning/40 bg-warning/5 hover:border-warning';
+                const badgeClass =
+                  entry.safe === 'yes'
+                    ? 'badge-yes'
+                    : entry.safe === 'no'
+                    ? 'badge-no'
+                    : 'badge-depends';
+                const verdictText =
+                  entry.safe === 'yes'
+                    ? t('verdict.yes')
+                    : entry.safe === 'no'
+                    ? t('verdict.no')
+                    : t('verdict.depends');
+                return (
+                  <a
+                    href={entry.url}
+                    class={`group rounded-md p-3.5 border transition-all flex flex-col items-center justify-between text-center min-h-[120px] shadow-2xs hover:shadow-sm ${cardClass}`}
+                  >
+                    <span class="text-[13px] font-semibold text-ink leading-tight">{app.name}</span>
+                    <span class={`${badgeClass} my-2 text-[11px] px-3 py-1`}>{verdictText}</span>
+                    <span class="text-[12px] font-medium text-link group-hover:underline inline-flex items-center gap-0.5">
+                      {matrixCopy.readGuide} <span aria-hidden="true">&rarr;</span>
+                    </span>
+                  </a>
+                );
+              }
+              return (
+                <div class="rounded-md p-3.5 border border-dashed border-hairline bg-surface-soft/70 flex flex-col items-center justify-between text-center min-h-[120px] opacity-75">
+                  <span class="text-[13px] font-medium text-muted leading-tight">{app.name}</span>
+                  <span class="my-2 inline-flex items-center justify-center font-semibold px-3 py-1 rounded-full text-[11px] tracking-wider uppercase bg-surface-strong/70 text-muted border border-hairline">
+                    {matrixCopy.naLabel}
+                  </span>
+                  <span class="text-[11px] text-muted">{matrixCopy.naSubtext}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          <p class="mt-4 text-[12.5px] text-muted">{matrixCopy.footerHint}</p>
+        </div>
+
+        <script id="home-matrix-data" type="application/json" is:inline set:html={JSON.stringify(matrixClientPayload).replace(/</g, '\\u003c')}></script>
+      </div>
+    </section>
+  )}
+
+  <!-- Consumer Kitchen Tools Spotlight Grid -->
+  <section id="home-tools-spotlight" class="bg-canvas py-16 md:py-20">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-10">
+        <div class="max-w-2xl">
+          <div class="flex items-center gap-2 mb-2.5">
+            <span class="inline-flex items-center justify-center bg-info/10 text-info w-5 h-5 rounded-full font-bold text-xs" aria-hidden="true">★</span>
+            <span class="text-xs uppercase tracking-wider text-muted font-bold">{toolsSpotlightCopy.badge}</span>
+          </div>
+          <h2 class="text-display-md text-ink tracking-tight mb-3">{toolsSpotlightCopy.title}</h2>
+          <p class="text-body-md text-muted leading-relaxed">{toolsSpotlightCopy.subtitle}</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3 shrink-0">
+          <a
+            href={toolsHubUrl}
+            class="min-h-[44px] px-5 py-2.5 bg-primary hover:bg-primary-active text-on-primary text-[14px] font-medium rounded-md inline-flex items-center justify-center gap-1.5 transition-colors"
+          >
+            <span>{toolsSpotlightCopy.allToolsCta}</span>
+            <span aria-hidden="true">&rarr;</span>
+          </a>
+          <a
+            href={savedCheatSheetUrl}
+            class="min-h-[44px] px-4 py-2.5 bg-surface-soft hover:bg-surface-strong/40 text-ink border border-hairline hover:border-border-strong text-[14px] font-medium rounded-md inline-flex items-center justify-center gap-2 transition-colors"
+          >
+            <svg class="w-4 h-4 text-muted shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            <span>{toolsSpotlightCopy.cheatSheetCta}</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {spotlightTools.map((tool) => (
+          <a
+            href={tool.url}
+            class="group bg-surface-soft border border-hairline hover:border-info-border hover:shadow-sm rounded-lg p-6 flex flex-col justify-between min-h-[210px] transition-all"
+          >
+            <div>
+              <div class="flex items-center justify-between gap-3 mb-4">
+                <span class={`w-10 h-10 rounded-md inline-flex items-center justify-center shrink-0 ${tool.accentClass}`} aria-hidden="true">
+                  {tool.icon === 'symbol' && (
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                  )}
+                  {tool.icon === 'pan' && (
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 3h.01" />
+                    </svg>
+                  )}
+                  {tool.icon === 'brand' && (
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  )}
+                  {tool.icon === 'oil' && (
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                    </svg>
+                  )}
+                  {tool.icon === 'airfryer' && (
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  )}
+                  {tool.icon === 'viral' && (
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  )}
+                </span>
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-muted bg-canvas border border-hairline px-2.5 py-1 rounded-full">
+                  {tool.tag}
+                </span>
+              </div>
+              <h3 class="text-title-sm text-ink font-semibold mb-2.5 group-hover:text-primary transition-colors leading-snug">
+                {tool.title}
+              </h3>
+              <p class="text-body-md text-body leading-relaxed mb-5">
+                {tool.desc}
+              </p>
+            </div>
+            <span class="text-link text-[14px] font-semibold inline-flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+              <span>{toolsSpotlightCopy.launchTool}</span>
+              <span aria-hidden="true">&rarr;</span>
+            </span>
+          </a>
+        ))}
+      </div>
     </div>
   </section>
 
@@ -1030,6 +1780,300 @@ if (lang === 'es') {
           }
           performSearch(query);
         });
+      }
+
+      // ======================================================================
+      // Interactive 7-Appliance Safety Matrix Lookup
+      // ======================================================================
+      const matrixDataEl = document.getElementById('home-matrix-data');
+      const matrixSearch = document.getElementById('home-matrix-search') as HTMLInputElement | null;
+      const matrixClear = document.getElementById('home-matrix-clear') as HTMLButtonElement | null;
+      const matrixDropdown = document.getElementById('home-matrix-dropdown');
+      const matrixSearchWrap = document.getElementById('home-matrix-search-wrap');
+      const matrixSection = document.getElementById('home-matrix-section');
+      const matrixGrid = document.getElementById('home-matrix-grid');
+      const matrixActiveName = document.getElementById('home-matrix-active-name');
+      const matrixActiveCount = document.getElementById('home-matrix-active-count');
+      const matrixToggleAll = document.getElementById('home-matrix-toggle-all') as HTMLButtonElement | null;
+      const matrixAllChips = document.getElementById('home-matrix-all-chips');
+
+      if (matrixDataEl && matrixGrid) {
+        type MatrixSafe = 'yes' | 'no' | 'depends';
+        interface ClientMatrixItem {
+          slug: string;
+          label: string;
+          search: string;
+          count: number;
+          appliances: Record<string, { safe: MatrixSafe; url: string } | undefined>;
+        }
+        interface ClientMatrixPayload {
+          appliances: Array<{ slug: string; name: string }>;
+          items: ClientMatrixItem[];
+          labels: {
+            yes: string;
+            no: string;
+            depends: string;
+            na: string;
+            naSubtext: string;
+            readGuide: string;
+            guidesSuffix: string;
+            noMatches: string;
+          };
+        }
+
+        let payload: ClientMatrixPayload | null = null;
+        try {
+          payload = JSON.parse(matrixDataEl.textContent || 'null');
+        } catch (err) {
+          console.error('Failed to parse matrix payload', err);
+        }
+
+        if (payload && payload.items.length > 0) {
+          const itemBySlug = new Map<string, ClientMatrixItem>(
+            payload.items.map((it) => [it.slug, it])
+          );
+          let matrixMatches: ClientMatrixItem[] = [];
+          let matrixOptionIndex = -1;
+
+          const closeMatrixDropdown = () => {
+            if (!matrixDropdown) return;
+            matrixDropdown.classList.add('hidden');
+            matrixDropdown.replaceChildren();
+            matrixSearch?.setAttribute('aria-expanded', 'false');
+            matrixSearch?.removeAttribute('aria-activedescendant');
+            matrixMatches = [];
+            matrixOptionIndex = -1;
+          };
+
+          const updateMatrixChips = (selectedSlug: string) => {
+            if (!matrixSection) return;
+            const chips = matrixSection.querySelectorAll<HTMLButtonElement>('.matrix-chip');
+            chips.forEach((chip) => {
+              const isSelected = chip.dataset.matrixSlug === selectedSlug;
+              chip.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+              if (isSelected) {
+                chip.classList.remove('bg-surface-soft', 'text-ink', 'border-hairline', 'hover:border-border-strong');
+                chip.classList.add('bg-primary', 'text-on-primary', 'border-primary');
+              } else {
+                chip.classList.remove('bg-primary', 'text-on-primary', 'border-primary');
+                chip.classList.add('bg-surface-soft', 'text-ink', 'border-hairline', 'hover:border-border-strong');
+              }
+            });
+          };
+
+          const renderMatrixRow = (item: ClientMatrixItem) => {
+            if (!payload || !matrixGrid) return;
+            if (matrixActiveName) matrixActiveName.textContent = item.label;
+            if (matrixActiveCount) {
+              matrixActiveCount.textContent = `${item.count}/7 ${payload.labels.guidesSuffix}`;
+            }
+            updateMatrixChips(item.slug);
+
+            const fragment = document.createDocumentFragment();
+            for (const app of payload.appliances) {
+              const entry = item.appliances[app.slug];
+              if (entry) {
+                const card = document.createElement('a');
+                card.href = entry.url;
+                const toneClass =
+                  entry.safe === 'yes'
+                    ? 'border-success/35 bg-success/5 hover:border-success'
+                    : entry.safe === 'no'
+                    ? 'border-error/35 bg-error/5 hover:border-error'
+                    : 'border-warning/40 bg-warning/5 hover:border-warning';
+                card.className = `group rounded-md p-3.5 border transition-all flex flex-col items-center justify-between text-center min-h-[120px] shadow-2xs hover:shadow-sm ${toneClass}`;
+
+                const appNameEl = document.createElement('span');
+                appNameEl.className = 'text-[13px] font-semibold text-ink leading-tight';
+                appNameEl.textContent = app.name;
+
+                const badgeEl = document.createElement('span');
+                const badgeTone =
+                  entry.safe === 'yes'
+                    ? 'badge-yes'
+                    : entry.safe === 'no'
+                    ? 'badge-no'
+                    : 'badge-depends';
+                badgeEl.className = `${badgeTone} my-2 text-[11px] px-3 py-1`;
+                badgeEl.textContent =
+                  entry.safe === 'yes'
+                    ? payload.labels.yes
+                    : entry.safe === 'no'
+                    ? payload.labels.no
+                    : payload.labels.depends;
+
+                const ctaEl = document.createElement('span');
+                ctaEl.className = 'text-[12px] font-medium text-link group-hover:underline inline-flex items-center gap-0.5';
+                ctaEl.textContent = `${payload.labels.readGuide} →`;
+
+                card.appendChild(appNameEl);
+                card.appendChild(badgeEl);
+                card.appendChild(ctaEl);
+                fragment.appendChild(card);
+              } else {
+                const card = document.createElement('div');
+                card.className = 'rounded-md p-3.5 border border-dashed border-hairline bg-surface-soft/70 flex flex-col items-center justify-between text-center min-h-[120px] opacity-75';
+
+                const appNameEl = document.createElement('span');
+                appNameEl.className = 'text-[13px] font-medium text-muted leading-tight';
+                appNameEl.textContent = app.name;
+
+                const naBadgeEl = document.createElement('span');
+                naBadgeEl.className = 'my-2 inline-flex items-center justify-center font-semibold px-3 py-1 rounded-full text-[11px] tracking-wider uppercase bg-surface-strong/70 text-muted border border-hairline';
+                naBadgeEl.textContent = payload.labels.na;
+
+                const naSubEl = document.createElement('span');
+                naSubEl.className = 'text-[11px] text-muted';
+                naSubEl.textContent = payload.labels.naSubtext;
+
+                card.appendChild(appNameEl);
+                card.appendChild(naBadgeEl);
+                card.appendChild(naSubEl);
+                fragment.appendChild(card);
+              }
+            }
+
+            matrixGrid.replaceChildren(fragment);
+          };
+
+          const selectMatrixItem = (item: ClientMatrixItem, syncInput: boolean) => {
+            renderMatrixRow(item);
+            closeMatrixDropdown();
+            if (syncInput && matrixSearch) {
+              matrixSearch.value = item.label;
+              if (matrixClear) matrixClear.classList.remove('hidden');
+            }
+          };
+
+          const updateMatrixOptionHighlight = (newIdx: number) => {
+            if (!matrixDropdown) return;
+            const opts = matrixDropdown.querySelectorAll<HTMLButtonElement>('.matrix-search-opt');
+            if (opts.length === 0) return;
+            if (matrixOptionIndex >= 0 && opts[matrixOptionIndex]) {
+              opts[matrixOptionIndex].classList.remove('bg-surface-soft');
+              opts[matrixOptionIndex].setAttribute('aria-selected', 'false');
+            }
+            matrixOptionIndex = newIdx;
+            if (matrixOptionIndex >= 0 && opts[matrixOptionIndex]) {
+              opts[matrixOptionIndex].classList.add('bg-surface-soft');
+              opts[matrixOptionIndex].setAttribute('aria-selected', 'true');
+              matrixSearch?.setAttribute('aria-activedescendant', opts[matrixOptionIndex].id);
+              opts[matrixOptionIndex].scrollIntoView({ block: 'nearest' });
+            } else {
+              matrixSearch?.removeAttribute('aria-activedescendant');
+            }
+          };
+
+          const renderMatrixDropdown = (query: string) => {
+            if (!payload || !matrixDropdown) return;
+            const norm = query.trim().toLowerCase();
+            matrixMatches = (norm
+              ? payload.items.filter((it) => it.search.includes(norm))
+              : payload.items
+            ).slice(0, 10);
+            matrixOptionIndex = -1;
+
+            const frag = document.createDocumentFragment();
+            if (matrixMatches.length === 0) {
+              const emptyEl = document.createElement('div');
+              emptyEl.className = 'px-4 py-3 text-[13px] text-muted';
+              emptyEl.textContent = payload.labels.noMatches;
+              frag.appendChild(emptyEl);
+            } else {
+              matrixMatches.forEach((item, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.id = `home-matrix-opt-${idx}`;
+                btn.setAttribute('role', 'option');
+                btn.setAttribute('aria-selected', 'false');
+                btn.dataset.matrixSlug = item.slug;
+                btn.className = 'matrix-search-opt w-full px-4 py-2.5 text-left text-[14px] text-ink hover:bg-surface-soft cursor-pointer flex items-center justify-between gap-2 transition-colors';
+
+                const labelSpan = document.createElement('span');
+                labelSpan.className = 'font-medium text-ink truncate';
+                labelSpan.textContent = item.label;
+
+                const metaSpan = document.createElement('span');
+                metaSpan.className = 'text-[12px] text-muted shrink-0';
+                metaSpan.textContent = `${item.count}/7`;
+
+                btn.appendChild(labelSpan);
+                btn.appendChild(metaSpan);
+                btn.addEventListener('click', () => selectMatrixItem(item, true));
+                frag.appendChild(btn);
+              });
+            }
+
+            matrixDropdown.replaceChildren(frag);
+            matrixDropdown.classList.remove('hidden');
+            matrixSearch?.setAttribute('aria-expanded', 'true');
+          };
+
+          // Delegate chip clicks across both quick-pick and expanded chip trays
+          matrixSection?.addEventListener('click', (e) => {
+            const chip = (e.target as HTMLElement).closest('.matrix-chip') as HTMLButtonElement | null;
+            if (!chip || !chip.dataset.matrixSlug) return;
+            const found = itemBySlug.get(chip.dataset.matrixSlug);
+            if (found) {
+              selectMatrixItem(found, false);
+              if (matrixSearch) matrixSearch.value = '';
+              if (matrixClear) matrixClear.classList.add('hidden');
+            }
+          });
+
+          if (matrixSearch) {
+            matrixSearch.addEventListener('focus', () => {
+              renderMatrixDropdown(matrixSearch.value);
+            });
+            matrixSearch.addEventListener('input', () => {
+              if (matrixClear) {
+                matrixClear.classList.toggle('hidden', matrixSearch.value.trim().length === 0);
+              }
+              renderMatrixDropdown(matrixSearch.value);
+            });
+            matrixSearch.addEventListener('keydown', (e) => {
+              if (!matrixDropdown || matrixDropdown.classList.contains('hidden')) return;
+              if (e.key === 'ArrowDown' && matrixMatches.length > 0) {
+                e.preventDefault();
+                updateMatrixOptionHighlight((matrixOptionIndex + 1) % matrixMatches.length);
+              } else if (e.key === 'ArrowUp' && matrixMatches.length > 0) {
+                e.preventDefault();
+                updateMatrixOptionHighlight(matrixOptionIndex <= 0 ? matrixMatches.length - 1 : matrixOptionIndex - 1);
+              } else if (e.key === 'Enter' && matrixMatches.length > 0) {
+                e.preventDefault();
+                const targetItem = matrixOptionIndex >= 0 ? matrixMatches[matrixOptionIndex] : matrixMatches[0];
+                if (targetItem) selectMatrixItem(targetItem, true);
+              } else if (e.key === 'Escape') {
+                closeMatrixDropdown();
+              }
+            });
+          }
+
+          if (matrixClear && matrixSearch) {
+            matrixClear.addEventListener('click', () => {
+              matrixSearch.value = '';
+              matrixClear.classList.add('hidden');
+              closeMatrixDropdown();
+              matrixSearch.focus();
+            });
+          }
+
+          if (matrixToggleAll && matrixAllChips) {
+            matrixToggleAll.addEventListener('click', () => {
+              const isHidden = matrixAllChips.classList.toggle('hidden');
+              matrixToggleAll.setAttribute('aria-expanded', isHidden ? 'false' : 'true');
+              const showText = matrixToggleAll.dataset.labelShow || 'Browse all';
+              const hideText = matrixToggleAll.dataset.labelHide || 'Show less';
+              matrixToggleAll.textContent = isHidden ? `${showText} +` : `${hideText} −`;
+            });
+          }
+
+          document.addEventListener('click', (e) => {
+            if (matrixSearchWrap && !matrixSearchWrap.contains(e.target as Node)) {
+              closeMatrixDropdown();
+            }
+          });
+        }
       }
     });
   </script>

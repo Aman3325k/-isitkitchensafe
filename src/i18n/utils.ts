@@ -206,7 +206,8 @@ const SPECIAL_PAGES = [
   'tools/commercial-continuous-sfm-dip-modeler',
   'tools/commercial-continuous-fm-acfd-modeler',
   'tools/commercial-continuous-scw-mcc-modeler',
-  'tools/kitchen-symbol-decoder'
+  'tools/kitchen-symbol-decoder',
+  'tools/leftover-shelf-life-calculator'
 ];
 
 const esSlugs = new Set([
