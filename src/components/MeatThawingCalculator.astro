@@ -1,0 +1,1771 @@
+---
+import rawData from '../data/meat-thawing-calculator-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+import { getDirectoryUrl } from '../i18n/utils';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+type MethodKey = 'fridge' | 'cold-water' | 'microwave' | 'cook-frozen';
+
+interface LocalizedCut {
+  id: string;
+  name: string;
+  minLbs: number;
+  maxLbs: number;
+  defaultLbs: number;
+  stepLbs: number;
+  fridgeHoursPerLbMin: number;
+  fridgeHoursPerLbMax: number;
+  fridgeMinHours: number;
+  coldWaterMinPerLb: number;
+  coldWaterMinMinutes: number;
+  microwaveMinPerLb: number;
+  microwaveMaxLbs: number;
+  cookFromFrozenAllowed: boolean;
+  postThawFridgeMinDays: number;
+  postThawFridgeMaxDays: number;
+  safeTempF: number;
+  safeTempC: number;
+  restMinutes: number;
+  refreezeAfterFridge: boolean;
+  specialAlertType: string;
+  safeTempLabel: string;
+  tempCheckLocation: string;
+  cutNote: string;
+  cookFromFrozenNote: string;
+}
+
+const localizedCuts: LocalizedCut[] = rawData.cuts.map((cut) => {
+  const tr = (cut.i18n as Record<string, any>)[lang] || cut.i18n.en;
+  return {
+    id: cut.id,
+    name: tr.name,
+    minLbs: cut.minLbs,
+    maxLbs: cut.maxLbs,
+    defaultLbs: cut.defaultLbs,
+    stepLbs: cut.stepLbs,
+    fridgeHoursPerLbMin: cut.fridgeHoursPerLbMin,
+    fridgeHoursPerLbMax: cut.fridgeHoursPerLbMax,
+    fridgeMinHours: cut.fridgeMinHours,
+    coldWaterMinPerLb: cut.coldWaterMinPerLb,
+    coldWaterMinMinutes: cut.coldWaterMinMinutes,
+    microwaveMinPerLb: cut.microwaveMinPerLb,
+    microwaveMaxLbs: cut.microwaveMaxLbs,
+    cookFromFrozenAllowed: cut.cookFromFrozenAllowed,
+    postThawFridgeMinDays: cut.postThawFridgeMinDays,
+    postThawFridgeMaxDays: cut.postThawFridgeMaxDays,
+    safeTempF: cut.safeTempF,
+    safeTempC: cut.safeTempC,
+    restMinutes: cut.restMinutes,
+    refreezeAfterFridge: cut.refreezeAfterFridge,
+    specialAlertType: cut.specialAlertType,
+    safeTempLabel: tr.safeTempLabel,
+    tempCheckLocation: tr.tempCheckLocation,
+    cutNote: tr.cutNote,
+    cookFromFrozenNote: tr.cookFromFrozenNote
+  };
+});
+
+const localizedPresets = rawData.presets.map((p) => ({
+  id: p.id,
+  cutId: p.cutId,
+  weightLbs: p.weightLbs,
+  label: (p.labels as Record<string, string>)[lang] || p.labels.en
+}));
+
+const defaultUnit = lang === 'en' ? 'lbs' : 'kg';
+const refreezeUrl = getDirectoryUrl('refreeze', lang);
+
+interface UiDict {
+  localeCode: string;
+  step1Title: string;
+  quickPresetsLabel: string;
+  selectCutLabel: string;
+  weightLabel: string;
+  unitLbs: string;
+  unitKg: string;
+  step2Title: string;
+  targetCookLabel: string;
+  targetCookHint: string;
+  methodLabel: string;
+  methods: Record<MethodKey, { title: string; badge: string; sub: string }>;
+  dashboardBadge: string;
+  startThawingByLabel: string;
+  totalThawDurationLabel: string;
+  cookDirectlyText: string;
+  noThawNeededDuration: string;
+  notRecommendedDuration: string;
+  tooLateWarning: string;
+  microwaveBlockedWarning: string;
+  botulismBannerTitle: string;
+  botulismBannerBody: string;
+  statusPills: {
+    fridge: string;
+    coldWater: string;
+    microwave: string;
+    cookFrozen: string;
+    tooLate: string;
+    notRecommended: string;
+  };
+  metrics: {
+    postThawTitle: string;
+    postThawFridgeValue: string;
+    postThawImmediateValue: string;
+    postThawFrozenValue: string;
+    postThawFridgeSub: string;
+    postThawImmediateSub: string;
+    postThawFrozenSub: string;
+    safeTempTitle: string;
+    refreezeTitle: string;
+    refreezeFridgeYes: string;
+    refreezeCookFirst: string;
+    refreezeFrozenNA: string;
+    waterChangesTitle: string;
+    waterChangesValue: string;
+    waterChangesSub: string;
+  };
+  cutNoteHeading: string;
+  checklistHeading: string;
+  checklistSub: string;
+  dangerZoneBannerTitle: string;
+  dangerZoneBannerBody: string;
+  checklists: {
+    fridge: string[];
+    coldWater: string[];
+    microwave: string[];
+    cookFrozen: string[];
+  };
+  comparisonTitle: string;
+  comparisonSub: string;
+  comparisonHeaders: [string, string, string, string];
+  comparisonNotes: {
+    fridge: string;
+    coldWater: string;
+    microwaveOk: string;
+    microwaveNotRec: string;
+    cookFrozen: string;
+  };
+  refreezeBtnLabel: string;
+  copyBtn: string;
+  copiedBtn: string;
+  resetBtn: string;
+  units: {
+    day: string;
+    days: string;
+    hr: string;
+    hrs: string;
+    min: string;
+    mins: string;
+    approxPrefix: string;
+    cookTimePlus50: string;
+    startNowOrSwitch: string;
+  };
+}
+
+const UI: Record<SupportedLanguage, UiDict> = {
+  en: {
+    localeCode: 'en-US',
+    step1Title: '1. Select Meat Cut & Weight',
+    quickPresetsLabel: 'Popular Presets:',
+    selectCutLabel: 'Meat or Poultry Cut',
+    weightLabel: 'Frozen Weight',
+    unitLbs: 'lbs',
+    unitKg: 'kg',
+    step2Title: '2. Target Cook Time & Thawing Method',
+    targetCookLabel: 'When do you plan to start cooking?',
+    targetCookHint: 'Defaults to 4 days from today so you can plan holiday roasts & weekly meal prep.',
+    methodLabel: 'Choose USDA-Approved Thawing Method',
+    methods: {
+      fridge: { title: 'Refrigerator', badge: 'Safest', sub: '≤40°F (4°C) · Recommended' },
+      'cold-water': { title: 'Cold Water Bath', badge: 'Fast', sub: '30 min/lb · Change water q30m' },
+      microwave: { title: 'Microwave Defrost', badge: 'Urgent', sub: '30% power · Cook immediately' },
+      'cook-frozen': { title: 'Cook From Frozen', badge: 'No Thaw', sub: '+50% cook time · No slow cooker' }
+    },
+    dashboardBadge: 'USDA FSIS Live Thawing Schedule',
+    startThawingByLabel: 'Start Thawing By',
+    totalThawDurationLabel: 'Total Thaw Duration',
+    cookDirectlyText: 'Start Cooking Directly',
+    noThawNeededDuration: '0 min thaw (+50% cook time)',
+    notRecommendedDuration: 'Not Recommended (Too Large)',
+    tooLateWarning: 'Too late for refrigerator thawing before your target cook time! Switch to Cold Water Bath or Cook From Frozen below.',
+    microwaveBlockedWarning: 'USDA Warning: This cut/weight is too large or dense to defrost evenly in a home microwave. Use Refrigerator, Cold Water Bath, or Cook From Frozen instead.',
+    botulismBannerTitle: 'CRITICAL FDA/USDA SEAFOOD WARNING — Clostridium botulinum Risk',
+    botulismBannerBody: 'Remove vacuum-sealed (reduced-oxygen packaged) fish from its airtight plastic pouch BEFORE thawing in the refrigerator or cold water. Oxygen-free thawing allows botulism toxin to form even at cold temperatures.',
+    statusPills: {
+      fridge: 'SAFEST METHOD — RECOMMENDED ✅',
+      coldWater: 'FAST THAW — COOK IMMEDIATELY ⚡',
+      microwave: 'MICROWAVE — COOK IMMEDIATELY ⏱️',
+      cookFrozen: 'NO THAW NEEDED — +50% COOK TIME 🔥',
+      tooLate: 'START TIME PASSED — SWITCH METHOD ⚠️',
+      notRecommended: 'NOT RECOMMENDED FOR THIS SIZE ❌'
+    },
+    metrics: {
+      postThawTitle: 'Post-Thaw Fridge Window',
+      postThawFridgeValue: '{min}–{max} days after thawed',
+      postThawImmediateValue: 'Cook Immediately!',
+      postThawFrozenValue: 'Direct to Oven / Pan',
+      postThawFridgeSub: 'Keep chilled at ≤40°F (4°C) until cooking',
+      postThawImmediateSub: 'Outer layer warms slightly — do not store raw',
+      postThawFrozenSub: 'Allow at least 50% extra cooking time',
+      safeTempTitle: 'USDA Safe Internal Temp',
+      refreezeTitle: 'Safe to Refreeze?',
+      refreezeFridgeYes: 'Yes (Raw or Cooked)',
+      refreezeCookFirst: 'Only AFTER Cooking',
+      refreezeFrozenNA: 'Cook First, Then Freeze Leftovers',
+      waterChangesTitle: '30-Min Water Changes',
+      waterChangesValue: '{count} refreshes',
+      waterChangesSub: 'Drain & refill cold tap water every 30 min'
+    },
+    cutNoteHeading: 'USDA Cut-Specific Thawing Tip',
+    checklistHeading: 'Step-by-Step USDA Safety Checklist',
+    checklistSub: 'Tap steps to track your safe defrosting prep.',
+    dangerZoneBannerTitle: 'NEVER Thaw on the Kitchen Counter or in Hot Water',
+    dangerZoneBannerBody: 'Meat left in the USDA Temperature Danger Zone (40°F–140°F / 4°C–60°C) for over 2 hours lets Salmonella, E. coli, and Staph multiply rapidly on the outer surface while the center stays frozen.',
+    checklists: {
+      fridge: [
+        'Verify your refrigerator is set to 40°F (4°C) or colder.',
+        'Place frozen meat in a rimmed pan or leak-proof tray on the BOTTOM shelf so raw juices never drip onto ready-to-eat foods.',
+        'Keep in original wrap (EXCEPT vacuum-sealed fish — slit or remove pouch before thawing!).',
+        'Once fully thawed, cook within the post-thaw window ({window}) or safely refreeze without cooking.'
+      ],
+      coldWater: [
+        'Seal meat inside a leak-proof zip-top bag (for vacuum-sealed fish, transfer to a bag with air inside so it is NOT oxygen-free).',
+        'Submerge completely in COLD tap water (never warm or hot water). Weigh down with a plate if it floats.',
+        'Set a 30-minute timer: drain and replace with fresh cold tap water every 30 minutes (~{changes} total changes).',
+        'Cook IMMEDIATELY as soon as thawed — do not refrigerate raw or refreeze before cooking.'
+      ],
+      microwave: [
+        'Remove all foam trays, freezer paper, metal clips, and non-microwave-safe wrap; place in a microwave-safe dish.',
+        'Use the Defrost setting (30% power) for ~{mins} minutes total, flipping and rotating halfway through.',
+        'Separate pieces or shield warm edges so the outer layer does not begin cooking prematurely.',
+        'Transfer to oven, stove, or grill IMMEDIATELY — partially warmed areas enter the Danger Zone fast.'
+      ],
+      cookFrozen: [
+        'Remove all plastic wrap, absorbent pads, and freezer packaging before heating (for whole poultry, pull out giblet bag once cavity loosens mid-roast).',
+        'Plan for +50% longer cooking time than a thawed cut (e.g., a 60-min recipe needs ~90 min).',
+        'Use oven (≥325°F / 163°C), stovetop, air fryer, or pressure cooker — NEVER cook frozen raw meat in a slow cooker.',
+        'Confirm doneness with a calibrated food thermometer at {temp} before serving.'
+      ]
+    },
+    comparisonTitle: 'All-Method Thawing Comparison for Your Weight',
+    comparisonSub: 'Click any row to switch thawing methods instantly.',
+    comparisonHeaders: ['Method', 'Estimated Time', 'Start Thawing By', 'Post-Thaw Rule'],
+    comparisonNotes: {
+      fridge: '{min}–{max} days in fridge',
+      coldWater: 'Cook immediately ({changes} water changes)',
+      microwaveOk: 'Cook immediately (30% power)',
+      microwaveNotRec: 'Not recommended (> {max} lb)',
+      cookFrozen: 'Cook directly (+50% cook time)'
+    },
+    refreezeBtnLabel: 'Can You Refreeze Thawed Meat?',
+    copyBtn: 'Copy Thawing Schedule',
+    copiedBtn: 'Copied to Clipboard ✓',
+    resetBtn: 'Reset',
+    units: {
+      day: 'day',
+      days: 'days',
+      hr: 'hr',
+      hrs: 'hrs',
+      min: 'min',
+      mins: 'mins',
+      approxPrefix: '~',
+      cookTimePlus50: '+50% cook time',
+      startNowOrSwitch: 'Start immediately or switch method'
+    }
+  },
+  es: {
+    localeCode: 'es-ES',
+    step1Title: '1. Elige el Corte de Carne y el Peso',
+    quickPresetsLabel: 'Ejemplos Rápidos:',
+    selectCutLabel: 'Tipo de Carne o Ave',
+    weightLabel: 'Peso Congelado',
+    unitLbs: 'lb',
+    unitKg: 'kg',
+    step2Title: '2. Fecha de Cocción y Método de Descongelación',
+    targetCookLabel: '¿Cuándo planeas empezar a cocinar?',
+    targetCookHint: 'Por defecto a 4 días desde hoy para planificar asados y pavos con antelación.',
+    methodLabel: 'Elige un Método Aprobado por el USDA',
+    methods: {
+      fridge: { title: 'Refrigerador', badge: 'Más Seguro', sub: '≤4°C (40°F) · Recomendado' },
+      'cold-water': { title: 'Baño de Agua Fría', badge: 'Rápido', sub: '30 min/lb · Cambiar cada 30 min' },
+      microwave: { title: 'Microondas', badge: 'Urgente', sub: '30% potencia · Cocinar ya' },
+      'cook-frozen': { title: 'Cocinar Congelado', badge: 'Sin Descongelar', sub: '+50% tiempo · Sin olla lenta' }
+    },
+    dashboardBadge: 'Plan de Descongelación Segura USDA FSIS',
+    startThawingByLabel: 'Empieza a Descongelar Antes De',
+    totalThawDurationLabel: 'Tiempo Total de Descongelación',
+    cookDirectlyText: 'Empieza a Cocinar Directamente',
+    noThawNeededDuration: '0 min descongelación (+50% cocción)',
+    notRecommendedDuration: 'No Recomendado (Muy Grande)',
+    tooLateWarning: '¡Ya es tarde para descongelar en nevera antes de tu hora de cocción! Cambia a Baño de Agua Fría o Cocinar Congelado.',
+    microwaveBlockedWarning: 'Aviso USDA: Esta pieza es demasiado grande o densa para descongelarse de forma segura en microondas. Usa Refrigerador, Agua Fría o Cocina Congelado.',
+    botulismBannerTitle: 'ALERTA CRÍTICA FDA/USDA — Riesgo de Botulismo en Pescado',
+    botulismBannerBody: 'Retira SIEMPRE el pescado envasado al vacío de su bolsa hermética ANTES de descongelar en nevera o agua fría. Sin oxígeno puede formarse toxina de Clostridium botulinum incluso en frío.',
+    statusPills: {
+      fridge: 'MÉTODO MÁS SEGURO — RECOMENDADO ✅',
+      coldWater: 'MÉTODO RÁPIDO — COCINAR DE INMEDIATO ⚡',
+      microwave: 'MICROONDAS — COCINAR DE INMEDIATO ⏱️',
+      cookFrozen: 'SIN DESCONGELAR — +50% DE COCCIÓN 🔥',
+      tooLate: 'HORA LÍMITE PASADA — CAMBIA DE MÉTODO ⚠️',
+      notRecommended: 'NO RECOMENDADO PARA ESTE TAMAÑO ❌'
+    },
+    metrics: {
+      postThawTitle: 'Ventana en Nevera Tras Descongelar',
+      postThawFridgeValue: '{min}–{max} días en nevera',
+      postThawImmediateValue: '¡Cocinar de Inmediato!',
+      postThawFrozenValue: 'Directo al Horno / Sartén',
+      postThawFridgeSub: 'Mantén a ≤4°C (40°F) hasta cocinar',
+      postThawImmediateSub: 'El exterior se templa — no guardar crudo',
+      postThawFrozenSub: 'Añade al menos 50% más de cocción',
+      safeTempTitle: 'Temperatura Interna Segura USDA',
+      refreezeTitle: '¿Se Puede Recongelar?',
+      refreezeFridgeYes: 'Sí (Crudo o Cocido)',
+      refreezeCookFirst: 'Solo DESPUÉS de Cocinar',
+      refreezeFrozenNA: 'Cocina Primero, Luego Congela Sobras',
+      waterChangesTitle: 'Cambios de Agua (c/30 min)',
+      waterChangesValue: '{count} cambios',
+      waterChangesSub: 'Renueva con agua fría del grifo cada 30 min'
+    },
+    cutNoteHeading: 'Consejo USDA para Este Corte',
+    checklistHeading: 'Lista de Verificación Segura Paso a Paso',
+    checklistSub: 'Marca los pasos completados durante la preparación.',
+    dangerZoneBannerTitle: 'NUNCA Descongeles en la Encimera ni con Agua Caliente',
+    dangerZoneBannerBody: 'Más de 2 horas en la Zona de Peligro (4°C–60°C / 40°F–140°F) permite que Salmonella y E. coli se multipliquen en la superficie mientras el centro sigue congelado.',
+    checklists: {
+      fridge: [
+        'Comprueba que tu refrigerador esté a 4°C (40°F) o menos.',
+        'Coloca la carne en una bandeja con borde en el ESTANTE INFERIOR para evitar goteos sobre otros alimentos.',
+        'Déjala en su envase (EXCEPTO pescado al vacío: abre o retira la bolsa antes de descongelar).',
+        'Una vez descongelada, cocínala dentro de {window} o recongela de forma segura sin cocinar.'
+      ],
+      coldWater: [
+        'Coloca la carne en una bolsa hermética sin fugas (en pescado al vacío, sácalo de su bolsa original y deja algo de aire).',
+        'Sumerge por completo en agua FRÍA del grifo (nunca tibia ni caliente). Coloca un plato encima si flota.',
+        'Pon un temporizador de 30 minutos y renueva el agua fría cada 30 min (~{changes} cambios en total).',
+        'Cocina DE INMEDIATO al terminar; no guardes crudo ni recongeles antes de cocinar.'
+      ],
+      microwave: [
+        'Retira bandejas de poliestireno, papel y clips metálicos; coloca en un plato apto para microondas.',
+        'Usa modo Descongelar (30% potencia) unos ~{mins} minutos en total, volteando a mitad de tiempo.',
+        'Separa las piezas para evitar que los bordes empiecen a cocinarse antes de tiempo.',
+        'Cocina DE INMEDIATO en horno, sartén o parrilla al salir del microondas.'
+      ],
+      cookFrozen: [
+        'Retira todos los plásticos y almohadillas absorbentes (en aves enteras, saca la bolsa de menudencias cuando se afloje a mitad del horneado).',
+        'Calcula un +50% más de tiempo de cocción respecto a una pieza descongelada.',
+        'Usa horno (≥163°C), sartén, freidora de aire u olla a presión — NUNCA olla de cocción lenta.',
+        'Verifica la temperatura interna segura de {temp} con un termómetro de cocina.'
+      ]
+    },
+    comparisonTitle: 'Comparación de Todos los Métodos para Tu Peso',
+    comparisonSub: 'Haz clic en cualquier fila para cambiar de método.',
+    comparisonHeaders: ['Método', 'Tiempo Estimado', 'Empezar Antes De', 'Regla Tras Descongelar'],
+    comparisonNotes: {
+      fridge: '{min}–{max} días en nevera',
+      coldWater: 'Cocinar ya ({changes} cambios de agua)',
+      microwaveOk: 'Cocinar ya (30% potencia)',
+      microwaveNotRec: 'No recomendado (> {max} lb)',
+      cookFrozen: 'Cocinar directo (+50% tiempo)'
+    },
+    refreezeBtnLabel: '¿Se Puede Recongelar Carne Descongelada?',
+    copyBtn: 'Copiar Plan de Descongelación',
+    copiedBtn: 'Copiado al Portapapeles ✓',
+    resetBtn: 'Restablecer',
+    units: {
+      day: 'día',
+      days: 'días',
+      hr: 'h',
+      hrs: 'h',
+      min: 'min',
+      mins: 'min',
+      approxPrefix: '~',
+      cookTimePlus50: '+50% cocción',
+      startNowOrSwitch: 'Empieza ya o cambia de método'
+    }
+  },
+  pt: {
+    localeCode: 'pt-BR',
+    step1Title: '1. Escolha o Corte de Carne e o Peso',
+    quickPresetsLabel: 'Atalhos Populares:',
+    selectCutLabel: 'Tipo de Carne ou Ave',
+    weightLabel: 'Peso Congelado',
+    unitLbs: 'lb',
+    unitKg: 'kg',
+    step2Title: '2. Data de Preparo e Método de Descongelamento',
+    targetCookLabel: 'Quando você pretende começar a cozinhar?',
+    targetCookHint: 'Padrão de 4 dias a partir de hoje para planejar assados e peru de festas.',
+    methodLabel: 'Escolha um Método Aprovado pelo USDA',
+    methods: {
+      fridge: { title: 'Geladeira', badge: 'Mais Seguro', sub: '≤4°C (40°F) · Recomendado' },
+      'cold-water': { title: 'Banho de Água Fria', badge: 'Rápido', sub: '30 min/lb · Trocar a cada 30 min' },
+      microwave: { title: 'Micro-ondas', badge: 'Urgente', sub: '30% potência · Cozinhar já' },
+      'cook-frozen': { title: 'Cozinhar Congelado', badge: 'Sem Descongelar', sub: '+50% tempo · Sem slow cooker' }
+    },
+    dashboardBadge: 'Cronograma Seguro de Descongelamento USDA',
+    startThawingByLabel: 'Comece a Descongelar Até',
+    totalThawDurationLabel: 'Duração Total do Descongelamento',
+    cookDirectlyText: 'Comece a Cozinhar Direto',
+    noThawNeededDuration: '0 min descongelando (+50% cozimento)',
+    notRecommendedDuration: 'Não Recomendado (Muito Grande)',
+    tooLateWarning: 'Tarde demais para descongelar na geladeira antes do preparo! Mude para Banho de Água Fria ou Cozinhar Congelado.',
+    microwaveBlockedWarning: 'Alerta USDA: Esta peça é grande ou densa demais para descongelar de modo uniforme no micro-ondas. Use Geladeira, Água Fria ou Cozinhe Congelado.',
+    botulismBannerTitle: 'ALERTA CRÍTICO FDA/USDA — Risco de Botulismo em Peixes',
+    botulismBannerBody: 'REMOVA sempre peixes embalados a vácuo do plástico vedado ANTES de descongelar na geladeira ou em água fria. Sem oxigênio pode haver formação da toxina de Clostridium botulinum mesmo no frio.',
+    statusPills: {
+      fridge: 'MÉTODO MAIS SEGURO — RECOMENDADO ✅',
+      coldWater: 'RÁPIDO — COZINHAR IMEDIATAMENTE ⚡',
+      microwave: 'MICRO-ONDAS — COZINHAR IMEDIATAMENTE ⏱️',
+      cookFrozen: 'SEM DESCONGELAR — +50% DE COZIMENTO 🔥',
+      tooLate: 'PRAZO EXCEDIDO — TROQUE O MÉTODO ⚠️',
+      notRecommended: 'NÃO RECOMENDADO PARA ESTE TAMANHO ❌'
+    },
+    metrics: {
+      postThawTitle: 'Prazo na Geladeira Pós-Descongelar',
+      postThawFridgeValue: '{min}–{max} dias na geladeira',
+      postThawImmediateValue: 'Cozinhe Imediatamente!',
+      postThawFrozenValue: 'Direto ao Forno / Panela',
+      postThawFridgeSub: 'Mantenha a ≤4°C (40°F) até o preparo',
+      postThawImmediateSub: 'Superfície aquece — não guardar cru',
+      postThawFrozenSub: 'Calcule pelo menos 50% a mais de tempo',
+      safeTempTitle: 'Temperatura Interna Segura USDA',
+      refreezeTitle: 'Pode Recongelar?',
+      refreezeFridgeYes: 'Sim (Cru ou Cozido)',
+      refreezeCookFirst: 'Somente APÓS Cozinhar',
+      refreezeFrozenNA: 'Cozinhe Primeiro, Depois Congele Sobras',
+      waterChangesTitle: 'Trocas de Água (30 min)',
+      waterChangesValue: '{count} trocas',
+      waterChangesSub: 'Troque por água fria da torneira a cada 30 min'
+    },
+    cutNoteHeading: 'Dica USDA para Este Corte',
+    checklistHeading: 'Checklist de Segurança Passo a Passo',
+    checklistSub: 'Marque cada etapa conforme prepara a carne com segurança.',
+    dangerZoneBannerTitle: 'NUNCA Descongele na Bancada ou em Água Quente',
+    dangerZoneBannerBody: 'Mais de 2 horas na Zona de Perigo (4°C–60°C / 40°F–140°F) faz Salmonella e E. coli se multiplicarem rapidamente na camada externa enquanto o miolo ainda está congelado.',
+    checklists: {
+      fridge: [
+        'Confirme que sua geladeira está a 4°C (40°F) ou menos.',
+        'Coloque a carne congelada em uma assadeira na PRATELEIRA INFERIOR para evitar que sucos escorram em outros alimentos.',
+        'Mantenha na embalagem original (EXCETO peixe a vácuo: abra ou retire do saco antes de descongelar).',
+        'Após descongelar, cozinhe dentro de {window} ou recongele com segurança sem cozinhar.'
+      ],
+      coldWater: [
+        'Vede a carne em saco plástico sem vazamentos (para peixe a vácuo, tire da embalagem a vácuo e deixe ar dentro do novo saco).',
+        'Submerja totalmente em água FRIA da torneira (nunca morna ou quente). Use um prato por cima se boiar.',
+        'Ajuste um alarme de 30 minutos e troque por água fria nova a cada 30 min (~{changes} trocas no total).',
+        'Cozinhe IMEDIATAMENTE ao concluir — não guarde cru nem recongele antes de cozinhar.'
+      ],
+      microwave: [
+        'Retire bandejas de isopor, plásticos comuns e grampos metálicos; use um refratário próprio para micro-ondas.',
+        'Use a função Descongelar (30% de potência) por ~{mins} minutos no total, virando na metade.',
+        'Separe as peças e evite que as bordas comecem a cozinhar antes do centro.',
+        'Leve ao forno, fogão ou grelha IMEDIATAMENTE após sair do micro-ondas.'
+      ],
+      cookFrozen: [
+        'Retire todas as embalagens e absorventes (em aves inteiras, remova o saco de miúdos assim que soltar no meio do assado).',
+        'Calcule +50% a mais de tempo de cozimento em relação à carne descongelada.',
+        'Use forno (≥163°C), fogão, air fryer ou panela de pressão — NUNCA panela elétrica lenta (slow cooker).',
+        'Confirme a temperatura interna segura de {temp} com termômetro culinário.'
+      ]
+    },
+    comparisonTitle: 'Comparação de Todos os Métodos para Este Peso',
+    comparisonSub: 'Clique em qualquer linha para alternar o método.',
+    comparisonHeaders: ['Método', 'Tempo Estimado', 'Começar Até', 'Regra Pós-Descongelar'],
+    comparisonNotes: {
+      fridge: '{min}–{max} dias na geladeira',
+      coldWater: 'Cozinhar já ({changes} trocas de água)',
+      microwaveOk: 'Cozinhar já (30% potência)',
+      microwaveNotRec: 'Não recomendado (> {max} lb)',
+      cookFrozen: 'Cozinhar direto (+50% tempo)'
+    },
+    refreezeBtnLabel: 'Pode Recongelar Carne Descongelada?',
+    copyBtn: 'Copiar Cronograma',
+    copiedBtn: 'Copiado ✓',
+    resetBtn: 'Redefinir',
+    units: {
+      day: 'dia',
+      days: 'dias',
+      hr: 'h',
+      hrs: 'h',
+      min: 'min',
+      mins: 'min',
+      approxPrefix: '~',
+      cookTimePlus50: '+50% cozimento',
+      startNowOrSwitch: 'Comece já ou troque o método'
+    }
+  },
+  'zh-cn': {
+    localeCode: 'zh-CN',
+    step1Title: '1. 选择肉类部位与重量',
+    quickPresetsLabel: '常用快捷预设：',
+    selectCutLabel: '肉类 / 禽类 / 海鲜部位',
+    weightLabel: '冷冻重量',
+    unitLbs: '磅 (lbs)',
+    unitKg: '公斤 (kg)',
+    step2Title: '2. 计划烹饪时间与解冻方式',
+    targetCookLabel: '你计划何时开始下锅烹饪？',
+    targetCookHint: '默认设为 4 天后，方便提前规划整只火鸡、炖烤大肉块或周末聚餐。',
+    methodLabel: '选择 USDA 认可的安全解冻方式',
+    methods: {
+      fridge: { title: '冰箱冷藏解冻', badge: '最安全', sub: '≤4°C (40°F) · 首选推荐' },
+      'cold-water': { title: '冷水浸泡解冻', badge: '较快', sub: '每磅约 30 分钟 · 每30分钟换水' },
+      microwave: { title: '微波炉解冻', badge: '应急', sub: '30% 火力 · 解冻后须立即烹饪' },
+      'cook-frozen': { title: '冷冻直接烹饪', badge: '免解冻', sub: '烹调时间 +50% · 禁用慢炖锅' }
+    },
+    dashboardBadge: 'USDA FSIS 实时安全解冻计划',
+    startThawingByLabel: '最晚开始解冻时间',
+    totalThawDurationLabel: '预计解冻总时长',
+    cookDirectlyText: '直接开始烹饪',
+    noThawNeededDuration: '0 分钟解冻（烹饪时间 +50%）',
+    notRecommendedDuration: '不推荐（体积过大）',
+    tooLateWarning: '距离计划开火时间已不够冰箱冷藏解冻！请立刻切换为「冷水浸泡解冻」或「冷冻直接烹饪」。',
+    microwaveBlockedWarning: 'USDA 警示：该部位/重量过大或过厚，家用微波炉无法均匀解冻。请改用冰箱冷藏解冻、冷水浸泡或冷冻直烹。',
+    botulismBannerTitle: 'FDA/USDA 海鲜关键警示 — 肉毒梭菌（Botulism）风险',
+    botulismBannerBody: '解冻真空包装（减氧包装）鱼类前，务必先剪开并取出真空袋！无氧密封状态下解冻，即使在冰箱冷藏室也可能产生致命肉毒毒素（Clostridium botulinum）。',
+    statusPills: {
+      fridge: '最安全方式 — 强烈推荐 ✅',
+      coldWater: '快速解冻 — 须立即烹饪 ⚡',
+      microwave: '微波应急 — 须立即烹饪 ⏱️',
+      cookFrozen: '免解冻直烹 — 烹饪时间 +50% 🔥',
+      tooLate: '冷藏已来不及 — 请切换方式 ⚠️',
+      notRecommended: '该重量不建议微波解冻 ❌'
+    },
+    metrics: {
+      postThawTitle: '解冻后冷藏可放时间',
+      postThawFridgeValue: '解冻后再存 {min}–{max} 天',
+      postThawImmediateValue: '必须立即烹饪！',
+      postThawFrozenValue: '直接入烤箱 / 炒锅',
+      postThawFridgeSub: '保持在 ≤4°C (40°F) 冷藏室',
+      postThawImmediateSub: '表层已微温 — 不可生肉回放冷藏',
+      postThawFrozenSub: '烹饪时长至少比常规增加 50%',
+      safeTempTitle: 'USDA 安全中心熟度温度',
+      refreezeTitle: '解冻后能否复冻？',
+      refreezeFridgeYes: '可以（生肉或熟肉皆可）',
+      refreezeCookFirst: '必须先煮熟后才能复冻',
+      refreezeFrozenNA: '煮熟后剩菜可冷冻保存',
+      waterChangesTitle: '每 30 分钟换水次数',
+      waterChangesValue: '共约 {count} 次换水',
+      waterChangesSub: '每隔 30 分钟倒掉旧水换新冷自来水'
+    },
+    cutNoteHeading: 'USDA 针对此部位的解冻要点',
+    checklistHeading: 'USDA 分步安全操作清单',
+    checklistSub: '勾选每一步，确保全程避开细菌危险温区。',
+    dangerZoneBannerTitle: '严禁常温台面解冻或热水泡肉',
+    dangerZoneBannerBody: '肉类在 4°C–60°C（40°F–140°F）细菌危险温区放置超过 2 小时，即使中心还是冰块，外层沙门氏菌与大肠杆菌也会呈指数级繁殖。',
+    checklists: {
+      fridge: [
+        '确认冰箱冷藏室温度设定在 4°C (40°F) 或以下。',
+        '将冻肉放入带边缘的接水盘，置于冷藏室「最底层」，防止血水滴落污染熟食蔬果。',
+        '保留原包装解冻（真空包装鱼类除外：解冻前务必先拆开真空袋！）。',
+        '完全解冻后请在 {window} 内烹调，或未经烹饪直接安全复冻。'
+      ],
+      coldWater: [
+        '将肉装入不漏水的密封袋（真空鱼肉需先取出原真空袋，换入留有空气的普通密封袋）。',
+        '完全浸没在冷自来水中（切勿用温水或热水），若浮起可用盘子压住。',
+        '设定 30 分钟闹钟：每隔 30 分钟彻底换一次新冷水（全程约需换水 {changes} 次）。',
+        '解冻完成后必须「立即烹饪」——切勿生肉放回冰箱或直接复冻。'
+      ],
+      microwave: [
+        '拆掉泡沫托盘、金属封口与非微波适用保鲜膜，换入微波专用深盘。',
+        '选择解冻档（约 30% 火力）总共约 {mins} 分钟，中途翻面并旋转受热。',
+        '尽早将粘连肉块掰开，避免边缘提前变熟而中心仍结冰。',
+        '微波一停必须「立即下锅」——局部温热区域极易迅速进入细菌危险温区。'
+      ],
+      cookFrozen: [
+        '烹调前去除所有塑料包装与吸水垫（整鸡/火鸡烤至中途腹腔化开后取出内脏袋）。',
+        '总烹饪时间按解冻肉配方延长至少 +50%（例如原需 60 分钟则预计 90 分钟）。',
+        '可使用烤箱（≥163°C）、炒锅、空气炸锅或高压锅——严禁用慢炖锅直接炖冻生肉。',
+        '出锅前用食品温度计插入最厚中心，确保达到 {temp}。'
+      ]
+    },
+    comparisonTitle: '当前重量下四种解冻方式横向对比',
+    comparisonSub: '点击任意一行即可快速切换解冻方案。',
+    comparisonHeaders: ['解冻方式', '预计耗时', '最晚开始时间', '解冻后规则'],
+    comparisonNotes: {
+      fridge: '解冻后可再冷藏 {min}–{max} 天',
+      coldWater: '须立即烹饪（约换水 {changes} 次）',
+      microwaveOk: '须立即烹饪（30% 火力）',
+      microwaveNotRec: '不推荐（超过 {max} 磅）',
+      cookFrozen: '直接烹调（时间 +50%）'
+    },
+    refreezeBtnLabel: '解冻后的肉还能再次冷冻吗？',
+    copyBtn: '复制解冻时间表',
+    copiedBtn: '已复制到剪贴板 ✓',
+    resetBtn: '重置',
+    units: {
+      day: '天',
+      days: '天',
+      hr: '小时',
+      hrs: '小时',
+      min: '分钟',
+      mins: '分钟',
+      approxPrefix: '约 ',
+      cookTimePlus50: '烹饪时间 +50%',
+      startNowOrSwitch: '请立即开始或换其他方式'
+    }
+  },
+  ja: {
+    localeCode: 'ja-JP',
+    step1Title: '1. 肉の種類と重量を選択',
+    quickPresetsLabel: '定番プリセット：',
+    selectCutLabel: '肉・鶏肉・魚介の部位',
+    weightLabel: '冷凍重量',
+    unitLbs: 'ポンド (lb)',
+    unitKg: 'キロ (kg)',
+    step2Title: '2. 調理予定日時と解凍方法',
+    targetCookLabel: 'いつ調理を開始する予定ですか？',
+    targetCookHint: '初期設定は4日後です。塊肉や七面鳥の逆算スケジュールに便利です。',
+    methodLabel: 'USDA推奨の安全な解凍方法を選択',
+    methods: {
+      fridge: { title: '冷蔵庫解凍', badge: '最も安全', sub: '4°C以下 · おすすめ' },
+      'cold-water': { title: '冷水解凍', badge: '時短', sub: '30分/lb · 30分ごとに水交換' },
+      microwave: { title: '電子レンジ解凍', badge: '急ぎ', sub: '解凍モード · 即加熱必須' },
+      'cook-frozen': { title: '凍ったまま調理', badge: '解凍不要', sub: '加熱時間+50% · スロークッカー不可' }
+    },
+    dashboardBadge: 'USDA FSIS 安全解凍スケジュール',
+    startThawingByLabel: '解凍開始の目安（この日時までに開始）',
+    totalThawDurationLabel: '解凍所要時間の目安',
+    cookDirectlyText: 'そのまま調理を開始',
+    noThawNeededDuration: '解凍0分（加熱時間+50%）',
+    notRecommendedDuration: '非推奨（サイズが大きすぎます）',
+    tooLateWarning: '調理予定時刻まで冷蔵庫解凍の時間が足りません！「冷水解凍」または「凍ったまま調理」に切り替えてください。',
+    microwaveBlockedWarning: 'USDA警告：この部位・重量は家庭用電子レンジでは均一に解凍できません。冷蔵庫解凍・冷水解凍・凍ったまま調理をご利用ください。',
+    botulismBannerTitle: '【FDA/USDA 重要警告】真空パック魚介のボツリヌス菌リスク',
+    botulismBannerBody: '真空パック（脱酸素包装）の魚は、冷蔵庫・冷水のいずれでも解凍前に必ず開封して袋から出してください。無酸素状態のまま解凍すると低温下でもボツリヌス菌毒素が発生する恐れがあります。',
+    statusPills: {
+      fridge: '最も安全な方法 — 推奨 ✅',
+      coldWater: '時短解凍 — 解凍後すぐ加熱 ⚡',
+      microwave: '電子レンジ — 解凍後すぐ加熱 ⏱️',
+      cookFrozen: '解凍不要 — 加熱時間 +50% 🔥',
+      tooLate: '開始目安を過ぎています — 方法変更推奨 ⚠️',
+      notRecommended: 'このサイズでは非推奨 ❌'
+    },
+    metrics: {
+      postThawTitle: '解凍後の冷蔵保存期限',
+      postThawFridgeValue: '解凍後 {min}〜{max} 日以内',
+      postThawImmediateValue: '直ちに加熱調理！',
+      postThawFrozenValue: 'そのままオーブン・鍋へ',
+      postThawFridgeSub: '4°C以下の冷蔵庫で保管してください',
+      postThawImmediateSub: '表面温度が上がるため生保存不可',
+      postThawFrozenSub: '通常より50%長く加熱してください',
+      safeTempTitle: 'USDA 安全中心温度',
+      refreezeTitle: '再冷凍は可能？',
+      refreezeFridgeYes: '可（生・加熱後どちらも）',
+      refreezeCookFirst: '加熱調理後のみ可',
+      refreezeFrozenNA: '加熱後の残り物は冷凍可',
+      waterChangesTitle: '30分ごとの水交換回数',
+      waterChangesValue: '約 {count} 回交換',
+      waterChangesSub: '30分ごとに冷たい水道水へ入れ替え'
+    },
+    cutNoteHeading: 'この部位のUSDA解凍ポイント',
+    checklistHeading: 'USDA 安全解凍ステップ・チェックリスト',
+    checklistSub: '各手順をタップして安全確認を進められます。',
+    dangerZoneBannerTitle: '常温（キッチン台）やお湯での解凍は絶対NG',
+    dangerZoneBannerBody: '4°C〜60°C（危険温度帯）に2時間以上置かれると、中心が凍っていても表面でサルモネラ菌や大腸菌が急激に増殖します。',
+    checklists: {
+      fridge: [
+        '冷蔵庫の温度が 4°C（40°F）以下であることを確認します。',
+        'ドリップが他の食品に垂れないよう、深めのトレーに乗せて冷蔵庫の「最下段」に置きます。',
+        '包装のまま解凍します（※真空パックの魚のみ例外：解凍前に必ず開封してください）。',
+        '解凍完了後は {window} 以内に加熱するか、加熱せずにそのまま再冷凍できます。'
+      ],
+      coldWater: [
+        '水漏れしないジッパー袋に入れます（真空パックの魚は袋から出し、空気を残した袋に移します）。',
+        '冷たい水道水に完全に浸します（ぬるま湯・お湯は厳禁）。浮く場合は皿で重しをします。',
+        '30分タイマーをかけ、30分ごとに新しい冷水に全量交換します（計約 {changes} 回）。',
+        '解凍後「直ちに加熱調理」してください。生のまま冷蔵保存・再冷凍はできません。'
+      ],
+      microwave: [
+        '発泡トレー・金属留め具・非対応ラップを外し、耐熱容器に移します。',
+        '解凍モード（出力約30%）で合計約 {mins} 分加熱し、途中で裏返し・向き替えを行います。',
+        '端が煮えないよう途中でほぐしながら均一に解凍します。',
+        '解凍後は一部が温まっているため、直ちにオーブン・フライパン等で完全に火を通してください。'
+      ],
+      cookFrozen: [
+        'ラップやドリップシートを全て外します（丸鶏・七面鳥は途中で内部が緩んだら内臓袋を除去）。',
+        '解凍済みのレシピより「+50%（1.5倍）」の加熱時間を確保してください。',
+        'オーブン（163°C以上）・フライパン・圧力鍋を使用（スロークッカーでの冷凍調理は厳禁）。',
+        '調理用温度計で中心部が {temp} に達したことを確認してからお召し上がりください。'
+      ]
+    },
+    comparisonTitle: 'この重量での全4解凍方法の比較表',
+    comparisonSub: '行をクリックすると解凍方法を切り替えられます。',
+    comparisonHeaders: ['解凍方法', '所要時間の目安', '開始目安', '解凍後のルール'],
+    comparisonNotes: {
+      fridge: '解凍後 {min}〜{max} 日冷蔵可',
+      coldWater: '即加熱（水交換 約{changes}回）',
+      microwaveOk: '即加熱（解凍モード30%）',
+      microwaveNotRec: '非推奨（{max} lb超）',
+      cookFrozen: 'そのまま調理（時間+50%）'
+    },
+    refreezeBtnLabel: '解凍した肉は再冷凍できる？',
+    copyBtn: 'スケジュールをコピー',
+    copiedBtn: 'コピーしました ✓',
+    resetBtn: 'リセット',
+    units: {
+      day: '日',
+      days: '日',
+      hr: '時間',
+      hrs: '時間',
+      min: '分',
+      mins: '分',
+      approxPrefix: '約',
+      cookTimePlus50: '調理時間+50%',
+      startNowOrSwitch: '今すぐ開始または方法変更'
+    }
+  }
+};
+
+const t = UI[lang] || UI.en;
+const initialCut = localizedCuts[0];
+
+const clientPayload = {
+  lang,
+  defaultUnit,
+  cuts: localizedCuts,
+  presets: localizedPresets,
+  ui: t
+};
+---
+
+<section
+  id="meat-thawing-calculator"
+  class="bg-canvas border border-hairline rounded-2xl shadow-sm overflow-hidden"
+  aria-label={t.dashboardBadge}
+>
+  <script
+    type="application/json"
+    id="mtc-payload"
+    is:inline
+    set:html={JSON.stringify(clientPayload)}
+  />
+
+  <!-- Top Quick Presets Strip -->
+  <div class="bg-surface-soft border-b border-hairline px-5 py-4">
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+      <span class="text-xs font-bold uppercase tracking-wider text-muted">
+        {t.quickPresetsLabel}
+      </span>
+      <button
+        type="button"
+        id="mtc-reset-btn"
+        class="text-xs font-semibold text-link hover:text-link-active underline cursor-pointer"
+      >
+        {t.resetBtn}
+      </button>
+    </div>
+    <div class="flex flex-wrap gap-2" role="group" aria-label={t.quickPresetsLabel}>
+      {localizedPresets.map((preset, idx) => (
+        <button
+          type="button"
+          data-mtc-preset-cut={preset.cutId}
+          data-mtc-preset-lbs={preset.weightLbs}
+          class={`mtc-preset-btn px-3 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
+            idx === 0
+              ? 'bg-primary text-on-primary border-primary shadow-xs'
+              : 'bg-canvas text-ink border-hairline hover:border-signature-coral'
+          }`}
+        >
+          {preset.label}
+        </button>
+      ))}
+    </div>
+  </div>
+
+  <!-- Main 2-Column Calculator Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-hairline">
+    <!-- Left Column: Controls -->
+    <div class="lg:col-span-5 p-5 md:p-6 space-y-6 bg-canvas">
+      <!-- Step 1: Cut & Weight -->
+      <div class="space-y-4">
+        <h2 class="text-title-sm font-semibold text-ink tracking-tight">
+          {t.step1Title}
+        </h2>
+
+        <!-- Cut Selector -->
+        <div>
+          <label for="mtc-cut-select" class="block text-xs font-semibold text-muted mb-1.5">
+            {t.selectCutLabel}
+          </label>
+          <select
+            id="mtc-cut-select"
+            class="w-full px-3.5 py-2.5 rounded-xl border border-hairline bg-canvas text-ink text-sm font-medium focus:outline-none focus:border-signature-coral cursor-pointer"
+          >
+            {localizedCuts.map((cut) => (
+              <option value={cut.id} selected={cut.id === initialCut.id}>
+                {cut.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <!-- Weight Input + Unit Toggle + Slider -->
+        <div class="p-4 rounded-xl bg-surface-soft border border-hairline space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <label for="mtc-weight-input" class="text-xs font-semibold text-ink">
+              {t.weightLabel}
+            </label>
+            <div class="inline-flex rounded-lg border border-hairline bg-canvas p-0.5" role="group" aria-label="Weight unit">
+              <button
+                type="button"
+                data-mtc-unit="lbs"
+                aria-pressed={defaultUnit === 'lbs' ? 'true' : 'false'}
+                class={`mtc-unit-btn px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                  defaultUnit === 'lbs'
+                    ? 'bg-primary text-on-primary'
+                    : 'text-body hover:text-ink'
+                }`}
+              >
+                {t.unitLbs}
+              </button>
+              <button
+                type="button"
+                data-mtc-unit="kg"
+                aria-pressed={defaultUnit === 'kg' ? 'true' : 'false'}
+                class={`mtc-unit-btn px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                  defaultUnit === 'kg'
+                    ? 'bg-primary text-on-primary'
+                    : 'text-body hover:text-ink'
+                }`}
+              >
+                {t.unitKg}
+              </button>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <input
+              type="number"
+              id="mtc-weight-input"
+              min="8"
+              max="24"
+              step="0.5"
+              value="16"
+              class="w-28 px-3 py-2 rounded-lg border border-hairline bg-canvas text-ink text-base font-bold text-center focus:outline-none focus:border-signature-coral"
+            />
+            <span id="mtc-weight-secondary" class="text-xs font-medium text-muted">
+              = 7.3 kg
+            </span>
+          </div>
+
+          <div>
+            <input
+              type="range"
+              id="mtc-weight-slider"
+              min="8"
+              max="24"
+              step="0.5"
+              value="16"
+              aria-label={t.weightLabel}
+              class="w-full accent-signature-coral cursor-pointer"
+            />
+            <div class="flex justify-between text-[11px] text-muted mt-1">
+              <span id="mtc-weight-min">8 lbs</span>
+              <span id="mtc-weight-mid">16 lbs</span>
+              <span id="mtc-weight-max">24 lbs</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Target Date & Method -->
+      <div class="space-y-4 pt-2 border-t border-hairline">
+        <h2 class="text-title-sm font-semibold text-ink tracking-tight">
+          {t.step2Title}
+        </h2>
+
+        <!-- Target Cook Date & Time -->
+        <div>
+          <label for="mtc-cook-datetime" class="block text-xs font-semibold text-muted mb-1.5">
+            {t.targetCookLabel}
+          </label>
+          <input
+            type="datetime-local"
+            id="mtc-cook-datetime"
+            class="w-full px-3.5 py-2.5 rounded-xl border border-hairline bg-canvas text-ink text-sm font-medium focus:outline-none focus:border-signature-coral"
+          />
+          <p class="text-[11.5px] text-muted mt-1.5 leading-snug">
+            {t.targetCookHint}
+          </p>
+        </div>
+
+        <!-- Method Selector -->
+        <div>
+          <span class="block text-xs font-semibold text-muted mb-2">
+            {t.methodLabel}
+          </span>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5" role="group" aria-label={t.methodLabel}>
+            {(['fridge', 'cold-water', 'microwave', 'cook-frozen'] as MethodKey[]).map((mKey) => {
+              const meta = t.methods[mKey];
+              const isDefault = mKey === 'fridge';
+              return (
+                <button
+                  type="button"
+                  data-mtc-method={mKey}
+                  aria-pressed={isDefault ? 'true' : 'false'}
+                  class={`mtc-method-btn text-left p-3 rounded-xl border transition-all cursor-pointer ${
+                    isDefault
+                      ? 'bg-primary text-on-primary border-primary shadow-xs'
+                      : 'bg-canvas text-ink border-hairline hover:border-signature-coral'
+                  }`}
+                >
+                  <div class="flex items-center justify-between gap-1.5 mb-0.5">
+                    <span class="text-xs font-bold">{meta.title}</span>
+                    <span
+                      class={`mtc-method-badge px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                        isDefault
+                          ? 'bg-white/20 text-white'
+                          : 'bg-surface-soft text-muted border border-hairline'
+                      }`}
+                    >
+                      {meta.badge}
+                    </span>
+                  </div>
+                  <div class={`mtc-method-sub text-[11px] leading-tight ${isDefault ? 'opacity-85' : 'text-muted'}`}>
+                    {meta.sub}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      <!-- Permanent Countertop Danger Zone Warning -->
+      <div class="p-4 rounded-xl bg-error-bg border border-error-border/70">
+        <div class="text-xs font-extrabold text-error uppercase tracking-wide mb-1">
+          ⛔ {t.dangerZoneBannerTitle}
+        </div>
+        <p class="text-[12.5px] text-body leading-relaxed">
+          {t.dangerZoneBannerBody}
+        </p>
+      </div>
+    </div>
+
+    <!-- Right Column: Live Dashboard Output -->
+    <div class="lg:col-span-7 p-5 md:p-6 space-y-5 bg-surface-soft/40">
+      <!-- Prominent Hero Callout Banner -->
+      <div id="mtc-hero-banner" class="p-5 rounded-2xl border-2 bg-emerald-50 border-emerald-500 transition-colors">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <span
+            id="mtc-status-pill"
+            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold tracking-wide bg-emerald-600 text-white"
+          >
+            {t.statusPills.fridge}
+          </span>
+          <span id="mtc-selected-summary" class="text-xs font-bold text-ink">
+            {initialCut.name} · 16 lbs (7.3 kg)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="p-3.5 rounded-xl bg-canvas border border-hairline/80">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-muted mb-1">
+              {t.startThawingByLabel}
+            </div>
+            <div id="mtc-start-by" class="text-lg md:text-xl font-bold text-ink leading-tight">
+              —
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-canvas border border-hairline/80">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-muted mb-1">
+              {t.totalThawDurationLabel}
+            </div>
+            <div id="mtc-duration" class="text-lg md:text-xl font-bold text-ink leading-tight">
+              3–4 days (77–96 hrs)
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Urgent Alert (Too Late or Microwave Blocked) -->
+        <div id="mtc-alert-box" class="hidden mt-3.5 p-3 rounded-xl bg-canvas/90 border border-error-border text-[13px] font-semibold text-error leading-snug">
+        </div>
+      </div>
+
+      <!-- Conditional Critical Seafood Vacuum-Seal Botulism Alert -->
+      <div id="mtc-botulism-box" class="hidden p-4 rounded-xl bg-error-bg border-2 border-error text-ink">
+        <div class="text-xs font-extrabold text-error uppercase tracking-wide mb-1">
+          ⚠️ {t.botulismBannerTitle}
+        </div>
+        <p class="text-[13px] text-body leading-relaxed">
+          {t.botulismBannerBody}
+        </p>
+      </div>
+
+      <!-- 3 Key USDA Safety Metrics -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="p-3.5 rounded-xl bg-canvas border border-hairline">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-muted mb-1">
+            {t.metrics.postThawTitle}
+          </div>
+          <div id="mtc-post-thaw-val" class="text-sm font-bold text-ink leading-snug">
+            1–2 days after thawed
+          </div>
+          <div id="mtc-post-thaw-sub" class="text-[11.5px] text-muted mt-1 leading-snug">
+            {t.metrics.postThawFridgeSub}
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-canvas border border-hairline">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-muted mb-1">
+            {t.metrics.safeTempTitle}
+          </div>
+          <div id="mtc-safe-temp-val" class="text-sm font-bold text-signature-coral leading-snug">
+            {initialCut.safeTempLabel}
+          </div>
+          <div id="mtc-temp-loc-sub" class="text-[11.5px] text-muted mt-1 leading-snug">
+            {initialCut.tempCheckLocation}
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-canvas border border-hairline">
+          <div id="mtc-third-card-title" class="text-[11px] font-bold uppercase tracking-wider text-muted mb-1">
+            {t.metrics.refreezeTitle}
+          </div>
+          <div id="mtc-third-card-val" class="text-sm font-bold text-ink leading-snug">
+            {t.metrics.refreezeFridgeYes}
+          </div>
+          <div id="mtc-third-card-sub" class="text-[11.5px] text-muted mt-1 leading-snug">
+            USDA FSIS
+          </div>
+        </div>
+      </div>
+
+      <!-- Cut-Specific USDA Note -->
+      <div class="p-4 rounded-xl bg-canvas border border-hairline">
+        <div class="text-xs font-bold uppercase tracking-wider text-signature-coral mb-1">
+          {t.cutNoteHeading}
+        </div>
+        <p id="mtc-cut-note" class="text-[13.5px] text-body leading-relaxed">
+          {initialCut.cutNote}
+        </p>
+      </div>
+
+      <!-- Step-by-Step Safety Checklist -->
+      <div class="p-4 rounded-xl bg-canvas border border-hairline space-y-2.5">
+        <div>
+          <h3 class="text-sm font-bold text-ink">
+            {t.checklistHeading}
+          </h3>
+          <p class="text-[12px] text-muted">
+            {t.checklistSub}
+          </p>
+        </div>
+        <div id="mtc-checklist" class="space-y-2 pt-1"></div>
+      </div>
+
+      <!-- All-Method Side-by-Side Comparison Table -->
+      <div class="rounded-xl bg-canvas border border-hairline overflow-hidden">
+        <div class="px-4 py-3 bg-surface-soft border-b border-hairline">
+          <h3 class="text-sm font-bold text-ink">
+            {t.comparisonTitle}
+          </h3>
+          <p class="text-[12px] text-muted">
+            {t.comparisonSub}
+          </p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs md:text-[13px]">
+            <thead class="bg-surface-strong/60 border-b border-hairline text-ink font-semibold">
+              <tr>
+                <th class="p-3">{t.comparisonHeaders[0]}</th>
+                <th class="p-3">{t.comparisonHeaders[1]}</th>
+                <th class="p-3">{t.comparisonHeaders[2]}</th>
+                <th class="p-3">{t.comparisonHeaders[3]}</th>
+              </tr>
+            </thead>
+            <tbody id="mtc-comparison-tbody" class="divide-y divide-hairline"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Bottom Action Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+        <a
+          href={refreezeUrl}
+          class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-primary text-on-primary hover:bg-primary-active transition-colors"
+        >
+          <span>{t.refreezeBtnLabel}</span>
+          <span aria-hidden="true">&rarr;</span>
+        </a>
+
+        <button
+          type="button"
+          id="mtc-copy-btn"
+          class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors cursor-pointer"
+        >
+          <span id="mtc-copy-label">{t.copyBtn}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  (function () {
+    const payloadEl = document.getElementById('mtc-payload');
+    if (!payloadEl) return;
+
+    let payload;
+    try {
+      payload = JSON.parse(payloadEl.textContent || '{}');
+    } catch (_) {
+      return;
+    }
+
+    const cuts = payload.cuts || [];
+    const ui = payload.ui || {};
+    const byId = new Map(cuts.map((c) => [c.id, c]));
+    if (!cuts.length) return;
+
+    const LBS_TO_KG = 0.45359237;
+
+    const cutSelect = document.getElementById('mtc-cut-select');
+    const weightInput = document.getElementById('mtc-weight-input');
+    const weightSlider = document.getElementById('mtc-weight-slider');
+    const weightSecondary = document.getElementById('mtc-weight-secondary');
+    const weightMinEl = document.getElementById('mtc-weight-min');
+    const weightMidEl = document.getElementById('mtc-weight-mid');
+    const weightMaxEl = document.getElementById('mtc-weight-max');
+    const cookDatetimeInput = document.getElementById('mtc-cook-datetime');
+    const resetBtn = document.getElementById('mtc-reset-btn');
+    const copyBtn = document.getElementById('mtc-copy-btn');
+    const copyLabel = document.getElementById('mtc-copy-label');
+
+    const presetButtons = Array.from(document.querySelectorAll('.mtc-preset-btn'));
+    const unitButtons = Array.from(document.querySelectorAll('.mtc-unit-btn'));
+    const methodButtons = Array.from(document.querySelectorAll('.mtc-method-btn'));
+
+    const heroBanner = document.getElementById('mtc-hero-banner');
+    const statusPill = document.getElementById('mtc-status-pill');
+    const selectedSummary = document.getElementById('mtc-selected-summary');
+    const startByEl = document.getElementById('mtc-start-by');
+    const durationEl = document.getElementById('mtc-duration');
+    const alertBox = document.getElementById('mtc-alert-box');
+    const botulismBox = document.getElementById('mtc-botulism-box');
+
+    const postThawVal = document.getElementById('mtc-post-thaw-val');
+    const postThawSub = document.getElementById('mtc-post-thaw-sub');
+    const safeTempVal = document.getElementById('mtc-safe-temp-val');
+    const tempLocSub = document.getElementById('mtc-temp-loc-sub');
+    const thirdCardTitle = document.getElementById('mtc-third-card-title');
+    const thirdCardVal = document.getElementById('mtc-third-card-val');
+    const thirdCardSub = document.getElementById('mtc-third-card-sub');
+    const cutNoteEl = document.getElementById('mtc-cut-note');
+    const checklistEl = document.getElementById('mtc-checklist');
+    const compTbody = document.getElementById('mtc-comparison-tbody');
+
+    function toDatetimeLocalValue(dateObj) {
+      const pad = (n) => String(n).padStart(2, '0');
+      return (
+        dateObj.getFullYear() +
+        '-' +
+        pad(dateObj.getMonth() + 1) +
+        '-' +
+        pad(dateObj.getDate()) +
+        'T' +
+        pad(dateObj.getHours()) +
+        ':' +
+        pad(dateObj.getMinutes())
+      );
+    }
+
+    function getDefaultCookDate() {
+      const d = new Date();
+      d.setDate(d.getDate() + 4);
+      d.setHours(12, 0, 0, 0);
+      return d;
+    }
+
+    let state = {
+      cutId: cuts[0].id,
+      weightLbs: cuts[0].defaultLbs,
+      unit: payload.defaultUnit || 'lbs',
+      method: 'fridge',
+      cookDate: getDefaultCookDate()
+    };
+
+    if (cookDatetimeInput) {
+      cookDatetimeInput.value = toDatetimeLocalValue(state.cookDate);
+    }
+
+    function roundTo(val, decimals) {
+      const factor = Math.pow(10, decimals);
+      return Math.round(val * factor) / factor;
+    }
+
+    function formatWeightPair(lbs) {
+      const lbsClean = roundTo(lbs, 2);
+      const kgClean = roundTo(lbs * LBS_TO_KG, 2);
+      return state.unit === 'lbs'
+        ? `${lbsClean} lb (${kgClean} kg)`
+        : `${kgClean} kg (${lbsClean} lb)`;
+    }
+
+    function formatDateShort(dateObj) {
+      try {
+        return new Intl.DateTimeFormat(ui.localeCode || 'en-US', {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit'
+        }).format(dateObj);
+      } catch (_) {
+        return dateObj.toLocaleString();
+      }
+    }
+
+    function formatHoursHuman(hoursMin, hoursMax) {
+      const u = ui.units;
+      if (hoursMax >= 36) {
+        const dMin = roundTo(hoursMin / 24, 1);
+        const dMax = roundTo(hoursMax / 24, 1);
+        const hMinR = Math.round(hoursMin);
+        const hMaxR = Math.round(hoursMax);
+        const dayStr = dMin === dMax ? `${dMax} ${dMax === 1 ? u.day : u.days}` : `${dMin}–${dMax} ${u.days}`;
+        const hrStr = hMinR === hMaxR ? `${hMaxR} ${u.hrs}` : `${hMinR}–${hMaxR} ${u.hrs}`;
+        return `${dayStr} (${hrStr})`;
+      }
+      const hMinR = Math.round(hoursMin);
+      const hMaxR = Math.round(hoursMax);
+      if (hMinR === hMaxR) {
+        return `${hMaxR} ${hMaxR === 1 ? u.hr : u.hrs}`;
+      }
+      return `${hMinR}–${hMaxR} ${u.hrs}`;
+    }
+
+    function formatMinutesHuman(totalMinutes) {
+      const u = ui.units;
+      const minsR = Math.round(totalMinutes);
+      if (minsR < 60) {
+        return `${u.approxPrefix}${minsR} ${minsR === 1 ? u.min : u.mins}`;
+      }
+      const hrs = Math.floor(minsR / 60);
+      const rem = minsR % 60;
+      if (rem === 0) {
+        return `${u.approxPrefix}${hrs} ${hrs === 1 ? u.hr : u.hrs}`;
+      }
+      return `${u.approxPrefix}${hrs} ${hrs === 1 ? u.hr : u.hrs} ${rem} ${u.mins}`;
+    }
+
+    function calcMethodEstimates(cut, weightLbs) {
+      // 1. Refrigerator
+      const fridgeMinHrs = Math.max(cut.fridgeMinHours, weightLbs * cut.fridgeHoursPerLbMin);
+      const fridgeMaxHrs = Math.max(cut.fridgeMinHours, weightLbs * cut.fridgeHoursPerLbMax);
+      const fridgePlanHrs = Math.ceil(fridgeMaxHrs);
+
+      // 2. Cold Water Bath
+      const coldWaterMins = Math.max(cut.coldWaterMinMinutes, Math.round(weightLbs * cut.coldWaterMinPerLb));
+      const waterChanges = Math.max(1, Math.ceil(coldWaterMins / 30));
+
+      // 3. Microwave
+      const microwaveAllowed = cut.microwaveMaxLbs > 0 && weightLbs <= cut.microwaveMaxLbs && cut.microwaveMinPerLb > 0;
+      const microwaveMins = microwaveAllowed ? Math.max(5, Math.round(weightLbs * cut.microwaveMinPerLb)) : 0;
+
+      return {
+        fridgeMinHrs,
+        fridgeMaxHrs,
+        fridgePlanHrs,
+        coldWaterMins,
+        waterChanges,
+        microwaveAllowed,
+        microwaveMins
+      };
+    }
+
+    function syncWeightControls() {
+      const cut = byId.get(state.cutId) || cuts[0];
+      const clampedLbs = Math.min(cut.maxLbs, Math.max(cut.minLbs, state.weightLbs));
+      state.weightLbs = clampedLbs;
+
+      const isKg = state.unit === 'kg';
+      const minDisp = isKg ? roundTo(cut.minLbs * LBS_TO_KG, 2) : cut.minLbs;
+      const maxDisp = isKg ? roundTo(cut.maxLbs * LBS_TO_KG, 2) : cut.maxLbs;
+      const stepDisp = isKg ? 0.1 : cut.stepLbs;
+      const valDisp = isKg ? roundTo(state.weightLbs * LBS_TO_KG, 2) : roundTo(state.weightLbs, 2);
+
+      if (weightInput) {
+        weightInput.min = String(minDisp);
+        weightInput.max = String(maxDisp);
+        weightInput.step = String(stepDisp);
+        weightInput.value = String(valDisp);
+      }
+      if (weightSlider) {
+        weightSlider.min = String(minDisp);
+        weightSlider.max = String(maxDisp);
+        weightSlider.step = String(stepDisp);
+        weightSlider.value = String(valDisp);
+      }
+      if (weightSecondary) {
+        weightSecondary.textContent = isKg
+          ? `= ${roundTo(state.weightLbs, 2)} lbs`
+          : `= ${roundTo(state.weightLbs * LBS_TO_KG, 2)} kg`;
+      }
+      const unitShort = isKg ? 'kg' : 'lbs';
+      if (weightMinEl) weightMinEl.textContent = `${minDisp} ${unitShort}`;
+      if (weightMidEl) weightMidEl.textContent = `${roundTo((minDisp + maxDisp) / 2, 1)} ${unitShort}`;
+      if (weightMaxEl) weightMaxEl.textContent = `${maxDisp} ${unitShort}`;
+    }
+
+    function updateUnitButtons() {
+      unitButtons.forEach((btn) => {
+        const isAct = btn.getAttribute('data-mtc-unit') === state.unit;
+        btn.setAttribute('aria-pressed', isAct ? 'true' : 'false');
+        if (isAct) {
+          btn.classList.add('bg-primary', 'text-on-primary');
+          btn.classList.remove('text-body');
+        } else {
+          btn.classList.remove('bg-primary', 'text-on-primary');
+          btn.classList.add('text-body');
+        }
+      });
+    }
+
+    function updatePresetButtons() {
+      presetButtons.forEach((btn) => {
+        const pCut = btn.getAttribute('data-mtc-preset-cut');
+        const pLbs = parseFloat(btn.getAttribute('data-mtc-preset-lbs') || '0');
+        const isAct = pCut === state.cutId && Math.abs(pLbs - state.weightLbs) < 0.15;
+        if (isAct) {
+          btn.classList.add('bg-primary', 'text-on-primary', 'border-primary', 'shadow-xs');
+          btn.classList.remove('bg-canvas', 'text-ink', 'border-hairline');
+        } else {
+          btn.classList.remove('bg-primary', 'text-on-primary', 'border-primary', 'shadow-xs');
+          btn.classList.add('bg-canvas', 'text-ink', 'border-hairline');
+        }
+      });
+    }
+
+    function updateMethodButtons() {
+      methodButtons.forEach((btn) => {
+        const isAct = btn.getAttribute('data-mtc-method') === state.method;
+        btn.setAttribute('aria-pressed', isAct ? 'true' : 'false');
+        const badge = btn.querySelector('.mtc-method-badge');
+        const sub = btn.querySelector('.mtc-method-sub');
+        if (isAct) {
+          btn.classList.add('bg-primary', 'text-on-primary', 'border-primary', 'shadow-xs');
+          btn.classList.remove('bg-canvas', 'text-ink', 'border-hairline');
+          if (badge) {
+            badge.classList.add('bg-white/20', 'text-white');
+            badge.classList.remove('bg-surface-soft', 'text-muted', 'border', 'border-hairline');
+          }
+          if (sub) {
+            sub.classList.add('opacity-85');
+            sub.classList.remove('text-muted');
+          }
+        } else {
+          btn.classList.remove('bg-primary', 'text-on-primary', 'border-primary', 'shadow-xs');
+          btn.classList.add('bg-canvas', 'text-ink', 'border-hairline');
+          if (badge) {
+            badge.classList.remove('bg-white/20', 'text-white');
+            badge.classList.add('bg-surface-soft', 'text-muted', 'border', 'border-hairline');
+          }
+          if (sub) {
+            sub.classList.remove('opacity-85');
+            sub.classList.add('text-muted');
+          }
+        }
+      });
+    }
+
+    function applyHeroTheme(theme) {
+      if (!heroBanner || !statusPill) return;
+      heroBanner.className = 'p-5 rounded-2xl border-2 transition-colors ';
+      statusPill.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold tracking-wide ';
+      if (theme === 'error') {
+        heroBanner.className += 'bg-red-50 border-red-600';
+        statusPill.className += 'bg-red-600 text-white';
+      } else if (theme === 'warn') {
+        heroBanner.className += 'bg-amber-50 border-amber-500';
+        statusPill.className += 'bg-amber-500 text-slate-950';
+      } else if (theme === 'info') {
+        heroBanner.className += 'bg-blue-50 border-blue-500';
+        statusPill.className += 'bg-blue-600 text-white';
+      } else {
+        heroBanner.className += 'bg-emerald-50 border-emerald-500';
+        statusPill.className += 'bg-emerald-600 text-white';
+      }
+    }
+
+    let lastScheduleSummary = '';
+
+    function render() {
+      const cut = byId.get(state.cutId) || cuts[0];
+      const est = calcMethodEstimates(cut, state.weightLbs);
+      const nowMs = Date.now();
+      const cookMs = state.cookDate ? state.cookDate.getTime() : getDefaultCookDate().getTime();
+
+      if (selectedSummary) {
+        selectedSummary.textContent = `${cut.name} · ${formatWeightPair(state.weightLbs)}`;
+      }
+
+      // Conditional seafood botulism alert
+      if (botulismBox) {
+        if (cut.specialAlertType === 'botulism-fish') {
+          botulismBox.classList.remove('hidden');
+        } else {
+          botulismBox.classList.add('hidden');
+        }
+      }
+
+      // Compute startBy & hero display per method
+      let startByText = '—';
+      let durationText = '—';
+      let heroTheme = 'safe';
+      let pillText = ui.statusPills.fridge;
+      let alertMessage = '';
+
+      const fridgeStartMs = cookMs - est.fridgePlanHrs * 3600000;
+      const coldWaterStartMs = cookMs - est.coldWaterMins * 60000;
+      const microwaveStartMs = est.microwaveAllowed ? cookMs - est.microwaveMins * 60000 : null;
+
+      if (state.method === 'fridge') {
+        durationText = formatHoursHuman(est.fridgeMinHrs, est.fridgeMaxHrs);
+        startByText = formatDateShort(new Date(fridgeStartMs));
+        if (fridgeStartMs < nowMs) {
+          heroTheme = 'warn';
+          pillText = ui.statusPills.tooLate;
+          alertMessage = ui.tooLateWarning;
+        } else {
+          heroTheme = 'safe';
+          pillText = ui.statusPills.fridge;
+        }
+      } else if (state.method === 'cold-water') {
+        durationText = formatMinutesHuman(est.coldWaterMins);
+        startByText = formatDateShort(new Date(coldWaterStartMs));
+        if (coldWaterStartMs < nowMs) {
+          heroTheme = 'warn';
+          pillText = ui.statusPills.tooLate;
+          alertMessage = ui.units.startNowOrSwitch;
+        } else {
+          heroTheme = 'info';
+          pillText = ui.statusPills.coldWater;
+        }
+      } else if (state.method === 'microwave') {
+        if (!est.microwaveAllowed) {
+          durationText = ui.notRecommendedDuration;
+          startByText = '—';
+          heroTheme = 'error';
+          pillText = ui.statusPills.notRecommended;
+          alertMessage = ui.microwaveBlockedWarning;
+        } else {
+          durationText = formatMinutesHuman(est.microwaveMins);
+          startByText = formatDateShort(new Date(microwaveStartMs));
+          heroTheme = 'warn';
+          pillText = ui.statusPills.microwave;
+        }
+      } else {
+        durationText = ui.noThawNeededDuration;
+        startByText = `${ui.cookDirectlyText} (${formatDateShort(new Date(cookMs))})`;
+        heroTheme = 'safe';
+        pillText = ui.statusPills.cookFrozen;
+      }
+
+      applyHeroTheme(heroTheme);
+      if (statusPill) statusPill.textContent = pillText;
+      if (startByEl) startByEl.textContent = startByText;
+      if (durationEl) durationEl.textContent = durationText;
+
+      if (alertBox) {
+        if (alertMessage) {
+          alertBox.textContent = alertMessage;
+          alertBox.classList.remove('hidden');
+        } else {
+          alertBox.textContent = '';
+          alertBox.classList.add('hidden');
+        }
+      }
+
+      // Metric cards
+      const fridgeWindowStr = ui.metrics.postThawFridgeValue
+        .replace('{min}', String(cut.postThawFridgeMinDays))
+        .replace('{max}', String(cut.postThawFridgeMaxDays));
+
+      if (postThawVal && postThawSub) {
+        if (state.method === 'fridge') {
+          postThawVal.textContent = fridgeWindowStr;
+          postThawSub.textContent = ui.metrics.postThawFridgeSub;
+        } else if (state.method === 'cook-frozen') {
+          postThawVal.textContent = ui.metrics.postThawFrozenValue;
+          postThawSub.textContent = ui.metrics.postThawFrozenSub;
+        } else {
+          postThawVal.textContent = ui.metrics.postThawImmediateValue;
+          postThawSub.textContent = ui.metrics.postThawImmediateSub;
+        }
+      }
+
+      if (safeTempVal) safeTempVal.textContent = cut.safeTempLabel;
+      if (tempLocSub) tempLocSub.textContent = cut.tempCheckLocation;
+
+      if (thirdCardTitle && thirdCardVal && thirdCardSub) {
+        if (state.method === 'cold-water') {
+          thirdCardTitle.textContent = ui.metrics.waterChangesTitle;
+          thirdCardVal.textContent = ui.metrics.waterChangesValue.replace('{count}', String(est.waterChanges));
+          thirdCardSub.textContent = ui.metrics.waterChangesSub;
+        } else if (state.method === 'fridge') {
+          thirdCardTitle.textContent = ui.metrics.refreezeTitle;
+          thirdCardVal.textContent = ui.metrics.refreezeFridgeYes;
+          thirdCardSub.textContent = 'USDA FSIS';
+        } else if (state.method === 'cook-frozen') {
+          thirdCardTitle.textContent = ui.metrics.refreezeTitle;
+          thirdCardVal.textContent = ui.metrics.refreezeFrozenNA;
+          thirdCardSub.textContent = ui.units.cookTimePlus50;
+        } else {
+          thirdCardTitle.textContent = ui.metrics.refreezeTitle;
+          thirdCardVal.textContent = ui.metrics.refreezeCookFirst;
+          thirdCardSub.textContent = 'USDA FSIS';
+        }
+      }
+
+      if (cutNoteEl) {
+        cutNoteEl.textContent = state.method === 'cook-frozen' ? cut.cookFromFrozenNote : cut.cutNote;
+      }
+
+      // Checklist
+      if (checklistEl) {
+        checklistEl.innerHTML = '';
+        const listKey =
+          state.method === 'cold-water'
+            ? 'coldWater'
+            : state.method === 'cook-frozen'
+              ? 'cookFrozen'
+              : state.method;
+        const steps = (ui.checklists && ui.checklists[listKey]) || [];
+        steps.forEach((rawStep) => {
+          const text = rawStep
+            .replace('{window}', fridgeWindowStr)
+            .replace('{changes}', String(est.waterChanges))
+            .replace('{mins}', String(est.microwaveMins || 10))
+            .replace('{temp}', cut.safeTempLabel);
+
+          const label = document.createElement('label');
+          label.className = 'flex items-start gap-2.5 text-[13px] text-body leading-relaxed cursor-pointer';
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.className = 'mt-1 w-4 h-4 rounded accent-signature-coral cursor-pointer shrink-0';
+          const span = document.createElement('span');
+          span.textContent = text;
+          label.appendChild(cb);
+          label.appendChild(span);
+          checklistEl.appendChild(label);
+        });
+      }
+
+      // Comparison Table
+      if (compTbody) {
+        compTbody.innerHTML = '';
+        const rows = [
+          {
+            key: 'fridge',
+            name: ui.methods.fridge.title,
+            time: formatHoursHuman(est.fridgeMinHrs, est.fridgeMaxHrs),
+            startBy: formatDateShort(new Date(fridgeStartMs)),
+            note: ui.comparisonNotes.fridge
+              .replace('{min}', String(cut.postThawFridgeMinDays))
+              .replace('{max}', String(cut.postThawFridgeMaxDays))
+          },
+          {
+            key: 'cold-water',
+            name: ui.methods['cold-water'].title,
+            time: formatMinutesHuman(est.coldWaterMins),
+            startBy: formatDateShort(new Date(coldWaterStartMs)),
+            note: ui.comparisonNotes.coldWater.replace('{changes}', String(est.waterChanges))
+          },
+          {
+            key: 'microwave',
+            name: ui.methods.microwave.title,
+            time: est.microwaveAllowed ? formatMinutesHuman(est.microwaveMins) : ui.notRecommendedDuration,
+            startBy: est.microwaveAllowed ? formatDateShort(new Date(microwaveStartMs)) : '—',
+            note: est.microwaveAllowed
+              ? ui.comparisonNotes.microwaveOk
+              : ui.comparisonNotes.microwaveNotRec.replace('{max}', String(cut.microwaveMaxLbs))
+          },
+          {
+            key: 'cook-frozen',
+            name: ui.methods['cook-frozen'].title,
+            time: ui.units.cookTimePlus50,
+            startBy: formatDateShort(new Date(cookMs)),
+            note: ui.comparisonNotes.cookFrozen
+          }
+        ];
+
+        rows.forEach((row) => {
+          const tr = document.createElement('tr');
+          const isAct = row.key === state.method;
+          tr.className = isAct
+            ? 'bg-signature-cream/60 font-semibold text-ink cursor-pointer transition-colors'
+            : 'bg-canvas hover:bg-surface-soft text-body cursor-pointer transition-colors';
+          tr.setAttribute('data-mtc-comp-method', row.key);
+
+          const td1 = document.createElement('td');
+          td1.className = 'p-3 font-semibold text-ink whitespace-nowrap';
+          td1.textContent = isAct ? `● ${row.name}` : row.name;
+
+          const td2 = document.createElement('td');
+          td2.className = 'p-3 whitespace-nowrap';
+          td2.textContent = row.time;
+
+          const td3 = document.createElement('td');
+          td3.className = 'p-3 whitespace-nowrap';
+          td3.textContent = row.startBy;
+
+          const td4 = document.createElement('td');
+          td4.className = 'p-3';
+          td4.textContent = row.note;
+
+          tr.appendChild(td1);
+          tr.appendChild(td2);
+          tr.appendChild(td3);
+          tr.appendChild(td4);
+
+          tr.addEventListener('click', () => {
+            state.method = row.key;
+            updateMethodButtons();
+            render();
+          });
+
+          compTbody.appendChild(tr);
+        });
+      }
+
+      lastScheduleSummary = [
+        `${cut.name} (${formatWeightPair(state.weightLbs)})`,
+        `${ui.methodLabel}: ${ui.methods[state.method].title}`,
+        `${ui.startThawingByLabel}: ${startByText}`,
+        `${ui.totalThawDurationLabel}: ${durationText}`,
+        `${ui.metrics.safeTempTitle}: ${cut.safeTempLabel}`
+      ].join('\n');
+    }
+
+    // Event bindings
+    if (cutSelect) {
+      cutSelect.addEventListener('change', () => {
+        const newCut = byId.get(cutSelect.value);
+        if (!newCut) return;
+        state.cutId = newCut.id;
+        state.weightLbs = newCut.defaultLbs;
+        syncWeightControls();
+        updatePresetButtons();
+        render();
+      });
+    }
+
+    function applyWeightFromDisplay(rawVal) {
+      const parsed = parseFloat(rawVal);
+      if (Number.isNaN(parsed) || parsed <= 0) return;
+      const cut = byId.get(state.cutId) || cuts[0];
+      const lbs = state.unit === 'kg' ? parsed / LBS_TO_KG : parsed;
+      state.weightLbs = Math.min(cut.maxLbs, Math.max(cut.minLbs, lbs));
+      if (weightSecondary) {
+        weightSecondary.textContent =
+          state.unit === 'kg'
+            ? `= ${roundTo(state.weightLbs, 2)} lbs`
+            : `= ${roundTo(state.weightLbs * LBS_TO_KG, 2)} kg`;
+      }
+      updatePresetButtons();
+      render();
+    }
+
+    if (weightSlider) {
+      weightSlider.addEventListener('input', () => {
+        if (weightInput) weightInput.value = weightSlider.value;
+        applyWeightFromDisplay(weightSlider.value);
+      });
+    }
+
+    if (weightInput) {
+      weightInput.addEventListener('input', () => {
+        if (weightSlider) weightSlider.value = weightInput.value;
+        applyWeightFromDisplay(weightInput.value);
+      });
+      weightInput.addEventListener('blur', () => {
+        syncWeightControls();
+        render();
+      });
+    }
+
+    unitButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const nextUnit = btn.getAttribute('data-mtc-unit');
+        if (!nextUnit || nextUnit === state.unit) return;
+        state.unit = nextUnit;
+        updateUnitButtons();
+        syncWeightControls();
+        render();
+      });
+    });
+
+    if (cookDatetimeInput) {
+      cookDatetimeInput.addEventListener('change', () => {
+        const parsed = new Date(cookDatetimeInput.value);
+        if (!Number.isNaN(parsed.getTime())) {
+          state.cookDate = parsed;
+          render();
+        }
+      });
+    }
+
+    methodButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const nextMethod = btn.getAttribute('data-mtc-method');
+        if (!nextMethod) return;
+        state.method = nextMethod;
+        updateMethodButtons();
+        render();
+      });
+    });
+
+    presetButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const pCut = btn.getAttribute('data-mtc-preset-cut');
+        const pLbs = parseFloat(btn.getAttribute('data-mtc-preset-lbs') || '0');
+        if (!pCut || !byId.has(pCut)) return;
+        state.cutId = pCut;
+        state.weightLbs = pLbs;
+        if (cutSelect) cutSelect.value = pCut;
+        syncWeightControls();
+        updatePresetButtons();
+        render();
+      });
+    });
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        state.cutId = cuts[0].id;
+        state.weightLbs = cuts[0].defaultLbs;
+        state.method = 'fridge';
+        state.cookDate = getDefaultCookDate();
+        if (cutSelect) cutSelect.value = state.cutId;
+        if (cookDatetimeInput) cookDatetimeInput.value = toDatetimeLocalValue(state.cookDate);
+        syncWeightControls();
+        updatePresetButtons();
+        updateMethodButtons();
+        render();
+      });
+    }
+
+    if (copyBtn && copyLabel) {
+      copyBtn.addEventListener('click', () => {
+        if (!navigator.clipboard || !lastScheduleSummary) return;
+        navigator.clipboard.writeText(lastScheduleSummary).then(() => {
+          copyLabel.textContent = ui.copiedBtn || 'Copied';
+          setTimeout(() => {
+            copyLabel.textContent = ui.copyBtn || 'Copy';
+          }, 2200);
+        }).catch(() => {});
+      });
+    }
+
+    // Initial mount
+    updateUnitButtons();
+    syncWeightControls();
+    updatePresetButtons();
+    updateMethodButtons();
+    render();
+  })();
+</script>

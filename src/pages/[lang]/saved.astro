@@ -1,0 +1,950 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import type { SupportedLanguage } from '../../i18n/ui';
+import { getApplianceUrl, getDirectoryUrl, useTranslatedPath, useTranslations } from '../../i18n/utils';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+interface QuickLinkItem {
+  label: string;
+  href: string;
+  desc: string;
+}
+
+interface ScriptI18n {
+  dateLocale: string;
+  printedPrefix: string;
+  defaultAppliance: string;
+  defaultItemName: string;
+  allAppliances: string;
+  emptyCategory: string;
+  removeLabelPrefix: string;
+  removeTitle: string;
+  clearAllConfirm: string;
+  applianceLabels: Record<string, string>;
+}
+
+interface LocaleContent {
+  pageTitle: string;
+  pageDescription: string;
+  breadcrumbLabel: string;
+  printHeaderTitle: string;
+  printHeaderSubtitle: string;
+  eyebrow: string;
+  h1: string;
+  introDesc: string;
+  printBtnLabel: string;
+  savedItemsLabel: string;
+  yesCountLabel: string;
+  dependsCountLabel: string;
+  noCountLabel: string;
+  clearAllBtnLabel: string;
+  filterByApplianceLabel: string;
+  filterGroupAria: string;
+  groupYesHeader: string;
+  groupDependsHeader: string;
+  groupNoHeader: string;
+  emptyTitle: string;
+  emptyDescBefore: string;
+  emptyDescButtonName: string;
+  emptyDescAfter: string;
+  exploreLabel: string;
+  tipBannerText: string;
+  tipBannerLink: string;
+  printFooterPrefix: string;
+  printFooterSuffix: string;
+  printFooterStandards: string;
+  quickLinks: {
+    dishwasher: { label: string; desc: string };
+    microwave: { label: string; desc: string };
+    airfryer: { label: string; desc: string };
+    freezer: { label: string; desc: string };
+    symbolDecoder: { label: string; desc: string };
+    methodology: { label: string; desc: string };
+  };
+  scriptI18n: ScriptI18n;
+}
+
+const { lang, availableLocales } = Astro.props;
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocaleContent> = {
+  es: {
+    pageTitle: 'Mi Hoja de Referencia de Seguridad en la Cocina | IsItKitchenSafe',
+    pageDescription:
+      'Consulta, filtra e imprime tu hoja de referencia personalizada de 1 página para la nevera con todas tus guías guardadas de compatibilidad con electrodomésticos.',
+    breadcrumbLabel: 'Hoja Guardada',
+    printHeaderTitle: '✓ Mi Hoja de Seguridad de Cocina para la Nevera',
+    printHeaderSubtitle:
+      'Guía rápida de compatibilidad con electrodomésticos • Verificada con USDA FSIS, FDA 21 CFR y manuales OEM',
+    eyebrow: 'Referencia Personal de Cocina',
+    h1: 'Mi Hoja de Referencia de Seguridad en la Cocina',
+    introDesc:
+      'Cada guía que guardas en IsItKitchenSafe se almacena de forma privada en tu navegador. Filtra por electrodoméstico o imprime una hoja limpia de 1 página para colocar en tu nevera.',
+    printBtnLabel: 'Imprimir Hoja de 1 Página para la Nevera',
+    savedItemsLabel: 'Artículos guardados:',
+    yesCountLabel: '✓ SÍ:',
+    dependsCountLabel: '⚠ DEPENDE:',
+    noCountLabel: '✗ NO:',
+    clearAllBtnLabel: 'Borrar Todo',
+    filterByApplianceLabel: 'Filtrar por electrodoméstico:',
+    filterGroupAria: 'Filtrar artículos guardados por electrodoméstico',
+    groupYesHeader: '✓ SÍ — SEGURO',
+    groupDependsHeader: '⚠ DEPENDE — CON CUIDADO',
+    groupNoHeader: '✗ NO — EVITAR',
+    emptyTitle: 'Tu Hoja de Referencia Está Vacía',
+    emptyDescBefore: 'Haz clic en ',
+    emptyDescButtonName: '«Guardar Guía»',
+    emptyDescAfter:
+      ' en cualquier ficha de seguridad para fijarla aquí. Cuando guardes los utensilios, botellas y recipientes habituales de tu hogar, pulsa imprimir para crear tu hoja de 1 página para la nevera.',
+    exploreLabel: 'Explorar',
+    tipBannerText:
+      'Las guías guardadas permanecen de forma local en este dispositivo mediante el almacenamiento del navegador (sin necesidad de cuenta). ¿Quieres saber cómo verificamos cada veredicto?',
+    tipBannerLink: 'Lee nuestra Metodología de Verificación',
+    printFooterPrefix: 'Generado en ',
+    printFooterSuffix: ' • Verifica siempre los símbolos grabados del fabricante antes de calentar.',
+    printFooterStandards: 'Estándares Editoriales de IsItKitchenSafe',
+    quickLinks: {
+      dishwasher: { label: 'Guías de Lavavajillas', desc: 'Botellas, madera, hierro fundido, plásticos y menaje' },
+      microwave: { label: 'Guías de Microondas', desc: 'Recipientes, papel de aluminio, cerámica y recalentado' },
+      airfryer: { label: 'Guías de Freidora de Aire', desc: 'Papel de horno, aluminio, silicona y moldes' },
+      freezer: { label: 'Guías de Congelador', desc: 'Frascos de vidrio, lácteos, carnes y conservación segura' },
+      symbolDecoder: { label: 'Decodificador de Símbolos', desc: 'Descifra los iconos grabados en la base de envases y sartenes' },
+      methodology: { label: 'Metodología de Seguridad', desc: 'Cómo verificamos los veredictos SÍ, NO y DEPENDE' }
+    },
+    scriptI18n: {
+      dateLocale: 'es-ES',
+      printedPrefix: 'Impreso el ',
+      defaultAppliance: 'Cocina',
+      defaultItemName: 'Artículo guardado',
+      allAppliances: 'Todos los electrodomésticos',
+      emptyCategory: 'No hay artículos en esta categoría.',
+      removeLabelPrefix: 'Eliminar ',
+      removeTitle: 'Quitar de la hoja de referencia',
+      clearAllConfirm: '¿Eliminar todos los artículos guardados de tu Hoja de Seguridad de Cocina?',
+      applianceLabels: {
+        dishwasher: 'Lavavajillas',
+        microwave: 'Microondas',
+        freezer: 'Congelador',
+        oven: 'Horno',
+        airfryer: 'Freidora de Aire',
+        refrigerator: 'Refrigerador',
+        dryer: 'Secadora',
+        'washing-machine': 'Lavadora'
+      }
+    }
+  },
+  pt: {
+    pageTitle: 'Minha Folha de Referência de Segurança na Cozinha | IsItKitchenSafe',
+    pageDescription:
+      'Visualize, filtre e imprima sua folha personalizada de 1 página para a geladeira com todos os seus guias salvos de compatibilidade com eletrodomésticos.',
+    breadcrumbLabel: 'Folha Salva',
+    printHeaderTitle: '✓ Minha Folha de Segurança de Cozinha para Geladeira',
+    printHeaderSubtitle:
+      'Tabela rápida de compatibilidade com eletrodomésticos • Verificada com USDA FSIS, FDA 21 CFR e manuais OEM',
+    eyebrow: 'Referência Pessoal de Cozinha',
+    h1: 'Minha Folha de Referência de Segurança na Cozinha',
+    introDesc:
+      'Cada guia que você salva no IsItKitchenSafe fica armazenado com privacidade no seu navegador. Filtre por eletrodoméstico ou imprima uma folha limpa de 1 página para prender na geladeira.',
+    printBtnLabel: 'Imprimir Folha de 1 Página para Geladeira',
+    savedItemsLabel: 'Itens salvos:',
+    yesCountLabel: '✓ SIM:',
+    dependsCountLabel: '⚠ DEPENDE:',
+    noCountLabel: '✗ NÃO:',
+    clearAllBtnLabel: 'Limpar Tudo',
+    filterByApplianceLabel: 'Filtrar por eletrodoméstico:',
+    filterGroupAria: 'Filtrar itens salvos por eletrodoméstico',
+    groupYesHeader: '✓ SIM — SEGURO',
+    groupDependsHeader: '⚠ DEPENDE — ATENÇÃO',
+    groupNoHeader: '✗ NÃO — EVITAR',
+    emptyTitle: 'Sua Folha de Segurança Está Vazia',
+    emptyDescBefore: 'Clique em ',
+    emptyDescButtonName: '“Salvar Guia”',
+    emptyDescAfter:
+      ' em qualquer página de segurança de item para fixá-lo aqui. Depois de salvar as panelas, garrafas e potes do seu dia a dia, clique em imprimir para gerar uma referência de 1 página para a geladeira.',
+    exploreLabel: 'Explorar',
+    tipBannerText:
+      'Os guias salvos permanecem localmente neste dispositivo via armazenamento do navegador (sem necessidade de conta). Quer saber como cada veredito é verificado?',
+    tipBannerLink: 'Leia nossa Metodologia de Verificação',
+    printFooterPrefix: 'Gerado em ',
+    printFooterSuffix: ' • Sempre confira os símbolos gravados na base pelo fabricante antes de aquecer.',
+    printFooterStandards: 'Padrões Editoriais do IsItKitchenSafe',
+    quickLinks: {
+      dishwasher: { label: 'Guias de Lava-Louças', desc: 'Garrafas, madeira, ferro fundido, plásticos e utensílios' },
+      microwave: { label: 'Guias de Micro-ondas', desc: 'Potes, papel-alumínio, cerâmica e regras de reaquecimento' },
+      airfryer: { label: 'Guias de Air Fryer', desc: 'Papel-manteiga, alumínio, silicone e formas' },
+      freezer: { label: 'Guias de Freezer', desc: 'Potes de vidro, laticínios, carnes e armazenamento seguro' },
+      symbolDecoder: { label: 'Decodificador de Símbolos', desc: 'Decifre as marcações na base de potes e panelas' },
+      methodology: { label: 'Metodologia de Segurança', desc: 'Como verificamos os vereditos SIM, NÃO e DEPENDE' }
+    },
+    scriptI18n: {
+      dateLocale: 'pt-BR',
+      printedPrefix: 'Impresso em ',
+      defaultAppliance: 'Cozinha',
+      defaultItemName: 'Item salvo',
+      allAppliances: 'Todos os eletrodomésticos',
+      emptyCategory: 'Nenhum item nesta categoria.',
+      removeLabelPrefix: 'Remover ',
+      removeTitle: 'Remover da folha de referência',
+      clearAllConfirm: 'Remover todos os itens salvos da sua Folha de Segurança na Cozinha?',
+      applianceLabels: {
+        dishwasher: 'Lava-Louças',
+        microwave: 'Micro-ondas',
+        freezer: 'Freezer',
+        oven: 'Forno',
+        airfryer: 'Fritadeira sem Óleo',
+        refrigerator: 'Geladeira',
+        dryer: 'Secadora',
+        'washing-machine': 'Máquina de Lavar'
+      }
+    }
+  },
+  'zh-cn': {
+    pageTitle: '我的厨房安全速查表（可打印）| 厨房安全指南',
+    pageDescription:
+      '查看、按电器筛选并打印您的专属 1 页冰箱贴厨房安全速查表，集中管理所有已收藏的厨具与电器安全指南。',
+    breadcrumbLabel: '我的安全速查表',
+    printHeaderTitle: '✓ 我的厨房安全冰箱速查表',
+    printHeaderSubtitle: '常用厨具与电器兼容性速查 • 依据 USDA FSIS、FDA 21 CFR 与原厂手册核验',
+    eyebrow: '个人厨房速查清单',
+    h1: '我的厨房安全速查表',
+    introDesc:
+      '您在厨房安全指南上收藏的每一篇安全条目都会私密保存在当前浏览器中。支持按电器筛选，或一键打印整洁的 1 页冰箱速查表供全家人随时查阅。',
+    printBtnLabel: '打印 1 页冰箱安全速查表',
+    savedItemsLabel: '已收藏条目：',
+    yesCountLabel: '✓ 可以：',
+    dependsCountLabel: '⚠ 视情况：',
+    noCountLabel: '✗ 不可以：',
+    clearAllBtnLabel: '清空全部收藏',
+    filterByApplianceLabel: '按电器筛选：',
+    filterGroupAria: '按电器筛选已收藏的安全条目',
+    groupYesHeader: '✓ 可以 — 安全使用',
+    groupDependsHeader: '⚠ 视情况 — 需注意条件',
+    groupNoHeader: '✗ 不可以 — 禁止放入',
+    emptyTitle: '您的厨房安全速查表还是空的',
+    emptyDescBefore: '在任意物品安全页面点击',
+    emptyDescButtonName: '「收藏指南」',
+    emptyDescAfter:
+      '即可将其固定到这里。收藏好家中常用的锅具、保温杯和保鲜盒后，点击打印即可生成 1 页冰箱安全速查表。',
+    exploreLabel: '去看看',
+    tipBannerText:
+      '已收藏的指南仅保存在当前设备的浏览器本地存储中（无需注册登录）。想了解每项结论是如何核验的吗？',
+    tipBannerLink: '阅读我们的安全核验方法论',
+    printFooterPrefix: '生成自 ',
+    printFooterSuffix: ' • 加热或机洗前请始终优先核对器皿底部的原厂安全标识。',
+    printFooterStandards: 'IsItKitchenSafe 编辑核验标准',
+    quickLinks: {
+      dishwasher: { label: '洗碗机安全指南', desc: '保温杯、木器、铸铁锅、塑料与各类厨具' },
+      microwave: { label: '微波炉安全指南', desc: '保鲜盒、锡纸、陶瓷与加热安全规范' },
+      airfryer: { label: '空气炸锅安全指南', desc: '烘焙纸、锡纸、硅胶模具与烤盘' },
+      freezer: { label: '冷冻室安全指南', desc: '玻璃罐、乳制品、肉类与冷冻保存安全' },
+      symbolDecoder: { label: '厨具底部符号解码器', desc: '一键查询容器与锅具底部的塑料编号与电器图标' },
+      methodology: { label: '安全核验方法论', desc: '了解我们如何判定“可以”“不可以”与“视情况而定”' }
+    },
+    scriptI18n: {
+      dateLocale: 'zh-CN',
+      printedPrefix: '打印日期：',
+      defaultAppliance: '厨房',
+      defaultItemName: '已收藏物品',
+      allAppliances: '全部电器',
+      emptyCategory: '此分类下暂无条目。',
+      removeLabelPrefix: '移除 ',
+      removeTitle: '从速查表中移除',
+      clearAllConfirm: '确定要清空厨房安全速查表中的所有已收藏条目吗？',
+      applianceLabels: {
+        dishwasher: '洗碗机',
+        microwave: '微波炉',
+        freezer: '冷冻室',
+        oven: '烤箱',
+        airfryer: '空气炸锅',
+        refrigerator: '冰箱',
+        dryer: '烘干机',
+        'washing-machine': '洗衣机'
+      }
+    }
+  },
+  ja: {
+    pageTitle: '保存済みキッチン安全早見表（印刷対応）| キッチン安全チェッカー',
+    pageDescription:
+      '保存したキッチン家電の安全性ガイドを一覧表示・家電別に絞り込み、冷蔵庫に貼れる1ページの早見表としてきれいに印刷できます。',
+    breadcrumbLabel: '保存済み早見表',
+    printHeaderTitle: '✓ マイ・キッチン安全 冷蔵庫早見表',
+    printHeaderSubtitle:
+      'キッチン家電の対応クイックチャート • USDA FSIS・FDA 21 CFR・メーカー公式マニュアルに基づき検証',
+    eyebrow: 'パーソナル・キッチンリファレンス',
+    h1: '保存済みキッチン安全早見表',
+    introDesc:
+      'キッチン安全チェッカーで保存したガイドはお使いのブラウザ内にのみ安全に保存されます。家電ごとに絞り込んだり、家族みんなで確認できる1ページの冷蔵庫用早見表として印刷したりできます。',
+    printBtnLabel: '1ページの冷蔵庫早見表を印刷',
+    savedItemsLabel: '保存済み件数：',
+    yesCountLabel: '✓ 可能：',
+    dependsCountLabel: '⚠ 条件付き：',
+    noCountLabel: '✕ 不可：',
+    clearAllBtnLabel: 'すべて削除',
+    filterByApplianceLabel: '家電で絞り込み：',
+    filterGroupAria: '保存済みアイテムを家電別に絞り込む',
+    groupYesHeader: '✓ 可能 — 安全',
+    groupDependsHeader: '⚠ 条件付き — 要注意',
+    groupNoHeader: '✕ 不可 — 使用禁止',
+    emptyTitle: '保存済みの安全ガイドはまだありません',
+    emptyDescBefore: '各アイテムの安全性ガイドページにある',
+    emptyDescButtonName: '「保存する」',
+    emptyDescAfter:
+      'ボタンを押すと、ここに一覧表示されます。ご家庭でよく使う調理器具・水筒・保存容器を保存したら、印刷ボタンから冷蔵庫用の1ページ早見表を作成できます。',
+    exploreLabel: '一覧を見る',
+    tipBannerText:
+      '保存データはアカウント不要でお使いの端末のブラウザにローカル保存されます。各判定の検証基準について詳しく知りたいですか？',
+    tipBannerLink: '安全性検証メソドロジーを読む',
+    printFooterPrefix: '作成元：',
+    printFooterSuffix: ' • 加熱・洗浄前に必ず製品底面のメーカー表示をご確認ください。',
+    printFooterStandards: 'IsItKitchenSafe 編集検証基準',
+    quickLinks: {
+      dishwasher: { label: '食洗機ガイド', desc: '水筒、木製品、鋳鉄、プラスチック・調理器具' },
+      microwave: { label: '電子レンジガイド', desc: '保存容器、アルミホイル、陶器・温めルール' },
+      airfryer: { label: 'ノンフライヤーガイド', desc: 'クッキングシート、ホイル、シリコン・耐熱皿' },
+      freezer: { label: '冷凍庫ガイド', desc: 'ガラス瓶、乳製品、肉類・冷凍保存の安全性' },
+      symbolDecoder: { label: 'キッチン記号デコーダー', desc: '容器・鍋の底面マークやプラ識別番号を解読' },
+      methodology: { label: '安全性検証基準', desc: '可能・不可・条件付きの判定基準と情報源' }
+    },
+    scriptI18n: {
+      dateLocale: 'ja-JP',
+      printedPrefix: '印刷日：',
+      defaultAppliance: 'キッチン',
+      defaultItemName: '保存済みアイテム',
+      allAppliances: 'すべての家電',
+      emptyCategory: 'このカテゴリーの項目はありません。',
+      removeLabelPrefix: '削除：',
+      removeTitle: '早見表から削除',
+      clearAllConfirm: 'キッチン安全早見表から保存済みアイテムをすべて削除しますか？',
+      applianceLabels: {
+        dishwasher: '食洗機',
+        microwave: '電子レンジ',
+        freezer: '冷凍庫',
+        oven: 'オーブン',
+        airfryer: 'ノンフライヤー',
+        refrigerator: '冷蔵庫',
+        dryer: '乾燥機',
+        'washing-machine': '洗濯機'
+      }
+    }
+  }
+};
+
+const content = CONTENT[lang as Exclude<SupportedLanguage, 'en'>] || CONTENT.es;
+const scriptI18n = content.scriptI18n;
+
+const quickStartLinks: QuickLinkItem[] = [
+  {
+    label: content.quickLinks.dishwasher.label,
+    href: getApplianceUrl('dishwasher', lang),
+    desc: content.quickLinks.dishwasher.desc
+  },
+  {
+    label: content.quickLinks.microwave.label,
+    href: getApplianceUrl('microwave', lang),
+    desc: content.quickLinks.microwave.desc
+  },
+  {
+    label: content.quickLinks.airfryer.label,
+    href: getApplianceUrl('airfryer', lang),
+    desc: content.quickLinks.airfryer.desc
+  },
+  {
+    label: content.quickLinks.freezer.label,
+    href: getApplianceUrl('freezer', lang),
+    desc: content.quickLinks.freezer.desc
+  },
+  {
+    label: content.quickLinks.symbolDecoder.label,
+    href: translatePath('/tools/kitchen-symbol-decoder/'),
+    desc: content.quickLinks.symbolDecoder.desc
+  },
+  {
+    label: content.quickLinks.methodology.label,
+    href: getDirectoryUrl('methodology', lang),
+    desc: content.quickLinks.methodology.desc
+  }
+];
+
+const savedCanonicalDisplayUrl = `https://isitkitchensafe.com/${lang}/saved/`;
+---
+
+<Layout
+  title={content.pageTitle}
+  description={content.pageDescription}
+  noindex={true}
+  excludeFaqSchema={true}
+  excludeArticleSchema={true}
+  availableLocales={availableLocales}
+  lang={lang}
+>
+  <Fragment slot="head">
+    <style is:inline>
+      .print-only-header,
+      .print-only-footer {
+        display: none;
+      }
+
+      @media print {
+        @page {
+          size: letter portrait;
+          margin: 0.45in;
+        }
+
+        header,
+        nav,
+        footer,
+        #cookie-consent-banner,
+        #back-to-top-container,
+        .no-print {
+          display: none !important;
+        }
+
+        body {
+          background: #ffffff !important;
+          color: #111827 !important;
+          font-size: 9.5pt !important;
+          line-height: 1.3 !important;
+        }
+
+        #saved-cheat-sheet-page {
+          max-width: 100% !important;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+
+        .print-only-header {
+          display: flex !important;
+          align-items: center;
+          justify-content: space-between;
+          border-bottom: 2px solid #181d26;
+          padding-bottom: 8px;
+          margin-bottom: 12px;
+        }
+
+        .print-only-footer {
+          display: flex !important;
+          align-items: center;
+          justify-content: space-between;
+          border-top: 1px solid #d1d5db;
+          padding-top: 6px;
+          margin-top: 14px;
+          font-size: 8pt;
+          color: #4b5563;
+        }
+
+        #saved-groups-container {
+          display: grid !important;
+          grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+          gap: 10px !important;
+          align-items: start !important;
+        }
+
+        .verdict-group-card {
+          break-inside: avoid;
+          border: 1.5px solid #181d26 !important;
+          border-radius: 6px !important;
+          padding: 8px !important;
+          background: #ffffff !important;
+          box-shadow: none !important;
+        }
+
+        .verdict-group-header {
+          padding-bottom: 6px !important;
+          margin-bottom: 6px !important;
+          border-bottom: 1px solid #d1d5db !important;
+        }
+
+        .saved-item-row {
+          padding: 5px 4px !important;
+          border-bottom: 1px dotted #d1d5db !important;
+          background: transparent !important;
+          border-left: none !important;
+          border-right: none !important;
+          border-top: none !important;
+          border-radius: 0 !important;
+        }
+
+        .saved-item-row:last-child {
+          border-bottom: none !important;
+        }
+
+        .saved-item-link {
+          color: #111827 !important;
+          text-decoration: none !important;
+          font-weight: 600 !important;
+          font-size: 9pt !important;
+        }
+
+        .saved-item-appliance {
+          font-size: 7.5pt !important;
+          color: #374151 !important;
+          border: 1px solid #9ca3af !important;
+          padding: 1px 4px !important;
+        }
+      }
+    </style>
+  </Fragment>
+
+  <section id="saved-cheat-sheet-page" class="max-w-[960px] mx-auto px-6 py-[48px] md:py-[64px]">
+    <!-- Breadcrumbs (screen only) -->
+    <div class="no-print">
+      <Breadcrumbs
+        items={[
+          { label: t('nav.home'), href: translatePath('/') },
+          { label: content.breadcrumbLabel }
+        ]}
+      />
+    </div>
+
+    <!-- Print-Only Fridge Sheet Header -->
+    <div class="print-only-header">
+      <div>
+        <div style="font-size: 14pt; font-weight: 700; color: #181d26;">
+          {content.printHeaderTitle}
+        </div>
+        <div style="font-size: 8.5pt; color: #4b5563;">
+          {content.printHeaderSubtitle}
+        </div>
+      </div>
+      <div style="text-align: right;">
+        <div style="font-size: 10pt; font-weight: 700; color: #181d26;">isitkitchensafe.com</div>
+        <div id="print-date-stamp" style="font-size: 8pt; color: #4b5563;"></div>
+      </div>
+    </div>
+
+    <!-- Screen Header -->
+    <header class="mb-8 pb-6 border-b border-hairline no-print">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-5">
+        <div>
+          <span class="text-caption text-signature-coral font-semibold uppercase tracking-wider text-xs block mb-2">
+            {content.eyebrow}
+          </span>
+          <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-3 leading-tight">
+            {content.h1}
+          </h1>
+          <p class="text-body-md text-body leading-relaxed max-w-2xl">
+            {content.introDesc}
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+          <button
+            id="print-cheat-sheet-btn"
+            type="button"
+            class="min-h-[44px] px-5 py-2.5 bg-primary hover:bg-primary-active active:scale-[0.98] text-on-primary rounded-lg text-sm font-medium inline-flex items-center gap-2 shadow-xs transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            <span>{content.printBtnLabel}</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Summary Metrics & Appliance Filter Bar (shown when items exist) -->
+    <div id="saved-controls-bar" class="hidden mb-8 no-print">
+      <div class="bg-surface-soft border border-hairline rounded-lg p-4 md:p-5 flex flex-col gap-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <span class="font-semibold text-ink">{content.savedItemsLabel} <strong id="total-saved-count">0</strong></span>
+            <span class="text-hairline">|</span>
+            <span class="badge-yes px-2.5 py-0.5 text-[11px]">{content.yesCountLabel} <span id="yes-saved-count" class="ml-1">0</span></span>
+            <span class="badge-depends px-2.5 py-0.5 text-[11px]">{content.dependsCountLabel} <span id="depends-saved-count" class="ml-1">0</span></span>
+            <span class="badge-no px-2.5 py-0.5 text-[11px]">{content.noCountLabel} <span id="no-saved-count" class="ml-1">0</span></span>
+          </div>
+
+          <button
+            id="clear-all-saved-btn"
+            type="button"
+            class="min-h-[36px] px-3 py-1.5 text-xs font-medium text-error hover:bg-error-bg border border-error/30 rounded-md transition-colors cursor-pointer"
+          >
+            {content.clearAllBtnLabel}
+          </button>
+        </div>
+
+        <div class="border-t border-hairline pt-3.5 flex flex-wrap items-center gap-2">
+          <span class="text-xs font-medium text-muted mr-1">{content.filterByApplianceLabel}</span>
+          <div id="appliance-filter-pills" class="flex flex-wrap gap-2" role="group" aria-label={content.filterGroupAria}></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Saved Items Grouped by Verdict -->
+    <div id="saved-groups-container" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10" aria-live="polite">
+      <!-- YES Group -->
+      <section class="verdict-group-card bg-surface-soft border border-hairline rounded-lg p-5 flex flex-col" data-verdict-group="yes">
+        <div class="verdict-group-header flex items-center justify-between pb-3 mb-3 border-b border-hairline">
+          <div class="flex items-center gap-2">
+            <span class="badge-yes px-3 py-1 text-xs">{content.groupYesHeader}</span>
+          </div>
+          <span id="group-count-yes" class="text-xs font-mono text-muted">0</span>
+        </div>
+        <ul id="saved-list-yes" class="flex flex-col gap-2.5 list-none p-0 m-0"></ul>
+      </section>
+
+      <!-- DEPENDS Group -->
+      <section class="verdict-group-card bg-surface-soft border border-hairline rounded-lg p-5 flex flex-col" data-verdict-group="depends">
+        <div class="verdict-group-header flex items-center justify-between pb-3 mb-3 border-b border-hairline">
+          <div class="flex items-center gap-2">
+            <span class="badge-depends px-3 py-1 text-xs">{content.groupDependsHeader}</span>
+          </div>
+          <span id="group-count-depends" class="text-xs font-mono text-muted">0</span>
+        </div>
+        <ul id="saved-list-depends" class="flex flex-col gap-2.5 list-none p-0 m-0"></ul>
+      </section>
+
+      <!-- NO Group -->
+      <section class="verdict-group-card bg-surface-soft border border-hairline rounded-lg p-5 flex flex-col" data-verdict-group="no">
+        <div class="verdict-group-header flex items-center justify-between pb-3 mb-3 border-b border-hairline">
+          <div class="flex items-center gap-2">
+            <span class="badge-no px-3 py-1 text-xs">{content.groupNoHeader}</span>
+          </div>
+          <span id="group-count-no" class="text-xs font-mono text-muted">0</span>
+        </div>
+        <ul id="saved-list-no" class="flex flex-col gap-2.5 list-none p-0 m-0"></ul>
+      </section>
+    </div>
+
+    <!-- Empty State -->
+    <div id="saved-empty-state" class="bg-surface-soft border border-hairline rounded-lg p-8 md:p-10 text-center no-print">
+      <div class="w-12 h-12 rounded-full bg-canvas border border-hairline flex items-center justify-center mx-auto mb-4 text-ink">
+        <svg class="w-6 h-6 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+        </svg>
+      </div>
+      <h2 class="text-title-md text-ink font-semibold mb-2">{content.emptyTitle}</h2>
+      <p class="text-body-md text-muted leading-relaxed max-w-lg mx-auto mb-8">
+        {content.emptyDescBefore}<strong class="text-ink font-medium">{content.emptyDescButtonName}</strong>{content.emptyDescAfter}
+      </p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-left max-w-3xl mx-auto">
+        {quickStartLinks.map((link) => (
+          <a
+            href={link.href}
+            class="bg-canvas border border-hairline hover:border-border-strong rounded-md p-4 flex flex-col justify-between transition-colors shadow-2xs"
+          >
+            <div>
+              <span class="text-ink font-semibold text-[14px] block mb-1">{link.label}</span>
+              <span class="text-xs text-muted leading-relaxed block">{link.desc}</span>
+            </div>
+            <span class="text-xs font-medium text-link mt-3 inline-block">{content.exploreLabel} &rarr;</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <!-- Tip Banner (screen only) -->
+    <div class="mt-8 bg-surface-soft border border-hairline rounded-md p-4 text-xs text-muted flex flex-wrap items-center justify-between gap-3 no-print">
+      <span>
+        {content.tipBannerText}
+      </span>
+      <a href={getDirectoryUrl('methodology', lang)} class="text-link hover:underline font-semibold shrink-0">
+        {content.tipBannerLink} &rarr;
+      </a>
+    </div>
+
+    <!-- Print-Only Fridge Footer -->
+    <div class="print-only-footer">
+      <span>{content.printFooterPrefix}<strong>{savedCanonicalDisplayUrl}</strong>{content.printFooterSuffix}</span>
+      <span>{content.printFooterStandards}</span>
+    </div>
+  </section>
+
+  <script is:inline define:vars={{ lang, scriptI18n }}>
+    (function () {
+      var STORAGE_KEY = 'kitchen_saved_items';
+      var activeApplianceFilter = 'all';
+      var APPLIANCE_LABELS = scriptI18n.applianceLabels || {};
+
+      function formatApplianceName(app) {
+        if (!app) return scriptI18n.defaultAppliance;
+        var key = String(app).toLowerCase();
+        if (APPLIANCE_LABELS[key]) return APPLIANCE_LABELS[key];
+        return key
+          .split('-')
+          .map(function (w) {
+            return w ? w.charAt(0).toUpperCase() + w.slice(1) : '';
+          })
+          .join(' ');
+      }
+
+      function formatSlugAsName(slug) {
+        if (!slug) return scriptI18n.defaultItemName;
+        return String(slug)
+          .split('-')
+          .map(function (w) {
+            return w ? w.charAt(0).toUpperCase() + w.slice(1) : '';
+          })
+          .join(' ');
+      }
+
+      function ensureSafeRelativeUrl(url, fallbackPath) {
+        var raw = String(url || '').trim();
+        if (!raw || raw.indexOf(':') !== -1 || raw.indexOf('//') === 0) {
+          raw = fallbackPath;
+        }
+        if (raw.charAt(0) !== '/') {
+          raw = '/' + raw;
+        }
+        return raw.charAt(raw.length - 1) === '/' ? raw : raw + '/';
+      }
+
+      function normalizeItem(raw) {
+        if (!raw || typeof raw !== 'object') return null;
+        var slug = String(raw.slug || '').trim();
+        var appliance = String(raw.appliance || '').trim().toLowerCase();
+        var name = String(raw.name || raw.item || formatSlugAsName(slug)).trim();
+        var safeRaw = String(raw.safe || 'depends').trim().toLowerCase();
+        var safe = safeRaw === 'yes' || safeRaw === 'no' ? safeRaw : 'depends';
+        var fallbackPath = '/' + lang + '/' + (appliance || 'dishwasher') + '/' + (slug ? slug + '/' : '');
+        var url = ensureSafeRelativeUrl(raw.url, fallbackPath);
+
+        return {
+          slug: slug,
+          name: name,
+          item: name,
+          appliance: appliance,
+          safe: safe,
+          url: url,
+          timestamp: raw.timestamp || 0
+        };
+      }
+
+      function readSavedItems() {
+        try {
+          var parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+          if (!Array.isArray(parsed)) return [];
+          return parsed.map(normalizeItem).filter(Boolean);
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function writeSavedItems(items) {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+        } catch (e) {}
+      }
+
+      function removeSavedItem(slug, appliance) {
+        var items = readSavedItems().filter(function (entry) {
+          return !(entry.slug === slug && entry.appliance === appliance);
+        });
+        writeSavedItems(items);
+        renderSavedSheet();
+      }
+
+      function createItemElement(entry) {
+        var li = document.createElement('li');
+        li.className =
+          'saved-item-row bg-canvas border border-hairline rounded-md p-3 flex items-start justify-between gap-2.5 transition-colors hover:border-border-strong';
+
+        var infoWrap = document.createElement('div');
+        infoWrap.className = 'min-w-0 flex-1';
+
+        var link = document.createElement('a');
+        link.href = entry.url;
+        link.className =
+          'saved-item-link text-[14px] font-medium text-ink hover:text-link hover:underline block break-words leading-snug';
+        link.textContent = entry.name;
+
+        var metaRow = document.createElement('div');
+        metaRow.className = 'mt-1.5 flex flex-wrap items-center gap-1.5';
+
+        var appBadge = document.createElement('span');
+        appBadge.className =
+          'saved-item-appliance inline-flex items-center text-[11px] font-medium text-muted bg-surface-soft border border-hairline px-2 py-0.5 rounded';
+        appBadge.textContent = formatApplianceName(entry.appliance);
+
+        metaRow.appendChild(appBadge);
+        infoWrap.appendChild(link);
+        infoWrap.appendChild(metaRow);
+
+        var removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className =
+          'no-print shrink-0 w-7 h-7 rounded flex items-center justify-center text-muted hover:text-error hover:bg-error-bg transition-colors cursor-pointer';
+        removeBtn.setAttribute(
+          'aria-label',
+          scriptI18n.removeLabelPrefix + entry.name + ' (' + formatApplianceName(entry.appliance) + ')'
+        );
+        removeBtn.title = scriptI18n.removeTitle;
+        removeBtn.textContent = '✕';
+        removeBtn.onclick = function () {
+          removeSavedItem(entry.slug, entry.appliance);
+        };
+
+        li.appendChild(infoWrap);
+        li.appendChild(removeBtn);
+        return li;
+      }
+
+      function renderApplianceFilters(allItems) {
+        var container = document.getElementById('appliance-filter-pills');
+        if (!container) return;
+        container.textContent = '';
+
+        var counts = {};
+        allItems.forEach(function (entry) {
+          var app = entry.appliance || 'other';
+          counts[app] = (counts[app] || 0) + 1;
+        });
+
+        var appliances = Object.keys(counts).sort();
+        if (activeApplianceFilter !== 'all' && !counts[activeApplianceFilter]) {
+          activeApplianceFilter = 'all';
+        }
+
+        function makePill(value, label, count) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          var isActive = activeApplianceFilter === value;
+          btn.className = isActive
+            ? 'min-h-[34px] px-3 py-1 rounded-full text-xs font-semibold bg-primary text-on-primary border border-primary cursor-pointer transition-colors'
+            : 'min-h-[34px] px-3 py-1 rounded-full text-xs font-medium bg-canvas text-ink hover:bg-surface-strong/40 border border-hairline cursor-pointer transition-colors';
+          btn.textContent = label + ' (' + count + ')';
+          btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+          btn.onclick = function () {
+            activeApplianceFilter = value;
+            renderSavedSheet();
+          };
+          return btn;
+        }
+
+        container.appendChild(makePill('all', scriptI18n.allAppliances, allItems.length));
+        appliances.forEach(function (app) {
+          container.appendChild(makePill(app, formatApplianceName(app), counts[app]));
+        });
+      }
+
+      function renderSavedSheet() {
+        var allItems = readSavedItems();
+        var controlsBar = document.getElementById('saved-controls-bar');
+        var groupsContainer = document.getElementById('saved-groups-container');
+        var emptyState = document.getElementById('saved-empty-state');
+        var printBtn = document.getElementById('print-cheat-sheet-btn');
+        var dateStamp = document.getElementById('print-date-stamp');
+
+        if (dateStamp) {
+          try {
+            dateStamp.textContent = scriptI18n.printedPrefix + new Date().toLocaleDateString(scriptI18n.dateLocale);
+          } catch (e) {}
+        }
+
+        if (allItems.length === 0) {
+          if (controlsBar) controlsBar.classList.add('hidden');
+          if (groupsContainer) groupsContainer.classList.add('hidden');
+          if (emptyState) emptyState.classList.remove('hidden');
+          if (printBtn) printBtn.disabled = true;
+          return;
+        }
+
+        if (controlsBar) controlsBar.classList.remove('hidden');
+        if (groupsContainer) groupsContainer.classList.remove('hidden');
+        if (emptyState) emptyState.classList.add('hidden');
+        if (printBtn) printBtn.disabled = false;
+
+        renderApplianceFilters(allItems);
+
+        var filtered =
+          activeApplianceFilter === 'all'
+            ? allItems
+            : allItems.filter(function (entry) {
+                return entry.appliance === activeApplianceFilter;
+              });
+
+        filtered.sort(function (a, b) {
+          if (b.timestamp !== a.timestamp) return (b.timestamp || 0) - (a.timestamp || 0);
+          return a.name.localeCompare(b.name, scriptI18n.dateLocale);
+        });
+
+        var grouped = { yes: [], depends: [], no: [] };
+        filtered.forEach(function (entry) {
+          grouped[entry.safe].push(entry);
+        });
+
+        var totalEl = document.getElementById('total-saved-count');
+        var yesCountEl = document.getElementById('yes-saved-count');
+        var dependsCountEl = document.getElementById('depends-saved-count');
+        var noCountEl = document.getElementById('no-saved-count');
+
+        if (totalEl) totalEl.textContent = String(filtered.length);
+        if (yesCountEl) yesCountEl.textContent = String(grouped.yes.length);
+        if (dependsCountEl) dependsCountEl.textContent = String(grouped.depends.length);
+        if (noCountEl) noCountEl.textContent = String(grouped.no.length);
+
+        ['yes', 'depends', 'no'].forEach(function (verdict) {
+          var listEl = document.getElementById('saved-list-' + verdict);
+          var countEl = document.getElementById('group-count-' + verdict);
+          if (countEl) countEl.textContent = String(grouped[verdict].length);
+          if (!listEl) return;
+          listEl.textContent = '';
+
+          if (grouped[verdict].length === 0) {
+            var emptyLi = document.createElement('li');
+            emptyLi.className = 'text-xs text-muted italic py-3 px-1';
+            emptyLi.textContent = scriptI18n.emptyCategory;
+            listEl.appendChild(emptyLi);
+            return;
+          }
+
+          grouped[verdict].forEach(function (entry) {
+            listEl.appendChild(createItemElement(entry));
+          });
+        });
+      }
+
+      function initSavedPage() {
+        var printBtn = document.getElementById('print-cheat-sheet-btn');
+        if (printBtn) {
+          printBtn.onclick = function () {
+            window.print();
+          };
+        }
+
+        var clearAllBtn = document.getElementById('clear-all-saved-btn');
+        if (clearAllBtn) {
+          clearAllBtn.onclick = function () {
+            if (window.confirm(scriptI18n.clearAllConfirm)) {
+              writeSavedItems([]);
+              activeApplianceFilter = 'all';
+              renderSavedSheet();
+            }
+          };
+        }
+
+        renderSavedSheet();
+      }
+
+      window.addEventListener('storage', function (evt) {
+        if (evt.key === STORAGE_KEY) {
+          renderSavedSheet();
+        }
+      });
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSavedPage);
+      } else {
+        initSavedPage();
+      }
+      document.addEventListener('astro:page-load', initSavedPage);
+    })();
+  </script>
+</Layout>

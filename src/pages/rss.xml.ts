@@ -51,6 +51,13 @@ const curatedTools: Array<{
     date: '2026-11-18',
   },
   {
+    path: '/tools/meat-thawing-calculator/',
+    title: 'USDA Meat & Turkey Safe Thawing Time Calculator',
+    description:
+      'Calculate precise refrigerator, cold water, and microwave thawing countdowns for whole turkey, chicken, roasts, and steaks following official USDA FSIS food safety guidelines.',
+    date: '2026-11-18',
+  },
+  {
     path: '/tools/leftover-shelf-life-calculator/',
     title: 'Leftover Shelf Life & Safe Storage Calculator',
     description:

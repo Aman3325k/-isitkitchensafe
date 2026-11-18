@@ -1,0 +1,522 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import MeatThawingCalculator from '../../../components/MeatThawingCalculator.astro';
+import type { SupportedLanguage } from '../../../i18n/ui';
+import { getApplianceUrl, getDirectoryUrl } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+
+interface ChartRow {
+  cut: string;
+  fridge: string;
+  coldWater: string;
+  postThaw: string;
+  temp: string;
+}
+
+interface LocaleContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  heroSub: string;
+  chartTitle: string;
+  chartIntro: string;
+  methodologyLabel: string;
+  chartHeaders: [string, string, string, string, string];
+  chartRows: ChartRow[];
+  relatedToolTag: string;
+  relatedLeftoverTitle: string;
+  relatedLeftoverDesc: string;
+  relatedDirTag: string;
+  relatedRefreezeTitle: string;
+  relatedRefreezeDesc: string;
+  hubsTitle: string;
+  hubsDesc: string;
+  hubLabels: {
+    freezer: string;
+    refrigerator: string;
+    refreeze: string;
+    howLong: string;
+    methodology: string;
+    allTools: string;
+  };
+  faqTitle: string;
+  faqs: Array<{ question: string; answer: string }>;
+  breadcrumbs: Array<{ label: string; href?: string }>;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocaleContent> = {
+  es: {
+    pageTitle: "Calculadora USDA de Tiempo para Descongelar Carne y Pavo | IsItKitchenSafe",
+    pageDescription: "Calcula el tiempo seguro USDA FSIS y la fecha exacta para descongelar pavo entero, pollo, asado de res, carne molida, jamón y pescado. Compara nevera, baño de agua fría, microondas y cocción desde congelado.",
+    badge: "Herramienta USDA FSIS de Descongelación Segura",
+    h1: "Calculadora de Tiempo Seguro para Descongelar Carne y Pavo",
+    heroSub: "¿Planeas hornear un pavo navideño, un asado de res o pollo entre semana? Elige el corte, el peso (lb o kg) y tu hora de cocción para obtener la fecha exacta para empezar a descongelar en nevera, agua fría, microondas o cocinando congelado.",
+    chartTitle: "Tabla Rápida USDA de Descongelación Segura de Carnes",
+    chartIntro: "Tiempos orientativos en refrigerador a 4°C (40°F) o menos y agua fría renovada cada 30 minutos. Consulta nuestras fuentes en",
+    methodologyLabel: "Metodología",
+    chartHeaders: ["Corte y Peso Ejemplo", "Nevera (≤4°C)", "Baño Agua Fría", "Nevera Post-Descongelar", "Temp. Interna Segura"],
+    chartRows: [
+      { cut: "Pavo Entero (16 lb / 7.3 kg)", fridge: "3–4 días (24h / 4–5 lb)", coldWater: "~8 h (30 min/lb)", postThaw: "1–2 días", temp: "74°C (165°F)" },
+      { cut: "Pollo Entero (5 lb / 2.3 kg)", fridge: "24–30 h", coldWater: "~2.5 h", postThaw: "1–2 días", temp: "74°C (165°F)" },
+      { cut: "Pollo Deshuesado (2 lb / 0.9 kg)", fridge: "24 h", coldWater: "~1–1.5 h", postThaw: "1–2 días", temp: "74°C (165°F)" },
+      { cut: "Asado Res / Cerdo (4 lb / 1.8 kg)", fridge: "24–26 h", coldWater: "~2 h", postThaw: "3–5 días", temp: "63°C (145°F) + 3m" },
+      { cut: "Carne Molida (2 lb / 0.9 kg)", fridge: "24 h", coldWater: "~1–1.5 h", postThaw: "1–2 días", temp: "71°C res · 74°C ave" },
+      { cut: "Jamón Crudo Entero (10 lb / 4.5 kg)", fridge: "2–2.5 días (4–6h/lb)", coldWater: "~5 h", postThaw: "3–5 días", temp: "63°C (145°F) + 3m" },
+      { cut: "Pescado y Camarón (1.5 lb / 0.7 kg)", fridge: "12–18 h (¡abrir vacío!)", coldWater: "~45 min", postThaw: "1–2 días", temp: "63°C (145°F)" }
+    ],
+    relatedToolTag: "Herramienta Interactiva Relacionada",
+    relatedLeftoverTitle: "Calculadora USDA de Vida Útil de Sobras y Nevera →",
+    relatedLeftoverDesc: "¿Ya cocinaste tu pavo, pollo o asado? Calcula la cuenta regresiva exacta de 3–4 días para sobras y temperatura de recalentado.",
+    relatedDirTag: "Directorio de Seguridad Alimentaria",
+    relatedRefreezeTitle: "¿Se Puede Recongelar Carne o Pollo Descongelado? →",
+    relatedRefreezeDesc: "Consulta alimento por alimento las reglas USDA para volver a congelar carnes crudas, pescado y platos cocinados.",
+    hubsTitle: "Explorar Guías Verificadas de Congelación y Conservación",
+    hubsDesc: "Verifica envases aptos para congelador, tiempos en nevera y reglas de recongelación.",
+    hubLabels: {
+      freezer: "Guía de Congelador",
+      refrigerator: "Guía de Nevera",
+      refreeze: "¿Se Puede Recongelar?",
+      howLong: "Cuánto Duran",
+      methodology: "Metodología",
+      allTools: "Todas las Herramientas →"
+    },
+    faqTitle: "Preguntas Frecuentes sobre Cómo Descongelar Carne de Forma Segura",
+    faqs: [
+      {
+        question: "¿Cuánto tiempo tarda en descongelarse un pavo congelado en el refrigerador?",
+        answer: "Según el USDA FSIS, debes calcular 24 horas en el refrigerador (a ≤4°C / 40°F) por cada 4 a 5 libras (1.8 a 2.3 kg) de pavo entero. Por ejemplo, un pavo de 16 lb (7.3 kg) necesita de 3 a 4 días completos en la nevera. Una vez descongelado en refrigeración, puede permanecer 1 a 2 días adicionales antes de hornearse."
+      },
+      {
+        question: "¿Por qué es peligroso descongelar carne o pollo en la encimera a temperatura ambiente?",
+        answer: "Aunque el centro siga congelado, la capa exterior supera rápidamente los 4°C (40°F) y entra en la Zona de Peligro (4°C–60°C) en menos de 2 horas. Bacterias como Salmonella, E. coli y Staphylococcus aureus se multiplican cada 20 minutos en la superficie y pueden generar toxinas resistentes al calor."
+      },
+      {
+        question: "¿Cómo funciona el método USDA de descongelación en baño de agua fría?",
+        answer: "Coloca la carne congelada dentro de una bolsa hermética sin fugas y sumérgela en agua fría del grifo (nunca tibia ni caliente). Calcula unos 30 minutos por libra (por ejemplo, 8 horas para un pavo de 16 lb) y cambia el agua cada 30 minutos para mantenerla fría. Debes cocinarla inmediatamente después."
+      },
+      {
+        question: "¿Por qué hay que sacar el pescado envasado al vacío de su bolsa antes de descongelar?",
+        answer: "Los envases al vacío (con oxígeno reducido) crean un ambiente anaeróbico. Si el pescado se descongela sellado al vacío —incluso dentro de la nevera—, las esporas de Clostridium botulinum pueden activarse y producir toxina botulínica sin alterar el olor ni el sabor. Abre o retira siempre el envase al vacío antes de descongelar."
+      },
+      {
+        question: "¿Puedo volver a congelar carne descongelada o cocinar carne directamente congelada?",
+        answer: "Sí, siguiendo las reglas USDA: la carne descongelada exclusivamente en el refrigerador (≤4°C) puede recongelarse cruda de forma segura (aunque puede perder algo de jugosidad). Si usaste agua fría o microondas, cocínala primero antes de congelar. También es seguro cocinar desde congelado en horno, sartén u olla a presión añadiendo +50% de tiempo —nunca en olla de cocción lenta (slow cooker)."
+      }
+    ],
+    breadcrumbs: [
+      { label: "Inicio", href: "/es/" },
+      { label: "Herramientas", href: "/es/tools/" },
+      { label: "Calculadora para Descongelar Carne y Pavo" }
+    ]
+  },
+  pt: {
+    pageTitle: "Calculadora USDA de Tempo para Descongelar Carne e Peru | IsItKitchenSafe",
+    pageDescription: "Calcule o tempo seguro USDA FSIS e a data exata para começar a descongelar peru inteiro, frango, carne assada, carne moída, pernil e peixes. Compare geladeira, água fria, micro-ondas e preparo congelado.",
+    badge: "Ferramenta USDA FSIS de Descongelamento Seguro",
+    h1: "Calculadora de Tempo Seguro para Descongelar Carne e Peru",
+    heroSub: "Planejando o peru de Natal, um assado de domingo ou frango para o jantar? Selecione o corte, o peso (lb ou kg) e o horário de preparo para saber exatamente quando começar a descongelar em cada método aprovado pelo USDA.",
+    chartTitle: "Tabela Rápida USDA de Descongelamento Seguro",
+    chartIntro: "Tempos estimados em geladeira a 4°C (40°F) ou menos e banho de água fria trocada a cada 30 minutos. Conheça nossos critérios em",
+    methodologyLabel: "Metodologia",
+    chartHeaders: ["Corte e Peso Exemplo", "Geladeira (≤4°C)", "Água Fria", "Geladeira Pós-Descongelar", "Temp. Interna Segura"],
+    chartRows: [
+      { cut: "Peru Inteiro (16 lb / 7,3 kg)", fridge: "3–4 dias (24h / 4–5 lb)", coldWater: "~8 h (30 min/lb)", postThaw: "1–2 dias", temp: "74°C (165°F)" },
+      { cut: "Frango Inteiro (5 lb / 2,3 kg)", fridge: "24–30 h", coldWater: "~2,5 h", postThaw: "1–2 dias", temp: "74°C (165°F)" },
+      { cut: "Peito de Frango (2 lb / 0,9 kg)", fridge: "24 h", coldWater: "~1–1,5 h", postThaw: "1–2 dias", temp: "74°C (165°F)" },
+      { cut: "Assado Bov/Suíno (4 lb / 1,8 kg)", fridge: "24–26 h", coldWater: "~2 h", postThaw: "3–5 dias", temp: "63°C (145°F) + 3m" },
+      { cut: "Carne Moída (2 lb / 0,9 kg)", fridge: "24 h", coldWater: "~1–1,5 h", postThaw: "1–2 dias", temp: "71°C bov · 74°C ave" },
+      { cut: "Pernil/Presunto Cru (10 lb / 4,5 kg)", fridge: "2–2,5 dias (4–6h/lb)", coldWater: "~5 h", postThaw: "3–5 dias", temp: "63°C (145°F) + 3m" },
+      { cut: "Peixe e Camarão (1,5 lb / 0,7 kg)", fridge: "12–18 h (abrir vácuo!)", coldWater: "~45 min", postThaw: "1–2 dias", temp: "63°C (145°F)" }
+    ],
+    relatedToolTag: "Ferramenta Interativa Relacionada",
+    relatedLeftoverTitle: "Calculadora USDA de Validade de Sobras na Geladeira →",
+    relatedLeftoverDesc: "Já preparou o peru, frango ou assado? Acompanhe o prazo de 3–4 dias na geladeira, a regra das 2 horas e o reaquecimento seguro.",
+    relatedDirTag: "Diretório de Segurança Alimentar",
+    relatedRefreezeTitle: "Pode Recongelar Carne ou Frango Descongelado? →",
+    relatedRefreezeDesc: "Veja alimento por alimento quando é seguro recongelar carne crua, peixes e pratos cozidos segundo o USDA.",
+    hubsTitle: "Explorar Guias Verificados de Congelamento e Armazenamento",
+    hubsDesc: "Confira potes seguros para freezer, temperaturas da geladeira e regras de recongelamento.",
+    hubLabels: {
+      freezer: "Guia do Freezer",
+      refrigerator: "Guia da Geladeira",
+      refreeze: "Pode Recongelar?",
+      howLong: "Quanto Tempo Dura",
+      methodology: "Metodologia",
+      allTools: "Todas as Ferramentas →"
+    },
+    faqTitle: "Perguntas Frequentes sobre Descongelamento Seguro de Carnes",
+    faqs: [
+      {
+        question: "Quanto tempo leva para descongelar um peru congelado na geladeira?",
+        answer: "Pelos padrões USDA FSIS, reserve 24 horas na geladeira (a ≤4°C / 40°F) para cada 4 a 5 libras (1,8 a 2,3 kg) de peru inteiro. Um peru de 16 lb (7,3 kg) precisa de 3 a 4 dias completos. Após descongelar na geladeira, permanece seguro por mais 1 a 2 dias antes de ir ao forno."
+      },
+      {
+        question: "Por que não se deve descongelar carne ou frango na pia ou bancada?",
+        answer: "Mesmo com o centro ainda congelado, a camada externa aquece acima de 4°C e entra na Zona de Perigo (4°C–60°C) em cerca de 2 horas. Bactérias como Salmonella, E. coli e Staphylococcus aureus se multiplicam rapidamente na superfície e podem produzir toxinas termoestáveis."
+      },
+      {
+        question: "Como funciona o descongelamento rápido em banho de água fria?",
+        answer: "Coloque a carne em um saco plástico bem vedado e mergulhe totalmente em água fria da torneira (nunca morna ou quente). Calcule cerca de 30 minutos por libra (aprox. 8 h para 16 lb) e troque toda a água a cada 30 minutos. Cozinhe imediatamente ao terminar."
+      },
+      {
+        question: "Por que devo retirar o peixe embalado a vácuo do plástico antes de descongelar?",
+        answer: "Embalagens a vácuo removem o oxigênio ao redor do peixe. Descongelar nesse ambiente sem oxigênio — mesmo dentro da geladeira — cria risco de germinação de Clostridium botulinum e produção de toxina botulínica sem cheiro ou aparência alterada. Sempre corte ou retire do saco a vácuo antes."
+      },
+      {
+        question: "Posso recongelar carne descongelada ou cozinhar direto do congelador?",
+        answer: "Sim! Carnes descongeladas exclusivamente na geladeira (≤4°C) podem ser recongeladas cruas com segurança (pode haver leve perda de textura). Se descongelou em água fria ou micro-ondas, cozinhe antes de recongelar. Também é seguro cozinhar direto do freezer no forno, fogão ou panela de pressão somando +50% ao tempo — nunca use slow cooker para carne crua congelada."
+      }
+    ],
+    breadcrumbs: [
+      { label: "Início", href: "/pt/" },
+      { label: "Ferramentas", href: "/pt/tools/" },
+      { label: "Calculadora para Descongelar Carne e Peru" }
+    ]
+  },
+  'zh-cn': {
+    pageTitle: "USDA 肉类与火鸡安全解冻时间计算器 | 最晚解冻倒推 | IsItKitchenSafe",
+    pageDescription: "根据美国农业部 USDA FSIS 安全解冻标准，精准计算整只火鸡、整鸡、鸡胸肉、牛排、肉馅、火腿及鱼虾的冷藏、冷水、微波及免解冻直烹时间，自动倒推最晚开始解冻日期。",
+    badge: "USDA FSIS 权威安全解冻工具",
+    h1: "肉类与火鸡安全解冻时间计算器",
+    heroSub: "准备烤感恩节火鸡、炖整块牛肉或煎牛排？选择肉类部位、冷冻重量（支持磅 lbs / 公斤 kg 切换）与计划开火时间，立刻获取四种 USDA 认证方式的最晚开始解冻时间、换水频次、安全中心温度与操作清单。",
+    chartTitle: "USDA 常见肉类安全解冻速查表",
+    chartIntro: "下表基于冰箱冷藏室 ≤4°C (40°F) 与冷水每 30 分钟换水一次的官方标准。查看我们的资料核验标准：",
+    methodologyLabel: "评估方法论",
+    chartHeaders: ["常见部位与示例重量", "冰箱冷藏 (≤4°C)", "冷水浸泡解冻", "解冻后冷藏上限", "安全中心熟度温度"],
+    chartRows: [
+      { cut: "整只火鸡 (16 lb / 7.3 kg)", fridge: "3–4 天 (每4–5磅24h)", coldWater: "约 8 小时 (30分/磅)", postThaw: "1–2 天", temp: "74°C (165°F)" },
+      { cut: "整鸡 (5 lb / 2.3 kg)", fridge: "24–30 小时", coldWater: "约 2.5 小时", postThaw: "1–2 天", temp: "74°C (165°F)" },
+      { cut: "无骨鸡胸/鸡腿 (2 lb / 0.9 kg)", fridge: "24 小时", coldWater: "约 1–1.5 小时", postThaw: "1–2 天", temp: "74°C (165°F)" },
+      { cut: "整块牛/猪烤肉 (4 lb / 1.8 kg)", fridge: "24–26 小时", coldWater: "约 2 小时", postThaw: "3–5 天", temp: "63°C + 静置3分" },
+      { cut: "牛肉/禽肉馅 (2 lb / 0.9 kg)", fridge: "24 小时", coldWater: "约 1–1.5 小时", postThaw: "1–2 天", temp: "牛猪71°C · 禽74°C" },
+      { cut: "整只生火腿 (10 lb / 4.5 kg)", fridge: "2–2.5 天 (4–6h/磅)", coldWater: "约 5 小时", postThaw: "3–5 天", temp: "63°C + 静置3分" },
+      { cut: "鱼柳与虾仁 (1.5 lb / 0.7 kg)", fridge: "12–18 小时 (先拆真空袋!)", coldWater: "约 45 分钟", postThaw: "1–2 天", temp: "63°C (145°F)" }
+    ],
+    relatedToolTag: "相关交互式安全工具",
+    relatedLeftoverTitle: "USDA 剩菜与冰箱保质期倒计时计算器 →",
+    relatedLeftoverDesc: "肉类烹饪完成后吃不完？实时计算熟肉与剩菜 3–4 天冷藏截止期、2 小时室温红线与复热温度。",
+    relatedDirTag: "食品安全速查目录",
+    relatedRefreezeTitle: "解冻后的生肉、海鲜与熟菜能否复冻？ →",
+    relatedRefreezeDesc: "逐项查阅 USDA 关于鸡肉、牛肉、海鲜与熟食二次冷冻的安全判定与口感指南。",
+    hubsTitle: "探索更多权威冷藏、冷冻与保鲜指南",
+    hubsDesc: "快速查阅冷冻室容器安全、冰箱分区保鲜与食材复冻规则。",
+    hubLabels: {
+      freezer: "冷冻室指南",
+      refrigerator: "冷藏室指南",
+      refreeze: "能否复冻查询",
+      howLong: "食物能放多久",
+      methodology: "方法论",
+      allTools: "全部工具 →"
+    },
+    faqTitle: "肉类安全解冻常见问题解答",
+    faqs: [
+      {
+        question: "整只冷冻火鸡在冰箱冷藏室解冻需要几天？",
+        answer: "根据 USDA FSIS 标准，在 ≤4°C（40°F）的冷藏室中，每 4–5 磅（约 1.8–2.3 公斤）火鸡需要 24 小时。例如 16 磅火鸡需要提前 3–4 天转入冷藏室，20 磅火鸡需要 4–5 天。冷藏完全解冻后的生火鸡还可安全存放 1–2 天再烤。"
+      },
+      {
+        question: "为什么绝对不能把冻肉放在厨房台面常温解冻或用热水泡？",
+        answer: "即使肉块中心还是硬冰块，外层肉面在常温下不到 2 小时就会升温进入 4°C–60°C（40°F–140°F）细菌危险温区。沙门氏菌、大肠杆菌与金黄色葡萄球菌会在表层快速繁殖，部分细菌产生的耐热毒素甚至无法靠彻底煮熟消除。"
+      },
+      {
+        question: "USDA 冷水浸泡解冻法的正确步骤是什么？",
+        answer: "将冻肉装入完全密封不漏水的拉链袋，全部浸没在冷自来水中（切勿用温水或热水）。按每磅约 30 分钟估算（如 2 磅肉馅约 1–1.5 小时，16 磅火鸡约 8 小时），并且必须每隔 30 分钟彻底更换一次新冷水。冷水解冻后必须立刻下锅烹饪。"
+      },
+      {
+        question: "为什么真空包装的鱼解冻前必须先拆开真空袋？",
+        answer: "真空包装属于减氧包装（ROP）。在无氧环境下解冻鱼类——哪怕是在冰箱冷藏室低温下——厌氧的肉毒梭菌（Clostridium botulinum）芽孢仍可能萌发并产生致命肉毒毒素，且食物外观与气味毫无异常。因此 FDA 与 USDA 要求解冻前务必先剪开或移除真空袋。"
+      },
+      {
+        question: "解冻后的肉还能再次冷冻吗？或者不解冻直接烹饪安全吗？",
+        answer: "遵循 USDA 规则两者皆可：仅在冰箱冷藏室（≤4°C）安全解冻的生肉可以直接复冻（水分流失会略微影响口感）；但冷水或微波解冻的肉必须先彻底煮熟后才能冷冻。此外，烤箱、炒锅、空气炸锅或高压锅均可直接烹饪冻肉，只需将烹调时间延长至少 50%——但严禁用慢炖锅（Slow Cooker）直接炖冷冻生肉。"
+      }
+    ],
+    breadcrumbs: [
+      { label: "首页", href: "/zh-cn/" },
+      { label: "工具", href: "/zh-cn/tools/" },
+      { label: "肉类与火鸡安全解冻计算器" }
+    ]
+  },
+  ja: {
+    pageTitle: "USDA 肉・七面鳥の安全な解凍時間計算ツール | 逆算スケジュール | IsItKitchenSafe",
+    pageDescription: "米国農務省（USDA FSIS）基準に基づき、七面鳥・丸鶏・鶏むね肉・塊肉・ひき肉・生ハム・魚介の安全な解凍時間と開始目安日時を自動計算。冷蔵庫・冷水・電子レンジ・凍ったまま調理の4方式を比較できます。",
+    badge: "USDA FSIS 安全解凍ガイドツール",
+    h1: "肉・七面鳥の安全な解凍時間計算ツール",
+    heroSub: "七面鳥やローストビーフ、普段の鶏肉・魚の解凍に。部位・冷凍重量（lb / kg 切替対応）・調理予定日時を選ぶだけで、4つのUSDA推奨解凍法それぞれの開始目安日時・水交換回数・安全中心温度・手順チェックリストを即座に表示します。",
+    chartTitle: "USDA 肉類・魚介の安全な解凍時間早見表",
+    chartIntro: "冷蔵庫は 4°C（40°F）以下、冷水解凍は 30 分ごとの水交換を前提とした目安です。科学的根拠の確認方法については",
+    methodologyLabel: "検証メソドロジー",
+    chartHeaders: ["部位・重量の例", "冷蔵庫 (4°C以下)", "冷水解凍", "解凍後の冷蔵期限", "安全な中心温度"],
+    chartRows: [
+      { cut: "七面鳥 丸ごと (16 lb / 7.3 kg)", fridge: "3〜4日 (4–5lb毎24h)", coldWater: "約8時間 (30分/lb)", postThaw: "1〜2日", temp: "74°C (165°F)" },
+      { cut: "丸鶏 (5 lb / 2.3 kg)", fridge: "24〜30時間", coldWater: "約2.5時間", postThaw: "1〜2日", temp: "74°C (165°F)" },
+      { cut: "骨なし鶏むね/もも (2 lb / 0.9 kg)", fridge: "24時間", coldWater: "約1〜1.5時間", postThaw: "1〜2日", temp: "74°C (165°F)" },
+      { cut: "牛・豚 塊肉 (4 lb / 1.8 kg)", fridge: "24〜26時間", coldWater: "約2時間", postThaw: "3〜5日", temp: "63°C＋3分休ませ" },
+      { cut: "ひき肉 (2 lb / 0.9 kg)", fridge: "24時間", coldWater: "約1〜1.5時間", postThaw: "1〜2日", temp: "牛豚71°C・鶏74°C" },
+      { cut: "骨付き生ハム塊 (10 lb / 4.5 kg)", fridge: "2〜2.5日 (4–6h/lb)", coldWater: "約5時間", postThaw: "3〜5日", temp: "63°C＋3分休ませ" },
+      { cut: "魚切り身・エビ (1.5 lb / 0.7 kg)", fridge: "12〜18時間 (真空開封!)", coldWater: "約45分", postThaw: "1〜2日", temp: "63°C (145°F)" }
+    ],
+    relatedToolTag: "関連インタラクティブツール",
+    relatedLeftoverTitle: "USDA 残り物・冷蔵庫日持ちカウントダウン計算機 →",
+    relatedLeftoverDesc: "調理後のローストや鶏肉の保存期限（3〜4日）や2時間ルール、再加熱温度をチェックできます。",
+    relatedDirTag: "食品衛生ディレクトリ",
+    relatedRefreezeTitle: "解凍した肉・魚・料理は再冷凍できる？ →",
+    relatedRefreezeDesc: "USDA基準に基づき、食材ごとの安全な再冷凍条件と注意点を一覧で確認できます。",
+    hubsTitle: "冷凍・冷蔵・再冷凍の検証済みガイドを見る",
+    hubsDesc: "冷凍庫の保存容器チェック、冷蔵庫の温度管理、日持ち一覧へ移動できます。",
+    hubLabels: {
+      freezer: "冷凍庫ガイド",
+      refrigerator: "冷蔵庫ガイド",
+      refreeze: "再冷凍できる？",
+      howLong: "食品の日持ち一覧",
+      methodology: "メソドロジー",
+      allTools: "全ツール一覧 →"
+    },
+    faqTitle: "肉の安全な解凍に関するよくある質問",
+    faqs: [
+      {
+        question: "冷凍の七面鳥を冷蔵庫で解凍するには何日かかりますか？",
+        answer: "USDA FSIS の基準では、4°C（40°F）以下の冷蔵庫で4〜5ポンド（約1.8〜2.3kg）あたり24時間が目安です。たとえば16ポンド（約7.3kg）の七面鳥は3〜4日かかります。冷蔵庫で完全解凍した後は、さらに1〜2日間冷蔵保存してから調理できます。"
+      },
+      {
+        question: "なぜ常温（キッチンの作業台）やぬるま湯で肉を解凍してはいけないのですか？",
+        answer: "肉の中心がまだ凍っていても、外側の表面は2時間以内に4°Cを超え、細菌が急増殖する危険温度帯（4°C〜60°C）に入ります。サルモネラ菌や腸管出血性大腸菌、黄色ブドウ球菌が表面で急増し、加熱しても壊れない耐熱性毒素が生成される危険があります。"
+      },
+      {
+        question: "USDA推奨の冷水解凍の正しい手順は？",
+        answer: "水漏れしない密閉ジッパー袋に肉を入れ、冷たい水道水に完全に浸します（ぬるま湯やお湯は厳禁）。1ポンドあたり約30分を目安とし、水温が上がらないよう30分ごとに必ず新しい冷水に全量交換してください。冷水解凍した肉は直ちに加熱調理する必要があります。"
+      },
+      {
+        question: "真空パックの魚はなぜ解凍前に必ず開封しなければならないのですか？",
+        answer: "真空パック（脱酸素包装）は無酸素環境を作るため、袋を閉じたまま解凍すると冷蔵庫内の低温でも嫌気性のボツリヌス菌（Clostridium botulinum）が増殖し、無臭・無味のまま猛毒のボツリヌス毒素を生成するリスクがあります。解凍前に必ず袋を切るか中身を出してください。"
+      },
+      {
+        question: "解凍した肉は再冷凍できますか？また凍ったまま調理しても安全ですか？",
+        answer: "条件を守ればどちらも可能です。冷蔵庫（4°C以下）で解凍した生肉は、加熱前でも安全に再冷凍できます（品質・食感はやや低下）。冷水や電子レンジで解凍した場合は、一度加熱調理してから冷凍してください。また、オーブン・フライパン・圧力鍋なら凍ったまま調理可能（通常の+50%の加熱時間）ですが、スロークッカーでの冷凍生肉調理は厳禁です。"
+      }
+    ],
+    breadcrumbs: [
+      { label: "ホーム", href: "/ja/" },
+      { label: "ツール", href: "/ja/tools/" },
+      { label: "肉・七面鳥 解凍時間計算ツール" }
+    ]
+  }
+};
+
+const c = CONTENT[lang as Exclude<SupportedLanguage, 'en'>] || CONTENT.es;
+const localizedUrl = `https://isitkitchensafe.com/${lang}/tools/meat-thawing-calculator/`;
+
+const freezerUrl = getApplianceUrl('freezer', lang);
+const refrigeratorUrl = getApplianceUrl('refrigerator', lang);
+const refreezeUrl = getDirectoryUrl('refreeze', lang);
+const howLongUrl = getDirectoryUrl('how-long', lang);
+const toolsUrl = getDirectoryUrl('tools', lang);
+const leftoverCalcUrl = `/${lang}/tools/leftover-shelf-life-calculator/`;
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": c.h1,
+  "url": localizedUrl,
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript.",
+  "description": c.pageDescription,
+  "inLanguage": lang === 'zh-cn' ? 'zh-CN' : lang,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IsItKitchenSafe",
+    "url": "https://isitkitchensafe.com"
+  }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": c.faqs.map((faq) => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+};
+---
+
+<Layout
+  title={c.pageTitle}
+  description={c.pageDescription}
+  excludeFaqSchema={true}
+  availableLocales={availableLocales}
+  lang={lang}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(webAppSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+  </Fragment>
+
+  <!-- Breadcrumbs -->
+  <div class="bg-surface-soft border-b border-hairline py-1">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <Breadcrumbs items={c.breadcrumbs} className="mb-0" />
+    </div>
+  </div>
+
+  <div class="max-w-[1140px] mx-auto px-6 py-10 md:py-14">
+    <!-- Hero Header -->
+    <header class="mb-10 text-center max-w-3xl mx-auto">
+      <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-signature-coral text-white mb-3">
+        {c.badge}
+      </span>
+      <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-4">
+        {c.h1}
+      </h1>
+      <p class="text-body text-[15px] md:text-[16px] leading-relaxed">
+        {c.heroSub}
+      </p>
+    </header>
+
+    <!-- Main Interactive Calculator -->
+    <div class="mb-14">
+      <MeatThawingCalculator lang={lang} />
+    </div>
+
+    <!-- USDA Safe Thawing Quick Reference Chart -->
+    <section class="mb-14 space-y-5">
+      <div>
+        <h2 class="text-title-lg font-medium text-ink tracking-tight mb-2">
+          {c.chartTitle}
+        </h2>
+        <p class="text-body text-[14.5px] leading-relaxed">
+          {c.chartIntro} <a href="/methodology/" class="text-link underline hover:text-link-active">{c.methodologyLabel}</a>.
+        </p>
+      </div>
+
+      <div class="border border-hairline rounded-xl overflow-hidden bg-canvas">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-surface-strong border-b border-hairline text-ink font-semibold">
+              <tr>
+                <th class="p-3.5">{c.chartHeaders[0]}</th>
+                <th class="p-3.5">{c.chartHeaders[1]}</th>
+                <th class="p-3.5">{c.chartHeaders[2]}</th>
+                <th class="p-3.5">{c.chartHeaders[3]}</th>
+                <th class="p-3.5">{c.chartHeaders[4]}</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-hairline">
+              {c.chartRows.map((row, idx) => (
+                <tr class={idx % 2 === 0 ? 'bg-canvas' : 'bg-surface-soft'}>
+                  <td class="p-3.5 font-semibold text-ink whitespace-nowrap">{row.cut}</td>
+                  <td class="p-3.5 text-body whitespace-nowrap font-medium">{row.fridge}</td>
+                  <td class="p-3.5 text-body whitespace-nowrap">{row.coldWater}</td>
+                  <td class="p-3.5 text-body whitespace-nowrap">{row.postThaw}</td>
+                  <td class="p-3.5 text-body text-[13px] whitespace-nowrap">{row.temp}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Related Tools & Storage Guides -->
+    <section class="mb-14 grid grid-cols-1 md:grid-cols-2 gap-5">
+      <a
+        href={leftoverCalcUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {c.relatedToolTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {c.relatedLeftoverTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">
+          {c.relatedLeftoverDesc}
+        </p>
+      </a>
+
+      <a
+        href={refreezeUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {c.relatedDirTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {c.relatedRefreezeTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">
+          {c.relatedRefreezeDesc}
+        </p>
+      </a>
+    </section>
+
+    <!-- Core Storage Hub Strip -->
+    <section class="mb-14 p-6 rounded-2xl bg-surface-soft border border-hairline">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-title-sm font-semibold text-ink mb-1">
+            {c.hubsTitle}
+          </h2>
+          <p class="text-[13px] text-muted">
+            {c.hubsDesc}
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <a href={freezerUrl} class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors">{c.hubLabels.freezer}</a>
+          <a href={refrigeratorUrl} class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors">{c.hubLabels.refrigerator}</a>
+          <a href={refreezeUrl} class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors">{c.hubLabels.refreeze}</a>
+          <a href={howLongUrl} class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors">{c.hubLabels.howLong}</a>
+          <a href="/methodology/" class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors">{c.hubLabels.methodology}</a>
+          <a href={toolsUrl} class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors">{c.hubLabels.allTools}</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Section (5 Consumer-Friendly FAQs) -->
+    <section class="mb-8">
+      <h2 class="text-title-lg font-medium text-ink tracking-tight mb-6">
+        {c.faqTitle}
+      </h2>
+      <div class="space-y-4">
+        {c.faqs.map((faq) => (
+          <details class="group p-5 bg-surface-soft border border-hairline rounded-xl" open>
+            <summary class="text-title-sm font-semibold text-ink cursor-pointer list-none flex items-center justify-between gap-3">
+              <span>{faq.question}</span>
+              <span class="text-muted text-sm transition-transform group-open:rotate-180 shrink-0" aria-hidden="true">&#9662;</span>
+            </summary>
+            <p class="text-[14px] text-body leading-relaxed mt-3 pt-3 border-t border-hairline/70">
+              {faq.answer}
+            </p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+</Layout>

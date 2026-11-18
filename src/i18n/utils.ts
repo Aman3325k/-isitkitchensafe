@@ -207,7 +207,10 @@ const SPECIAL_PAGES = [
   'tools/commercial-continuous-fm-acfd-modeler',
   'tools/commercial-continuous-scw-mcc-modeler',
   'tools/kitchen-symbol-decoder',
-  'tools/leftover-shelf-life-calculator'
+  'tools/leftover-shelf-life-calculator',
+  'tools/meat-thawing-calculator',
+  'methodology',
+  'saved'
 ];
 
 const esSlugs = new Set([
@@ -297,10 +300,10 @@ export function isItemTranslatedInLocale(appliance: string, slug: string, lang: 
   return false;
 }
 
-const esDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens', 'compare', 'blog', 'material', 'tools', 'about', 'contact', 'privacy', 'terms', 'disclaimer', 'sitemap-page']);
-const ptDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens', 'compare', 'blog', 'material', 'tools', 'about', 'contact', 'privacy', 'terms', 'disclaimer', 'sitemap-page']);
-const zhDirectories = new Set<string>(['washing-machine', 'how-long', 'material', 'what-happens', 'refreeze', 'compare', 'blog', 'tools', 'about', 'contact', 'privacy', 'terms', 'disclaimer', 'sitemap-page']);
-const jaDirectories = new Set<string>(['washing-machine', 'how-long', 'material', 'what-happens', 'refreeze', 'compare', 'blog', 'tools', 'about', 'contact', 'privacy', 'terms', 'disclaimer', 'sitemap-page']);
+const esDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens', 'compare', 'blog', 'material', 'tools', 'about', 'contact', 'privacy', 'terms', 'disclaimer', 'sitemap-page', 'methodology', 'saved']);
+const ptDirectories = new Set<string>(['washing-machine', 'how-long', 'refreeze', 'what-happens', 'compare', 'blog', 'material', 'tools', 'about', 'contact', 'privacy', 'terms', 'disclaimer', 'sitemap-page', 'methodology', 'saved']);
+const zhDirectories = new Set<string>(['washing-machine', 'how-long', 'material', 'what-happens', 'refreeze', 'compare', 'blog', 'tools', 'about', 'contact', 'privacy', 'terms', 'disclaimer', 'sitemap-page', 'methodology', 'saved']);
+const jaDirectories = new Set<string>(['washing-machine', 'how-long', 'material', 'what-happens', 'refreeze', 'compare', 'blog', 'tools', 'about', 'contact', 'privacy', 'terms', 'disclaimer', 'sitemap-page', 'methodology', 'saved']);
 
 /**
  * Checks whether a safety directory section has translated content in the given locale.

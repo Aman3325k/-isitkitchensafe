@@ -213,6 +213,66 @@ const recommendedToolUrl = translatePath(recommendedTool.path);
 const methodologyUrl = getDirectoryUrl('methodology', lang);
 const savedSheetUrl = getDirectoryUrl('saved', lang);
 
+// Shareable 4:5 PNG Safety Card localized labels & tips
+const safeTipsList: string[] = Array.isArray(data.tips) ? data.tips.filter(Boolean) : [];
+const safeWarningsList: string[] = Array.isArray(data.warnings) ? data.warnings.filter(Boolean) : [];
+const cardTip1 = safeTipsList[0] || data.tip || safeWarningsList[0] || '';
+const cardTip2 = safeTipsList[1] || (safeWarningsList[0] && safeWarningsList[0] !== cardTip1 ? safeWarningsList[0] : (data.specific_warning || ''));
+
+const cardVerdictLabel = data.safe === 'yes'
+  ? (lang === 'es' ? 'SÍ — SEGURO' : lang === 'pt' ? 'SIM — SEGURO' : lang === 'zh-cn' ? '安全 — 可以使用' : lang === 'ja' ? '安全 — 使用OK' : 'YES — SAFE')
+  : data.safe === 'no'
+  ? (lang === 'es' ? 'NO — NO SEGURO' : lang === 'pt' ? 'NÃO — INSEGURO' : lang === 'zh-cn' ? '危险 — 切勿使用' : lang === 'ja' ? '危険 — 使用NG' : 'NO — UNSAFE')
+  : (lang === 'es' ? 'DEPENDE — CON PRECAUCIÓN' : lang === 'pt' ? 'DEPENDE — COM CAUTELA' : lang === 'zh-cn' ? '视情况 — 需谨慎' : lang === 'ja' ? '条件付き — 注意' : 'DEPENDS — WITH CAUTION');
+
+const cardCopy = {
+  buttonLabel: lang === 'es' ? 'Descargar Tarjeta' :
+               lang === 'pt' ? 'Baixar Cartão' :
+               lang === 'zh-cn' ? '保存安全卡片' :
+               lang === 'ja' ? '画像カードを保存' :
+               'Save Image Card',
+  downloadedLabel: lang === 'es' ? 'Descargada ✓' :
+                   lang === 'pt' ? 'Baixado ✓' :
+                   lang === 'zh-cn' ? '已下载 ✓' :
+                   lang === 'ja' ? '保存しました ✓' :
+                   'Downloaded ✓',
+  quickAnswerLabel: lang === 'es' ? 'VEREDICTO RÁPIDO' :
+                    lang === 'pt' ? 'VEREDITO RÁPIDO' :
+                    lang === 'zh-cn' ? '快速安全结论' :
+                    lang === 'ja' ? 'クイック結論' :
+                    'QUICK ANSWER',
+  tipsHeading: lang === 'es' ? 'CONSEJOS CLAVE DE SEGURIDAD' :
+               lang === 'pt' ? 'PRINCIPAIS DICAS DE SEGURANÇA' :
+               lang === 'zh-cn' ? '核心实用安全建议' :
+               lang === 'ja' ? '実用的な安全ポイント' :
+               'TOP PRACTICAL SAFETY TIPS',
+  footerVerified: lang === 'es' ? 'Verificado según USDA/FDA y manuales OEM' :
+                  lang === 'pt' ? 'Verificado conforme USDA/FDA e manuais OEM' :
+                  lang === 'zh-cn' ? '依据 USDA/FDA 规范与原厂手册核验' :
+                  lang === 'ja' ? 'USDA/FDA基準・メーカー仕様に基づき検証済み' :
+                  'Verified against USDA/FDA & OEM Appliance Specs',
+  verifiedBadge: lang === 'es' ? 'VERIFICADO' :
+                 lang === 'pt' ? 'VERIFICADO' :
+                 lang === 'zh-cn' ? '已核验' :
+                 lang === 'ja' ? '検証済み' :
+                 'VERIFIED',
+  howToShareLabel: lang === 'es' ? 'Cómo Compartir / Guardar en Pinterest' :
+                   lang === 'pt' ? 'Como Compartilhar / Salvar no Pinterest' :
+                   lang === 'zh-cn' ? '如何分享 / 保存卡片' :
+                   lang === 'ja' ? '共有・ピン保存の方法' :
+                   'How to Share / Pin',
+  howToShareDesc: lang === 'es' ? 'Haz clic en "Descargar Tarjeta" para guardar un PNG 4:5 listo para Pinterest, Instagram Stories, WhatsApp o imprimir en el refrigerador.' :
+                  lang === 'pt' ? 'Clique em "Baixar Cartão" para salvar um PNG 4:5 pronto para Pinterest, Instagram Stories, WhatsApp ou imprimir na geladeira.' :
+                  lang === 'zh-cn' ? '点击“保存安全卡片”即可下载 4:5 高清 PNG 图片，适合分享至微信、小红书、Pinterest 或打印贴在冰箱上。' :
+                  lang === 'ja' ? '「画像カードを保存」をクリックすると、Pinterest・Instagramストーリーズ・LINE共有や冷蔵庫への印刷に最適な4:5 PNG画像を保存できます。' :
+                  'Click "Save Image Card" to download a crisp 4:5 PNG ready for Pinterest, Instagram Stories, WhatsApp, or fridge printing.',
+  fridgeSheetLink: lang === 'es' ? 'Abrir Hoja para el Refrigerador →' :
+                   lang === 'pt' ? 'Abrir Folha para a Geladeira →' :
+                   lang === 'zh-cn' ? '打开冰箱速查表 →' :
+                   lang === 'ja' ? '冷蔵庫用早見表を開く →' :
+                   'Open Fridge Cheat Sheet →'
+};
+
 ---
 
 <Layout title={pageTitle} description={pageDescription} faqs={data.faqs} lang={lang} availableLocales={availableLocales}>
@@ -325,6 +385,34 @@ const savedSheetUrl = getDirectoryUrl('saved', lang);
           <span id="bookmark-btn-text">{t('action.saveGuide')}</span>
         </button>
 
+        <!-- Download Shareable PNG Safety Card Button -->
+        <button
+          id="download-card-btn"
+          type="button"
+          class="min-h-[40px] px-4 py-2 bg-canvas hover:bg-surface-soft active:scale-[0.98] text-ink border border-hairline rounded-md text-xs font-medium inline-flex items-center gap-2 shadow-xs transition-all cursor-pointer no-print"
+          data-card-title={questionHeading}
+          data-card-verdict={data.safe}
+          data-card-appliance={formattedAppliance}
+          data-card-appliance-slug={data.appliance}
+          data-card-short={data.shortAnswer}
+          data-card-tip1={cardTip1}
+          data-card-tip2={cardTip2}
+          data-card-slug={data.slug}
+          data-card-lang={lang}
+          data-card-verdict-label={cardVerdictLabel}
+          data-card-quick-label={cardCopy.quickAnswerLabel}
+          data-card-tips-label={cardCopy.tipsHeading}
+          data-card-footer-tagline={cardCopy.footerVerified}
+          data-card-verified-badge={cardCopy.verifiedBadge}
+          data-default-text={cardCopy.buttonLabel}
+          data-downloaded-text={cardCopy.downloadedLabel}
+        >
+          <svg class="w-4 h-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          <span id="download-card-btn-text">{cardCopy.buttonLabel}</span>
+        </button>
+
         <!-- Print Kitchen Safety Card Button -->
         <button
           id="print-card-btn"
@@ -337,6 +425,20 @@ const savedSheetUrl = getDirectoryUrl('saved', lang);
           <span>{t('action.printCard')}</span>
         </button>
       </div>
+
+      <!-- Compact How to Share / Pin Hint -->
+      <details class="mt-2.5 inline-block text-left no-print">
+        <summary class="text-[11px] text-muted hover:text-link cursor-pointer list-none [&::-webkit-details-marker]:hidden inline-flex items-center gap-1 select-none transition-colors">
+          <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>{cardCopy.howToShareLabel}</span>
+        </summary>
+        <p class="mt-1.5 text-[11px] text-muted bg-surface-soft border border-hairline rounded-md px-3 py-2 max-w-[560px] leading-relaxed">
+          {cardCopy.howToShareDesc}{' '}
+          <a href={savedSheetUrl} class="text-link hover:underline font-medium">{cardCopy.fridgeSheetLink}</a>
+        </p>
+      </details>
     </header>
 
     <!-- Quick Answer & Explanation Card -->
@@ -814,6 +916,623 @@ const savedSheetUrl = getDirectoryUrl('saved', lang);
         if (printBtn) {
           printBtn.onclick = function() {
             window.print();
+          };
+        }
+
+        // 4. Download Shareable 1080x1350 PNG Safety Card (Zero-Dependency Canvas)
+        var downloadBtn = document.getElementById('download-card-btn');
+        var downloadBtnText = document.getElementById('download-card-btn-text');
+        if (downloadBtn && downloadBtnText) {
+          var feedbackTimer = null;
+
+          function drawRoundRect(ctx, x, y, w, h, r) {
+            var radius = Math.min(r, w / 2, h / 2);
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + w - radius, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+            ctx.lineTo(x + w, y + h - radius);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+            ctx.lineTo(x + radius, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+          }
+
+          function isCjkChar(ch) {
+            var code = ch.charCodeAt(0);
+            return (
+              (code >= 0x3000 && code <= 0x303f) ||
+              (code >= 0x3040 && code <= 0x309f) ||
+              (code >= 0x30a0 && code <= 0x30ff) ||
+              (code >= 0x3400 && code <= 0x4dbf) ||
+              (code >= 0x4e00 && code <= 0x9fff) ||
+              (code >= 0xf900 && code <= 0xfaff) ||
+              (code >= 0xff00 && code <= 0xffef)
+            );
+          }
+
+          function tokenizeForWrap(text) {
+            var cleaned = String(text || '').replace(/\s+/g, ' ').trim();
+            var tokens = [];
+            var buf = '';
+            for (var i = 0; i < cleaned.length; i++) {
+              var ch = cleaned.charAt(i);
+              if (ch === ' ') {
+                if (buf) {
+                  tokens.push(buf);
+                  buf = '';
+                }
+                tokens.push(' ');
+              } else if (isCjkChar(ch)) {
+                if (buf) {
+                  tokens.push(buf);
+                  buf = '';
+                }
+                tokens.push(ch);
+              } else {
+                buf += ch;
+              }
+            }
+            if (buf) tokens.push(buf);
+            return tokens;
+          }
+
+          function truncateToWidth(ctx, str, maxWidth, forceEllipsis) {
+            var ellipsis = '…';
+            var out = String(str || '').trim();
+            if (!forceEllipsis && ctx.measureText(out).width <= maxWidth) return out;
+            while (out.length > 0 && ctx.measureText(out + ellipsis).width > maxWidth) {
+              out = out.slice(0, -1);
+            }
+            return out.trim() + ellipsis;
+          }
+
+          function wrapCanvasText(ctx, text, maxWidth, maxLines) {
+            var tokens = tokenizeForWrap(text);
+            if (!tokens.length) return [];
+            var lines = [];
+            var current = '';
+            var overflowed = false;
+
+            function pushLine(line) {
+              lines.push(line.replace(/^\s+|\s+$/g, ''));
+            }
+
+            for (var i = 0; i < tokens.length; i++) {
+              var tok = tokens[i];
+              if (tok === ' ' && !current) continue;
+
+              var candidate = current + tok;
+              if (ctx.measureText(candidate).width <= maxWidth) {
+                current = candidate;
+              } else if (!current) {
+                // Single token wider than maxWidth: wrap character by character
+                var piece = '';
+                for (var c = 0; c < tok.length; c++) {
+                  var nextPiece = piece + tok.charAt(c);
+                  if (ctx.measureText(nextPiece).width <= maxWidth || !piece) {
+                    piece = nextPiece;
+                  } else {
+                    pushLine(piece);
+                    if (maxLines && lines.length >= maxLines) {
+                      overflowed = true;
+                      break;
+                    }
+                    piece = tok.charAt(c);
+                  }
+                }
+                if (overflowed) break;
+                current = piece;
+              } else {
+                pushLine(current);
+                if (maxLines && lines.length >= maxLines) {
+                  overflowed = true;
+                  break;
+                }
+                if (tok === ' ') {
+                  current = '';
+                } else if (ctx.measureText(tok).width <= maxWidth) {
+                  current = tok;
+                } else {
+                  // Re-process oversized token on empty line
+                  current = '';
+                  i--;
+                }
+              }
+            }
+
+            if (!overflowed && current.trim()) {
+              if (!maxLines || lines.length < maxLines) {
+                pushLine(current);
+              } else {
+                overflowed = true;
+              }
+            }
+
+            if (overflowed && lines.length > 0) {
+              var lastIdx = lines.length - 1;
+              lines[lastIdx] = truncateToWidth(ctx, lines[lastIdx], maxWidth, true);
+            }
+
+            return lines;
+          }
+
+          function sanitizeFilenamePart(str) {
+            return String(str || 'guide').toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '') || 'guide';
+          }
+
+          function getFontStack(langCode) {
+            if (langCode === 'zh-cn') {
+              return '"PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            }
+            if (langCode === 'ja') {
+              return '"Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Meiryo", "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            }
+            return '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+          }
+
+          function renderSafetyCardPng(meta) {
+            var W = 1080;
+            var H = 1350;
+            var canvas = document.createElement('canvas');
+            canvas.width = W;
+            canvas.height = H;
+            var ctx = canvas.getContext('2d');
+            if (!ctx) return null;
+
+            var fontStack = getFontStack(meta.lang);
+            var verdict = (meta.verdict || 'depends').toLowerCase();
+            var theme = verdict === 'yes' ? {
+              accent: '#10b981',
+              pillBg: '#059669',
+              pillBorder: '#34d399',
+              pillText: '#ffffff',
+              softBg: '#ecfdf5',
+              softText: '#047857',
+              glow: 'rgba(16, 185, 129, 0.20)'
+            } : verdict === 'no' ? {
+              accent: '#f43f5e',
+              pillBg: '#e11d48',
+              pillBorder: '#fb7185',
+              pillText: '#ffffff',
+              softBg: '#fff1f2',
+              softText: '#be123c',
+              glow: 'rgba(244, 63, 94, 0.20)'
+            } : {
+              accent: '#f59e0b',
+              pillBg: '#b45309',
+              pillBorder: '#fbbf24',
+              pillText: '#ffffff',
+              softBg: '#fffbeb',
+              softText: '#92400e',
+              glow: 'rgba(245, 158, 11, 0.20)'
+            };
+
+            // Warm editorial background
+            ctx.fillStyle = '#f6f3ee';
+            ctx.fillRect(0, 0, W, H);
+
+            // Measure wrapped question heading first so header height adapts cleanly
+            var titleSizes = [50, 44, 38];
+            var titleFontSize = 38;
+            var titleLines = [];
+            for (var ts = 0; ts < titleSizes.length; ts++) {
+              titleFontSize = titleSizes[ts];
+              ctx.font = '700 ' + titleFontSize + 'px ' + fontStack;
+              var testLines = wrapCanvasText(ctx, meta.title, 952, 0);
+              if (testLines.length <= 3 || ts === titleSizes.length - 1) {
+                titleLines = wrapCanvasText(ctx, meta.title, 952, 3);
+                break;
+              }
+            }
+            var titleLineHeight = Math.round(titleFontSize * 1.24);
+            var titleStartY = 258;
+            var headerHeight = Math.max(432, Math.min(500, titleStartY + titleLines.length * titleLineHeight + 44));
+
+            // Dark editorial header band
+            var headerGrad = ctx.createLinearGradient(0, 0, W, headerHeight);
+            headerGrad.addColorStop(0, '#181d26');
+            headerGrad.addColorStop(1, '#202736');
+            ctx.fillStyle = headerGrad;
+            ctx.fillRect(0, 0, W, headerHeight);
+
+            // Subtle radial glow in top-right corner of header
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(0, 0, W, headerHeight);
+            ctx.clip();
+            var glowGrad = ctx.createRadialGradient(960, 70, 20, 960, 70, 380);
+            glowGrad.addColorStop(0, theme.glow);
+            glowGrad.addColorStop(1, 'rgba(24, 29, 38, 0)');
+            ctx.fillStyle = glowGrad;
+            ctx.fillRect(540, 0, 540, headerHeight);
+            ctx.restore();
+
+            // Top verdict accent stripe
+            ctx.fillStyle = theme.accent;
+            ctx.fillRect(0, 0, W, 12);
+
+            // Brand mark (top-left)
+            drawRoundRect(ctx, 64, 52, 34, 34, 9);
+            ctx.fillStyle = theme.accent;
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 3.5;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            ctx.moveTo(73, 69);
+            ctx.lineTo(79, 75);
+            ctx.lineTo(90, 62);
+            ctx.stroke();
+
+            ctx.font = '700 22px ' + fontStack;
+            ctx.fillStyle = '#e2e8f0';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('ISITKITCHENSAFE', 112, 70);
+
+            // Appliance Label Pill (top-right)
+            var applianceText = String(meta.appliance || '').toUpperCase();
+            ctx.font = '700 20px ' + fontStack;
+            var applianceClamped = truncateToWidth(ctx, applianceText, 340);
+            var appTextW = ctx.measureText(applianceClamped).width;
+            var appPillW = Math.max(120, appTextW + 44);
+            var appPillH = 44;
+            var appPillX = W - 64 - appPillW;
+            var appPillY = 47;
+            drawRoundRect(ctx, appPillX, appPillY, appPillW, appPillH, 22);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.10)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.fillStyle = '#f8fafc';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(applianceClamped, appPillX + 22, appPillY + appPillH / 2 + 1);
+
+            // High-Contrast Verdict Pill
+            var verdictLabel = meta.verdictLabel || (verdict === 'yes' ? 'YES — SAFE' : verdict === 'no' ? 'NO — UNSAFE' : 'DEPENDS — WITH CAUTION');
+            ctx.font = '800 28px ' + fontStack;
+            var verdictClamped = truncateToWidth(ctx, verdictLabel, 840);
+            var vTextW = ctx.measureText(verdictClamped).width;
+            var vPillH = 66;
+            var vPillW = Math.min(952, 26 + 34 + 16 + vTextW + 34);
+            var vPillX = 64;
+            var vPillY = 138;
+            drawRoundRect(ctx, vPillX, vPillY, vPillW, vPillH, 33);
+            ctx.fillStyle = theme.pillBg;
+            ctx.fill();
+            ctx.strokeStyle = theme.pillBorder;
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+
+            // Vector glyph inside Verdict Pill
+            var iconCx = vPillX + 43;
+            var iconCy = vPillY + vPillH / 2;
+            ctx.beginPath();
+            ctx.arc(iconCx, iconCy, 17, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.22)';
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.fillStyle = '#ffffff';
+            ctx.lineWidth = 3.2;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            if (verdict === 'yes') {
+              ctx.beginPath();
+              ctx.moveTo(iconCx - 7, iconCy);
+              ctx.lineTo(iconCx - 2, iconCy + 6);
+              ctx.lineTo(iconCx + 8, iconCy - 6);
+              ctx.stroke();
+            } else if (verdict === 'no') {
+              ctx.beginPath();
+              ctx.moveTo(iconCx - 6, iconCy - 6);
+              ctx.lineTo(iconCx + 6, iconCy + 6);
+              ctx.moveTo(iconCx + 6, iconCy - 6);
+              ctx.lineTo(iconCx - 6, iconCy + 6);
+              ctx.stroke();
+            } else {
+              ctx.beginPath();
+              ctx.moveTo(iconCx, iconCy - 7);
+              ctx.lineTo(iconCx, iconCy + 1);
+              ctx.stroke();
+              ctx.beginPath();
+              ctx.arc(iconCx, iconCy + 7, 2, 0, Math.PI * 2);
+              ctx.fill();
+            }
+
+            ctx.font = '800 28px ' + fontStack;
+            ctx.fillStyle = theme.pillText;
+            ctx.textBaseline = 'middle';
+            ctx.fillText(verdictClamped, vPillX + 74, iconCy + 1);
+
+            // Wrapped Question Heading
+            ctx.font = '700 ' + titleFontSize + 'px ' + fontStack;
+            ctx.fillStyle = '#ffffff';
+            ctx.textBaseline = 'top';
+            for (var ti = 0; ti < titleLines.length; ti++) {
+              ctx.fillText(titleLines[ti], 64, titleStartY + ti * titleLineHeight);
+            }
+
+            // Footer metrics (reserved bottom band)
+            var footerTop = 1212;
+            var footerH = H - footerTop;
+            var bodyTop = headerHeight + 34;
+
+            // Short Answer Box
+            var shortSizes = [30, 27, 24];
+            var shortFontSize = 24;
+            var shortLines = [];
+            for (var ss = 0; ss < shortSizes.length; ss++) {
+              shortFontSize = shortSizes[ss];
+              ctx.font = '600 ' + shortFontSize + 'px ' + fontStack;
+              var sTest = wrapCanvasText(ctx, meta.shortAnswer, 872, 0);
+              if (sTest.length <= 4 || ss === shortSizes.length - 1) {
+                shortLines = wrapCanvasText(ctx, meta.shortAnswer, 872, 5);
+                break;
+              }
+            }
+            var shortLineHeight = Math.round(shortFontSize * 1.44);
+            var shortBoxH = Math.min(320, 30 + 24 + 16 + shortLines.length * shortLineHeight + 34);
+
+            // Card drop shadow
+            ctx.save();
+            ctx.shadowColor = 'rgba(24, 29, 38, 0.08)';
+            ctx.shadowBlur = 24;
+            ctx.shadowOffsetY = 8;
+            drawRoundRect(ctx, 64, bodyTop, 952, shortBoxH, 20);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+            ctx.restore();
+
+            drawRoundRect(ctx, 64, bodyTop, 952, shortBoxH, 20);
+            ctx.strokeStyle = '#e5e7eb';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            // Left verdict accent bar clipped to rounded card
+            ctx.save();
+            drawRoundRect(ctx, 64, bodyTop, 952, shortBoxH, 20);
+            ctx.clip();
+            ctx.fillStyle = theme.accent;
+            ctx.fillRect(64, bodyTop, 10, shortBoxH);
+            ctx.restore();
+
+            ctx.font = '800 18px ' + fontStack;
+            ctx.fillStyle = theme.softText;
+            ctx.textBaseline = 'top';
+            ctx.fillText(meta.quickLabel || 'QUICK ANSWER', 102, bodyTop + 30);
+
+            ctx.font = '600 ' + shortFontSize + 'px ' + fontStack;
+            ctx.fillStyle = '#181d26';
+            for (var si = 0; si < shortLines.length; si++) {
+              ctx.fillText(shortLines[si], 102, bodyTop + 68 + si * shortLineHeight);
+            }
+
+            // Top 2 Practical Safety Tips Box
+            var tips = [];
+            if (meta.tip1) tips.push(meta.tip1);
+            if (meta.tip2) tips.push(meta.tip2);
+
+            var tipsBoxTop = bodyTop + shortBoxH + 28;
+            var tipsBoxH = footerTop - 28 - tipsBoxTop;
+
+            if (tips.length > 0 && tipsBoxH >= 150) {
+              ctx.save();
+              ctx.shadowColor = 'rgba(24, 29, 38, 0.06)';
+              ctx.shadowBlur = 20;
+              ctx.shadowOffsetY = 6;
+              drawRoundRect(ctx, 64, tipsBoxTop, 952, tipsBoxH, 20);
+              ctx.fillStyle = '#ffffff';
+              ctx.fill();
+              ctx.restore();
+
+              drawRoundRect(ctx, 64, tipsBoxTop, 952, tipsBoxH, 20);
+              ctx.strokeStyle = '#e5e7eb';
+              ctx.lineWidth = 1.5;
+              ctx.stroke();
+
+              ctx.font = '800 18px ' + fontStack;
+              ctx.fillStyle = '#41454d';
+              ctx.textBaseline = 'top';
+              ctx.fillText(meta.tipsLabel || 'TOP PRACTICAL SAFETY TIPS', 96, tipsBoxTop + 28);
+
+              // Subtle divider
+              ctx.fillStyle = '#eceff3';
+              ctx.fillRect(96, tipsBoxTop + 62, 888, 2);
+
+              var innerAvailH = tipsBoxH - 88 - 26;
+              var tipGap = 24;
+              var tipSizes = [25, 23, 21, 19];
+              var chosenTipFont = 19;
+              var chosenTipLH = 28;
+              var chosenWrapped = [];
+
+              for (var tsz = 0; tsz < tipSizes.length; tsz++) {
+                var candidateFont = tipSizes[tsz];
+                var candidateLH = Math.round(candidateFont * 1.44);
+                var maxLinesPerTip = tips.length === 1 ? 6 : 4;
+                ctx.font = '500 ' + candidateFont + 'px ' + fontStack;
+                var wrappedSet = [];
+                var totalH = 0;
+                for (var k = 0; k < tips.length; k++) {
+                  var wl = wrapCanvasText(ctx, tips[k], 820, maxLinesPerTip);
+                  wrappedSet.push(wl);
+                  totalH += Math.max(44, wl.length * candidateLH);
+                  if (k > 0) totalH += tipGap;
+                }
+                chosenTipFont = candidateFont;
+                chosenTipLH = candidateLH;
+                chosenWrapped = wrappedSet;
+                if (totalH <= innerAvailH) break;
+              }
+
+              // If still slightly taller than innerAvailH, cap to 3 lines per tip
+              var finalTotalH = 0;
+              for (var fh = 0; fh < chosenWrapped.length; fh++) {
+                finalTotalH += Math.max(44, chosenWrapped[fh].length * chosenTipLH) + (fh > 0 ? tipGap : 0);
+              }
+              if (finalTotalH > innerAvailH && tips.length > 1) {
+                ctx.font = '500 ' + chosenTipFont + 'px ' + fontStack;
+                chosenWrapped = [
+                  wrapCanvasText(ctx, tips[0], 820, 3),
+                  wrapCanvasText(ctx, tips[1], 820, 3)
+                ];
+              }
+
+              var cursorY = tipsBoxTop + 88;
+              for (var idx = 0; idx < chosenWrapped.length; idx++) {
+                var linesForTip = chosenWrapped[idx];
+                var badgeCenterY = cursorY + Math.round(chosenTipLH * 0.52);
+
+                // Numbered circular badge
+                ctx.beginPath();
+                ctx.arc(116, badgeCenterY, 20, 0, Math.PI * 2);
+                ctx.fillStyle = theme.softBg;
+                ctx.fill();
+                ctx.strokeStyle = theme.accent;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.font = '800 20px ' + fontStack;
+                ctx.fillStyle = theme.softText;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(String(idx + 1), 116, badgeCenterY + 1);
+                ctx.textAlign = 'left';
+
+                // Tip text lines
+                ctx.font = '500 ' + chosenTipFont + 'px ' + fontStack;
+                ctx.fillStyle = '#333840';
+                ctx.textBaseline = 'top';
+                for (var li = 0; li < linesForTip.length; li++) {
+                  ctx.fillText(linesForTip[li], 156, cursorY + li * chosenTipLH);
+                }
+
+                cursorY += Math.max(44, linesForTip.length * chosenTipLH) + tipGap;
+              }
+            }
+
+            // Verification Footer Watermark Band
+            ctx.fillStyle = '#181d26';
+            ctx.fillRect(0, footerTop, W, footerH);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.10)';
+            ctx.fillRect(0, footerTop, W, 2);
+
+            ctx.font = '700 30px ' + fontStack;
+            ctx.fillStyle = '#ffffff';
+            ctx.textBaseline = 'top';
+            ctx.fillText('IsItKitchenSafe.com', 64, footerTop + 34);
+
+            ctx.font = '500 19px ' + fontStack;
+            ctx.fillStyle = '#cbd5e1';
+            var tagline = truncateToWidth(ctx, meta.footerTagline || 'Verified against USDA/FDA & OEM Appliance Specs', 680);
+            ctx.fillText(tagline, 64, footerTop + 78);
+
+            // Right verified badge pill
+            var vBadgeText = meta.verifiedBadge || 'VERIFIED';
+            ctx.font = '700 18px ' + fontStack;
+            var vBadgeW = Math.max(132, ctx.measureText(vBadgeText).width + 62);
+            var vBadgeH = 46;
+            var vBadgeX = W - 64 - vBadgeW;
+            var vBadgeY = footerTop + Math.round((footerH - vBadgeH) / 2);
+
+            drawRoundRect(ctx, vBadgeX, vBadgeY, vBadgeW, vBadgeH, 23);
+            ctx.fillStyle = 'rgba(16, 185, 129, 0.16)';
+            ctx.fill();
+            ctx.strokeStyle = '#34d399';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            // Small checkmark inside verified pill
+            ctx.strokeStyle = '#34d399';
+            ctx.lineWidth = 2.6;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            var checkCy = vBadgeY + vBadgeH / 2;
+            ctx.beginPath();
+            ctx.moveTo(vBadgeX + 20, checkCy);
+            ctx.lineTo(vBadgeX + 25, checkCy + 5);
+            ctx.lineTo(vBadgeX + 34, checkCy - 5);
+            ctx.stroke();
+
+            ctx.fillStyle = '#ecfdf5';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(vBadgeText, vBadgeX + 44, checkCy + 1);
+
+            return canvas;
+          }
+
+          function triggerPngDownload(canvas, filename, onDone) {
+            function invokeDownload(href, shouldRevoke) {
+              var link = document.createElement('a');
+              link.setAttribute('download', filename);
+              link.setAttribute('href', href);
+              link.style.display = 'none';
+              document.body.appendChild(link);
+              link.click();
+              setTimeout(function() {
+                if (link.parentNode) link.parentNode.removeChild(link);
+                if (shouldRevoke && window.URL && window.URL.revokeObjectURL) {
+                  window.URL.revokeObjectURL(href);
+                }
+              }, 1000);
+              if (onDone) onDone();
+            }
+
+            if (canvas.toBlob) {
+              canvas.toBlob(function(blob) {
+                if (blob && window.URL && window.URL.createObjectURL) {
+                  invokeDownload(window.URL.createObjectURL(blob), true);
+                } else {
+                  invokeDownload(canvas.toDataURL('image/png'), false);
+                }
+              }, 'image/png');
+            } else {
+              invokeDownload(canvas.toDataURL('image/png'), false);
+            }
+          }
+
+          downloadBtn.onclick = function() {
+            var meta = {
+              title: downloadBtn.getAttribute('data-card-title') || document.title,
+              verdict: downloadBtn.getAttribute('data-card-verdict') || 'depends',
+              appliance: downloadBtn.getAttribute('data-card-appliance') || '',
+              applianceSlug: downloadBtn.getAttribute('data-card-appliance-slug') || downloadBtn.getAttribute('data-card-appliance') || 'kitchen',
+              shortAnswer: downloadBtn.getAttribute('data-card-short') || '',
+              tip1: downloadBtn.getAttribute('data-card-tip1') || '',
+              tip2: downloadBtn.getAttribute('data-card-tip2') || '',
+              slug: downloadBtn.getAttribute('data-card-slug') || 'guide',
+              lang: downloadBtn.getAttribute('data-card-lang') || 'en',
+              verdictLabel: downloadBtn.getAttribute('data-card-verdict-label') || '',
+              quickLabel: downloadBtn.getAttribute('data-card-quick-label') || 'QUICK ANSWER',
+              tipsLabel: downloadBtn.getAttribute('data-card-tips-label') || 'TOP PRACTICAL SAFETY TIPS',
+              footerTagline: downloadBtn.getAttribute('data-card-footer-tagline') || '',
+              verifiedBadge: downloadBtn.getAttribute('data-card-verified-badge') || 'VERIFIED'
+            };
+
+            try {
+              var canvas = renderSafetyCardPng(meta);
+              if (!canvas) return;
+              var filename = 'isitkitchensafe-' + sanitizeFilenamePart(meta.applianceSlug) + '-' + sanitizeFilenamePart(meta.slug) + '.png';
+              var defaultLabel = downloadBtn.getAttribute('data-default-text') || 'Save Image Card';
+              var downloadedLabel = downloadBtn.getAttribute('data-downloaded-text') || 'Downloaded ✓';
+
+              triggerPngDownload(canvas, filename, function() {
+                downloadBtnText.textContent = downloadedLabel;
+                downloadBtn.classList.add('bg-success-bg', 'text-success', 'border-success-border/40');
+                if (feedbackTimer) clearTimeout(feedbackTimer);
+                feedbackTimer = setTimeout(function() {
+                  downloadBtnText.textContent = defaultLabel;
+                  downloadBtn.classList.remove('bg-success-bg', 'text-success', 'border-success-border/40');
+                  feedbackTimer = null;
+                }, 2500);
+              });
+            } catch (err) {
+              console.error('Safety card PNG export failed:', err);
+            }
           };
         }
       }
