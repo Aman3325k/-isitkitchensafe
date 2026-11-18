@@ -1,0 +1,688 @@
+---
+import rawData from '../data/internal-cooking-temp-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+const defaultUnit = lang === 'en' ? 'F' : 'C';
+
+const CATEGORY_LABELS: Record<string, Record<SupportedLanguage, string>> = {
+  'poultry': {
+    en: 'Poultry & Fowl',
+    es: 'Aves y Pollo',
+    pt: 'Aves e Frango',
+    'zh-cn': '家禽与禽肉',
+    ja: '家禽・鶏肉'
+  },
+  'beef-lamb': {
+    en: 'Beef, Veal & Lamb',
+    es: 'Res, Ternera y Cordero',
+    pt: 'Bovinos e Cordeiro',
+    'zh-cn': '牛肉与羊肉',
+    ja: '牛肉・羊肉'
+  },
+  'pork': {
+    en: 'Pork & Ham',
+    es: 'Cerdo y Jamón',
+    pt: 'Carne Suína e Presunto',
+    'zh-cn': '猪肉与火腿',
+    ja: '豚肉・ハム'
+  },
+  'seafood': {
+    en: 'Fish & Seafood',
+    es: 'Pescados y Mariscos',
+    pt: 'Peixes e Frutos do Mar',
+    'zh-cn': '鱼类与海鲜',
+    ja: '魚介類・シーフード'
+  },
+  'eggs-leftovers': {
+    en: 'Eggs & Leftovers',
+    es: 'Huevos y Sobras',
+    pt: 'Ovos e Sobras',
+    'zh-cn': '蛋品与剩菜',
+    ja: '卵料理・残り物'
+  }
+};
+
+const categories = [
+  { id: 'poultry', label: CATEGORY_LABELS['poultry'][lang] || CATEGORY_LABELS['poultry'].en },
+  { id: 'beef-lamb', label: CATEGORY_LABELS['beef-lamb'][lang] || CATEGORY_LABELS['beef-lamb'].en },
+  { id: 'pork', label: CATEGORY_LABELS['pork'][lang] || CATEGORY_LABELS['pork'].en },
+  { id: 'seafood', label: CATEGORY_LABELS['seafood'][lang] || CATEGORY_LABELS['seafood'].en },
+  { id: 'eggs-leftovers', label: CATEGORY_LABELS['eggs-leftovers'][lang] || CATEGORY_LABELS['eggs-leftovers'].en }
+];
+
+interface LocalizedFoodItem {
+  id: string;
+  category: string;
+  categoryLabel: string;
+  usdaSafeTempF: number;
+  usdaSafeTempC: number;
+  restMinutes: number;
+  carryoverRiseF: number;
+  name: string;
+  notes: string;
+  placementTip: string;
+  pullTempTip: string;
+  searchText: string;
+}
+
+const localizedItems: LocalizedFoodItem[] = rawData.foods.map((item) => {
+  const i18n = (item.i18n as Record<string, any>)[lang] || item.i18n.en;
+  const categoryLabel = CATEGORY_LABELS[item.category]?.[lang] || item.category;
+  const name = i18n.name || item.id;
+  const notes = i18n.notes || '';
+  const placementTip = i18n.placementTip || item.thermometerPlacement || '';
+  const pullTempTip = i18n.pullTempTip || '';
+
+  const searchParts = [
+    name,
+    item.i18n.en?.name || '',
+    notes,
+    placementTip,
+    pullTempTip,
+    categoryLabel,
+    item.id
+  ];
+
+  return {
+    id: item.id,
+    category: item.category,
+    categoryLabel,
+    usdaSafeTempF: item.usdaSafeTempF,
+    usdaSafeTempC: item.usdaSafeTempC,
+    restMinutes: item.restMinutes || 0,
+    carryoverRiseF: item.carryoverRiseF || 0,
+    name,
+    notes,
+    placementTip,
+    pullTempTip,
+    searchText: searchParts.join(' ').toLowerCase()
+  };
+});
+
+const presets = rawData.presets.map((p) => ({
+  id: p.id,
+  foodId: p.foodId,
+  label: (p.labels as Record<string, string>)[lang] || p.labels.en
+}));
+
+interface UiDict {
+  searchLabel: string;
+  searchPlaceholder: string;
+  clearSearch: string;
+  unitLabel: string;
+  allCategories: string;
+  usdaSafeBadge: string;
+  pullTempBadge: string;
+  minRestLabel: string;
+  minRestMinutes: string;
+  probeLabel: string;
+  safetyLabel: string;
+  pullTipLabel: string;
+  quickLookups: string;
+  resultsCount: string;
+  noResults: string;
+  printTableTitle: string;
+  printColItem: string;
+  printColSafe: string;
+  printColRest: string;
+  printColPlacement: string;
+}
+
+const UI: Record<SupportedLanguage, UiDict> = {
+  en: {
+    searchLabel: 'Search Food, Meat, or Dish',
+    searchPlaceholder: 'Search chicken, turkey, steak, pork, salmon, burger, ham...',
+    clearSearch: 'Clear',
+    unitLabel: 'Temperature Unit',
+    allCategories: 'All Foods',
+    usdaSafeBadge: 'USDA SAFE MINIMUM',
+    pullTempBadge: 'CARRYOVER RISE',
+    minRestLabel: 'Mandatory Rest',
+    minRestMinutes: 'min rest',
+    probeLabel: 'Probe Placement',
+    safetyLabel: 'USDA Standards & Food Science',
+    pullTipLabel: 'Chef Pulling & Resting Tip',
+    quickLookups: 'Quick presets:',
+    resultsCount: 'Showing {count} of {total} tested foods',
+    noResults: 'No food items match your filter criteria.',
+    printTableTitle: 'Quick Reference Safe Temp Cheat Sheet',
+    printColItem: 'Food / Cut',
+    printColSafe: 'USDA Safe Min',
+    printColRest: 'Rest Time',
+    printColPlacement: 'Thermometer Placement'
+  },
+  es: {
+    searchLabel: 'Buscar Alimento, Carne o Plato',
+    searchPlaceholder: 'Buscar pollo, pavo, res, cerdo, salmón, hamburguesa, jamón...',
+    clearSearch: 'Borrar',
+    unitLabel: 'Unidad de Temperatura',
+    allCategories: 'Todos los Alimentos',
+    usdaSafeBadge: 'MÍNIMO SEGURO USDA',
+    pullTempBadge: 'AUMENTO RESIDUAL',
+    minRestLabel: 'Reposo Obligatorio',
+    minRestMinutes: 'min reposo',
+    probeLabel: 'Colocación de Sonda',
+    safetyLabel: 'Normas USDA y Ciencia de Alimentos',
+    pullTipLabel: 'Consejo de Retiro y Reposo',
+    quickLookups: 'Preselecciones rápidas:',
+    resultsCount: 'Mostrando {count} de {total} alimentos evaluados',
+    noResults: 'No se encontraron alimentos con los filtros actuales.',
+    printTableTitle: 'Tabla Rápida de Temperaturas Seguras',
+    printColItem: 'Alimento / Corte',
+    printColSafe: 'Mínimo Seguro USDA',
+    printColRest: 'Tiempo Reposo',
+    printColPlacement: 'Punto de Medición'
+  },
+  pt: {
+    searchLabel: 'Buscar Alimento, Carne ou Prato',
+    searchPlaceholder: 'Buscar frango, peru, bife, carne suína, salmão, hambúrguer, presunto...',
+    clearSearch: 'Limpar',
+    unitLabel: 'Unidade de Temperatura',
+    allCategories: 'Todos os Alimentos',
+    usdaSafeBadge: 'MÍNIMO SEGURO USDA',
+    pullTempBadge: 'GANHO RESIDUAL',
+    minRestLabel: 'Descanso Obrigatório',
+    minRestMinutes: 'min descanso',
+    probeLabel: 'Posicionamento do Termômetro',
+    safetyLabel: 'Padrão USDA e Ciência de Alimentos',
+    pullTipLabel: 'Dica de Retirada e Descanso',
+    quickLookups: 'Atalhos rápidos:',
+    resultsCount: 'Mostrando {count} de {total} alimentos avaliados',
+    noResults: 'Nenhum alimento corresponde aos critérios selecionados.',
+    printTableTitle: 'Tabela Prática de Temperaturas Seguras',
+    printColItem: 'Alimento / Corte',
+    printColSafe: 'Mínimo Seguro USDA',
+    printColRest: 'Tempo Descanso',
+    printColPlacement: 'Ponto de Medição'
+  },
+  'zh-cn': {
+    searchLabel: '搜索食品、肉类或菜肴',
+    searchPlaceholder: '搜索鸡肉、火鸡、牛排、猪肉、三文鱼、汉堡排、火腿...',
+    clearSearch: '清空',
+    unitLabel: '温度单位',
+    allCategories: '全部食材',
+    usdaSafeBadge: 'USDA 安全底线',
+    pullTempBadge: '后熟余温升幅',
+    minRestLabel: '强制静置时间',
+    minRestMinutes: '分钟静置',
+    probeLabel: '测温探针插入位置',
+    safetyLabel: 'USDA标准与灭菌机理',
+    pullTipLabel: '离火温度与静置技巧',
+    quickLookups: '常用预设：',
+    resultsCount: '显示 {count} / {total} 种测评食品',
+    noResults: '未找到符合筛选条件的食材。',
+    printTableTitle: 'USDA 安全烹饪核心温度快速速查表',
+    printColItem: '食材种类 / 部位',
+    printColSafe: 'USDA安全温度',
+    printColRest: '建议静置',
+    printColPlacement: '探针测试位置'
+  },
+  ja: {
+    searchLabel: '食材・肉の種類・料理を検索',
+    searchPlaceholder: '鶏肉、七面鳥、ステーキ、豚肉、鮭、ハンバーグ、ハムを検索...',
+    clearSearch: 'クリア',
+    unitLabel: '温度単位',
+    allCategories: 'すべての食材',
+    usdaSafeBadge: 'USDA 安全最低温度',
+    pullTempBadge: '余熱による温度上昇',
+    minRestLabel: '必須休息時間',
+    minRestMinutes: '分休息',
+    probeLabel: '温度計プローブの刺し方',
+    safetyLabel: 'USDA基準と食品衛生の科学',
+    pullTipLabel: '火止め温度と休息のコツ',
+    quickLookups: '定番プリセット：',
+    resultsCount: '{total} 品目中 {count} 件を表示',
+    noResults: '条件に一致する食材が見つかりませんでした。',
+    printTableTitle: 'USDA 安全中心温度クイック早見表',
+    printColItem: '食材・部位',
+    printColSafe: 'USDA安全基準',
+    printColRest: '休息時間',
+    printColPlacement: '温度計の挿入位置'
+  }
+};
+
+const currentUi = UI[lang] || UI.en;
+---
+
+<div class="food-temp-lookup-root not-prose" data-lang={lang} data-default-unit={defaultUnit}>
+  <!-- Controls Panel: Unit Toggle & Instant Search -->
+  <div class="bg-surface border border-hairline rounded-lg p-5 md:p-6 mb-8 shadow-xs">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5 mb-6 pb-6 border-b border-hairline">
+      <!-- Search Input -->
+      <div class="flex-1 max-w-[560px]">
+        <label for="food-search-input" class="block text-caption text-muted uppercase tracking-wider text-xs font-medium mb-1.5">
+          {currentUi.searchLabel}
+        </label>
+        <div class="relative">
+          <svg class="w-4 h-4 text-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1010.5 18a7.5 7.5 0 006.15-3.35z" />
+          </svg>
+          <input
+            type="text"
+            id="food-search-input"
+            autocomplete="off"
+            placeholder={currentUi.searchPlaceholder}
+            aria-label={currentUi.searchLabel}
+            class="w-full h-11 pl-10 pr-10 py-2 bg-canvas text-ink text-[16px] md:text-[14px] border border-hairline rounded-md focus:outline-none focus:border-info-border shadow-xs"
+          />
+          <button
+            type="button"
+            id="food-clear-btn"
+            aria-label={currentUi.clearSearch}
+            class="hidden absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-md text-muted hover:text-ink hover:bg-surface-soft inline-flex items-center justify-center transition-colors cursor-pointer"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Temperature Unit Selector (°F / °C) -->
+      <div class="shrink-0 flex flex-col sm:flex-row sm:items-center gap-3">
+        <span class="text-caption text-muted uppercase tracking-wider text-xs font-medium">
+          {currentUi.unitLabel}
+        </span>
+        <div class="inline-flex p-1 bg-surface-soft border border-hairline rounded-lg" role="group" aria-label={currentUi.unitLabel}>
+          <button
+            type="button"
+            id="unit-btn-f"
+            data-unit="F"
+            class={`min-h-[38px] px-4 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer ${defaultUnit === 'F' ? 'bg-primary text-on-primary shadow-xs' : 'text-muted hover:text-ink'}`}
+          >
+            °F (Fahrenheit)
+          </button>
+          <button
+            type="button"
+            id="unit-btn-c"
+            data-unit="C"
+            class={`min-h-[38px] px-4 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer ${defaultUnit === 'C' ? 'bg-primary text-on-primary shadow-xs' : 'text-muted hover:text-ink'}`}
+          >
+            °C (Celsius)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Preset Buttons -->
+    <div class="flex flex-wrap items-center gap-2 mb-4 text-xs">
+      <span class="text-muted font-medium">{currentUi.quickLookups}</span>
+      {presets.map((pr) => (
+        <button
+          type="button"
+          class="quick-preset-pill min-h-[32px] px-2.5 py-1 rounded-full bg-surface-soft hover:bg-surface-elevated text-ink border border-hairline hover:border-border-strong cursor-pointer transition-colors"
+          data-food-id={pr.foodId}
+        >
+          {pr.label}
+        </button>
+      ))}
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="flex flex-wrap items-center gap-2" role="tablist" aria-label="Food Categories">
+      <button
+        type="button"
+        role="tab"
+        aria-selected="true"
+        data-category="all"
+        class="category-tab-btn min-h-[38px] px-3.5 py-1.5 rounded-lg text-xs font-medium border bg-primary text-on-primary border-primary cursor-pointer transition-colors flex items-center gap-1.5"
+      >
+        <span>{currentUi.allCategories}</span>
+        <span class="text-[11px] opacity-80">({localizedItems.length})</span>
+      </button>
+      {categories.map((cat) => {
+        const count = localizedItems.filter((i) => i.category === cat.id).length;
+        return (
+          <button
+            type="button"
+            role="tab"
+            aria-selected="false"
+            data-category={cat.id}
+            class="category-tab-btn min-h-[38px] px-3.5 py-1.5 rounded-lg text-xs font-medium border bg-canvas text-body border-hairline hover:border-border-strong hover:text-ink cursor-pointer transition-colors flex items-center gap-1.5"
+          >
+            <span>{cat.label}</span>
+            <span class="text-[11px] opacity-75">({count})</span>
+          </button>
+        );
+      })}
+    </div>
+  </div>
+
+  <!-- Results Counter -->
+  <div class="flex items-center justify-between mb-6">
+    <p id="food-results-count" class="text-xs font-medium text-muted" data-template={currentUi.resultsCount}>
+      {currentUi.resultsCount.replace('{count}', String(localizedItems.length)).replace('{total}', String(localizedItems.length))}
+    </p>
+  </div>
+
+  <!-- Food Items Grid -->
+  <div id="food-cards-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {localizedItems.map((item) => (
+      <article
+        class="food-card bg-surface border border-hairline rounded-lg p-5 md:p-6 flex flex-col justify-between shadow-xs hover:border-border-strong transition-all"
+        data-id={item.id}
+        data-category={item.category}
+        data-search={item.searchText}
+        data-temp-f={item.usdaSafeTempF}
+        data-temp-c={item.usdaSafeTempC}
+        data-rise-f={item.carryoverRiseF}
+      >
+        <div>
+          <!-- Header: Category & Rest Badge -->
+          <div class="flex items-center justify-between gap-3 mb-3">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted">
+              {item.categoryLabel}
+            </span>
+            {item.restMinutes > 0 ? (
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-info-soft text-info border border-info-border">
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>{item.restMinutes} {currentUi.minRestMinutes}</span>
+              </span>
+            ) : (
+              <span class="text-[11px] text-muted">0 min rest</span>
+            )}
+          </div>
+
+          <!-- Title -->
+          <h3 class="text-title-sm md:text-title-md font-semibold text-ink mb-2">
+            {item.name}
+          </h3>
+
+          <!-- Temperature Gauge Row -->
+          <div class="grid grid-cols-2 gap-3 p-3.5 rounded-lg bg-surface-soft/80 border border-hairline mb-5">
+            <!-- USDA Safe Minimum -->
+            <div class="flex flex-col">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-signature-teal mb-1">
+                {currentUi.usdaSafeBadge}
+              </span>
+              <div class="flex items-baseline gap-1">
+                <span class="text-display-sm font-bold text-ink temp-val-safe">
+                  {defaultUnit === 'F' ? `${item.usdaSafeTempF}°F` : `${item.usdaSafeTempC}°C`}
+                </span>
+              </div>
+            </div>
+
+            <!-- Carryover Rise -->
+            <div class="flex flex-col border-l border-hairline pl-3">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-muted mb-1">
+                {currentUi.pullTempBadge}
+              </span>
+              <div class="flex items-baseline gap-1">
+                <span class="text-display-sm font-bold text-ink temp-val-rise">
+                  +{defaultUnit === 'F' ? `${item.carryoverRiseF}°F` : `${Math.round(item.carryoverRiseF * 5 / 9)}°C`}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Deep Guidance Blocks -->
+          <div class="space-y-3 text-xs leading-relaxed">
+            <!-- Probe Placement -->
+            {item.placementTip && (
+              <div class="p-3 rounded-md bg-canvas border border-hairline">
+                <div class="flex items-center gap-1.5 font-semibold text-ink mb-1">
+                  <svg class="w-3.5 h-3.5 text-info shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11.25l1.5 1.5.75-.75V8.25m0 0a3.75 3.75 0 10-7.5 0v3.75l.75.75 1.5-1.5m3.5-3.75H12" />
+                  </svg>
+                  <span>{currentUi.probeLabel}:</span>
+                </div>
+                <p class="text-muted">{item.placementTip}</p>
+              </div>
+            )}
+
+            <!-- Safety Rationale & Notes -->
+            {item.notes && (
+              <div class="p-3 rounded-md bg-canvas border border-hairline">
+                <div class="flex items-center gap-1.5 font-semibold text-ink mb-1">
+                  <svg class="w-3.5 h-3.5 text-signature-teal shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                  </svg>
+                  <span>{currentUi.safetyLabel}:</span>
+                </div>
+                <p class="text-muted">{item.notes}</p>
+              </div>
+            )}
+
+            <!-- Pulling & Resting Tip -->
+            {item.pullTempTip && (
+              <div class="p-3 rounded-md bg-canvas border border-hairline">
+                <div class="flex items-center gap-1.5 font-semibold text-ink mb-1">
+                  <svg class="w-3.5 h-3.5 text-warning shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                  </svg>
+                  <span>{currentUi.pullTipLabel}:</span>
+                </div>
+                <p class="text-muted">{item.pullTempTip}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </article>
+    ))}
+  </div>
+
+  <!-- Empty State -->
+  <div id="food-empty-state" class="hidden text-center py-16 px-6 bg-surface-soft border border-dashed border-hairline rounded-lg mt-6">
+    <div class="w-12 h-12 rounded-full bg-surface mx-auto flex items-center justify-center text-muted mb-3 border border-hairline">
+      <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+      </svg>
+    </div>
+    <p class="text-body-md font-medium text-ink mb-1">{currentUi.noResults}</p>
+  </div>
+
+  <!-- Printable Summary Table -->
+  <div class="mt-12 bg-surface border border-hairline rounded-lg p-6 shadow-xs">
+    <h3 class="text-title-sm md:text-title-md font-semibold text-ink mb-4 flex items-center gap-2">
+      <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+      </svg>
+      <span>{currentUi.printTableTitle}</span>
+    </h3>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs border-collapse">
+        <thead>
+          <tr class="border-b border-hairline bg-surface-soft text-ink font-semibold">
+            <th class="py-2.5 px-3">{currentUi.printColItem}</th>
+            <th class="py-2.5 px-3">{currentUi.printColSafe}</th>
+            <th class="py-2.5 px-3">{currentUi.printColRest}</th>
+            <th class="py-2.5 px-3">{currentUi.printColPlacement}</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline">
+          {localizedItems.map((item) => (
+            <tr class="hover:bg-surface-soft/50 transition-colors">
+              <td class="py-2 px-3 font-medium text-ink">{item.name}</td>
+              <td class="py-2 px-3 text-signature-teal font-semibold table-safe-temp" data-f={`${item.usdaSafeTempF}°F`} data-c={`${item.usdaSafeTempC}°C`}>
+                {defaultUnit === 'F' ? `${item.usdaSafeTempF}°F` : `${item.usdaSafeTempC}°C`}
+              </td>
+              <td class="py-2 px-3 text-body">{item.restMinutes > 0 ? `${item.restMinutes} min` : 'None'}</td>
+              <td class="py-2 px-3 text-muted">{item.placementTip}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  function initFoodTempLookup() {
+    const root = document.querySelector('.food-temp-lookup-root');
+    if (!root) return;
+
+    let currentUnit = root.getAttribute('data-default-unit') || 'F';
+    let currentCategory = 'all';
+    let searchQuery = '';
+
+    const searchInput = root.querySelector('#food-search-input') as HTMLInputElement | null;
+    const clearBtn = root.querySelector('#food-clear-btn') as HTMLButtonElement | null;
+    const unitBtnF = root.querySelector('#unit-btn-f') as HTMLButtonElement | null;
+    const unitBtnC = root.querySelector('#unit-btn-c') as HTMLButtonElement | null;
+    const categoryTabs = root.querySelectorAll('.category-tab-btn');
+    const presets = root.querySelectorAll('.quick-preset-pill');
+    const cards = root.querySelectorAll('.food-card');
+    const emptyState = root.querySelector('#food-empty-state');
+    const resultsCountEl = root.querySelector('#food-results-count');
+    const template = resultsCountEl?.getAttribute('data-template') || 'Showing {count} of {total} tested foods';
+
+    function updateTemperatures() {
+      cards.forEach((card) => {
+        const safeSpan = card.querySelector('.temp-val-safe');
+        const riseSpan = card.querySelector('.temp-val-rise');
+        const tempF = card.getAttribute('data-temp-f');
+        const tempC = card.getAttribute('data-temp-c');
+        const riseF = Number(card.getAttribute('data-rise-f') || 0);
+
+        if (safeSpan) safeSpan.textContent = currentUnit === 'F' ? `${tempF}°F` : `${tempC}°C`;
+        if (riseSpan) riseSpan.textContent = currentUnit === 'F' ? `+${riseF}°F` : `+${Math.round(riseF * 5 / 9)}°C`;
+      });
+
+      root.querySelectorAll('.table-safe-temp').forEach((el) => {
+        el.textContent = currentUnit === 'F' ? el.getAttribute('data-f') : el.getAttribute('data-c');
+      });
+
+      if (unitBtnF && unitBtnC) {
+        if (currentUnit === 'F') {
+          unitBtnF.className = 'min-h-[38px] px-4 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer bg-primary text-on-primary shadow-xs';
+          unitBtnC.className = 'min-h-[38px] px-4 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer text-muted hover:text-ink';
+        } else {
+          unitBtnC.className = 'min-h-[38px] px-4 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer bg-primary text-on-primary shadow-xs';
+          unitBtnF.className = 'min-h-[38px] px-4 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer text-muted hover:text-ink';
+        }
+      }
+    }
+
+    function filterCards() {
+      let visibleCount = 0;
+      const q = searchQuery.trim().toLowerCase();
+
+      cards.forEach((card) => {
+        const cat = card.getAttribute('data-category');
+        const text = card.getAttribute('data-search') || '';
+
+        const matchesCat = currentCategory === 'all' || cat === currentCategory;
+        const matchesQuery = !q || text.includes(q);
+
+        if (matchesCat && matchesQuery) {
+          (card as HTMLElement).style.display = 'flex';
+          visibleCount++;
+        } else {
+          (card as HTMLElement).style.display = 'none';
+        }
+      });
+
+      if (emptyState) {
+        if (visibleCount === 0) {
+          emptyState.classList.remove('hidden');
+        } else {
+          emptyState.classList.add('hidden');
+        }
+      }
+
+      if (resultsCountEl) {
+        resultsCountEl.textContent = template
+          .replace('{count}', String(visibleCount))
+          .replace('{total}', String(cards.length));
+      }
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        searchQuery = searchInput.value;
+        if (clearBtn) {
+          if (searchQuery.length > 0) clearBtn.classList.remove('hidden');
+          else clearBtn.classList.add('hidden');
+        }
+        filterCards();
+      });
+    }
+
+    if (clearBtn && searchInput) {
+      clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        searchQuery = '';
+        clearBtn.classList.add('hidden');
+        searchInput.focus();
+        filterCards();
+      });
+    }
+
+    presets.forEach((pr) => {
+      pr.addEventListener('click', () => {
+        const foodId = pr.getAttribute('data-food-id') || '';
+        // Find food card
+        const targetCard = root.querySelector(`.food-card[data-id="${foodId}"]`);
+        if (targetCard) {
+          // Switch category tab to all or that category
+          categoryTabs.forEach((t) => {
+            t.setAttribute('aria-selected', 'false');
+            t.className = 'category-tab-btn min-h-[38px] px-3.5 py-1.5 rounded-lg text-xs font-medium border bg-canvas text-body border-hairline hover:border-border-strong hover:text-ink cursor-pointer transition-colors flex items-center gap-1.5';
+          });
+          const allTab = root.querySelector('.category-tab-btn[data-category="all"]');
+          if (allTab) {
+            allTab.setAttribute('aria-selected', 'true');
+            allTab.className = 'category-tab-btn min-h-[38px] px-3.5 py-1.5 rounded-lg text-xs font-medium border bg-primary text-on-primary border-primary cursor-pointer transition-colors flex items-center gap-1.5';
+          }
+          currentCategory = 'all';
+
+          const cardName = targetCard.querySelector('h3')?.textContent?.trim().split(' ')[0] || '';
+          if (searchInput) {
+            searchInput.value = cardName;
+            searchQuery = cardName.toLowerCase();
+            if (clearBtn) clearBtn.classList.remove('hidden');
+          }
+          filterCards();
+          targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
+    });
+
+    categoryTabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        categoryTabs.forEach((t) => {
+          t.setAttribute('aria-selected', 'false');
+          t.className = 'category-tab-btn min-h-[38px] px-3.5 py-1.5 rounded-lg text-xs font-medium border bg-canvas text-body border-hairline hover:border-border-strong hover:text-ink cursor-pointer transition-colors flex items-center gap-1.5';
+        });
+        tab.setAttribute('aria-selected', 'true');
+        tab.className = 'category-tab-btn min-h-[38px] px-3.5 py-1.5 rounded-lg text-xs font-medium border bg-primary text-on-primary border-primary cursor-pointer transition-colors flex items-center gap-1.5';
+
+        currentCategory = tab.getAttribute('data-category') || 'all';
+        filterCards();
+      });
+    });
+
+    if (unitBtnF) {
+      unitBtnF.addEventListener('click', () => {
+        if (currentUnit !== 'F') {
+          currentUnit = 'F';
+          updateTemperatures();
+        }
+      });
+    }
+
+    if (unitBtnC) {
+      unitBtnC.addEventListener('click', () => {
+        if (currentUnit !== 'C') {
+          currentUnit = 'C';
+          updateTemperatures();
+        }
+      });
+    }
+
+    updateTemperatures();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFoodTempLookup);
+  } else {
+    initFoodTempLookup();
+  }
+</script>

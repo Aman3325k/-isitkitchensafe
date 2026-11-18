@@ -79,6 +79,13 @@ const curatedTools: Array<{
     date: '2026-11-18',
   },
   {
+    path: '/tools/internal-cooking-temp-chart/',
+    title: 'USDA Safe Internal Cooking Temperature Chart & Doneness Lookup',
+    description:
+      'Interactive USDA FSIS minimum safe internal cooking temperatures, rest timers, and thermometer probe placement tips across 24 cuts of meat, poultry, seafood, eggs, and leftovers in °F and °C.',
+    date: '2026-11-18',
+  },
+  {
     path: '/tools/leftover-shelf-life-calculator/',
     title: 'Leftover Shelf Life & Safe Storage Calculator',
     description:

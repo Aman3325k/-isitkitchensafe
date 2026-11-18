@@ -5,6 +5,51 @@ import whatHappensData from '../../data/what-happens.json';
 
 const pageTitle = "Kitchen Accident & Safety Guides | IsItKitchenSafe";
 const pageDescription = "Explore the science and safety details behind common kitchen mishaps. Learn what happens if you microwave foil, leave the stove on, or heat glass in the oven.";
+
+type ApplianceKey = 'microwave' | 'dishwasher' | 'oven' | 'freezer-fridge' | 'stove-cookware' | 'food-chemicals';
+
+function classifyAppliance(slug: string): ApplianceKey {
+  if (slug.includes('microwave')) return 'microwave';
+  if (slug.includes('dishwasher') || slug.includes('detergent')) return 'dishwasher';
+  if (slug.includes('oven')) return 'oven';
+  if (slug.includes('freeze') || slug.includes('fridge')) return 'freezer-fridge';
+  if (slug.includes('stove') || slug.includes('boil-dry-pot') || slug.includes('hot-pan') || slug.includes('hot-glass')) {
+    return 'stove-cookware';
+  }
+  return 'food-chemicals';
+}
+
+const applianceLabels: Record<ApplianceKey, string> = {
+  microwave: 'Microwave',
+  dishwasher: 'Dishwasher',
+  oven: 'Oven',
+  'freezer-fridge': 'Freezer & Fridge',
+  'stove-cookware': 'Stove & Cookware',
+  'food-chemicals': 'Food & Chemicals'
+};
+
+const enrichedItems = whatHappensData.map(item => {
+  const applianceKey = classifyAppliance(item.slug);
+  return {
+    ...item,
+    applianceKey,
+    applianceLabel: applianceLabels[applianceKey]
+  };
+});
+
+const totalCount = enrichedItems.length;
+const dangerousCount = enrichedItems.filter(item => item.dangerLevel === 'dangerous').length;
+const cautionCount = enrichedItems.filter(item => item.dangerLevel === 'caution').length;
+const safeCount = enrichedItems.filter(item => item.dangerLevel === 'safe').length;
+
+const applianceCounts: Record<ApplianceKey, number> = {
+  microwave: enrichedItems.filter(i => i.applianceKey === 'microwave').length,
+  dishwasher: enrichedItems.filter(i => i.applianceKey === 'dishwasher').length,
+  oven: enrichedItems.filter(i => i.applianceKey === 'oven').length,
+  'freezer-fridge': enrichedItems.filter(i => i.applianceKey === 'freezer-fridge').length,
+  'stove-cookware': enrichedItems.filter(i => i.applianceKey === 'stove-cookware').length,
+  'food-chemicals': enrichedItems.filter(i => i.applianceKey === 'food-chemicals').length
+};
 ---
 
 <Layout title={pageTitle} description={pageDescription} excludeArticleSchema={true} availableLocales={['en', 'es', 'pt', 'ja', 'zh-cn']}>
@@ -29,31 +74,174 @@ const pageDescription = "Explore the science and safety details behind common ki
   </section>
 
   <!-- Items Grid Section -->
-  <section class="max-w-[1280px] mx-auto px-6 py-[96px]">
-    <div class="flex flex-col md:flex-row md:items-end justify-between border-b border-hairline pb-8 mb-12">
-      <div>
-        <h2 class="text-display-md text-ink tracking-tight mb-2">Tested Scenarios ({whatHappensData.length})</h2>
-        <p class="text-body-md text-muted">A comprehensive safety analysis of daily kitchen habits and potential accidents.</p>
+  <section class="max-w-[1280px] mx-auto px-6 py-[72px] md:py-[96px]">
+    <!-- Emergency & Fact-Check Spotlight Banner -->
+    <div class="mb-10 rounded-lg border border-hairline bg-surface-soft/80 p-5 md:p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-5 shadow-xs">
+      <div class="flex items-start gap-4 max-w-[680px]">
+        <div class="w-10 h-10 rounded-md bg-signature-coral text-white flex items-center justify-center shrink-0 mt-0.5" aria-hidden="true">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+          </svg>
+        </div>
+        <div>
+          <span class="inline-block text-[11px] font-bold uppercase tracking-wider text-signature-coral mb-1">Live Safety &amp; Triage Tools</span>
+          <h2 class="text-title-sm font-semibold text-ink mb-1">Having a kitchen safety scare right now?</h2>
+          <p class="text-body-md text-muted leading-relaxed">
+            Get step-by-step immediate action guidance for sparks, smoke, chemical fumes, or broken glass—or verify whether a viral cooking hack is actually safe.
+          </p>
+        </div>
       </div>
-      
-      <!-- Filter Input -->
-      <div class="mt-6 md:mt-0 flex gap-3 max-w-[320px] w-full">
-        <input 
-          type="text" 
-          id="filter-input"
-          placeholder="Search scenarios (e.g. foil in microwave)..."
-          aria-label="Search scenarios"
-          class="w-full h-11 px-3 py-2 bg-canvas text-ink text-[16px] md:text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
-        />
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
+        <a
+          href="/tools/kitchen-hazard-emergency-triage/"
+          class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 min-h-[44px] bg-signature-coral text-white text-[13px] font-medium rounded-lg hover:bg-black transition-colors whitespace-nowrap"
+        >
+          <span>Kitchen Hazard Emergency Triage</span>
+          <span aria-hidden="true">&rarr;</span>
+        </a>
+        <a
+          href="/tools/viral-trend-debunker/"
+          class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 min-h-[44px] bg-canvas text-ink text-[13px] font-medium border border-hairline hover:border-border-strong rounded-lg transition-colors whitespace-nowrap"
+        >
+          <span>Viral Trend Debunker</span>
+          <span aria-hidden="true">&rarr;</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Header, Instant Search & Severity / Appliance Filter Pills -->
+    <div class="border-b border-hairline pb-8 mb-10">
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+        <div>
+          <h2 class="text-display-md text-ink tracking-tight mb-2">Tested Scenarios ({totalCount})</h2>
+          <p class="text-body-md text-muted">A comprehensive safety analysis of daily kitchen habits and potential accidents.</p>
+        </div>
+        
+        <!-- Instant Scenario Search Input -->
+        <div class="w-full lg:max-w-[440px]">
+          <div class="relative">
+            <svg class="w-4 h-4 text-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1010.5 18a7.5 7.5 0 006.15-3.35z" />
+            </svg>
+            <input 
+              type="text" 
+              id="what-happens-search"
+              autocomplete="off"
+              placeholder="Search scenarios (e.g. foil, bleach, egg, cast iron)..."
+              aria-label="Search safety scenarios"
+              class="w-full h-11 pl-10 pr-10 py-2 bg-canvas text-ink text-[16px] md:text-[14px] border border-hairline rounded-md focus:outline-none focus:border-info-border shadow-xs"
+            />
+            <button
+              type="button"
+              id="what-happens-clear"
+              aria-label="Clear search"
+              class="hidden absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-md text-muted hover:text-ink hover:bg-surface-soft inline-flex items-center justify-center transition-colors cursor-pointer"
+            >
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Pills: Severity & Appliance -->
+      <div class="mt-6 space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div id="what-happens-severity-filters" class="flex flex-wrap items-center gap-2" role="group" aria-label="Filter by severity level">
+            <button
+              type="button"
+              data-severity="all"
+              aria-pressed="true"
+              class="severity-pill min-h-[38px] px-4 py-1.5 rounded-full text-[13px] font-medium border bg-primary text-on-primary border-primary cursor-pointer transition-colors inline-flex items-center gap-2 select-none"
+            >
+              <span>All Severities</span>
+              <span class="text-[11px] opacity-80">({totalCount})</span>
+            </button>
+            <button
+              type="button"
+              data-severity="dangerous"
+              aria-pressed="false"
+              class="severity-pill min-h-[38px] px-4 py-1.5 rounded-full text-[13px] font-medium border bg-canvas text-body border-hairline hover:border-border-strong hover:text-ink cursor-pointer transition-colors inline-flex items-center gap-2 select-none"
+            >
+              <span class="w-2 h-2 rounded-full bg-error shrink-0" aria-hidden="true"></span>
+              <span>Dangerous</span>
+              <span class="text-[11px] opacity-75">({dangerousCount})</span>
+            </button>
+            <button
+              type="button"
+              data-severity="caution"
+              aria-pressed="false"
+              class="severity-pill min-h-[38px] px-4 py-1.5 rounded-full text-[13px] font-medium border bg-canvas text-body border-hairline hover:border-border-strong hover:text-ink cursor-pointer transition-colors inline-flex items-center gap-2 select-none"
+            >
+              <span class="w-2 h-2 rounded-full bg-warning shrink-0" aria-hidden="true"></span>
+              <span>Caution</span>
+              <span class="text-[11px] opacity-75">({cautionCount})</span>
+            </button>
+            <button
+              type="button"
+              data-severity="safe"
+              aria-pressed="false"
+              class="severity-pill min-h-[38px] px-4 py-1.5 rounded-full text-[13px] font-medium border bg-canvas text-body border-hairline hover:border-border-strong hover:text-ink cursor-pointer transition-colors inline-flex items-center gap-2 select-none"
+            >
+              <span class="w-2 h-2 rounded-full bg-success shrink-0" aria-hidden="true"></span>
+              <span>Safe</span>
+              <span class="text-[11px] opacity-75">({safeCount})</span>
+            </button>
+          </div>
+
+          <div class="flex items-center gap-3 shrink-0">
+            <p
+              id="what-happens-count"
+              aria-live="polite"
+              data-template="Showing {count} of {total} scenarios"
+              class="text-xs font-medium text-muted"
+            >
+              Showing {totalCount} of {totalCount} scenarios
+            </p>
+            <button
+              type="button"
+              id="what-happens-reset-inline"
+              class="hidden text-xs font-medium text-link hover:text-link-active underline underline-offset-2 cursor-pointer"
+            >
+              Reset filters
+            </button>
+          </div>
+        </div>
+
+        <div id="what-happens-appliance-filters" class="flex flex-wrap items-center gap-2" role="group" aria-label="Filter by appliance or context">
+          <button
+            type="button"
+            data-appliance="all"
+            aria-pressed="true"
+            class="appliance-pill min-h-[34px] px-3.5 py-1 rounded-full text-[12px] font-medium border bg-ink text-white border-ink cursor-pointer transition-colors inline-flex items-center gap-1.5 select-none"
+          >
+            <span>All Appliances</span>
+          </button>
+          {(Object.keys(applianceLabels) as ApplianceKey[]).map((key) => (
+            <button
+              type="button"
+              data-appliance={key}
+              aria-pressed="false"
+              class="appliance-pill min-h-[34px] px-3.5 py-1 rounded-full text-[12px] font-medium border bg-canvas text-body border-hairline hover:border-border-strong hover:text-ink cursor-pointer transition-colors inline-flex items-center gap-1.5 select-none"
+            >
+              <span>{applianceLabels[key]}</span>
+              <span class="text-[11px] opacity-70">({applianceCounts[key]})</span>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
 
     <!-- Items Grid -->
     <div id="items-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {whatHappensData.map(item => (
+      {enrichedItems.map(item => (
         <div 
           class="item-card bg-canvas border border-hairline rounded-md p-6 flex flex-col justify-between shadow-xs transition-all hover:border-border-strong"
           data-name={item.item.toLowerCase()}
+          data-severity={item.dangerLevel}
+          data-appliance={item.applianceKey}
+          data-search={`${item.item} ${item.material || ''} ${item.shortAnswer || ''} ${item.keyRisk || ''} ${item.applianceLabel} ${item.dangerLevel}`.toLowerCase()}
         >
           <div>
             <div class="flex items-center justify-between mb-4">
@@ -84,7 +272,14 @@ const pageDescription = "Explore the science and safety details behind common ki
 
     <!-- No results message -->
     <div id="no-results" class="hidden text-center py-12">
-      <p class="text-title-md text-muted">No items match your search.</p>
+      <p class="text-title-md text-muted mb-4">No scenarios match your current search and filters.</p>
+      <button
+        type="button"
+        id="what-happens-reset"
+        class="px-4 py-2 min-h-[40px] bg-canvas text-ink text-[13px] font-medium border border-hairline hover:border-border-strong rounded-md transition-colors cursor-pointer"
+      >
+        Reset all filters
+      </button>
     </div>
   </section>
 
@@ -151,35 +346,119 @@ const pageDescription = "Explore the science and safety details behind common ki
 
   <!-- Client-side filtering script -->
   <script is:inline>
-    const filterInput = document.getElementById('filter-input');
-    const itemsGrid = document.getElementById('items-grid');
-    const noResults = document.getElementById('no-results');
+    (() => {
+      const searchInput = document.getElementById('what-happens-search');
+      const clearBtn = document.getElementById('what-happens-clear');
+      const resetBtn = document.getElementById('what-happens-reset');
+      const resetInlineBtn = document.getElementById('what-happens-reset-inline');
+      const countEl = document.getElementById('what-happens-count');
+      const itemsGrid = document.getElementById('items-grid');
+      const noResults = document.getElementById('no-results');
+      const severityButtons = Array.from(document.querySelectorAll('#what-happens-severity-filters .severity-pill'));
+      const applianceButtons = Array.from(document.querySelectorAll('#what-happens-appliance-filters .appliance-pill'));
 
-    if (filterInput && itemsGrid) {
-      const cards = itemsGrid.getElementsByClassName('item-card');
-      
-      filterInput.addEventListener('input', (e) => {
-        const query = e.target.value.trim().toLowerCase();
+      if (!searchInput || !itemsGrid) return;
+
+      const cards = Array.from(itemsGrid.getElementsByClassName('item-card'));
+      const total = cards.length;
+      const template = (countEl && countEl.getAttribute('data-template')) || 'Showing {count} of {total} scenarios';
+      let activeSeverity = 'all';
+      let activeAppliance = 'all';
+
+      const updatePillState = (buttons, attrName, activeValue, activeClasses) => {
+        buttons.forEach((btn) => {
+          const isSelected = btn.getAttribute(attrName) === activeValue;
+          btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+          activeClasses.forEach((cls) => btn.classList.toggle(cls, isSelected));
+          btn.classList.toggle('bg-canvas', !isSelected);
+          btn.classList.toggle('text-body', !isSelected);
+          btn.classList.toggle('border-hairline', !isSelected);
+          btn.classList.toggle('hover:border-border-strong', !isSelected);
+          btn.classList.toggle('hover:text-ink', !isSelected);
+        });
+      };
+
+      const applyFilter = () => {
+        const query = searchInput.value.trim().toLowerCase();
         let matches = 0;
-        
-        for (let i = 0; i < cards.length; i++) {
+
+        for (let i = 0; i < total; i++) {
           const card = cards[i];
-          const name = card.getAttribute('data-name');
-          
-          if (name.includes(query)) {
+          const haystack = card.getAttribute('data-search') || card.getAttribute('data-name') || '';
+          const severity = card.getAttribute('data-severity') || '';
+          const appliance = card.getAttribute('data-appliance') || '';
+
+          const matchesQuery = !query || haystack.includes(query);
+          const matchesSeverity = activeSeverity === 'all' || severity === activeSeverity;
+          const matchesAppliance = activeAppliance === 'all' || appliance === activeAppliance;
+
+          if (matchesQuery && matchesSeverity && matchesAppliance) {
             card.classList.remove('hidden');
             matches++;
           } else {
             card.classList.add('hidden');
           }
         }
-        
-        if (matches === 0) {
-          noResults.classList.remove('hidden');
-        } else {
-          noResults.classList.add('hidden');
+
+        const hasActiveFilters = query.length > 0 || activeSeverity !== 'all' || activeAppliance !== 'all';
+
+        if (clearBtn) {
+          clearBtn.classList.toggle('hidden', query.length === 0);
         }
+
+        if (resetInlineBtn) {
+          resetInlineBtn.classList.toggle('hidden', !hasActiveFilters);
+        }
+
+        if (countEl) {
+          countEl.textContent = template
+            .replace('{count}', String(matches))
+            .replace('{total}', String(total));
+        }
+
+        if (noResults) {
+          noResults.classList.toggle('hidden', matches > 0);
+        }
+      };
+
+      searchInput.addEventListener('input', applyFilter);
+
+      severityButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          activeSeverity = btn.getAttribute('data-severity') || 'all';
+          updatePillState(severityButtons, 'data-severity', activeSeverity, ['bg-primary', 'text-on-primary', 'border-primary']);
+          applyFilter();
+        });
       });
-    }
+
+      applianceButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          activeAppliance = btn.getAttribute('data-appliance') || 'all';
+          updatePillState(applianceButtons, 'data-appliance', activeAppliance, ['bg-ink', 'text-white', 'border-ink']);
+          applyFilter();
+        });
+      });
+
+      if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+          searchInput.value = '';
+          applyFilter();
+          searchInput.focus();
+        });
+      }
+
+      const resetAll = () => {
+        searchInput.value = '';
+        activeSeverity = 'all';
+        activeAppliance = 'all';
+        updatePillState(severityButtons, 'data-severity', 'all', ['bg-primary', 'text-on-primary', 'border-primary']);
+        updatePillState(applianceButtons, 'data-appliance', 'all', ['bg-ink', 'text-white', 'border-ink']);
+        applyFilter();
+        searchInput.focus();
+      };
+
+      if (resetBtn) resetBtn.addEventListener('click', resetAll);
+      if (resetInlineBtn) resetInlineBtn.addEventListener('click', resetAll);
+    })();
   </script>
 </Layout>

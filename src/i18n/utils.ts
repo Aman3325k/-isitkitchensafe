@@ -212,6 +212,7 @@ const SPECIAL_PAGES = [
   'tools/plastic-code-checker',
   'tools/air-fryer-oven-converter',
   'tools/cookware-oven-temp-lookup',
+  'tools/internal-cooking-temp-chart',
   'methodology',
   'saved'
 ];

@@ -6,6 +6,77 @@ import blogData from '../../data/blog.json';
 const pageTitle = "Kitchen Safety Blog | IsItKitchenSafe";
 const pageDescription = "Explore kitchen safety guides, appliance tips, USDA/FDA food storage guidelines, and common kitchen myths compiled from official public guidance.";
 
+type TopicKey = 'cookware' | 'appliances' | 'storage' | 'plastics';
+
+function classifyArticleTopic(slug: string): TopicKey {
+  const s = slug.toLowerCase();
+  if (/cookware|hexclad|caraway|nonstick|stainless|pyrex|cutting-board|stanley|yeti/.test(s)) {
+    return 'cookware';
+  }
+  if (/plastic/.test(s)) {
+    return 'plastics';
+  }
+  if (/refreeze|freezer|refrigeration|leftovers|turkey|thawing/.test(s)) {
+    return 'storage';
+  }
+  return 'appliances';
+}
+
+const topicLabels: Record<TopicKey, string> = {
+  cookware: 'Cookware & Materials',
+  appliances: 'Appliance Safety',
+  storage: 'Food Storage & Holidays',
+  plastics: 'Plastics & Packaging',
+};
+
+const classifiedArticles = blogData.map((article) => ({
+  ...article,
+  topic: classifyArticleTopic(article.slug),
+}));
+
+const totalCount = classifiedArticles.length;
+const topicCounts: Record<TopicKey, number> = {
+  cookware: classifiedArticles.filter((a) => a.topic === 'cookware').length,
+  appliances: classifiedArticles.filter((a) => a.topic === 'appliances').length,
+  storage: classifiedArticles.filter((a) => a.topic === 'storage').length,
+  plastics: classifiedArticles.filter((a) => a.topic === 'plastics').length,
+};
+
+const topicChips: { key: 'all' | TopicKey; label: string; count: number }[] = [
+  { key: 'all', label: 'All Guides', count: totalCount },
+  { key: 'cookware', label: topicLabels.cookware, count: topicCounts.cookware },
+  { key: 'appliances', label: topicLabels.appliances, count: topicCounts.appliances },
+  { key: 'storage', label: topicLabels.storage, count: topicCounts.storage },
+  { key: 'plastics', label: topicLabels.plastics, count: topicCounts.plastics },
+];
+
+const featuredTools = [
+  {
+    href: '/tools/kitchen-symbol-decoder/',
+    badge: 'Symbols',
+    title: 'Kitchen Symbol Decoder',
+    description: 'Decode microwave waves, wine glass & fork, dishwasher, and induction symbols.',
+  },
+  {
+    href: '/tools/leftover-shelf-life-calculator/',
+    badge: 'USDA Timer',
+    title: 'Leftover Shelf-Life Calculator',
+    description: 'Calculate exact USDA fridge & freezer discard dates and 2-hour Danger Zone rules.',
+  },
+  {
+    href: '/tools/plastic-code-checker/',
+    badge: 'Resin #1–#7',
+    title: 'Plastic Code Checker',
+    description: 'Check microwave, dishwasher, and hot-liquid limits for PET, HDPE, PP, PS, and Tritan.',
+  },
+  {
+    href: '/tools/cookware-oven-temp-lookup/',
+    badge: 'Heat Limits',
+    title: 'Cookware Oven Temp Lookup',
+    description: 'Compare max oven & broiler temperatures for HexClad, Le Creuset, Pyrex, and silicone.',
+  },
+];
+
 const blogFaqs = [
   {
     question: "How long can leftovers safely stay in the refrigerator?",
@@ -42,7 +113,7 @@ const blogFaqs = [
     />
 
     <!-- Header Section -->
-    <header class="max-w-[800px] mb-12">
+    <header class="max-w-[800px] mb-10">
       <h1 class="text-4xl md:text-5xl font-bold text-ink tracking-tight mb-4">
         Kitchen Safety Blog
       </h1>
@@ -51,29 +122,106 @@ const blogFaqs = [
       </p>
     </header>
 
+    <!-- Instant Search & Topic Filter Bar -->
+    <div class="mb-8 rounded-lg border border-hairline bg-surface-soft/70 p-4 md:p-5 shadow-xs">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="relative w-full md:max-w-[460px]">
+          <svg class="w-4 h-4 text-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1010.5 18a7.5 7.5 0 006.15-3.35z" />
+          </svg>
+          <input
+            type="text"
+            id="blog-search"
+            autocomplete="off"
+            placeholder="Search guides by topic, brand, or appliance (e.g. Pyrex, Air Fryer, Leftovers)..."
+            aria-label="Search kitchen safety blog guides"
+            class="w-full h-11 pl-10 pr-10 py-2 bg-canvas text-ink text-[16px] md:text-[14px] border border-hairline rounded-md focus:outline-none focus:border-info-border shadow-xs"
+          />
+          <button
+            type="button"
+            id="blog-clear"
+            aria-label="Clear search"
+            class="hidden absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-md text-muted hover:text-ink hover:bg-surface-soft inline-flex items-center justify-center transition-colors cursor-pointer"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <p
+          id="blog-count"
+          aria-live="polite"
+          data-template="Showing {count} of {total} guides"
+          class="text-xs font-medium text-muted shrink-0"
+        >
+          Showing {totalCount} of {totalCount} guides
+        </p>
+      </div>
+
+      <div id="blog-topic-filters" class="mt-4 flex flex-wrap gap-2" role="group" aria-label="Filter guides by topic">
+        {topicChips.map((chip, idx) => (
+          <button
+            type="button"
+            data-topic={chip.key}
+            aria-pressed={idx === 0 ? 'true' : 'false'}
+            class={idx === 0
+              ? 'blog-topic-chip min-h-[38px] px-3.5 py-1.5 rounded-full text-[13px] font-medium border bg-primary text-on-primary border-primary cursor-pointer transition-colors inline-flex items-center gap-1.5 select-none'
+              : 'blog-topic-chip min-h-[38px] px-3.5 py-1.5 rounded-full text-[13px] font-medium border bg-canvas text-body border-hairline hover:border-border-strong hover:text-ink cursor-pointer transition-colors inline-flex items-center gap-1.5 select-none'}
+          >
+            <span>{chip.label}</span>
+            <span class="text-[11px] opacity-80">({chip.count})</span>
+          </button>
+        ))}
+      </div>
+    </div>
+
     <!-- Main Content Area with Sidebar Grid Layout -->
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-      <!-- Article Cards Grid -->
-      <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-8">
-        {blogData.map((article) => (
-          <article class="bg-canvas border border-hairline rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between overflow-hidden">
-            <div class="p-6">
-              <span class="text-[11px] text-link uppercase tracking-wider font-bold block mb-2">
-                Safety Guides
-              </span>
-              <h2 class="text-title-sm text-ink font-semibold mb-3 hover:text-link transition-colors">
-                <a href={`/blog/${article.slug}/`}>{article.title}</a>
-              </h2>
-              <p class="text-[14px] text-muted leading-relaxed mb-4 line-clamp-3">
-                {article.excerpt}
-              </p>
-            </div>
-            <div class="px-6 pb-6 pt-4 border-t border-hairline bg-surface-soft flex items-center justify-between text-xs text-muted">
-              <span>{article.date}</span>
-              <span>{article.readTime}</span>
-            </div>
-          </article>
-        ))}
+      <!-- Article Cards Column -->
+      <div class="lg:col-span-3">
+        <div id="blog-grid" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {classifiedArticles.map((article) => (
+            <article
+              class="blog-card bg-canvas border border-hairline rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between overflow-hidden"
+              data-topic={article.topic}
+              data-search={`${article.title} ${article.excerpt} ${topicLabels[article.topic]} ${article.topic} ${article.slug.replace(/-/g, ' ')}`.toLowerCase()}
+            >
+              <div class="p-6">
+                <div class="flex items-center justify-between gap-2 mb-2">
+                  <span class="text-[11px] text-link uppercase tracking-wider font-bold">
+                    Safety Guides
+                  </span>
+                  <span class="text-[11px] font-medium text-muted bg-surface-soft border border-hairline px-2 py-0.5 rounded-full">
+                    {topicLabels[article.topic]}
+                  </span>
+                </div>
+                <h2 class="text-title-sm text-ink font-semibold mb-3 hover:text-link transition-colors">
+                  <a href={`/blog/${article.slug}/`}>{article.title}</a>
+                </h2>
+                <p class="text-[14px] text-muted leading-relaxed mb-4 line-clamp-3">
+                  {article.excerpt}
+                </p>
+              </div>
+              <div class="px-6 pb-6 pt-4 border-t border-hairline bg-surface-soft flex items-center justify-between text-xs text-muted">
+                <span>{article.date}</span>
+                <span>{article.readTime}</span>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <!-- Empty Search/Filter State -->
+        <div id="blog-no-results" class="hidden text-center py-12 px-6 rounded-lg border border-hairline bg-surface-soft/50">
+          <p class="text-title-md text-muted mb-4">No safety guides match your current search or topic filter.</p>
+          <button
+            type="button"
+            id="blog-reset"
+            class="px-4 py-2 min-h-[40px] bg-canvas text-ink text-[13px] font-medium border border-hairline hover:border-border-strong rounded-md transition-colors cursor-pointer"
+          >
+            Reset filters
+          </button>
+        </div>
       </div>
 
       <!-- Sidebar -->
@@ -90,5 +238,170 @@ const blogFaqs = [
         </div>
       </aside>
     </div>
+
+    <!-- Popular Interactive Kitchen Safety Tools Spotlight Strip -->
+    <div class="mt-14 pt-10 border-t border-hairline">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+        <div>
+          <span class="inline-block text-[11px] font-bold uppercase tracking-wider text-info mb-1">
+            Free Interactive Kitchen Safety Calculators
+          </span>
+          <h2 class="text-title-lg text-ink font-semibold tracking-tight">
+            Popular Interactive Kitchen Safety Tools
+          </h2>
+          <p class="text-body-md text-muted mt-1">
+            Run instant checks for stamped container symbols, USDA leftover deadlines, plastic codes #1–#7, and brand-by-brand oven limits.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 shrink-0">
+          <a
+            href="/tools/"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 min-h-[38px] rounded-md border border-hairline bg-canvas text-ink text-[13px] font-medium hover:border-border-strong transition-colors"
+          >
+            <span>All Tools</span>
+            <span aria-hidden="true">&rarr;</span>
+          </a>
+          <a
+            href="/rss.xml"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 min-h-[38px] rounded-md border border-hairline bg-surface-soft text-ink text-[13px] font-medium hover:border-border-strong transition-colors"
+          >
+            <svg class="w-3.5 h-3.5 text-signature-coral" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 5c7.18 0 13 5.82 13 13M6 11a7 7 0 017 7m-6 0a1 1 0 11-2 0 1 1 0 012 0z" />
+            </svg>
+            <span>RSS Subscribe</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {featuredTools.map((tool) => (
+          <a
+            href={tool.href}
+            class="group bg-canvas border border-hairline rounded-lg p-5 hover:border-border-strong hover:shadow-sm transition-all flex flex-col justify-between"
+          >
+            <div>
+              <span class="inline-block text-[11px] font-bold uppercase tracking-wider text-link mb-2">
+                {tool.badge}
+              </span>
+              <h3 class="text-title-sm text-ink font-semibold mb-2 group-hover:text-link transition-colors">
+                {tool.title}
+              </h3>
+              <p class="text-[13px] text-muted leading-relaxed mb-4">
+                {tool.description}
+              </p>
+            </div>
+            <span class="text-xs font-semibold text-link inline-flex items-center gap-1">
+              <span>Open tool</span>
+              <span class="group-hover:translate-x-0.5 transition-transform" aria-hidden="true">&rarr;</span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
   </section>
+
+  <!-- Client-side search & topic filtering script -->
+  <script is:inline>
+    (() => {
+      const searchInput = document.getElementById('blog-search');
+      const clearBtn = document.getElementById('blog-clear');
+      const resetBtn = document.getElementById('blog-reset');
+      const countEl = document.getElementById('blog-count');
+      const blogGrid = document.getElementById('blog-grid');
+      const noResults = document.getElementById('blog-no-results');
+      const topicButtons = Array.from(document.querySelectorAll('#blog-topic-filters .blog-topic-chip'));
+
+      if (!searchInput || !blogGrid) return;
+
+      const cards = Array.from(blogGrid.getElementsByClassName('blog-card'));
+      const total = cards.length;
+      const template = (countEl && countEl.getAttribute('data-template')) || 'Showing {count} of {total} guides';
+      let activeTopic = 'all';
+
+      const setActiveTopic = (topic) => {
+        topicButtons.forEach((btn) => {
+          const isSelected = btn.getAttribute('data-topic') === topic;
+          btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+          btn.classList.toggle('bg-primary', isSelected);
+          btn.classList.toggle('text-on-primary', isSelected);
+          btn.classList.toggle('border-primary', isSelected);
+          btn.classList.toggle('bg-canvas', !isSelected);
+          btn.classList.toggle('text-body', !isSelected);
+          btn.classList.toggle('border-hairline', !isSelected);
+          btn.classList.toggle('hover:border-border-strong', !isSelected);
+          btn.classList.toggle('hover:text-ink', !isSelected);
+        });
+      };
+
+      const applyFilter = () => {
+        const query = searchInput.value.trim().toLowerCase();
+        let matches = 0;
+
+        for (let i = 0; i < total; i++) {
+          const card = cards[i];
+          const haystack = card.getAttribute('data-search') || '';
+          const topic = card.getAttribute('data-topic') || '';
+          const matchesQuery = !query || haystack.includes(query);
+          const matchesTopic = activeTopic === 'all' || topic === activeTopic;
+
+          if (matchesQuery && matchesTopic) {
+            card.classList.remove('hidden');
+            matches++;
+          } else {
+            card.classList.add('hidden');
+          }
+        }
+
+        if (clearBtn) {
+          clearBtn.classList.toggle('hidden', query.length === 0);
+        }
+
+        if (countEl) {
+          countEl.textContent = template
+            .replace('{count}', String(matches))
+            .replace('{total}', String(total));
+        }
+
+        if (noResults) {
+          noResults.classList.toggle('hidden', matches > 0);
+        }
+      };
+
+      searchInput.addEventListener('input', applyFilter);
+
+      searchInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && searchInput.value) {
+          searchInput.value = '';
+          applyFilter();
+        }
+      });
+
+      topicButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          activeTopic = btn.getAttribute('data-topic') || 'all';
+          setActiveTopic(activeTopic);
+          applyFilter();
+        });
+      });
+
+      if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+          searchInput.value = '';
+          applyFilter();
+          searchInput.focus();
+        });
+      }
+
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          searchInput.value = '';
+          activeTopic = 'all';
+          setActiveTopic('all');
+          applyFilter();
+          searchInput.focus();
+        });
+      }
+    })();
+  </script>
 </Layout>

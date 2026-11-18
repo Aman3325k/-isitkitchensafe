@@ -1,0 +1,507 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import InternalCookingTempChart from '../../../components/InternalCookingTempChart.astro';
+import type { SupportedLanguage } from '../../../i18n/ui';
+import { getApplianceUrl, getDirectoryUrl } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+
+interface LocaleContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  heroSub: string;
+  trapsKicker: string;
+  trapsTitle: string;
+  trapsSub: string;
+  traps: Array<{ title: string; desc: string }>;
+  relatedTitle: string;
+  thawingTag: string;
+  thawingTitle: string;
+  thawingDesc: string;
+  shelfTag: string;
+  shelfTitle: string;
+  shelfDesc: string;
+  ovenTag: string;
+  ovenTitle: string;
+  ovenDesc: string;
+  faqKicker: string;
+  faqTitle: string;
+  faqSub: string;
+  faqs: Array<{ question: string; answer: string }>;
+  homeLabel: string;
+  toolsLabel: string;
+  toolShortLabel: string;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocaleContent> = {
+  es: {
+    pageTitle: "Tabla de Temperaturas Seguras de Cocción USDA y Términos de Carne | IsItKitchenSafe",
+    pageDescription: "Consulta al instante las temperaturas mínimas seguras de cocción del USDA, objetivos culinarios y tiempos de reposo para pollo, res, cerdo, carnes molidas y pescados con selector °F/°C.",
+    badge: "Norma Oficial de Referencia USDA FSIS y Código Alimentario FDA",
+    h1: "Tabla de Temperaturas Internas Seguras de Cocción USDA y Términos de Cocción",
+    heroSub: "Elimina suposiciones y riesgos de intoxicación alimentaria. Consulta temperaturas mínimas seguras certificadas por el USDA, puntos culinarios óptimos y tiempos de reposo en 16 cortes y platos comunes con conversión inmediata en °F y °C.",
+    trapsKicker: "Pautas de Seguridad Alimentaria E-E-A-T",
+    trapsTitle: "4 Peligrosos Mitos sobre la Temperatura de los Alimentos",
+    trapsSub: "La inspección visual y creencias obsoletas provocan miles de hospitalizaciones prevenibles cada año por Salmonella, E. coli y Campylobacter.",
+    traps: [
+      {
+        title: "Trampa #1: Confiar en 'Jugos Claros' o Color Marrón en Hamburguesas",
+        desc: "Estudios del USDA demostraron que 1 de cada 4 hamburguesas de carne molida adquiere color marrón por dentro antes de alcanzar los 160°F de pasteurización. El color es un indicador engañoso; solo un termómetro digital de sonda garantiza la inocuidad."
+      },
+      {
+        title: "Trampa #2: Omitir los 3 Minutos Obligatorios de Reposo en Cerdo y Filetes",
+        desc: "Retirar un lomo de cerdo a 145°F y cortarlo de inmediato libera vapor presurizado y frena el calor residual. El reposo de 3 minutos permite que la inercia térmica destruya bacterias residuales mientras las fibras musculares reabsorben los jugos."
+      },
+      {
+        title: "Trampa #3: Tratar la Carne Oscura de Pollo Igual que la Pechuga",
+        desc: "Aunque ambas son seguras a 165°F, la pechuga se reseca por encima de esa cifra, mientras que el colágeno en muslos y alitas necesita 175°F–180°F (79°C–82°C) para fundirse en gelatina suave y sabrosa."
+      },
+      {
+        title: "Trampa #4: Recalentar Sobras en Microondas sin Remover a Mitad del Tiempo",
+        desc: "Las microondas generan puntos calientes y bolsas frías donde la diferencia puede superar los 20°C. Siempre revuelve guisos y sopas a mitad de cocción y comprueba que alcancen 165°F (74°C) en el centro más frío."
+      }
+    ],
+    relatedTitle: "Herramientas Prácticas de Seguridad en Cocina",
+    thawingTag: "Descongelación Segura",
+    thawingTitle: "Calculadora de Descongelación de Carne y Pavo USDA",
+    thawingDesc: "Calcula los tiempos exactos para descongelar en refrigerador, agua fría y microondas sin entrar en la zona de peligro térmico.",
+    shelfTag: "Control de Sobras",
+    shelfTitle: "Calculadora de Caducidad de Sobras en Refrigerador USDA",
+    shelfDesc: "Consulta los plazos límite de 3 a 4 días en nevera y reglas de congelación para carnes cocinadas, sopas y guisos.",
+    ovenTag: "Límites de Menaje",
+    ovenTitle: "Buscador de Temperaturas Máximas de Menaje y Moldes",
+    ovenDesc: "Verifica límites para Le Creuset, Pyrex, HexClad, moldes de silicona y papel sulfurizado antes de encender el horno.",
+    faqKicker: "Preguntas Frecuentes",
+    faqTitle: "Preguntas Frecuentes sobre Temperaturas y Términos",
+    faqSub: "Respuestas basadas en ciencia alimentaria sobre termómetros digitales, tiempos de reposo y normativas oficiales.",
+    faqs: [
+      {
+        question: "¿Por qué el USDA redujo la temperatura segura del cerdo de 160°F a 145°F?",
+        answer: "En 2011, el USDA actualizó sus normas para cortes enteros de cerdo fresco bajando de 160°F a 145°F con 3 minutos obligatorios de reposo. La crianza moderna erradicó la triquinosis (inactivada a 137°F), y 145°F con reposo logra exactamente la misma reducción patógena que 160°F, manteniendo la carne jugosa y con un sutil tono rosado."
+      },
+      {
+        question: "¿Por qué la carne molida requiere 160°F mientras un filete entero es seguro a 145°F?",
+        answer: "En un filete entero, bacterias como E. coli habitan exclusivamente en la superficie exterior, donde el sellado a alta temperatura las destruye al instante. El proceso de molienda mezcla las bacterias superficiales por todo el interior de la hamburguesa, obligando a cocinar el núcleo a 160°F (71°C) completos."
+      },
+      {
+        question: "¿Por qué el pollo cocido a veces se ve rosado cerca del hueso incluso a 165°F?",
+        answer: "Los pollos jóvenes tienen huesos delgados y porosos por los que la hemoglobina de la médula ósea se filtra a la carne vecina al cocinarse. Además, la mioglobina y gases del horno crean tonos rosados estables. La única prueba válida es un termómetro que marque 165°F (74°C) en la zona más gruesa."
+      },
+      {
+        question: "¿Dónde debe insertarse exactamente la sonda del termómetro en un ave o asado?",
+        answer: "En aves enteras, inserta la sonda en la parte más gruesa del muslo interior (hacia el cuerpo sin tocar hueso), en el centro de la pechuga y en la articulación del ala. En filetes y hamburguesas, insértala horizontalmente por el lateral hasta el centro geométrico."
+      }
+    ],
+    homeLabel: "Inicio",
+    toolsLabel: "Herramientas",
+    toolShortLabel: "Tabla de Temperaturas Seguras"
+  },
+  pt: {
+    pageTitle: "Tabela de Temperaturas Seguras de Cozimento USDA e Ponto da Carne | É Seguro na Cozinha?",
+    pageDescription: "Consulte temperaturas mínimas seguras do USDA, metas culinárias e tempo de descanso para aves, carnes bovinas, suínas e peixes com seletor interativo °F/°C.",
+    badge: "Padrão Oficial de Referência USDA FSIS e Código Alimentar FDA",
+    h1: "Tabela de Temperaturas Internas Seguras de Cozimento USDA e Pontos da Carne",
+    heroSub: "Elimine dúvidas e riscos de contaminação bacteriana. Descubra temperaturas mínimas oficiais do USDA, metas gastronômicas de maciez e tempos de descanso para 16 cortes e pratos do dia a dia com alternância direta entre °F e °C.",
+    trapsKicker: "Diretrizes de Segurança Alimentar E-E-A-T",
+    trapsTitle: "4 Mitos Perigosos sobre a Temperatura dos Alimentos",
+    trapsSub: "Avaliações visuais e costumes antigos causam milhares de internações anuais evitáveis por Salmonella, E. coli e Campylobacter.",
+    traps: [
+      {
+        title: "Armadilha #1: Confiar na Cor Escurecida ou Sucos Claros em Hambúrgueres",
+        desc: "Pesquisas do USDA provaram que 25% dos hambúrgueres bovinos escurecem por dentro antes de atingir os 160°F de pasteurização. A cor engana; apenas o termômetro digital de espeto comprova a segurança microbiológica."
+      },
+      {
+        title: "Armadilha #2: Ignorar os 3 Minutos Obrigatórios de Descanso em Suínos e Bifes",
+        desc: "Cortar a carne suína imediatamente ao sair do fogo a 145°F faz a temperatura interna despencar antes da hora. O repouso de 3 minutos mantém a temperatura e liquida bactérias enquanto os tecidos reabsorvem os sucos."
+      },
+      {
+        title: "Armadilha #3: Cozinhar Sobrecoxa de Frango como se Fosse Peito",
+        desc: "Embora ambos fiquem livres de germes a 165°F, o peito resseca com calor excessivo, enquanto o colágeno de coxas e asas precisa de 175°F–180°F (79°C–82°C) para derreter em gelatina tenra e suculenta."
+      },
+      {
+        title: "Armadilha #4: Esquentar Sobras no Micro-ondas sem Mexer na Metade do Tempo",
+        desc: "O micro-ondas aquece de forma desigual gerando zonas frias com diferença de até 20°C. Mexa travessas e sopas no meio do processo e garanta que o centro atinja 165°F (74°C)."
+      }
+    ],
+    relatedTitle: "Ferramentas Complementares de Segurança na Cozinha",
+    thawingTag: "Descongelamento Seguro",
+    thawingTitle: "Calculadora de Descongelamento de Carne e Peru USDA",
+    thawingDesc: "Calcule com exatidão o tempo na geladeira, água fria ou micro-ondas sem permitir a proliferação na zona de perigo térmico.",
+    shelfTag: "Validade de Sobras",
+    shelfTitle: "Calculadora de Validade de Sobras de Geladeira USDA",
+    shelfDesc: "Verifique a regra de 3 a 4 dias de geladeira e limites de congelamento para carnes preparadas, caldos e tortas.",
+    ovenTag: "Segurança de Panelas",
+    ovenTitle: "Consulta de Temperatura Máxima de Panelas e Formas",
+    ovenDesc: "Cheque limites de temperatura para Le Creuset, Pyrex, HexClad, silicone e papel manteiga antes de usar o forno.",
+    faqKicker: "Perguntas Frequentes",
+    faqTitle: "Perguntas Frequentes sobre Temperatura e Ponto da Carne",
+    faqSub: "Respostas com base em microbiologia alimentar sobre uso de termômetros, descanso e recomendações sanitárias.",
+    faqs: [
+      {
+        question: "Por que o USDA reduziu a temperatura segura do porco de 160°F para 145°F?",
+        answer: "Em 2011, o USDA atualizou as normas para cortes inteiros de carne suína fresca de 160°F para 145°F com 3 minutos obrigatórios de descanso. A triquinose foi erradicada em criações comerciais modernas e o descanso térmico garante a mesma segurança que 160°F, deixando a carne muito mais macia."
+      },
+      {
+        question: "Por que carne moída exige 160°F e bife inteiro é seguro a 145°F?",
+        answer: "Em peças inteiras, bactérias perigosas ficam concentradas na superfície externa, que atinge calor altíssimo na frigideira. O moedor espalha essas bactérias por todo o interior do hambúrguer, exigindo cozimento completo até 160°F no miolo."
+      },
+      {
+        question: "Por que o frango bem cozido pode ter partes rosadas perto do osso?",
+        answer: "Frangos jovens têm ossos porosos cuja hemoglobina da medula migra para as fibras vizinhas durante o preparo. Isso cria uma cor rosada inofensiva. A única garantia real é o termômetro registrando 165°F (74°C) na parte mais grossa."
+      },
+      {
+        question: "Onde devo espetar o termômetro culinário em carnes grandes?",
+        answer: "Em aves inteiras, insira na parte mais espessa da coxa interna (sem encostar no osso) e no centro do peito. Em bifes e hambúrgueres, espete horizontalmente pela lateral até o centro da peça."
+      }
+    ],
+    homeLabel: "Início",
+    toolsLabel: "Ferramentas",
+    toolShortLabel: "Tabela de Temperaturas Seguras"
+  },
+  'zh-cn': {
+    pageTitle: "USDA 食品安全烹饪核心温度与熟度速查表 | IsItKitchenSafe",
+    pageDescription: "即时查询禽肉、牛肉、猪肉、绞肉、鱼类及剩菜的USDA安全最低内部温度、主厨最佳风味温度与强制静置时间，支持华氏度/摄氏度双向切换。",
+    badge: "美国农业部 FSIS 与美国 FDA 食品法典权威标准",
+    h1: "USDA 食品安全烹饪核心温度与肉类熟度速查表",
+    heroSub: "告别凭感觉做饭与致病菌风险。全面收录美国农业部（USDA）官方认证的16类原切肉类、禽肉、水产与日常熟食的安全最低核心温度、主厨风味推荐温度及必不可少的后熟静置法则，支持°F与°C实时换算。",
+    trapsKicker: "E-E-A-T 食品安全指南",
+    trapsTitle: "4 大极易引发食物中毒的肉类温度误区",
+    trapsSub: "依靠肉眼观察与传统经验每年导致数以万计因沙门氏菌、致病性大肠杆菌和弯曲杆菌引发的腹泻与感染住院。",
+    traps: [
+      {
+        title: "误区一：单凭汉堡肉饼变褐或肉汁清亮来判断熟度",
+        desc: "美国农业部实验室实验证实，多达四分之一的绞牛肉饼在中心未达到160°F巴氏灭菌标准前内部就已经变灰褐色。只有插入数字食品温度计确认达到160°F才能彻底杀灭O157:H7大肠杆菌。"
+      },
+      {
+        title: "误区二：猪肉和牛排煎烤出锅后立即切开，忽略3分钟静置",
+        desc: "猪肉在达到145°F离火后立即切开会导致肉汁大量溢出并让中心温度骤降。强制静置3分钟不仅让肌肉纤维重新吸附肉汁，后熟蓄热更会持续杀灭残留细菌。"
+      },
+      {
+        title: "误区三：用对待鸡胸肉的标准去烤鸡腿和鸡翅",
+        desc: "鸡胸肉和深色鸡腿肉在165°F时均已杀菌，但精瘦鸡胸肉超过165°F就会变得干柴难咽；而鸡腿翅中富含的粗纤维胶原蛋白需要加热至175°F–180°F (79°C–82°C) 才能彻底水解成软糯多汁的明胶。"
+      },
+      {
+        title: "误区四：微波炉二次加热剩饭剩菜时不加盖且中途不搅拌",
+        desc: "微波加热存在严重的电磁驻波冷斑，食物内外温差有时可达20°C以上。加热炖菜和米饭必须在中间暂停搅拌一次，并确保最冷处达到165°F (74°C)。"
+      }
+    ],
+    relatedTitle: "相关厨房安全与食品保鲜工具",
+    thawingTag: "解冻安全",
+    thawingTitle: "USDA 肉类与火鸡安全解冻时间计算器",
+    thawingDesc: "科学计算冷藏室、冷水与微波解冻所需精准时长，远离40°F–140°F细菌危险温区。",
+    shelfTag: "剩菜保质期",
+    shelfTitle: "USDA 剩饭剩菜冷藏保质期倒计时计算器",
+    shelfDesc: "查询煮熟肉类、肉汤及焗烤菜肴的冷藏3-4天保质期限与冷冻延长法则。",
+    ovenTag: "锅具烤箱极限",
+    ovenTitle: "锅具与烘焙模具安全烤箱耐温查询工具",
+    ovenDesc: "进烤箱前快速核对Le Creuset、Pyrex玻璃、HexClad、硅胶垫与烘焙纸的安全极限耐温。",
+    faqKicker: "常见问答",
+    faqTitle: "食品核心温度与熟度常见问题解答",
+    faqSub: "基于食品微生物学与权威检疫标准的科学解答，助您掌握温度计探针用法。",
+    faqs: [
+      {
+        question: "为什么美国农业部将猪肉的安全烹饪温度从160°F降至145°F？",
+        answer: "2011年，USDA将整块原切猪肉的安全基准下调至145°F并要求静置3分钟。现代商业集约化养殖已完全杜绝旋毛虫病（旋毛虫在137°F即死灭），145°F加静置达到的杀菌率与160°F完全相同，同时肉质中心呈鲜嫩粉红色，彻底告别干硬口感。"
+      },
+      {
+        question: "为什么汉堡肉饼中心必须达到160°F，而牛排达到130-145°F就是安全的？",
+        answer: "原切整块牛排的致病菌几乎100%附着在肉块外表面，表面高温煎烤即可彻底杀菌。而绞肉机在绞碎过程中把表面细菌充分混入了肉饼最中心，因此肉饼内芯必须全熟加热至160°F。"
+      },
+      {
+        question: "为什么即使鸡肉达到了165°F的安全温度，骨头附近有时看起来还是粉红色的？",
+        answer: "幼年肉鸡的骨骼非常脆弱多孔，加热过程中骨髓中的血红蛋白会渗透到邻近的肌肉组织中留下粉红色印记。只要数字温度计在肉最厚处测得165°F (74°C)，即使骨头微红也是完全安全的。"
+      },
+      {
+        question: "在整只烤鸡或整块烤肉中，测温探针应插入哪个具体位置？",
+        answer: "整只鸡或火鸡应将探针插入大腿内侧最厚的肉层（不要触碰骨头）、鸡胸中央最厚处和翅膀关节处。牛排和肉饼应从侧面水平插入几何中心。"
+      }
+    ],
+    homeLabel: "首页",
+    toolsLabel: "实用工具",
+    toolShortLabel: "安全烹饪温度速查表"
+  },
+  ja: {
+    pageTitle: "USDA 食品安全中心温度と肉の焼き加減早見表 | IsItKitchenSafe",
+    pageDescription: "鶏肉、牛肉、豚肉、ひき肉、魚介類、残り物のUSDA公式安全最低中心温度、シェフ推奨目標温度、必須休息時間を°F/°C切り替えで確認できます。",
+    badge: "米国農務省 FSIS 及び 米国 FDA 食品衛生基準準拠",
+    h1: "USDA 食品安全中心温度と肉の焼き加減早見表",
+    heroSub: "見た目による勘や食中毒のリスクをゼロに。米国農務省（USDA）が公認する16種類の肉の部位・魚介類・日常料理について、安全最低中心温度、旨味を引き出す最適温度、そして肉汁を保つ休息時間を華氏（°F）と摂氏（°C）で即座に確認できます。",
+    trapsKicker: "E-E-A-T 食品衛生ガイドライン",
+    trapsTitle: "食中毒を招く食品温度の4大誤解",
+    trapsSub: "見た目の色や古い調理習慣に頼ることで、サルモネラ菌やカンピロバクター、病原性大腸菌による事故が毎年多発しています。",
+    traps: [
+      {
+        title: "落とし穴1：ハンバーグの色が茶色いから安全と過信する",
+        desc: "USDAの研究により、牛ひき肉パティの4個に1個は安全基準の160°F（71°C）に達する前に内部が茶色く変色することが判明しています。見た目の色ではなく、デジタル中心温度計で測定することが不可欠です。"
+      },
+      {
+        title: "落とし穴2：豚肉やステーキを焼き上がり直後に切り分ける（休息を省く）",
+        desc: "145°Fで火から下ろした直後に肉を切ると、肉汁が流出し中心温度が急激に下がってしまいます。3分間の休息時間を設けることで、余熱による殺菌が完了し、筋繊維が肉汁を再吸収します。"
+      },
+      {
+        title: "落とし穴3：鶏もも肉を鶏胸肉と同じ火加減で加熱する",
+        desc: "衛生上はどちらも165°Fで安全ですが、胸肉は165°Fを超えるとパサつき、もも肉やすじ肉は175°F〜180°F（79°C〜82°C）までしっかり熱を入れることでコラーゲンがゼラチン化し柔らかくなります。"
+      },
+      {
+        title: "落とし穴4：電子レンジで残り物を途中でかき混ぜずに温める",
+        desc: "電子レンジは加熱ムラが生じやすく、冷たい部分との温度差が20°C以上になることがあります。シチューやスープは加熱の途中で一度かき混ぜ、最も冷たい部分でも165°F（74°C）に達しているか確認してください。"
+      }
+    ],
+    relatedTitle: "関連する便利なキッチン安全ツール",
+    thawingTag: "安全な解凍",
+    thawingTitle: "USDA 肉・ターキー解凍時間計算ツール",
+    thawingDesc: "冷蔵庫・冷水・電子レンジでの適正解凍時間を算出し、細菌が増殖しやすい危険温度帯（40°F〜140°F）を回避します。",
+    shelfTag: "残り物の保存期間",
+    shelfTitle: "USDA 残り物冷蔵保存期間カウントダウンツール",
+    shelfDesc: "調理済み肉料理、スープ、おかずの冷蔵3〜4日の保存期限と冷凍保存ルールを確認できます。",
+    ovenTag: "調理器具の耐熱限界",
+    ovenTitle: "鍋・耐熱皿オーブン安全温度検索ツール",
+    ovenDesc: "ル・クルーゼ、パイレックス、ヘックスクラッド、シリコン型、クッキングシートの最高耐熱温度を瞬時に確認できます。",
+    faqKicker: "よくある質問",
+    faqTitle: "食品温度と焼き加減に関するFAQ",
+    faqSub: "食品微生物学と公的衛生基準に基づく、温度計の使い方と安全管理のポイントを解説します。",
+    faqs: [
+      {
+        question: "なぜUSDAは豚肉の安全中心温度を160°Fから145°Fに引き下げたのですか？",
+        answer: "2011年、USDAは豚肉一枚肉の基準を160°Fから「145°F＋3分間の休息」へ改定しました。近代的な衛生管理により旋毛虫病のリスクがほぼ根絶されたこと、そして145°Fでの余熱休息により160°Fと同等の殺菌効果が得られ、肉がパサつかずジューシーに仕上がることが実証されたためです。"
+      },
+      {
+        question: "なぜひき肉は160°Fが必要で、ステーキ肉は145°F（レアやミディアムレア）で安全なのですか？",
+        answer: "ブロックのステーキ肉では、O157などの病原菌は表面にしか存在せず、表面を強火で焼くことで完全に死滅します。一方、ひき肉は加工の段階で表面の菌が中心部まで練り込まれるため、芯まで160°F（71°C）に加熱する必要があります。"
+      },
+      {
+        question: "鶏肉が165°Fに達していても、骨の近くがピンク色に見えるのはなぜですか？",
+        answer: "若鶏の骨は多孔質で薄いため、加熱中に骨髄のヘモグロビンが周囲の肉に染み出してピンク色に見えることがあります。中心温度計で165°F（74°C）が確認できていれば、見た目が薄いピンク色であっても完全に安全です。"
+      },
+      {
+        question: "丸鶏や大きなロースト肉のどこに温度計プローブを刺すべきですか？",
+        answer: "丸鶏やターキーでは、もも肉の付け根（骨に当たらないよう注意）、胸肉の最も厚い部分、手羽の関節にプローブを刺します。ステーキやハンバーグは側面から水平に中心に向けて刺します。"
+      }
+    ],
+    homeLabel: "ホーム",
+    toolsLabel: "ツール一覧",
+    toolShortLabel: "安全調理温度早見表"
+  }
+};
+
+const c = CONTENT[lang as Exclude<SupportedLanguage, 'en'>];
+
+const breadcrumbs = [
+  { label: c.homeLabel, href: `/${lang}/` },
+  { label: c.toolsLabel, href: `/${lang}/tools/` },
+  { label: c.toolShortLabel }
+];
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": c.h1,
+  "url": `https://isitkitchensafe.com/${lang}/tools/internal-cooking-temp-chart/`,
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript.",
+  "description": c.pageDescription,
+  "inLanguage": lang,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IsItKitchenSafe",
+    "url": "https://isitkitchensafe.com"
+  }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": c.faqs.map((faq) => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+};
+---
+
+<Layout
+  title={c.pageTitle}
+  description={c.pageDescription}
+  lang={lang}
+  availableLocales={availableLocales}
+  breadcrumbs={breadcrumbs}
+  faqs={c.faqs}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(webAppSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+  <!-- Breadcrumbs -->
+  <div class="bg-surface-soft border-b border-hairline py-1">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <Breadcrumbs items={breadcrumbs} className="mb-0" />
+    </div>
+  </div>
+
+  <main class="max-w-[1280px] mx-auto px-6 py-10 md:py-14">
+    <!-- Hero Header -->
+    <header class="max-w-[880px] mb-8">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-signature-teal text-white mb-3">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+        </svg>
+        <span>{c.badge}</span>
+      </div>
+      <h1 class="text-display-lg md:text-display-xl font-bold text-ink tracking-tight mb-4">
+        {c.h1}
+      </h1>
+      <p class="text-body-lg text-muted leading-relaxed">
+        {c.heroSub}
+      </p>
+    </header>
+
+    <!-- Interactive Component -->
+    <InternalCookingTempChart lang={lang} />
+
+    <!-- Traps Section -->
+    <section class="mt-14 pt-12 border-t border-hairline">
+      <div class="max-w-[880px] mb-8">
+        <span class="text-caption text-muted uppercase tracking-wider text-xs block mb-1">{c.trapsKicker}</span>
+        <h2 class="text-display-sm md:text-display-md font-bold text-ink tracking-tight mb-3">
+          {c.trapsTitle}
+        </h2>
+        <p class="text-body-md text-muted leading-relaxed">
+          {c.trapsSub}
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {c.traps.map((trap) => (
+          <div class="p-5 rounded-lg border border-hairline bg-surface shadow-xs">
+            <div class="flex items-center gap-2 mb-2 font-semibold text-error">
+              <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+              </svg>
+              <span>{trap.title}</span>
+            </div>
+            <p class="text-body-sm text-body leading-relaxed">
+              {trap.desc}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Related Tools Section -->
+    <section class="mt-14 pt-10 border-t border-hairline">
+      <h2 class="text-title-md font-semibold text-ink mb-6">
+        {c.relatedTitle}
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <a
+          href={`/${lang}/tools/meat-thawing-calculator/`}
+          class="p-5 rounded-lg border border-hairline bg-surface hover:border-border-strong hover:shadow-xs transition-all flex flex-col justify-between group"
+        >
+          <div>
+            <span class="inline-block text-[11px] font-bold uppercase tracking-wider text-info mb-1.5">{c.thawingTag}</span>
+            <h3 class="text-title-sm font-semibold text-ink group-hover:text-primary transition-colors mb-2">
+              {c.thawingTitle}
+            </h3>
+            <p class="text-body-xs text-muted leading-relaxed">
+              {c.thawingDesc}
+            </p>
+          </div>
+          <span class="text-link text-xs font-semibold flex items-center gap-1 mt-4">
+            <span>&rarr;</span>
+          </span>
+        </a>
+
+        <a
+          href={`/${lang}/tools/leftover-shelf-life-calculator/`}
+          class="p-5 rounded-lg border border-hairline bg-surface hover:border-border-strong hover:shadow-xs transition-all flex flex-col justify-between group"
+        >
+          <div>
+            <span class="inline-block text-[11px] font-bold uppercase tracking-wider text-signature-teal mb-1.5">{c.shelfTag}</span>
+            <h3 class="text-title-sm font-semibold text-ink group-hover:text-primary transition-colors mb-2">
+              {c.shelfTitle}
+            </h3>
+            <p class="text-body-xs text-muted leading-relaxed">
+              {c.shelfDesc}
+            </p>
+          </div>
+          <span class="text-link text-xs font-semibold flex items-center gap-1 mt-4">
+            <span>&rarr;</span>
+          </span>
+        </a>
+
+        <a
+          href={`/${lang}/tools/cookware-oven-temp-lookup/`}
+          class="p-5 rounded-lg border border-hairline bg-surface hover:border-border-strong hover:shadow-xs transition-all flex flex-col justify-between group"
+        >
+          <div>
+            <span class="inline-block text-[11px] font-bold uppercase tracking-wider text-signature-coral mb-1.5">{c.ovenTag}</span>
+            <h3 class="text-title-sm font-semibold text-ink group-hover:text-primary transition-colors mb-2">
+              {c.ovenTitle}
+            </h3>
+            <p class="text-body-xs text-muted leading-relaxed">
+              {c.ovenDesc}
+            </p>
+          </div>
+          <span class="text-link text-xs font-semibold flex items-center gap-1 mt-4">
+            <span>&rarr;</span>
+          </span>
+        </a>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="mt-14 pt-10 border-t border-hairline">
+      <div class="max-w-[800px] mb-8">
+        <span class="text-caption text-muted uppercase tracking-wider text-xs block mb-1">{c.faqKicker}</span>
+        <h2 class="text-display-sm font-bold text-ink tracking-tight mb-2">
+          {c.faqTitle}
+        </h2>
+        <p class="text-body-md text-muted leading-relaxed">
+          {c.faqSub}
+        </p>
+      </div>
+
+      <div class="space-y-4 max-w-[880px]">
+        {c.faqs.map((faq) => (
+          <details class="group bg-surface border border-hairline rounded-lg p-5 transition-colors open:bg-surface-soft/60">
+            <summary class="font-semibold text-ink cursor-pointer list-none flex items-center justify-between gap-4 text-title-sm">
+              <span>{faq.question}</span>
+              <svg class="w-5 h-5 text-muted shrink-0 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+            </summary>
+            <p class="mt-3 text-body-sm text-body leading-relaxed pt-3 border-t border-hairline">
+              {faq.answer}
+            </p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </main>
+</Layout>

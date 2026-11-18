@@ -6,6 +6,7 @@ import blogPt from '../../../data/blog.pt.json';
 import blogZh from '../../../data/blog.zh-cn.json';
 import blogJa from '../../../data/blog.ja.json';
 import type { SupportedLanguage } from '../../../i18n/ui';
+import { useTranslatedPath } from '../../../i18n/utils';
 
 export function getStaticPaths() {
   const locales: { lang: SupportedLanguage; data: typeof blogEs }[] = [
@@ -32,9 +33,259 @@ interface Props {
 }
 
 const { lang, blogData, availableLocales } = Astro.props;
+const tp = useTranslatedPath(lang);
 const isEs = lang === 'es';
 const isPt = lang === 'pt';
 const isZh = lang === 'zh-cn';
+
+type TopicKey = 'cookware' | 'appliances' | 'storage' | 'plastics';
+
+function classifyArticleTopic(slug: string): TopicKey {
+  const s = slug.toLowerCase();
+  if (/cookware|hexclad|caraway|nonstick|stainless|pyrex|cutting-board|stanley|yeti/.test(s)) {
+    return 'cookware';
+  }
+  if (/plastic/.test(s)) {
+    return 'plastics';
+  }
+  if (/refreeze|freezer|refrigeration|leftovers|turkey|thawing/.test(s)) {
+    return 'storage';
+  }
+  return 'appliances';
+}
+
+const topicLabels: Record<TopicKey, string> = isEs
+  ? {
+      cookware: 'Utensilios y Materiales',
+      appliances: 'Seguridad en Electrodomésticos',
+      storage: 'Conservación y Festividades',
+      plastics: 'Plásticos y Envases',
+    }
+  : isPt
+  ? {
+      cookware: 'Panelas e Materiais',
+      appliances: 'Segurança em Eletrodomésticos',
+      storage: 'Conservação e Festas',
+      plastics: 'Plásticos e Embalagens',
+    }
+  : isZh
+  ? {
+      cookware: '厨具与材质',
+      appliances: '家电安全',
+      storage: '食品储存与节日',
+      plastics: '塑料与包装',
+    }
+  : {
+      cookware: '調理器具・素材',
+      appliances: '家電の安全',
+      storage: '食品保存・行事',
+      plastics: 'プラスチック・容器',
+    };
+
+const allGuidesLabel = isEs
+  ? 'Todas las Guías'
+  : isPt
+  ? 'Todos os Guias'
+  : isZh
+  ? '全部指南'
+  : 'すべてのガイド';
+
+const classifiedArticles = blogData.map((article) => ({
+  ...article,
+  topic: classifyArticleTopic(article.slug),
+}));
+
+const totalCount = classifiedArticles.length;
+const topicCounts: Record<TopicKey, number> = {
+  cookware: classifiedArticles.filter((a) => a.topic === 'cookware').length,
+  appliances: classifiedArticles.filter((a) => a.topic === 'appliances').length,
+  storage: classifiedArticles.filter((a) => a.topic === 'storage').length,
+  plastics: classifiedArticles.filter((a) => a.topic === 'plastics').length,
+};
+
+const topicChips: { key: 'all' | TopicKey; label: string; count: number }[] = [
+  { key: 'all', label: allGuidesLabel, count: totalCount },
+  { key: 'cookware', label: topicLabels.cookware, count: topicCounts.cookware },
+  { key: 'appliances', label: topicLabels.appliances, count: topicCounts.appliances },
+  { key: 'storage', label: topicLabels.storage, count: topicCounts.storage },
+  { key: 'plastics', label: topicLabels.plastics, count: topicCounts.plastics },
+];
+
+const uiCopy = isEs
+  ? {
+      searchPlaceholder: 'Buscar guías por tema, marca o aparato (ej. Pyrex, Freidora, Sobras)...',
+      searchAria: 'Buscar guías del blog de seguridad en la cocina',
+      clearAria: 'Borrar búsqueda',
+      filterGroupAria: 'Filtrar guías por tema',
+      countTemplate: 'Mostrando {count} de {total} guías',
+      noResults: 'Ninguna guía coincide con tu búsqueda o filtro de tema.',
+      resetFilters: 'Restablecer filtros',
+      toolsEyebrow: 'Calculadoras Interactivas Gratuitas de Seguridad',
+      toolsHeading: 'Herramientas Interactivas Populares de Seguridad en la Cocina',
+      toolsSubtitle: 'Verifica al instante símbolos de recipientes, fechas límite de sobras del USDA, códigos plásticos #1–#7 y límites de horno por marca.',
+      allTools: 'Todas las herramientas',
+      rssSubscribe: 'Suscribirse por RSS',
+      openTool: 'Abrir herramienta',
+    }
+  : isPt
+  ? {
+      searchPlaceholder: 'Pesquisar guias por tema, marca ou aparelho (ex. Pyrex, Air Fryer, Sobras)...',
+      searchAria: 'Pesquisar guias do blog de segurança na cozinha',
+      clearAria: 'Limpar pesquisa',
+      filterGroupAria: 'Filtrar guias por tema',
+      countTemplate: 'Mostrando {count} de {total} guias',
+      noResults: 'Nenhum guia corresponde à sua pesquisa ou filtro de tema.',
+      resetFilters: 'Redefinir filtros',
+      toolsEyebrow: 'Calculadoras Interativas Gratuitas de Segurança',
+      toolsHeading: 'Ferramentas Interativas Populares de Segurança na Cozinha',
+      toolsSubtitle: 'Verifique instantaneamente símbolos de recipientes, prazos de sobras do USDA, códigos plásticos #1–#7 e limites de forno por marca.',
+      allTools: 'Todas as ferramentas',
+      rssSubscribe: 'Assinar via RSS',
+      openTool: 'Abrir ferramenta',
+    }
+  : isZh
+  ? {
+      searchPlaceholder: '按主题、品牌或电器搜索指南（如 Pyrex、空气炸锅、剩菜）...',
+      searchAria: '搜索厨房安全科普博客指南',
+      clearAria: '清除搜索',
+      filterGroupAria: '按主题筛选指南',
+      countTemplate: '显示 {count} / {total} 篇指南',
+      noResults: '没有找到符合当前搜索词或主题筛选的安全指南。',
+      resetFilters: '重置筛选',
+      toolsEyebrow: '免费互动厨房安全计算器',
+      toolsHeading: '热门互动厨房安全工具',
+      toolsSubtitle: '即时查询容器底部图标、USDA剩菜保质期倒计时、1–7号塑料编码及主流厨具品牌耐温上限。',
+      allTools: '全部工具',
+      rssSubscribe: '订阅 RSS',
+      openTool: '打开工具',
+    }
+  : {
+      searchPlaceholder: 'テーマ・ブランド・家電でガイドを検索（例：パイレックス、ノンフライヤー、残り物）...',
+      searchAria: 'キッチン安全ブログのガイドを検索',
+      clearAria: '検索をクリア',
+      filterGroupAria: 'テーマ別にガイドを絞り込む',
+      countTemplate: '{total} 件中 {count} 件のガイドを表示',
+      noResults: '現在の検索条件またはテーマに一致する安全ガイドはありません。',
+      resetFilters: 'フィルターをリセット',
+      toolsEyebrow: '無料インタラクティブ安全計算ツール',
+      toolsHeading: '人気のインタラクティブ・キッチン安全ツール',
+      toolsSubtitle: '容器底面の記号解読、USDA基準の残り物保存期限、プラスチック識別番号#1〜#7、ブランド別オーブン耐熱温度を即座にチェック。',
+      allTools: 'すべてのツール',
+      rssSubscribe: 'RSS購読',
+      openTool: 'ツールを開く',
+    };
+
+const initialCountText = uiCopy.countTemplate
+  .replace('{count}', String(totalCount))
+  .replace('{total}', String(totalCount));
+
+const featuredTools = isEs
+  ? [
+      {
+        href: tp('/tools/kitchen-symbol-decoder/'),
+        badge: 'Símbolos',
+        title: 'Decodificador de Símbolos',
+        description: 'Descifra ondas de microondas, copa y tenedor, lavavajillas e iconos de inducción.',
+      },
+      {
+        href: tp('/tools/leftover-shelf-life-calculator/'),
+        badge: 'Temporizador USDA',
+        title: 'Calculadora de Sobras USDA',
+        description: 'Calcula fechas exactas de descarte en nevera o congelador y la regla de 2 horas.',
+      },
+      {
+        href: tp('/tools/plastic-code-checker/'),
+        badge: 'Resina #1–#7',
+        title: 'Verificador de Plásticos',
+        description: 'Consulta límites de microondas, lavavajillas y líquidos calientes para PET, HDPE, PP, PS y Tritan.',
+      },
+      {
+        href: tp('/tools/cookware-oven-temp-lookup/'),
+        badge: 'Límites de Calor',
+        title: 'Límites de Horno para Utensilios',
+        description: 'Compara temperaturas máximas de horno y grill para HexClad, Le Creuset, Pyrex y silicona.',
+      },
+    ]
+  : isPt
+  ? [
+      {
+        href: tp('/tools/kitchen-symbol-decoder/'),
+        badge: 'Símbolos',
+        title: 'Decodificador de Símbolos',
+        description: 'Decifre ondas de micro-ondas, taça e garfo, lava-louças e ícones de indução.',
+      },
+      {
+        href: tp('/tools/leftover-shelf-life-calculator/'),
+        badge: 'Prazo USDA',
+        title: 'Calculadora de Validade de Sobras',
+        description: 'Calcule datas exatas de descarte na geladeira ou freezer e a regra de 2 horas.',
+      },
+      {
+        href: tp('/tools/plastic-code-checker/'),
+        badge: 'Resina #1–#7',
+        title: 'Verificador de Plásticos',
+        description: 'Verifique limites de micro-ondas, lava-louças e líquidos quentes para PET, HDPE, PP, PS e Tritan.',
+      },
+      {
+        href: tp('/tools/cookware-oven-temp-lookup/'),
+        badge: 'Limites Térmicos',
+        title: 'Limites de Forno para Panelas',
+        description: 'Compare temperaturas máximas de forno e grill para HexClad, Le Creuset, Pyrex e silicone.',
+      },
+    ]
+  : isZh
+  ? [
+      {
+        href: tp('/tools/kitchen-symbol-decoder/'),
+        badge: '图标解码',
+        title: '厨具底部图标解码器',
+        description: '一键解读微波炉波浪纹、食品级酒杯刀叉、洗碗机与电磁炉标志。',
+      },
+      {
+        href: tp('/tools/leftover-shelf-life-calculator/'),
+        badge: 'USDA 计时',
+        title: '剩菜保质期倒计时计算器',
+        description: '按USDA标准计算冰箱冷藏与冷冻丢弃日期，排查2小时危险温区风险。',
+      },
+      {
+        href: tp('/tools/plastic-code-checker/'),
+        badge: '1–7号树脂',
+        title: '塑料编码安全查询',
+        description: '速查 PET、HDPE、PP、PS 及 Tritan 的微波、洗碗机和耐高温上限。',
+      },
+      {
+        href: tp('/tools/cookware-oven-temp-lookup/'),
+        badge: '耐温上限',
+        title: '厨具烤箱耐温上限查询',
+        description: '对比 HexClad、Le Creuset、Pyrex 和硅胶模具的最高烤箱与炙烤温度。',
+      },
+    ]
+  : [
+      {
+        href: tp('/tools/kitchen-symbol-decoder/'),
+        badge: '記号解読',
+        title: 'キッチン記号デコーダー',
+        description: '電子レンジ・食洗機・食品衛生マーク・IH対応などの底面記号を即解読。',
+      },
+      {
+        href: tp('/tools/leftover-shelf-life-calculator/'),
+        badge: 'USDA基準',
+        title: '残り物・保存期間計算ツール',
+        description: 'USDA基準の冷蔵・冷凍廃棄日と2時間危険温度帯ルールを自動計算。',
+      },
+      {
+        href: tp('/tools/plastic-code-checker/'),
+        badge: '樹脂番号 #1–#7',
+        title: 'プラスチック番号チェッカー',
+        description: 'PET・HDPE・PP・PS・トライタンのレンジ・食洗機・耐熱安全性を確認。',
+      },
+      {
+        href: tp('/tools/cookware-oven-temp-lookup/'),
+        badge: '耐熱上限',
+        title: '調理器具オーブン耐熱検索',
+        description: 'HexClad・ルクルーゼ・パイレックス・シリコンの耐熱・グリル上限を比較。',
+      },
+    ];
 
 const pageTitle = isEs
   ? "Blog de Seguridad en la Cocina | ¿Es Seguro en la Cocina?"
@@ -157,7 +408,7 @@ const blogFaqs = isEs
     />
 
     <!-- Header Section -->
-    <header class="max-w-[800px] mb-12">
+    <header class="max-w-[800px] mb-10">
       <h1 class="text-4xl md:text-5xl font-bold text-ink tracking-tight mb-4">
         {isEs
           ? "Blog de Seguridad en la Cocina"
@@ -178,29 +429,106 @@ const blogFaqs = isEs
       </p>
     </header>
 
+    <!-- Instant Search & Topic Filter Bar -->
+    <div class="mb-8 rounded-lg border border-hairline bg-surface-soft/70 p-4 md:p-5 shadow-xs">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="relative w-full md:max-w-[460px]">
+          <svg class="w-4 h-4 text-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1010.5 18a7.5 7.5 0 006.15-3.35z" />
+          </svg>
+          <input
+            type="text"
+            id="blog-search"
+            autocomplete="off"
+            placeholder={uiCopy.searchPlaceholder}
+            aria-label={uiCopy.searchAria}
+            class="w-full h-11 pl-10 pr-10 py-2 bg-canvas text-ink text-[16px] md:text-[14px] border border-hairline rounded-md focus:outline-none focus:border-info-border shadow-xs"
+          />
+          <button
+            type="button"
+            id="blog-clear"
+            aria-label={uiCopy.clearAria}
+            class="hidden absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-md text-muted hover:text-ink hover:bg-surface-soft inline-flex items-center justify-center transition-colors cursor-pointer"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <p
+          id="blog-count"
+          aria-live="polite"
+          data-template={uiCopy.countTemplate}
+          class="text-xs font-medium text-muted shrink-0"
+        >
+          {initialCountText}
+        </p>
+      </div>
+
+      <div id="blog-topic-filters" class="mt-4 flex flex-wrap gap-2" role="group" aria-label={uiCopy.filterGroupAria}>
+        {topicChips.map((chip, idx) => (
+          <button
+            type="button"
+            data-topic={chip.key}
+            aria-pressed={idx === 0 ? 'true' : 'false'}
+            class={idx === 0
+              ? 'blog-topic-chip min-h-[38px] px-3.5 py-1.5 rounded-full text-[13px] font-medium border bg-primary text-on-primary border-primary cursor-pointer transition-colors inline-flex items-center gap-1.5 select-none'
+              : 'blog-topic-chip min-h-[38px] px-3.5 py-1.5 rounded-full text-[13px] font-medium border bg-canvas text-body border-hairline hover:border-border-strong hover:text-ink cursor-pointer transition-colors inline-flex items-center gap-1.5 select-none'}
+          >
+            <span>{chip.label}</span>
+            <span class="text-[11px] opacity-80">({chip.count})</span>
+          </button>
+        ))}
+      </div>
+    </div>
+
     <!-- Main Content Area with Sidebar Grid Layout -->
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-      <!-- Article Cards Grid -->
-      <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-8">
-        {blogData.map((article) => (
-          <article class="bg-canvas border border-hairline rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between overflow-hidden">
-            <div class="p-6">
-              <span class="text-[11px] text-link uppercase tracking-wider font-bold block mb-2">
-                {isEs ? "Guías de Seguridad" : isPt ? "Guias de Segurança" : isZh ? "安全指南" : "安全ガイド"}
-              </span>
-              <h2 class="text-title-sm text-ink font-semibold mb-3 hover:text-link transition-colors">
-                <a href={`/${lang}/blog/${article.slug}/`}>{article.title}</a>
-              </h2>
-              <p class="text-[14px] text-muted leading-relaxed mb-4 line-clamp-3">
-                {article.excerpt}
-              </p>
-            </div>
-            <div class="px-6 pb-6 pt-4 border-t border-hairline bg-surface-soft flex items-center justify-between text-xs text-muted">
-              <span>{article.date}</span>
-              <span>{article.readTime}</span>
-            </div>
-          </article>
-        ))}
+      <!-- Article Cards Column -->
+      <div class="lg:col-span-3">
+        <div id="blog-grid" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {classifiedArticles.map((article) => (
+            <article
+              class="blog-card bg-canvas border border-hairline rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between overflow-hidden"
+              data-topic={article.topic}
+              data-search={`${article.title} ${article.excerpt} ${topicLabels[article.topic]} ${article.topic} ${article.slug.replace(/-/g, ' ')}`.toLowerCase()}
+            >
+              <div class="p-6">
+                <div class="flex items-center justify-between gap-2 mb-2">
+                  <span class="text-[11px] text-link uppercase tracking-wider font-bold">
+                    {isEs ? "Guías de Seguridad" : isPt ? "Guias de Segurança" : isZh ? "安全指南" : "安全ガイド"}
+                  </span>
+                  <span class="text-[11px] font-medium text-muted bg-surface-soft border border-hairline px-2 py-0.5 rounded-full">
+                    {topicLabels[article.topic]}
+                  </span>
+                </div>
+                <h2 class="text-title-sm text-ink font-semibold mb-3 hover:text-link transition-colors">
+                  <a href={`/${lang}/blog/${article.slug}/`}>{article.title}</a>
+                </h2>
+                <p class="text-[14px] text-muted leading-relaxed mb-4 line-clamp-3">
+                  {article.excerpt}
+                </p>
+              </div>
+              <div class="px-6 pb-6 pt-4 border-t border-hairline bg-surface-soft flex items-center justify-between text-xs text-muted">
+                <span>{article.date}</span>
+                <span>{article.readTime}</span>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <!-- Empty Search/Filter State -->
+        <div id="blog-no-results" class="hidden text-center py-12 px-6 rounded-lg border border-hairline bg-surface-soft/50">
+          <p class="text-title-md text-muted mb-4">{uiCopy.noResults}</p>
+          <button
+            type="button"
+            id="blog-reset"
+            class="px-4 py-2 min-h-[40px] bg-canvas text-ink text-[13px] font-medium border border-hairline hover:border-border-strong rounded-md transition-colors cursor-pointer"
+          >
+            {uiCopy.resetFilters}
+          </button>
+        </div>
       </div>
 
       <!-- Sidebar -->
@@ -237,5 +565,170 @@ const blogFaqs = isEs
         </div>
       </aside>
     </div>
+
+    <!-- Popular Interactive Kitchen Safety Tools Spotlight Strip -->
+    <div class="mt-14 pt-10 border-t border-hairline">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+        <div>
+          <span class="inline-block text-[11px] font-bold uppercase tracking-wider text-info mb-1">
+            {uiCopy.toolsEyebrow}
+          </span>
+          <h2 class="text-title-lg text-ink font-semibold tracking-tight">
+            {uiCopy.toolsHeading}
+          </h2>
+          <p class="text-body-md text-muted mt-1">
+            {uiCopy.toolsSubtitle}
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 shrink-0">
+          <a
+            href={tp('/tools/')}
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 min-h-[38px] rounded-md border border-hairline bg-canvas text-ink text-[13px] font-medium hover:border-border-strong transition-colors"
+          >
+            <span>{uiCopy.allTools}</span>
+            <span aria-hidden="true">&rarr;</span>
+          </a>
+          <a
+            href="/rss.xml"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 min-h-[38px] rounded-md border border-hairline bg-surface-soft text-ink text-[13px] font-medium hover:border-border-strong transition-colors"
+          >
+            <svg class="w-3.5 h-3.5 text-signature-coral" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 5c7.18 0 13 5.82 13 13M6 11a7 7 0 017 7m-6 0a1 1 0 11-2 0 1 1 0 012 0z" />
+            </svg>
+            <span>{uiCopy.rssSubscribe}</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {featuredTools.map((tool) => (
+          <a
+            href={tool.href}
+            class="group bg-canvas border border-hairline rounded-lg p-5 hover:border-border-strong hover:shadow-sm transition-all flex flex-col justify-between"
+          >
+            <div>
+              <span class="inline-block text-[11px] font-bold uppercase tracking-wider text-link mb-2">
+                {tool.badge}
+              </span>
+              <h3 class="text-title-sm text-ink font-semibold mb-2 group-hover:text-link transition-colors">
+                {tool.title}
+              </h3>
+              <p class="text-[13px] text-muted leading-relaxed mb-4">
+                {tool.description}
+              </p>
+            </div>
+            <span class="text-xs font-semibold text-link inline-flex items-center gap-1">
+              <span>{uiCopy.openTool}</span>
+              <span class="group-hover:translate-x-0.5 transition-transform" aria-hidden="true">&rarr;</span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
   </section>
+
+  <!-- Client-side search & topic filtering script -->
+  <script is:inline>
+    (() => {
+      const searchInput = document.getElementById('blog-search');
+      const clearBtn = document.getElementById('blog-clear');
+      const resetBtn = document.getElementById('blog-reset');
+      const countEl = document.getElementById('blog-count');
+      const blogGrid = document.getElementById('blog-grid');
+      const noResults = document.getElementById('blog-no-results');
+      const topicButtons = Array.from(document.querySelectorAll('#blog-topic-filters .blog-topic-chip'));
+
+      if (!searchInput || !blogGrid) return;
+
+      const cards = Array.from(blogGrid.getElementsByClassName('blog-card'));
+      const total = cards.length;
+      const template = (countEl && countEl.getAttribute('data-template')) || 'Showing {count} of {total} guides';
+      let activeTopic = 'all';
+
+      const setActiveTopic = (topic) => {
+        topicButtons.forEach((btn) => {
+          const isSelected = btn.getAttribute('data-topic') === topic;
+          btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+          btn.classList.toggle('bg-primary', isSelected);
+          btn.classList.toggle('text-on-primary', isSelected);
+          btn.classList.toggle('border-primary', isSelected);
+          btn.classList.toggle('bg-canvas', !isSelected);
+          btn.classList.toggle('text-body', !isSelected);
+          btn.classList.toggle('border-hairline', !isSelected);
+          btn.classList.toggle('hover:border-border-strong', !isSelected);
+          btn.classList.toggle('hover:text-ink', !isSelected);
+        });
+      };
+
+      const applyFilter = () => {
+        const query = searchInput.value.trim().toLowerCase();
+        let matches = 0;
+
+        for (let i = 0; i < total; i++) {
+          const card = cards[i];
+          const haystack = card.getAttribute('data-search') || '';
+          const topic = card.getAttribute('data-topic') || '';
+          const matchesQuery = !query || haystack.includes(query);
+          const matchesTopic = activeTopic === 'all' || topic === activeTopic;
+
+          if (matchesQuery && matchesTopic) {
+            card.classList.remove('hidden');
+            matches++;
+          } else {
+            card.classList.add('hidden');
+          }
+        }
+
+        if (clearBtn) {
+          clearBtn.classList.toggle('hidden', query.length === 0);
+        }
+
+        if (countEl) {
+          countEl.textContent = template
+            .replace('{count}', String(matches))
+            .replace('{total}', String(total));
+        }
+
+        if (noResults) {
+          noResults.classList.toggle('hidden', matches > 0);
+        }
+      };
+
+      searchInput.addEventListener('input', applyFilter);
+
+      searchInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && searchInput.value) {
+          searchInput.value = '';
+          applyFilter();
+        }
+      });
+
+      topicButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          activeTopic = btn.getAttribute('data-topic') || 'all';
+          setActiveTopic(activeTopic);
+          applyFilter();
+        });
+      });
+
+      if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+          searchInput.value = '';
+          applyFilter();
+          searchInput.focus();
+        });
+      }
+
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          searchInput.value = '';
+          activeTopic = 'all';
+          setActiveTopic('all');
+          applyFilter();
+          searchInput.focus();
+        });
+      }
+    })();
+  </script>
 </Layout>
