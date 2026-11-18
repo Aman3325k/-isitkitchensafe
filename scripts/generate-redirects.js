@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { execSync } from 'child_process';
 
 // ─── GENERATE REDIRECTS SCRIPT ───
 // 1. Reads redirects.json (single source of truth for all redirect rules).
@@ -21,17 +22,16 @@ const distPath = path.resolve('dist');
 // Clean dist directory before build to avoid stale Vite/Rollup prerender chunk collisions on Windows
 if (fs.existsSync(distPath)) {
   try {
-    fs.rmSync(distPath, { recursive: true, force: true, maxRetries: 10, retryDelay: 300 });
+    if (process.platform === 'win32') {
+      execSync('cmd /c "rmdir /s /q dist"', { stdio: 'ignore' });
+    } else {
+      fs.rmSync(distPath, { recursive: true, force: true });
+    }
   } catch (err) {
-    // If directory cannot be removed directly on Windows due to transient file handle lock, clean children
-    console.warn(`[redirects] Notice: dist lock encountered (${err.code}). Cleaning contents...`);
     try {
-      const files = fs.readdirSync(distPath);
-      for (const file of files) {
-        fs.rmSync(path.join(distPath, file), { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
-      }
+      fs.rmSync(distPath, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
     } catch (innerErr) {
-      console.warn(`[redirects] Warning cleaning dist contents: ${innerErr.message}`);
+      console.warn(`[redirects] Warning cleaning dist: ${innerErr.message}`);
     }
   }
 }

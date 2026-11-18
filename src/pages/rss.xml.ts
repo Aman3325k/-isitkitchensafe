@@ -86,6 +86,13 @@ const curatedTools: Array<{
     date: '2026-11-18',
   },
   {
+    path: '/tools/cleaner-mixing-danger-checker/',
+    title: 'Kitchen Cleaner Mixing Danger Checker: Bleach, Vinegar, Ammonia & Peroxide',
+    description:
+      'Interactive toxic gas reaction matrix for household cleaners — check bleach, vinegar, ammonia, hydrogen peroxide, rubbing alcohol, and drain openers for chlorine, chloramine, chloroform, and peracetic acid hazards plus emergency guidance.',
+    date: '2026-11-18',
+  },
+  {
     path: '/tools/appliance-descaling-calculator/',
     title: 'Coffee Maker, Electric Kettle & Espresso Descaling Ratio Calculator',
     description:

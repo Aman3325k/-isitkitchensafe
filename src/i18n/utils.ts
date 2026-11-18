@@ -214,6 +214,8 @@ const SPECIAL_PAGES = [
   'tools/cookware-oven-temp-lookup',
   'tools/internal-cooking-temp-chart',
   'tools/appliance-descaling-calculator',
+  'tools/cleaner-mixing-danger-checker',
+  'tools/microwave-wattage-converter',
   'methodology',
   'saved'
 ];

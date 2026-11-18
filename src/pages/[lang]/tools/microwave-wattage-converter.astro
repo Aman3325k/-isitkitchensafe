@@ -1,0 +1,437 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import MicrowaveWattageConverter from '../../../components/MicrowaveWattageConverter.astro';
+import type { SupportedLanguage } from '../../../i18n/ui';
+import { getApplianceUrl, useTranslatedPath } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+const translatePath = useTranslatedPath(lang);
+
+interface LocaleContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  heroSub: string;
+  relatedPlasticTag: string;
+  relatedPlasticTitle: string;
+  relatedPlasticDesc: string;
+  relatedTempTag: string;
+  relatedTempTitle: string;
+  relatedTempDesc: string;
+  relatedEggTag: string;
+  relatedEggTitle: string;
+  relatedEggDesc: string;
+  hubsTitle: string;
+  hubsDescPrefix: string;
+  methodologyLabel: string;
+  hubLabels: {
+    microwave: string;
+    methodology: string;
+    allTools: string;
+  };
+  faqTitle: string;
+  faqs: Array<{ question: string; answer: string }>;
+  breadcrumbs: Array<{ label: string; href?: string }>;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocaleContent> = {
+  es: {
+    pageTitle: "Conversor de Potencia y Tiempo de Microondas (600W–1250W) | IsItKitchenSafe",
+    pageDescription: "Convierte tiempos de microondas entre 600W, 700W, 800W, 900W, 1000W, 1100W, 1200W y 1250W Inverter. Incluye niveles de potencia (30%–100%), aviso de remover a la mitad, tiempo de reposo y seguridad USDA 74°C.",
+    badge: "Calculadora de Vatios de Microondas y Seguridad Alimentaria",
+    h1: "Conversor de Potencia y Tiempo de Microondas (600W–1250W)",
+    heroSub: "Ajusta al instante los tiempos de comidas congeladas, palomitas, sopas, patatas y descongelado desde cualquier potencia de envase hasta tu microondas exacto (600W a 1250W Inverter) y nivel de potencia (30%–100%), con aviso de remover a la mitad y reglas USDA de 74°C (165°F).",
+    relatedPlasticTag: "Seguridad de Envases",
+    relatedPlasticTitle: "Verificador de Códigos de Plástico (#1–#7) →",
+    relatedPlasticDesc: "Comprueba qué tuppers y envases (#5 PP frente a #1 PET y unicel #6) son seguros para calentar en microondas.",
+    relatedTempTag: "Guía de Termómetro USDA",
+    relatedTempTitle: "Tabla de Temperaturas Internas Seguras →",
+    relatedTempDesc: "Verifica las temperaturas mínimas seguras para sobras (74°C), carne molida (71°C), aves y pescados.",
+    relatedEggTag: "Física del Sobrecalentamiento",
+    relatedEggTitle: "Simulador de Explosión de Huevos en Microondas →",
+    relatedEggDesc: "Descubre por qué los huevos enteros y duros se sobrecalientan por encima de 100°C y cómo evitar explosiones.",
+    hubsTitle: "Verifica Qué Platos y Materiales Son Seguros en Tu Microondas",
+    hubsDescPrefix: "Consulta veredictos material por material en la Guía de Microondas y revisa nuestros criterios en",
+    methodologyLabel: "Metodología",
+    hubLabels: {
+      microwave: "Guía de Microondas",
+      methodology: "Metodología",
+      allTools: "Todas las Herramientas →"
+    },
+    faqTitle: "Preguntas Frecuentes sobre Conversión de Potencia en Microondas",
+    faqs: [
+      {
+        question: "¿Cómo puedo saber los vatios (W) de mi microondas si perdí el manual?",
+        answer: "Abre la puerta del microondas y busca la etiqueta técnica en el marco interior o en la parte trasera. Fíjate específicamente en 'Potencia de salida / Output Power' (normalmente entre 600W y 1250W), NO en 'Potencia de entrada / Input' (que es un 35–45% mayor por el motor, la luz y las pérdidas eléctricas). Si no tiene etiqueta, calienta 1 taza (240 ml) de agua fría al 100%: si hierve en menos de 2 min son ~1000–1200W; 2,5 min equivale a ~800–900W; más de 3 min indica ~600–700W."
+      },
+      {
+        question: "¿Cuál es la fórmula para convertir una comida congelada de 1100W a un microondas de 700W, 900W o 1000W?",
+        answer: "Multiplica el tiempo del envase (en segundos) por la potencia indicada en la caja y divide entre los vatios de tu microondas: Tiempo Ajustado = Segundos Envase × (Vatios Envase ÷ Tus Vatios). Por ejemplo, un plato de 4 min 30 seg (270 s) a 1100W requiere 270 × (1100 ÷ 900) = 330 s (5:30) en uno de 900W, o 270 × (1100 ÷ 700) = 424 s (7:04) en uno compacto de 700W."
+      },
+      {
+        question: "¿Por qué las cajas de congelados indican remover a la mitad y dejar reposar 1–2 minutos?",
+        answer: "Las ondas de 2,45 GHz crean ondas estacionarias que generan zonas muy calientes junto a puntos fríos en el centro. Remover a mitad de cocción redistribuye el calor y el tiempo de reposo tapado (1–2 minutos) permite que la conducción térmica elimine los puntos fríos donde podrían sobrevivir Salmonella y Listeria, asegurando alcanzar los 74°C (165°F) exigidos por el USDA."
+      },
+      {
+        question: "¿Por qué puede ser peligroso calentar una taza de agua sola en el microondas?",
+        answer: "En tazas muy lisas de vidrio o cerámica esmaltada, el agua pura puede sobrecalentarse por encima de 100°C sin burbujear por falta de sitios de nucleación. Al mover la taza o meter una bolsita de té o cuchara, el agua puede entrar en ebullición explosiva instantánea causando quemaduras graves. Evítalo colocando un agitador de madera o palillo de bambú dentro de la taza antes de calentar y esperando 30 segundos."
+      },
+      {
+        question: "¿Qué recipientes NUNCA se deben usar en el microondas, sobre todo en tiempos largos?",
+        answer: "Nunca metas envases de unicel / poliestireno expandido (#6 PS), ya que se derriten y liberan estireno en comidas grasas; ni papel aluminio o vajilla con filos metálicos (provocan chispas y arcos eléctricos); ni tapas herméticas cerradas a presión (el vapor acumulado puede hacer estallar el envase). Usa vidrio borosilicato, cerámica apta o plástico #5 PP con la tapa ligeramente abierta."
+      }
+    ],
+    breadcrumbs: [
+      { label: "Inicio", href: "/es/" },
+      { label: "Herramientas", href: "/es/tools/" },
+      { label: "Conversor de Potencia de Microondas" }
+    ]
+  },
+  pt: {
+    pageTitle: "Conversor de Potência e Tempo de Micro-ondas (600W–1250W) | IsItKitchenSafe",
+    pageDescription: "Converta tempos de micro-ondas entre 600W, 700W, 800W, 900W, 1000W, 1100W, 1200W e 1250W Inverter. Com ajuste de nível de potência (30%–100%), aviso de mexer na metade, descanso e regra USDA 74°C.",
+    badge: "Calculadora de Potência de Micro-ondas e Segurança Alimentar",
+    h1: "Conversor de Potência e Tempo de Micro-ondas (600W–1250W)",
+    heroSub: "Adapte na hora o tempo de pratos congelados, pipoca, sopas, batata e descongelamento da potência da embalagem para o seu micro-ondas (600W a 1250W Inverter) e nível de potência (30%–100%), com aviso para mexer na metade, descanso e segurança USDA de 74°C (165°F).",
+    relatedPlasticTag: "Segurança de Embalagens",
+    relatedPlasticTitle: "Verificador de Códigos de Plástico (#1–#7) →",
+    relatedPlasticDesc: "Descubra quais potes (#5 PP vs. #1 PET e isopor #6) podem ir ao micro-ondas sem liberar toxinas.",
+    relatedTempTag: "Guia de Termômetro USDA",
+    relatedTempTitle: "Tabela de Temperaturas Internas Seguras →",
+    relatedTempDesc: "Consulte as temperaturas seguras para reaquecer sobras (74°C), carne moída (71°C), aves e peixes.",
+    relatedEggTag: "Física do Superaquecimento",
+    relatedEggTitle: "Simulador de Explosão de Ovos no Micro-ondas →",
+    relatedEggDesc: "Entenda por que ovos inteiros e cozidos passam de 100°C no micro-ondas e como evitar queimaduras.",
+    hubsTitle: "Verifique Quais Recipientes São Seguros no Seu Micro-ondas",
+    hubsDescPrefix: "Consulte os vereditos material por material no Guia de Micro-ondas e conheça nossos critérios em",
+    methodologyLabel: "Metodologia",
+    hubLabels: {
+      microwave: "Guia de Micro-ondas",
+      methodology: "Metodologia",
+      allTools: "Todas as Ferramentas →"
+    },
+    faqTitle: "Perguntas Frequentes sobre Conversão de Potência no Micro-ondas",
+    faqs: [
+      {
+        question: "Como descobrir a potência (W) do meu micro-ondas sem o manual?",
+        answer: "Abra a porta do aparelho e procure a etiqueta técnica na moldura interna ou na parte traseira. Observe a 'Potência Útil / de Saída' (geralmente entre 600W e 1250W), e NÃO o consumo elétrico nominal ('Input'), que é cerca de 35–45% maior. Se a etiqueta apagou, aqueça 1 xícara (240 ml) de água fria em potência máxima: se ferver em menos de 2 min são ~1000–1200W; 2,5 min indica ~800–900W; mais de 3 min indica ~600–700W."
+      },
+      {
+        question: "Qual a fórmula para converter uma embalagem de 1100W para micro-ondas de 700W, 900W ou 1000W?",
+        answer: "Multiplique o tempo da embalagem (em segundos) pela potência da embalagem e divida pela potência do seu micro-ondas: Tempo Ajustado = Segundos × (Watts da Embalagem ÷ Seus Watts). Por exemplo, um congelado de 4 min 30 s (270 s) em 1100W exige 270 × (1100 ÷ 900) = 330 s (5:30) em um aparelho de 900W, ou 424 s (7:04) em um compacto de 700W."
+      },
+      {
+        question: "Por que é obrigatório mexer na metade e esperar 1–2 minutos após o micro-ondas apitar?",
+        answer: "As ondas de 2,45 GHz formam pontos quentes e pontos frios dentro do alimento. Mexer ou virar na metade redistribui a temperatura, e o descanso de 1–2 minutos tampado permite que o calor conduza até o centro frio onde bactérias como Salmonella e Listeria poderiam sobreviver, garantindo o padrão seguro USDA de 74°C (165°F)."
+      },
+      {
+        question: "Por que ferver água pura no micro-ondas pode ser perigoso e como evitar o superaquecimento?",
+        answer: "Em canecas lisas de vidro ou cerâmica, a água pura pode ultrapassar 100°C sem formar bolhas visíveis por falta de núcleos de ebulição. Ao mexer ou colocar um sachê de chá ou colher, a água pode jorrar violentamente causando queimaduras graves. Para prevenir, coloque sempre um palito de madeira ou bambu dentro da xícara antes de aquecer e aguarde 30 segundos."
+      },
+      {
+        question: "Quais recipientes NUNCA devem ir ao micro-ondas, especialmente em tempos longos?",
+        answer: "Jamais aqueça marmitas de isopor (#6 PS — liberam estireno em comidas quentes e gordurosas), papel alumínio ou louças com borda metálica (geram faíscas e risco de incêndio), nem potes com tampas hermeticamente vedadas (o vapor pode estourar a tampa). Prefira vidro borossilicato, cerâmica própria ou plástico #5 PP com a tampa semiaberta."
+      }
+    ],
+    breadcrumbs: [
+      { label: "Início", href: "/pt/" },
+      { label: "Ferramentas", href: "/pt/tools/" },
+      { label: "Conversor de Potência de Micro-ondas" }
+    ]
+  },
+  'zh-cn': {
+    pageTitle: "微波炉功率与加热时间换算器 (600W–1250W) 及食品安全工具 | IsItKitchenSafe",
+    pageDescription: "一键精准换算 600W、700W、800W、900W、1000W、1100W、1200W 及 1250W 变频微波炉的加热时间。支持 30%–100% 火力档位、中途翻拌节点、出炉静置回温与 USDA 74°C 食品安全预警。",
+    badge: "微波炉功率换算与热安全计算器",
+    h1: "微波炉功率与加热时间换算器 (600W–1250W)",
+    heroSub: "将任意包装标称功率的冷冻便当、爆米花、浓汤、烤土豆及解冻时间，秒速换算为你家微波炉的实际输出功率（600W 至 1250W 变频）与火力档位（30%–100%），同步生成中途翻拌时刻、静置时间与 USDA 74°C (165°F) 冷点安全提示。",
+    relatedPlasticTag: "餐盒材质安全查询",
+    relatedPlasticTitle: "1–7 号塑料回收代码微波安全查询器 →",
+    relatedPlasticDesc: "秒查外卖盒与保鲜盒底部三角编号（5 号 PP 与 1 号 PET、6 号发泡盒对比）能否微波加热。",
+    relatedTempTag: "USDA 探针测温指南",
+    relatedTempTitle: "肉类与剩菜中心安全温度速查表 →",
+    relatedTempDesc: "核验剩菜复热（74°C）、解冻肉馅（71°C）、禽肉及海鲜的 USDA 最低安全熟度温度。",
+    relatedEggTag: "微波过热物理模型",
+    relatedEggTitle: "微波炉加热鸡蛋过热空化爆炸模拟器 →",
+    relatedEggDesc: "了解带壳鸡蛋与熟水煮蛋在微波炉内突破 100°C 暴沸爆裂的物理机制与防伤规程。",
+    hubsTitle: "查询各类餐具与材质能否安全放进微波炉",
+    hubsDescPrefix: "逐项查阅微波炉器皿安全指南，并了解我们的科学评估标准：",
+    methodologyLabel: "评估方法论",
+    hubLabels: {
+      microwave: "微波炉安全指南",
+      methodology: "评估方法论",
+      allTools: "全部工具 →"
+    },
+    faqTitle: "微波炉功率换算与加热安全常见问题解答",
+    faqs: [
+      {
+        question: "说明书丢了，如何查找自家微波炉的准确功率（瓦数）？",
+        answer: "打开微波炉门，检查炉门内侧边框或机身背面的银色/白色铭牌参数。请注意区分“微波输出功率 (Output)”（常见 600W–1250W）和“额定输入功率 (Input)”（含转盘电机与变压器损耗，通常高出约 35–45%），换算必须使用输出功率。若铭牌模糊，可用 1 杯（240 ml）冷水高火测试：2 分钟内沸腾约 1000–1200W；约 2.5 分钟为 800–900W；超过 3 分钟约 600–700W。"
+      },
+      {
+        question: "包装写着 1100W 加热的时间，怎么换算成 700W、900W 或 1000W？",
+        answer: "核心能量守恒公式为：换算后秒数 = 包装建议秒数 × (包装标称功率 ÷ 你的微波炉功率)。例如一份标称 1100W 加热 4 分 30 秒（270 秒）的冷冻便当，在 900W 微波炉中需 270 × (1100 ÷ 900) = 330 秒（5:30），在 700W 迷你宿舍微波炉中则需 270 × (1100 ÷ 700) = 424 秒（7:04）。"
+      },
+      {
+        question: "为什么冷冻餐包装总是强调“中途翻拌”和“出炉静置 1–2 分钟”？",
+        answer: "家用微波炉使用 2.45 GHz 驻波场，极易在厚实食物内部产生局部滚烫热点与冰冷死角。中途翻拌可打破受热不均，而出炉加盖静置 1–2 分钟能让高温外层通过热传导均匀加热低温中心，彻底消除沙门氏菌与李斯特菌易残留的冷点，确保整份食物安全达到 USDA 74°C (165°F) 标准。"
+      },
+      {
+        question: "用微波炉烧一杯清水为什么会有“暴沸”危险？如何预防？",
+        answer: "在光滑玻璃杯或釉面陶瓷杯中加热纯水时，由于缺乏粗糙表面形成气泡核，水温可能突破 100°C 仍表面平静（过热亚稳态）。一旦你端起杯子、放入勺子或投入茶包/速溶咖啡，过热水会瞬间剧烈炸沸喷溅烫伤面部与双手。预防极其简单：加热前在杯中放一根木质搅拌棒或竹签，并在停机后静置 30 秒再端出。"
+      },
+      {
+        question: "哪些容器绝对不能放进微波炉，尤其是在延长加热时间时？",
+        answer: "严禁放入 6 号发泡聚苯乙烯外卖盒（Styrofoam，受热遇油易软化并溶出苯乙烯）、铝箔锡纸或带金银金属镶边的瓷盘（引发电弧打火与火灾），以及完全扣紧的密封保鲜盒盖（内部蒸汽压力剧增会导致容器爆开）。推荐改用高硼硅玻璃碗、无金属边微波陶瓷或留缝透气的 5 号 PP 餐盒。"
+      }
+    ],
+    breadcrumbs: [
+      { label: "首页", href: "/zh-cn/" },
+      { label: "实用工具", href: "/zh-cn/tools/" },
+      { label: "微波炉功率时间换算器" }
+    ]
+  },
+  ja: {
+    pageTitle: "電子レンジ ワット数・加熱時間変換ツール (600W–1250W) | IsItKitchenSafe",
+    pageDescription: "600W・700W・800W・900W・1000W・1100W・1200W・1250Wインバーター電子レンジの加熱時間を瞬時に換算。出力レベル（30%〜100%）、途中混ぜ目安、蒸らし時間、USDA 74°C食品衛生基準に対応。",
+    badge: "電子レンジ出力換算＆食品安全ツール",
+    h1: "電子レンジ ワット数・加熱時間変換ツール（600W–1250W）",
+    heroSub: "冷凍食品・ポップコーン・スープ・じゃがいも・ひき肉解凍などの記載ワット数と時間を、ご自宅の電子レンジ（600W〜1250Wインバーター）および出力レベル（30%〜100%）に合わせて瞬時に換算。途中で混ぜるタイミングや蒸らし時間、USDA 74°C (165°F) 安全チェック付きです。",
+    relatedPlasticTag: "耐熱容器の安全チェック",
+    relatedPlasticTitle: "プラスチック識別マーク（#1–#7）チェッカー →",
+    relatedPlasticDesc: "テイクアウト容器や保存容器（#5 PP vs #1 PET・発泡スチロール#6）のレンジ対応可否を即判定。",
+    relatedTempTag: "USDA 調理温度ガイド",
+    relatedTempTitle: "安全な中心温度クイック早見表 →",
+    relatedTempDesc: "再加熱食品（74°C）、ひき肉（71°C）、鶏肉・魚介のUSDA安全基準温度を確認できます。",
+    relatedEggTag: "突沸・過熱物理シミュレーター",
+    relatedEggTitle: "電子レンジ加熱卵の爆発シミュレーター →",
+    relatedEggDesc: "殻付き卵やゆで卵が電子レンジで100°Cを超えて爆発する科学メカニズムと安全な加熱法を解説。",
+    hubsTitle: "電子レンジで安全に使える食器・素材を確認",
+    hubsDescPrefix: "素材ごとの電子レンジ可否ガイドと科学的検証基準は以下からご覧いただけます：",
+    methodologyLabel: "検証メソドロジー",
+    hubLabels: {
+      microwave: "電子レンジ安全ガイド",
+      methodology: "メソドロジー",
+      allTools: "全ツール一覧 →"
+    },
+    faqTitle: "電子レンジのワット数変換と加熱安全に関するよくある質問",
+    faqs: [
+      {
+        question: "取扱説明書がない場合、電子レンジのワット数はどこで確認できますか？",
+        answer: "扉を開けた内側の枠や本体背面の銘板シールを確認してください。必ず「定格高周波出力（Output）」（例：600W〜1250W）を使用します。「定格消費電力（Input）」はモーター等の電力を含み35〜45%高く表記されているため混同に注意してください。表示が消えている場合、冷水1カップ（240ml）を強で温めて2分未満で沸騰なら1000〜1200W、約2.5分なら800〜900W、3分超なら600〜700Wが目安です。"
+      },
+      {
+        question: "1100W表記の冷凍食品を600W・700W・900Wへ変換する計算式は？",
+        answer: "計算式は「変換後の秒数 ＝ 表示秒数 ×（表示ワット数 ÷ 使用ワット数）」です。例えば1100Wで4分30秒（270秒）の冷凍食品は、900Wなら 270 × (1100 ÷ 900) ＝ 330秒（5分30秒）、600Wなら 270 × (1100 ÷ 600) ＝ 495秒（8分15秒）となります。"
+      },
+      {
+        question: "なぜ途中でかき混ぜたり、加熱後に1〜2分蒸らす（放置する）必要があるのですか？",
+        answer: "2.45GHzのマイクロ波は庫内で加熱ムラ（ホットスポットとコールドスポット）を生じやすいためです。途中でかき混ぜて熱を均一化し、ラップや蓋をしたまま1〜2分置くことで、熱伝導により中心の冷たい部分まで温まり、サルモネラ菌やリステリア菌を死滅させるUSDA安全基準74°C（165°F）に達しやすくなります。"
+      },
+      {
+        question: "電子レンジで水やお茶を温める際の「突沸」とは？どう防げますか？",
+        answer: "滑らかなガラスや陶器のマグカップで水を温めると、気泡の核がないため100°Cを超えても沸騰しない過熱状態（スーパーヒーティング）になることがあります。取り出した瞬間やティーバッグ・スプーンを入れた拍子に爆発的に噴き出し火傷する危険があるため、加熱前に電子レンジ対応の木製マドラーや竹串・割り箸を1本入れ、加熱後は30秒待ってから取り出してください。"
+      },
+      {
+        question: "加熱時間が長くなるとき、絶対に電子レンジで使ってはいけない容器は？",
+        answer: "発泡スチロール（#6 PS）容器は熱と油分で溶けスチレンが溶出するため厳禁です。また、アルミホイルや金縁の食器は火花（アーク放電）や発火を招き、完全に密閉した蓋付き容器は内部の蒸気圧で破裂する危険があります。耐熱ガラス（ホウケイ酸ガラス）、レンジ対応陶器、または蓋をずらした#5 PP（ポリプロピレン）容器を使用してください。"
+      }
+    ],
+    breadcrumbs: [
+      { label: "ホーム", href: "/ja/" },
+      { label: "ツール", href: "/ja/tools/" },
+      { label: "電子レンジワット数変換ツール" }
+    ]
+  }
+};
+
+const c = CONTENT[lang as Exclude<SupportedLanguage, 'en'>] || CONTENT.es;
+const localizedUrl = `https://isitkitchensafe.com/${lang}/tools/microwave-wattage-converter/`;
+
+const microwaveUrl = getApplianceUrl('microwave', lang);
+const methodologyUrl = translatePath('/methodology/');
+const toolsUrl = translatePath('/tools/');
+const plasticUrl = translatePath('/tools/plastic-code-checker/');
+const tempChartUrl = translatePath('/tools/internal-cooking-temp-chart/');
+const eggSimUrl = translatePath('/tools/microwave-egg-explosion-simulator/');
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": c.h1,
+  "url": localizedUrl,
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript.",
+  "description": c.pageDescription,
+  "inLanguage": lang === 'zh-cn' ? 'zh-CN' : lang,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IsItKitchenSafe",
+    "url": "https://isitkitchensafe.com"
+  }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": c.faqs.map((faq) => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+};
+---
+
+<Layout
+  title={c.pageTitle}
+  description={c.pageDescription}
+  excludeFaqSchema={true}
+  availableLocales={availableLocales}
+  lang={lang}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(webAppSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+  </Fragment>
+
+  <!-- Breadcrumbs -->
+  <div class="bg-surface-soft border-b border-hairline py-1">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <Breadcrumbs items={c.breadcrumbs} className="mb-0" />
+    </div>
+  </div>
+
+  <div class="max-w-[1140px] mx-auto px-6 py-10 md:py-14">
+    <!-- Hero Header -->
+    <header class="mb-10 text-center max-w-3xl mx-auto">
+      <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-signature-coral text-white mb-3">
+        {c.badge}
+      </span>
+      <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-4">
+        {c.h1}
+      </h1>
+      <p class="text-body text-[15px] md:text-[16px] leading-relaxed">
+        {c.heroSub}
+      </p>
+    </header>
+
+    <!-- Main Interactive Converter -->
+    <div class="mb-14">
+      <MicrowaveWattageConverter lang={lang} />
+    </div>
+
+    <!-- Related Verified Companion Tools -->
+    <section class="mb-14 grid grid-cols-1 md:grid-cols-3 gap-5">
+      <a
+        href={plasticUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {c.relatedPlasticTag}
+        </span>
+        <h2 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {c.relatedPlasticTitle}
+        </h2>
+        <p class="text-[13.5px] text-body leading-relaxed">
+          {c.relatedPlasticDesc}
+        </p>
+      </a>
+
+      <a
+        href={tempChartUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {c.relatedTempTag}
+        </span>
+        <h2 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {c.relatedTempTitle}
+        </h2>
+        <p class="text-[13.5px] text-body leading-relaxed">
+          {c.relatedTempDesc}
+        </p>
+      </a>
+
+      <a
+        href={eggSimUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {c.relatedEggTag}
+        </span>
+        <h2 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {c.relatedEggTitle}
+        </h2>
+        <p class="text-[13.5px] text-body leading-relaxed">
+          {c.relatedEggDesc}
+        </p>
+      </a>
+    </section>
+
+    <!-- Verified Appliance Hub & Methodology Strip -->
+    <section class="mb-14 p-6 rounded-2xl bg-surface-soft border border-hairline">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-title-sm font-semibold text-ink mb-1">
+            {c.hubsTitle}
+          </h2>
+          <p class="text-[13px] text-muted">
+            {c.hubsDescPrefix}{' '}
+            <a href={methodologyUrl} class="text-link underline hover:text-link-active">{c.methodologyLabel}</a>.
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <a href={microwaveUrl} class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors">{c.hubLabels.microwave}</a>
+          <a href={methodologyUrl} class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors">{c.hubLabels.methodology}</a>
+          <a href={toolsUrl} class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors">{c.hubLabels.allTools}</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Section (5 Consumer FAQs) -->
+    <section class="mb-8">
+      <h2 class="text-title-lg font-medium text-ink tracking-tight mb-6">
+        {c.faqTitle}
+      </h2>
+      <div class="space-y-4">
+        {c.faqs.map((faq) => (
+          <details class="group p-5 bg-surface-soft border border-hairline rounded-xl" open>
+            <summary class="text-title-sm font-semibold text-ink cursor-pointer list-none flex items-center justify-between gap-3">
+              <span>{faq.question}</span>
+              <span class="text-muted text-sm transition-transform group-open:rotate-180 shrink-0" aria-hidden="true">&#9662;</span>
+            </summary>
+            <p class="text-[14px] text-body leading-relaxed mt-3 pt-3 border-t border-hairline/70">
+              {faq.answer}
+            </p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </div>
+</Layout>

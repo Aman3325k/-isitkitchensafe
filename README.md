@@ -4,7 +4,7 @@ A static kitchen safety reference platform and interactive consumer tool suite a
 
 ## Overview
 
-IsItKitchenSafe delivers **10,600+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **183 interactive tools** (including **32 Google-indexed Everyday Consumer Kitchen Safety Tools**), **19 multilingual blog guides**, **55 high-intent brand comparisons**, and transparent E-E-A-T verification standards.
+IsItKitchenSafe delivers **10,700+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **184 interactive tools** (including **33 Google-indexed Everyday Consumer Kitchen Safety Tools**), **22 multilingual blog guides**, **55 high-intent brand comparisons**, **WCAG 2.1 AA accessibility**, and transparent E-E-A-T verification standards.
 
 ## Tech Stack
 - **Framework**: Astro.js (MPA static generation)
@@ -14,8 +14,8 @@ IsItKitchenSafe delivers **10,600+ static pages** across **11 verticals** and **
 
 ## Consumer Growth, E-E-A-T & Retention Architecture
 
-### Everyday Consumer Kitchen Safety Tools (32 Google-Indexed Tools)
-All 183 interactive tools are split cleanly between everyday consumer utilities and specialized commercial/lab simulators. **32 high-utility consumer tools** are explicitly allowlisted for search indexing in [`src/data/consumer-tools-allowlist.json`](src/data/consumer-tools-allowlist.json) across all 5 languages, including:
+### Everyday Consumer Kitchen Safety Tools (33 Google-Indexed Tools)
+All 184 interactive tools are split cleanly between everyday consumer utilities and specialized commercial/lab simulators. **33 high-utility consumer tools** are explicitly allowlisted for search indexing in [`src/data/consumer-tools-allowlist.json`](src/data/consumer-tools-allowlist.json) across all 5 languages, including:
 - **Kitchen Bottom Symbol Decoder** (`kitchen-symbol-decoder`)
 - **USDA Leftover Shelf-Life Countdown Calculator** (`leftover-shelf-life-calculator`)
 - **USDA Meat & Turkey Thawing Calculator** (`meat-thawing-calculator`)
@@ -24,15 +24,18 @@ All 183 interactive tools are split cleanly between everyday consumer utilities 
 - **Cookware Safe Oven Temp Lookup** (`cookware-oven-temp-lookup`)
 - **USDA Safe Internal Cooking Temp Chart** (`internal-cooking-temp-chart`)
 - **Coffee Maker & Kettle Descaling Calculator** (`appliance-descaling-calculator`)
+- **Kitchen Cleaner Mixing Danger Checker** (`cleaner-mixing-danger-checker`)
 - **Pan Scratch Inspector** (`pan-scratch-inspector`)
 - Plus recall scanning, thermal shock, culinary oil smoke point, cookware brand transparency, and hazard triage tools.
 
 ### Content & Comparison Verticals
-- **19 Multilingual Blog Guides** with **100% 5-language slug parity** across EN, ES, PT, ZH-CN, and JA.
+- **22 Multilingual Blog Guides** with **100% 5-language slug parity** across EN, ES, PT, ZH-CN, and JA.
 - **55 High-Intent Brand & Material Comparisons** (`/compare/`), covering popular cookware, drinkware, and kitchen material matchups across 5 languages.
 - **Original SVG Visual Safety Diagrams** embedded across all **7 appliance hubs** (Dishwasher, Microwave, Freezer, Oven, Dryer, Air Fryer, Refrigerator).
 
-### E-E-A-T, Discovery & Retention Features
+### E-E-A-T, Discovery, Accessibility & Retention Features
+- **WCAG 2.1 AA Accessibility**: Consistent keyboard `:focus-visible` outlines, `prefers-reduced-motion` support, skip-to-content navigation, and semantic ARIA landmarks across templates and interactive calculators.
+- **Live Instant Directory Search**: Client-side instant search and filtering across every major directory hub (`/tools/`, `/blog/`, `/how-long/`, `/refreeze/`, `/compare/`, `/material/`, `/what-happens/`) in all 5 languages.
 - **Multilingual Verification Standards**: Localized `/methodology/` pages detailing USDA, FDA, NSF, and materials-science review standards.
 - **Printable 1-Page Fridge Safety Cheat Sheet**: Localized `/saved/` bookmark hub with clean print layout for kitchen reference.
 - **1080×1350 Browser PNG Safety Card Exporter**: One-click client-side social/reference card download.
@@ -82,21 +85,22 @@ npm run ops:indexnow
 # Run targeted audits
 npm run ops:seo        # Structured data (JSON-LD FAQPage, BreadcrumbList) & canonicals
 npm run ops:cwv        # Core Web Vitals bundle budgets & asset geometry
-node scripts/autonomous-growth-engine.cjs --tools      # 183 tools × 5 languages audit
+node scripts/autonomous-growth-engine.cjs --tools      # 184 tools × 5 languages audit
 node scripts/autonomous-growth-engine.cjs --redirects  # Cloudflare Pages 2k ceiling monitor
 node scripts/autonomous-growth-engine.cjs --datasets   # Multilingual data assets audit
 
 # Run all-day autonomous background daemon (default 30m heartbeat)
 npm run ops:daemon
 
-# Run full master cycle (audits + 10,600+-page static build + link verification)
+# Run full master cycle (audits + 10,700+-page static build + link verification)
 npm run ops:engine
 ```
 
 ## Scale & Metrics
-- **10,600+ Static Pages** across 11 verticals and 5 languages (EN, ES, PT, ZH-CN, JA)
-- **183 Interactive Tools** with 100% 5-language parity, including **32 Google-indexed Everyday Consumer Tools** (`src/data/consumer-tools-allowlist.json`)
-- **19 Multilingual Blog Guides** (100% 5-language slug parity) + **55 High-Intent Brand Comparisons**
+- **10,700+ Static Pages** across 11 verticals and 5 languages (EN, ES, PT, ZH-CN, JA)
+- **184 Interactive Tools** with 100% 5-language parity, including **33 Google-indexed Everyday Consumer Tools** (`src/data/consumer-tools-allowlist.json`)
+- **22 Multilingual Blog Guides** (100% 5-language slug parity) + **55 High-Intent Brand Comparisons**
+- **WCAG 2.1 AA Accessibility** (`:focus-visible`, `prefers-reduced-motion`, ARIA landmarks) + **Live Instant Search** across `/tools/`, `/blog/`, `/how-long/`, `/refreeze/`, `/compare/`, `/material/`, and `/what-happens/`
 - **Zero Dead Links** (1,000,000+ internal hrefs audited with 100% resolution)
 - **Verified XML Sitemaps & Real-Time Indexing** (`sitemap-index.xml`, `sitemap-0.xml`, `scripts/ping-indexnow.cjs`)
 - **Cloudflare Edge Middleware & Dynamic Cards** (`functions/_redirects-map.js`, `functions/api/og.svg.js`)

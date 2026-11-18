@@ -212,7 +212,9 @@ const TOOLS_REGISTRY = [
   { slug: 'air-fryer-oven-converter', name: 'Air Fryer to Oven Conversion Calculator & Gas Mark Chart', category: 'Consumer Kitchen Safety', component: 'AirFryerOvenConverter.astro', dataFile: 'air-fryer-oven-converter-data.json' },
   { slug: 'cookware-oven-temp-lookup', name: 'Cookware & Bakeware Safe Oven Temperature Lookup', category: 'Consumer Kitchen Safety', component: 'CookwareOvenTempLookup.astro', dataFile: 'cookware-oven-temp-data.json' },
   { slug: 'internal-cooking-temp-chart', name: 'USDA Safe Internal Cooking Temperature Chart & Doneness Lookup', category: 'Consumer Kitchen Safety', component: 'InternalCookingTempChart.astro', dataFile: 'internal-cooking-temp-data.json' },
-  { slug: 'appliance-descaling-calculator', name: 'Coffee Maker, Electric Kettle & Espresso Descaling Ratio Calculator', category: 'Consumer Kitchen Safety', component: 'ApplianceDescalingCalculator.astro', dataFile: 'appliance-descaling-calculator-data.json' }
+  { slug: 'appliance-descaling-calculator', name: 'Coffee Maker, Electric Kettle & Espresso Descaling Ratio Calculator', category: 'Consumer Kitchen Safety', component: 'ApplianceDescalingCalculator.astro', dataFile: 'appliance-descaling-calculator-data.json' },
+  { slug: 'cleaner-mixing-danger-checker', name: 'Kitchen Cleaner Mixing Danger Checker & Chemical Reaction Guide', category: 'Consumer Kitchen Safety', component: 'CleanerMixingDangerChecker.astro', dataFile: 'cleaner-mixing-danger-checker-data.json' },
+  { slug: 'microwave-wattage-converter', name: 'Microwave Wattage Time Converter (600W-1250W)', category: 'Consumer Kitchen Safety', component: 'MicrowaveWattageConverter.astro', dataFile: 'microwave-wattage-converter-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -515,7 +517,9 @@ function auditDatasets() {
     'air-fryer-oven-converter-data.json',
     'cookware-oven-temp-data.json',
     'internal-cooking-temp-data.json',
-    'appliance-descaling-calculator-data.json'
+    'appliance-descaling-calculator-data.json',
+    'cleaner-mixing-danger-checker-data.json',
+    'microwave-wattage-converter-data.json'
 ];
 
   const datasetStats = {};

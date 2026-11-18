@@ -129,23 +129,234 @@ const quickActionText = data.tip || (data.tips && data.tips[0]) || (data.instruc
 
 // Contextual Consumer Tool Recommendation
 const matchContext = `${data.slug || ''} ${data.item || ''} ${data.material || ''}`.toLowerCase();
-let recommendedToolKey: 'symbol' | 'pan' | 'airfryer' | 'oil' = 'symbol';
+type RecommendedToolKey =
+  | 'cleaner'
+  | 'descaling'
+  | 'pan'
+  | 'plastic'
+  | 'thawing'
+  | 'cookingTemp'
+  | 'leftover'
+  | 'ovenTemp'
+  | 'airfryer'
+  | 'oil'
+  | 'symbol';
 
-if (/\b(nonstick|non-stick|teflon|ptfe|pan|skillet|frying pan|fry pan)\b/i.test(matchContext)) {
+let recommendedToolKey: RecommendedToolKey = 'symbol';
+
+if (/\b(bleach|vinegar|ammonia|peroxide|cleaners?|detergents?|baking[- ]soda|soaps?|sanitizers?|disinfectants?|drain[- ]cleaners?|lye|caustic|rinse[- ]aid|dishwasher[- ]pods?)\b/i.test(matchContext)) {
+  recommendedToolKey = 'cleaner';
+} else if (/\b(coffee|espresso|kettles?|keurig|nespresso|carafes?|ice[- ]makers?|steamers?|descal(?:e|ing))\b/i.test(matchContext)) {
+  recommendedToolKey = 'descaling';
+} else if (/\b(nonstick|non[- ]stick|teflon|ptfe|ceramic[- ]pans?|hexclad|caraway|fry(?:ing)?[- ]pans?|skillets?|cast[- ]iron|carbon[- ]steel|woks?)\b/i.test(matchContext)) {
   recommendedToolKey = 'pan';
-} else if (/\b(oil|oils)\b/i.test(matchContext)) {
-  recommendedToolKey = 'oil';
+} else if (/\b(plastics?|tupperware|styrofoam|polystyrene|polypropylene|pet|hdpe|pvc|silicone[- ]bags?|ziploc|water[- ]bottles?|takeout|cling|wraps?)\b/i.test(matchContext)) {
+  recommendedToolKey = 'plastic';
+} else if (
+  data.appliance === 'freezer' &&
+  /\b(chicken|turkey|beef|pork|steaks?|meats?|ham|lamb|fish|salmon|shrimp|seafood|bacon|sausages?|ground)\b/i.test(matchContext)
+) {
+  recommendedToolKey = 'thawing';
+} else if (
+  (data.appliance === 'oven' || data.appliance === 'airfryer') &&
+  /\b(chicken|turkey|beef|pork|steaks?|meats?|ham|lamb|fish|salmon|shrimp|seafood|eggs?|casseroles?)\b/i.test(matchContext)
+) {
+  recommendedToolKey = 'cookingTemp';
+} else if (
+  (data.appliance === 'refrigerator' || data.appliance === 'freezer') &&
+  /\b(milk|cheese|yogurt|cream|eggs?|leftovers?|rice|pasta|pizza|soups?|stews?|bread|fruits?|avocados?|berr(?:y|ies)|potato(?:es)?|tomato(?:es)?|onions?|meats?|chicken|fish|broth|pies?|salads?)\b/i.test(matchContext)
+) {
+  recommendedToolKey = 'leftover';
+} else if (
+  data.appliance === 'oven' &&
+  /\b(pyrex|glass|ceramic|stoneware|cast[- ]iron|dutch[- ]ovens?|le[- ]creuset|lodge|stainless|parchment|wax[- ]paper|foil|silicone|bakeware|baking[- ]sheets?|pans?|pots?|lids?)\b/i.test(matchContext)
+) {
+  recommendedToolKey = 'ovenTemp';
 } else if (data.appliance === 'airfryer') {
   recommendedToolKey = 'airfryer';
-} else if (data.appliance === 'dishwasher' || /\b(plastic|container|tupperware|bottle|tumbler|flask)\b/i.test(matchContext)) {
-  recommendedToolKey = 'symbol';
+} else if (/\b(oils?|butter|ghee|lard|shortening)\b/i.test(matchContext)) {
+  recommendedToolKey = 'oil';
 }
 
-const toolCatalog = {
+const interactiveToolBadge =
+  lang === 'es' ? 'Herramienta Interactiva' :
+  lang === 'pt' ? 'Ferramenta Interativa' :
+  lang === 'zh-cn' ? '互动工具' :
+  lang === 'ja' ? 'インタラクティブツール' :
+  'Interactive Tool';
+
+const toolCatalog: Record<RecommendedToolKey, {
+  path: string;
+  icon: string;
+  badge: string;
+  title: string;
+  description: string;
+  cta: string;
+}> = {
+  cleaner: {
+    path: '/tools/cleaner-mixing-danger-checker/',
+    icon: '🧪',
+    badge: interactiveToolBadge,
+    title: lang === 'es' ? 'Verificador de Peligro al Mezclar Limpiadores de Cocina' :
+           lang === 'pt' ? 'Verificador de Perigo ao Misturar Produtos de Limpeza' :
+           lang === 'zh-cn' ? '厨房清洁剂混用危险检测器' :
+           lang === 'ja' ? 'キッチン洗剤の危険な混合チェッカー' :
+           'Kitchen Cleaner Mixing Danger Checker',
+    description: lang === 'es' ? 'Comprueba dos limpiadores domésticos antes de mezclarlos para detectar al instante gas cloro tóxico, cloramina o reacciones peligrosas.' :
+                 lang === 'pt' ? 'Verifique dois produtos de limpeza antes de misturá-los para detectar instantaneamente gás cloro tóxico, cloramina ou reações perigosas.' :
+                 lang === 'zh-cn' ? '混合清洁剂前一键排查两种化学成分，即时识别氯气、氯胺中毒与剧烈放热反应风险。' :
+                 lang === 'ja' ? '2種類の家庭用洗剤を混ぜる前にチェックし、有毒な塩素ガスやクロラミン発生、発熱反応の危険を瞬時に判定します。' :
+                 'Check two household cleaners before mixing to detect toxic chlorine gas, chloramine, or exothermic reaction hazards instantly.',
+    cta: lang === 'es' ? 'Verificar Mezcla' : lang === 'pt' ? 'Verificar Mistura' : lang === 'zh-cn' ? '检测混用风险' : lang === 'ja' ? '混合の危険を確認' : 'Check Cleaner Mix'
+  },
+  descaling: {
+    path: '/tools/appliance-descaling-calculator/',
+    icon: '☕',
+    badge: interactiveToolBadge,
+    title: lang === 'es' ? 'Calculadora de Descalcificación para Cafeteras y Hervidores' :
+           lang === 'pt' ? 'Calculadora de Descalcificação para Cafeteiras e Chaleiras' :
+           lang === 'zh-cn' ? '咖啡机与水壶除垢比例计算器' :
+           lang === 'ja' ? 'コーヒーメーカー・ケトル水垢除去比率計算ツール' :
+           'Coffee Maker & Kettle Descaling Ratio Calculator',
+    description: lang === 'es' ? 'Calcula la proporción exacta de ácido cítrico o vinagre blanco y los ciclos de enjuague para tu cafetera, máquina de espresso o hervidor.' :
+                 lang === 'pt' ? 'Calcule a proporção exata de ácido cítrico ou vinagre branco e ciclos de enxágue para sua cafeteira, máquina de espresso ou chaleira.' :
+                 lang === 'zh-cn' ? '根据咖啡机、意式机或电水壶容量，精准计算柠檬酸或白醋除垢配比与安全冲洗次数。' :
+                 lang === 'ja' ? 'コーヒーメーカー・エスプレッソマシン・電気ケトルの容量に合わせて、クエン酸や酢の安全な配合比とすすぎ回数を計算します。' :
+                 'Calculate exact citric acid or white vinegar descaling ratios and rinse cycles tailored to your coffee maker, espresso machine, or kettle.',
+    cta: lang === 'es' ? 'Calcular Proporción' : lang === 'pt' ? 'Calcular Proporção' : lang === 'zh-cn' ? '计算除垢比例' : lang === 'ja' ? '除垢比率を計算' : 'Calculate Descaling Ratio'
+  },
+  pan: {
+    path: '/tools/pan-scratch-inspector/',
+    icon: '🍳',
+    badge: interactiveToolBadge,
+    title: lang === 'es' ? 'Inspector IA de Rayones y Daño de Recubrimiento en Sartenes' :
+           lang === 'pt' ? 'Inspetor IA de Riscos e Danos no Revestimento de Panelas' :
+           lang === 'zh-cn' ? 'AI 不粘锅划痕与涂层损伤检测器' :
+           lang === 'ja' ? 'AIフライパン傷・コーティング劣化診断ツール' :
+           'AI Pan Scratch & Coating Damage Inspector',
+    description: lang === 'es' ? 'Evalúa si tu sartén antiadherente, de teflón o cerámica con rayones sigue siendo segura o si debes reemplazarla para evitar desprendimiento.' :
+                 lang === 'pt' ? 'Avalie se sua panela antiaderente, de teflon ou cerâmica riscada ainda é segura para cozinhar ou deve ser substituída para evitar descamação.' :
+                 lang === 'zh-cn' ? '评估不粘锅、特氟龙或陶瓷涂层的划伤与剥落程度，判断是继续安全使用还是应立即更换。' :
+                 lang === 'ja' ? '傷ついたフッ素樹脂・テフロン・セラミック製フライパンがそのまま使えるか、剥がれリスクのため買い替えるべきかを診断します。' :
+                 'Assess whether your scratched nonstick, Teflon, or ceramic pan is still safe to cook with or should be replaced to avoid coating flaking.',
+    cta: lang === 'es' ? 'Inspeccionar Sartén' : lang === 'pt' ? 'Inspecionar Panela' : lang === 'zh-cn' ? '开始检测锅具' : lang === 'ja' ? 'フライパンを診断' : 'Inspect Your Pan'
+  },
+  plastic: {
+    path: '/tools/plastic-code-checker/',
+    icon: '♻️',
+    badge: interactiveToolBadge,
+    title: lang === 'es' ? 'Verificador de Seguridad de Códigos de Plástico #1–#7' :
+           lang === 'pt' ? 'Verificador de Segurança de Códigos de Plástico #1–#7' :
+           lang === 'zh-cn' ? '塑料回收编号 #1–#7 安全查询器' :
+           lang === 'ja' ? 'プラスチック識別番号 #1〜#7 安全性チェッカー' :
+           'Plastic Recycling Code #1–#7 Safety Checker',
+    description: lang === 'es' ? 'Consulta cualquier código de resina #1–#7 (PET, HDPE, PVC, PP, PS) para comprobar si es apto para microondas, lavavajillas, congelador y libre de BPA.' :
+                 lang === 'pt' ? 'Consulte qualquer código de resina #1–#7 (PET, HDPE, PVC, PP, PS) para verificar segurança em micro-ondas, lava-louças, freezer e risco de BPA.' :
+                 lang === 'zh-cn' ? '一键查询 #1–#7 塑料树脂代码（PET、HDPE、PVC、PP、PS 等），快速核对微波炉、洗碗机、冷冻耐受度与化学析出风险。' :
+                 lang === 'ja' ? '#1〜#7のプラスチック材質番号（PET・HDPE・PVC・PP・PS等）から電子レンジ・食洗機・冷凍適性と溶出リスクを瞬時に確認できます。' :
+                 'Look up any resin code #1–#7 (PET, HDPE, PVC, LDPE, PP, PS, Other) to check microwave, dishwasher, freezer, and BPA/leaching safety.',
+    cta: lang === 'es' ? 'Verificar Código #1–#7' : lang === 'pt' ? 'Verificar Código #1–#7' : lang === 'zh-cn' ? '查询塑料编号' : lang === 'ja' ? 'プラ番号を確認' : 'Check Plastic Code'
+  },
+  thawing: {
+    path: '/tools/meat-thawing-calculator/',
+    icon: '❄️',
+    badge: interactiveToolBadge,
+    title: lang === 'es' ? 'Calculadora USDA de Descongelación Segura de Carne y Pavo' :
+           lang === 'pt' ? 'Calculadora USDA de Descongelamento Seguro de Carne e Peru' :
+           lang === 'zh-cn' ? 'USDA 肉类与火鸡安全解冻时间计算器' :
+           lang === 'ja' ? 'USDA 肉・七面鳥の安全な解凍時間計算ツール' :
+           'USDA Meat & Turkey Safe Thawing Calculator',
+    description: lang === 'es' ? 'Calcula los tiempos exactos del USDA para descongelar en refrigerador o agua fría según peso y corte, evitando la zona de peligro bacteriano.' :
+                 lang === 'pt' ? 'Calcule os tempos exatos do USDA para descongelar na geladeira ou em água fria por peso e corte, mantendo carnes fora da zona de perigo.' :
+                 lang === 'zh-cn' ? '按重量与肉类部位精准计算 USDA 冷藏与冷水安全解冻时长，让禽肉、牛猪肉与海鲜远离细菌危险温区。' :
+                 lang === 'ja' ? '重量と部位からUSDA基準の冷蔵解凍・冷水解凍時間を正確に計算し、食中毒の危険温度帯を避けて安全に解凍できます。' :
+                 'Calculate exact USDA refrigerator and cold-water thawing times by weight and cut so poultry, beef, pork, and seafood stay out of the danger zone.',
+    cta: lang === 'es' ? 'Calcular Descongelación' : lang === 'pt' ? 'Calcular Descongelamento' : lang === 'zh-cn' ? '计算解冻时间' : lang === 'ja' ? '解凍時間を計算' : 'Calculate Thaw Time'
+  },
+  cookingTemp: {
+    path: '/tools/internal-cooking-temp-chart/',
+    icon: '🌡️',
+    badge: interactiveToolBadge,
+    title: lang === 'es' ? 'Tabla USDA de Temperaturas Internas Seguras de Cocción' :
+           lang === 'pt' ? 'Tabela USDA de Temperaturas Internas Seguras de Cozimento' :
+           lang === 'zh-cn' ? 'USDA 安全烹饪中心温度速查表' :
+           lang === 'ja' ? 'USDA 安全な調理中心温度チャート' :
+           'USDA Safe Internal Cooking Temp Chart',
+    description: lang === 'es' ? 'Consulta las temperaturas internas mínimas oficiales del USDA (°F y °C) y tiempos de reposo para aves, res, cerdo, mariscos, huevos y cazuelas.' :
+                 lang === 'pt' ? 'Confira as temperaturas internas mínimas oficiais do USDA (°F e °C) e tempos de descanso para aves, boi, porco, frutos do mar, ovos e assados.' :
+                 lang === 'zh-cn' ? '查阅 USDA 官方最低安全中心温度（°F 与 °C）及静置时间，覆盖禽肉、牛羊猪肉、海鲜、蛋类与烘焙砂锅菜。' :
+                 lang === 'ja' ? '鶏肉・牛肉・豚肉・魚介・卵・キャセロールのUSDA公式最低中心温度（°F・°C）と休ませ時間を一覧で確認できます。' :
+                 'Check official USDA minimum internal temperatures (°F & °C) and required rest times for poultry, beef, pork, seafood, eggs, and casseroles.',
+    cta: lang === 'es' ? 'Ver Temperaturas' : lang === 'pt' ? 'Ver Temperaturas' : lang === 'zh-cn' ? '查看安全温度' : lang === 'ja' ? '中心温度を確認' : 'Check Safe Temps'
+  },
+  leftover: {
+    path: '/tools/leftover-shelf-life-calculator/',
+    icon: '🗓️',
+    badge: interactiveToolBadge,
+    title: lang === 'es' ? 'Calculadora USDA de Vida Útil de Sobras y Refrigerador' :
+           lang === 'pt' ? 'Calculadora USDA de Validade de Sobras na Geladeira' :
+           lang === 'zh-cn' ? 'USDA 剩菜与冰箱保质期倒计时计算器' :
+           lang === 'ja' ? 'USDA 残り物・冷蔵保存期限カウントダウン計算ツール' :
+           'USDA Leftover & Fridge Shelf-Life Countdown Calculator',
+    description: lang === 'es' ? 'Ingresa cuándo cocinaste o abriste un alimento para obtener su fecha límite exacta del USDA en refrigerador y congelador.' :
+                 lang === 'pt' ? 'Informe quando cozinhou ou abriu um alimento para obter a data limite exata do USDA na geladeira e no congelador.' :
+                 lang === 'zh-cn' ? '输入烹饪或开封日期，即时生成剩菜、乳制品、肉类与果蔬的 USDA 冰箱冷藏与冷冻安全食用截止日。' :
+                 lang === 'ja' ? '調理日や開封日を入力するだけで、残り物・乳製品・肉・野菜のUSDA基準による冷蔵・冷凍の安全消費期限を算出します。' :
+                 'Enter when you cooked or opened an item to get its exact USDA refrigerator and freezer eat-by date for leftovers, dairy, meat, and produce.',
+    cta: lang === 'es' ? 'Calcular Caducidad' : lang === 'pt' ? 'Calcular Validade' : lang === 'zh-cn' ? '计算保质期' : lang === 'ja' ? '保存期限を確認' : 'Check Shelf Life'
+  },
+  ovenTemp: {
+    path: '/tools/cookware-oven-temp-lookup/',
+    icon: '♨️',
+    badge: interactiveToolBadge,
+    title: lang === 'es' ? 'Buscador de Temperatura Segura de Horno para Ollas y Moldes' :
+           lang === 'pt' ? 'Consulta de Temperatura Segura no Forno para Panelas e Formas' :
+           lang === 'zh-cn' ? '厨具与烤盘烤箱耐热上限查询器' :
+           lang === 'ja' ? '調理器具・耐熱皿のオーブン耐熱温度検索ツール' :
+           'Cookware & Bakeware Safe Oven Temp Lookup',
+    description: lang === 'es' ? 'Comprueba los límites exactos de temperatura en horno y grill para Pyrex, vidrio, gres, hierro fundido, Le Creuset, silicona, papel horno y tapas.' :
+                 lang === 'pt' ? 'Verifique os limites exatos de temperatura no forno e grill para Pyrex, vidro, cerâmica, ferro fundido, Le Creuset, silicone, papel manteiga e tampas.' :
+                 lang === 'zh-cn' ? '速查 Pyrex 玻璃、陶瓷炻器、铸铁锅、Le Creuset、硅胶模具、烘焙纸及锅盖的烤箱与炙烤最高耐热温度。' :
+                 lang === 'ja' ? 'Pyrex・ガラス・陶器・鋳鉄・ル・クルーゼ・シリコン・クッキングシート・蓋のオーブンおよびグリル耐熱上限を検索できます。' :
+                 'Check exact max safe oven and broiler temperature limits for Pyrex, glass, stoneware, cast iron, Le Creuset, silicone, parchment, and lids.',
+    cta: lang === 'es' ? 'Buscar Límite de Horno' : lang === 'pt' ? 'Consultar Limite no Forno' : lang === 'zh-cn' ? '查询耐热上限' : lang === 'ja' ? '耐熱上限を調べる' : 'Lookup Max Oven Temp'
+  },
+  airfryer: {
+    path: '/tools/air-fryer-oven-converter/',
+    icon: '🔥',
+    badge: interactiveToolBadge,
+    title: lang === 'es' ? 'Conversor de Freidora de Aire, Horno de Convección y Gas Mark' :
+           lang === 'pt' ? 'Conversor de Air Fryer, Forno de Convecção e Gas Mark' :
+           lang === 'zh-cn' ? '空气炸锅、对流烤箱与燃气档位换算器' :
+           lang === 'ja' ? 'ノンフライヤー・コンベクション・ガスマーク変換ツール' :
+           'Air Fryer, Convection Oven & Gas Mark Converter',
+    description: lang === 'es' ? 'Convierte al instante cualquier receta de horno convencional a temperatura (°F/°C) y tiempo reducido para freidora de aire sin quemar la comida.' :
+                 lang === 'pt' ? 'Converta na hora qualquer receita de forno convencional para temperatura (°F/°C) e tempo reduzido na air fryer evitando queimar os alimentos.' :
+                 lang === 'zh-cn' ? '将传统烤箱食谱一键换算为空气炸锅安全温度（°F/°C）与缩短后的烹饪时长，避免焦糊与过热。' :
+                 lang === 'ja' ? '通常のオーブンレシピをノンフライヤー用の安全な温度（°F/°C）と短縮時間に瞬時に変換し、焦げ付きを防ぎます。' :
+                 'Convert any conventional oven recipe into safe air fryer temperature (°F/°C) and reduced cook time instantly to prevent burning.',
+    cta: lang === 'es' ? 'Convertir Temperatura' : lang === 'pt' ? 'Converter Temperatura' : lang === 'zh-cn' ? '换算炸锅温时' : lang === 'ja' ? '温度・時間を変換' : 'Convert Oven to Air Fryer'
+  },
+  oil: {
+    path: '/tools/culinary-oil-smoke-point-simulator/',
+    icon: '🫒',
+    badge: interactiveToolBadge,
+    title: lang === 'es' ? 'Simulador de Punto de Humo de Aceites' :
+           lang === 'pt' ? 'Simulador de Ponto de Fumaça de Óleos' :
+           lang === 'zh-cn' ? '食用油烟点安全模拟器' :
+           lang === 'ja' ? '調理油の発煙点シミュレーター' :
+           'Culinary Oil Smoke Point Simulator',
+    description: lang === 'es' ? 'Compara los puntos de humo y la estabilidad térmica de aceites, mantequilla y ghee para evitar humo tóxico e incendios por grasa.' :
+                 lang === 'pt' ? 'Compare os pontos de fumaça e a estabilidade térmica de óleos, manteiga e ghee para evitar fumaça tóxica e superaquecimento.' :
+                 lang === 'zh-cn' ? '对比各类食用油、黄油与酥油的烟点及高温氧化稳定性，避免油烟有害物质与厨房起火隐患。' :
+                 lang === 'ja' ? '調理油・バター・ギーの発煙点と熱安定性を比較し、有害な煙や過熱トラブルを防ぎます。' :
+                 'Compare cooking oil, butter, and ghee smoke points and thermal oxidation thresholds to prevent toxic fumes and grease flare-ups.',
+    cta: lang === 'es' ? 'Comparar Aceites' : lang === 'pt' ? 'Comparar Óleos' : lang === 'zh-cn' ? '模拟油温烟点' : lang === 'ja' ? '発煙点を確認' : 'Check Oil Smoke Points'
+  },
   symbol: {
     path: '/tools/kitchen-symbol-decoder/',
     icon: '🔍',
-    badge: lang === 'es' ? 'Herramienta Interactiva' : lang === 'pt' ? 'Ferramenta Interativa' : lang === 'zh-cn' ? '互动工具' : lang === 'ja' ? 'インタラクティブツール' : 'Interactive Tool',
+    badge: interactiveToolBadge,
     title: lang === 'es' ? 'Decodificador de Símbolos de Cocina' :
            lang === 'pt' ? 'Decodificador de Símbolos de Cozinha' :
            lang === 'zh-cn' ? '厨具底部安全标志识别器' :
@@ -157,54 +368,6 @@ const toolCatalog = {
                  lang === 'ja' ? '容器の底にあるマークの意味がわからない時は、食洗機・電子レンジ・耐熱マークを瞬時に判定できます。' :
                  'Unsure about the icons stamped on the bottom of your container or cookware? Decode dishwasher, microwave, oven, and plastic resin symbols instantly.',
     cta: lang === 'es' ? 'Abrir Decodificador' : lang === 'pt' ? 'Abrir Decodificador' : lang === 'zh-cn' ? '打开标志识别器' : lang === 'ja' ? 'マークを調べる' : 'Decode Bottom Symbols'
-  },
-  pan: {
-    path: '/tools/pan-scratch-inspector/',
-    icon: '🍳',
-    badge: lang === 'es' ? 'Herramienta Interactiva' : lang === 'pt' ? 'Ferramenta Interativa' : lang === 'zh-cn' ? '互动工具' : lang === 'ja' ? 'インタラクティブツール' : 'Interactive Tool',
-    title: lang === 'es' ? 'Inspector de Rayones en Sartenes Antiadherentes' :
-           lang === 'pt' ? 'Inspetor de Riscos em Panelas Antiaderentes' :
-           lang === 'zh-cn' ? '不粘锅划痕安全检测器' :
-           lang === 'ja' ? 'テフロン・フライパン傷診断ツール' :
-           'Nonstick Pan Scratch Inspector',
-    description: lang === 'es' ? 'Evalúa si tu sartén antiadherente o de teflón sigue siendo segura para cocinar o si debes reemplazarla por riesgo de PTFE/PFAS.' :
-                 lang === 'pt' ? 'Avalie se sua panela antiaderente ainda é segura para cozinhar ou se deve ser substituída devido ao desgaste do revestimento.' :
-                 lang === 'zh-cn' ? '评估不粘锅或特氟龙涂层划伤程度，判断是继续安全使用还是应立即更换。' :
-                 lang === 'ja' ? 'フッ素樹脂加工フライパンの傷の深さを診断し、使い続けて安全か買い替えるべきかを判定します。' :
-                 'Check whether your scratched nonstick skillet or pan is still safe to cook with or should be replaced to avoid coating flaking.',
-    cta: lang === 'es' ? 'Inspeccionar Sartén' : lang === 'pt' ? 'Inspecionar Panela' : lang === 'zh-cn' ? '开始检测锅具' : lang === 'ja' ? 'フライパンを診断' : 'Inspect Your Pan'
-  },
-  airfryer: {
-    path: '/tools/air-fryer-acrylamide-calculator/',
-    icon: '🔥',
-    badge: lang === 'es' ? 'Herramienta Interactiva' : lang === 'pt' ? 'Ferramenta Interativa' : lang === 'zh-cn' ? '互动工具' : lang === 'ja' ? 'インタラクティブツール' : 'Interactive Tool',
-    title: lang === 'es' ? 'Calculadora de Acrilamida en Freidora de Aire' :
-           lang === 'pt' ? 'Calculadora de Acrilamida na Air Fryer' :
-           lang === 'zh-cn' ? '空气炸锅丙烯酰胺温度计算器' :
-           lang === 'ja' ? 'ノンフライヤー アクリルアミド計算ツール' :
-           'Air Fryer Acrylamide & Temp Calculator',
-    description: lang === 'es' ? 'Optimiza el tiempo y la temperatura de tu freidora de aire para reducir la formación de acrilamida y evitar el sobrecalentamiento.' :
-                 lang === 'pt' ? 'Ajuste a temperatura e o tempo na air fryer para reduzir a formação de acrilamida e cozinhar com mais segurança.' :
-                 lang === 'zh-cn' ? '科学评估空气炸锅温度与时间组合，降低高温美拉德反应产生的丙烯酰胺风险。' :
-                 lang === 'ja' ? 'ノンフライヤーの加熱温度と時間からアクリルアミド生成リスクを評価し、安全な調理条件を見つけます。' :
-                 'Dial in safer air-fryer temperatures and cook times to minimize acrylamide formation and prevent overheating.',
-    cta: lang === 'es' ? 'Abrir Calculadora' : lang === 'pt' ? 'Abrir Calculadora' : lang === 'zh-cn' ? '打开计算器' : lang === 'ja' ? 'ツールを開く' : 'Run Air Fryer Calculator'
-  },
-  oil: {
-    path: '/tools/culinary-oil-smoke-point-simulator/',
-    icon: '🫒',
-    badge: lang === 'es' ? 'Herramienta Interactiva' : lang === 'pt' ? 'Ferramenta Interativa' : lang === 'zh-cn' ? '互动工具' : lang === 'ja' ? 'インタラクティブツール' : 'Interactive Tool',
-    title: lang === 'es' ? 'Simulador de Punto de Humo de Aceites' :
-           lang === 'pt' ? 'Simulador de Ponto de Fumaça de Óleos' :
-           lang === 'zh-cn' ? '食用油烟点安全模拟器' :
-           lang === 'ja' ? '調理油の発煙点シミュレーター' :
-           'Culinary Oil Smoke Point Simulator',
-    description: lang === 'es' ? 'Compara los puntos de humo y la estabilidad térmica de los aceites de cocina para evitar humo tóxico e incendios por grasa.' :
-                 lang === 'pt' ? 'Compare os pontos de fumaça e a estabilidade térmica dos óleos culinários para evitar fumaça tóxica e superaquecimento.' :
-                 lang === 'zh-cn' ? '对比各类食用油的烟点与高温氧化稳定性，避免油烟有害物质与厨房起火隐患。' :
-                 lang === 'ja' ? '調理油ごとの発煙点と熱安定性を比較し、有害な煙や過熱トラブルを防ぎます。' :
-                 'Compare cooking oil smoke points and thermal oxidation thresholds to prevent toxic fumes and grease flare-ups.',
-    cta: lang === 'es' ? 'Comparar Aceites' : lang === 'pt' ? 'Comparar Óleos' : lang === 'zh-cn' ? '模拟油温烟点' : lang === 'ja' ? '発煙点を確認' : 'Check Oil Smoke Points'
   }
 };
 

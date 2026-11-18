@@ -1,0 +1,1375 @@
+---
+import rawData from '../data/microwave-wattage-converter-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+
+const localizedWattages = rawData.wattages.map((w) => {
+  const tr = (w.i18n as Record<string, any>)[lang] || w.i18n.en;
+  return {
+    watts: w.watts,
+    isInverter: w.isInverter,
+    typicalVolumeCuFt: w.typicalVolumeCuFt,
+    label: tr.label,
+    sizeType: tr.sizeType,
+    description: tr.description
+  };
+});
+
+const localizedPowerLevels = rawData.powerLevels.map((pl) => {
+  const tr = (pl.i18n as Record<string, any>)[lang] || pl.i18n.en;
+  return {
+    pct: pl.pct,
+    name: tr.name,
+    shortLabel: tr.shortLabel,
+    useCase: tr.useCase
+  };
+});
+
+const localizedPresets = rawData.presets.map((p) => {
+  const tr = (p.i18n as Record<string, any>)[lang] || p.i18n.en;
+  return {
+    id: p.id,
+    icon: p.icon,
+    pkgWatts: p.pkgWatts,
+    pkgSeconds: p.pkgSeconds,
+    basePowerPct: p.basePowerPct,
+    standingTimeMin: p.standingTimeMin,
+    usdaTempF: p.usdaTempF,
+    usdaTempC: p.usdaTempC,
+    specialAlert: p.specialAlert,
+    name: tr.name,
+    standingLabel: tr.standingLabel,
+    usdaLabel: tr.usdaLabel,
+    stirTip: tr.stirTip,
+    safetyNote: tr.safetyNote
+  };
+});
+
+const localizedSafetyRules = rawData.safetyRules.map((r) => {
+  const tr = (r.i18n as Record<string, any>)[lang] || r.i18n.en;
+  return {
+    id: r.id,
+    icon: r.icon,
+    severity: r.severity,
+    title: tr.title,
+    body: tr.body
+  };
+});
+
+interface UiDict {
+  ariaLabel: string;
+  step1Title: string;
+  pkgWattLabel: string;
+  myWattLabel: string;
+  swapBtn: string;
+  doorStickerTitle: string;
+  doorStickerTip: string;
+  step2Title: string;
+  minutesLabel: string;
+  secondsLabel: string;
+  quickNudgeLabel: string;
+  powerLevelTitle: string;
+  presetsTitle: string;
+  presetsSub: string;
+  dashboardBadge: string;
+  adjustedTimeLabel: string;
+  diffLonger: string;
+  diffShorter: string;
+  diffExact: string;
+  stirCheckpointLabel: string;
+  stirAtPrefix: string;
+  noStirPopcorn: string;
+  standingTimeLabel: string;
+  defaultStandingVal: string;
+  usdaTempLabel: string;
+  defaultUsdaVal: string;
+  effectivePowerNote: string;
+  inverterNote: string;
+  presetGuideEyebrow: string;
+  presetStirLabel: string;
+  presetSafetyLabel: string;
+  superheatBannerTitle: string;
+  defrostBannerTitle: string;
+  pierceBannerTitle: string;
+  popcornBannerTitle: string;
+  copyBtn: string;
+  copiedBtn: string;
+  resetBtn: string;
+  chartTitle: string;
+  chartSub: string;
+  chartHeaders: [string, string, string, string, string];
+  chartBadgeYours: string;
+  chartBadgePkg: string;
+  safetyStripTitle: string;
+  safetyStripSub: string;
+  unitMinShort: string;
+  unitSecShort: string;
+  copyTitle: string;
+  copyPackageLine: string;
+  copyAdjustedLine: string;
+  copyStirLine: string;
+  copyStandingLine: string;
+  copyUsdaLine: string;
+}
+
+const UI: Record<SupportedLanguage, UiDict> = {
+  en: {
+    ariaLabel: 'Microwave Wattage Time Converter',
+    step1Title: '1. Select Package & Your Microwave Wattage',
+    pkgWattLabel: 'Package / Recipe Wattage',
+    myWattLabel: 'Your Microwave Wattage',
+    swapBtn: 'Swap Wattages ⇅',
+    doorStickerTitle: 'Where to find your wattage?',
+    doorStickerTip: 'Open the microwave door and check the rating label along the inner door frame or back plate. Use "Output Power" (e.g., 900W)—not "Input Power" (which is ~40% higher).',
+    step2Title: '2. Package Cooking Time & Power Level',
+    minutesLabel: 'Minutes',
+    secondsLabel: 'Seconds',
+    quickNudgeLabel: 'Quick adjust:',
+    powerLevelTitle: 'Microwave Power Level',
+    presetsTitle: '3. Popular Frozen Meal & Reheating Presets (10 Foods)',
+    presetsSub: 'Tap a preset to load its standard package wattage, time, power level, and food safety notes.',
+    dashboardBadge: 'Live Adjusted Microwave Time',
+    adjustedTimeLabel: 'Set Your Microwave Timer To',
+    diffLonger: 'longer',
+    diffShorter: 'shorter',
+    diffExact: 'Exact match (0s difference)',
+    stirCheckpointLabel: 'Stir / Rotate Halfway',
+    stirAtPrefix: 'Stir at',
+    noStirPopcorn: 'Do not open — listen for 1–2s between pops',
+    standingTimeLabel: 'Recommended Standing Time',
+    defaultStandingVal: '1–2 min covered',
+    usdaTempLabel: 'USDA Safe Center Temp',
+    defaultUsdaVal: '165°F (74°C)',
+    effectivePowerNote: 'Power level applied:',
+    inverterNote: 'Inverter continuous-wave output detected — heats more evenly at partial power; check 15–20s early.',
+    presetGuideEyebrow: 'Selected Food Safety & Timing Guide',
+    presetStirLabel: 'Stir / Prep Technique',
+    presetSafetyLabel: 'Thermal Safety Note',
+    superheatBannerTitle: 'Superheated Water Boil-Over Warning',
+    defrostBannerTitle: 'USDA Microwave Defrost Rule',
+    pierceBannerTitle: 'Steam Burst Prevention',
+    popcornBannerTitle: 'Steam Burn & Scorch Warning',
+    copyBtn: 'Copy Adjusted Time',
+    copiedBtn: 'Copied to Clipboard ✓',
+    resetBtn: 'Reset',
+    chartTitle: 'Full Microwave Wattage Conversion Chart (600W – 1250W)',
+    chartSub: 'Instant side-by-side times for your current recipe across every microwave wattage. Click any row to select it as your microwave.',
+    chartHeaders: ['Wattage', 'Typical Model Size', 'Adjusted Time', 'Difference', 'Stir Halfway'],
+    chartBadgeYours: 'Yours',
+    chartBadgePkg: 'Package',
+    safetyStripTitle: 'Essential Microwave Thermal & Container Safety Rules',
+    safetyStripSub: 'Evidence-based guidelines from USDA FSIS and FDA food-contact safety standards.',
+    unitMinShort: 'm',
+    unitSecShort: 's',
+    copyTitle: 'IsItKitchenSafe — Microwave Wattage Conversion',
+    copyPackageLine: 'Package / Recipe',
+    copyAdjustedLine: 'Adjusted Setting',
+    copyStirLine: 'Stir / Rotate Halfway',
+    copyStandingLine: 'Standing Time',
+    copyUsdaLine: 'USDA Safe Temp'
+  },
+  es: {
+    ariaLabel: 'Conversor de Potencia y Tiempo de Microondas',
+    step1Title: '1. Elige la Potencia del Envase y de Tu Microondas',
+    pkgWattLabel: 'Potencia del Envase / Receta',
+    myWattLabel: 'Potencia de Tu Microondas',
+    swapBtn: 'Intercambiar ⇅',
+    doorStickerTitle: '¿Dónde ver los vatios (W)?',
+    doorStickerTip: 'Abre la puerta del microondas y mira la pegatina interior del marco o la placa trasera. Usa "Potencia de salida / Output" (ej. 900W), no la de consumo eléctrico ("Input").',
+    step2Title: '2. Tiempo del Envase y Nivel de Potencia',
+    minutesLabel: 'Minutos',
+    secondsLabel: 'Segundos',
+    quickNudgeLabel: 'Ajuste rápido:',
+    powerLevelTitle: 'Nivel de Potencia del Microondas',
+    presetsTitle: '3. 10 Alimentos Populares y Comidas Congeladas',
+    presetsSub: 'Pulsa cualquier opción para cargar potencia estándar, tiempo, nivel y advertencias de seguridad.',
+    dashboardBadge: 'Tiempo Ajustado en Vivo',
+    adjustedTimeLabel: 'Programa Tu Microondas En',
+    diffLonger: 'más largo',
+    diffShorter: 'más corto',
+    diffExact: 'Coincidencia exacta (0s)',
+    stirCheckpointLabel: 'Remover / Girar a la Mitad',
+    stirAtPrefix: 'Remover a los',
+    noStirPopcorn: 'No abrir — detén cuando pasen 1–2s entre estallidos',
+    standingTimeLabel: 'Tiempo de Reposo Recomendado',
+    defaultStandingVal: '1–2 min tapado',
+    usdaTempLabel: 'Temp. Segura USDA en Centro',
+    defaultUsdaVal: '74°C (165°F)',
+    effectivePowerNote: 'Potencia aplicada:',
+    inverterNote: 'Modo Inverter continuo: calienta de forma constante incluso a potencia media; revisa 15–20s antes.',
+    presetGuideEyebrow: 'Guía de Seguridad y Tiempos del Alimento',
+    presetStirLabel: 'Técnica de Preparación / Removido',
+    presetSafetyLabel: 'Nota de Seguridad Térmica',
+    superheatBannerTitle: 'Alerta de Agua Sobrecalentada (Ebullición Explosiva)',
+    defrostBannerTitle: 'Regla USDA de Descongelado en Microondas',
+    pierceBannerTitle: 'Prevención de Estallido por Vapor',
+    popcornBannerTitle: 'Advertencia de Vapor Caliente',
+    copyBtn: 'Copiar Tiempo Ajustado',
+    copiedBtn: 'Copiado al Portapapeles ✓',
+    resetBtn: 'Restablecer',
+    chartTitle: 'Tabla Completa de Conversión por Vatios (600W – 1250W)',
+    chartSub: 'Compara al instante el tiempo exacto en todas las potencias. Haz clic en cualquier fila para elegir tu microondas.',
+    chartHeaders: ['Potencia', 'Tamaño Típico', 'Tiempo Ajustado', 'Diferencia', 'Remover a la Mitad'],
+    chartBadgeYours: 'Tuyo',
+    chartBadgePkg: 'Envase',
+    safetyStripTitle: 'Reglas Esenciales de Seguridad Térmica y Envases en Microondas',
+    safetyStripSub: 'Basado en recomendaciones del USDA FSIS y normativas FDA de contacto con alimentos.',
+    unitMinShort: 'm',
+    unitSecShort: 's',
+    copyTitle: 'IsItKitchenSafe — Conversor de Potencia de Microondas',
+    copyPackageLine: 'Envase / Receta',
+    copyAdjustedLine: 'Tiempo Ajustado',
+    copyStirLine: 'Remover a la Mitad',
+    copyStandingLine: 'Tiempo de Reposo',
+    copyUsdaLine: 'Temp. Segura USDA'
+  },
+  pt: {
+    ariaLabel: 'Conversor de Potência e Tempo de Micro-ondas',
+    step1Title: '1. Escolha a Potência da Embalagem e do Seu Micro-ondas',
+    pkgWattLabel: 'Potência da Embalagem / Receita',
+    myWattLabel: 'Potência do Seu Micro-ondas',
+    swapBtn: 'Inverter ⇅',
+    doorStickerTitle: 'Onde encontrar a potência (W)?',
+    doorStickerTip: 'Abra a porta do micro-ondas e procure a etiqueta na moldura interna ou na traseira. Use a "Potência de saída / útil" (ex.: 900W), não o consumo nominal ("Input").',
+    step2Title: '2. Tempo da Embalagem e Nível de Potência',
+    minutesLabel: 'Minutos',
+    secondsLabel: 'Segundos',
+    quickNudgeLabel: 'Ajuste rápido:',
+    powerLevelTitle: 'Nível de Potência do Micro-ondas',
+    presetsTitle: '3. 10 Pratos Congelados e Reaquecimentos Populares',
+    presetsSub: 'Toque em um alimento para preencher potência, tempo, nível e alertas de segurança alimentar.',
+    dashboardBadge: 'Tempo Ajustado em Tempo Real',
+    adjustedTimeLabel: 'Ajuste o Timer do Micro-ondas Para',
+    diffLonger: 'a mais',
+    diffShorter: 'a menos',
+    diffExact: 'Tempo exato (0s de diferença)',
+    stirCheckpointLabel: 'Mexer / Virar na Metade',
+    stirAtPrefix: 'Mexer aos',
+    noStirPopcorn: 'Não abra — pare com 1–2s entre estouros',
+    standingTimeLabel: 'Tempo de Descanso Recomendado',
+    defaultStandingVal: '1–2 min tampado',
+    usdaTempLabel: 'Temp. Segura USDA no Centro',
+    defaultUsdaVal: '74°C (165°F)',
+    effectivePowerNote: 'Nível de potência:',
+    inverterNote: 'Tecnologia Inverter contínua: aquece de forma constante sem pulsar — verifique 15–20s antes do fim.',
+    presetGuideEyebrow: 'Guia de Segurança do Alimento Selecionado',
+    presetStirLabel: 'Como Mexer / Preparar',
+    presetSafetyLabel: 'Alerta de Segurança Térmica',
+    superheatBannerTitle: 'Aviso de Água Superaquecida (Ebulição Explosiva)',
+    defrostBannerTitle: 'Regra USDA de Descongelamento',
+    pierceBannerTitle: 'Prevenção de Estouro por Vapor',
+    popcornBannerTitle: 'Aviso de Vapor Quente',
+    copyBtn: 'Copiar Tempo Ajustado',
+    copiedBtn: 'Copiado ✓',
+    resetBtn: 'Redefinir',
+    chartTitle: 'Tabela Completa de Conversão de Potência (600W – 1250W)',
+    chartSub: 'Veja na hora o tempo exato em todas as potências. Clique em qualquer linha para definir como seu micro-ondas.',
+    chartHeaders: ['Potência', 'Modelo Típico', 'Tempo Ajustado', 'Diferença', 'Mexer na Metade'],
+    chartBadgeYours: 'Seu',
+    chartBadgePkg: 'Embalagem',
+    safetyStripTitle: 'Regras Essenciais de Segurança Térmica e Recipientes no Micro-ondas',
+    safetyStripSub: 'Diretrizes baseadas em padrões USDA FSIS e normas FDA de contato alimentar.',
+    unitMinShort: 'm',
+    unitSecShort: 's',
+    copyTitle: 'IsItKitchenSafe — Conversor de Potência de Micro-ondas',
+    copyPackageLine: 'Embalagem / Receita',
+    copyAdjustedLine: 'Tempo Ajustado',
+    copyStirLine: 'Mexer na Metade',
+    copyStandingLine: 'Tempo de Descanso',
+    copyUsdaLine: 'Temp. Segura USDA'
+  },
+  'zh-cn': {
+    ariaLabel: '微波炉功率与加热时间换算器',
+    step1Title: '1. 选择包装标称功率与你的微波炉功率',
+    pkgWattLabel: '包装说明 / 食谱功率',
+    myWattLabel: '你的微波炉输出功率',
+    swapBtn: '互换功率 ⇅',
+    doorStickerTitle: '在哪里看微波炉实际功率？',
+    doorStickerTip: '打开炉门查看内门框或机身背面的铭牌参数。请认准“微波输出功率 (Output)”（如 900W），而非高出约 40% 的“额定输入功率 (Input)”。',
+    step2Title: '2. 包装建议时间与火力档位',
+    minutesLabel: '分钟',
+    secondsLabel: '秒',
+    quickNudgeLabel: '快速微调：',
+    powerLevelTitle: '微波炉火力档位',
+    presetsTitle: '3. 10 款高频冷冻餐与日常复热一键预设',
+    presetsSub: '点击任意食材自动载入标准功率、时间、火力档位与食品安全警示。',
+    dashboardBadge: '实时换算加热时间',
+    adjustedTimeLabel: '建议微波炉定时设置为',
+    diffLonger: '更长',
+    diffShorter: '更短',
+    diffExact: '完全一致（无需增减）',
+    stirCheckpointLabel: '中途翻拌 / 旋转节点',
+    stirAtPrefix: '第',
+    noStirPopcorn: '中途勿开门——爆裂声间隔 1–2 秒即停',
+    standingTimeLabel: '建议出炉静置时间',
+    defaultStandingVal: '加盖静置 1–2 分钟',
+    usdaTempLabel: 'USDA 中心安全温度',
+    defaultUsdaVal: '74°C (165°F)',
+    effectivePowerNote: '当前火力档位：',
+    inverterNote: '已选变频连续波机型：中低火也能持续稳定加热，建议提前 15–20 秒检查熟度。',
+    presetGuideEyebrow: '当前预设食材安全与操作指南',
+    presetStirLabel: '翻拌 / 预处理要点',
+    presetSafetyLabel: '热安全与防爆提示',
+    superheatBannerTitle: '过热水暴沸喷溅高危警告',
+    defrostBannerTitle: 'USDA 微波解冻强制规范',
+    pierceBannerTitle: '防蒸汽高压爆裂提示',
+    popcornBannerTitle: '高温蒸汽烫伤与焦糊警示',
+    copyBtn: '复制换算时间',
+    copiedBtn: '已复制到剪贴板 ✓',
+    resetBtn: '重置',
+    chartTitle: '全功率段微波炉时间换算速查表 (600W – 1250W)',
+    chartSub: '一表查看当前食谱在所有常见功率微波炉上的精准时长。点击任意一行即可设为你的微波炉。',
+    chartHeaders: ['输出功率', '常见机型规格', '换算后时长', '时间差值', '中途翻拌节点'],
+    chartBadgeYours: '你的机型',
+    chartBadgePkg: '包装基准',
+    safetyStripTitle: '微波加热必读食品安全与容器红线',
+    safetyStripSub: '依据美国 USDA FSIS 食品安全规范与 FDA 食品接触材料指南整理。',
+    unitMinShort: '分',
+    unitSecShort: '秒',
+    copyTitle: 'IsItKitchenSafe — 微波炉功率时间换算结果',
+    copyPackageLine: '包装原说明',
+    copyAdjustedLine: '换算后设置',
+    copyStirLine: '中途翻拌时间',
+    copyStandingLine: '出炉静置时间',
+    copyUsdaLine: 'USDA 安全中心温'
+  },
+  ja: {
+    ariaLabel: '電子レンジワット数・加熱時間変換ツール',
+    step1Title: '1. 表示ワット数とご自宅のレンジ出力を選択',
+    pkgWattLabel: 'パッケージ・レシピ記載ワット数',
+    myWattLabel: 'お使いの電子レンジのワット数',
+    swapBtn: '出力を入替 ⇅',
+    doorStickerTitle: 'ワット数の確認場所',
+    doorStickerTip: '扉を開けた内側の枠または背面の銘板シールを確認してください。「定格高周波出力（Output）」の値（例：600W/900W）を使います（消費電力 Input ではありません）。',
+    step2Title: '2. 記載の加熱時間と出力レベル',
+    minutesLabel: '分',
+    secondsLabel: '秒',
+    quickNudgeLabel: 'クイック調整：',
+    powerLevelTitle: '電子レンジの出力レベル',
+    presetsTitle: '3. 定番冷凍食品・温め直しプリセット（10種類）',
+    presetsSub: 'タップすると標準ワット数・時間・出力レベルと安全ポイントを自動入力します。',
+    dashboardBadge: 'リアルタイム換算結果',
+    adjustedTimeLabel: '電子レンジのタイマー設定目安',
+    diffLonger: '延長',
+    diffShorter: '短縮',
+    diffExact: '変更なし（0秒差）',
+    stirCheckpointLabel: '途中で混ぜる・裏返す目安',
+    stirAtPrefix: '開始から',
+    noStirPopcorn: '扉を開けず、弾ける間隔が1〜2秒で停止',
+    standingTimeLabel: '推奨の蒸らし（放置）時間',
+    defaultStandingVal: 'ラップ等で 1〜2分蒸らし',
+    usdaTempLabel: 'USDA 安全中心温度',
+    defaultUsdaVal: '74°C (165°F)',
+    effectivePowerNote: '適用出力レベル：',
+    inverterNote: 'インバーター連続出力機のため中・弱出力でも効率よく加熱されます。終了15〜20秒前に様子を確認してください。',
+    presetGuideEyebrow: '選択中の食品ガイド＆安全ポイント',
+    presetStirLabel: '混ぜ方・下準備のコツ',
+    presetSafetyLabel: '加熱時の安全注意',
+    superheatBannerTitle: '突沸（過熱水噴出）注意警告',
+    defrostBannerTitle: 'USDA 電子レンジ解凍ルール',
+    pierceBannerTitle: '蒸気破裂防止のポイント',
+    popcornBannerTitle: '高温蒸気・焦げ付き注意',
+    copyBtn: '換算時間をコピー',
+    copiedBtn: 'コピーしました ✓',
+    resetBtn: 'リセット',
+    chartTitle: '全ワット数一括換算早見表（600W 〜 1250W）',
+    chartSub: '現在のレシピを全ワット数で横並び比較できます。任意の行をクリックすると「お使いのレンジ」に設定されます。',
+    chartHeaders: ['ワット数', '代表的な機種サイズ', '換算後の時間', '元の時間との差', '途中混ぜ目安'],
+    chartBadgeYours: '選択中',
+    chartBadgePkg: '表示基準',
+    safetyStripTitle: '電子レンジの食品安全・耐熱容器の必須ルール',
+    safetyStripSub: '米国USDA FSIS食品安全基準およびFDA食品接触材料ガイドラインに基づきます。',
+    unitMinShort: '分',
+    unitSecShort: '秒',
+    copyTitle: 'IsItKitchenSafe — 電子レンジワット数時間換算',
+    copyPackageLine: 'パッケージ表記',
+    copyAdjustedLine: '換算後の設定',
+    copyStirLine: '途中で混ぜる目安',
+    copyStandingLine: '蒸らし時間',
+    copyUsdaLine: 'USDA 安全中心温度'
+  }
+};
+
+const t = UI[lang] || UI.en;
+
+// Default initial state: 1100W -> 900W, 4m 30s (270s), 100% power => 5:30 (+1m 00s longer), Stir at 2m 45s
+const defaultPkgWatts = 1100;
+const defaultMyWatts = 900;
+const defaultPkgMin = 4;
+const defaultPkgSec = 30;
+const defaultTotalSec = defaultPkgMin * 60 + defaultPkgSec; // 270
+const defaultAdjSec = Math.round((defaultTotalSec * defaultPkgWatts) / defaultMyWatts); // 330 (5:30)
+
+function formatMMSS(sec: number): string {
+  const s = Math.max(1, Math.round(sec));
+  const m = Math.floor(s / 60);
+  const rem = s % 60;
+  return `${m}:${String(rem).padStart(2, '0')}`;
+}
+
+function formatReadable(sec: number, minShort: string, secShort: string): string {
+  const s = Math.max(0, Math.round(sec));
+  const m = Math.floor(s / 60);
+  const rem = s % 60;
+  if (m === 0) return `${rem}${secShort}`;
+  if (rem === 0) return `${m}${minShort} 00${secShort}`;
+  return `${m}${minShort} ${String(rem).padStart(2, '0')}${secShort}`;
+}
+
+const initialChartRows = localizedWattages.map((w) => {
+  const adj = Math.max(1, Math.round((defaultTotalSec * defaultPkgWatts) / w.watts));
+  const diff = adj - defaultTotalSec;
+  const stir = Math.max(1, Math.round(adj / 2));
+  return {
+    ...w,
+    adjFormatted: formatMMSS(adj),
+    diffFormatted:
+      diff === 0
+        ? '0s'
+        : `${diff > 0 ? '+' : '-'}${formatReadable(Math.abs(diff), t.unitMinShort, t.unitSecShort)}`,
+    diffSign: diff > 0 ? 'longer' : diff < 0 ? 'shorter' : 'exact',
+    stirFormatted: formatMMSS(stir)
+  };
+});
+
+const defaultPkgObj = localizedWattages.find((w) => w.watts === defaultPkgWatts) || localizedWattages[5];
+const defaultMyObj = localizedWattages.find((w) => w.watts === defaultMyWatts) || localizedWattages[3];
+
+const clientPayload = {
+  lang,
+  wattages: localizedWattages,
+  powerLevels: localizedPowerLevels,
+  presets: localizedPresets,
+  ui: t
+};
+---
+
+<section
+  id="microwave-wattage-converter"
+  class="bg-canvas border border-hairline rounded-2xl shadow-sm overflow-hidden"
+  aria-label={t.ariaLabel}
+>
+  <script type="application/json" id="mwc-payload" set:html={JSON.stringify(clientPayload)} />
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-hairline">
+    <!-- Left Column: Interactive Controls -->
+    <div class="lg:col-span-6 p-5 sm:p-6 space-y-6">
+      <!-- Step 1: Wattage Selectors -->
+      <div class="space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h2 class="text-title-sm font-semibold text-ink">{t.step1Title}</h2>
+          <button
+            type="button"
+            id="mwc-swap-btn"
+            class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-surface-soft border border-hairline text-ink hover:border-signature-coral transition-colors cursor-pointer"
+          >
+            {t.swapBtn}
+          </button>
+        </div>
+
+        <!-- Package / Recipe Wattage -->
+        <div class="p-4 rounded-xl bg-surface-soft border border-hairline space-y-2.5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs sm:text-sm font-semibold text-ink">{t.pkgWattLabel}</span>
+            <span id="mwc-pkg-size-label" class="text-[11px] font-medium text-muted text-right">
+              {defaultPkgObj.sizeType}
+            </span>
+          </div>
+          <div class="grid grid-cols-4 gap-1.5" role="radiogroup" aria-label={t.pkgWattLabel}>
+            {localizedWattages.map((w) => (
+              <button
+                type="button"
+                role="radio"
+                aria-checked={w.watts === defaultPkgWatts ? 'true' : 'false'}
+                data-mwc-pkg-w={w.watts}
+                class={`mwc-pkg-btn min-h-[42px] px-2 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
+                  w.watts === defaultPkgWatts
+                    ? 'bg-primary text-on-primary border-primary shadow-sm'
+                    : 'bg-canvas text-ink border-hairline hover:border-border-strong'
+                }`}
+              >
+                {w.isInverter ? '1250W*' : `${w.watts}W`}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <!-- Your Microwave Wattage -->
+        <div class="p-4 rounded-xl bg-surface-soft border border-hairline space-y-2.5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs sm:text-sm font-semibold text-ink">{t.myWattLabel}</span>
+            <span id="mwc-my-size-label" class="text-[11px] font-medium text-muted text-right">
+              {defaultMyObj.sizeType}
+            </span>
+          </div>
+          <div class="grid grid-cols-4 gap-1.5" role="radiogroup" aria-label={t.myWattLabel}>
+            {localizedWattages.map((w) => (
+              <button
+                type="button"
+                role="radio"
+                aria-checked={w.watts === defaultMyWatts ? 'true' : 'false'}
+                data-mwc-my-w={w.watts}
+                class={`mwc-my-btn min-h-[42px] px-2 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
+                  w.watts === defaultMyWatts
+                    ? 'bg-signature-coral text-white border-signature-coral shadow-sm'
+                    : 'bg-canvas text-ink border-hairline hover:border-border-strong'
+                }`}
+              >
+                {w.isInverter ? '1250W*' : `${w.watts}W`}
+              </button>
+            ))}
+          </div>
+
+          <!-- Inside Door Sticker Tip -->
+          <div class="p-3 rounded-lg bg-canvas border border-hairline text-xs text-body leading-relaxed flex items-start gap-2">
+            <span aria-hidden="true" class="text-sm shrink-0 mt-0.5">🏷️</span>
+            <div>
+              <strong class="text-ink">{t.doorStickerTitle}</strong>{' '}
+              <span>{t.doorStickerTip}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Cooking Time & Power Level -->
+      <div class="space-y-4">
+        <h2 class="text-title-sm font-semibold text-ink">{t.step2Title}</h2>
+
+        <!-- Minutes & Seconds Inputs -->
+        <div class="p-4 rounded-xl bg-surface-soft border border-hairline space-y-3">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="mwc-min-input" class="block text-xs font-semibold text-ink mb-1.5">
+                {t.minutesLabel}
+              </label>
+              <div class="relative">
+                <input
+                  type="number"
+                  id="mwc-min-input"
+                  min="0"
+                  max="60"
+                  step="1"
+                  value={defaultPkgMin}
+                  class="w-full h-11 pl-3 pr-10 rounded-lg bg-canvas border border-hairline text-ink font-bold text-base focus:outline-none focus:border-info-border"
+                />
+                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted pointer-events-none">
+                  {t.unitMinShort}
+                </span>
+              </div>
+            </div>
+            <div>
+              <label for="mwc-sec-input" class="block text-xs font-semibold text-ink mb-1.5">
+                {t.secondsLabel}
+              </label>
+              <div class="relative">
+                <input
+                  type="number"
+                  id="mwc-sec-input"
+                  min="0"
+                  max="59"
+                  step="5"
+                  value={defaultPkgSec}
+                  class="w-full h-11 pl-3 pr-10 rounded-lg bg-canvas border border-hairline text-ink font-bold text-base focus:outline-none focus:border-info-border"
+                />
+                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted pointer-events-none">
+                  {t.unitSecShort}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Time Nudges -->
+          <div class="flex flex-wrap items-center gap-1.5 pt-1">
+            <span class="text-[11px] font-semibold text-muted mr-1">{t.quickNudgeLabel}</span>
+            <button type="button" data-mwc-nudge="-30" class="mwc-nudge-btn px-2.5 py-1 rounded-md text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral cursor-pointer">-30s</button>
+            <button type="button" data-mwc-nudge="-15" class="mwc-nudge-btn px-2.5 py-1 rounded-md text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral cursor-pointer">-15s</button>
+            <button type="button" data-mwc-nudge="15" class="mwc-nudge-btn px-2.5 py-1 rounded-md text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral cursor-pointer">+15s</button>
+            <button type="button" data-mwc-nudge="30" class="mwc-nudge-btn px-2.5 py-1 rounded-md text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral cursor-pointer">+30s</button>
+            <button type="button" data-mwc-nudge="60" class="mwc-nudge-btn px-2.5 py-1 rounded-md text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral cursor-pointer">+1m</button>
+          </div>
+        </div>
+
+        <!-- Power Level Selector -->
+        <div class="p-4 rounded-xl bg-surface-soft border border-hairline space-y-2.5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs sm:text-sm font-semibold text-ink">{t.powerLevelTitle}</span>
+            <span id="mwc-power-badge" class="text-xs font-mono font-semibold text-muted">
+              {localizedPowerLevels[0].name}
+            </span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5" role="radiogroup" aria-label={t.powerLevelTitle}>
+            {localizedPowerLevels.map((pl) => (
+              <button
+                type="button"
+                role="radio"
+                aria-checked={pl.pct === 100 ? 'true' : 'false'}
+                data-mwc-power={pl.pct}
+                class={`mwc-power-btn min-h-[42px] px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
+                  pl.pct === 100
+                    ? 'bg-primary text-on-primary border-primary shadow-sm'
+                    : 'bg-canvas text-ink border-hairline hover:border-border-strong'
+                }`}
+              >
+                {pl.shortLabel}
+              </button>
+            ))}
+          </div>
+          <p id="mwc-power-desc" class="text-[11.5px] text-muted leading-snug">
+            {localizedPowerLevels[0].useCase}
+          </p>
+        </div>
+      </div>
+
+      <!-- Step 3: 10 Popular Frozen Meal & Reheating Presets -->
+      <div class="space-y-2.5">
+        <div>
+          <h2 class="text-title-sm font-semibold text-ink">{t.presetsTitle}</h2>
+          <p class="text-xs text-muted mt-0.5">{t.presetsSub}</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {localizedPresets.map((preset) => (
+            <button
+              type="button"
+              data-mwc-preset={preset.id}
+              class="mwc-preset-btn min-h-[44px] px-3 py-2 rounded-xl border border-hairline bg-surface-soft hover:border-signature-coral text-left transition-all cursor-pointer flex items-center justify-between gap-2"
+            >
+              <span class="flex items-center gap-2 min-w-0">
+                <span aria-hidden="true" class="text-base shrink-0">{preset.icon}</span>
+                <span class="text-xs font-semibold text-ink truncate">{preset.name}</span>
+              </span>
+              <span class="text-[11px] font-mono text-muted shrink-0">
+                {preset.pkgWatts}W · {formatMMSS(preset.pkgSeconds)}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Live Result Dashboard -->
+    <div class="lg:col-span-6 p-5 sm:p-6 bg-surface-soft/50 flex flex-col justify-between space-y-5">
+      <div class="space-y-4">
+        <!-- Main High-Contrast Result Card -->
+        <div class="rounded-2xl bg-surface-dark text-on-dark p-5 sm:p-6 space-y-4 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-signature-peach">
+              {t.dashboardBadge}
+            </span>
+            <span id="mwc-formula-pill" class="px-2.5 py-1 rounded-full text-[11px] font-mono font-semibold bg-white/10 text-white/90">
+              1100W · 4:30 → 900W (100%)
+            </span>
+          </div>
+
+          <!-- Prominent Adjusted Cooking Time & Difference -->
+          <div class="p-4 sm:p-5 rounded-xl bg-white/5 border border-white/10 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+            <div>
+              <div class="text-xs text-white/75 font-medium">{t.adjustedTimeLabel}</div>
+              <div id="mwc-result-time" class="text-4xl sm:text-5xl font-extrabold tracking-tight text-white font-mono mt-1">
+                {formatMMSS(defaultAdjSec)}
+              </div>
+            </div>
+            <div class="sm:text-right space-y-1">
+              <div
+                id="mwc-result-diff"
+                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-signature-yellow/20 text-signature-yellow border border-signature-yellow/30"
+              >
+                +1{t.unitMinShort} 00{t.unitSecShort} {t.diffLonger}
+              </div>
+              <div id="mwc-result-power-line" class="text-[11px] text-white/75 font-medium">
+                {t.effectivePowerNote} {localizedPowerLevels[0].name}
+              </div>
+            </div>
+          </div>
+
+          <!-- 3 Key Safety & Timing Metrics -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <div class="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1">
+              <div class="text-[11px] text-white/70 font-medium">{t.stirCheckpointLabel}</div>
+              <div id="mwc-stir-checkpoint" class="text-sm font-bold text-signature-mint leading-snug">
+                {t.stirAtPrefix} 2{t.unitMinShort} 45{t.unitSecShort}
+              </div>
+            </div>
+            <div class="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1">
+              <div class="text-[11px] text-white/70 font-medium">{t.standingTimeLabel}</div>
+              <div id="mwc-standing-val" class="text-sm font-bold text-white leading-snug">
+                {t.defaultStandingVal}
+              </div>
+            </div>
+            <div class="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1">
+              <div class="text-[11px] text-white/70 font-medium">{t.usdaTempLabel}</div>
+              <div id="mwc-usda-val" class="text-sm font-bold text-signature-peach leading-snug">
+                {t.defaultUsdaVal}
+              </div>
+            </div>
+          </div>
+
+          <!-- Inverter Note (shown dynamically when 1250W Inverter is selected) -->
+          <div id="mwc-inverter-banner" class="hidden p-3 rounded-xl bg-white/10 border border-white/15 text-xs text-white/90 leading-relaxed">
+            ⚡ {t.inverterNote}
+          </div>
+        </div>
+
+        <!-- Contextual Special Hazard Banner (shown for Cup of Water superheating, Ground Beef defrost, Potato pierce, Popcorn steam) -->
+        <div id="mwc-hazard-banner" class="hidden rounded-2xl border p-4 space-y-1.5 bg-warning-bg dark:bg-amber-950/40 border-warning-border">
+          <div class="flex items-center gap-2">
+            <span id="mwc-hazard-icon" aria-hidden="true" class="text-base">⚠️</span>
+            <h3 id="mwc-hazard-title" class="text-xs sm:text-sm font-bold text-warning dark:text-amber-300"></h3>
+          </div>
+          <p id="mwc-hazard-body" class="text-xs text-ink dark:text-amber-100 leading-relaxed"></p>
+        </div>
+
+        <!-- Active Food Preset Guide Card (shown when a preset is selected) -->
+        <div id="mwc-preset-card" class="hidden rounded-2xl bg-canvas border border-hairline p-4 sm:p-5 space-y-3">
+          <div class="flex items-center justify-between gap-2 border-b border-hairline pb-2.5">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span id="mwc-preset-icon" class="text-xl shrink-0" aria-hidden="true">🍱</span>
+              <div class="min-w-0">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-signature-coral block">
+                  {t.presetGuideEyebrow}
+                </span>
+                <h3 id="mwc-preset-name" class="text-sm sm:text-base font-bold text-ink truncate"></h3>
+              </div>
+            </div>
+            <span id="mwc-preset-base-pill" class="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-surface-soft text-ink border border-hairline shrink-0"></span>
+          </div>
+          <div class="space-y-2 text-xs text-body leading-relaxed">
+            <div>
+              <strong class="text-ink">{t.presetStirLabel}:</strong>{' '}
+              <span id="mwc-preset-stir-tip"></span>
+            </div>
+            <div>
+              <strong class="text-ink">{t.presetSafetyLabel}:</strong>{' '}
+              <span id="mwc-preset-safety-note"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Model Size Comparison Mini-Card -->
+        <div class="rounded-2xl bg-canvas border border-hairline p-4 space-y-2">
+          <div class="flex items-center justify-between gap-2 text-xs">
+            <span class="font-bold text-ink" id="mwc-my-watt-heading">900W · {defaultMyObj.sizeType}</span>
+            <span class="font-mono text-[11px] text-muted" id="mwc-my-volume">{defaultMyObj.typicalVolumeCuFt}</span>
+          </div>
+          <p id="mwc-my-watt-desc" class="text-xs text-body leading-relaxed">
+            {defaultMyObj.description}
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+        <button
+          type="button"
+          id="mwc-reset-btn"
+          class="min-h-[44px] px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-canvas text-ink border border-hairline hover:border-border-strong transition-colors cursor-pointer"
+        >
+          {t.resetBtn}
+        </button>
+        <button
+          type="button"
+          id="mwc-copy-btn"
+          class="min-h-[44px] flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors cursor-pointer shadow-sm"
+        >
+          <span id="mwc-copy-label">{t.copyBtn}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full Conversion Quick Chart (600W – 1250W) -->
+  <div class="border-t border-hairline p-5 sm:p-6 space-y-4">
+    <div>
+      <h2 class="text-title-md font-semibold text-ink">{t.chartTitle}</h2>
+      <p class="text-xs text-muted mt-0.5">{t.chartSub}</p>
+    </div>
+
+    <div class="border border-hairline rounded-xl overflow-hidden bg-canvas">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs sm:text-sm">
+          <thead class="bg-surface-strong border-b border-hairline text-ink font-semibold">
+            <tr>
+              <th class="p-3">{t.chartHeaders[0]}</th>
+              <th class="p-3">{t.chartHeaders[1]}</th>
+              <th class="p-3">{t.chartHeaders[2]}</th>
+              <th class="p-3">{t.chartHeaders[3]}</th>
+              <th class="p-3">{t.chartHeaders[4]}</th>
+            </tr>
+          </thead>
+          <tbody id="mwc-chart-tbody" class="divide-y divide-hairline">
+            {initialChartRows.map((row, idx) => (
+              <tr
+                data-mwc-chart-row={row.watts}
+                class={`mwc-chart-row cursor-pointer transition-colors hover:bg-signature-cream/40 dark:hover:bg-white/5 ${
+                  row.watts === defaultMyWatts
+                    ? 'ring-2 ring-inset ring-signature-coral bg-signature-cream/50 dark:bg-white/10'
+                    : idx % 2 === 0
+                      ? 'bg-canvas'
+                      : 'bg-surface-soft'
+                }`}
+              >
+                <td class="p-3 font-bold text-ink whitespace-nowrap">
+                  <span>{row.label}</span>
+                  <span
+                    data-mwc-row-badge-yours={row.watts}
+                    class={`ml-1.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-signature-coral text-white ${row.watts === defaultMyWatts ? '' : 'hidden'}`}
+                  >
+                    {t.chartBadgeYours}
+                  </span>
+                  <span
+                    data-mwc-row-badge-pkg={row.watts}
+                    class={`ml-1.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-primary text-on-primary ${row.watts === defaultPkgWatts ? '' : 'hidden'}`}
+                  >
+                    {t.chartBadgePkg}
+                  </span>
+                </td>
+                <td class="p-3 text-body">
+                  <span class="font-medium text-ink">{row.sizeType}</span>
+                  <span class="block text-[11px] text-muted">{row.typicalVolumeCuFt}</span>
+                </td>
+                <td data-mwc-row-time={row.watts} class="p-3 font-mono font-bold text-ink text-sm sm:text-base whitespace-nowrap">
+                  {row.adjFormatted}
+                </td>
+                <td data-mwc-row-diff={row.watts} class="p-3 font-mono text-xs font-semibold text-body whitespace-nowrap">
+                  {row.diffFormatted}
+                </td>
+                <td data-mwc-row-stir={row.watts} class="p-3 font-mono text-body whitespace-nowrap">
+                  {row.stirFormatted}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Essential Microwave Safety Rules Strip -->
+  <div class="border-t border-hairline p-5 sm:p-6 bg-surface-soft/50 space-y-4">
+    <div>
+      <h2 class="text-title-md font-semibold text-ink">{t.safetyStripTitle}</h2>
+      <p class="text-xs text-muted mt-0.5">{t.safetyStripSub}</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {localizedSafetyRules.map((rule) => (
+        <article
+          class={`p-4 rounded-xl border space-y-2 ${
+            rule.severity === 'hazard'
+              ? 'bg-error-bg/60 dark:bg-red-950/25 border-error-border/70'
+              : rule.severity === 'warning'
+                ? 'bg-warning-bg/70 dark:bg-amber-950/25 border-warning-border/70'
+                : 'bg-canvas border-hairline'
+          }`}
+        >
+          <div class="flex items-center gap-2">
+            <span aria-hidden="true" class="text-lg">{rule.icon}</span>
+            <h3 class="text-xs sm:text-sm font-bold text-ink leading-snug">{rule.title}</h3>
+          </div>
+          <p class="text-xs text-body leading-relaxed">{rule.body}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  (function () {
+    const payloadEl = document.getElementById('mwc-payload');
+    if (!payloadEl) return;
+
+    let payload;
+    try {
+      payload = JSON.parse(payloadEl.textContent || '{}');
+    } catch (_) {
+      return;
+    }
+
+    const wattages = payload.wattages || [];
+    const powerLevels = payload.powerLevels || [];
+    const presets = payload.presets || [];
+    const ui = payload.ui || {};
+
+    const wattByVal = new Map(wattages.map((w) => [w.watts, w]));
+    const powerByPct = new Map(powerLevels.map((pl) => [pl.pct, pl]));
+    const presetById = new Map(presets.map((p) => [p.id, p]));
+
+    // DOM references
+    const pkgButtons = Array.from(document.querySelectorAll('.mwc-pkg-btn'));
+    const myButtons = Array.from(document.querySelectorAll('.mwc-my-btn'));
+    const powerButtons = Array.from(document.querySelectorAll('.mwc-power-btn'));
+    const presetButtons = Array.from(document.querySelectorAll('.mwc-preset-btn'));
+    const nudgeButtons = Array.from(document.querySelectorAll('.mwc-nudge-btn'));
+    const chartRows = Array.from(document.querySelectorAll('.mwc-chart-row'));
+
+    const swapBtn = document.getElementById('mwc-swap-btn');
+    const pkgSizeLabel = document.getElementById('mwc-pkg-size-label');
+    const mySizeLabel = document.getElementById('mwc-my-size-label');
+
+    const minInput = document.getElementById('mwc-min-input');
+    const secInput = document.getElementById('mwc-sec-input');
+
+    const powerBadge = document.getElementById('mwc-power-badge');
+    const powerDesc = document.getElementById('mwc-power-desc');
+
+    const formulaPill = document.getElementById('mwc-formula-pill');
+    const resultTime = document.getElementById('mwc-result-time');
+    const resultDiff = document.getElementById('mwc-result-diff');
+    const resultPowerLine = document.getElementById('mwc-result-power-line');
+    const stirCheckpoint = document.getElementById('mwc-stir-checkpoint');
+    const standingVal = document.getElementById('mwc-standing-val');
+    const usdaVal = document.getElementById('mwc-usda-val');
+    const inverterBanner = document.getElementById('mwc-inverter-banner');
+
+    const hazardBanner = document.getElementById('mwc-hazard-banner');
+    const hazardIcon = document.getElementById('mwc-hazard-icon');
+    const hazardTitle = document.getElementById('mwc-hazard-title');
+    const hazardBody = document.getElementById('mwc-hazard-body');
+
+    const presetCard = document.getElementById('mwc-preset-card');
+    const presetIcon = document.getElementById('mwc-preset-icon');
+    const presetName = document.getElementById('mwc-preset-name');
+    const presetBasePill = document.getElementById('mwc-preset-base-pill');
+    const presetStirTip = document.getElementById('mwc-preset-stir-tip');
+    const presetSafetyNote = document.getElementById('mwc-preset-safety-note');
+
+    const myWattHeading = document.getElementById('mwc-my-watt-heading');
+    const myVolume = document.getElementById('mwc-my-volume');
+    const myWattDesc = document.getElementById('mwc-my-watt-desc');
+
+    const resetBtn = document.getElementById('mwc-reset-btn');
+    const copyBtn = document.getElementById('mwc-copy-btn');
+    const copyLabel = document.getElementById('mwc-copy-label');
+
+    const state = {
+      pkgWatts: 1100,
+      myWatts: 900,
+      pkgTotalSeconds: 270, // 4:30
+      basePowerPct: 100,
+      selectedPowerPct: 100,
+      activePresetId: null
+    };
+
+    let lastCopyText = '';
+
+    function clamp(v, min, max) {
+      return Math.min(max, Math.max(min, v));
+    }
+
+    function formatMMSS(totalSec) {
+      const s = Math.max(1, Math.round(totalSec));
+      const m = Math.floor(s / 60);
+      const rem = s % 60;
+      return m + ':' + String(rem).padStart(2, '0');
+    }
+
+    function formatReadable(totalSec) {
+      const s = Math.max(0, Math.round(totalSec));
+      const m = Math.floor(s / 60);
+      const rem = s % 60;
+      const mU = ui.unitMinShort || 'm';
+      const sU = ui.unitSecShort || 's';
+      if (m === 0) return rem + sU;
+      return m + mU + ' ' + String(rem).padStart(2, '0') + sU;
+    }
+
+    function computeAdjusted(targetWatts) {
+      const num = state.pkgTotalSeconds * state.pkgWatts * state.basePowerPct;
+      const den = targetWatts * state.selectedPowerPct;
+      return Math.max(1, Math.round(num / den));
+    }
+
+    function syncTimeInputs() {
+      const clamped = clamp(Math.round(state.pkgTotalSeconds), 5, 3600);
+      state.pkgTotalSeconds = clamped;
+      const m = Math.floor(clamped / 60);
+      const s = clamped % 60;
+      if (minInput) minInput.value = String(m);
+      if (secInput) secInput.value = String(s);
+    }
+
+    function updateButtonStates() {
+      pkgButtons.forEach((btn) => {
+        const w = parseInt(btn.getAttribute('data-mwc-pkg-w') || '0', 10);
+        const active = w === state.pkgWatts;
+        btn.setAttribute('aria-checked', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('shadow-sm', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      myButtons.forEach((btn) => {
+        const w = parseInt(btn.getAttribute('data-mwc-my-w') || '0', 10);
+        const active = w === state.myWatts;
+        btn.setAttribute('aria-checked', active ? 'true' : 'false');
+        btn.classList.toggle('bg-signature-coral', active);
+        btn.classList.toggle('text-white', active);
+        btn.classList.toggle('border-signature-coral', active);
+        btn.classList.toggle('shadow-sm', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      powerButtons.forEach((btn) => {
+        const p = parseInt(btn.getAttribute('data-mwc-power') || '100', 10);
+        const active = p === state.selectedPowerPct;
+        btn.setAttribute('aria-checked', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('shadow-sm', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      presetButtons.forEach((btn) => {
+        const pid = btn.getAttribute('data-mwc-preset');
+        const active = pid === state.activePresetId;
+        btn.classList.toggle('border-signature-coral', active);
+        btn.classList.toggle('bg-signature-cream/50', active);
+        btn.classList.toggle('dark:bg-white/10', active);
+        btn.classList.toggle('border-hairline', !active);
+        btn.classList.toggle('bg-surface-soft', !active);
+      });
+    }
+
+    function render() {
+      updateButtonStates();
+
+      const pkgObj = wattByVal.get(state.pkgWatts) || wattages[5];
+      const myObj = wattByVal.get(state.myWatts) || wattages[3];
+      const powerObj = powerByPct.get(state.selectedPowerPct) || powerLevels[0];
+      const activePreset = state.activePresetId ? presetById.get(state.activePresetId) : null;
+
+      if (pkgSizeLabel && pkgObj) pkgSizeLabel.textContent = pkgObj.sizeType;
+      if (mySizeLabel && myObj) mySizeLabel.textContent = myObj.sizeType;
+      if (powerBadge && powerObj) powerBadge.textContent = powerObj.name;
+      if (powerDesc && powerObj) powerDesc.textContent = powerObj.useCase;
+
+      const adjSec = computeAdjusted(state.myWatts);
+      const diffSec = adjSec - state.pkgTotalSeconds;
+      const stirSec = Math.max(1, Math.round(adjSec / 2));
+
+      // Formula pill
+      if (formulaPill) {
+        const basePwrTag = state.basePowerPct < 100 ? ' (' + state.basePowerPct + '%)' : '';
+        formulaPill.textContent =
+          state.pkgWatts +
+          'W' +
+          basePwrTag +
+          ' · ' +
+          formatMMSS(state.pkgTotalSeconds) +
+          ' → ' +
+          state.myWatts +
+          'W (' +
+          state.selectedPowerPct +
+          '%)';
+      }
+
+      // Main time display
+      if (resultTime) resultTime.textContent = formatMMSS(adjSec);
+
+      // Difference badge
+      if (resultDiff) {
+        resultDiff.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ';
+        if (diffSec === 0) {
+          resultDiff.className += 'bg-white/10 text-white border-white/20';
+          resultDiff.textContent = ui.diffExact;
+        } else if (diffSec > 0) {
+          resultDiff.className += 'bg-signature-yellow/20 text-signature-yellow border-signature-yellow/30';
+          resultDiff.textContent = '+' + formatReadable(diffSec) + ' ' + ui.diffLonger;
+        } else {
+          resultDiff.className += 'bg-signature-mint/20 text-signature-mint border-signature-mint/30';
+          resultDiff.textContent = '-' + formatReadable(Math.abs(diffSec)) + ' ' + ui.diffShorter;
+        }
+      }
+
+      if (resultPowerLine && powerObj) {
+        resultPowerLine.textContent = ui.effectivePowerNote + ' ' + powerObj.name;
+      }
+
+      // Stir / Rotate checkpoint
+      let stirDisplayText = '';
+      if (activePreset && activePreset.specialAlert === 'popcorn') {
+        stirDisplayText = ui.noStirPopcorn;
+      } else {
+        stirDisplayText = ui.stirAtPrefix + ' ' + formatReadable(stirSec);
+      }
+      if (stirCheckpoint) stirCheckpoint.textContent = stirDisplayText;
+
+      // Standing time & USDA temp
+      const standingDisplay = activePreset ? activePreset.standingLabel : ui.defaultStandingVal;
+      const usdaDisplay = activePreset ? activePreset.usdaLabel : ui.defaultUsdaVal;
+      if (standingVal) standingVal.textContent = standingDisplay;
+      if (usdaVal) usdaVal.textContent = usdaDisplay;
+
+      // Inverter callout
+      if (inverterBanner) {
+        inverterBanner.classList.toggle('hidden', !(myObj && myObj.isInverter));
+      }
+
+      // Special Hazard Banner for high-risk presets
+      if (hazardBanner && hazardTitle && hazardBody && hazardIcon) {
+        if (activePreset && activePreset.specialAlert) {
+          hazardBanner.classList.remove('hidden');
+          if (activePreset.specialAlert === 'superheat') {
+            hazardIcon.textContent = '⚠️';
+            hazardTitle.textContent = ui.superheatBannerTitle;
+          } else if (activePreset.specialAlert === 'defrost') {
+            hazardIcon.textContent = '🥩';
+            hazardTitle.textContent = ui.defrostBannerTitle;
+          } else if (activePreset.specialAlert === 'pierce') {
+            hazardIcon.textContent = '🥔';
+            hazardTitle.textContent = ui.pierceBannerTitle;
+          } else {
+            hazardIcon.textContent = '🍿';
+            hazardTitle.textContent = ui.popcornBannerTitle;
+          }
+          hazardBody.textContent = activePreset.safetyNote;
+        } else {
+          hazardBanner.classList.add('hidden');
+        }
+      }
+
+      // Active preset card
+      if (presetCard) {
+        if (activePreset) {
+          presetCard.classList.remove('hidden');
+          if (presetIcon) presetIcon.textContent = activePreset.icon;
+          if (presetName) presetName.textContent = activePreset.name;
+          if (presetBasePill) {
+            presetBasePill.textContent =
+              activePreset.pkgWatts +
+              'W · ' +
+              formatMMSS(activePreset.pkgSeconds) +
+              (activePreset.basePowerPct < 100 ? ' (' + activePreset.basePowerPct + '%)' : '');
+          }
+          if (presetStirTip) presetStirTip.textContent = activePreset.stirTip;
+          if (presetSafetyNote) presetSafetyNote.textContent = activePreset.safetyNote;
+        } else {
+          presetCard.classList.add('hidden');
+        }
+      }
+
+      // Selected microwave size description
+      if (myObj) {
+        if (myWattHeading) myWattHeading.textContent = myObj.label + ' · ' + myObj.sizeType;
+        if (myVolume) myVolume.textContent = myObj.typicalVolumeCuFt;
+        if (myWattDesc) myWattDesc.textContent = myObj.description;
+      }
+
+      // Update Full Conversion Quick Chart rows
+      chartRows.forEach((row) => {
+        const wVal = parseInt(row.getAttribute('data-mwc-chart-row') || '0', 10);
+        const rowAdj = computeAdjusted(wVal);
+        const rowDiff = rowAdj - state.pkgTotalSeconds;
+        const rowStir = Math.max(1, Math.round(rowAdj / 2));
+
+        const isYours = wVal === state.myWatts;
+        const isPkg = wVal === state.pkgWatts;
+
+        row.classList.toggle('ring-2', isYours);
+        row.classList.toggle('ring-inset', isYours);
+        row.classList.toggle('ring-signature-coral', isYours);
+        row.classList.toggle('bg-signature-cream/50', isYours);
+        row.classList.toggle('dark:bg-white/10', isYours);
+
+        const yoursBadge = row.querySelector('[data-mwc-row-badge-yours]');
+        const pkgBadge = row.querySelector('[data-mwc-row-badge-pkg]');
+        const timeCell = row.querySelector('[data-mwc-row-time]');
+        const diffCell = row.querySelector('[data-mwc-row-diff]');
+        const stirCell = row.querySelector('[data-mwc-row-stir]');
+
+        if (yoursBadge) yoursBadge.classList.toggle('hidden', !isYours);
+        if (pkgBadge) pkgBadge.classList.toggle('hidden', !isPkg);
+        if (timeCell) timeCell.textContent = formatMMSS(rowAdj);
+        if (diffCell) {
+          if (rowDiff === 0) {
+            diffCell.textContent = '0' + (ui.unitSecShort || 's');
+          } else {
+            diffCell.textContent = (rowDiff > 0 ? '+' : '-') + formatReadable(Math.abs(rowDiff));
+          }
+        }
+        if (stirCell) {
+          stirCell.textContent =
+            activePreset && activePreset.specialAlert === 'popcorn' ? '—' : formatMMSS(rowStir);
+        }
+      });
+
+      // Plain-text clipboard summary (zero HTML tags)
+      const diffLine =
+        diffSec === 0
+          ? ui.diffExact
+          : (diffSec > 0 ? '+' : '-') +
+            formatReadable(Math.abs(diffSec)) +
+            ' ' +
+            (diffSec > 0 ? ui.diffLonger : ui.diffShorter);
+
+      lastCopyText = [
+        ui.copyTitle,
+        ui.copyPackageLine + ': ' + state.pkgWatts + 'W · ' + formatMMSS(state.pkgTotalSeconds),
+        ui.copyAdjustedLine +
+          ': ' +
+          state.myWatts +
+          'W (' +
+          (powerObj ? powerObj.name : state.selectedPowerPct + '%') +
+          ') → ' +
+          formatMMSS(adjSec) +
+          ' [' +
+          diffLine +
+          ']',
+        ui.copyStirLine + ': ' + stirDisplayText,
+        ui.copyStandingLine + ': ' + standingDisplay,
+        ui.copyUsdaLine + ': ' + usdaDisplay
+      ].join('\n');
+    }
+
+    // Event Listeners
+    pkgButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const w = parseInt(btn.getAttribute('data-mwc-pkg-w') || '1100', 10);
+        if (!isNaN(w)) {
+          state.pkgWatts = w;
+          state.activePresetId = null;
+          state.basePowerPct = 100;
+          render();
+        }
+      });
+    });
+
+    myButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const w = parseInt(btn.getAttribute('data-mwc-my-w') || '900', 10);
+        if (!isNaN(w)) {
+          state.myWatts = w;
+          render();
+        }
+      });
+    });
+
+    if (swapBtn) {
+      swapBtn.addEventListener('click', () => {
+        const tmp = state.pkgWatts;
+        state.pkgWatts = state.myWatts;
+        state.myWatts = tmp;
+        render();
+      });
+    }
+
+    function handleTimeManualInput() {
+      const m = clamp(parseInt((minInput && minInput.value) || '0', 10) || 0, 0, 60);
+      const s = clamp(parseInt((secInput && secInput.value) || '0', 10) || 0, 0, 59);
+      state.pkgTotalSeconds = Math.max(5, m * 60 + s);
+      state.activePresetId = null;
+      state.basePowerPct = 100;
+      render();
+    }
+
+    if (minInput) minInput.addEventListener('input', handleTimeManualInput);
+    if (secInput) secInput.addEventListener('input', handleTimeManualInput);
+
+    nudgeButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const delta = parseInt(btn.getAttribute('data-mwc-nudge') || '0', 10);
+        state.pkgTotalSeconds = clamp(state.pkgTotalSeconds + delta, 5, 3600);
+        state.activePresetId = null;
+        state.basePowerPct = 100;
+        syncTimeInputs();
+        render();
+      });
+    });
+
+    powerButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const p = parseInt(btn.getAttribute('data-mwc-power') || '100', 10);
+        if (!isNaN(p)) {
+          state.selectedPowerPct = p;
+          render();
+        }
+      });
+    });
+
+    presetButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const pid = btn.getAttribute('data-mwc-preset');
+        const preset = pid ? presetById.get(pid) : null;
+        if (!preset) return;
+        state.activePresetId = preset.id;
+        state.pkgWatts = preset.pkgWatts;
+        state.pkgTotalSeconds = preset.pkgSeconds;
+        state.basePowerPct = preset.basePowerPct || 100;
+        state.selectedPowerPct = preset.basePowerPct || 100;
+        syncTimeInputs();
+        render();
+      });
+    });
+
+    chartRows.forEach((row) => {
+      row.addEventListener('click', () => {
+        const w = parseInt(row.getAttribute('data-mwc-chart-row') || '0', 10);
+        if (!isNaN(w) && w > 0) {
+          state.myWatts = w;
+          render();
+        }
+      });
+    });
+
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        state.pkgWatts = 1100;
+        state.myWatts = 900;
+        state.pkgTotalSeconds = 270;
+        state.basePowerPct = 100;
+        state.selectedPowerPct = 100;
+        state.activePresetId = null;
+        syncTimeInputs();
+        render();
+      });
+    }
+
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        const showCopied = () => {
+          if (copyLabel) copyLabel.textContent = ui.copiedBtn || 'Copied ✓';
+          window.setTimeout(() => {
+            if (copyLabel) copyLabel.textContent = ui.copyBtn || 'Copy Adjusted Time';
+          }, 2200);
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(lastCopyText).then(showCopied).catch(() => {
+            showCopied();
+          });
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = lastCopyText;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'absolute';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          try {
+            document.execCommand('copy');
+          } catch (_) {
+            // ignore
+          }
+          document.body.removeChild(ta);
+          showCopied();
+        }
+      });
+    }
+
+    // Initial render
+    render();
+  })();
+</script>
