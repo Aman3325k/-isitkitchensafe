@@ -1,0 +1,1810 @@
+---
+import rawData from '../data/instant-pot-pressure-release-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+import { useTranslatedPath } from '../i18n/utils';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+const translatePath = useTranslatedPath(lang);
+
+const internalTempUrl = translatePath('/tools/internal-cooking-temp-chart/');
+const meatThawingUrl = translatePath('/tools/meat-thawing-calculator/');
+const kitchenFireUrl = translatePath('/tools/kitchen-fire-emergency-guide/');
+const methodologyUrl = translatePath('/methodology/');
+const allToolsUrl = translatePath('/tools/');
+
+type RiskLevel = 'low' | 'medium' | 'high' | 'extreme';
+type CategoryKey = 'foaming-grains' | 'meats-poultry' | 'soups-liquids' | 'veggies-eggs' | 'pot-in-pot';
+type ReleaseFilterKey = 'full-npr' | 'partial-npr' | 'quick-release';
+
+interface BannerRule {
+  icon: string;
+  title: string;
+  body: string;
+}
+
+interface SafetyBannerData {
+  badge: string;
+  headline: string;
+  subline: string;
+  rules: BannerRule[];
+}
+
+interface LocalizedPotSize {
+  id: string;
+  icon: string;
+  minLiquidCups: string;
+  minLiquidMl: string;
+  isStovetop: boolean;
+  shortName: string;
+  name: string;
+  liquidDisplay: string;
+  liquidNote: string;
+  stovetopOption: string;
+}
+
+interface LocalizedFood {
+  id: string;
+  icon: string;
+  category: CategoryKey;
+  maxFill: '1/2' | '2/3';
+  releaseFilter: ReleaseFilterKey;
+  foamRisk: RiskLevel;
+  burnRisk: RiskLevel;
+  hasUsdaTemp: boolean;
+  usdaTemp: string;
+  shortName: string;
+  name: string;
+  releaseBadge: string;
+  releaseSummary: string;
+  foamNote: string;
+  burnTip: string;
+  usdaNote: string;
+}
+
+const safetyBanner: SafetyBannerData =
+  (rawData.safetyBanner as Record<string, SafetyBannerData>)[lang] ||
+  rawData.safetyBanner.en;
+
+const localizedPotSizes: LocalizedPotSize[] = rawData.potSizes.map((item) => {
+  const tr = (item.i18n as Record<string, any>)[lang] || item.i18n.en;
+  return {
+    id: item.id,
+    icon: item.icon,
+    minLiquidCups: item.minLiquidCups,
+    minLiquidMl: item.minLiquidMl,
+    isStovetop: Boolean(item.isStovetop),
+    shortName: tr.shortName,
+    name: tr.name,
+    liquidDisplay: tr.liquidDisplay,
+    liquidNote: tr.liquidNote,
+    stovetopOption: tr.stovetopOption || ''
+  };
+});
+
+const localizedFoods: LocalizedFood[] = rawData.foods.map((item) => {
+  const tr = (item.i18n as Record<string, any>)[lang] || item.i18n.en;
+  return {
+    id: item.id,
+    icon: item.icon,
+    category: item.category as CategoryKey,
+    maxFill: item.maxFill as '1/2' | '2/3',
+    releaseFilter: item.releaseFilter as ReleaseFilterKey,
+    foamRisk: item.foamRisk as RiskLevel,
+    burnRisk: item.burnRisk as RiskLevel,
+    hasUsdaTemp: Boolean(item.hasUsdaTemp),
+    usdaTemp: item.usdaTemp || '',
+    shortName: tr.shortName,
+    name: tr.name,
+    releaseBadge: tr.releaseBadge,
+    releaseSummary: tr.releaseSummary,
+    foamNote: tr.foamNote,
+    burnTip: tr.burnTip,
+    usdaNote: tr.usdaNote || ''
+  };
+});
+
+const localizedFaqs: Array<{ question: string; answer: string }> =
+  (rawData.faqs as Record<string, Array<{ question: string; answer: string }>>)[lang] ||
+  rawData.faqs.en;
+
+interface UiDict {
+  ariaLabel: string;
+  toolBadge: string;
+  toolTitle: string;
+  toolSub: string;
+  copyBtn: string;
+  copiedBtn: string;
+  printBtn: string;
+  potStepLabel: string;
+  potStepHint: string;
+  minLiquidLabel: string;
+  inspectorBadge: string;
+  fillGaugeHeading: string;
+  fillHalfBadge: string;
+  fillTwoThirdsBadge: string;
+  fillHalfExplain: string;
+  fillTwoThirdsExplain: string;
+  gaugeEmpty: string;
+  gaugeHalf: string;
+  gaugeTwoThirds: string;
+  gaugeRim: string;
+  releaseHeading: string;
+  potLiquidHeading: string;
+  stovetopHeading: string;
+  foamRiskHeading: string;
+  burnTipHeading: string;
+  usdaHeading: string;
+  usdaDefaultNote: string;
+  usdaNotRequiredBadge: string;
+  riskLow: string;
+  riskMedium: string;
+  riskHigh: string;
+  riskExtreme: string;
+  foodStepLabel: string;
+  foodStepHint: string;
+  searchPlaceholder: string;
+  searchClearLabel: string;
+  catAll: string;
+  catFoaming: string;
+  catMeats: string;
+  catSoups: string;
+  catVeggies: string;
+  catPotInPot: string;
+  relFilterLabel: string;
+  relAll: string;
+  relFullNpr: string;
+  relPartialNpr: string;
+  relQuick: string;
+  showingCountPrefix: string;
+  showingCountSuffix: string;
+  noResultsTitle: string;
+  resetFiltersBtn: string;
+  cardFillHalf: string;
+  cardFillTwoThirds: string;
+  cardFoamLabel: string;
+  cardBurnLabel: string;
+  printTitle: string;
+  printSub: string;
+  printColFood: string;
+  printColFill: string;
+  printColRelease: string;
+  printColRisk: string;
+  printColTip: string;
+  copyHeader: string;
+  copyPotLine: string;
+  copyLiquidLine: string;
+  copyFoodLine: string;
+  copyFillLine: string;
+  copyReleaseLine: string;
+  copyFoamLine: string;
+  copyBurnLine: string;
+  copyUsdaLine: string;
+  copyRulesHeader: string;
+  relatedHeading: string;
+  relatedTempTag: string;
+  relatedTempTitle: string;
+  relatedTempDesc: string;
+  relatedThawTag: string;
+  relatedThawTitle: string;
+  relatedThawDesc: string;
+  relatedFireTag: string;
+  relatedFireTitle: string;
+  relatedFireDesc: string;
+  methodologyStripTitle: string;
+  methodologyStripPrefix: string;
+  methodologyLabel: string;
+  tempQuickLabel: string;
+  allToolsLabel: string;
+  faqTitle: string;
+}
+
+const UI: Record<SupportedLanguage, UiDict> = {
+  en: {
+    ariaLabel: 'Interactive Instant Pot & Pressure Cooker Fill-Line, Natural vs. Quick Release & Foaming Safety Checker',
+    toolBadge: '22 Pressure Cooker Foods · 4 Pot Sizes · UL 1026 & USDA Rules',
+    toolTitle: 'Instant Pot Fill-Line, Pressure Release & Burn-Prevention Checker',
+    toolSub: 'Choose your pressure cooker size and tap any food below to check its exact 1/2 MAX vs. 2/3 MAX fill limit, Natural vs. Quick Release method, valve-clog risk, minimum thin liquid, and BURN notice prevention.',
+    copyBtn: 'Copy Instant Pot Cheat Sheet',
+    copiedBtn: 'Cheat Sheet Copied ✓',
+    printBtn: 'Print Fridge Reference Chart',
+    potStepLabel: '1. Select Your Pressure Cooker Size (Updates Minimum Liquid)',
+    potStepHint: 'Minimum thin liquid (water, broth, wine) scales with pot diameter so the float pin seals cleanly without a BURN alert.',
+    minLiquidLabel: 'Min Liquid:',
+    inspectorBadge: 'LIVE INSTANT POT SAFETY INSPECTOR',
+    fillGaugeHeading: 'Maximum Safe Fill Line',
+    fillHalfBadge: '1/2 MAX — FOAMING / EXPANDING LIMIT',
+    fillTwoThirdsBadge: '2/3 MAX — STANDARD FILL LIMIT',
+    fillHalfExplain: 'Stop at or below the 1/2 MAX etched line inside the stainless pot (food + liquid combined).',
+    fillTwoThirdsExplain: 'Never exceed the 2/3 MAX etched line inside the stainless pot (food + liquid combined).',
+    gaugeEmpty: 'Base',
+    gaugeHalf: '1/2 MAX',
+    gaugeTwoThirds: '2/3 MAX',
+    gaugeRim: 'Rim',
+    releaseHeading: 'Exact Pressure Release Protocol',
+    potLiquidHeading: 'Minimum Thin Liquid for Selected Pot',
+    stovetopHeading: 'Stovetop Cold-Water Sink Release Option',
+    foamRiskHeading: 'Valve-Clog & Foam Risk',
+    burnTipHeading: 'BURN Notice Prevention Tip',
+    usdaHeading: 'USDA Internal Temp & Safety Check',
+    usdaDefaultNote: 'No raw meat internal temp check required — confirm the float pin has dropped completely before twisting the lid open away from your face.',
+    usdaNotRequiredBadge: 'STEAM & LID CHECK',
+    riskLow: 'LOW',
+    riskMedium: 'MEDIUM',
+    riskHigh: 'HIGH',
+    riskExtreme: 'EXTREME',
+    foodStepLabel: '2. Browse or Search 22 Everyday Pressure Cooker Foods',
+    foodStepHint: 'Click any food card to update the Safety Inspector above with its exact fill line, release timing, and burn-prevention rules.',
+    searchPlaceholder: 'Search beans, rice, frozen chicken, chili, oatmeal, cheesecake...',
+    searchClearLabel: 'Clear',
+    catAll: 'All (22)',
+    catFoaming: 'Foaming & Grains (1/2 MAX)',
+    catMeats: 'Meats & Poultry',
+    catSoups: 'Soups & Sauces',
+    catVeggies: 'Veggies & Eggs',
+    catPotInPot: 'Pot-in-Pot',
+    relFilterLabel: 'Release Method:',
+    relAll: 'All Releases',
+    relFullNpr: 'Full Natural Release',
+    relPartialNpr: '10-Min NPR',
+    relQuick: 'Quick Release',
+    showingCountPrefix: 'Showing',
+    showingCountSuffix: 'of 22 foods',
+    noResultsTitle: 'No pressure cooker foods match your current search or filters.',
+    resetFiltersBtn: 'Reset Search & Filters',
+    cardFillHalf: '1/2 MAX',
+    cardFillTwoThirds: '2/3 MAX',
+    cardFoamLabel: 'Foam:',
+    cardBurnLabel: 'Burn:',
+    printTitle: 'INSTANT POT & PRESSURE COOKER FRIDGE REFERENCE CHART (UL 1026 · USDA)',
+    printSub: 'Never cover the steam valve with a towel · Keep hands & face clear when venting · Wait until float pin drops.',
+    printColFood: 'Food',
+    printColFill: 'Max Fill',
+    printColRelease: 'Release Method',
+    printColRisk: 'Foam / Burn',
+    printColTip: 'Key Safety / Burn Rule',
+    copyHeader: 'IsItKitchenSafe — Instant Pot & Pressure Cooker Safety Cheat Sheet',
+    copyPotLine: 'POT SIZE:',
+    copyLiquidLine: 'MIN THIN LIQUID:',
+    copyFoodLine: 'SELECTED FOOD:',
+    copyFillLine: 'MAX FILL LINE:',
+    copyReleaseLine: 'RELEASE METHOD:',
+    copyFoamLine: 'VALVE-CLOG / FOAM RISK:',
+    copyBurnLine: 'BURN PREVENTION TIP:',
+    copyUsdaLine: 'USDA / SAFETY CHECK:',
+    copyRulesHeader: '3 CRITICAL PRESSURE COOKER SAFETY RULES:',
+    relatedHeading: 'Related Cooking Temperature, Thawing & Kitchen Safety Tools',
+    relatedTempTag: 'USDA Thermometer Guide',
+    relatedTempTitle: 'Internal Cooking Temp Chart →',
+    relatedTempDesc: 'Verify exact USDA safe internal temperatures for pressure-cooked chicken (165°F), pork roasts, brisket, and chili.',
+    relatedThawTag: 'Frozen Meat Safety',
+    relatedThawTitle: 'Meat Thawing Time Calculator →',
+    relatedThawDesc: 'Compare safe fridge and cold-water thawing times when cooking outside a pressure cooker.',
+    relatedFireTag: 'Scald & Emergency Response',
+    relatedFireTitle: 'Kitchen Fire & Burn Emergency Guide →',
+    relatedFireDesc: 'Immediate Red Cross cool-water burn first aid and NFPA emergency steps for steam scalds and kitchen fires.',
+    methodologyStripTitle: 'Grounded in Instant Pot / UL 1026 Pressure Manuals & USDA FSIS Standards',
+    methodologyStripPrefix: 'All fill-line limits (1/2 MAX vs. 2/3 MAX), towel-free steam release warnings, minimum liquid rules, and frozen-poultry cooking temperatures follow UL 1026 pressure cooker safety standards and USDA FSIS guidance. Read our',
+    methodologyLabel: 'Methodology',
+    tempQuickLabel: 'USDA Temp Chart',
+    allToolsLabel: 'All Kitchen Tools →',
+    faqTitle: 'Frequently Asked Questions: Instant Pot Fill Lines, Steam Release & Burn Notices'
+  },
+  es: {
+    ariaLabel: 'Verificador Interactivo de Línea de Llenado, Liberación de Presión y Espuma para Instant Pot y Olla a Presión',
+    toolBadge: '22 Alimentos · 4 Tamaños de Olla · Normas UL 1026 y USDA',
+    toolTitle: 'Verificador de Llenado, Liberación de Presión y Aviso BURN',
+    toolSub: 'Elige el tamaño de tu olla a presión y toca cualquier alimento para consultar el límite exacto 1/2 MAX vs. 2/3 MAX, Liberación Natural vs. Rápida, riesgo de obstrucción, líquido mínimo y cómo evitar el aviso BURN.',
+    copyBtn: 'Copiar Guía Rápida Instant Pot',
+    copiedBtn: 'Guía Copiada ✓',
+    printBtn: 'Imprimir Tabla para Nevera',
+    potStepLabel: '1. Selecciona el Tamaño de tu Olla (Actualiza el Líquido Mínimo)',
+    potStepHint: 'El líquido ligero mínimo (agua, caldo, vino) depende del ancho de la olla para generar vapor y evitar el aviso BURN.',
+    minLiquidLabel: 'Líquido Mín.:',
+    inspectorBadge: 'INSPECTOR DE SEGURIDAD EN VIVO',
+    fillGaugeHeading: 'Línea Máxima Segura de Llenado',
+    fillHalfBadge: '1/2 MAX — LÍMITE PARA ESPUMA / EXPANSIÓN',
+    fillTwoThirdsBadge: '2/3 MAX — LÍMITE ESTÁNDAR',
+    fillHalfExplain: 'No superes la marca grabada 1/2 MAX en la olla interior (alimentos + líquido juntos).',
+    fillTwoThirdsExplain: 'No superes la marca grabada 2/3 MAX en la olla interior (alimentos + líquido juntos).',
+    gaugeEmpty: 'Base',
+    gaugeHalf: '1/2 MAX',
+    gaugeTwoThirds: '2/3 MAX',
+    gaugeRim: 'Borde',
+    releaseHeading: 'Protocolo Exacto de Liberación de Presión',
+    potLiquidHeading: 'Líquido Ligero Mínimo para tu Olla',
+    stovetopHeading: 'Opción de Chorro de Agua Fría (Olla de Estufa)',
+    foamRiskHeading: 'Riesgo de Espuma y Válvula Tapada',
+    burnTipHeading: 'Cómo Evitar el Aviso BURN',
+    usdaHeading: 'Control de Temperatura USDA y Seguridad',
+    usdaDefaultNote: 'No requiere termómetro de carne cruda; verifica que el pin flotador haya bajado por completo antes de abrir la tapa lejos del rostro.',
+    usdaNotRequiredBadge: 'CONTROL DE VAPOR Y TAPA',
+    riskLow: 'BAJO',
+    riskMedium: 'MEDIO',
+    riskHigh: 'ALTO',
+    riskExtreme: 'EXTREMO',
+    foodStepLabel: '2. Explora o Busca entre 22 Alimentos de Olla a Presión',
+    foodStepHint: 'Pulsa cualquier alimento para actualizar al instante el Inspector de Seguridad arriba.',
+    searchPlaceholder: 'Buscar frijoles, arroz, pollo congelado, chili, avena, cheesecake...',
+    searchClearLabel: 'Limpiar',
+    catAll: 'Todos (22)',
+    catFoaming: 'Espuma y Granos (1/2 MAX)',
+    catMeats: 'Carnes y Aves',
+    catSoups: 'Sopas y Salsas',
+    catVeggies: 'Verduras y Huevos',
+    catPotInPot: 'Baño María (Pot-in-Pot)',
+    relFilterLabel: 'Liberación:',
+    relAll: 'Todas',
+    relFullNpr: 'Natural Total (NPR)',
+    relPartialNpr: '10 min NPR',
+    relQuick: 'Rápida (QR)',
+    showingCountPrefix: 'Mostrando',
+    showingCountSuffix: 'de 22 alimentos',
+    noResultsTitle: 'Ningún alimento coincide con tu búsqueda o filtros actuales.',
+    resetFiltersBtn: 'Restablecer Filtros',
+    cardFillHalf: '1/2 MAX',
+    cardFillTwoThirds: '2/3 MAX',
+    cardFoamLabel: 'Espuma:',
+    cardBurnLabel: 'BURN:',
+    printTitle: 'TABLA DE NEVERA PARA INSTANT POT Y OLLA A PRESIÓN (UL 1026 · USDA)',
+    printSub: 'Nunca pongas un trapo sobre la válvula · Mantén rostro y manos lejos del vapor · Espera a que baje el pin.',
+    printColFood: 'Alimento',
+    printColFill: 'Llenado Máx.',
+    printColRelease: 'Liberación',
+    printColRisk: 'Espuma / BURN',
+    printColTip: 'Regla Clave de Seguridad / BURN',
+    copyHeader: 'IsItKitchenSafe — Guía Rápida de Seguridad para Instant Pot y Olla a Presión',
+    copyPotLine: 'TAMAÑO DE OLLA:',
+    copyLiquidLine: 'LÍQUIDO MÍNIMO:',
+    copyFoodLine: 'ALIMENTO SELECCIONADO:',
+    copyFillLine: 'LÍNEA MÁXIMA:',
+    copyReleaseLine: 'LIBERACIÓN DE PRESIÓN:',
+    copyFoamLine: 'RIESGO DE ESPUMA / VÁLVULA:',
+    copyBurnLine: 'CONSEJO ANTI-BURN:',
+    copyUsdaLine: 'CONTROL USDA / SEGURIDAD:',
+    copyRulesHeader: '3 REGLAS CRÍTICAS DE SEGURIDAD EN OLLA A PRESIÓN:',
+    relatedHeading: 'Herramientas Relacionadas de Temperaturas, Descongelación y Seguridad',
+    relatedTempTag: 'Guía de Termómetro USDA',
+    relatedTempTitle: 'Tabla de Temperaturas Internas →',
+    relatedTempDesc: 'Comprueba la temperatura interna segura USDA para pollo (74 °C / 165 °F), cerdo, res y guisos.',
+    relatedThawTag: 'Descongelación Segura',
+    relatedThawTitle: 'Calculadora de Descongelación de Carne →',
+    relatedThawDesc: 'Calcula tiempos seguros en nevera y agua fría cuando cocines fuera de la olla a presión.',
+    relatedFireTag: 'Primeros Auxilios por Quemaduras',
+    relatedFireTitle: 'Guía de Emergencia de Fuego y Quemaduras →',
+    relatedFireDesc: 'Primeros auxilios inmediatos con agua fresca de la Cruz Roja para quemaduras por vapor y fuegos.',
+    methodologyStripTitle: 'Basado en Manuales Instant Pot / UL 1026 y Estándares USDA FSIS',
+    methodologyStripPrefix: 'Todas las líneas de llenado (1/2 MAX vs. 2/3 MAX), prohibiciones de paños sobre la válvula, líquidos mínimos y temperaturas de cocción siguen UL 1026 y USDA FSIS. Consulta nuestra',
+    methodologyLabel: 'Metodología',
+    tempQuickLabel: 'Tabla USDA',
+    allToolsLabel: 'Todas las Herramientas →',
+    faqTitle: 'Preguntas Frecuentes: Líneas de Llenado, Liberación de Vapor y Aviso BURN'
+  },
+  pt: {
+    ariaLabel: 'Verificador Interativo de Limite de Volume, Liberação de Pressão e Espuma para Instant Pot e Panela de Pressão',
+    toolBadge: '22 Alimentos · 4 Tamanhos de Panela · Normas UL 1026 e USDA',
+    toolTitle: 'Verificador de Limite, Liberação de Pressão e Erro BURN',
+    toolSub: 'Escolha o tamanho da sua panela de pressão e toque em qualquer alimento para ver o limite exato 1/2 MAX vs. 2/3 MAX, Liberação Natural vs. Rápida, risco de entupimento, líquido mínimo e prevenção de BURN.',
+    copyBtn: 'Copiar Cola de Instant Pot',
+    copiedBtn: 'Cola Copiada ✓',
+    printBtn: 'Imprimir Tabela p/ Geladeira',
+    potStepLabel: '1. Selecione o Tamanho da Panela (Atualiza o Líquido Mínimo)',
+    potStepHint: 'O mínimo de líquido fino (água, caldo, vinho) varia conforme o diâmetro da panela para vedar sem erro BURN.',
+    minLiquidLabel: 'Líquido Mín.:',
+    inspectorBadge: 'INSPETOR DE SEGURANÇA AO VIVO',
+    fillGaugeHeading: 'Linha Máxima Segura de Volume',
+    fillHalfBadge: '1/2 MAX — LIMITE P/ ESPUMA E EXPANSÃO',
+    fillTwoThirdsBadge: '2/3 MAX — LIMITE PADRÃO',
+    fillHalfExplain: 'Pare na linha gravada 1/2 MAX da cuba interna (alimentos + líquido somados).',
+    fillTwoThirdsExplain: 'Nunca ultrapasse a linha gravada 2/3 MAX da cuba interna (alimentos + líquido somados).',
+    gaugeEmpty: 'Fundo',
+    gaugeHalf: '1/2 MAX',
+    gaugeTwoThirds: '2/3 MAX',
+    gaugeRim: 'Borda',
+    releaseHeading: 'Protocolo Exato de Liberação de Pressão',
+    potLiquidHeading: 'Líquido Fino Mínimo para sua Panela',
+    stovetopHeading: 'Opção de Água Fria na Pia (Panela de Fogão)',
+    foamRiskHeading: 'Risco de Espuma e Entupimento',
+    burnTipHeading: 'Dica para Evitar Erro BURN',
+    usdaHeading: 'Checagem USDA de Temperatura e Segurança',
+    usdaDefaultNote: 'Não requer termômetro de carne crua — confirme que o pino flutuante baixou totalmente antes de girar a tampa longe do rosto.',
+    usdaNotRequiredBadge: 'CHECAGEM DE VAPOR E TAMPA',
+    riskLow: 'BAIXO',
+    riskMedium: 'MÉDIO',
+    riskHigh: 'ALTO',
+    riskExtreme: 'EXTREMO',
+    foodStepLabel: '2. Pesquise ou Escolha Entre 22 Alimentos na Pressão',
+    foodStepHint: 'Clique em qualquer cartão para atualizar instantaneamente o Inspetor de Segurança acima.',
+    searchPlaceholder: 'Buscar feijão, arroz, frango congelado, chili, aveia, cheesecake...',
+    searchClearLabel: 'Limpar',
+    catAll: 'Todos (22)',
+    catFoaming: 'Espuma e Grãos (1/2 MAX)',
+    catMeats: 'Carnes e Aves',
+    catSoups: 'Sopas e Molhos',
+    catVeggies: 'Legumes e Ovos',
+    catPotInPot: 'Banho-Maria (Pot-in-Pot)',
+    relFilterLabel: 'Liberação:',
+    relAll: 'Todas',
+    relFullNpr: 'Natural Completa',
+    relPartialNpr: '10 min NPR',
+    relQuick: 'Rápida (QR)',
+    showingCountPrefix: 'Exibindo',
+    showingCountSuffix: 'de 22 alimentos',
+    noResultsTitle: 'Nenhum alimento corresponde à busca ou filtros atuais.',
+    resetFiltersBtn: 'Limpar Busca e Filtros',
+    cardFillHalf: '1/2 MAX',
+    cardFillTwoThirds: '2/3 MAX',
+    cardFoamLabel: 'Espuma:',
+    cardBurnLabel: 'BURN:',
+    printTitle: 'TABELA DE GELADEIRA PARA INSTANT POT E PANELA DE PRESSÃO (UL 1026 · USDA)',
+    printSub: 'Nunca cubra a válvula com pano · Mantenha rosto e mãos longe do vapor · Aguarde o pino abaixar.',
+    printColFood: 'Alimento',
+    printColFill: 'Limite Máx.',
+    printColRelease: 'Liberação',
+    printColRisk: 'Espuma / BURN',
+    printColTip: 'Regra-Chave de Segurança / BURN',
+    copyHeader: 'IsItKitchenSafe — Guia Rápido de Segurança para Instant Pot e Panela de Pressão',
+    copyPotLine: 'TAMANHO DA PANELA:',
+    copyLiquidLine: 'LÍQUIDO MÍNIMO:',
+    copyFoodLine: 'ALIMENTO SELECIONADO:',
+    copyFillLine: 'LIMITE DE VOLUME:',
+    copyReleaseLine: 'LIBERAÇÃO DE PRESSÃO:',
+    copyFoamLine: 'RISCO DE ESPUMA / VÁLVULA:',
+    copyBurnLine: 'PREVENÇÃO DE BURN:',
+    copyUsdaLine: 'CHECAGEM USDA / SEGURANÇA:',
+    copyRulesHeader: '3 REGRAS CRÍTICAS DE PANELA DE PRESSÃO:',
+    relatedHeading: 'Ferramentas Relacionadas de Temperatura, Descongelamento e Segurança',
+    relatedTempTag: 'Guia de Termômetro USDA',
+    relatedTempTitle: 'Tabela de Temperaturas Internas →',
+    relatedTempDesc: 'Confira temperaturas internas seguras USDA para frango (74 °C / 165 °F), porco, carne bovina e chili.',
+    relatedThawTag: 'Descongelamento Seguro',
+    relatedThawTitle: 'Calculadora de Descongelamento de Carnes →',
+    relatedThawDesc: 'Compare tempos seguros na geladeira e água fria ao cozinhar fora da panela de pressão.',
+    relatedFireTag: 'Socorros em Queimaduras',
+    relatedFireTitle: 'Guia de Emergência de Fogo e Queimaduras →',
+    relatedFireDesc: 'Primeiros socorros imediatos com água fresca para queimaduras por vapor e emergências de cozinha.',
+    methodologyStripTitle: 'Baseado nos Manuais Instant Pot / UL 1026 e Padrões USDA FSIS',
+    methodologyStripPrefix: 'Todos os limites de volume (1/2 MAX vs. 2/3 MAX), proibição de pano na válvula, líquidos mínimos e temperaturas de aves congeladas seguem UL 1026 e USDA FSIS. Leia nossa',
+    methodologyLabel: 'Metodologia',
+    tempQuickLabel: 'Tabela USDA',
+    allToolsLabel: 'Todas as Ferramentas →',
+    faqTitle: 'Perguntas Frequentes: Limite de Volume, Liberação de Vapor e Erro BURN'
+  },
+  'zh-cn': {
+    ariaLabel: '交互式电压力锅与高压锅水位红线、自然泄压与快排及起泡防堵安全速查器',
+    toolBadge: '22 种高频食材 · 4 种锅体容量 · UL 1026 与 USDA 规范',
+    toolTitle: '电压力锅 / Instant Pot 水位红线、泄压方式与防糊底检查器',
+    toolSub: '先选锅体容量，再点击下方任意食材，即刻查清 1/2 MAX 与 2/3 MAX 上限、自然泄压 vs 手动快排、堵阀起泡风险、最低清液用量以及避免“BURN”报错的关键技巧。',
+    copyBtn: '复制电压力锅速查表',
+    copiedBtn: '速查表已复制 ✓',
+    printBtn: '打印冰箱参考图',
+    potStepLabel: '1. 选择你的高压锅容量（动态计算最低液体量）',
+    potStepHint: '内胆越宽，顺利顶起浮子并避免 BURN 糊底所需的稀薄清液（水、清高汤、料酒）就越多。',
+    minLiquidLabel: '最低清液：',
+    inspectorBadge: '实时电压力锅安全检测面板',
+    fillGaugeHeading: '最高安全水位红线',
+    fillHalfBadge: '1/2 MAX — 易起泡/膨胀食材红线',
+    fillTwoThirdsBadge: '2/3 MAX — 标准安全上限',
+    fillHalfExplain: '食材加汤水总高度严禁超过内胆刻度线 1/2 MAX。',
+    fillTwoThirdsExplain: '食材加汤水总高度严禁超过内胆刻度线 2/3 MAX。',
+    gaugeEmpty: '锅底',
+    gaugeHalf: '1/2 MAX',
+    gaugeTwoThirds: '2/3 MAX',
+    gaugeRim: '锅沿',
+    releaseHeading: '标准泄压操作方式',
+    potLiquidHeading: '当前锅型最低稀薄液体要求',
+    stovetopHeading: '明火高压锅冷水冲盖泄压提示',
+    foamRiskHeading: '起泡喷沫与堵阀风险',
+    burnTipHeading: '预防“BURN”糊底报警技巧',
+    usdaHeading: 'USDA 中心温度与安全核查',
+    usdaDefaultNote: '此类食材无需生肉测温——务必确认浮子完全落下后，将锅盖朝远离面部方向拧开。',
+    usdaNotRequiredBadge: '蒸汽与浮子安全核查',
+    riskLow: '低',
+    riskMedium: '中',
+    riskHigh: '高',
+    riskExtreme: '极高',
+    foodStepLabel: '2. 筛选或搜索 22 种常见高压锅食材',
+    foodStepHint: '点击任意食材卡片，上方实时更新水位标尺、泄压方式与防糊底要点。',
+    searchPlaceholder: '搜索 干豆、米饭、冷冻鸡胸、燕麦、番茄酱、芝士蛋糕...',
+    searchClearLabel: '清除',
+    catAll: '全部 (22)',
+    catFoaming: '起泡与谷物 (1/2 MAX)',
+    catMeats: '肉类与禽类',
+    catSoups: '汤羹与浓酱',
+    catVeggies: '蔬菜与鸡蛋',
+    catPotInPot: '隔水炖 (Pot-in-Pot)',
+    relFilterLabel: '泄压方式：',
+    relAll: '全部方式',
+    relFullNpr: '完全自然泄压',
+    relPartialNpr: '10 分钟自然泄压',
+    relQuick: '快速泄压 (QR)',
+    showingCountPrefix: '当前显示',
+    showingCountSuffix: '种（共 22 种）',
+    noResultsTitle: '没有符合当前搜索词或筛选条件的食材。',
+    resetFiltersBtn: '重置搜索与筛选',
+    cardFillHalf: '1/2 MAX',
+    cardFillTwoThirds: '2/3 MAX',
+    cardFoamLabel: '起泡:',
+    cardBurnLabel: '糊底:',
+    printTitle: '电压力锅 / INSTANT POT 冰箱速查表（UL 1026 · USDA）',
+    printSub: '严禁在排气阀上盖毛巾 · 泄压时面部与手远离蒸汽 · 浮子彻底落下前严禁强行开盖',
+    printColFood: '食材',
+    printColFill: '水位上限',
+    printColRelease: '泄压方式',
+    printColRisk: '起泡 / 糊底',
+    printColTip: '核心安全与防 BURN 要点',
+    copyHeader: 'IsItKitchenSafe — 电压力锅/Instant Pot 水位与泄压安全速查表',
+    copyPotLine: '所选锅型：',
+    copyLiquidLine: '最低清液：',
+    copyFoodLine: '当前食材：',
+    copyFillLine: '最高水位线：',
+    copyReleaseLine: '推荐泄压方式：',
+    copyFoamLine: '堵阀/起泡风险：',
+    copyBurnLine: '防糊底技巧：',
+    copyUsdaLine: 'USDA/安全核查：',
+    copyRulesHeader: '3 条电压力锅核心安全铁律：',
+    relatedHeading: '相关烹饪测温、解冻与厨房急救工具',
+    relatedTempTag: 'USDA 探针测温表',
+    relatedTempTitle: '肉类安全中心温度速查表 →',
+    relatedTempDesc: '核对高压锅烹煮鸡胸肉（74°C）、手撕猪肉、牛腩与肉酱的 USDA 权威中心温度。',
+    relatedThawTag: '冷冻肉类安全',
+    relatedThawTitle: '肉类安全解冻时间计算器 →',
+    relatedThawDesc: '当不用高压锅而改用慢炖锅或烤箱时，测算冷藏与冷水安全解冻时长。',
+    relatedFireTag: '蒸汽烫伤与火灾急救',
+    relatedFireTitle: '厨房起火与烫伤急救应急指南 →',
+    relatedFireDesc: '查看美国红十字会蒸汽/热油烫伤流动凉水急救法与 NFPA 厨房灭火规范。',
+    methodologyStripTitle: '依据 Instant Pot / UL 1026 安全手册与 USDA FSIS 标准编制',
+    methodologyStripPrefix: '所有 1/2 MAX 与 2/3 MAX 水位规范、排气阀禁盖毛巾警示、最低清液量及冷冻禽肉安全测温标准均严格参照 UL 1026 与 USDA FSIS 指南。查阅我们的',
+    methodologyLabel: '科学方法论',
+    tempQuickLabel: 'USDA 测温表',
+    allToolsLabel: '全部厨房工具 →',
+    faqTitle: '常见问题：电压力锅水位线、泄压方式与 BURN 报错解决'
+  },
+  ja: {
+    ariaLabel: '電気圧力鍋・Instant Pot 上限線・自然減圧vsクイックリリース・泡詰まり安全チェッカー',
+    toolBadge: '定番22食材 · 4サイズ対応 · UL 1026 & USDA準拠',
+    toolTitle: '電気圧力鍋・Instant Pot 上限線＆減圧方式チェッカー',
+    toolSub: '鍋のサイズと食材を選ぶだけで、「1/2 MAX vs 2/3 MAX」の上限線、自然減圧 vs クイックリリース、ノズル詰まりリスク、最低水分量、BURN（焦げ付き）防止策を一目で確認できます。',
+    copyBtn: 'チートシートをコピー',
+    copiedBtn: 'コピーしました ✓',
+    printBtn: '冷蔵庫用一覧表を印刷',
+    potStepLabel: '1. 圧力鍋のサイズを選択（最低水分量を自動更新）',
+    potStepHint: '内鍋が大きいほど浮きピンを押し上げ BURN を防ぐための最低水分量（水・出汁・ワイン）が増えます。',
+    minLiquidLabel: '最低水分:',
+    inspectorBadge: 'リアルタイム圧力鍋安全インスペクター',
+    fillGaugeHeading: '安全な上限線（MAX ライン）',
+    fillHalfBadge: '1/2 MAX — 泡立ち・膨張食材の上限',
+    fillTwoThirdsBadge: '2/3 MAX — 通常食材の上限',
+    fillHalfExplain: '食材＋液体を合わせて内鍋の「1/2 MAX」線以下を厳守してください。',
+    fillTwoThirdsExplain: '食材＋液体を合わせて内鍋の「2/3 MAX」線以下を守ってください。',
+    gaugeEmpty: '底面',
+    gaugeHalf: '1/2 MAX',
+    gaugeTwoThirds: '2/3 MAX',
+    gaugeRim: 'フチ',
+    releaseHeading: '推奨減圧プロトコル',
+    potLiquidHeading: '選択サイズに必要な最低水分量',
+    stovetopHeading: 'ガス・IH直火式の冷水急冷オプション',
+    foamRiskHeading: '泡立ち・ノズル詰まりリスク',
+    burnTipHeading: 'BURN（焦げ付き）防止のコツ',
+    usdaHeading: 'USDA 安全中心温度＆安全確認',
+    usdaDefaultNote: '生肉の温度測定は不要です。浮きピンが完全に下がったのを確認し、顔から離してフタを開けてください。',
+    usdaNotRequiredBadge: '蒸気・フタ安全確認',
+    riskLow: '低',
+    riskMedium: '中',
+    riskHigh: '高',
+    riskExtreme: '極高',
+    foodStepLabel: '2. 圧力鍋の定番 22 食材を検索・フィルター',
+    foodStepHint: '食材カードをクリックすると上の安全インスペクターが即座に更新されます。',
+    searchPlaceholder: '豆、白米、冷凍鶏むね肉、チリ、オートミール、チーズケーキ...',
+    searchClearLabel: 'クリア',
+    catAll: 'すべて (22)',
+    catFoaming: '泡立ち・穀物 (1/2 MAX)',
+    catMeats: '肉・鶏肉',
+    catSoups: 'スープ・ソース',
+    catVeggies: '野菜・卵',
+    catPotInPot: '湯煎 (Pot-in-Pot)',
+    relFilterLabel: '減圧方法:',
+    relAll: 'すべて',
+    relFullNpr: '完全自然減圧',
+    relPartialNpr: '10分自然減圧',
+    relQuick: 'クイックリリース',
+    showingCountPrefix: '表示中：',
+    showingCountSuffix: '/ 22 食材',
+    noResultsTitle: '検索条件・フィルターに一致する食材がありません。',
+    resetFiltersBtn: 'フィルターをリセット',
+    cardFillHalf: '1/2 MAX',
+    cardFillTwoThirds: '2/3 MAX',
+    cardFoamLabel: '泡:',
+    cardBurnLabel: '焦げ:',
+    printTitle: '電気圧力鍋・INSTANT POT 冷蔵庫リファレンス表（UL 1026・USDA準拠）',
+    printSub: '蒸気弁にタオル厳禁 · 排気時は顔と手を離す · 浮きピンが完全に下がるまで開蓋しない',
+    printColFood: '食材',
+    printColFill: '上限線',
+    printColRelease: '減圧方式',
+    printColRisk: '泡 / 焦げ',
+    printColTip: '安全・BURN防止のポイント',
+    copyHeader: 'IsItKitchenSafe — 電気圧力鍋・Instant Pot 安全チートシート',
+    copyPotLine: '鍋サイズ：',
+    copyLiquidLine: '最低水分量：',
+    copyFoodLine: '選択食材：',
+    copyFillLine: '安全上限線：',
+    copyReleaseLine: '推奨減圧方式：',
+    copyFoamLine: '泡立ち・詰まりリスク：',
+    copyBurnLine: 'BURN 防止対策：',
+    copyUsdaLine: 'USDA / 安全確認：',
+    copyRulesHeader: '圧力鍋の必須安全ルール 3か条：',
+    relatedHeading: '関連する調理温度・解凍・キッチン安全ツール',
+    relatedTempTag: 'USDA 温度計ガイド',
+    relatedTempTitle: '安全中心温度チャート →',
+    relatedTempDesc: '圧力調理した鶏肉（74°C）、豚塊肉、牛ブリスケット、ひき肉の安全温度を確認できます。',
+    relatedThawTag: '冷凍肉の安全管理',
+    relatedThawTitle: '肉の安全解凍時間計算機 →',
+    relatedThawDesc: '圧力鍋以外で調理する際の冷蔵庫・冷水での安全な解凍時間を計算します。',
+    relatedFireTag: '蒸気やけど応急手当',
+    relatedFireTitle: 'キッチン火災・やけど緊急ガイド →',
+    relatedFireDesc: '蒸気やけど時の米国赤十字・流水冷却応急処置と NFPA 防火手順を確認できます。',
+    methodologyStripTitle: 'Instant Pot / UL 1026 安全基準および USDA FSIS ガイドライン準拠',
+    methodologyStripPrefix: '上限線（1/2 MAX・2/3 MAX）、タオル被せ禁止規定、最低水分量、冷凍鶏肉の安全温度はすべて UL 1026 圧力鍋安全基準および USDA FSIS に準拠しています。詳細は',
+    methodologyLabel: '検証メソドロジー',
+    tempQuickLabel: 'USDA 温度表',
+    allToolsLabel: 'すべてのツール →',
+    faqTitle: 'よくある質問：上限線・蒸気リリース・BURN（焦げ付き）対策'
+  }
+};
+
+const t = UI[lang] || UI.en;
+
+const defaultPot = localizedPotSizes.find((p) => p.id === '6-qt') || localizedPotSizes[0];
+const defaultFood = localizedFoods[0];
+
+function getRiskLabel(risk: RiskLevel): string {
+  if (risk === 'extreme') return t.riskExtreme;
+  if (risk === 'high') return t.riskHigh;
+  if (risk === 'medium') return t.riskMedium;
+  return t.riskLow;
+}
+
+function getRiskPillDarkClass(risk: RiskLevel): string {
+  if (risk === 'extreme') return 'bg-red-500/25 text-red-100 border-red-400/55';
+  if (risk === 'high') return 'bg-amber-500/25 text-amber-100 border-amber-400/50';
+  if (risk === 'medium') return 'bg-yellow-500/20 text-yellow-100 border-yellow-400/40';
+  return 'bg-emerald-500/20 text-emerald-200 border-emerald-400/40';
+}
+
+function getRiskTextLightClass(risk: RiskLevel): string {
+  if (risk === 'extreme') return 'text-red-700 dark:text-red-300';
+  if (risk === 'high') return 'text-amber-800 dark:text-amber-300';
+  if (risk === 'medium') return 'text-yellow-800 dark:text-yellow-300';
+  return 'text-emerald-700 dark:text-emerald-300';
+}
+
+function getReleasePillDarkClass(rel: ReleaseFilterKey): string {
+  if (rel === 'full-npr') return 'bg-amber-500/25 text-amber-100 border-amber-400/50';
+  if (rel === 'partial-npr') return 'bg-sky-500/25 text-sky-100 border-sky-400/50';
+  return 'bg-emerald-500/25 text-emerald-100 border-emerald-400/50';
+}
+
+function getReleasePillCardClass(rel: ReleaseFilterKey): string {
+  if (rel === 'full-npr') return 'bg-amber-500/15 text-amber-900 dark:text-amber-200 border-amber-500/40';
+  if (rel === 'partial-npr') return 'bg-sky-500/15 text-sky-900 dark:text-sky-200 border-sky-500/40';
+  return 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-200 border-emerald-500/40';
+}
+
+const categoryDefs: Array<{ key: 'all' | CategoryKey; label: string }> = [
+  { key: 'all', label: t.catAll },
+  { key: 'foaming-grains', label: t.catFoaming },
+  { key: 'meats-poultry', label: t.catMeats },
+  { key: 'soups-liquids', label: t.catSoups },
+  { key: 'veggies-eggs', label: t.catVeggies },
+  { key: 'pot-in-pot', label: t.catPotInPot }
+];
+
+const releaseDefs: Array<{ key: 'all' | ReleaseFilterKey; label: string }> = [
+  { key: 'all', label: t.relAll },
+  { key: 'full-npr', label: t.relFullNpr },
+  { key: 'partial-npr', label: t.relPartialNpr },
+  { key: 'quick-release', label: t.relQuick }
+];
+
+const clientPayload = {
+  lang,
+  defaultPotId: defaultPot.id,
+  defaultFoodId: defaultFood.id,
+  potSizes: localizedPotSizes,
+  foods: localizedFoods,
+  safetyRules: safetyBanner.rules,
+  ui: {
+    copyBtn: t.copyBtn,
+    copiedBtn: t.copiedBtn,
+    fillHalfBadge: t.fillHalfBadge,
+    fillTwoThirdsBadge: t.fillTwoThirdsBadge,
+    fillHalfExplain: t.fillHalfExplain,
+    fillTwoThirdsExplain: t.fillTwoThirdsExplain,
+    usdaDefaultNote: t.usdaDefaultNote,
+    usdaNotRequiredBadge: t.usdaNotRequiredBadge,
+    riskLow: t.riskLow,
+    riskMedium: t.riskMedium,
+    riskHigh: t.riskHigh,
+    riskExtreme: t.riskExtreme,
+    showingCountPrefix: t.showingCountPrefix,
+    showingCountSuffix: t.showingCountSuffix,
+    copyHeader: t.copyHeader,
+    copyPotLine: t.copyPotLine,
+    copyLiquidLine: t.copyLiquidLine,
+    copyFoodLine: t.copyFoodLine,
+    copyFillLine: t.copyFillLine,
+    copyReleaseLine: t.copyReleaseLine,
+    copyFoamLine: t.copyFoamLine,
+    copyBurnLine: t.copyBurnLine,
+    copyUsdaLine: t.copyUsdaLine,
+    copyRulesHeader: t.copyRulesHeader
+  }
+};
+---
+
+<div id="instant-pot-checker-root" class="space-y-12">
+  <!-- Top 3-Rule Critical Pressure Cooker Safety Banner -->
+  <aside
+    class="p-5 sm:p-6 rounded-2xl bg-error-bg/80 dark:bg-red-950/45 border-2 border-error-border shadow-sm space-y-4"
+    role="alert"
+    aria-label={safetyBanner.badge}
+  >
+    <div class="space-y-1.5 max-w-4xl">
+      <span class="inline-block px-3 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-error-border text-white">
+        ⚠️ {safetyBanner.badge}
+      </span>
+      <h2 class="text-base sm:text-xl font-extrabold text-ink leading-snug">
+        {safetyBanner.headline}
+      </h2>
+      <p class="text-xs sm:text-[13.5px] font-medium text-body leading-relaxed">
+        {safetyBanner.subline}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      {safetyBanner.rules.map((rule) => (
+        <div class="p-3.5 rounded-xl bg-canvas border border-hairline shadow-xs space-y-1">
+          <div class="flex items-start gap-2">
+            <span aria-hidden="true" class="text-lg leading-none mt-0.5 shrink-0">{rule.icon}</span>
+            <h3 class="text-xs sm:text-[13px] font-extrabold text-ink leading-snug">{rule.title}</h3>
+          </div>
+          <p class="text-xs text-body leading-relaxed">{rule.body}</p>
+        </div>
+      ))}
+    </div>
+  </aside>
+
+  <!-- Main Interactive Instant Pot Fill-Line & Release Checker Card -->
+  <section
+    id="instant-pot-pressure-release-checker"
+    class="bg-canvas border border-hairline rounded-2xl shadow-sm overflow-hidden"
+    aria-label={t.ariaLabel}
+  >
+    <script type="application/json" id="ippr-payload" set:html={JSON.stringify(clientPayload)} />
+
+    <!-- Top Header + Pot Size Selector + High-Contrast Dark Safety Inspector -->
+    <div class="p-5 sm:p-6 border-b border-hairline bg-surface-soft/50 space-y-6">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div class="space-y-1 max-w-2xl">
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-signature-coral text-white">
+            🫕 {t.toolBadge}
+          </span>
+          <h2 class="text-title-md font-bold text-ink">{t.toolTitle}</h2>
+          <p class="text-xs sm:text-[13px] text-muted leading-relaxed">{t.toolSub}</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 print:hidden">
+          <button
+            type="button"
+            id="ippr-copy-btn"
+            class="min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors cursor-pointer shadow-sm"
+          >
+            <span id="ippr-copy-label">📋 {t.copyBtn}</span>
+          </button>
+          <button
+            type="button"
+            id="ippr-print-btn"
+            class="min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-semibold bg-canvas text-ink border border-hairline hover:border-signature-coral transition-colors cursor-pointer"
+          >
+            🖨️ {t.printBtn}
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 1: 4 Pot Size Presets -->
+      <div class="space-y-2.5 print:hidden">
+        <div class="space-y-0.5">
+          <h3 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-ink">
+            {t.potStepLabel}
+          </h3>
+          <p class="text-xs text-muted">{t.potStepHint}</p>
+        </div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5" role="group" aria-label={t.potStepLabel}>
+          {localizedPotSizes.map((pot) => {
+            const isDefault = pot.id === defaultPot.id;
+            return (
+              <button
+                type="button"
+                data-ippr-pot={pot.id}
+                aria-pressed={isDefault ? 'true' : 'false'}
+                class={`ippr-pot-btn text-left p-3.5 rounded-xl border transition-all cursor-pointer flex items-start gap-2.5 ${
+                  isDefault
+                    ? 'bg-primary text-on-primary border-primary ring-2 ring-signature-coral/60 shadow-sm'
+                    : 'bg-canvas text-ink border-hairline hover:border-signature-coral'
+                }`}
+              >
+                <span aria-hidden="true" class="text-xl leading-none mt-0.5 shrink-0">{pot.icon}</span>
+                <span class="min-w-0 block">
+                  <span class="block text-xs sm:text-[13px] font-extrabold leading-snug">{pot.shortName}</span>
+                  <span
+                    data-ippr-pot-sub
+                    class={`block text-[11px] font-semibold mt-0.5 ${
+                      isDefault ? 'text-white/85' : 'text-muted'
+                    }`}
+                  >
+                    {t.minLiquidLabel} {pot.liquidDisplay}
+                  </span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <!-- High-Contrast Dark Instant Pot Safety Inspector -->
+      <div
+        id="ippr-inspector"
+        aria-live="polite"
+        class={`w-full rounded-2xl bg-surface-dark text-on-dark p-5 sm:p-6 space-y-5 shadow-sm border-l-4 ${
+          defaultFood.maxFill === '1/2' ? 'border-amber-400' : 'border-emerald-400'
+        }`}
+      >
+        <!-- Inspector Header -->
+        <div class="space-y-2">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10.5px] font-extrabold uppercase tracking-wider bg-white/12 text-signature-peach border border-white/15">
+                🔍 {t.inspectorBadge}
+              </span>
+              <span
+                id="ippr-fill-pill"
+                class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider ${
+                  defaultFood.maxFill === '1/2'
+                    ? 'bg-amber-500 text-slate-950'
+                    : 'bg-emerald-500 text-slate-950'
+                }`}
+              >
+                {defaultFood.maxFill === '1/2' ? t.fillHalfBadge : t.fillTwoThirdsBadge}
+              </span>
+            </div>
+            <span
+              id="ippr-release-pill"
+              class={`inline-flex items-center px-2.5 py-0.5 rounded-md border text-[11px] font-extrabold uppercase tracking-wider ${getReleasePillDarkClass(defaultFood.releaseFilter)}`}
+            >
+              ⏱️ {defaultFood.releaseBadge}
+            </span>
+          </div>
+
+          <h3 id="ippr-food-title" class="text-xl sm:text-2xl font-extrabold tracking-tight text-white leading-snug">
+            {defaultFood.icon} {defaultFood.name}
+          </h3>
+        </div>
+
+        <!-- Max Fill Visual Gauge + Minimum Liquid for Selected Pot -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <!-- Visual Max Fill Line Gauge -->
+          <div class="lg:col-span-6 p-4 rounded-xl bg-white/7 border border-white/14 space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-[11px] font-extrabold uppercase tracking-wider text-signature-peach">
+                📏 {t.fillGaugeHeading}
+              </span>
+              <span
+                id="ippr-gauge-value"
+                class={`text-sm font-extrabold tracking-tight ${
+                  defaultFood.maxFill === '1/2' ? 'text-amber-300' : 'text-emerald-300'
+                }`}
+              >
+                {defaultFood.maxFill} MAX
+              </span>
+            </div>
+
+            <!-- Horizontal Inner-Pot Fill Bar -->
+            <div class="space-y-1.5">
+              <div class="relative h-5 w-full rounded-full bg-white/12 overflow-hidden border border-white/15">
+                <div
+                  id="ippr-gauge-bar"
+                  class={`h-full rounded-full transition-all duration-300 ${
+                    defaultFood.maxFill === '1/2'
+                      ? 'bg-gradient-to-r from-amber-500 to-error-border'
+                      : 'bg-gradient-to-r from-emerald-500 to-teal-400'
+                  }`}
+                  style={defaultFood.maxFill === '1/2' ? 'width: 50%;' : 'width: 67%;'}
+                />
+                <!-- 1/2 MAX tick -->
+                <div class="absolute top-0 bottom-0 left-1/2 w-0.5 bg-white/70" aria-hidden="true" />
+                <!-- 2/3 MAX tick -->
+                <div class="absolute top-0 bottom-0 left-[66.66%] w-0.5 bg-white/70" aria-hidden="true" />
+              </div>
+              <div class="relative flex justify-between text-[10px] font-bold text-white/75">
+                <span>{t.gaugeEmpty}</span>
+                <span class="text-amber-200">{t.gaugeHalf}</span>
+                <span class="text-emerald-200">{t.gaugeTwoThirds}</span>
+                <span class="text-red-300">{t.gaugeRim}</span>
+              </div>
+            </div>
+
+            <p id="ippr-fill-explain" class="text-xs text-white/90 leading-relaxed">
+              {defaultFood.maxFill === '1/2' ? t.fillHalfExplain : t.fillTwoThirdsExplain}
+            </p>
+          </div>
+
+          <!-- Dynamic Minimum Thin Liquid for Selected Pot -->
+          <div class="lg:col-span-6 p-4 rounded-xl bg-sky-500/12 border border-sky-400/40 space-y-2">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-[11px] font-extrabold uppercase tracking-wider text-sky-200">
+                💧 {t.potLiquidHeading}
+              </span>
+              <span
+                id="ippr-pot-liquid-badge"
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-sky-400 text-slate-950"
+              >
+                {defaultPot.liquidDisplay}
+              </span>
+            </div>
+            <p id="ippr-pot-name" class="text-xs font-extrabold text-white">
+              {defaultPot.icon} {defaultPot.name}
+            </p>
+            <p id="ippr-pot-liquid-note" class="text-xs text-white/90 leading-relaxed">
+              {defaultPot.liquidNote}
+            </p>
+          </div>
+        </div>
+
+        <!-- Stovetop Cold-Water Sink Release Callout (Visible only when Stovetop is selected) -->
+        <div
+          id="ippr-stovetop-box"
+          class={`p-4 rounded-xl bg-teal-500/15 border border-teal-400/45 space-y-1 ${defaultPot.isStovetop ? '' : 'hidden'}`}
+        >
+          <span class="block text-[11px] font-extrabold uppercase tracking-wider text-teal-200">
+            🚰 {t.stovetopHeading}
+          </span>
+          <p id="ippr-stovetop-text" class="text-xs text-white/95 leading-relaxed">
+            {defaultPot.stovetopOption}
+          </p>
+        </div>
+
+        <!-- Exact Pressure Release Explanation -->
+        <div class="p-4 rounded-xl bg-white/8 border border-white/15 space-y-1.5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-signature-mint">
+              💨 {t.releaseHeading}
+            </span>
+            <span id="ippr-release-inline" class="text-xs font-extrabold text-white">
+              {defaultFood.releaseBadge}
+            </span>
+          </div>
+          <p id="ippr-release-summary" class="text-xs sm:text-[13.5px] text-white/95 leading-relaxed">
+            {defaultFood.releaseSummary}
+          </p>
+        </div>
+
+        <!-- 3 Diagnostic Safety Cards: Foam Risk / Burn Prevention / USDA Check -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
+          <!-- Foam & Valve-Clog Risk -->
+          <div class="p-4 rounded-xl bg-white/6 border border-white/14 space-y-2">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-[11px] font-extrabold uppercase tracking-wider text-white/90">
+                🫧 {t.foamRiskHeading}
+              </span>
+              <span
+                id="ippr-foam-pill"
+                class={`inline-flex items-center px-2 py-0.5 rounded-md border text-[10px] font-extrabold uppercase tracking-wider ${getRiskPillDarkClass(defaultFood.foamRisk)}`}
+              >
+                {getRiskLabel(defaultFood.foamRisk)}
+              </span>
+            </div>
+            <p id="ippr-foam-note" class="text-xs text-white/90 leading-relaxed">
+              {defaultFood.foamNote}
+            </p>
+          </div>
+
+          <!-- Burn Notice Prevention -->
+          <div class="p-4 rounded-xl bg-white/6 border border-white/14 space-y-2">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-[11px] font-extrabold uppercase tracking-wider text-white/90">
+                🔥 {t.burnTipHeading}
+              </span>
+              <span
+                id="ippr-burn-pill"
+                class={`inline-flex items-center px-2 py-0.5 rounded-md border text-[10px] font-extrabold uppercase tracking-wider ${getRiskPillDarkClass(defaultFood.burnRisk)}`}
+              >
+                {getRiskLabel(defaultFood.burnRisk)}
+              </span>
+            </div>
+            <p id="ippr-burn-tip" class="text-xs text-white/90 leading-relaxed">
+              {defaultFood.burnTip}
+            </p>
+          </div>
+
+          <!-- USDA Internal Temp / Food Safety Check -->
+          <div
+            id="ippr-usda-card"
+            class={`p-4 rounded-xl border space-y-2 ${
+              defaultFood.hasUsdaTemp
+                ? 'bg-emerald-500/14 border-emerald-400/45'
+                : 'bg-white/6 border-white/14'
+            }`}
+          >
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-200">
+                🌡️ {t.usdaHeading}
+              </span>
+              <span
+                id="ippr-usda-pill"
+                class={`inline-flex items-center px-2 py-0.5 rounded-md border text-[10px] font-extrabold uppercase tracking-wider ${
+                  defaultFood.hasUsdaTemp
+                    ? 'bg-emerald-500 text-slate-950 border-emerald-400'
+                    : 'bg-white/10 text-white/85 border-white/20'
+                }`}
+              >
+                {defaultFood.hasUsdaTemp ? defaultFood.usdaTemp : t.usdaNotRequiredBadge}
+              </span>
+            </div>
+            <p id="ippr-usda-note" class="text-xs text-white/90 leading-relaxed">
+              {defaultFood.usdaNote ? defaultFood.usdaNote : t.usdaDefaultNote}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Search + Category Filter Pills + Release Filter Pills + 22 Food Cards -->
+    <div class="p-5 sm:p-6 space-y-5 print:hidden">
+      <div class="space-y-1">
+        <h3 class="text-base sm:text-lg font-bold text-ink">{t.foodStepLabel}</h3>
+        <p class="text-xs sm:text-[13px] text-muted leading-relaxed">{t.foodStepHint}</p>
+      </div>
+
+      <!-- Search Bar & Filter Controls -->
+      <div class="space-y-3.5">
+        <div class="flex flex-col sm:flex-row gap-2.5">
+          <div class="relative flex-1">
+            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none" aria-hidden="true">
+              🔎
+            </span>
+            <input
+              type="search"
+              id="ippr-search"
+              placeholder={t.searchPlaceholder}
+              aria-label={t.searchPlaceholder}
+              class="w-full min-h-[42px] pl-10 pr-20 py-2 rounded-xl bg-surface-soft border border-hairline text-sm text-ink placeholder:text-muted focus:outline-none focus:border-signature-coral focus:ring-2 focus:ring-signature-coral/30"
+            />
+            <button
+              type="button"
+              id="ippr-search-clear"
+              class="hidden absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-canvas border border-hairline text-muted hover:text-ink cursor-pointer"
+            >
+              {t.searchClearLabel}
+            </button>
+          </div>
+        </div>
+
+        <!-- Category Filter Pills -->
+        <div class="flex flex-wrap gap-2" role="group" aria-label={t.foodStepLabel}>
+          {categoryDefs.map((cat, idx) => (
+            <button
+              type="button"
+              data-ippr-cat={cat.key}
+              aria-pressed={idx === 0 ? 'true' : 'false'}
+              class={`ippr-cat-btn px-3 py-1.5 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
+                idx === 0
+                  ? 'bg-primary text-on-primary border-primary'
+                  : 'bg-surface-soft text-ink border-hairline hover:border-signature-coral'
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+
+        <!-- Release Method Filter Pills + Live Count -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+          <div class="flex flex-wrap items-center gap-2" role="group" aria-label={t.relFilterLabel}>
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-muted">
+              {t.relFilterLabel}
+            </span>
+            {releaseDefs.map((rel, idx) => (
+              <button
+                type="button"
+                data-ippr-rel={rel.key}
+                aria-pressed={idx === 0 ? 'true' : 'false'}
+                class={`ippr-rel-btn px-2.5 py-1 rounded-lg text-[11.5px] font-bold border transition-colors cursor-pointer ${
+                  idx === 0
+                    ? 'bg-signature-coral text-white border-signature-coral'
+                    : 'bg-canvas text-ink border-hairline hover:border-signature-coral'
+                }`}
+              >
+                {rel.label}
+              </button>
+            ))}
+          </div>
+
+          <span id="ippr-count" class="text-xs font-semibold text-muted">
+            {t.showingCountPrefix} {localizedFoods.length} {t.showingCountSuffix}
+          </span>
+        </div>
+      </div>
+
+      <!-- Empty Search State -->
+      <div
+        id="ippr-empty"
+        class="hidden p-8 rounded-2xl bg-surface-soft border border-hairline text-center space-y-3"
+      >
+        <p class="text-sm font-semibold text-ink">{t.noResultsTitle}</p>
+        <button
+          type="button"
+          id="ippr-reset-btn"
+          class="px-4 py-2 rounded-xl text-xs font-bold bg-primary text-on-primary hover:bg-primary-active transition-colors cursor-pointer"
+        >
+          {t.resetFiltersBtn}
+        </button>
+      </div>
+
+      <!-- 22 Clickable Food Cards Grid -->
+      <div id="ippr-food-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {localizedFoods.map((food, idx) => {
+          const isSelected = idx === 0;
+          return (
+            <button
+              type="button"
+              data-ippr-food={food.id}
+              data-ippr-food-cat={food.category}
+              data-ippr-food-rel={food.releaseFilter}
+              aria-pressed={isSelected ? 'true' : 'false'}
+              class={`ippr-food-card text-left w-full p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-3 ${
+                isSelected
+                  ? 'bg-canvas border-signature-coral ring-2 ring-signature-coral shadow-sm'
+                  : 'bg-surface-soft/65 border-hairline hover:border-signature-coral'
+              }`}
+            >
+              <div class="space-y-2">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="flex items-start gap-2 min-w-0">
+                    <span aria-hidden="true" class="text-xl leading-none mt-0.5 shrink-0">{food.icon}</span>
+                    <h4 class="text-sm font-extrabold text-ink leading-snug">{food.shortName}</h4>
+                  </div>
+                  <span
+                    class={`shrink-0 px-2 py-0.5 rounded-md text-[10.5px] font-extrabold uppercase tracking-wider border ${
+                      food.maxFill === '1/2'
+                        ? 'bg-amber-500/20 text-amber-900 dark:text-amber-200 border-amber-500/45'
+                        : 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-200 border-emerald-500/40'
+                    }`}
+                  >
+                    {food.maxFill === '1/2' ? t.cardFillHalf : t.cardFillTwoThirds}
+                  </span>
+                </div>
+
+                <span
+                  class={`inline-block px-2 py-0.5 rounded-md text-[10.5px] font-bold border ${getReleasePillCardClass(food.releaseFilter)}`}
+                >
+                  ⏱️ {food.releaseBadge}
+                </span>
+              </div>
+
+              <div class="pt-2 border-t border-hairline/70 flex flex-wrap items-center justify-between gap-2 text-[11px] font-bold">
+                <span class={getRiskTextLightClass(food.foamRisk)}>
+                  🫧 {t.cardFoamLabel} {getRiskLabel(food.foamRisk)}
+                </span>
+                <span class={getRiskTextLightClass(food.burnRisk)}>
+                  🔥 {t.cardBurnLabel} {getRiskLabel(food.burnRisk)}
+                </span>
+                {food.hasUsdaTemp && (
+                  <span class="text-sky-700 dark:text-sky-300">
+                    🌡️ {food.usdaTemp.split(' ')[0]}
+                  </span>
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+
+    <!-- Print-Only Complete 22-Food Fridge Reference Chart -->
+    <div class="hidden print:block p-5 border-t border-hairline space-y-4">
+      <div class="text-center border-b border-hairline pb-2">
+        <h3 class="text-sm font-extrabold uppercase tracking-wider text-ink">{t.printTitle}</h3>
+        <p class="text-[11px] text-muted">{t.printSub}</p>
+      </div>
+
+      <div class="grid grid-cols-4 gap-2 text-[10.5px] border-b border-hairline pb-2">
+        {localizedPotSizes.map((pot) => (
+          <div class="p-2 rounded border border-hairline">
+            <strong class="block text-ink">{pot.shortName}</strong>
+            <span class="text-body">{t.minLiquidLabel} {pot.liquidDisplay}</span>
+          </div>
+        ))}
+      </div>
+
+      <table class="w-full text-left border-collapse text-[10.5px]">
+        <thead>
+          <tr class="border-b border-hairline">
+            <th class="py-1.5 pr-2 font-extrabold text-ink">{t.printColFood}</th>
+            <th class="py-1.5 px-2 font-extrabold text-ink">{t.printColFill}</th>
+            <th class="py-1.5 px-2 font-extrabold text-ink">{t.printColRelease}</th>
+            <th class="py-1.5 px-2 font-extrabold text-ink">{t.printColRisk}</th>
+            <th class="py-1.5 pl-2 font-extrabold text-ink">{t.printColTip}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {localizedFoods.map((food) => (
+            <tr class="border-b border-hairline/60 break-inside-avoid">
+              <td class="py-1.5 pr-2 font-bold text-ink">{food.shortName}</td>
+              <td class="py-1.5 px-2 font-extrabold text-ink">{food.maxFill} MAX</td>
+              <td class="py-1.5 px-2 text-ink">{food.releaseBadge}</td>
+              <td class="py-1.5 px-2 text-ink">
+                {getRiskLabel(food.foamRisk)} / {getRiskLabel(food.burnRisk)}
+              </td>
+              <td class="py-1.5 pl-2 text-body">{food.burnTip}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Related Companion Tools -->
+  <section class="space-y-4 print:hidden">
+    <h2 class="text-title-md font-semibold text-ink">{t.relatedHeading}</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <a
+        href={internalTempUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedTempTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedTempTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedTempDesc}</p>
+      </a>
+
+      <a
+        href={meatThawingUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedThawTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedThawTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedThawDesc}</p>
+      </a>
+
+      <a
+        href={kitchenFireUrl}
+        class="p-6 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedFireTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedFireTitle}
+        </h3>
+        <p class="text-[13.5px] text-body leading-relaxed">{t.relatedFireDesc}</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- Methodology & Hub Strip -->
+  <section class="p-6 rounded-2xl bg-surface-soft border border-hairline print:hidden">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-title-sm font-semibold text-ink mb-1">{t.methodologyStripTitle}</h2>
+        <p class="text-[13px] text-muted">
+          {t.methodologyStripPrefix}{' '}
+          <a href={methodologyUrl} class="text-link underline hover:text-link-active">{t.methodologyLabel}</a>.
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a
+          href={internalTempUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
+        >
+          {t.tempQuickLabel}
+        </a>
+        <a
+          href={methodologyUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
+        >
+          {t.methodologyLabel}
+        </a>
+        <a
+          href={allToolsUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors"
+        >
+          {t.allToolsLabel}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Visible FAQ Accordion (Matches JSON-LD 1:1) -->
+  <section class="print:hidden">
+    <h2 class="text-title-lg font-medium text-ink tracking-tight mb-6">
+      {t.faqTitle}
+    </h2>
+    <div class="space-y-4">
+      {localizedFaqs.map((faq) => (
+        <details class="group p-5 bg-surface-soft border border-hairline rounded-xl" open>
+          <summary class="text-title-sm font-semibold text-ink cursor-pointer list-none flex items-center justify-between gap-3">
+            <span>{faq.question}</span>
+            <span class="text-muted text-sm transition-transform group-open:rotate-180 shrink-0" aria-hidden="true">&#9662;</span>
+          </summary>
+          <p class="text-[14px] text-body leading-relaxed mt-3 pt-3 border-t border-hairline/70">
+            {faq.answer}
+          </p>
+        </details>
+      ))}
+    </div>
+  </section>
+</div>
+
+<script is:inline>
+  (function () {
+    var payloadEl = document.getElementById('ippr-payload');
+    if (!payloadEl) return;
+
+    var payload;
+    try {
+      payload = JSON.parse(payloadEl.textContent || '{}');
+    } catch (_) {
+      return;
+    }
+
+    var potSizes = Array.isArray(payload.potSizes) ? payload.potSizes : [];
+    var foods = Array.isArray(payload.foods) ? payload.foods : [];
+    var safetyRules = Array.isArray(payload.safetyRules) ? payload.safetyRules : [];
+    var ui = payload.ui || {};
+
+    var potMap = {};
+    potSizes.forEach(function (p) {
+      if (p && p.id) potMap[p.id] = p;
+    });
+
+    var foodMap = {};
+    foods.forEach(function (f) {
+      if (f && f.id) foodMap[f.id] = f;
+    });
+
+    var state = {
+      potId: payload.defaultPotId || (potSizes[0] ? potSizes[0].id : ''),
+      foodId: payload.defaultFoodId || (foods[0] ? foods[0].id : ''),
+      category: 'all',
+      releaseFilter: 'all',
+      query: ''
+    };
+
+    // DOM References
+    var potBtns = Array.from(document.querySelectorAll('.ippr-pot-btn'));
+    var catBtns = Array.from(document.querySelectorAll('.ippr-cat-btn'));
+    var relBtns = Array.from(document.querySelectorAll('.ippr-rel-btn'));
+    var foodCards = Array.from(document.querySelectorAll('.ippr-food-card'));
+
+    var elInspector = document.getElementById('ippr-inspector');
+    var elFillPill = document.getElementById('ippr-fill-pill');
+    var elReleasePill = document.getElementById('ippr-release-pill');
+    var elFoodTitle = document.getElementById('ippr-food-title');
+    var elGaugeValue = document.getElementById('ippr-gauge-value');
+    var elGaugeBar = document.getElementById('ippr-gauge-bar');
+    var elFillExplain = document.getElementById('ippr-fill-explain');
+    var elPotLiquidBadge = document.getElementById('ippr-pot-liquid-badge');
+    var elPotName = document.getElementById('ippr-pot-name');
+    var elPotLiquidNote = document.getElementById('ippr-pot-liquid-note');
+    var elStovetopBox = document.getElementById('ippr-stovetop-box');
+    var elStovetopText = document.getElementById('ippr-stovetop-text');
+    var elReleaseInline = document.getElementById('ippr-release-inline');
+    var elReleaseSummary = document.getElementById('ippr-release-summary');
+    var elFoamPill = document.getElementById('ippr-foam-pill');
+    var elFoamNote = document.getElementById('ippr-foam-note');
+    var elBurnPill = document.getElementById('ippr-burn-pill');
+    var elBurnTip = document.getElementById('ippr-burn-tip');
+    var elUsdaCard = document.getElementById('ippr-usda-card');
+    var elUsdaPill = document.getElementById('ippr-usda-pill');
+    var elUsdaNote = document.getElementById('ippr-usda-note');
+
+    var elSearch = document.getElementById('ippr-search');
+    var elSearchClear = document.getElementById('ippr-search-clear');
+    var elCount = document.getElementById('ippr-count');
+    var elEmpty = document.getElementById('ippr-empty');
+    var elResetBtn = document.getElementById('ippr-reset-btn');
+
+    var copyBtn = document.getElementById('ippr-copy-btn');
+    var copyLabel = document.getElementById('ippr-copy-label');
+    var printBtn = document.getElementById('ippr-print-btn');
+
+    function getRiskLabel(risk) {
+      if (risk === 'extreme') return ui.riskExtreme || 'EXTREME';
+      if (risk === 'high') return ui.riskHigh || 'HIGH';
+      if (risk === 'medium') return ui.riskMedium || 'MEDIUM';
+      return ui.riskLow || 'LOW';
+    }
+
+    function getRiskPillClass(risk) {
+      var base = 'inline-flex items-center px-2 py-0.5 rounded-md border text-[10px] font-extrabold uppercase tracking-wider ';
+      if (risk === 'extreme') return base + 'bg-red-500/25 text-red-100 border-red-400/55';
+      if (risk === 'high') return base + 'bg-amber-500/25 text-amber-100 border-amber-400/50';
+      if (risk === 'medium') return base + 'bg-yellow-500/20 text-yellow-100 border-yellow-400/40';
+      return base + 'bg-emerald-500/20 text-emerald-200 border-emerald-400/40';
+    }
+
+    function getReleasePillClass(rel) {
+      var base = 'inline-flex items-center px-2.5 py-0.5 rounded-md border text-[11px] font-extrabold uppercase tracking-wider ';
+      if (rel === 'full-npr') return base + 'bg-amber-500/25 text-amber-100 border-amber-400/50';
+      if (rel === 'partial-npr') return base + 'bg-sky-500/25 text-sky-100 border-sky-400/50';
+      return base + 'bg-emerald-500/25 text-emerald-100 border-emerald-400/50';
+    }
+
+    function renderPot() {
+      var pot = potMap[state.potId] || potSizes[0];
+      if (!pot) return;
+
+      potBtns.forEach(function (btn) {
+        var active = btn.getAttribute('data-ippr-pot') === pot.id;
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('ring-2', active);
+        btn.classList.toggle('ring-signature-coral/60', active);
+        btn.classList.toggle('shadow-sm', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+
+        var sub = btn.querySelector('[data-ippr-pot-sub]');
+        if (sub) {
+          sub.classList.toggle('text-white/85', active);
+          sub.classList.toggle('text-muted', !active);
+        }
+      });
+
+      if (elPotLiquidBadge) elPotLiquidBadge.textContent = pot.liquidDisplay || '';
+      if (elPotName) elPotName.textContent = (pot.icon ? pot.icon + ' ' : '') + (pot.name || '');
+      if (elPotLiquidNote) elPotLiquidNote.textContent = pot.liquidNote || '';
+
+      if (elStovetopBox) {
+        var showStovetop = Boolean(pot.isStovetop && pot.stovetopOption);
+        elStovetopBox.classList.toggle('hidden', !showStovetop);
+        if (elStovetopText && showStovetop) {
+          elStovetopText.textContent = pot.stovetopOption;
+        }
+      }
+    }
+
+    function renderInspector() {
+      var food = foodMap[state.foodId] || foods[0];
+      if (!food) return;
+
+      var isHalf = food.maxFill === '1/2';
+
+      // Highlight active card
+      foodCards.forEach(function (card) {
+        var active = card.getAttribute('data-ippr-food') === food.id;
+        card.setAttribute('aria-pressed', active ? 'true' : 'false');
+        card.classList.toggle('bg-canvas', active);
+        card.classList.toggle('border-signature-coral', active);
+        card.classList.toggle('ring-2', active);
+        card.classList.toggle('ring-signature-coral', active);
+        card.classList.toggle('shadow-sm', active);
+        card.classList.toggle('bg-surface-soft/65', !active);
+        card.classList.toggle('border-hairline', !active);
+      });
+
+      if (elInspector) {
+        elInspector.classList.toggle('border-amber-400', isHalf);
+        elInspector.classList.toggle('border-emerald-400', !isHalf);
+      }
+
+      if (elFillPill) {
+        elFillPill.textContent = isHalf
+          ? (ui.fillHalfBadge || '1/2 MAX — FOAMING / EXPANDING LIMIT')
+          : (ui.fillTwoThirdsBadge || '2/3 MAX — STANDARD FILL LIMIT');
+        elFillPill.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider ' + (
+          isHalf ? 'bg-amber-500 text-slate-950' : 'bg-emerald-500 text-slate-950'
+        );
+      }
+
+      if (elReleasePill) {
+        elReleasePill.textContent = '⏱️ ' + (food.releaseBadge || '');
+        elReleasePill.className = getReleasePillClass(food.releaseFilter);
+      }
+
+      if (elFoodTitle) {
+        elFoodTitle.textContent = (food.icon ? food.icon + ' ' : '') + (food.name || '');
+      }
+
+      if (elGaugeValue) {
+        elGaugeValue.textContent = (food.maxFill || '2/3') + ' MAX';
+        elGaugeValue.className = 'text-sm font-extrabold tracking-tight ' + (isHalf ? 'text-amber-300' : 'text-emerald-300');
+      }
+
+      if (elGaugeBar) {
+        elGaugeBar.style.width = isHalf ? '50%' : '67%';
+        elGaugeBar.className = 'h-full rounded-full transition-all duration-300 ' + (
+          isHalf
+            ? 'bg-gradient-to-r from-amber-500 to-error-border'
+            : 'bg-gradient-to-r from-emerald-500 to-teal-400'
+        );
+      }
+
+      if (elFillExplain) {
+        elFillExplain.textContent = isHalf
+          ? (ui.fillHalfExplain || '')
+          : (ui.fillTwoThirdsExplain || '');
+      }
+
+      if (elReleaseInline) elReleaseInline.textContent = food.releaseBadge || '';
+      if (elReleaseSummary) elReleaseSummary.textContent = food.releaseSummary || '';
+
+      if (elFoamPill) {
+        elFoamPill.textContent = getRiskLabel(food.foamRisk);
+        elFoamPill.className = getRiskPillClass(food.foamRisk);
+      }
+      if (elFoamNote) elFoamNote.textContent = food.foamNote || '';
+
+      if (elBurnPill) {
+        elBurnPill.textContent = getRiskLabel(food.burnRisk);
+        elBurnPill.className = getRiskPillClass(food.burnRisk);
+      }
+      if (elBurnTip) elBurnTip.textContent = food.burnTip || '';
+
+      if (elUsdaCard) {
+        elUsdaCard.className = 'p-4 rounded-xl border space-y-2 ' + (
+          food.hasUsdaTemp
+            ? 'bg-emerald-500/14 border-emerald-400/45'
+            : 'bg-white/6 border-white/14'
+        );
+      }
+      if (elUsdaPill) {
+        elUsdaPill.textContent = food.hasUsdaTemp && food.usdaTemp
+          ? food.usdaTemp
+          : (ui.usdaNotRequiredBadge || 'STEAM & LID CHECK');
+        elUsdaPill.className = 'inline-flex items-center px-2 py-0.5 rounded-md border text-[10px] font-extrabold uppercase tracking-wider ' + (
+          food.hasUsdaTemp
+            ? 'bg-emerald-500 text-slate-950 border-emerald-400'
+            : 'bg-white/10 text-white/85 border-white/20'
+        );
+      }
+      if (elUsdaNote) {
+        elUsdaNote.textContent = food.usdaNote ? food.usdaNote : (ui.usdaDefaultNote || '');
+      }
+    }
+
+    function applyFilters() {
+      var q = (state.query || '').trim().toLowerCase();
+      var visibleCount = 0;
+
+      catBtns.forEach(function (btn) {
+        var active = btn.getAttribute('data-ippr-cat') === state.category;
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('bg-surface-soft', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      relBtns.forEach(function (btn) {
+        var active = btn.getAttribute('data-ippr-rel') === state.releaseFilter;
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        btn.classList.toggle('bg-signature-coral', active);
+        btn.classList.toggle('text-white', active);
+        btn.classList.toggle('border-signature-coral', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      if (elSearchClear) {
+        elSearchClear.classList.toggle('hidden', q.length === 0);
+      }
+
+      foodCards.forEach(function (card) {
+        var id = card.getAttribute('data-ippr-food') || '';
+        var food = foodMap[id];
+        if (!food) return;
+
+        var matchCat = state.category === 'all' || food.category === state.category;
+        var matchRel = state.releaseFilter === 'all' || food.releaseFilter === state.releaseFilter;
+        var matchQuery = true;
+
+        if (q.length > 0) {
+          var haystack = (
+            (food.shortName || '') + ' ' +
+            (food.name || '') + ' ' +
+            (food.releaseBadge || '') + ' ' +
+            (food.releaseSummary || '') + ' ' +
+            (food.foamNote || '') + ' ' +
+            (food.burnTip || '') + ' ' +
+            (food.maxFill || '')
+          ).toLowerCase();
+          matchQuery = haystack.indexOf(q) !== -1;
+        }
+
+        var show = matchCat && matchRel && matchQuery;
+        card.classList.toggle('hidden', !show);
+        if (show) visibleCount += 1;
+      });
+
+      if (elCount) {
+        elCount.textContent = (ui.showingCountPrefix || 'Showing') + ' ' + String(visibleCount) + ' ' + (ui.showingCountSuffix || 'of 22 foods');
+      }
+
+      if (elEmpty) {
+        elEmpty.classList.toggle('hidden', visibleCount > 0);
+      }
+    }
+
+    function buildCopySummary() {
+      var pot = potMap[state.potId] || potSizes[0];
+      var food = foodMap[state.foodId] || foods[0];
+      var lines = [];
+
+      lines.push(ui.copyHeader || 'IsItKitchenSafe — Instant Pot Safety Cheat Sheet');
+      lines.push('');
+
+      if (pot) {
+        lines.push((ui.copyPotLine || 'POT SIZE:') + ' ' + pot.name);
+        lines.push((ui.copyLiquidLine || 'MIN THIN LIQUID:') + ' ' + pot.liquidDisplay + ' — ' + pot.liquidNote);
+      }
+
+      if (food) {
+        lines.push('');
+        lines.push((ui.copyFoodLine || 'SELECTED FOOD:') + ' ' + food.name);
+        lines.push((ui.copyFillLine || 'MAX FILL LINE:') + ' ' + food.maxFill + ' MAX');
+        lines.push((ui.copyReleaseLine || 'RELEASE METHOD:') + ' ' + food.releaseBadge + ' — ' + food.releaseSummary);
+        lines.push((ui.copyFoamLine || 'FOAM RISK:') + ' [' + getRiskLabel(food.foamRisk) + '] ' + food.foamNote);
+        lines.push((ui.copyBurnLine || 'BURN TIP:') + ' [' + getRiskLabel(food.burnRisk) + '] ' + food.burnTip);
+        lines.push((ui.copyUsdaLine || 'USDA CHECK:') + ' ' + (food.usdaNote || ui.usdaDefaultNote || ''));
+      }
+
+      if (safetyRules.length > 0) {
+        lines.push('');
+        lines.push(ui.copyRulesHeader || '3 CRITICAL PRESSURE COOKER SAFETY RULES:');
+        safetyRules.forEach(function (r, idx) {
+          lines.push('  ' + String(idx + 1) + '. ' + r.title + ' — ' + r.body);
+        });
+      }
+
+      return lines.join('\n');
+    }
+
+    // Bind Pot Size Buttons
+    potBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.getAttribute('data-ippr-pot');
+        if (id && potMap[id]) {
+          state.potId = id;
+          renderPot();
+        }
+      });
+    });
+
+    // Bind Category Filter Buttons
+    catBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var cat = btn.getAttribute('data-ippr-cat');
+        if (cat) {
+          state.category = cat;
+          applyFilters();
+        }
+      });
+    });
+
+    // Bind Release Filter Buttons
+    relBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var rel = btn.getAttribute('data-ippr-rel');
+        if (rel) {
+          state.releaseFilter = rel;
+          applyFilters();
+        }
+      });
+    });
+
+    // Bind Search Input
+    if (elSearch) {
+      elSearch.addEventListener('input', function () {
+        state.query = elSearch.value || '';
+        applyFilters();
+      });
+    }
+
+    if (elSearchClear) {
+      elSearchClear.addEventListener('click', function () {
+        state.query = '';
+        if (elSearch) elSearch.value = '';
+        applyFilters();
+        if (elSearch) elSearch.focus();
+      });
+    }
+
+    if (elResetBtn) {
+      elResetBtn.addEventListener('click', function () {
+        state.category = 'all';
+        state.releaseFilter = 'all';
+        state.query = '';
+        if (elSearch) elSearch.value = '';
+        applyFilters();
+      });
+    }
+
+    // Bind Food Cards
+    foodCards.forEach(function (card) {
+      card.addEventListener('click', function () {
+        var id = card.getAttribute('data-ippr-food');
+        if (id && foodMap[id]) {
+          state.foodId = id;
+          renderInspector();
+          if (elInspector && elInspector.getBoundingClientRect) {
+            var rect = elInspector.getBoundingClientRect();
+            if (rect.top < 16) {
+              elInspector.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }
+        }
+      });
+    });
+
+    // Bind Copy Button
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        var text = buildCopySummary();
+        var showCopied = function () {
+          if (copyLabel) copyLabel.textContent = ui.copiedBtn || 'Cheat Sheet Copied ✓';
+          window.setTimeout(function () {
+            if (copyLabel) copyLabel.textContent = '📋 ' + (ui.copyBtn || 'Copy Instant Pot Cheat Sheet');
+          }, 2200);
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(showCopied).catch(showCopied);
+        } else {
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'absolute';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          try {
+            document.execCommand('copy');
+          } catch (_) {
+            // ignore
+          }
+          document.body.removeChild(ta);
+          showCopied();
+        }
+      });
+    }
+
+    // Bind Print Button
+    if (printBtn) {
+      printBtn.addEventListener('click', function () {
+        window.print();
+      });
+    }
+
+    renderPot();
+    renderInspector();
+    applyFilters();
+  })();
+</script>

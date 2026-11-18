@@ -1,6 +1,8 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import type { SupportedLanguage } from '../../i18n/ui';
+import { getDirectoryUrl, useTranslatedPath, useTranslations } from '../../i18n/utils';
 
 export function getStaticPaths() {
   const allLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -8,7 +10,7 @@ export function getStaticPaths() {
     { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales: allLocales } },
     { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales: allLocales } },
     { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales: allLocales } },
-    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales: allLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales: allLocales } }
   ];
 }
 
@@ -17,269 +19,2099 @@ interface Props {
   availableLocales: SupportedLanguage[];
 }
 
-const { lang, availableLocales } = Astro.props;
+interface QuickCalcItem {
+  path: string;
+  tag: string;
+  title: string;
+  desc: string;
+}
 
-const contentByLang = {
-  ja: {
-    title: "お問い合わせ | キッチン安全チェッカー",
-    description: "キッチン安全ガイドに関するご質問、掲載リクエスト、または内容の訂正・ご意見がございましたら、お気軽にご連絡ください。",
-    faqs: [
-      {
-        question: "新しい調理器具やアイテムの掲載をリクエストするにはどうすればよいですか？",
-        answer: "当ページのお問い合わせフォームまたはメール（support@isitkitchensafe.com）にてお送りいただけます。"
-      },
-      {
-        question: "問い合わせの返信にはどのくらい時間がかかりますか？",
-        answer: "通常、2〜3営業日以内にすべてのリクエストと訂正提案を確認・検討しています。"
-      }
-    ],
-    h1: "お問い合わせ",
-    intro: "まだ掲載されていない調理器具やアイテムのリクエスト、または安全ガイドへの訂正・改善のご提案がございましたら、以下のフォームまたはメール（",
-    introEnd: "）にてお気軽にお問い合わせください。",
-    labelName: "お名前",
-    placeholderName: "山田 太郎",
-    labelEmail: "メールアドレス",
-    placeholderEmail: "yamada@example.com",
-    labelSubject: "件名",
-    placeholderSubject: "アイテム掲載リクエスト / ガイドの訂正提案",
-    labelMessage: "メッセージ内容",
-    placeholderMessage: "対象の調理器具・食品と家電名、詳細をご記入ください...",
-    btnSubmit: "メッセージを送信",
-    btnSending: "送信中...",
-    successTitle: "送信完了！",
-    successDesc: "お問い合わせありがとうございます。メッセージを受け付けました。順次確認させていただきます。",
-    errorTitle: "送信に失敗しました",
-    errorDesc: "エラーが発生しました。時間をおいて再度お試しください。"
-  },
-  'zh-cn': {
-    title: "联系我们 | 厨房安全指南",
-    description: "对我们的厨房安全指南有疑问、纠错建议或希望评估新物品？欢迎给我们留言，我们将尽快与您取得联系。",
-    faqs: [
-      {
-        question: "如何建议评估新的厨房用品或食品？",
-        answer: "您可以通过填写本页面的联系表单，或直接发送邮件至 support@isitkitchensafe.com 提交建议。"
-      },
-      {
-        question: "通常需要多长时间才能得到回复？",
-        answer: "我们通常会在 2 至 3 个工作日内查阅所有用户建议和纠错申请。"
-      }
-    ],
-    h1: "联系我们",
-    intro: "想建议我们评估尚未收录的厨房用品？或是发现现有指南需要勘误纠正？请填写下方表格，或直接发送邮件至 ",
-    introEnd: " 联系我们。",
-    labelName: "您的姓名",
-    placeholderName: "张三",
-    labelEmail: "电子邮箱",
-    placeholderEmail: "zhangsan@example.com",
-    labelSubject: "主题",
-    placeholderSubject: "新物品评估建议 / 指南勘误反馈",
-    labelMessage: "留言内容",
-    placeholderMessage: "请详细描述涉及的厨房物品、电器及您的疑问...",
-    btnSubmit: "发送留言",
-    btnSending: "正在发送...",
-    successTitle: "发送成功！",
-    successDesc: "感谢您的来信。我们已收到您的反馈，并将尽快进行审核处理。",
-    errorTitle: "发送失败",
-    errorDesc: "发生错误，请稍后重试。"
-  },
+interface TriageScriptLocaleConfig {
+  supportEmail: string;
+  editorialEmail: string;
+  copiedLabel: string;
+  copyFailedLabel: string;
+  loadedNotice: string;
+  question: {
+    subjectPrefix: string;
+    defaultTopic: string;
+    bodyIntro: string;
+    labelCategory: string;
+    labelDetails: string;
+    defaultDetails: string;
+    bodyOutro: string;
+  };
+  correction: {
+    subjectPrefix: string;
+    defaultSubjectSuffix: string;
+    bodyIntro: string;
+    labelUrl: string;
+    defaultUrl: string;
+    labelStandard: string;
+    labelNotes: string;
+    defaultNotes: string;
+    bodyOutro: string;
+  };
+  suggestion: {
+    subjectPrefix: string;
+    defaultSubjectSuffix: string;
+    bodyIntro: string;
+    labelCategory: string;
+    labelBrand: string;
+    defaultBrand: string;
+    labelItem: string;
+    defaultItem: string;
+    bodyOutro: string;
+  };
+  media: {
+    subject: string;
+    body: string;
+  };
+}
+
+interface ContactLocaleContent {
+  title: string;
+  description: string;
+  schemaName: string;
+  breadcrumbLabel: string;
+  eyebrow: string;
+  h1: string;
+  introBeforeSupport: string;
+  introBetweenEmails: string;
+  introAfterEditorial: string;
+  emergencyBadge: string;
+  emergencyTitle: string;
+  emergencyBody: string;
+  emergencyFireBtn: string;
+  emergencyCleanerBtn: string;
+  triageEyebrow: string;
+  triageHeading: string;
+  triageGroupAria: string;
+  tabs: {
+    question: { step: string; title: string; sub: string };
+    correction: { step: string; title: string; sub: string };
+    suggestion: { step: string; title: string; sub: string };
+    media: { step: string; title: string; sub: string };
+  };
+  panelQ: {
+    eyebrow: string;
+    heading: string;
+    intro: string;
+    openCalcLabel: string;
+    builderHeading: string;
+    labelCategory: string;
+    labelDetails: string;
+    placeholderDetails: string;
+    btnFillForm: string;
+    btnMailto: string;
+    btnCopy: string;
+  };
+  panelC: {
+    slaBadge: string;
+    slaSub: string;
+    heading: string;
+    intro: string;
+    methodologyBtn: string;
+    labelUrl: string;
+    placeholderUrl: string;
+    labelStandard: string;
+    labelNotes: string;
+    placeholderNotes: string;
+    btnFillForm: string;
+    btnMailto: string;
+    btnCopy: string;
+  };
+  panelS: {
+    eyebrow: string;
+    heading: string;
+    intro: string;
+    labelCategory: string;
+    labelBrand: string;
+    placeholderBrand: string;
+    quickPickLabel: string;
+    labelItem: string;
+    placeholderItem: string;
+    btnFillForm: string;
+    btnMailto: string;
+    btnCopy: string;
+  };
+  panelM: {
+    eyebrow: string;
+    heading: string;
+    intro: string;
+    editorialCardTag: string;
+    editorialCardTitle: string;
+    editorialCardDesc: string;
+    supportCardTag: string;
+    supportCardTitle: string;
+    supportCardDesc: string;
+    btnFillForm: string;
+    btnMailto: string;
+    btnCopy: string;
+  };
+  formEyebrow: string;
+  formHeading: string;
+  formIntro: string;
+  labelName: string;
+  placeholderName: string;
+  labelEmail: string;
+  placeholderEmail: string;
+  labelSubject: string;
+  placeholderSubject: string;
+  labelMessage: string;
+  placeholderMessage: string;
+  btnSubmit: string;
+  btnSending: string;
+  successTitle: string;
+  successDesc: string;
+  errorTitle: string;
+  errorDesc: string;
+  sidebarSlaTitle: string;
+  slaCorrectionTitle: string;
+  slaCorrectionDesc: string;
+  slaSuggestionTitle: string;
+  slaSuggestionDesc: string;
+  slaIndependenceTitle: string;
+  slaIndependenceDesc: string;
+  sidebarDesksTitle: string;
+  deskSupportLabel: string;
+  deskEditorialLabel: string;
+  sidebarLinksTitle: string;
+  linkMethodology: string;
+  linkAbout: string;
+  linkTools: string;
+  linkDisclaimer: string;
+  quickCalculators: QuickCalcItem[];
+  applianceOptions: string[];
+  standardOptions: string[];
+  triageConfig: TriageScriptLocaleConfig;
+}
+
+const { lang, availableLocales } = Astro.props;
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+
+const popularBrands = ['Ninja', 'Stanley', 'Pyrex', 'Le Creuset', 'YETI', 'HexClad', 'Instant Pot', 'Lodge'];
+
+const contentByLang: Record<'es' | 'pt' | 'zh-cn' | 'ja', ContactLocaleContent> = {
   es: {
-    title: "Contacto y Soporte | ¿Es Seguro en la Cocina?",
-    description: "¿Tienes dudas sobre una guía de seguridad, deseas solicitar la evaluación de un artículo o reportar una corrección? Envíanos un mensaje y te responderemos a la brevedad.",
-    faqs: [
+    title: 'Contacto, Correcciones de Seguridad y Sugerencias | ¿Es Seguro en la Cocina?',
+    description:
+      'Contacta con la mesa editorial y soporte de IsItKitchenSafe. Reporta correcciones con SLA de 48 horas, sugiere marcas o calculadoras, o consulta nuestras herramientas instantáneas.',
+    schemaName: 'Contacto y Soporte — IsItKitchenSafe',
+    breadcrumbLabel: 'Contacto',
+    eyebrow: 'Soporte al Lector y Mesa Editorial',
+    h1: 'Contacto y Soporte',
+    introBeforeSupport:
+      'Selecciona tu motivo de consulta para acceder a calculadoras de verificación inmediata, plantillas de corrección editorial con SLA de 48 horas o solicitudes de nuevas marcas. También puedes escribir a ',
+    introBetweenEmails: ' o contactar con la mesa editorial en ',
+    introAfterEditorial: '.',
+    emergencyBadge: 'No Monitoreado para Emergencias',
+    emergencyTitle: '¿Incendio en la Cocina, Fuga de Gas o Mezcla Tóxica de Químicos?',
+    emergencyBody:
+      'El correo electrónico y este formulario NO se monitorean en tiempo real. Si hay un incendio de grasa, olor a gas, quemadura grave o vapores tóxicos por mezclar limpiadores (como lejía con vinagre o amoníaco), evacua el área y llama de inmediato al 112 (España/UE), 911 (América), o al Servicio de Información Toxicológica (España: 91 562 04 20 / EE. UU.: 1-800-222-1222).',
+    emergencyFireBtn: 'Guía de Emergencia por Incendio en Cocina',
+    emergencyCleanerBtn: 'Verificador de Mezcla Peligrosa de Limpiadores',
+    triageEyebrow: 'Paso 1 · Clasificación Guiada',
+    triageHeading: '¿Cómo Podemos Ayudarte Hoy?',
+    triageGroupAria: 'Selector de tipo de consulta',
+    tabs: {
+      question: {
+        step: '01 · Autoservicio',
+        title: 'Hacer una Pregunta de Seguridad',
+        sub: 'Calculadoras instantáneas + plantilla'
+      },
+      correction: {
+        step: '02 · SLA 48 h',
+        title: 'Reportar Corrección o Norma',
+        sub: 'USDA, FDA, NSF y manuales OEM'
+      },
+      suggestion: {
+        step: '03 · Nueva Cobertura',
+        title: 'Sugerir Marca, Artículo o Herramienta',
+        sub: 'Ninja, Stanley, Pyrex, Le Creuset y más'
+      },
+      media: {
+        step: '04 · Editorial',
+        title: 'Prensa, Licencias Educativas y General',
+        sub: 'Medios, aulas y consultas institucionales'
+      }
+    },
+    panelQ: {
+      eyebrow: 'Consultas Instantáneas de Autoservicio',
+      heading: 'Obtén una Respuesta Verificada al Instante Antes de Escribir',
+      intro:
+        'La mayoría de las dudas cotidianas se resuelven en segundos con nuestras calculadoras gratuitas basadas en normas USDA, FDA y NSF:',
+      openCalcLabel: 'Abrir Calculadora',
+      builderHeading: '¿Aún Tienes una Duda Específica? Prepara tu Consulta Estructurada',
+      labelCategory: 'Electrodoméstico o Tema',
+      labelDetails: 'Artículo, Material o Pregunta Breve',
+      placeholderDetails: 'Ej.: ¿Se puede meter una tapa de acero inoxidable aislado en la freidora de aire?',
+      btnFillForm: 'Cargar en el Formulario de Abajo',
+      btnMailto: 'Abrir en Correo (mailto)',
+      btnCopy: 'Copiar Plantilla'
+    },
+    panelC: {
+      slaBadge: 'SLA Editorial de 48 Horas',
+      slaSub: 'Verificación con Fuentes Primarias',
+      heading: 'Reportar una Corrección de Seguridad o Actualización de Norma',
+      intro:
+        'Cada veredicto se apoya en códigos regulatorios públicos y especificaciones del fabricante. Cuando nos señalas un manual actualizado o cambio normativo USDA/FDA/NSF, nuestra mesa editorial lo audita en un plazo máximo de 48 horas hábiles.',
+      methodologyBtn: 'Ver Metodología Editorial',
+      labelUrl: 'URL de la Guía o Calculadora',
+      placeholderUrl: 'https://isitkitchensafe.com/es/dishwasher/...',
+      labelStandard: 'Norma o Fuente Citada',
+      labelNotes: 'Resumen de la Corrección y Enlace de Respaldo',
+      placeholderNotes: 'Indica el límite térmico, cambio de material o enlace al manual oficial / norma USDA-FDA...',
+      btnFillForm: 'Cargar Corrección en el Formulario',
+      btnMailto: 'Enviar a Mesa Editorial (mailto)',
+      btnCopy: 'Copiar Plantilla'
+    },
+    panelS: {
+      eyebrow: 'Amplía Nuestra Biblioteca de Referencia',
+      heading: 'Sugerir una Nueva Marca, Artículo de Cocina o Calculadora',
+      intro:
+        '¿Falta una línea de utensilios, termo o calculadora de seguridad alimentaria? Elige una categoría y marca para generar una solicitud estructurada para nuestro equipo.',
+      labelCategory: 'Electrodoméstico / Categoría',
+      labelBrand: 'Nombre de la Marca',
+      placeholderBrand: 'Ej.: Ninja, Stanley, Pyrex, Le Creuset',
+      quickPickLabel: 'Marcas populares:',
+      labelItem: 'Modelo Específico o Idea de Calculadora',
+      placeholderItem: 'Ej.: Tapa Stanley Quencher H2.0, recipiente Ninja Crispi o guía de masa madre',
+      btnFillForm: 'Cargar Sugerencia en el Formulario',
+      btnMailto: 'Enviar Sugerencia (mailto)',
+      btnCopy: 'Copiar Plantilla'
+    },
+    panelM: {
+      eyebrow: 'Prensa, Docentes e Instituciones',
+      heading: 'Prensa, Licencias Educativas y Consultas Generales',
+      intro:
+        'Periodistas, escuelas culinarias, nutricionistas y educadores de salud pública pueden citar nuestras tablas y guías imprimibles con atribución. IsItKitchenSafe mantiene un 100% de independencia editorial y no acepta patrocinios ni pagos para alterar veredictos.',
+      editorialCardTag: 'Editorial, Prensa y Correcciones',
+      editorialCardTitle: 'Mesa de Verificación Editorial',
+      editorialCardDesc: 'Para entrevistas, citas en medios, licencias educativas y correcciones basadas en normas.',
+      supportCardTag: 'Soporte al Lector y General',
+      supportCardTitle: 'Mesa de Soporte General',
+      supportCardDesc: 'Para accesibilidad, reporte de fallos técnicos, sugerencias de artículos y dudas generales.',
+      btnFillForm: 'Cargar Consulta Editorial en el Formulario',
+      btnMailto: 'Escribir a Prensa (mailto)',
+      btnCopy: 'Copiar Plantilla'
+    },
+    formEyebrow: 'Paso 2 · Mensaje Directo',
+    formHeading: 'Envíanos un Mensaje',
+    formIntro:
+      '¿Prefieres escribir directamente desde aquí? Completa el formulario (o usa una plantilla arriba para rellenar automáticamente el asunto y el mensaje).',
+    labelName: 'Tu Nombre',
+    placeholderName: 'Carlos García',
+    labelEmail: 'Correo Electrónico',
+    placeholderEmail: 'carlos@example.com',
+    labelSubject: 'Asunto',
+    placeholderSubject: 'Solicitud de artículo / Sugerencia de corrección',
+    labelMessage: 'Mensaje',
+    placeholderMessage: 'Describe el artículo de cocina, el electrodoméstico o la norma citada...',
+    btnSubmit: 'Enviar Mensaje',
+    btnSending: 'Enviando...',
+    successTitle: '¡Mensaje Enviado!',
+    successDesc: 'Gracias por contactarnos. Hemos recibido tu mensaje y lo revisaremos a la brevedad.',
+    errorTitle: 'Error al Enviar',
+    errorDesc: 'Ocurrió un error al procesar el envío. Por favor, intenta de nuevo más tarde.',
+    sidebarSlaTitle: 'Tiempos de Respuesta y SLA Editorial',
+    slaCorrectionTitle: 'Correcciones de Seguridad y Normas',
+    slaCorrectionDesc: 'Auditadas frente a USDA, FDA, NSF y manuales OEM en un máximo de 48 horas hábiles.',
+    slaSuggestionTitle: 'Nuevas Marcas, Artículos y Calculadoras',
+    slaSuggestionDesc: 'Clasificadas e incorporadas a nuestra cola editorial en 2 a 3 días hábiles.',
+    slaIndependenceTitle: 'Política de Cero Veredictos Patrocinados',
+    slaIndependenceDesc: 'Nunca aceptamos pagos de marcas para cambiar un veredicto SÍ, DEPENDE o NO.',
+    sidebarDesksTitle: 'Correos Directos',
+    deskSupportLabel: 'Soporte y Solicitudes de Artículos',
+    deskEditorialLabel: 'Correcciones, Prensa y Licencias',
+    sidebarLinksTitle: 'Transparencia y Recursos de Seguridad',
+    linkMethodology: 'Metodología de Verificación Editorial',
+    linkAbout: 'Acerca de Nosotros y Consejo Editorial',
+    linkTools: 'Ver Todas las Calculadoras Interactivas',
+    linkDisclaimer: 'Aviso Legal y de Seguridad Médica',
+    quickCalculators: [
       {
-        question: "¿Cómo puedo solicitar que evalúen un nuevo artículo o electrodoméstico?",
-        answer: "Puedes usar el formulario de contacto en esta página o enviarnos un correo electrónico a support@isitkitchensafe.com con el nombre del producto y el electrodoméstico."
+        path: '/tools/kitchen-symbol-decoder/',
+        tag: 'Decodificador Visual',
+        title: 'Decodificador de Símbolos de Cocina',
+        desc: 'Identifica símbolos de lavavajillas, microondas, horno, congelador y plásticos #1–#7.'
       },
       {
-        question: "¿Cuánto tardan en responder a las consultas?",
-        answer: "Solemos revisar las sugerencias de artículos y solicitudes de corrección en un plazo de 2 a 3 días hábiles."
+        path: '/tools/power-outage-food-safety-checker/',
+        tag: 'USDA 4h / 24h / 48h',
+        title: 'Verificador de Alimentos tras Corte Eléctrico',
+        desc: 'Calcula qué alimentos de nevera y congelador conservar o desechar tras un apagón.'
+      },
+      {
+        path: '/tools/moldy-food-safety-checker/',
+        tag: 'Guía USDA',
+        title: 'Verificador de Alimentos con Moho',
+        desc: 'Comprueba qué alimentos duros pueden recortarse 2,5 cm y cuáles deben desecharse.'
+      },
+      {
+        path: '/tools/kitchen-fire-emergency-guide/',
+        tag: 'Protocolo de Emergencia',
+        title: 'Guía de Emergencia por Incendio en Cocina',
+        desc: 'Pasos seguros para incendios de grasa, horno, microondas y fallos eléctricos.'
       }
     ],
-    h1: "Contacto y Soporte",
-    intro: "¿Deseas solicitar que evaluemos un artículo de cocina o sugerir una corrección en una de nuestras guías? Completa el siguiente formulario o escríbenos directamente a ",
-    introEnd: ".",
-    labelName: "Tu Nombre",
-    placeholderName: "Carlos García",
-    labelEmail: "Correo Electrónico",
-    placeholderEmail: "carlos@example.com",
-    labelSubject: "Asunto",
-    placeholderSubject: "Solicitud de artículo / Sugerencia de corrección",
-    labelMessage: "Mensaje",
-    placeholderMessage: "Describe el artículo de cocina, el electrodoméstico y los detalles de tu consulta...",
-    btnSubmit: "Enviar Mensaje",
-    btnSending: "Enviando...",
-    successTitle: "¡Mensaje Enviado!",
-    successDesc: "Gracias por contactarnos. Hemos recibido tu mensaje y lo revisaremos a la brevedad.",
-    errorTitle: "Error al Enviar",
-    errorDesc: "Ocurrió un error al procesar el envío. Por favor, intenta de nuevo más tarde."
+    applianceOptions: [
+      'Lavavajillas',
+      'Microondas',
+      'Freidora de Aire',
+      'Horno / Grill',
+      'Congelador',
+      'Refrigerador',
+      'Vida Útil / Seguridad Alimentaria',
+      'Nueva Calculadora Interactiva'
+    ],
+    standardOptions: [
+      'USDA FSIS (FoodKeeper / Temperaturas Seguras)',
+      'FDA 21 CFR (Materiales en Contacto con Alimentos)',
+      'NSF/ANSI 51 o 184 (Equipos / Lavavajillas)',
+      'CDC / AAP (Alimentación Infantil)',
+      'Manual del Fabricante (OEM)',
+      'EPA / ASTM / Otra Norma Primaria'
+    ],
+    triageConfig: {
+      supportEmail: 'support@isitkitchensafe.com',
+      editorialEmail: 'editorial@isitkitchensafe.com',
+      copiedLabel: '¡Copiado!',
+      copyFailedLabel: 'Copia manualmente desde la vista previa',
+      loadedNotice: 'Plantilla cargada en el formulario de abajo. Agrega tu nombre y correo para enviar.',
+      question: {
+        subjectPrefix: '[Consulta de Seguridad] ',
+        defaultTopic: 'Seguridad en Electrodomésticos',
+        bodyIntro: 'Hola equipo de soporte de IsItKitchenSafe,',
+        labelCategory: 'Electrodoméstico / Tema: ',
+        labelDetails: 'Detalles de la consulta: ',
+        defaultDetails: '(Describe el material, marca/modelo o alimento y lo que deseas verificar)',
+        bodyOutro: '¡Muchas gracias!'
+      },
+      correction: {
+        subjectPrefix: '[Corrección de Seguridad - SLA 48h] ',
+        defaultSubjectSuffix: 'Actualización de Guía',
+        bodyIntro: 'Hola Mesa Editorial de IsItKitchenSafe,',
+        labelUrl: 'URL de la página: ',
+        defaultUrl: 'https://isitkitchensafe.com/es/...',
+        labelStandard: 'Norma o fuente citada: ',
+        labelNotes: 'Corrección sugerida y respaldo: ',
+        defaultNotes: '(Describe el veredicto, límite de temperatura o especificación a revisar)',
+        bodyOutro: 'Por favor revisar bajo el SLA editorial de 48 horas hábiles.'
+      },
+      suggestion: {
+        subjectPrefix: '[Nueva Sugerencia] ',
+        defaultSubjectSuffix: 'Solicitud de Marca / Artículo / Calculadora',
+        bodyIntro: 'Hola equipo de IsItKitchenSafe,',
+        labelCategory: 'Electrodoméstico / Categoría: ',
+        labelBrand: 'Marca: ',
+        defaultBrand: '(Ej.: Ninja, Stanley, Pyrex, Le Creuset)',
+        labelItem: 'Producto, modelo o idea de calculadora: ',
+        defaultItem: '(Describe el producto o herramienta que te gustaría añadir)',
+        bodyOutro: '¡Gracias por considerar esta propuesta!'
+      },
+      media: {
+        subject: '[Prensa / Licencia Educativa] Consulta para la Mesa Editorial de IsItKitchenSafe',
+        body: 'Hola Mesa Editorial de IsItKitchenSafe,\n\nOrganización / Medio / Institución educativa:\nTipo de consulta (Prensa / Licencia en aula / Permiso de cita / General):\nFecha límite o plazo deseado:\nDetalles:\n\n¡Muchas gracias!'
+      }
+    }
   },
   pt: {
-    title: "Contato e Suporte | É Seguro na Cozinha?",
-    description: "Tem dúvidas sobre um guia de segurança, deseja sugerir a avaliação de um item ou relatar uma correção? Envie-nos uma mensagem e responderemos o mais breve possível.",
-    faqs: [
+    title: 'Contato, Correções de Segurança e Sugestões | É Seguro na Cozinha?',
+    description:
+      'Fale com a equipe editorial e suporte do IsItKitchenSafe. Relate correções com SLA de 48 horas, sugira marcas ou calculadoras, ou use nossas ferramentas instantâneas.',
+    schemaName: 'Contato e Suporte — IsItKitchenSafe',
+    breadcrumbLabel: 'Contato',
+    eyebrow: 'Suporte ao Leitor e Mesa Editorial',
+    h1: 'Contato e Suporte',
+    introBeforeSupport:
+      'Escolha o tipo de atendimento abaixo para acessar calculadoras instantâneas, modelos de correção editorial com SLA de 48 horas ou pedidos de novas marcas. Você também pode enviar e-mail para ',
+    introBetweenEmails: ' ou falar com a mesa editorial em ',
+    introAfterEditorial: '.',
+    emergencyBadge: 'Não Monitorado para Emergências',
+    emergencyTitle: 'Incêndio na Cozinha, Vazamento de Gás ou Mistura Química Tóxica?',
+    emergencyBody:
+      'E-mails e mensagens enviadas por este formulário NÃO são monitorados em tempo real. Em caso de fogo em óleo, cheiro de gás, queimadura grave ou vapores tóxicos por misturar produtos de limpeza (como água sanitária com vinagre ou amônia), saia do local e ligue imediatamente para 193 (Bombeiros) / 192 (SAMU) no Brasil, 112 (Portugal/UE), ou Disque-Intoxicação ANVISA (0800 722 6001).',
+    emergencyFireBtn: 'Guia de Emergência para Incêndio na Cozinha',
+    emergencyCleanerBtn: 'Verificador de Mistura Perigosa de Produtos',
+    triageEyebrow: 'Passo 1 · Triagem Guiada',
+    triageHeading: 'Como Podemos Ajudar Hoje?',
+    triageGroupAria: 'Seletor de assunto de contato',
+    tabs: {
+      question: {
+        step: '01 · Autoatendimento',
+        title: 'Fazer Pergunta de Segurança',
+        sub: 'Calculadoras instantâneas + modelo'
+      },
+      correction: {
+        step: '02 · SLA 48h',
+        title: 'Relatar Correção ou Norma',
+        sub: 'USDA, FDA, NSF e manuais OEM'
+      },
+      suggestion: {
+        step: '03 · Nova Cobertura',
+        title: 'Sugerir Marca, Item ou Ferramenta',
+        sub: 'Ninja, Stanley, Pyrex, Le Creuset e mais'
+      },
+      media: {
+        step: '04 · Editorial',
+        title: 'Imprensa, Licenciamento e Geral',
+        sub: 'Mídia, salas de aula e parcerias'
+      }
+    },
+    panelQ: {
+      eyebrow: 'Consultas Instantâneas de Autoatendimento',
+      heading: 'Receba uma Resposta Verificada na Hora Antes de Enviar E-mail',
+      intro:
+        'A maioria das dúvidas do dia a dia é resolvida em segundos com nossas calculadoras gratuitas baseadas em normas USDA, FDA e NSF:',
+      openCalcLabel: 'Abrir Calculadora',
+      builderHeading: 'Ainda Tem uma Dúvida Específica? Monte sua Pergunta Estruturada',
+      labelCategory: 'Eletrodoméstico ou Tema',
+      labelDetails: 'Item, Material ou Pergunta Curta',
+      placeholderDetails: 'Ex.: Posso colocar uma tampa térmica de inox na fritadeira sem óleo?',
+      btnFillForm: 'Preencher no Formulário Abaixo',
+      btnMailto: 'Abrir no App de E-mail (mailto)',
+      btnCopy: 'Copiar Modelo'
+    },
+    panelC: {
+      slaBadge: 'SLA Editorial de 48 Horas',
+      slaSub: 'Verificação em Fontes Primárias',
+      heading: 'Relatar uma Correção de Segurança ou Atualização de Norma',
+      intro:
+        'Cada veredito é ancorado em códigos regulatórios públicos e especificações do fabricante. Quando você aponta um manual atualizado ou mudança de norma USDA/FDA/NSF, nossa mesa editorial revisa em até 48 horas úteis.',
+      methodologyBtn: 'Ler Metodologia Editorial',
+      labelUrl: 'URL do Guia ou Calculadora',
+      placeholderUrl: 'https://isitkitchensafe.com/pt/dishwasher/...',
+      labelStandard: 'Norma ou Fonte Citada',
+      labelNotes: 'Resumo da Correção e Link de Comprovação',
+      placeholderNotes: 'Informe o limite de temperatura, mudança de material ou link do manual oficial / norma USDA-FDA...',
+      btnFillForm: 'Carregar Correção no Formulário',
+      btnMailto: 'Enviar à Mesa Editorial (mailto)',
+      btnCopy: 'Copiar Modelo'
+    },
+    panelS: {
+      eyebrow: 'Expanda Nossa Biblioteca de Referência',
+      heading: 'Sugerir uma Nova Marca, Item de Cozinha ou Calculadora',
+      intro:
+        'Sentiu falta de uma linha de panelas, copo térmico ou cenário de segurança alimentar? Selecione a categoria e a marca abaixo para gerar um pedido estruturado.',
+      labelCategory: 'Eletrodoméstico / Categoria',
+      labelBrand: 'Nome da Marca',
+      placeholderBrand: 'Ex.: Ninja, Stanley, Pyrex, Le Creuset',
+      quickPickLabel: 'Marcas populares:',
+      labelItem: 'Modelo Específico ou Ideia de Calculadora',
+      placeholderItem: 'Ex.: Tampa Stanley Quencher H2.0, recipiente Ninja Crispi ou validade de fermento natural',
+      btnFillForm: 'Carregar Sugestão no Formulário',
+      btnMailto: 'Enviar Sugestão (mailto)',
+      btnCopy: 'Copiar Modelo'
+    },
+    panelM: {
+      eyebrow: 'Imprensa, Educadores e Instituições',
+      heading: 'Imprensa, Licenciamento Educacional e Consultas Gerais',
+      intro:
+        'Jornalistas, escolas de gastronomia, nutricionistas e educadores podem citar nossas tabelas verificadas e guias imprimíveis com crédito. O IsItKitchenSafe mantém 100% de independência editorial e não aceita vereditos pagos ou patrocinados.',
+      editorialCardTag: 'Editorial, Imprensa e Correções',
+      editorialCardTitle: 'Mesa de Verificação Editorial',
+      editorialCardDesc: 'Para entrevistas, citações na mídia, licenciamento educacional e correções técnicas.',
+      supportCardTag: 'Suporte ao Leitor e Geral',
+      supportCardTitle: 'Suporte Geral',
+      supportCardDesc: 'Para acessibilidade, relato de erros técnicos, sugestões de itens e dúvidas gerais.',
+      btnFillForm: 'Carregar Contato Editorial no Formulário',
+      btnMailto: 'Enviar à Imprensa (mailto)',
+      btnCopy: 'Copiar Modelo'
+    },
+    formEyebrow: 'Passo 2 · Mensagem Direta',
+    formHeading: 'Envie uma Mensagem',
+    formIntro:
+      'Prefere enviar diretamente nesta página? Preencha o formulário abaixo (ou use um modelo acima para preencher assunto e mensagem automaticamente).',
+    labelName: 'Seu Nome',
+    placeholderName: 'Carlos Silva',
+    labelEmail: 'E-mail',
+    placeholderEmail: 'carlos@example.com',
+    labelSubject: 'Assunto',
+    placeholderSubject: 'Sugestão de item / Proposta de correção',
+    labelMessage: 'Mensagem',
+    placeholderMessage: 'Descreva o item de cozinha, eletrodoméstico ou referência técnica...',
+    btnSubmit: 'Enviar Mensagem',
+    btnSending: 'Enviando...',
+    successTitle: 'Mensagem Enviada!',
+    successDesc: 'Obrigado pelo contato. Recebemos sua mensagem e a revisaremos em breve.',
+    errorTitle: 'Erro ao Enviar',
+    errorDesc: 'Ocorreu um erro ao processar o envio. Por favor, tente novamente mais tarde.',
+    sidebarSlaTitle: 'Prazos de Resposta e SLA Editorial',
+    slaCorrectionTitle: 'Correções de Segurança e Normas',
+    slaCorrectionDesc: 'Auditadas com normas USDA, FDA, NSF e manuais OEM em até 48 horas úteis.',
+    slaSuggestionTitle: 'Novas Marcas, Itens e Calculadoras',
+    slaSuggestionDesc: 'Avaliadas e incluídas em nossa fila editorial em 2 a 3 dias úteis.',
+    slaIndependenceTitle: 'Política de Zero Vereditos Patrocinados',
+    slaIndependenceDesc: 'Nunca aceitamos pagamentos de marcas para alterar um veredito SIM, DEPENDE ou NÃO.',
+    sidebarDesksTitle: 'E-mails Diretos',
+    deskSupportLabel: 'Suporte e Pedidos de Itens',
+    deskEditorialLabel: 'Correções, Imprensa e Licenciamento',
+    sidebarLinksTitle: 'Transparência e Recursos de Segurança',
+    linkMethodology: 'Metodologia de Verificação Editorial',
+    linkAbout: 'Sobre Nós e Conselho Editorial',
+    linkTools: 'Ver Todas as Calculadoras Interativas',
+    linkDisclaimer: 'Aviso Legal e de Segurança Médica',
+    quickCalculators: [
       {
-        question: "Como posso solicitar a avaliação de um novo item ou eletrodoméstico?",
-        answer: "Você pode usar o formulário de contato nesta página ou nos enviar um e-mail para support@isitkitchensafe.com com o nome do produto e o eletrodoméstico."
+        path: '/tools/kitchen-symbol-decoder/',
+        tag: 'Decodificador Visual',
+        title: 'Decodificador de Símbolos de Cozinha',
+        desc: 'Identifique símbolos de lava-louças, micro-ondas, forno, freezer e códigos de plástico.'
       },
       {
-        question: "Quanto tempo leva para responder às mensagens?",
-        answer: "Costumamos revisar sugestões de itens e pedidos de correção em um prazo de 2 a 3 dias úteis."
+        path: '/tools/power-outage-food-safety-checker/',
+        tag: 'USDA 4h / 24h / 48h',
+        title: 'Verificador de Alimentos após Queda de Energia',
+        desc: 'Saiba na hora quais alimentos da geladeira e do freezer manter ou descartar.'
+      },
+      {
+        path: '/tools/moldy-food-safety-checker/',
+        tag: 'Diretriz USDA',
+        title: 'Verificador de Alimentos com Mofo',
+        desc: 'Veja quais alimentos firmes podem ser aparados em 2,5 cm e quais devem ir para o lixo.'
+      },
+      {
+        path: '/tools/kitchen-fire-emergency-guide/',
+        tag: 'Protocolo de Emergência',
+        title: 'Guia de Emergência para Incêndio na Cozinha',
+        desc: 'Passos seguros para fogo em óleo, forno, micro-ondas e curto-circuito.'
       }
     ],
-    h1: "Contato e Suporte",
-    intro: "Deseja solicitar a avaliação de um item de cozinha ou sugerir uma correção em um de nossos guias? Preencha o formulário abaixo ou escreva diretamente para ",
-    introEnd: ".",
-    labelName: "Seu Nome",
-    placeholderName: "Carlos Silva",
-    labelEmail: "E-mail",
-    placeholderEmail: "carlos@example.com",
-    labelSubject: "Assunto",
-    placeholderSubject: "Sugestão de item / Proposta de correção",
-    labelMessage: "Mensagem",
-    placeholderMessage: "Descreva o item de cozinha, o eletrodoméstico e os detalhes da sua dúvida...",
-    btnSubmit: "Enviar Mensagem",
-    btnSending: "Enviando...",
-    successTitle: "Mensagem Enviada!",
-    successDesc: "Obrigado pelo contato. Recebemos sua mensagem e a revisaremos em breve.",
-    errorTitle: "Erro ao Enviar",
-    errorDesc: "Ocorreu um erro ao processar o envio. Por favor, tente novamente mais tarde."
+    applianceOptions: [
+      'Lava-Louças',
+      'Micro-ondas',
+      'Fritadeira sem Óleo (Air Fryer)',
+      'Forno / Grill',
+      'Freezer',
+      'Geladeira',
+      'Validade / Segurança Alimentar',
+      'Nova Calculadora Interativa'
+    ],
+    standardOptions: [
+      'USDA FSIS (FoodKeeper / Temperaturas Seguras)',
+      'FDA 21 CFR (Materiais em Contato com Alimentos)',
+      'NSF/ANSI 51 ou 184 (Equipamentos / Lava-Louças)',
+      'CDC / AAP (Alimentação Infantil)',
+      'Manual do Fabricante (OEM)',
+      'EPA / ASTM / Outra Norma Primária'
+    ],
+    triageConfig: {
+      supportEmail: 'support@isitkitchensafe.com',
+      editorialEmail: 'editorial@isitkitchensafe.com',
+      copiedLabel: 'Copiado!',
+      copyFailedLabel: 'Copie manualmente da visualização',
+      loadedNotice: 'Modelo carregado no formulário abaixo. Preencha seu nome e e-mail para enviar.',
+      question: {
+        subjectPrefix: '[Dúvida de Segurança] ',
+        defaultTopic: 'Segurança em Eletrodomésticos',
+        bodyIntro: 'Olá equipe de suporte do IsItKitchenSafe,',
+        labelCategory: 'Eletrodoméstico / Tema: ',
+        labelDetails: 'Detalhes da dúvida: ',
+        defaultDetails: '(Descreva o material, marca/modelo ou alimento e o que deseja verificar)',
+        bodyOutro: 'Obrigado!'
+      },
+      correction: {
+        subjectPrefix: '[Correção de Segurança - SLA 48h] ',
+        defaultSubjectSuffix: 'Atualização de Guia',
+        bodyIntro: 'Olá Mesa Editorial do IsItKitchenSafe,',
+        labelUrl: 'URL da página: ',
+        defaultUrl: 'https://isitkitchensafe.com/pt/...',
+        labelStandard: 'Norma ou fonte citada: ',
+        labelNotes: 'Correção sugerida e evidência: ',
+        defaultNotes: '(Descreva o veredito, temperatura ou especificação técnica para revisão)',
+        bodyOutro: 'Favor revisar conforme o SLA editorial de 48 horas úteis.'
+      },
+      suggestion: {
+        subjectPrefix: '[Nova Sugestão] ',
+        defaultSubjectSuffix: 'Pedido de Marca / Item / Calculadora',
+        bodyIntro: 'Olá equipe do IsItKitchenSafe,',
+        labelCategory: 'Eletrodoméstico / Categoria: ',
+        labelBrand: 'Marca: ',
+        defaultBrand: '(Ex.: Ninja, Stanley, Pyrex, Le Creuset)',
+        labelItem: 'Produto, modelo ou ideia de calculadora: ',
+        defaultItem: '(Descreva o produto ou calculadora que gostaria de ver no site)',
+        bodyOutro: 'Obrigado por avaliar esta sugestão!'
+      },
+      media: {
+        subject: '[Imprensa / Licenciamento Educacional] Contato para Mesa Editorial IsItKitchenSafe',
+        body: 'Olá Mesa Editorial do IsItKitchenSafe,\n\nOrganização / Veículo / Escola:\nTipo de contato (Imprensa / Uso em sala de aula / Permissão de citação / Geral):\nPrazo desejado:\nDetalhes:\n\nObrigado!'
+      }
+    }
+  },
+  'zh-cn': {
+    title: '联系我们、安全纠错与新品牌建议 | 厨房安全指南',
+    description:
+      '联系厨房安全指南（IsItKitchenSafe）编辑部与读者支持团队。提交 48 小时响应的安全勘误、建议新厨具品牌或计算器，或立即使用免费安全自查工具。',
+    schemaName: '联系我们与编辑部支持 — IsItKitchenSafe',
+    breadcrumbLabel: '联系我们',
+    eyebrow: '读者支持与编辑审核台',
+    h1: '联系我们',
+    introBeforeSupport:
+      '在下方选择您的问题类型，即可获取即时自助安全工具、48 小时编辑勘误模板、新品牌/计算器建议模板或媒体合作方式。您也可直接发邮件至 ',
+    introBetweenEmails: '，或联系编辑审核台 ',
+    introAfterEditorial: '。',
+    emergencyBadge: '非紧急救援通道',
+    emergencyTitle: '遇到厨房起火、燃气泄漏或清洁剂误混有毒气体？',
+    emergencyBody:
+      '电子邮件与本页联系表单均不提供实时应急监控。如遇热油起火、疑似燃气泄漏、严重烫伤，或因误混清洁剂（如 84 消毒液/漂白水与洁厕灵、白醋或氨水混合）产生刺激性毒气，请立即撤离现场并拨打 119（火警）、120（急救）或当地紧急救援电话（如海外拨打 911 / 112 及中毒控制中心）。',
+    emergencyFireBtn: '厨房火灾应急处理指南',
+    emergencyCleanerBtn: '清洁剂混用危险检查器',
+    triageEyebrow: '第 1 步 · 智能分流',
+    triageHeading: '请问我们今天可以如何帮您？',
+    triageGroupAria: '咨询类型选择器',
+    tabs: {
+      question: {
+        step: '01 · 自助速查',
+        title: '咨询厨房安全问题',
+        sub: '免费计算器速查 + 提问模板'
+      },
+      correction: {
+        step: '02 · 48 小时响应',
+        title: '提交安全勘误或标准更新',
+        sub: 'USDA / FDA / NSF 与厂商手册'
+      },
+      suggestion: {
+        step: '03 · 扩充收录',
+        title: '建议新品牌、物品或工具',
+        sub: 'Ninja、Stanley、Pyrex、Le Creuset 等'
+      },
+      media: {
+        step: '04 · 编辑合作',
+        title: '媒体采访、教学授权与综合咨询',
+        sub: '新闻引用、课堂使用与机构联络'
+      }
+    },
+    panelQ: {
+      eyebrow: '即时自助安全查询',
+      heading: '发邮件前，先用权威计算器 10 秒获取验证结论',
+      intro:
+        '绝大多数日常厨房疑问可通过我们基于 USDA、FDA 与 NSF 标准的免费交互式工具立刻获得答案：',
+      openCalcLabel: '打开工具',
+      builderHeading: '仍有具体疑问？一键生成结构化提问模板',
+      labelCategory: '涉及电器或主题',
+      labelDetails: '物品材质、品牌型号或简短问题',
+      placeholderDetails: '例如：双层真空不锈钢保温杯的盖子能放进空气炸锅或洗碗机吗？',
+      btnFillForm: '填入下方联系表单',
+      btnMailto: '用邮件客户端打开 (mailto)',
+      btnCopy: '复制模板'
+    },
+    panelC: {
+      slaBadge: '48 小时编辑审核 SLA',
+      slaSub: '一手权威标准复核',
+      heading: '提交安全勘误或监管标准更新',
+      intro:
+        '本站每一项安全判定均基于公开监管法规与厂商工程规范。如您发现厂商保养手册更新或 USDA/FDA/NSF 标准修订，编辑部将在 48 个工作小时内核查一手资料并更新页面。',
+      methodologyBtn: '查看编辑审核方法论',
+      labelUrl: '指南或计算器页面链接',
+      placeholderUrl: 'https://isitkitchensafe.com/zh-cn/dishwasher/...',
+      labelStandard: '引用的标准或资料来源',
+      labelNotes: '勘误要点与参考来源链接',
+      placeholderNotes: '请说明具体的温度阈值、材质说明差异，或附上 USDA/FDA/品牌官方说明书链接...',
+      btnFillForm: '载入下方表单提交',
+      btnMailto: '发送至编辑部 (mailto)',
+      btnCopy: '复制勘误模板'
+    },
+    panelS: {
+      eyebrow: '共建厨房安全资料库',
+      heading: '建议新增品牌、厨具物品或计算器',
+      intro:
+        '想让我们评测某款热门厨具、保温杯，或开发新的食品安全计算器？选择分类与品牌即可生成规范的收录建议。',
+      labelCategory: '适用电器 / 分类',
+      labelBrand: '品牌名称',
+      placeholderBrand: '例如：Ninja、Stanley、Pyrex、Le Creuset',
+      quickPickLabel: '热门品牌快选：',
+      labelItem: '具体产品型号或计算器构想',
+      placeholderItem: '例如：Stanley Quencher H2.0 杯盖与吸管、Ninja Crispi 玻璃内胆或酸面团保存工具',
+      btnFillForm: '载入下方表单提交',
+      btnMailto: '邮件发送建议 (mailto)',
+      btnCopy: '复制建议模板'
+    },
+    panelM: {
+      eyebrow: '媒体、教育机构与公共卫生',
+      heading: '媒体采访、教学授权与综合咨询',
+      intro:
+        '记者、烹饪教师、营养师与科普教育者在注明出处的前提下，可引用本站验证数据与可打印安全速查表。IsItKitchenSafe 坚持 100% 编辑独立，绝不接受任何品牌赞助或付费修改安全结论。',
+      editorialCardTag: '编辑审核、媒体与勘误',
+      editorialCardTitle: '编辑核查与媒体联络台',
+      editorialCardDesc: '适用于媒体引用采访、学校课堂资料授权以及基于标准的页面勘误。',
+      supportCardTag: '读者支持与综合事务',
+      supportCardTitle: '读者服务支持台',
+      supportCardDesc: '适用于无障碍体验反馈、页面故障反馈、新物品评测建议与常规咨询。',
+      btnFillForm: '载入媒体/授权模板至下方表单',
+      btnMailto: '致信媒体编辑台 (mailto)',
+      btnCopy: '复制模板'
+    },
+    formEyebrow: '第 2 步 · 在线留言',
+    formHeading: '发送留言',
+    formIntro:
+      '希望直接在本页提交？填写下方表单即可（也可点击上方分流卡片的“填入下方表单”自动填充主题与正文）。',
+    labelName: '您的姓名',
+    placeholderName: '张三',
+    labelEmail: '电子邮箱',
+    placeholderEmail: 'zhangsan@example.com',
+    labelSubject: '主题',
+    placeholderSubject: '新物品评估建议 / 指南勘误反馈',
+    labelMessage: '留言内容',
+    placeholderMessage: '请详细描述涉及的厨房物品、电器或您引用的权威标准...',
+    btnSubmit: '发送留言',
+    btnSending: '正在发送...',
+    successTitle: '发送成功！',
+    successDesc: '感谢您的来信。我们已收到您的反馈，并将尽快进行审核处理。',
+    errorTitle: '发送失败',
+    errorDesc: '发生错误，请稍后重试。',
+    sidebarSlaTitle: '回复时效与编辑承诺',
+    slaCorrectionTitle: '安全勘误与标准更新',
+    slaCorrectionDesc: '对照 USDA、FDA、NSF 与厂商手册，在 48 个工作小时内完成审核。',
+    slaSuggestionTitle: '新品牌、物品与计算器建议',
+    slaSuggestionDesc: '通常在 2 至 3 个工作日内完成分拣并排入编辑计划。',
+    slaIndependenceTitle: '零赞助判定原则',
+    slaIndependenceDesc: '我们绝不接受任何付费合作来改变“安全 / 视情况 / 禁止”的判定结果。',
+    sidebarDesksTitle: '直连邮箱',
+    deskSupportLabel: '读者支持与物品建议',
+    deskEditorialLabel: '安全勘误、媒体与授权',
+    sidebarLinksTitle: '公开透明与安全资源',
+    linkMethodology: '安全验证方法论与引用标准',
+    linkAbout: '关于我们与编辑委员会',
+    linkTools: '浏览全部互动安全计算器',
+    linkDisclaimer: '安全与医疗免责声明',
+    quickCalculators: [
+      {
+        path: '/tools/kitchen-symbol-decoder/',
+        tag: '图示识别',
+        title: '厨房餐具符号解码器',
+        desc: '快速识别锅碗底部印刻的洗碗机、微波炉、烤箱、冷冻及塑料回收标号。'
+      },
+      {
+        path: '/tools/power-outage-food-safety-checker/',
+        tag: 'USDA 4/24/48 小时',
+        title: '停电食品安全检查器',
+        desc: '根据停电时长判断冰箱冷藏与冷冻食品应保留还是丢弃。'
+      },
+      {
+        path: '/tools/moldy-food-safety-checker/',
+        tag: 'USDA 指南',
+        title: '发霉食品安全判断器',
+        desc: '区分哪些硬质食物可切除霉斑周围 2.5 厘米，哪些软质食物必须整份丢弃。'
+      },
+      {
+        path: '/tools/kitchen-fire-emergency-guide/',
+        tag: '应急步骤',
+        title: '厨房火灾应急处理指南',
+        desc: '油锅起火、烤箱、微波炉及电器起火的正确灭火与避险步骤。'
+      }
+    ],
+    applianceOptions: [
+      '洗碗机',
+      '微波炉',
+      '空气炸锅',
+      '烤箱 / 炙烤',
+      '冷冻室',
+      '冰箱冷藏室',
+      '食物保质期 / 食品安全',
+      '新互动计算器建议'
+    ],
+    standardOptions: [
+      'USDA FSIS（食品安全与核心温度）',
+      'FDA 21 CFR（食品接触材料法规）',
+      'NSF/ANSI 51 或 184（厨具与洗碗机标准）',
+      'CDC / AAP（婴幼儿喂养安全指南）',
+      '品牌官方使用与保养手册（OEM）',
+      'EPA / ASTM / 其他一手权威标准'
+    ],
+    triageConfig: {
+      supportEmail: 'support@isitkitchensafe.com',
+      editorialEmail: 'editorial@isitkitchensafe.com',
+      copiedLabel: '已复制！',
+      copyFailedLabel: '请从预览框手动复制',
+      loadedNotice: '模板已填入下方表单，请补充您的姓名和邮箱后点击发送。',
+      question: {
+        subjectPrefix: '[厨房安全咨询] ',
+        defaultTopic: '厨房电器安全',
+        bodyIntro: 'IsItKitchenSafe 支持团队您好：',
+        labelCategory: '电器 / 主题：',
+        labelDetails: '问题详情：',
+        defaultDetails: '（请说明厨具材质、品牌型号或食材，以及您想确认的安全场景）',
+        bodyOutro: '非常感谢！'
+      },
+      correction: {
+        subjectPrefix: '[安全勘误 - 48小时SLA] ',
+        defaultSubjectSuffix: '页面信息复核请求',
+        bodyIntro: 'IsItKitchenSafe 编辑审核台您好：',
+        labelUrl: '页面链接：',
+        defaultUrl: 'https://isitkitchensafe.com/zh-cn/...',
+        labelStandard: '参考标准 / 资料来源：',
+        labelNotes: '勘误说明与依据链接：',
+        defaultNotes: '（请说明需要复核的安全判定、温度数值或厂商规范细节）',
+        bodyOutro: '请按 48 小时编辑复核流程核查，谢谢！'
+      },
+      suggestion: {
+        subjectPrefix: '[新收录建议] ',
+        defaultSubjectSuffix: '品牌 / 物品 / 计算器建议',
+        bodyIntro: 'IsItKitchenSafe 团队您好：',
+        labelCategory: '电器 / 分类：',
+        labelBrand: '品牌名称：',
+        defaultBrand: '（例如：Ninja、Stanley、Pyrex、Le Creuset）',
+        labelItem: '产品型号或计算器想法：',
+        defaultItem: '（请描述希望收录的产品型号或安全工具功能）',
+        bodyOutro: '感谢考虑我的建议！'
+      },
+      media: {
+        subject: '[媒体采访 / 教学授权] 致 IsItKitchenSafe 编辑部',
+        body: 'IsItKitchenSafe 编辑部您好：\n\n机构 / 媒体 / 学校名称：\n咨询类型（媒体采访 / 课堂教学授权 / 数据引用许可 / 综合合作）：\n期望回复时间：\n具体说明：\n\n谢谢！'
+      }
+    }
+  },
+  ja: {
+    title: 'お問い合わせ・安全情報の訂正・掲載リクエスト | キッチン安全チェッカー',
+    description:
+      'キッチン安全チェッカー（IsItKitchenSafe）編集部・サポート窓口へのお問い合わせ。48時間以内の訂正レビュー申請、ブランド・ツール提案、即時セルフチェック計算機をご案内します。',
+    schemaName: 'お問い合わせ・サポート窓口 — IsItKitchenSafe',
+    breadcrumbLabel: 'お問い合わせ',
+    eyebrow: '読者サポート・編集検証デスク',
+    h1: 'お問い合わせ',
+    introBeforeSupport:
+      '下記からお問い合わせの種類を選ぶと、無料の即時セルフチェックツール、48時間対応の訂正テンプレート、新ブランド・計算機リクエスト、または取材窓口をすぐにご利用いただけます。直接メールでのご連絡は ',
+    introBetweenEmails: '、編集検証デスクは ',
+    introAfterEditorial: ' までお送りください。',
+    emergencyBadge: '緊急事態には対応していません',
+    emergencyTitle: 'キッチンでの火災・ガス漏れ・洗剤混合による有毒ガス発生時',
+    emergencyBody:
+      'メールおよび本フォームはリアルタイム監視を行っていません。油火災、ガス臭、重度のやけど、塩素系漂白剤と酸性洗剤・酢の混合などによる有毒ガス発生時は、直ちにその場を離れ、119番（消防・救急）または日本中毒情報センター 中毒110番（大阪 072-727-2499／つくば 029-852-9999）へご連絡ください。',
+    emergencyFireBtn: 'キッチン火災 緊急対処ガイド',
+    emergencyCleanerBtn: '洗剤混合の危険チェッカー',
+    triageEyebrow: 'ステップ 1 · お問い合わせトリアージ',
+    triageHeading: 'どのようなご用件でしょうか？',
+    triageGroupAria: 'お問い合わせ種別セレクター',
+    tabs: {
+      question: {
+        step: '01 · セルフチェック',
+        title: 'キッチン安全について質問する',
+        sub: '即時チェッカー＋質問テンプレート'
+      },
+      correction: {
+        step: '02 · 48時間SLA',
+        title: '安全情報の訂正・基準更新を報告',
+        sub: 'USDA / FDA / NSF・メーカー公式'
+      },
+      suggestion: {
+        step: '03 · 掲載リクエスト',
+        title: '新しいブランド・製品・ツールを提案',
+        sub: 'Ninja, Stanley, Pyrex, Le Creuset など'
+      },
+      media: {
+        step: '04 · 取材・教育',
+        title: '取材・教育利用・一般お問い合わせ',
+        sub: 'メディア引用・授業利用・その他'
+      }
+    },
+    panelQ: {
+      eyebrow: '即時セルフチェックツール',
+      heading: 'メール前に検証済みチェッカーで今すぐ確認',
+      intro:
+        '日常的なキッチン安全の疑問の多くは、USDA・FDA・NSF基準に基づく無料ツールで数秒以内に解決できます：',
+      openCalcLabel: 'ツールを開く',
+      builderHeading: '個別の疑問がありますか？質問テンプレートを自動作成',
+      labelCategory: '対象の家電・カテゴリ',
+      labelDetails: '製品素材・ブランドや質問の要点',
+      placeholderDetails: '例：真空断熱ステンレスボトルのフタは食洗機やノンフライヤーで使えますか？',
+      btnFillForm: '下のフォームに自動入力',
+      btnMailto: 'メールアプリで開く (mailto)',
+      btnCopy: 'テンプレートをコピー'
+    },
+    panelC: {
+      slaBadge: '48時間 編集検証SLA',
+      slaSub: '一次情報・公的基準レビュー',
+      heading: '安全情報の訂正または公的基準の更新を報告',
+      intro:
+        '当サイトの判定はすべて公的安全基準とメーカー仕様書に基づいています。取扱説明書の改訂や USDA/FDA/NSF 基準の更新をご指摘いただいた場合、編集デスクが48営業時間以内に一次資料を確認・反映します。',
+      methodologyBtn: '編集検証メソドロジーを見る',
+      labelUrl: '対象ガイドまたはツールのURL',
+      placeholderUrl: 'https://isitkitchensafe.com/ja/dishwasher/...',
+      labelStandard: '参照する基準・一次情報源',
+      labelNotes: '訂正内容の要約と根拠リンク',
+      placeholderNotes: '耐熱温度の数値変更、素材仕様の更新、メーカー公式マニュアルや公的基準のURLをご記入ください...',
+      btnFillForm: '訂正内容を下のフォームに読込',
+      btnMailto: '編集デスクへメール (mailto)',
+      btnCopy: 'テンプレートをコピー'
+    },
+    panelS: {
+      eyebrow: '安全リファレンス拡充リクエスト',
+      heading: '新しいブランド・調理器具・計算機を提案する',
+      intro:
+        'まだ掲載されていない人気ブランドや調理器具、食品保存ツールがありますか？カテゴリとブランドを選ぶと、整理されたリクエスト文を自動生成します。',
+      labelCategory: '家電・カテゴリ',
+      labelBrand: 'ブランド名',
+      placeholderBrand: '例：Ninja, Stanley, Pyrex, Le Creuset',
+      quickPickLabel: '人気ブランドから選択：',
+      labelItem: '具体的な製品名・型番またはツール案',
+      placeholderItem: '例：Stanley Quencher H2.0 のフタとストロー、Ninja ガラス容器、自家製発酵食品の保存チェッカー',
+      btnFillForm: '提案を下のフォームに読込',
+      btnMailto: 'メールでリクエスト (mailto)',
+      btnCopy: 'テンプレートをコピー'
+    },
+    panelM: {
+      eyebrow: '報道・教育機関・一般窓口',
+      heading: '取材・教育利用ライセンス・一般のお問い合わせ',
+      intro:
+        '報道関係者、料理教室、管理栄養士、公衆衛生教育ご担当者様は、出典明記のうえで検証済みデータや印刷用チートシートを引用いただけます。IsItKitchenSafe は100%の編集独立性を維持しており、広告・協賛による安全判定の変更は一切行いません。',
+      editorialCardTag: '編集・取材・訂正窓口',
+      editorialCardTitle: '編集検証デスク',
+      editorialCardDesc: 'メディア取材、引用確認、学校・自治体での教育利用、安全基準に基づく訂正申請。',
+      supportCardTag: '読者サポート・一般窓口',
+      supportCardTitle: '一般サポートデスク',
+      supportCardDesc: 'アクセシビリティ改善、不具合報告、新規アイテム掲載リクエスト、一般的なお問い合わせ。',
+      btnFillForm: '取材・教育用テンプレートをフォームに読込',
+      btnMailto: '編集デスクへメール (mailto)',
+      btnCopy: 'テンプレートをコピー'
+    },
+    formEyebrow: 'ステップ 2 · 直接送信フォーム',
+    formHeading: 'メッセージを送信',
+    formIntro:
+      'このページから直接送信する場合は、以下のフォームをご記入ください（上のトリアージで件名と本文を自動入力できます）。',
+    labelName: 'お名前',
+    placeholderName: '山田 太郎',
+    labelEmail: 'メールアドレス',
+    placeholderEmail: 'yamada@example.com',
+    labelSubject: '件名',
+    placeholderSubject: 'アイテム掲載リクエスト / ガイドの訂正提案',
+    labelMessage: 'メッセージ内容',
+    placeholderMessage: '対象の調理器具・食品、家電名、または参照基準の詳細をご記入ください...',
+    btnSubmit: 'メッセージを送信',
+    btnSending: '送信中...',
+    successTitle: '送信完了！',
+    successDesc: 'お問い合わせありがとうございます。メッセージを受け付けました。順次確認させていただきます。',
+    errorTitle: '送信に失敗しました',
+    errorDesc: 'エラーが発生しました。時間をおいて再度お試しください。',
+    sidebarSlaTitle: '返信目安と編集SLA',
+    slaCorrectionTitle: '安全情報の訂正・基準更新',
+    slaCorrectionDesc: 'USDA・FDA・NSFおよびメーカー公式仕様と照合し、48営業時間以内にレビューします。',
+    slaSuggestionTitle: '新ブランド・アイテム・ツール提案',
+    slaSuggestionDesc: '通常 2〜3 営業日以内に確認し、検証キューへ登録します。',
+    slaIndependenceTitle: '非スポンサー・独立判定ポリシー',
+    slaIndependenceDesc: '企業協賛や報酬により「安全・条件付き・不可」の判定を変更することは一切ありません。',
+    sidebarDesksTitle: '直通メールアドレス',
+    deskSupportLabel: 'サポート・掲載リクエスト',
+    deskEditorialLabel: '訂正・取材・教育ライセンス',
+    sidebarLinksTitle: '透明性・安全リソース',
+    linkMethodology: '安全検証メソドロジーと参照基準',
+    linkAbout: '運営概要・編集委員会について',
+    linkTools: 'すべての安全チェッカー一覧を見る',
+    linkDisclaimer: '安全・医療に関する免責事項',
+    quickCalculators: [
+      {
+        path: '/tools/kitchen-symbol-decoder/',
+        tag: '記号デコーダー',
+        title: 'キッチン用品マーク解読ツール',
+        desc: '食洗機・電子レンジ・オーブン・冷凍・プラスチック識別マークをすぐ判別。'
+      },
+      {
+        path: '/tools/power-outage-food-safety-checker/',
+        tag: 'USDA 4/24/48時間',
+        title: '停電時の食品安全チェッカー',
+        desc: '停電時間から冷蔵庫・冷凍庫内の食品を保存可か廃棄すべきか判定します。'
+      },
+      {
+        path: '/tools/moldy-food-safety-checker/',
+        tag: 'USDA基準',
+        title: 'カビが生えた食品の安全判定ツール',
+        desc: '周囲2.5cm切除で食べられる硬質食品と、丸ごと廃棄が必要な軟質食品を判別。'
+      },
+      {
+        path: '/tools/kitchen-fire-emergency-guide/',
+        tag: '緊急プロトコル',
+        title: 'キッチン火災 緊急対処ガイド',
+        desc: '油火災・オーブン・電子レンジ・電気火災ごとの正しい初期対応を確認。'
+      }
+    ],
+    applianceOptions: [
+      '食洗機',
+      '電子レンジ',
+      'ノンフライヤー（エアフライヤー）',
+      'オーブン・グリル',
+      '冷凍庫',
+      '冷蔵庫',
+      '保存期間・食品安全',
+      '新しい計算機・ツール案'
+    ],
+    standardOptions: [
+      'USDA FSIS（食品安全・中心温度基準）',
+      'FDA 21 CFR（食品接触材料規格）',
+      'NSF/ANSI 51・184（調理器具・食洗機基準）',
+      'CDC / AAP（乳幼児の調乳・授乳ガイドライン）',
+      'メーカー公式取扱説明書（OEM）',
+      'EPA / ASTM / その他の一次基準'
+    ],
+    triageConfig: {
+      supportEmail: 'support@isitkitchensafe.com',
+      editorialEmail: 'editorial@isitkitchensafe.com',
+      copiedLabel: 'コピーしました！',
+      copyFailedLabel: 'プレビュー欄から手動でコピーしてください',
+      loadedNotice: 'テンプレートを下のフォームに入力しました。お名前とメールアドレスを入力して送信してください。',
+      question: {
+        subjectPrefix: '【安全に関するご質問】',
+        defaultTopic: 'キッチン家電の安全性',
+        bodyIntro: 'IsItKitchenSafe サポートご担当者様',
+        labelCategory: '対象家電・カテゴリ：',
+        labelDetails: 'ご質問内容：',
+        defaultDetails: '（調理器具の素材・ブランド型番・食品名と確認したい状況をご記入ください）',
+        bodyOutro: 'よろしくお願いいたします。'
+      },
+      correction: {
+        subjectPrefix: '【安全情報の訂正・48時間SLA】',
+        defaultSubjectSuffix: 'ガイド検証アップデート依頼',
+        bodyIntro: 'IsItKitchenSafe 編集検証デスクご担当者様',
+        labelUrl: '対象ページURL：',
+        defaultUrl: 'https://isitkitchensafe.com/ja/...',
+        labelStandard: '参照基準・一次情報源：',
+        labelNotes: '訂正提案と根拠リンク：',
+        defaultNotes: '（見直しが必要な判定・温度数値・メーカー仕様の詳細をご記入ください）',
+        bodyOutro: '48営業時間SLAでのご確認をお願いいたします。'
+      },
+      suggestion: {
+        subjectPrefix: '【新規掲載リクエスト】',
+        defaultSubjectSuffix: 'ブランド・アイテム・ツール提案',
+        bodyIntro: 'IsItKitchenSafe 編集部様',
+        labelCategory: '対象家電・カテゴリ：',
+        labelBrand: 'ブランド名：',
+        defaultBrand: '（例：Ninja, Stanley, Pyrex, Le Creuset）',
+        labelItem: '製品名・型番またはツール案：',
+        defaultItem: '（追加してほしい製品モデルや計算機の内容をご記入ください）',
+        bodyOutro: 'ご検討のほどよろしくお願いいたします。'
+      },
+      media: {
+        subject: '【取材・教育利用のお問い合わせ】IsItKitchenSafe 編集デスク宛',
+        body: 'IsItKitchenSafe 編集デスクご担当者様\n\n貴社・媒体・学校名：\nご用件（取材・引用許可・教育利用・一般）：\nご希望の期日：\n詳細内容：\n\nよろしくお願いいたします。'
+      }
+    }
   }
 };
 
-const content = contentByLang[lang as keyof typeof contentByLang] || contentByLang.es;
+const localeKey = (lang in contentByLang ? lang : 'es') as keyof typeof contentByLang;
+const content = contentByLang[localeKey];
+
+const methodologyUrl = getDirectoryUrl('methodology', lang);
+const aboutUrl = getDirectoryUrl('about', lang);
+const toolsUrl = getDirectoryUrl('tools', lang);
+const disclaimerUrl = getDirectoryUrl('disclaimer', lang);
+
+const fireGuideUrl = translatePath('/tools/kitchen-fire-emergency-guide/');
+const cleanerMixUrl = translatePath('/tools/cleaner-mixing-danger-checker/');
+
+const resolvedQuickCalculators = content.quickCalculators.map((item) => ({
+  href: translatePath(item.path),
+  tag: item.tag,
+  title: item.title,
+  desc: item.desc
+}));
+
+const canonicalContactUrl = `https://isitkitchensafe.com${getDirectoryUrl('contact', lang)}`;
+const canonicalMethodologyUrl = `https://isitkitchensafe.com${methodologyUrl}`;
+
+const contactSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ContactPage',
+  name: content.schemaName,
+  url: canonicalContactUrl,
+  inLanguage: lang === 'zh-cn' ? 'zh-CN' : lang,
+  description: content.description,
+  isPartOf: {
+    '@type': 'WebSite',
+    name: 'IsItKitchenSafe',
+    url: 'https://isitkitchensafe.com/'
+  },
+  mainEntity: {
+    '@type': 'Organization',
+    name: 'IsItKitchenSafe',
+    alternateName: 'Is It Kitchen Safe?',
+    url: 'https://isitkitchensafe.com/',
+    logo: {
+      '@type': 'ImageObject',
+      url: 'https://isitkitchensafe.com/favicon.svg'
+    },
+    publishingPrinciples: canonicalMethodologyUrl,
+    correctionsPolicy: `${canonicalMethodologyUrl}#review-protocol`,
+    contactPoint: [
+      {
+        '@type': 'ContactPoint',
+        email: 'editorial@isitkitchensafe.com',
+        contactType: 'editorial desk',
+        availableLanguage: ['English', 'Spanish', 'Portuguese', 'Chinese', 'Japanese']
+      },
+      {
+        '@type': 'ContactPoint',
+        email: 'support@isitkitchensafe.com',
+        contactType: 'customer support',
+        availableLanguage: ['English', 'Spanish', 'Portuguese', 'Chinese', 'Japanese']
+      }
+    ]
+  }
+};
 ---
 
-<Layout title={content.title} description={content.description} faqs={content.faqs} excludeArticleSchema={true} availableLocales={availableLocales} lang={lang}>
-  <section class="max-w-[600px] mx-auto px-6 py-[96px]">
-    <h1 class="text-display-lg font-medium text-ink tracking-tight mb-4">{content.h1}</h1>
-    <p class="text-body-md text-muted mb-8 leading-relaxed">
-      {content.intro}<!--email_off--><a href="mailto:support@isitkitchensafe.com" class="text-link hover:underline">support@isitkitchensafe.com</a><!--/email_off-->{content.introEnd}
-    </p>
+<Layout
+  title={content.title}
+  description={content.description}
+  excludeArticleSchema={true}
+  excludeFaqSchema={true}
+  availableLocales={availableLocales}
+  lang={lang}
+>
+  <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(contactSchema)} />
 
-    <!-- Client-side Interactive Form -->
-    <form id="contact-form" class="flex flex-col gap-6">
-      <div class="flex flex-col gap-2">
-        <label for="name" class="text-[13px] font-semibold text-ink uppercase tracking-wider">{content.labelName}</label>
-        <input 
-          type="text" 
-          id="name" 
-          name="name" 
-          required 
-          placeholder={content.placeholderName}
-          class="w-full h-11 px-4 py-3 bg-canvas text-ink text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
-        />
+  <article class="max-w-[920px] mx-auto px-6 py-12 md:py-16">
+    <Breadcrumbs
+      items={[
+        { label: t('nav.home'), href: translatePath('/') },
+        { label: content.breadcrumbLabel }
+      ]}
+      className="mb-6"
+    />
+
+    <!-- Hero Header -->
+    <header class="mb-8">
+      <span class="text-xs font-semibold uppercase tracking-wider text-signature-coral block mb-2">
+        {content.eyebrow}
+      </span>
+      <h1 class="text-display-lg font-medium text-ink tracking-tight mb-3">
+        {content.h1}
+      </h1>
+      <p class="text-title-md text-body leading-relaxed max-w-[760px]">
+        {content.introBeforeSupport}<!--email_off--><a href="mailto:support@isitkitchensafe.com" class="text-link hover:underline font-medium">support@isitkitchensafe.com</a><!--/email_off-->{content.introBetweenEmails}<!--email_off--><a href="mailto:editorial@isitkitchensafe.com" class="text-link hover:underline font-medium">editorial@isitkitchensafe.com</a><!--/email_off-->{content.introAfterEditorial}
+      </p>
+    </header>
+
+    <!-- Emergency Medical / Poison Control / Fire Safety Disclaimer Callout -->
+    <aside
+      aria-labelledby="emergency-disclaimer-heading"
+      class="bg-error-bg border border-error/30 dark:border-error-border/40 rounded-lg p-5 mb-10"
+    >
+      <div class="flex flex-col gap-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-error/15 text-error dark:text-error-border border border-error/30">
+            {content.emergencyBadge}
+          </span>
+          <h2 id="emergency-disclaimer-heading" class="text-title-sm font-semibold text-ink">
+            {content.emergencyTitle}
+          </h2>
+        </div>
+        <p class="text-[13.5px] text-body leading-relaxed">
+          {content.emergencyBody}
+        </p>
+        <div class="flex flex-wrap gap-2.5 pt-1">
+          <a
+            href={fireGuideUrl}
+            class="min-h-[38px] px-3.5 py-2 bg-canvas hover:bg-surface-strong/40 text-ink border border-error/30 rounded-md text-xs font-semibold inline-flex items-center gap-1.5 transition-colors"
+          >
+            {content.emergencyFireBtn} &rarr;
+          </a>
+          <a
+            href={cleanerMixUrl}
+            class="min-h-[38px] px-3.5 py-2 bg-canvas hover:bg-surface-strong/40 text-ink border border-error/30 rounded-md text-xs font-semibold inline-flex items-center gap-1.5 transition-colors"
+          >
+            {content.emergencyCleanerBtn} &rarr;
+          </a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Interactive 4-Topic Inquiry Triage Selector -->
+    <section
+      id="contact-triage"
+      aria-labelledby="triage-heading"
+      class="mb-12"
+      data-config={JSON.stringify(content.triageConfig)}
+    >
+      <div class="mb-4">
+        <span class="text-xs font-semibold uppercase tracking-wider text-signature-coral block mb-1">
+          {content.triageEyebrow}
+        </span>
+        <h2 id="triage-heading" class="text-title-lg font-medium text-ink tracking-tight">
+          {content.triageHeading}
+        </h2>
       </div>
 
-      <div class="flex flex-col gap-2">
-        <label for="email" class="text-[13px] font-semibold text-ink uppercase tracking-wider">{content.labelEmail}</label>
-        <input 
-          type="email" 
-          id="email" 
-          name="email" 
-          required 
-          placeholder={content.placeholderEmail}
-          class="w-full h-11 px-4 py-3 bg-canvas text-ink text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
-        />
+      <!-- 4 Topic Selector Buttons -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6" role="group" aria-label={content.triageGroupAria}>
+        <button
+          type="button"
+          data-triage-tab="question"
+          aria-pressed="true"
+          class="text-left rounded-lg border p-4 transition-colors cursor-pointer bg-primary text-on-primary border-primary flex flex-col gap-1"
+        >
+          <span class="text-[11px] font-mono uppercase tracking-wider opacity-80">{content.tabs.question.step}</span>
+          <span class="text-[14px] font-semibold leading-snug">{content.tabs.question.title}</span>
+          <span class="text-[12px] opacity-80 leading-snug">{content.tabs.question.sub}</span>
+        </button>
+
+        <button
+          type="button"
+          data-triage-tab="correction"
+          aria-pressed="false"
+          class="text-left rounded-lg border p-4 transition-colors cursor-pointer bg-surface-soft text-ink border-hairline hover:bg-surface-strong/40 flex flex-col gap-1"
+        >
+          <span class="text-[11px] font-mono uppercase tracking-wider opacity-80">{content.tabs.correction.step}</span>
+          <span class="text-[14px] font-semibold leading-snug">{content.tabs.correction.title}</span>
+          <span class="text-[12px] opacity-80 leading-snug">{content.tabs.correction.sub}</span>
+        </button>
+
+        <button
+          type="button"
+          data-triage-tab="suggestion"
+          aria-pressed="false"
+          class="text-left rounded-lg border p-4 transition-colors cursor-pointer bg-surface-soft text-ink border-hairline hover:bg-surface-strong/40 flex flex-col gap-1"
+        >
+          <span class="text-[11px] font-mono uppercase tracking-wider opacity-80">{content.tabs.suggestion.step}</span>
+          <span class="text-[14px] font-semibold leading-snug">{content.tabs.suggestion.title}</span>
+          <span class="text-[12px] opacity-80 leading-snug">{content.tabs.suggestion.sub}</span>
+        </button>
+
+        <button
+          type="button"
+          data-triage-tab="media"
+          aria-pressed="false"
+          class="text-left rounded-lg border p-4 transition-colors cursor-pointer bg-surface-soft text-ink border-hairline hover:bg-surface-strong/40 flex flex-col gap-1"
+        >
+          <span class="text-[11px] font-mono uppercase tracking-wider opacity-80">{content.tabs.media.step}</span>
+          <span class="text-[14px] font-semibold leading-snug">{content.tabs.media.title}</span>
+          <span class="text-[12px] opacity-80 leading-snug">{content.tabs.media.sub}</span>
+        </button>
       </div>
 
-      <div class="flex flex-col gap-2">
-        <label for="subject" class="text-[13px] font-semibold text-ink uppercase tracking-wider">{content.labelSubject}</label>
-        <input 
-          type="text" 
-          id="subject" 
-          name="subject" 
-          required 
-          placeholder={content.placeholderSubject}
-          class="w-full h-11 px-4 py-3 bg-canvas text-ink text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
-        />
-      </div>
-
-      <div class="flex flex-col gap-2">
-        <label for="message" class="text-[13px] font-semibold text-ink uppercase tracking-wider">{content.labelMessage}</label>
-        <textarea 
-          id="message" 
-          name="message" 
-          required 
-          rows="5"
-          placeholder={content.placeholderMessage}
-          class="w-full px-4 py-3 bg-canvas text-ink text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border resize-y min-h-[120px]"
-        ></textarea>
-      </div>
-
-      <!-- Honeypot -->
-      <input type="text" name="b_name" id="b_name" style="display:none" tabindex="-1" autocomplete="off" />
-
-      <button 
-        id="submit-btn"
-        type="submit" 
-        class="btn-primary mt-2"
-        data-sending-text={content.btnSending}
-        data-error-text={content.errorDesc}
+      <!-- PANEL 1: Ask a Kitchen Safety Question -->
+      <div
+        data-triage-panel="question"
+        class="bg-surface-soft border border-hairline rounded-lg p-5 md:p-6 flex flex-col gap-6"
       >
-        {content.btnSubmit}
-      </button>
-    </form>
+        <div>
+          <span class="text-[11px] font-semibold uppercase tracking-wider text-success dark:text-success-border block mb-1">
+            {content.panelQ.eyebrow}
+          </span>
+          <h3 class="text-title-sm font-semibold text-ink mb-1.5">
+            {content.panelQ.heading}
+          </h3>
+          <p class="text-[13.5px] text-body leading-relaxed">
+            {content.panelQ.intro}
+          </p>
+        </div>
 
-    <!-- Success Message Container -->
-    <div id="success-message" class="hidden bg-success-bg border border-success-border/30 rounded-md p-6 mt-8" aria-live="polite">
-      <h3 class="text-title-sm text-success font-medium mb-2 flex items-center gap-1.5">
-        <span>✓</span> {content.successTitle}
-      </h3>
-      <p class="text-[13px] text-body leading-relaxed">
-        {content.successDesc}
-      </p>
-    </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {resolvedQuickCalculators.map((calc) => (
+            <a
+              href={calc.href}
+              class="group bg-canvas hover:bg-surface-strong/30 border border-hairline rounded-md p-4 flex flex-col gap-1.5 transition-colors"
+            >
+              <span class="text-[11px] font-mono text-muted">{calc.tag}</span>
+              <span class="text-[14px] font-semibold text-ink group-hover:text-link transition-colors">
+                {calc.title}
+              </span>
+              <span class="text-[12.5px] text-body leading-relaxed">{calc.desc}</span>
+              <span class="text-xs font-medium text-link mt-1">{content.panelQ.openCalcLabel} &rarr;</span>
+            </a>
+          ))}
+        </div>
 
-    <!-- Error Message Container -->
-    <div id="error-message" class="hidden bg-error-bg border border-error/30 rounded-md p-6 mt-8" aria-live="polite">
-      <h3 class="text-title-sm text-error font-medium mb-2 flex items-center gap-1.5">
-        <span>✗</span> {content.errorTitle}
-      </h3>
-      <p id="error-text" class="text-[13px] text-error leading-relaxed">
-        {content.errorDesc}
-      </p>
-    </div>
-  </section>
+        <div class="border-t border-hairline pt-5 flex flex-col gap-4">
+          <h4 class="text-[14px] font-semibold text-ink">
+            {content.panelQ.builderHeading}
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label for="triage-q-category" class="text-[12px] font-semibold text-ink uppercase tracking-wider">
+                {content.panelQ.labelCategory}
+              </label>
+              <select
+                id="triage-q-category"
+                class="w-full h-11 px-3.5 bg-canvas text-ink text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
+              >
+                {content.applianceOptions.map((opt) => (
+                  <option value={opt}>{opt}</option>
+                ))}
+              </select>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label for="triage-q-details" class="text-[12px] font-semibold text-ink uppercase tracking-wider">
+                {content.panelQ.labelDetails}
+              </label>
+              <input
+                type="text"
+                id="triage-q-details"
+                placeholder={content.panelQ.placeholderDetails}
+                class="w-full h-11 px-3.5 bg-canvas text-ink text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
+              />
+            </div>
+          </div>
+
+          <pre
+            id="triage-q-preview"
+            class="bg-canvas border border-hairline rounded-md p-3.5 text-[12.5px] text-body font-mono whitespace-pre-wrap break-words leading-relaxed"
+          ></pre>
+
+          <div class="flex flex-wrap items-center gap-2.5">
+            <button
+              type="button"
+              data-fill-form="question"
+              class="min-h-[42px] px-4 py-2 bg-primary hover:bg-primary-active text-on-primary rounded-md text-xs font-semibold cursor-pointer transition-colors"
+            >
+              {content.panelQ.btnFillForm}
+            </button>
+            <a
+              id="triage-q-mailto"
+              href="mailto:support@isitkitchensafe.com"
+              class="min-h-[42px] px-4 py-2 bg-canvas hover:bg-surface-strong/40 text-ink border border-hairline rounded-md text-xs font-semibold inline-flex items-center transition-colors"
+            >
+              {content.panelQ.btnMailto} &rarr;
+            </a>
+            <button
+              type="button"
+              data-copy-template="question"
+              class="min-h-[42px] px-4 py-2 bg-canvas hover:bg-surface-strong/40 text-ink border border-hairline rounded-md text-xs font-semibold cursor-pointer transition-colors"
+            >
+              {content.panelQ.btnCopy}
+            </button>
+            <span id="triage-q-copy-status" class="text-xs font-medium text-success dark:text-success-border" aria-live="polite"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL 2: Report a Safety Correction or Standard Update -->
+      <div
+        data-triage-panel="correction"
+        class="hidden bg-surface-soft border border-hairline rounded-lg p-5 md:p-6 flex flex-col gap-5"
+      >
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div class="max-w-[620px]">
+            <div class="flex flex-wrap items-center gap-2 mb-1.5">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-info/10 text-info dark:text-info-border border border-info/30">
+                {content.panelC.slaBadge}
+              </span>
+              <span class="text-xs text-muted">{content.panelC.slaSub}</span>
+            </div>
+            <h3 class="text-title-sm font-semibold text-ink mb-1">
+              {content.panelC.heading}
+            </h3>
+            <p class="text-[13.5px] text-body leading-relaxed">
+              {content.panelC.intro}
+            </p>
+          </div>
+          <a
+            href={methodologyUrl}
+            class="min-h-[38px] px-3.5 py-2 bg-canvas hover:bg-surface-strong/40 text-link border border-hairline rounded-md text-xs font-semibold inline-flex items-center shrink-0 transition-colors"
+          >
+            {content.panelC.methodologyBtn} &rarr;
+          </a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label for="triage-c-url" class="text-[12px] font-semibold text-ink uppercase tracking-wider">
+              {content.panelC.labelUrl}
+            </label>
+            <input
+              type="url"
+              id="triage-c-url"
+              placeholder={content.panelC.placeholderUrl}
+              class="w-full h-11 px-3.5 bg-canvas text-ink text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
+            />
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label for="triage-c-standard" class="text-[12px] font-semibold text-ink uppercase tracking-wider">
+              {content.panelC.labelStandard}
+            </label>
+            <select
+              id="triage-c-standard"
+              class="w-full h-11 px-3.5 bg-canvas text-ink text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
+            >
+              {content.standardOptions.map((opt) => (
+                <option value={opt}>{opt}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="triage-c-notes" class="text-[12px] font-semibold text-ink uppercase tracking-wider">
+            {content.panelC.labelNotes}
+          </label>
+          <textarea
+            id="triage-c-notes"
+            rows="3"
+            placeholder={content.panelC.placeholderNotes}
+            class="w-full px-3.5 py-2.5 bg-canvas text-ink text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border resize-y"
+          ></textarea>
+        </div>
+
+        <pre
+          id="triage-c-preview"
+          class="bg-canvas border border-hairline rounded-md p-3.5 text-[12.5px] text-body font-mono whitespace-pre-wrap break-words leading-relaxed"
+        ></pre>
+
+        <div class="flex flex-wrap items-center gap-2.5">
+          <button
+            type="button"
+            data-fill-form="correction"
+            class="min-h-[42px] px-4 py-2 bg-primary hover:bg-primary-active text-on-primary rounded-md text-xs font-semibold cursor-pointer transition-colors"
+          >
+            {content.panelC.btnFillForm}
+          </button>
+          <a
+            id="triage-c-mailto"
+            href="mailto:editorial@isitkitchensafe.com"
+            class="min-h-[42px] px-4 py-2 bg-canvas hover:bg-surface-strong/40 text-ink border border-hairline rounded-md text-xs font-semibold inline-flex items-center transition-colors"
+          >
+            {content.panelC.btnMailto} &rarr;
+          </a>
+          <button
+            type="button"
+            data-copy-template="correction"
+            class="min-h-[42px] px-4 py-2 bg-canvas hover:bg-surface-strong/40 text-ink border border-hairline rounded-md text-xs font-semibold cursor-pointer transition-colors"
+          >
+            {content.panelC.btnCopy}
+          </button>
+          <span id="triage-c-copy-status" class="text-xs font-medium text-success dark:text-success-border" aria-live="polite"></span>
+        </div>
+      </div>
+
+      <!-- PANEL 3: Suggest a New Brand, Item, or Calculator -->
+      <div
+        data-triage-panel="suggestion"
+        class="hidden bg-surface-soft border border-hairline rounded-lg p-5 md:p-6 flex flex-col gap-5"
+      >
+        <div>
+          <span class="text-[11px] font-semibold uppercase tracking-wider text-signature-coral block mb-1">
+            {content.panelS.eyebrow}
+          </span>
+          <h3 class="text-title-sm font-semibold text-ink mb-1">
+            {content.panelS.heading}
+          </h3>
+          <p class="text-[13.5px] text-body leading-relaxed">
+            {content.panelS.intro}
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label for="triage-s-category" class="text-[12px] font-semibold text-ink uppercase tracking-wider">
+              {content.panelS.labelCategory}
+            </label>
+            <select
+              id="triage-s-category"
+              class="w-full h-11 px-3.5 bg-canvas text-ink text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
+            >
+              {content.applianceOptions.map((opt) => (
+                <option value={opt}>{opt}</option>
+              ))}
+            </select>
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label for="triage-s-brand" class="text-[12px] font-semibold text-ink uppercase tracking-wider">
+              {content.panelS.labelBrand}
+            </label>
+            <input
+              type="text"
+              id="triage-s-brand"
+              placeholder={content.panelS.placeholderBrand}
+              class="w-full h-11 px-3.5 bg-canvas text-ink text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
+            />
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-[12px] text-muted font-medium">{content.panelS.quickPickLabel}</span>
+          {popularBrands.map((brand) => (
+            <button
+              type="button"
+              data-brand-chip={brand}
+              class="px-2.5 py-1 rounded-full text-xs font-medium bg-canvas hover:bg-surface-strong/40 text-ink border border-hairline cursor-pointer transition-colors"
+            >
+              {brand}
+            </button>
+          ))}
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="triage-s-item" class="text-[12px] font-semibold text-ink uppercase tracking-wider">
+            {content.panelS.labelItem}
+          </label>
+          <input
+            type="text"
+            id="triage-s-item"
+            placeholder={content.panelS.placeholderItem}
+            class="w-full h-11 px-3.5 bg-canvas text-ink text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
+          />
+        </div>
+
+        <pre
+          id="triage-s-preview"
+          class="bg-canvas border border-hairline rounded-md p-3.5 text-[12.5px] text-body font-mono whitespace-pre-wrap break-words leading-relaxed"
+        ></pre>
+
+        <div class="flex flex-wrap items-center gap-2.5">
+          <button
+            type="button"
+            data-fill-form="suggestion"
+            class="min-h-[42px] px-4 py-2 bg-primary hover:bg-primary-active text-on-primary rounded-md text-xs font-semibold cursor-pointer transition-colors"
+          >
+            {content.panelS.btnFillForm}
+          </button>
+          <a
+            id="triage-s-mailto"
+            href="mailto:support@isitkitchensafe.com"
+            class="min-h-[42px] px-4 py-2 bg-canvas hover:bg-surface-strong/40 text-ink border border-hairline rounded-md text-xs font-semibold inline-flex items-center transition-colors"
+          >
+            {content.panelS.btnMailto} &rarr;
+          </a>
+          <button
+            type="button"
+            data-copy-template="suggestion"
+            class="min-h-[42px] px-4 py-2 bg-canvas hover:bg-surface-strong/40 text-ink border border-hairline rounded-md text-xs font-semibold cursor-pointer transition-colors"
+          >
+            {content.panelS.btnCopy}
+          </button>
+          <span id="triage-s-copy-status" class="text-xs font-medium text-success dark:text-success-border" aria-live="polite"></span>
+        </div>
+      </div>
+
+      <!-- PANEL 4: Media, Educational Licensing & General Inquiries -->
+      <div
+        data-triage-panel="media"
+        class="hidden bg-surface-soft border border-hairline rounded-lg p-5 md:p-6 flex flex-col gap-5"
+      >
+        <div>
+          <span class="text-[11px] font-semibold uppercase tracking-wider text-signature-coral block mb-1">
+            {content.panelM.eyebrow}
+          </span>
+          <h3 class="text-title-sm font-semibold text-ink mb-1">
+            {content.panelM.heading}
+          </h3>
+          <p class="text-[13.5px] text-body leading-relaxed">
+            {content.panelM.intro}
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="bg-canvas border border-hairline rounded-md p-4 flex flex-col gap-1.5">
+            <span class="text-[11px] font-mono uppercase tracking-wider text-muted">{content.panelM.editorialCardTag}</span>
+            <span class="text-[15px] font-semibold text-ink">{content.panelM.editorialCardTitle}</span>
+            <!--email_off--><a href="mailto:editorial@isitkitchensafe.com" class="text-sm text-link hover:underline font-medium">editorial@isitkitchensafe.com</a><!--/email_off-->
+            <p class="text-xs text-muted leading-relaxed mt-1">
+              {content.panelM.editorialCardDesc}
+            </p>
+          </div>
+
+          <div class="bg-canvas border border-hairline rounded-md p-4 flex flex-col gap-1.5">
+            <span class="text-[11px] font-mono uppercase tracking-wider text-muted">{content.panelM.supportCardTag}</span>
+            <span class="text-[15px] font-semibold text-ink">{content.panelM.supportCardTitle}</span>
+            <!--email_off--><a href="mailto:support@isitkitchensafe.com" class="text-sm text-link hover:underline font-medium">support@isitkitchensafe.com</a><!--/email_off-->
+            <p class="text-xs text-muted leading-relaxed mt-1">
+              {content.panelM.supportCardDesc}
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2.5">
+          <button
+            type="button"
+            data-fill-form="media"
+            class="min-h-[42px] px-4 py-2 bg-primary hover:bg-primary-active text-on-primary rounded-md text-xs font-semibold cursor-pointer transition-colors"
+          >
+            {content.panelM.btnFillForm}
+          </button>
+          <a
+            id="triage-m-mailto"
+            href="mailto:editorial@isitkitchensafe.com"
+            class="min-h-[42px] px-4 py-2 bg-canvas hover:bg-surface-strong/40 text-ink border border-hairline rounded-md text-xs font-semibold inline-flex items-center transition-colors"
+          >
+            {content.panelM.btnMailto} &rarr;
+          </a>
+          <button
+            type="button"
+            data-copy-template="media"
+            class="min-h-[42px] px-4 py-2 bg-canvas hover:bg-surface-strong/40 text-ink border border-hairline rounded-md text-xs font-semibold cursor-pointer transition-colors"
+          >
+            {content.panelM.btnCopy}
+          </button>
+          <span id="triage-m-copy-status" class="text-xs font-medium text-success dark:text-success-border" aria-live="polite"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 2: Direct Contact Form + Editorial Standards Sidebar -->
+    <section id="contact-form-section" aria-labelledby="direct-form-heading" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div class="lg:col-span-7 bg-surface-soft border border-hairline rounded-lg p-6 md:p-8">
+        <div class="mb-6">
+          <span class="text-xs font-semibold uppercase tracking-wider text-signature-coral block mb-1">
+            {content.formEyebrow}
+          </span>
+          <h2 id="direct-form-heading" class="text-title-lg font-medium text-ink tracking-tight mb-1.5">
+            {content.formHeading}
+          </h2>
+          <p class="text-[13.5px] text-muted leading-relaxed">
+            {content.formIntro}
+          </p>
+        </div>
+
+        <div
+          id="form-prefill-notice"
+          class="hidden bg-info/10 border border-info/30 text-info dark:text-info-border rounded-md px-4 py-3 text-xs font-medium mb-5"
+          aria-live="polite"
+        ></div>
+
+        <!-- Client-side Interactive Form -->
+        <form id="contact-form" class="flex flex-col gap-5">
+          <div class="flex flex-col gap-2">
+            <label for="name" class="text-[13px] font-semibold text-ink uppercase tracking-wider">{content.labelName}</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              required
+              placeholder={content.placeholderName}
+              class="w-full h-11 px-4 py-3 bg-canvas text-ink text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
+            />
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label for="email" class="text-[13px] font-semibold text-ink uppercase tracking-wider">{content.labelEmail}</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              placeholder={content.placeholderEmail}
+              class="w-full h-11 px-4 py-3 bg-canvas text-ink text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
+            />
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label for="subject" class="text-[13px] font-semibold text-ink uppercase tracking-wider">{content.labelSubject}</label>
+            <input
+              type="text"
+              id="subject"
+              name="subject"
+              required
+              placeholder={content.placeholderSubject}
+              class="w-full h-11 px-4 py-3 bg-canvas text-ink text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border"
+            />
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label for="message" class="text-[13px] font-semibold text-ink uppercase tracking-wider">{content.labelMessage}</label>
+            <textarea
+              id="message"
+              name="message"
+              required
+              rows="6"
+              placeholder={content.placeholderMessage}
+              class="w-full px-4 py-3 bg-canvas text-ink text-[14px] border border-hairline rounded-sm focus:outline-none focus:border-info-border resize-y min-h-[140px]"
+            ></textarea>
+          </div>
+
+          <!-- Honeypot -->
+          <input type="text" name="b_name" id="b_name" style="display:none" tabindex="-1" autocomplete="off" />
+
+          <button
+            id="submit-btn"
+            type="submit"
+            class="btn-primary mt-1"
+            data-sending-text={content.btnSending}
+            data-error-text={content.errorDesc}
+          >
+            {content.btnSubmit}
+          </button>
+        </form>
+
+        <!-- Success Message Container -->
+        <div id="success-message" class="hidden bg-success/10 border border-success/30 rounded-md p-6 mt-6" aria-live="polite">
+          <h3 class="text-title-sm text-success dark:text-success-border font-semibold mb-2 flex items-center gap-1.5">
+            <span>&#10003;</span> {content.successTitle}
+          </h3>
+          <p class="text-[13.5px] text-body leading-relaxed">
+            {content.successDesc}
+          </p>
+        </div>
+
+        <!-- Error Message Container -->
+        <div id="error-message" class="hidden bg-error-bg border border-error/30 rounded-md p-6 mt-6" aria-live="polite">
+          <h3 class="text-title-sm text-error dark:text-error-border font-semibold mb-2 flex items-center gap-1.5">
+            <span>&#10007;</span> {content.errorTitle}
+          </h3>
+          <p id="error-text" class="text-[13.5px] text-error dark:text-error-border leading-relaxed">
+            {content.errorDesc}
+          </p>
+        </div>
+      </div>
+
+      <!-- Right Sidebar: SLA, Direct Desks & Trust Links -->
+      <aside class="lg:col-span-5 flex flex-col gap-5">
+        <div class="bg-surface-soft border border-hairline rounded-lg p-5 flex flex-col gap-4">
+          <h2 class="text-title-sm font-semibold text-ink">{content.sidebarSlaTitle}</h2>
+          <ul class="flex flex-col gap-3 text-[13.5px] text-body leading-relaxed list-none p-0 m-0">
+            <li class="flex flex-col gap-0.5 pb-3 border-b border-hairline">
+              <span class="font-semibold text-ink">{content.slaCorrectionTitle}</span>
+              <span>{content.slaCorrectionDesc}</span>
+            </li>
+            <li class="flex flex-col gap-0.5 pb-3 border-b border-hairline">
+              <span class="font-semibold text-ink">{content.slaSuggestionTitle}</span>
+              <span>{content.slaSuggestionDesc}</span>
+            </li>
+            <li class="flex flex-col gap-0.5">
+              <span class="font-semibold text-ink">{content.slaIndependenceTitle}</span>
+              <span>{content.slaIndependenceDesc}</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="bg-surface-soft border border-hairline rounded-lg p-5 flex flex-col gap-3">
+          <h2 class="text-title-sm font-semibold text-ink">{content.sidebarDesksTitle}</h2>
+          <div class="text-[13.5px] text-body flex flex-col gap-2">
+            <div>
+              <span class="text-xs uppercase tracking-wider text-muted font-semibold block">{content.deskSupportLabel}</span>
+              <!--email_off--><a href="mailto:support@isitkitchensafe.com" class="text-link hover:underline font-medium">support@isitkitchensafe.com</a><!--/email_off-->
+            </div>
+            <div>
+              <span class="text-xs uppercase tracking-wider text-muted font-semibold block">{content.deskEditorialLabel}</span>
+              <!--email_off--><a href="mailto:editorial@isitkitchensafe.com" class="text-link hover:underline font-medium">editorial@isitkitchensafe.com</a><!--/email_off-->
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-surface-soft border border-hairline rounded-lg p-5 flex flex-col gap-3">
+          <h2 class="text-title-sm font-semibold text-ink">{content.sidebarLinksTitle}</h2>
+          <div class="flex flex-col gap-2">
+            <a href={methodologyUrl} class="text-[13.5px] text-link hover:underline font-medium">
+              {content.linkMethodology} &rarr;
+            </a>
+            <a href={aboutUrl} class="text-[13.5px] text-link hover:underline font-medium">
+              {content.linkAbout} &rarr;
+            </a>
+            <a href={toolsUrl} class="text-[13.5px] text-link hover:underline font-medium">
+              {content.linkTools} &rarr;
+            </a>
+            <a href={disclaimerUrl} class="text-[13.5px] text-link hover:underline font-medium">
+              {content.linkDisclaimer} &rarr;
+            </a>
+          </div>
+        </div>
+      </aside>
+    </section>
+  </article>
 
   <script is:inline>
-    const form = document.getElementById('contact-form');
-    const successMsg = document.getElementById('success-message');
-    const errorMsg = document.getElementById('error-message');
-    const errorText = document.getElementById('error-text');
-    const submitBtn = document.getElementById('submit-btn');
-
-    if (form && successMsg && errorMsg) {
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const formData = new FormData(form);
-        const originalBtnText = submitBtn.innerText;
-        submitBtn.innerText = submitBtn.getAttribute('data-sending-text') || 'Sending...';
-        submitBtn.disabled = true;
-        errorMsg.classList.add('hidden');
-        
+    (function () {
+      var triageRoot = document.getElementById('contact-triage');
+      var cfg = {};
+      if (triageRoot) {
         try {
-          const response = await fetch('/api/contact', {
+          cfg = JSON.parse(triageRoot.getAttribute('data-config') || '{}');
+        } catch (err) {
+          cfg = {};
+        }
+      }
+
+      var tabs = triageRoot ? triageRoot.querySelectorAll('[data-triage-tab]') : [];
+      var panels = triageRoot ? triageRoot.querySelectorAll('[data-triage-panel]') : [];
+
+      var qCat = document.getElementById('triage-q-category');
+      var qDetails = document.getElementById('triage-q-details');
+      var qPreview = document.getElementById('triage-q-preview');
+      var qMailto = document.getElementById('triage-q-mailto');
+
+      var cUrl = document.getElementById('triage-c-url');
+      var cStd = document.getElementById('triage-c-standard');
+      var cNotes = document.getElementById('triage-c-notes');
+      var cPreview = document.getElementById('triage-c-preview');
+      var cMailto = document.getElementById('triage-c-mailto');
+
+      var sCat = document.getElementById('triage-s-category');
+      var sBrand = document.getElementById('triage-s-brand');
+      var sItem = document.getElementById('triage-s-item');
+      var sPreview = document.getElementById('triage-s-preview');
+      var sMailto = document.getElementById('triage-s-mailto');
+      var brandChips = triageRoot ? triageRoot.querySelectorAll('[data-brand-chip]') : [];
+
+      var mMailto = document.getElementById('triage-m-mailto');
+
+      var form = document.getElementById('contact-form');
+      var subjectInput = document.getElementById('subject');
+      var messageInput = document.getElementById('message');
+      var prefillNotice = document.getElementById('form-prefill-notice');
+      var successMsg = document.getElementById('success-message');
+      var errorMsg = document.getElementById('error-message');
+      var errorText = document.getElementById('error-text');
+      var submitBtn = document.getElementById('submit-btn');
+
+      function buildMailtoHref(email, subject, body) {
+        return 'mailto:' + email + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+      }
+
+      function buildTemplate(topic) {
+        var supportEmail = cfg.supportEmail || 'support@isitkitchensafe.com';
+        var editorialEmail = cfg.editorialEmail || 'editorial@isitkitchensafe.com';
+
+        if (topic === 'question') {
+          var q = cfg.question || {};
+          var catVal = qCat ? qCat.value : (q.defaultTopic || 'Kitchen Safety');
+          var detVal = (qDetails && qDetails.value.trim()) ? qDetails.value.trim() : (q.defaultDetails || '');
+          var qSubject = (q.subjectPrefix || '[Safety Question] ') + catVal;
+          var qBody = (q.bodyIntro || '') + '\n\n' +
+            (q.labelCategory || 'Topic: ') + catVal + '\n' +
+            (q.labelDetails || 'Details: ') + detVal + '\n\n' +
+            (q.bodyOutro || '');
+          return { email: supportEmail, subject: qSubject, body: qBody };
+        }
+
+        if (topic === 'correction') {
+          var c = cfg.correction || {};
+          var urlVal = (cUrl && cUrl.value.trim()) ? cUrl.value.trim() : (c.defaultUrl || '');
+          var stdVal = cStd ? cStd.value : '';
+          var notesVal = (cNotes && cNotes.value.trim()) ? cNotes.value.trim() : (c.defaultNotes || '');
+          var cSubject = (c.subjectPrefix || '[Correction] ') + (stdVal || c.defaultSubjectSuffix || '');
+          var cBody = (c.bodyIntro || '') + '\n\n' +
+            (c.labelUrl || 'Page URL: ') + urlVal + '\n' +
+            (c.labelStandard || 'Standard: ') + stdVal + '\n' +
+            (c.labelNotes || 'Notes: ') + notesVal + '\n\n' +
+            (c.bodyOutro || '');
+          return { email: editorialEmail, subject: cSubject, body: cBody };
+        }
+
+        if (topic === 'suggestion') {
+          var s = cfg.suggestion || {};
+          var sCatVal = sCat ? sCat.value : '';
+          var brandVal = (sBrand && sBrand.value.trim()) ? sBrand.value.trim() : (s.defaultBrand || '');
+          var itemVal = (sItem && sItem.value.trim()) ? sItem.value.trim() : (s.defaultItem || '');
+          var suffix = (sBrand && sBrand.value.trim()) ? (sBrand.value.trim() + ' - ' + sCatVal) : (sCatVal || s.defaultSubjectSuffix || '');
+          var sSubject = (s.subjectPrefix || '[Suggestion] ') + suffix;
+          var sBody = (s.bodyIntro || '') + '\n\n' +
+            (s.labelCategory || 'Category: ') + sCatVal + '\n' +
+            (s.labelBrand || 'Brand: ') + brandVal + '\n' +
+            (s.labelItem || 'Item: ') + itemVal + '\n\n' +
+            (s.bodyOutro || '');
+          return { email: supportEmail, subject: sSubject, body: sBody };
+        }
+
+        var m = cfg.media || {};
+        return {
+          email: editorialEmail,
+          subject: m.subject || '[Media / Licensing Inquiry]',
+          body: m.body || ''
+        };
+      }
+
+      function refreshTemplates() {
+        var qData = buildTemplate('question');
+        if (qPreview) {
+          qPreview.textContent = qData.subject + '\n\n' + qData.body;
+        }
+        if (qMailto) {
+          qMailto.setAttribute('href', buildMailtoHref(qData.email, qData.subject, qData.body));
+        }
+
+        var cData = buildTemplate('correction');
+        if (cPreview) {
+          cPreview.textContent = cData.subject + '\n\n' + cData.body;
+        }
+        if (cMailto) {
+          cMailto.setAttribute('href', buildMailtoHref(cData.email, cData.subject, cData.body));
+        }
+
+        var sData = buildTemplate('suggestion');
+        if (sPreview) {
+          sPreview.textContent = sData.subject + '\n\n' + sData.body;
+        }
+        if (sMailto) {
+          sMailto.setAttribute('href', buildMailtoHref(sData.email, sData.subject, sData.body));
+        }
+
+        var mData = buildTemplate('media');
+        if (mMailto) {
+          mMailto.setAttribute('href', buildMailtoHref(mData.email, mData.subject, mData.body));
+        }
+      }
+
+      function activateTopic(topic) {
+        for (var i = 0; i < tabs.length; i++) {
+          var tab = tabs[i];
+          var isCurrent = tab.getAttribute('data-triage-tab') === topic;
+          tab.setAttribute('aria-pressed', isCurrent ? 'true' : 'false');
+          if (isCurrent) {
+            tab.classList.add('bg-primary', 'text-on-primary', 'border-primary');
+            tab.classList.remove('bg-surface-soft', 'text-ink', 'border-hairline', 'hover:bg-surface-strong/40');
+          } else {
+            tab.classList.remove('bg-primary', 'text-on-primary', 'border-primary');
+            tab.classList.add('bg-surface-soft', 'text-ink', 'border-hairline', 'hover:bg-surface-strong/40');
+          }
+        }
+        for (var j = 0; j < panels.length; j++) {
+          var panel = panels[j];
+          var show = panel.getAttribute('data-triage-panel') === topic;
+          panel.classList.toggle('hidden', !show);
+        }
+      }
+
+      function copyTextWithFallback(text, statusEl) {
+        function showStatus(msg) {
+          if (!statusEl) return;
+          statusEl.textContent = msg;
+          setTimeout(function () {
+            if (statusEl.textContent === msg) {
+              statusEl.textContent = '';
+            }
+          }, 2600);
+        }
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function () {
+            showStatus(cfg.copiedLabel || 'Copied!');
+          }).catch(function () {
+            showStatus(cfg.copyFailedLabel || 'Copy manually');
+          });
+          return;
+        }
+
+        try {
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'absolute';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          showStatus(cfg.copiedLabel || 'Copied!');
+        } catch (err) {
+          showStatus(cfg.copyFailedLabel || 'Copy manually');
+        }
+      }
+
+      for (var tIdx = 0; tIdx < tabs.length; tIdx++) {
+        tabs[tIdx].addEventListener('click', function (evt) {
+          var topic = evt.currentTarget.getAttribute('data-triage-tab') || 'question';
+          activateTopic(topic);
+        });
+      }
+
+      var liveInputs = [qCat, qDetails, cUrl, cStd, cNotes, sCat, sBrand, sItem];
+      for (var inpIdx = 0; inpIdx < liveInputs.length; inpIdx++) {
+        if (liveInputs[inpIdx]) {
+          liveInputs[inpIdx].addEventListener('input', refreshTemplates);
+          liveInputs[inpIdx].addEventListener('change', refreshTemplates);
+        }
+      }
+
+      for (var bIdx = 0; bIdx < brandChips.length; bIdx++) {
+        brandChips[bIdx].addEventListener('click', function (evt) {
+          var chosen = evt.currentTarget.getAttribute('data-brand-chip') || '';
+          if (sBrand) {
+            sBrand.value = chosen;
+            sBrand.focus();
+          }
+          refreshTemplates();
+        });
+      }
+
+      var copyButtons = triageRoot ? triageRoot.querySelectorAll('[data-copy-template]') : [];
+      var statusMap = {
+        question: document.getElementById('triage-q-copy-status'),
+        correction: document.getElementById('triage-c-copy-status'),
+        suggestion: document.getElementById('triage-s-copy-status'),
+        media: document.getElementById('triage-m-copy-status')
+      };
+
+      for (var cpIdx = 0; cpIdx < copyButtons.length; cpIdx++) {
+        copyButtons[cpIdx].addEventListener('click', function (evt) {
+          var topic = evt.currentTarget.getAttribute('data-copy-template') || 'question';
+          var data = buildTemplate(topic);
+          var fullText = 'To: ' + data.email + '\nSubject: ' + data.subject + '\n\n' + data.body;
+          copyTextWithFallback(fullText, statusMap[topic]);
+        });
+      }
+
+      var fillButtons = triageRoot ? triageRoot.querySelectorAll('[data-fill-form]') : [];
+      for (var flIdx = 0; flIdx < fillButtons.length; flIdx++) {
+        fillButtons[flIdx].addEventListener('click', function (evt) {
+          var topic = evt.currentTarget.getAttribute('data-fill-form') || 'question';
+          var data = buildTemplate(topic);
+          if (subjectInput) {
+            subjectInput.value = data.subject;
+          }
+          if (messageInput) {
+            messageInput.value = data.body;
+          }
+          if (prefillNotice) {
+            prefillNotice.textContent = cfg.loadedNotice || 'Template loaded into the form below.';
+            prefillNotice.classList.remove('hidden');
+          }
+          var formSection = document.getElementById('contact-form-section');
+          if (formSection) {
+            formSection.scrollIntoView({ behavior: 'smooth' });
+          }
+          var nameInput = document.getElementById('name');
+          if (nameInput) {
+            nameInput.focus();
+          }
+        });
+      }
+
+      // Support optional URL query or hash deep-linking (e.g. ?topic=correction&url=...)
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var urlTopic = params.get('topic') || (window.location.hash ? window.location.hash.replace('#', '') : '');
+        var urlRef = params.get('url');
+        if (urlRef && cUrl) {
+          cUrl.value = urlRef;
+        }
+        if (urlTopic === 'question' || urlTopic === 'correction' || urlTopic === 'suggestion' || urlTopic === 'media') {
+          activateTopic(urlTopic);
+        }
+      } catch (err) {
+        // Ignore URL parsing issues
+      }
+
+      refreshTemplates();
+
+      if (form && successMsg && errorMsg && submitBtn) {
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+
+          var formData = new FormData(form);
+          var originalBtnText = submitBtn.textContent;
+          submitBtn.textContent = submitBtn.getAttribute('data-sending-text') || 'Sending...';
+          submitBtn.disabled = true;
+          errorMsg.classList.add('hidden');
+
+          fetch('/api/contact', {
             method: 'POST',
             body: formData
+          }).then(function (response) {
+            return response.json().catch(function () {
+              return { success: false, message: submitBtn.getAttribute('data-error-text') || 'Invalid response from server.' };
+            }).then(function (result) {
+              if (response.ok && result.success) {
+                form.classList.add('hidden');
+                if (prefillNotice) {
+                  prefillNotice.classList.add('hidden');
+                }
+                successMsg.classList.remove('hidden');
+                successMsg.scrollIntoView({ behavior: 'smooth' });
+              } else {
+                throw new Error(result.message || submitBtn.getAttribute('data-error-text') || 'Unknown error occurred.');
+              }
+            });
+          }).catch(function (err) {
+            if (errorText) {
+              errorText.textContent = (err && err.message) ? err.message : (submitBtn.getAttribute('data-error-text') || 'There was a network error. Please try again later.');
+            }
+            errorMsg.classList.remove('hidden');
+            submitBtn.textContent = originalBtnText;
+            submitBtn.disabled = false;
           });
-
-          const result = await response.json().catch(() => ({ success: false, message: 'Invalid response from server.' }));
-
-          if (response.ok && result.success) {
-            form.classList.add('hidden');
-            successMsg.classList.remove('hidden');
-            successMsg.scrollIntoView({ behavior: 'smooth' });
-          } else {
-            throw new Error(result.message || 'Unknown error occurred.');
-          }
-        } catch (err) {
-          errorText.innerText = err.message || submitBtn.getAttribute('data-error-text') || 'There was a network error. Please try again later.';
-          errorMsg.classList.remove('hidden');
-          submitBtn.innerText = originalBtnText;
-          submitBtn.disabled = false;
-        }
-      });
-    }
+        });
+      }
+    })();
   </script>
 </Layout>

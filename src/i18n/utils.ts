@@ -229,6 +229,7 @@ const SPECIAL_PAGES = [
   'tools/moldy-food-safety-checker',
   'tools/oven-rack-bakeware-heat-adjuster',
   'tools/kitchen-fire-emergency-guide',
+  'tools/instant-pot-pressure-release-checker',
   'methodology',
   'saved'
 ];

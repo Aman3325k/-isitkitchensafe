@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/kitchen-fire-emergency-guide/',
+    title: 'Kitchen Grease Fire, Electrical & Burn Emergency First-Response Guide',
+    description:
+      'Instant NFPA, USFA/FEMA & American Red Cross kitchen emergency guide: interactive DO vs. NEVER DO first-response triage for grease pan fires, oven/microwave fires, electrical fires, gas leaks & cooking oil burns — plus a 6-tool fire extinguisher matcher and printable fridge safety poster.',
+    date: '2026-11-18',
+  },
+  {
     path: '/tools/oven-rack-bakeware-heat-adjuster/',
     title: 'Oven Rack Position, Convection & Bakeware Material Heat Adjuster',
     description:
