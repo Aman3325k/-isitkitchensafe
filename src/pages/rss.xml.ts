@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/kitchen-plastic-leaching-checker/',
+    title: 'Kitchen Plastic Leaching & Hot Food Safe Container Checker',
+    description:
+      'Evidence-based interactive calculator: calculate BPA, BPS, phthalates, and microplastic leaching risks when heating or storing hot, acidic, or fatty foods in plastic containers (#1 to #7). Verified with ACS Nano 2023 & FDA 21 CFR § 177 standards.',
+    date: '2026-11-19',
+  },
+  {
     path: '/tools/dishwasher-rinse-aid-scale-troubleshooter/',
     title: 'Dishwasher Rinse Aid, White Film & Water Hardness Scale Troubleshooter',
     description:

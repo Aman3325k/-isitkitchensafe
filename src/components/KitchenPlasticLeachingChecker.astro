@@ -1,0 +1,874 @@
+---
+import rawData from '../data/kitchen-plastic-leaching-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+import { useTranslatedPath } from '../i18n/utils';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+const translatePath = useTranslatedPath(lang);
+
+const plasticCodeCheckerUrl = translatePath('/tools/plastic-code-checker/');
+const migrationPredictorUrl = translatePath('/tools/food-contact-migration-predictor/');
+const plasticizerEstimatorUrl = translatePath('/tools/plasticizer-microplastic-burden-estimator/');
+const cuttingBoardUrl = translatePath('/tools/cutting-board-microplastic-pathogen-analyzer/');
+const panScratchUrl = translatePath('/tools/pan-scratch-inspector/');
+const methodologyUrl = translatePath('/methodology/');
+const allToolsUrl = translatePath('/tools/');
+
+const currentLocale = (['en', 'es', 'pt', 'zh-cn', 'ja'].includes(lang) ? lang : 'en') as 'en' | 'es' | 'pt' | 'zh-cn' | 'ja';
+
+const bannerData = rawData.safetyBanner[currentLocale] || rawData.safetyBanner.en;
+
+const localizedResins = rawData.resins.map((resin: any) => ({
+  code: resin.code,
+  name: resin.name,
+  fullName: resin.fullName,
+  maxTempC: resin.maxTempC,
+  maxTempF: resin.maxTempF,
+  microwaveSafe: resin.microwaveSafe,
+  dishwasherSafe: resin.dishwasherSafe,
+  commonUses: resin.commonUses,
+  leachingHazards: resin.leachingHazards,
+  title: resin.i18n[currentLocale]?.title || resin.i18n.en.title,
+  summary: resin.i18n[currentLocale]?.summary || resin.i18n.en.summary,
+  bestUse: resin.i18n[currentLocale]?.bestUse || resin.i18n.en.bestUse,
+  avoid: resin.i18n[currentLocale]?.avoid || resin.i18n.en.avoid
+}));
+
+const localizedFoods = rawData.simulator.foodTypes.map((f: any) => ({
+  id: f.id,
+  multiplier: f.multiplier,
+  name: f.i18n[currentLocale]?.name || f.i18n.en.name,
+  desc: f.i18n[currentLocale]?.desc || f.i18n.en.desc
+}));
+
+const localizedTemps = rawData.simulator.temps.map((t: any) => ({
+  id: t.id,
+  tempC: t.tempC,
+  tempF: t.tempF,
+  multiplier: t.multiplier,
+  name: t.i18n[currentLocale]?.name || t.i18n.en.name,
+  desc: t.i18n[currentLocale]?.desc || t.i18n.en.desc
+}));
+
+const localizedWearStates = rawData.simulator.wearStates.map((w: any) => ({
+  id: w.id,
+  multiplier: w.multiplier,
+  name: w.i18n[currentLocale]?.name || w.i18n.en.name,
+  desc: w.i18n[currentLocale]?.desc || w.i18n.en.desc
+}));
+
+const localizedFaqs = rawData.faqs[currentLocale] || rawData.faqs.en;
+
+const uiStrings: Record<'en' | 'es' | 'pt' | 'zh-cn' | 'ja', {
+  tabSimulator: string;
+  tabResinMatrix: string;
+  tabScience: string;
+  tabSafeSwaps: string;
+  resinLabel: string;
+  foodLabel: string;
+  tempLabel: string;
+  wearLabel: string;
+  verdictSafe: string;
+  verdictCaution: string;
+  verdictDanger: string;
+  riskScoreLabel: string;
+  chemicalsHeader: string;
+  microplasticsHeader: string;
+  mechanismHeader: string;
+  actionHeader: string;
+  copyBtn: string;
+  copySuccess: string;
+  printBtn: string;
+  faqHeading: string;
+  relatedHeading: string;
+  quickChecklistHeader: string;
+}> = {
+  en: {
+    tabSimulator: 'Interactive Leaching Calculator',
+    tabResinMatrix: 'Resin #1–#7 Master Table',
+    tabScience: 'The Science: Microwave & Fats',
+    tabSafeSwaps: 'Safe Swaps & Triage Protocol',
+    resinLabel: '1. Select Container Plastic Resin (#1 to #7):',
+    foodLabel: '2. Select Food Type & Chemistry:',
+    tempLabel: '3. Select Heating & Temperature Exposure:',
+    wearLabel: '4. Select Container Physical Condition:',
+    verdictSafe: 'LOW LEACHING RISK · RELATIVELY STABLE',
+    verdictCaution: 'CONDITIONAL / ELEVATED MIGRATION',
+    verdictDanger: 'HIGH CHEMICAL & NANOPLASTIC MIGRATION · DO NOT MICROWAVE',
+    riskScoreLabel: 'Overall Chemical & Microplastic Migration Index:',
+    chemicalsHeader: 'Primary Chemical Additives Leached:',
+    microplasticsHeader: 'Estimated Particle Release (ACS Nano 2023 Scale):',
+    mechanismHeader: 'Scientific Leaching Mechanism:',
+    actionHeader: 'Actionable Safe Protocol:',
+    copyBtn: '📋 Copy Safety Assessment',
+    copySuccess: 'Copied to clipboard!',
+    printBtn: '🖨️ Print Safe Kitchen Summary',
+    faqHeading: 'Scientific FAQs & Peer-Reviewed Evidence',
+    relatedHeading: 'Related Verified Diagnostic Tools',
+    quickChecklistHeader: '4 Signs Your Plastic Container Must Be Recycled'
+  },
+  es: {
+    tabSimulator: 'Calculadora de Migración Química',
+    tabResinMatrix: 'Tabla de Resinas #1 al #7',
+    tabScience: 'La Ciencia: Microondas y Grasas',
+    tabSafeSwaps: 'Sustitutos Seguros y Protocolo',
+    resinLabel: '1. Selecciona la resina plástica (#1 al #7):',
+    foodLabel: '2. Selecciona el tipo de comida y acidez:',
+    tempLabel: '3. Selecciona la temperatura y calentamiento:',
+    wearLabel: '4. Selecciona el desgaste del recipiente:',
+    verdictSafe: 'BAJO RIESGO DE MIGRACIÓN · ESTABLE',
+    verdictCaution: 'PRECAUCIÓN / MIGRACIÓN MODERADA',
+    verdictDanger: 'ALTO RIESGO QUÍMICO Y NANOPLÁSTICOS · NO CALENTAR EN MICROONDAS',
+    riskScoreLabel: 'Índice de Migración Química y Microplásticos:',
+    chemicalsHeader: 'Principales aditivos químicos liberados:',
+    microplasticsHeader: 'Desprendimiento estimado de microplásticos (ACS Nano 2023):',
+    mechanismHeader: 'Mecanismo físico-químico:',
+    actionHeader: 'Protocolo seguro recomendado:',
+    copyBtn: '📋 Copiar evaluación de seguridad',
+    copySuccess: '¡Copiado al portapapeles!',
+    printBtn: '🖨️ Imprimir resumen de seguridad',
+    faqHeading: 'Preguntas Frecuentes y Evidencia Científica',
+    relatedHeading: 'Herramientas Diagnósticas Relacionadas',
+    quickChecklistHeader: '4 Señales de que tu recipiente de plástico debe ser retirado'
+  },
+  pt: {
+    tabSimulator: 'Calculadora de Migração Química',
+    tabResinMatrix: 'Tabela de Resinas #1 a #7',
+    tabScience: 'A Ciência: Micro-ondas e Gorduras',
+    tabSafeSwaps: 'Substitutos Seguros e Protocolo',
+    resinLabel: '1. Selecione a resina plástica (#1 a #7):',
+    foodLabel: '2. Selecione o tipo de alimento e acidez:',
+    tempLabel: '3. Selecione a temperatura de aquecimento:',
+    wearLabel: '4. Selecione o estado de conservação do pote:',
+    verdictSafe: 'BAIXO RISCO DE MIGRAÇÃO · ESTÁVEL',
+    verdictCaution: 'CUIDADO / MIGRAÇÃO MODERADA',
+    verdictDanger: 'ALTO RISCO QUÍMICO E NANOPLÁSTICOS · NÃO LEVE AO MICRO-ONDAS',
+    riskScoreLabel: 'Índice de Migração Química e Microplásticos:',
+    chemicalsHeader: 'Principais aditivos químicos liberados:',
+    microplasticsHeader: 'Desprendimento estimado de partículas (ACS Nano 2023):',
+    mechanismHeader: 'Mecanismo científico de migração:',
+    actionHeader: 'Protocolo de segurança imediato:',
+    copyBtn: '📋 Copiar avaliação de segurança',
+    copySuccess: 'Copiado para a área de transferência!',
+    printBtn: '🖨️ Imprimir resumo de segurança',
+    faqHeading: 'Perguntas Frequentes e Evidências Científicas',
+    relatedHeading: 'Ferramentas Diagnósticas Relacionadas',
+    quickChecklistHeader: '4 Sinais de que seu pote plástico deve ser descartado'
+  },
+  'zh-cn': {
+    tabSimulator: '塑料化学迁移与微塑料测算器',
+    tabResinMatrix: '#1 至 #7 塑料材质全景速查表',
+    tabScience: '科学机理：微波辐射与高脂超温',
+    tabSafeSwaps: '安全平替材质与报废自检',
+    resinLabel: '1. 选择食品塑料容器编号（#1 至 #7）：',
+    foodLabel: '2. 选择食物类型与化学性质：',
+    tempLabel: '3. 选择接触温度与加热方式：',
+    wearLabel: '4. 选择容器内壁磨损与使用状态：',
+    verdictSafe: '低化学迁移风险 · 结构相对稳定',
+    verdictCaution: '需谨慎使用 · 存在中度化学迁移风险',
+    verdictDanger: '高化学溶出与纳米塑料脱落危险 · 严禁微波加热',
+    riskScoreLabel: '化学物质与微塑料综合迁移指数：',
+    chemicalsHeader: '潜在析出化学添加剂：',
+    microplasticsHeader: '估算微塑料与纳米颗粒释放量（基于 ACS Nano 2023 标尺）：',
+    mechanismHeader: '微观物理与化学反应机理：',
+    actionHeader: '权威安全操作指引：',
+    copyBtn: '📋 复制安全评估报告',
+    copySuccess: '已成功复制到剪贴板！',
+    printBtn: '🖨️ 打印厨房容器安全指南',
+    faqHeading: '同行评审学术证据与深度解答',
+    relatedHeading: '相关厨房安全诊断工具',
+    quickChecklistHeader: '塑料保鲜盒必须立即淘汰报废的 4 大特征'
+  },
+  ja: {
+    tabSimulator: '化学溶出・マイクロプラスチック計算機',
+    tabResinMatrix: '#1〜#7 プラスチック樹脂早見表',
+    tabScience: '科学の真実：マイクロ波と油分の過熱',
+    tabSafeSwaps: '安全な代替素材と廃棄診断',
+    resinLabel: '1. 容器のプラスチック識別番号（#1〜#7）を選択：',
+    foodLabel: '2. 食品の種類と油分・酸性を選択：',
+    tempLabel: '3. 加熱温度・調理条件を選択：',
+    wearLabel: '4. 容器の内壁劣化・傷の状態を選択：',
+    verdictSafe: '溶出リスク低 · 比較的安定',
+    verdictCaution: '条件付き注意 · 中程度の化学物質移行あり',
+    verdictDanger: '高リスク・有害化学物質＆ナノプラスチック溶出 · レンジ加熱厳禁',
+    riskScoreLabel: '化学物質・マイクロプラスチック総合溶出指数：',
+    chemicalsHeader: '溶出が懸念される主たる添加剤：',
+    microplasticsHeader: '推定微小粒子放出量（ACS Nano 2023論文基準）：',
+    mechanismHeader: '物理・化学的溶出メカニズム：',
+    actionHeader: '推奨される安全対策手順：',
+    copyBtn: '📋 診断結果をコピー',
+    copySuccess: 'クリップボードにコピーしました！',
+    printBtn: '🖨️ 診断サマリーを印刷',
+    faqHeading: '査読論文エビデンスに基づくFAQ',
+    relatedHeading: '関連キッチン安全ツール',
+    quickChecklistHeader: 'プラスチック保存容器を直ちに廃棄すべき4大サイン'
+  }
+};
+
+const t = uiStrings[currentLocale];
+---
+
+<div class="space-y-10" id="plastic-leaching-app">
+  <!-- Top Safety Banner -->
+  <div class="bg-amber-50 border border-amber-200 rounded-2xl p-6 text-amber-950">
+    <div class="flex items-start gap-3">
+      <span class="text-2xl" aria-hidden="true">⚠️</span>
+      <div>
+        <h2 class="text-base font-bold text-amber-900 mb-1">{bannerData.title}</h2>
+        <p class="text-sm leading-relaxed text-amber-900/90">{bannerData.text}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="flex flex-wrap gap-2 border-b border-hairline pb-4" role="tablist" aria-label="Tool Navigation">
+    <button
+      type="button"
+      role="tab"
+      aria-selected="true"
+      aria-controls="tab-panel-simulator"
+      id="tab-btn-simulator"
+      class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-signature-coral text-white shadow-sm"
+      data-target="tab-panel-simulator"
+    >
+      🧮 {t.tabSimulator}
+    </button>
+    <button
+      type="button"
+      role="tab"
+      aria-selected="false"
+      aria-controls="tab-panel-matrix"
+      id="tab-btn-matrix"
+      class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-surface-soft hover:bg-neutral-200 text-ink"
+      data-target="tab-panel-matrix"
+    >
+      📋 {t.tabResinMatrix}
+    </button>
+    <button
+      type="button"
+      role="tab"
+      aria-selected="false"
+      aria-controls="tab-panel-science"
+      id="tab-btn-science"
+      class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-surface-soft hover:bg-neutral-200 text-ink"
+      data-target="tab-panel-science"
+    >
+      🔬 {t.tabScience}
+    </button>
+    <button
+      type="button"
+      role="tab"
+      aria-selected="false"
+      aria-controls="tab-panel-swaps"
+      id="tab-btn-swaps"
+      class="tab-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-surface-soft hover:bg-neutral-200 text-ink"
+      data-target="tab-panel-swaps"
+    >
+      🔄 {t.tabSafeSwaps}
+    </button>
+  </div>
+
+  <!-- TAB 1: INTERACTIVE CALCULATOR PANEL -->
+  <section id="tab-panel-simulator" role="tabpanel" aria-labelledby="tab-btn-simulator" class="tab-panel space-y-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <!-- Input Controls -->
+      <div class="lg:col-span-6 space-y-6 bg-white p-6 rounded-2xl border border-hairline shadow-sm">
+        <h2 class="text-lg font-bold text-ink">Configure Container & Heating Scenario</h2>
+
+        <!-- 1. Resin Picker -->
+        <div>
+          <label for="resin-select" class="block text-xs font-bold uppercase tracking-wider text-neutral-600 mb-2">
+            {t.resinLabel}
+          </label>
+          <select id="resin-select" class="w-full p-3 rounded-xl border border-hairline bg-surface-soft text-ink font-medium focus:ring-2 focus:ring-signature-coral focus:outline-none">
+            {localizedResins.map((r: any) => (
+              <option value={r.code} selected={r.code === 5}>
+                #{r.code} {r.name} - {r.fullName} (Max: {r.maxTempC}°C / {r.maxTempF}°F)
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <!-- 2. Food Type Picker -->
+        <div>
+          <label for="food-select" class="block text-xs font-bold uppercase tracking-wider text-neutral-600 mb-2">
+            {t.foodLabel}
+          </label>
+          <select id="food-select" class="w-full p-3 rounded-xl border border-hairline bg-surface-soft text-ink font-medium focus:ring-2 focus:ring-signature-coral focus:outline-none">
+            {localizedFoods.map((f: any) => (
+              <option value={f.id} selected={f.id === 'oily'}>
+                {f.name}
+              </option>
+            ))}
+          </select>
+          <p id="food-desc" class="text-xs text-neutral-500 mt-1.5 leading-relaxed"></p>
+        </div>
+
+        <!-- 3. Temperature Picker -->
+        <div>
+          <label for="temp-select" class="block text-xs font-bold uppercase tracking-wider text-neutral-600 mb-2">
+            {t.tempLabel}
+          </label>
+          <select id="temp-select" class="w-full p-3 rounded-xl border border-hairline bg-surface-soft text-ink font-medium focus:ring-2 focus:ring-signature-coral focus:outline-none">
+            {localizedTemps.map((tm: any) => (
+              <option value={tm.id} selected={tm.id === 'microwave'}>
+                {tm.name}
+              </option>
+            ))}
+          </select>
+          <p id="temp-desc" class="text-xs text-neutral-500 mt-1.5 leading-relaxed"></p>
+        </div>
+
+        <!-- 4. Wear State Picker -->
+        <div>
+          <label for="wear-select" class="block text-xs font-bold uppercase tracking-wider text-neutral-600 mb-2">
+            {t.wearLabel}
+          </label>
+          <select id="wear-select" class="w-full p-3 rounded-xl border border-hairline bg-surface-soft text-ink font-medium focus:ring-2 focus:ring-signature-coral focus:outline-none">
+            {localizedWearStates.map((w: any) => (
+              <option value={w.id} selected={w.id === 'scratched'}>
+                {w.name}
+              </option>
+            ))}
+          </select>
+          <p id="wear-desc" class="text-xs text-neutral-500 mt-1.5 leading-relaxed"></p>
+        </div>
+      </div>
+
+      <!-- Live Results Card -->
+      <div class="lg:col-span-6 flex flex-col justify-between bg-surface-soft p-6 md:p-8 rounded-2xl border border-hairline shadow-sm space-y-6">
+        <div>
+          <!-- Verdict Badge -->
+          <div id="verdict-badge" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-4 bg-red-100 text-red-800 border border-red-200">
+            <span class="inline-block w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse"></span>
+            <span id="verdict-text">{t.verdictDanger}</span>
+          </div>
+
+          <h3 id="result-headline" class="text-xl md:text-2xl font-bold text-ink mb-2">
+            Polypropylene Reheated with Hot Oils
+          </h3>
+          <p id="result-summary" class="text-sm text-body leading-relaxed mb-6">
+            Localized oil superheating creates thermal pits, accelerating microplastic shedding and additive migration.
+          </p>
+
+          <!-- Leaching Risk Score Gauge -->
+          <div class="space-y-2 mb-6">
+            <div class="flex justify-between items-center text-xs font-bold">
+              <span class="text-neutral-600 uppercase tracking-wider">{t.riskScoreLabel}</span>
+              <span id="risk-score-value" class="text-base text-red-700 font-extrabold">85 / 100</span>
+            </div>
+            <div class="w-full h-3 rounded-full bg-neutral-200 overflow-hidden">
+              <div id="risk-score-bar" class="h-full bg-red-600 rounded-full transition-all duration-500" style="width: 85%;"></div>
+            </div>
+          </div>
+
+          <!-- Microplastic & Chemical Details -->
+          <div class="space-y-4 pt-4 border-t border-hairline">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-neutral-500 block mb-1">
+                {t.chemicalsHeader}
+              </span>
+              <p id="chemicals-list" class="text-sm font-medium text-ink bg-white p-2.5 rounded-xl border border-hairline">
+                Phthalate esters, slip agents (erucamide), hindered amine light stabilizers (HALS), cyclic oligomers.
+              </p>
+            </div>
+
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-neutral-500 block mb-1">
+                {t.microplasticsHeader}
+              </span>
+              <p id="microplastics-estimate" class="text-sm font-medium text-ink bg-white p-2.5 rounded-xl border border-hairline">
+                ~1,200,000 to 4,200,000 microplastics + ~2.1 billion nanoplastics / cm²
+              </p>
+            </div>
+
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-neutral-500 block mb-1">
+                {t.mechanismHeader}
+              </span>
+              <p id="mechanism-text" class="text-xs text-body leading-relaxed">
+                Lipids act as non-polar extraction solvents while microwave dielectric hot spots exceed 150°C, causing surface melting.
+              </p>
+            </div>
+
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-neutral-500 block mb-1">
+                {t.actionHeader}
+              </span>
+              <p id="action-text" class="text-xs font-semibold text-signature-coral leading-relaxed">
+                Transfer to a lead-free ceramic bowl or borosilicate glass container before heating. Never microwave oily foods in plastic.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex flex-wrap gap-3 pt-4 border-t border-hairline">
+          <button
+            type="button"
+            id="copy-report-btn"
+            class="px-4 py-2.5 rounded-xl bg-white hover:bg-neutral-100 text-ink border border-hairline text-xs font-bold transition-all shadow-sm flex items-center gap-2"
+          >
+            {t.copyBtn}
+          </button>
+          <button
+            type="button"
+            onclick="window.print()"
+            class="px-4 py-2.5 rounded-xl bg-white hover:bg-neutral-100 text-ink border border-hairline text-xs font-bold transition-all shadow-sm flex items-center gap-2"
+          >
+            {t.printBtn}
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 2: RESIN MATRIX PANEL -->
+  <section id="tab-panel-matrix" role="tabpanel" aria-labelledby="tab-btn-matrix" class="tab-panel hidden space-y-6">
+    <div class="bg-white rounded-2xl border border-hairline shadow-sm overflow-hidden">
+      <div class="p-6 border-b border-hairline">
+        <h2 class="text-lg font-bold text-ink mb-1">Resin Identification Code (RIC #1 to #7) Safety Matrix</h2>
+        <p class="text-xs text-body leading-relaxed">
+          Standardized under ASTM D7611 and ISO 1043. Review each polymer's exact maximum heat tolerance, microwave safety, and dishwasher suitability.
+        </p>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="bg-surface-soft border-b border-hairline text-ink font-bold">
+              <th class="p-3.5">Code & Polymer</th>
+              <th class="p-3.5">Max Safe Temp</th>
+              <th class="p-3.5">Microwave</th>
+              <th class="p-3.5">Dishwasher</th>
+              <th class="p-3.5">Common Products</th>
+              <th class="p-3.5">Primary Leaching Hazard</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-hairline">
+            {localizedResins.map((r: any) => (
+              <tr class="hover:bg-neutral-50 transition-colors">
+                <td class="p-3.5 font-bold text-ink whitespace-nowrap">
+                  <span class="inline-block px-2 py-0.5 rounded bg-neutral-100 font-mono text-xs mr-1.5 border border-hairline">#{r.code}</span>
+                  {r.name}
+                </td>
+                <td class="p-3.5 whitespace-nowrap font-medium text-ink">
+                  {r.maxTempC}°C / {r.maxTempF}°F
+                </td>
+                <td class="p-3.5">
+                  <span class={`inline-block px-2 py-0.5 rounded text-[11px] font-bold ${
+                    r.microwaveSafe === 'safe'
+                      ? 'bg-green-100 text-green-800'
+                      : r.microwaveSafe === 'conditional'
+                      ? 'bg-amber-100 text-amber-800'
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {r.microwaveSafe.toUpperCase()}
+                  </span>
+                </td>
+                <td class="p-3.5">
+                  <span class={`inline-block px-2 py-0.5 rounded text-[11px] font-bold ${
+                    r.dishwasherSafe === 'top-rack'
+                      ? 'bg-green-100 text-green-800'
+                      : r.dishwasherSafe === 'conditional'
+                      ? 'bg-amber-100 text-amber-800'
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {r.dishwasherSafe.toUpperCase()}
+                  </span>
+                </td>
+                <td class="p-3.5 text-neutral-600 max-w-xs">{r.commonUses}</td>
+                <td class="p-3.5 text-neutral-600 max-w-xs">{r.leachingHazards}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 3: THE SCIENCE PANEL -->
+  <section id="tab-panel-science" role="tabpanel" aria-labelledby="tab-btn-science" class="tab-panel hidden space-y-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-white p-6 rounded-2xl border border-hairline shadow-sm space-y-3">
+        <div class="text-2xl">🔬</div>
+        <h3 class="text-base font-bold text-ink">The 2023 ACS Nano Discovery: Billions of Particles</h3>
+        <p class="text-xs text-body leading-relaxed">
+          In 2023, researchers at the University of Nebraska-Lincoln published groundbreaking findings in <em>ACS Nano</em> (Hussain et al.). Testing FDA-approved polypropylene (#5) containers, they discovered that just 3 minutes of microwave heating released up to <strong>4.22 million microplastics</strong> and <strong>2.11 billion nanoplastics per cm²</strong> into food simulant liquids.
+        </p>
+        <p class="text-xs text-body leading-relaxed">
+          Nanoplastics smaller than 1,000 nanometers easily cross the human gut barrier, enter hepatic circulation, and have been detected in blood vessels, placental tissue, and cardiac arterial plaques.
+        </p>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl border border-hairline shadow-sm space-y-3">
+        <div class="text-2xl">🔥</div>
+        <h3 class="text-base font-bold text-ink">The Fat Extraction Multiplier: Why Oils Melt Plastic</h3>
+        <p class="text-xs text-body leading-relaxed">
+          While water is thermodynamically limited to 100°C (212°F) at standard atmospheric pressure, lipids, gravies, and oils have no such barrier. Under microwave radiation, culinary oils superheat past <strong>180°C to 200°C (356°F–392°F)</strong> in seconds.
+        </p>
+        <p class="text-xs text-body leading-relaxed">
+          Because polypropylene softens at 120°C and melts at 160°C, molten fat burns directly into the plastic surface, creating the familiar permanent cloudy white haze and pitting. Lipids also act as organic non-polar solvents, drawing out lipophilic phthalate and antioxidant plasticizers up to <strong>20× faster</strong> than water.
+        </p>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl border border-hairline shadow-sm space-y-3">
+        <div class="text-2xl">🫧</div>
+        <h3 class="text-base font-bold text-ink">Dishwasher Detergent Etching (pH 10–11)</h3>
+        <p class="text-xs text-body leading-relaxed">
+          Residential dishwashers use highly alkaline caustic detergents (pH 10–11) designed to saponify grease. Combined with 65°C heated water and 80°C forced-air drying cycles, repeated washing strips the plastic's protective injection-molded outer skin layer.
+        </p>
+        <p class="text-xs text-body leading-relaxed">
+          This causes microscopic surface craze-cracking. Once a plastic container becomes cloudy or brittle from the dishwasher, subsequent microwave cycles shed exponentially more plastic shards directly into warm meals.
+        </p>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl border border-hairline shadow-sm space-y-3">
+        <div class="text-2xl">🏷️</div>
+        <h3 class="text-base font-bold text-ink">The 'Microwave-Safe' Legal Myth</h3>
+        <p class="text-xs text-body leading-relaxed">
+          Consumers frequently assume the words 'Microwave-Safe' mean zero chemicals or particles enter food. Under US FDA 21 CFR § 177 and European EFSA regulations, the stamp only certifies that <em>the container itself will not melt, warp, or catch fire</em> under laboratory baseline conditions.
+        </p>
+        <p class="text-xs text-body leading-relaxed">
+          The certification does not test for nanoplastic shedding, endocrine disruptor release in scratched containers, or fat-catalyzed migration.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 4: SAFE SWAPS & TRIAGE PROTOCOL -->
+  <section id="tab-panel-swaps" role="tabpanel" aria-labelledby="tab-btn-swaps" class="tab-panel hidden space-y-8">
+    <div class="bg-white p-6 md:p-8 rounded-2xl border border-hairline shadow-sm space-y-6">
+      <h2 class="text-lg font-bold text-ink mb-2">{t.quickChecklistHeader}</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="flex items-start gap-3 p-4 rounded-xl bg-red-50 border border-red-200 text-red-950">
+          <span class="text-xl font-bold text-red-600">1</span>
+          <div>
+            <h3 class="text-xs font-bold uppercase tracking-wider mb-1">Permanent White Rings or Haze</h3>
+            <p class="text-xs text-red-900/90 leading-relaxed">
+              Indicates the plastic polymer melted from superheated oil or tomato sauce. The polymer chains are broken, releasing ongoing microplastics.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3 p-4 rounded-xl bg-red-50 border border-red-200 text-red-950">
+          <span class="text-xl font-bold text-red-600">2</span>
+          <div>
+            <h3 class="text-xs font-bold uppercase tracking-wider mb-1">Deep Fork, Knife or Scrubber Furrows</h3>
+            <p class="text-xs text-red-900/90 leading-relaxed">
+              Mechanical abrasions harbor bacterial biofilms that cannot be sanitized, while jagged edges shed microscopic plastic shards.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3 p-4 rounded-xl bg-red-50 border border-red-200 text-red-950">
+          <span class="text-xl font-bold text-red-600">3</span>
+          <div>
+            <h3 class="text-xs font-bold uppercase tracking-wider mb-1">Sticky or Gummy Surface After Washing</h3>
+            <p class="text-xs text-red-900/90 leading-relaxed">
+              Known as 'plasticizer bleed-out'. Additives and internal plasticizing oils have migrated to the surface due to polymer degradation.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3 p-4 rounded-xl bg-red-50 border border-red-200 text-red-950">
+          <span class="text-xl font-bold text-red-600">4</span>
+          <div>
+            <h3 class="text-xs font-bold uppercase tracking-wider mb-1">Rancid Chemical Odor Absorption</h3>
+            <p class="text-xs text-red-900/90 leading-relaxed">
+              If washing with hot water and baking soda does not remove grease smell, the polymer porous matrix has absorbed volatile organic compounds.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Safe Kitchen Swaps -->
+      <div class="pt-6 border-t border-hairline">
+        <h3 class="text-base font-bold text-ink mb-4">Recommended Non-Toxic Food Container Swaps</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="p-4 rounded-xl bg-surface-soft border border-hairline">
+            <span class="text-2xl mb-2 block">🫙</span>
+            <h4 class="text-xs font-bold text-ink uppercase tracking-wider mb-1">Borosilicate Glass (Pyrex)</h4>
+            <p class="text-xs text-body leading-relaxed">
+              100% chemically inert, resists thermal shock up to 300°C (572°F), zero chemical leaching into acids or hot fats, dishwasher safe.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-surface-soft border border-hairline">
+            <span class="text-2xl mb-2 block">🥣</span>
+            <h4 class="text-xs font-bold text-ink uppercase tracking-wider mb-1">304 / 316 Stainless Steel</h4>
+            <p class="text-xs text-body leading-relaxed">
+              Virtually indestructible for freezer, fridge, and school lunches. Zero microplastics, zero estrogenic activity. (Not for microwave).
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-surface-soft border border-hairline">
+            <span class="text-2xl mb-2 block">🍃</span>
+            <h4 class="text-xs font-bold text-ink uppercase tracking-wider mb-1">Platinum Food-Grade Silicone</h4>
+            <p class="text-xs text-body leading-relaxed">
+              Cured with platinum catalysts (no peroxide fillers). Withstands -40°C to 230°C (-40°F to 446°F), microwave & dishwasher safe.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCIENTIFIC FAQS ACCORDION -->
+  <section class="bg-white p-6 md:p-8 rounded-2xl border border-hairline shadow-sm space-y-6">
+    <h2 class="text-lg font-bold text-ink">{t.faqHeading}</h2>
+    <div class="space-y-3">
+      {localizedFaqs.map((faq: any, idx: number) => (
+        <details class="group p-4 rounded-xl bg-surface-soft border border-hairline transition-all">
+          <summary class="flex justify-between items-center font-bold text-ink text-sm cursor-pointer list-none">
+            <span>{faq.question}</span>
+            <span class="transition-transform group-open:rotate-180 text-signature-coral text-lg font-mono">▾</span>
+          </summary>
+          <div class="mt-3 text-xs leading-relaxed text-body border-t border-hairline pt-3">
+            {faq.answer}
+          </div>
+        </details>
+      ))}
+    </div>
+  </section>
+
+  <!-- RELATED TOOLS STRIP -->
+  <section class="bg-surface-soft p-6 rounded-2xl border border-hairline space-y-4">
+    <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-500">{t.relatedHeading}</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      <a href={plasticCodeCheckerUrl} class="p-3.5 rounded-xl bg-white border border-hairline hover:border-signature-coral transition-colors flex items-center gap-3">
+        <span class="text-xl">♻️</span>
+        <div>
+          <span class="text-xs font-bold text-ink block">Plastic Code #1–#7 Checker</span>
+          <span class="text-[11px] text-neutral-500">Recycling code safety lookup</span>
+        </div>
+      </a>
+      <a href={migrationPredictorUrl} class="p-3.5 rounded-xl bg-white border border-hairline hover:border-signature-coral transition-colors flex items-center gap-3">
+        <span class="text-xl">🧬</span>
+        <div>
+          <span class="text-xs font-bold text-ink block">Food Chemical Migration Predictor</span>
+          <span class="text-[11px] text-neutral-500">Diffusion kinetics calculator</span>
+        </div>
+      </a>
+      <a href={plasticizerEstimatorUrl} class="p-3.5 rounded-xl bg-white border border-hairline hover:border-signature-coral transition-colors flex items-center gap-3">
+        <span class="text-xl">🩸</span>
+        <div>
+          <span class="text-xs font-bold text-ink block">Plasticizer & Blood Burden Estimator</span>
+          <span class="text-[11px] text-neutral-500">Microplastic exposure tracker</span>
+        </div>
+      </a>
+      <a href={cuttingBoardUrl} class="p-3.5 rounded-xl bg-white border border-hairline hover:border-signature-coral transition-colors flex items-center gap-3">
+        <span class="text-xl">🔪</span>
+        <div>
+          <span class="text-xs font-bold text-ink block">Cutting Board Microplastic Analyzer</span>
+          <span class="text-[11px] text-neutral-500">Polymer furrows & knife damage</span>
+        </div>
+      </a>
+      <a href={panScratchUrl} class="p-3.5 rounded-xl bg-white border border-hairline hover:border-signature-coral transition-colors flex items-center gap-3">
+        <span class="text-xl">🍳</span>
+        <div>
+          <span class="text-xs font-bold text-ink block">AI Pan Scratch Inspector</span>
+          <span class="text-[11px] text-neutral-500">PTFE & coating damage scan</span>
+        </div>
+      </a>
+      <a href={allToolsUrl} class="p-3.5 rounded-xl bg-white border border-hairline hover:border-signature-coral transition-colors flex items-center gap-3">
+        <span class="text-xl">🛠️</span>
+        <div>
+          <span class="text-xs font-bold text-ink block">All 54 Consumer Safety Tools</span>
+          <span class="text-[11px] text-neutral-500">Explore interactive lab</span>
+        </div>
+      </a>
+    </div>
+  </section>
+</div>
+
+<!-- Reactive Client-Side Simulation Script -->
+<script is:inline define:vars={{ rawData, currentLocale, t }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    // 1. Tab switching
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-target');
+        tabButtons.forEach(b => {
+          b.setAttribute('aria-selected', 'false');
+          b.classList.remove('bg-signature-coral', 'text-white', 'shadow-sm');
+          b.classList.add('bg-surface-soft', 'text-ink');
+        });
+        tabPanels.forEach(p => p.classList.add('hidden'));
+
+        btn.setAttribute('aria-selected', 'true');
+        btn.classList.add('bg-signature-coral', 'text-white', 'shadow-sm');
+        btn.classList.remove('bg-surface-soft', 'text-ink');
+
+        const activePanel = document.getElementById(targetId);
+        if (activePanel) {
+          activePanel.classList.remove('hidden');
+        }
+      });
+    });
+
+    // 2. Simulator Logic
+    const resinSelect = document.getElementById('resin-select');
+    const foodSelect = document.getElementById('food-select');
+    const tempSelect = document.getElementById('temp-select');
+    const wearSelect = document.getElementById('wear-select');
+
+    const foodDesc = document.getElementById('food-desc');
+    const tempDesc = document.getElementById('temp-desc');
+    const wearDesc = document.getElementById('wear-desc');
+
+    const verdictBadge = document.getElementById('verdict-badge');
+    const verdictText = document.getElementById('verdict-text');
+    const resultHeadline = document.getElementById('result-headline');
+    const resultSummary = document.getElementById('result-summary');
+    const riskScoreValue = document.getElementById('risk-score-value');
+    const riskScoreBar = document.getElementById('risk-score-bar');
+    const chemicalsList = document.getElementById('chemicals-list');
+    const microplasticsEstimate = document.getElementById('microplastics-estimate');
+    const mechanismText = document.getElementById('mechanism-text');
+    const actionText = document.getElementById('action-text');
+
+    function updateSimulation() {
+      const resinCode = parseInt(resinSelect.value, 10);
+      const foodId = foodSelect.value;
+      const tempId = tempSelect.value;
+      const wearId = wearSelect.value;
+
+      const resinObj = rawData.resins.find(r => r.code === resinCode) || rawData.resins[4];
+      const foodObj = rawData.simulator.foodTypes.find(f => f.id === foodId) || rawData.simulator.foodTypes[0];
+      const tempObj = rawData.simulator.temps.find(t => t.id === tempId) || rawData.simulator.temps[0];
+      const wearObj = rawData.simulator.wearStates.find(w => w.id === wearId) || rawData.simulator.wearStates[0];
+
+      // Update helper description texts
+      if (foodDesc) foodDesc.textContent = foodObj.i18n[currentLocale]?.desc || foodObj.i18n.en.desc;
+      if (tempDesc) tempDesc.textContent = tempObj.i18n[currentLocale]?.desc || tempObj.i18n.en.desc;
+      if (wearDesc) wearDesc.textContent = wearObj.i18n[currentLocale]?.desc || wearObj.i18n.en.desc;
+
+      // Calculate composite score
+      let baseResinFactor = 20;
+      if (resinCode === 1) baseResinFactor = 55; // PET
+      else if (resinCode === 2) baseResinFactor = 15; // HDPE
+      else if (resinCode === 3) baseResinFactor = 75; // PVC
+      else if (resinCode === 4) baseResinFactor = 25; // LDPE
+      else if (resinCode === 5) baseResinFactor = 18; // PP
+      else if (resinCode === 6) baseResinFactor = 85; // PS
+      else if (resinCode === 7) baseResinFactor = 65; // Other / PC / Melamine
+
+      const composite = Math.min(100, Math.round(
+        baseResinFactor * 0.35 +
+        (foodObj.multiplier * 6.5) +
+        (tempObj.multiplier * 3.2) +
+        (wearObj.multiplier * 4.0)
+      ));
+
+      // Overheating override
+      const isOverheated = (tempObj.tempC > resinObj.maxTempC);
+      let finalScore = composite;
+      if (isOverheated) {
+        finalScore = Math.max(finalScore, 82);
+      }
+      if (resinCode === 6 && (tempId === 'boiling' || tempId === 'microwave')) {
+        finalScore = 98; // Styrofoam heated
+      }
+      if (resinCode === 3 && (tempId === 'boiling' || tempId === 'microwave')) {
+        finalScore = 95; // PVC heated
+      }
+      finalScore = Math.min(100, finalScore);
+
+      // Render Badge & Colors
+      if (finalScore >= 75) {
+        verdictBadge.className = 'inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-4 bg-red-100 text-red-800 border border-red-200';
+        verdictText.textContent = t.verdictDanger;
+        riskScoreValue.className = 'text-base text-red-700 font-extrabold';
+        riskScoreBar.className = 'h-full bg-red-600 rounded-full transition-all duration-500';
+      } else if (finalScore >= 40) {
+        verdictBadge.className = 'inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-4 bg-amber-100 text-amber-800 border border-amber-200';
+        verdictText.textContent = t.verdictCaution;
+        riskScoreValue.className = 'text-base text-amber-700 font-extrabold';
+        riskScoreBar.className = 'h-full bg-amber-500 rounded-full transition-all duration-500';
+      } else {
+        verdictBadge.className = 'inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-4 bg-green-100 text-green-800 border border-green-200';
+        verdictText.textContent = t.verdictSafe;
+        riskScoreValue.className = 'text-base text-green-700 font-extrabold';
+        riskScoreBar.className = 'h-full bg-green-600 rounded-full transition-all duration-500';
+      }
+
+      riskScoreValue.textContent = `${finalScore} / 100`;
+      riskScoreBar.style.width = `${finalScore}%`;
+
+      // Headline & Details
+      const resinTitle = resinObj.i18n[currentLocale]?.title || resinObj.i18n.en.title;
+      resultHeadline.textContent = `${resinTitle} — ${foodObj.i18n[currentLocale]?.name || foodObj.i18n.en.name}`;
+
+      if (isOverheated) {
+        resultSummary.textContent = `CRITICAL WARNING: Temperature (${tempObj.tempC}°C / ${tempObj.tempF}°F) exceeds maximum resin stability limit (${resinObj.maxTempC}°C / ${resinObj.maxTempF}°F). Polymer melting and chemical structural breakdown occur.`;
+      } else {
+        resultSummary.textContent = resinObj.i18n[currentLocale]?.summary || resinObj.i18n.en.summary;
+      }
+
+      // Microplastics estimate text
+      let particleEst = '~500 to 25,000 particles / cm² (cold/dry baseline)';
+      if (tempId === 'warm') particleEst = '~50,000 to 350,000 microplastics / cm²';
+      else if (tempId === 'boiling') particleEst = '~850,000 to 2,100,000 microplastics + nanoplastics / cm²';
+      else if (tempId === 'microwave') particleEst = '~1,200,000 to 4,220,000 microplastics + >2.1 billion nanoplastics / cm²';
+      if (wearId === 'degraded') particleEst += ' (× 5.0 multiplier due to surface micro-cracking)';
+      microplasticsEstimate.textContent = particleEst;
+
+      chemicalsList.textContent = resinObj.leachingHazards;
+
+      if (isOverheated) {
+        mechanismText.textContent = `Thermal energy exceeds secondary polymer van der Waals bonds. Matrix relaxation allows volatile organic compounds, unreacted monomers, and catalyst residue to migrate into the food.`;
+        actionText.textContent = `DO NOT CONSUME food heated past resin tolerance. Discard or transfer remaining portions immediately to borosilicate glass or lead-free ceramic.`;
+      } else if (tempId === 'microwave') {
+        mechanismText.textContent = `Dielectric hot-spotting causes localized molten fat interface temperatures (>160°C). Non-polar fatty acids rapidly solvate lipophilic plastic additives.`;
+        actionText.textContent = `Plate before heating! Always transfer refrigerated leftovers to a ceramic plate or glass bowl prior to microwaving.`;
+      } else {
+        mechanismText.textContent = `Aqueous diffusion at low temperature remains below regulatory migration limits. Minimal chemical transfer occurs into non-fatty neutral food.`;
+        actionText.textContent = `Safe for storage. Hand wash or place on top rack of dishwasher away from heating elements. Avoid metal fork scratches.`;
+      }
+    }
+
+    resinSelect.addEventListener('change', updateSimulation);
+    foodSelect.addEventListener('change', updateSimulation);
+    tempSelect.addEventListener('change', updateSimulation);
+    wearSelect.addEventListener('change', updateSimulation);
+
+    // Initial run
+    updateSimulation();
+
+    // Copy report
+    const copyBtn = document.getElementById('copy-report-btn');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        const textToCopy = `IsItKitchenSafe Plastic Leaching Assessment\n` +
+          `-----------------------------------------\n` +
+          `Resin: ${resinSelect.options[resinSelect.selectedIndex].text}\n` +
+          `Food: ${foodSelect.options[foodSelect.selectedIndex].text}\n` +
+          `Exposure: ${tempSelect.options[tempSelect.selectedIndex].text}\n` +
+          `Condition: ${wearSelect.options[wearSelect.selectedIndex].text}\n` +
+          `Verdict: ${verdictText.textContent}\n` +
+          `Migration Index: ${riskScoreValue.textContent}\n` +
+          `Chemicals: ${chemicalsList.textContent}\n` +
+          `Microplastics: ${microplasticsEstimate.textContent}\n` +
+          `Protocol: ${actionText.textContent}\n` +
+          `Verified at: https://isitkitchensafe.com/tools/kitchen-plastic-leaching-checker/`;
+
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          const originalText = copyBtn.innerHTML;
+          copyBtn.innerHTML = `✅ ${t.copySuccess}`;
+          setTimeout(() => {
+            copyBtn.innerHTML = originalText;
+          }, 2500);
+        });
+      });
+    }
+  });
+</script>

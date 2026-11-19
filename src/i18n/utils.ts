@@ -235,6 +235,7 @@ const SPECIAL_PAGES = [
   'tools/coffee-tea-brew-safety-checker',
   'tools/outdoor-grill-bbq-safety-checker',
   'tools/dishwasher-rinse-aid-scale-troubleshooter',
+  'tools/kitchen-plastic-leaching-checker',
   'methodology',
   'saved'
 ];
