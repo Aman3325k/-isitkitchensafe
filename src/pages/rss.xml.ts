@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/microwave-steam-splash-simulator/',
+    title: 'Microwave Steam Splash, Venting & Warped Container Leaching Simulator',
+    description:
+      'Calculate scald explosion, steam pressurization, vacuum warping, and condensation droplet chemical reflux risks when microwaving food in plastic containers. Verified via ACS Nano 2023 & FDA standards.',
+    date: '2026-11-19',
+  },
+  {
     path: '/tools/kitchen-plastic-leaching-checker/',
     title: 'Kitchen Plastic Leaching & Hot Food Safe Container Checker',
     description:

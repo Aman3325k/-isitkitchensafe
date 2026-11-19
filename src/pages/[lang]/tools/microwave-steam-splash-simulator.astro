@@ -1,0 +1,164 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import MicrowaveSteamSplashSimulator from '../../../components/MicrowaveSteamSplashSimulator.astro';
+import rawData from '../../../data/microwave-steam-splash-data.json';
+import type { SupportedLanguage } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+
+interface LocalePageContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  heroSub: string;
+  breadcrumbs: Array<{ label: string; href?: string }>;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocalePageContent> = {
+  es: {
+    pageTitle: "Simulador de Vapor en Microondas, Ventilación y Deformación de Plásticos | IsItKitchenSafe",
+    pageDescription: "Calcula riesgos de explosión por vapor presurizado, deformación por vacío y reflujo químico de gotas al calentar en recipientes plásticos. Normas ACS Nano 2023 y FDA.",
+    badge: "ACS Nano 2023 · FDA 21 CFR § 177 · Termodinámica de Vapor · Códigos ASTM #1–#7",
+    h1: "Simulador de Vapor en Microondas, Ventilación y Deformación de Plásticos",
+    heroSub: "Evita quemaduras por vapor atrapado y contaminación química: calcula el riesgo de explosión con tapas selladas, simula el reflujo de gotas cargadas de plastificantes desde la tapa hacia la comida, inspecciona anillos de plástico fundido por grasa y aprende protocolos de ventilación 100% seguros.",
+    breadcrumbs: [
+      { label: "Inicio", href: "/es/" },
+      { label: "Herramientas", href: "/es/tools/" },
+      { label: "Simulador de Vapor en Microondas" }
+    ]
+  },
+  pt: {
+    pageTitle: "Simulador de Vapor de Micro-ondas, Ventilação e Deformação de Potes | IsItKitchenSafe",
+    pageDescription: "Calcule riscos de explosão por vapor, deformação por vácuo e refluxo de gotículas químicas ao aquecer em potes plásticos no micro-ondas. Padrões ACS Nano 2023 e FDA.",
+    badge: "ACS Nano 2023 · FDA 21 CFR § 177 · Termodinâmica de Vapor · Códigos ASTM #1–#7",
+    h1: "Simulador de Vapor de Micro-ondas, Ventilação e Deformação de Potes",
+    heroSub: "Elimine o risco de queimaduras por vapor e contaminação por plastificantes: calcule o risco de pressão com tampas travadas, simule o gotejamento de vapores químicos da tampa de volta no prato, diagnostique marcas de plástico derretido por óleo quente e domine alternativas seguras sem plástico.",
+    breadcrumbs: [
+      { label: "Início", href: "/pt/" },
+      { label: "Ferramentas", href: "/pt/tools/" },
+      { label: "Simulador de Vapor de Micro-ondas" }
+    ]
+  },
+  'zh-cn': {
+    pageTitle: "微波蒸汽防爆沸、排气泄压与老化塑料盒溶出模拟器 | IsItKitchenSafe",
+    pageDescription: "科学测算微波密封加热下的过热高压爆沸、真空下陷形变与冷凝水滴塑化剂回流风险。基于美国 ACS Nano 2023 权威研究与 FDA 21 CFR § 177 食品接触标准。",
+    badge: "ACS Nano 2023 权威实测 · FDA 21 CFR § 177 · 蒸汽回流物理模型 · ASTM D7611 材质标尺",
+    h1: "微波蒸汽防爆沸、排气泄压与老化塑料盒溶出模拟器",
+    heroSub: "告别盖紧微波引起的炸裂烫伤与二次化学污染：精准评估密封盒盖的高压蒸汽瞬时膨胀与真空塌陷应力，模拟塑料盖冷凝水滴反滴食物中的微塑料与增塑剂回流过程，辨析油滴局部高温熔痕，掌握无塑安全复热守则。",
+    breadcrumbs: [
+      { label: "首页", href: "/zh-cn/" },
+      { label: "安全工具", href: "/zh-cn/tools/" },
+      { label: "微波蒸汽防爆沸与塑料溶出模拟器" }
+    ]
+  },
+  ja: {
+    pageTitle: "電子レンジ蒸気圧・変形容器溶出シミュレーター | IsItKitchenSafe",
+    pageDescription: "密閉加熱時の過熱蒸気爆発・突沸火傷、冷却時の真空変形、蓋裏結露水による可塑剤の還流滴下リスクを科学的に計算。米ACS Nano 2023論文・米FDA基準準拠。",
+    badge: "ACS Nano 2023 論文準拠 · 米FDA 21 CFR § 177 · 蒸気還流熱力学モデル · ASTM #1〜#7",
+    h1: "電子レンジ蒸気圧・変形容器溶出シミュレーター",
+    heroSub: "電子レンジでの密閉蓋加熱による突沸・火傷や化学汚染を未然に防止：高圧蒸気による容器の真空変形、蓋の結露水が料理に滴下する「ケミカル還流現象」、過熱油による樹脂表面の溶解リングを診断し、安全な通気・脱プラ加熱法を提示します。",
+    breadcrumbs: [
+      { label: "ホーム", href: "/ja/" },
+      { label: "安全ツール", href: "/ja/tools/" },
+      { label: "電子レンジ蒸気変形シミュレーター" }
+    ]
+  }
+};
+
+const content = CONTENT[lang as Exclude<SupportedLanguage, 'en'>] || CONTENT.es;
+
+const faqs = (rawData.faqs[lang as 'es' | 'pt' | 'zh-cn' | 'ja'] || rawData.faqs.en);
+
+const canonicalUrl = `https://isitkitchensafe.com/${lang}/tools/microwave-steam-splash-simulator/`;
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": content.h1,
+  "url": canonicalUrl,
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript.",
+  "description": content.pageDescription,
+  "inLanguage": lang,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IsItKitchenSafe",
+    "url": "https://isitkitchensafe.com"
+  }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map((faq: any) => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+};
+---
+
+<Layout
+  title={content.pageTitle}
+  description={content.pageDescription}
+  faqs={faqs}
+  excludeFaqSchema={true}
+  availableLocales={availableLocales}
+  lang={lang}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(webAppSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+  </Fragment>
+
+  <!-- Breadcrumbs -->
+  <div class="bg-surface-soft border-b border-hairline py-1 print:hidden">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <Breadcrumbs items={content.breadcrumbs} className="mb-0" />
+    </div>
+  </div>
+
+  <div class="max-w-[1140px] mx-auto px-6 py-10 md:py-14">
+    <!-- Hero Header -->
+    <header class="mb-10 text-center max-w-3xl mx-auto">
+      <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-signature-coral text-white mb-3">
+        {content.badge}
+      </span>
+      <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-4">
+        {content.h1}
+      </h1>
+      <p class="text-body text-[15px] md:text-[16px] leading-relaxed">
+        {content.heroSub}
+      </p>
+    </header>
+
+    <!-- Main Interactive Simulator Component -->
+    <MicrowaveSteamSplashSimulator lang={lang} />
+  </div>
+</Layout>

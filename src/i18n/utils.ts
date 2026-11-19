@@ -236,6 +236,7 @@ const SPECIAL_PAGES = [
   'tools/outdoor-grill-bbq-safety-checker',
   'tools/dishwasher-rinse-aid-scale-troubleshooter',
   'tools/kitchen-plastic-leaching-checker',
+  'tools/microwave-steam-splash-simulator',
   'methodology',
   'saved'
 ];
