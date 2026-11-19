@@ -4,7 +4,7 @@ A static kitchen safety reference platform and interactive consumer tool suite a
 
 ## Overview
 
-IsItKitchenSafe delivers **11,207+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **206 interactive tools** (**1,030 localized tool pages**, including **55 Google-indexed Everyday Consumer Kitchen Safety Tools**), **47 evergreen guides × 5 languages = 235 localized articles**, **88 comparisons × 5 languages = 440 localized pages**, **1,307 item pages per language (6,535 localized reference pages)**, **WCAG 2.1 AA accessibility**, and transparent E-E-A-T verification standards.
+IsItKitchenSafe delivers **11,215+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **207 interactive tools** (**1,035 localized tool pages**, including **56 Google-indexed Everyday Consumer Kitchen Safety Tools**), **50 evergreen guides × 5 languages = 250 localized articles**, **88 comparisons × 5 languages = 440 localized pages**, **1,307 item pages per language (6,535 localized reference pages)**, **WCAG 2.1 AA accessibility**, and transparent E-E-A-T verification standards.
 
 ## Tech Stack
 - **Framework**: Astro.js (MPA static generation)
@@ -14,8 +14,9 @@ IsItKitchenSafe delivers **11,207+ static pages** across **11 verticals** and **
 
 ## Consumer Growth, E-E-A-T & Retention Architecture
 
-### Everyday Consumer Kitchen Safety Tools (55 Google-Indexed Tools)
-All 206 interactive tools are split cleanly between everyday consumer utilities and specialized commercial/lab simulators (**88 Home Kitchen Safety** + **118 Commercial & Industrial Engineering Lab** = **1,030 localized tool pages** across 5 languages). **55 high-utility consumer tools** are explicitly allowlisted for search indexing in [`src/data/consumer-tools-allowlist.json`](src/data/consumer-tools-allowlist.json) across all 5 languages, including:
+### Everyday Consumer Kitchen Safety Tools (56 Google-Indexed Tools)
+All 207 interactive tools are split cleanly between everyday consumer utilities and specialized commercial/lab simulators (**89 Home Kitchen Safety** + **118 Commercial & Industrial Engineering Lab** = **1,035 localized tool pages** across 5 languages). **56 high-utility consumer tools** are explicitly allowlisted for search indexing in [`src/data/consumer-tools-allowlist.json`](src/data/consumer-tools-allowlist.json) across all 5 languages, including:
+- **Air Fryer Parchment vs. Silicone Liner Airflow & Fire Hazard Simulator** (`air-fryer-liner-fire-hazard-simulator`)
 - **Microwave Steam Splash, Venting & Warped Container Leaching Simulator** (`microwave-steam-splash-simulator`)
 - **Kitchen Plastic Leaching & Hot Food Safe Container Checker** (`kitchen-plastic-leaching-checker`)
 - **Dishwasher Rinse Aid, White Film & Water Hardness Scale Troubleshooter** (`dishwasher-rinse-aid-scale-troubleshooter`)

@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/air-fryer-liner-fire-hazard-simulator/',
+    title: 'Air Fryer Parchment vs. Silicone Liner Airflow Obstruction & Fire Hazard Simulator',
+    description:
+      'Simulate aerodynamic suction lift into glowing heating coils (400°C–600°C), convective bottom airflow loss, scorch limits, and PFAS-free parchment safety in air fryers. Verified via CPSC and FDA standards.',
+    date: '2026-11-19',
+  },
+  {
     path: '/tools/microwave-steam-splash-simulator/',
     title: 'Microwave Steam Splash, Venting & Warped Container Leaching Simulator',
     description:

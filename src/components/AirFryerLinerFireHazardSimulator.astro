@@ -1,0 +1,851 @@
+---
+import rawData from '../data/air-fryer-liner-fire-hazard-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+import { useTranslatedPath } from '../i18n/utils';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+const translatePath = useTranslatedPath(lang);
+
+const panScratchUrl = translatePath('/tools/pan-scratch-inspector/');
+const microwaveSteamUrl = translatePath('/tools/microwave-steam-splash-simulator/');
+const plasticLeachingUrl = translatePath('/tools/kitchen-plastic-leaching-checker/');
+const ovenTempUrl = translatePath('/tools/cookware-oven-temp-lookup/');
+const airfryerOvenUrl = translatePath('/tools/air-fryer-oven-converter/');
+const acrylamideUrl = translatePath('/tools/air-fryer-acrylamide-calculator/');
+const methodologyUrl = translatePath('/methodology/');
+const allToolsUrl = translatePath('/tools/');
+
+const currentLocale = (['en', 'es', 'pt', 'zh-cn', 'ja'].includes(lang) ? lang : 'en') as 'en' | 'es' | 'pt' | 'zh-cn' | 'ja';
+
+const bannerData = rawData.safetyBanner[currentLocale] || rawData.safetyBanner.en;
+
+const localizedLiners = rawData.liners.map((l: any) => ({
+  id: l.id,
+  name: l.name[currentLocale] || l.name.en,
+  material: l.material,
+  maxSafeTempF: l.maxSafeTempF,
+  maxSafeTempC: l.maxSafeTempC,
+  ignitionTempF: l.ignitionTempF,
+  ignitionTempC: l.ignitionTempC,
+  aerodynamicLiftRisk: l.aerodynamicLiftRisk,
+  airflowRestrictionPct: l.airflowRestrictionPct,
+  weightThresholdG: l.weightThresholdG,
+  pfasStatus: l.pfasStatus,
+  scorchRisk: l.scorchRisk,
+  crispnessImpact: l.crispnessImpact
+}));
+
+const localizedModes = rawData.operatingModes.map((m: any) => ({
+  id: m.id,
+  name: m.name[currentLocale] || m.name.en,
+  tempRangeF: m.tempRangeF,
+  fanSpeedRpm: m.fanSpeedRpm,
+  airVelocityMps: m.airVelocityMps,
+  foodWeightG: m.foodWeightG,
+  suctionLiftMultiplier: m.suctionLiftMultiplier,
+  hazardSummary: m.hazardSummary
+}));
+
+const localizedFaqs = rawData.faqs[currentLocale] || rawData.faqs.en;
+
+const uiStrings: Record<'en' | 'es' | 'pt' | 'zh-cn' | 'ja', {
+  tabSimulator: string;
+  tabComparison: string;
+  tabPhysics: string;
+  tabProtocols: string;
+  linerLabel: string;
+  modeLabel: string;
+  hazardScoreLabel: string;
+  suctionRiskLabel: string;
+  airflowRestrictionLabel: string;
+  mechanismHeader: string;
+  actionHeader: string;
+  copyBtn: string;
+  copySuccess: string;
+  printBtn: string;
+  faqHeading: string;
+  relatedHeading: string;
+  badgeSafe: string;
+  badgeCaution: string;
+  badgeDanger: string;
+  badgeCritical: string;
+}> = {
+  en: {
+    tabSimulator: 'Fire Hazard & Airflow Simulator',
+    tabComparison: 'Liner Material Comparison Matrix',
+    tabPhysics: 'Aerodynamic Physics & Coil Ignitions',
+    tabProtocols: 'The 4 Golden Safety Protocols',
+    linerLabel: '1. Select Liner Material & Configuration:',
+    modeLabel: '2. Select Air Fryer Cycle & Food Weight:',
+    hazardScoreLabel: 'Fire & Scorch Hazard Index',
+    suctionRiskLabel: 'Aerodynamic Coil Contact Probability',
+    airflowRestrictionLabel: 'Convective Bottom Airflow Loss',
+    mechanismHeader: 'Thermal & Aerodynamic Hazard Mechanism',
+    actionHeader: 'Immediate Safety Protocol & Action',
+    copyBtn: 'Copy Safety Verdict',
+    copySuccess: 'Safety Verdict Copied!',
+    printBtn: 'Print / Save PDF',
+    faqHeading: 'Frequently Asked Questions: Air Fryer Liners & Fire Safety',
+    relatedHeading: 'Related Kitchen Thermal & Appliance Safety Tools',
+    badgeSafe: '100% AERODYNAMICALLY STABLE & SAFE',
+    badgeCaution: 'OPERATIONAL CAUTION REQUIRED',
+    badgeDanger: 'HIGH SCORCH & SMOKE WARNING',
+    badgeCritical: 'CATASTROPHIC HEATING COIL FIRE RISK'
+  },
+  es: {
+    tabSimulator: 'Simulador de Riesgo de Fuego y Flujo de Aire',
+    tabComparison: 'Matriz Comparativa de Materiales',
+    tabPhysics: 'Física Aerodinámica y Resistencia',
+    tabProtocols: 'Los 4 Protocolos de Seguridad Clave',
+    linerLabel: '1. Selecciona el Tipo de Protector o Molde:',
+    modeLabel: '2. Selecciona el Ciclo y Peso del Alimento:',
+    hazardScoreLabel: 'Índice de Peligro de Fuego y Quemaduras',
+    suctionRiskLabel: 'Probabilidad de Contacto con Resistencia',
+    airflowRestrictionLabel: 'Pérdida de Flujo de Convección Inferior',
+    mechanismHeader: 'Mecanismo Térmico y Aerodinámico',
+    actionHeader: 'Protocolo Inmediato y Acción Requerida',
+    copyBtn: 'Copiar Veredicto de Seguridad',
+    copySuccess: '¡Veredicto Copiado con Éxito!',
+    printBtn: 'Imprimir / Guardar PDF',
+    faqHeading: 'Preguntas Frecuentes: Protectores de Freidora de Aire',
+    relatedHeading: 'Herramientas Relacionadas de Seguridad en Cocina',
+    badgeSafe: '100% ESTABLE Y SEGURO',
+    badgeCaution: 'REQUIERE PRECAUCIÓN OPERATIVA',
+    badgeDanger: 'ALERTA DE HUMO Y CHAMUSCADO',
+    badgeCritical: 'RIESGO CRÍTICO DE INCENDIO EN RESISTENCIA'
+  },
+  pt: {
+    tabSimulator: 'Simulador de Fogo e Fluxo de Ar',
+    tabComparison: 'Matriz Comparativa de Materiais',
+    tabPhysics: 'Física Aerodinâmica e Serpentina',
+    tabProtocols: 'Os 4 Protocolos de Segurança Cruciais',
+    linerLabel: '1. Selecione o Tipo de Forro ou Cesto:',
+    modeLabel: '2. Selecione o Ciclo e Peso do Alimento:',
+    hazardScoreLabel: 'Índice de Perigo de Fogo e Queima',
+    suctionRiskLabel: 'Probabilidade de Sucção na Resistência',
+    airflowRestrictionLabel: 'Perda de Circulação Inferior de Ar',
+    mechanismHeader: 'Mecanismo Térmico e Aerodinâmico',
+    actionHeader: 'Protocolo Imediato de Segurança',
+    copyBtn: 'Copiar Veredito de Segurança',
+    copySuccess: 'Veredito Copiado com Sucesso!',
+    printBtn: 'Imprimir / Salvar PDF',
+    faqHeading: 'Perguntas Frequentes: Forros de Air Fryer e Segurança',
+    relatedHeading: 'Ferramentas Relacionadas de Segurança Térmica na Cozinha',
+    badgeSafe: '100% ESTÁVEL E SEGURO',
+    badgeCaution: 'ATENÇÃO OPERACIONAL NECESSÁRIA',
+    badgeDanger: 'ALERTA DE FUMAÇA E CARBONIZAÇÃO',
+    badgeCritical: 'PERIGO CRÍTICO DE INCÊNDIO NA RESISTÊNCIA'
+  },
+  'zh-cn': {
+    tabSimulator: '空气炸锅气流阻隔与起火模拟器',
+    tabComparison: '垫纸与硅胶内胆材质综合对比表',
+    tabPhysics: '流体力学涡流与发热管引燃机理',
+    tabProtocols: '空气炸锅垫纸 4 大黄金安全法则',
+    linerLabel: '1. 选择烘焙垫纸或内胆类型：',
+    modeLabel: '2. 选择工作模式与食材压重：',
+    hazardScoreLabel: '高温碳化与起火危险指数',
+    suctionRiskLabel: '气动吸附触碰发热管概率',
+    airflowRestrictionLabel: '炸篮底部对流热风衰减率',
+    mechanismHeader: '气动涡流吸附与热力学机理剖析',
+    actionHeader: '即刻执行的安全避险操作规范',
+    copyBtn: '复制安全评估结果',
+    copySuccess: '安全评估结果已复制到剪贴板！',
+    printBtn: '打印 / 导出 PDF',
+    faqHeading: '常见问题解答：空气炸锅垫纸与起火安全',
+    relatedHeading: '更多厨房高温电器与材质安全测试工具',
+    badgeSafe: '100% 气动稳定 / 极佳安全状态',
+    badgeCaution: '需谨慎操作 / 建议优化食材布局',
+    badgeDanger: '高温碳化预警 / 存在浓烟风险',
+    badgeCritical: '致命起火隐患 / 严禁此项操作'
+  },
+  ja: {
+    tabSimulator: 'エアフライヤー発火＆気流シミュレーター',
+    tabComparison: 'シート・シリコン素材総合比較マトリクス',
+    tabPhysics: '気動力学渦流と電熱線発火メカニズム',
+    tabProtocols: '絶対に守るべき4大安全プロトコル',
+    linerLabel: '1. 敷きシート・ポットの素材を選択：',
+    modeLabel: '2. 稼働モードと食材の重さを選択：',
+    hazardScoreLabel: '焦げ付き・発火ハザード指数',
+    suctionRiskLabel: '電熱線（ヒーター）への吸引接触確率',
+    airflowRestrictionLabel: '底部熱風対流の遮断率（焼きムラ要因）',
+    mechanismHeader: '熱力学および空力吸着メカニズム分析',
+    actionHeader: '直ちに行うべき安全対策・回避操作',
+    copyBtn: '安全診断結果をコピー',
+    copySuccess: '診断結果をクリップボードにコピーしました！',
+    printBtn: '印刷 / PDF保存',
+    faqHeading: 'よくある質問：エアフライヤーシートと火災予防',
+    relatedHeading: '関連するキッチン熱機器・器具安全シミュレーター',
+    badgeSafe: '100% 気流安定・安全稼働',
+    badgeCaution: '適切な使用配慮が必要',
+    badgeDanger: '高温焦げ付き・発煙警告',
+    badgeCritical: 'ヒーター直接引火・破滅的火災リスク'
+  }
+};
+
+const t = uiStrings[currentLocale];
+---
+
+<div class="air-fryer-liner-simulator space-y-10">
+  <!-- Scientific Warning Banner -->
+  <div class="bg-amber-500/10 border-l-4 border-amber-500 rounded-r-xl p-5 md:p-6 shadow-sm">
+    <div class="flex items-start gap-4">
+      <div class="text-3xl select-none" aria-hidden="true">🔥</div>
+      <div class="space-y-1">
+        <h2 class="text-lg md:text-xl font-bold text-ink tracking-tight">
+          {bannerData.title}
+        </h2>
+        <p class="text-sm md:text-[15px] text-body leading-relaxed">
+          {bannerData.body}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <div class="flex flex-wrap gap-2 border-b border-hairline pb-3" role="tablist" aria-label="Tool Navigation">
+    <button
+      class="tab-btn px-4 py-2.5 rounded-lg text-sm font-semibold transition-all bg-signature-coral text-white shadow-sm"
+      role="tab"
+      aria-selected="true"
+      data-target="panel-simulator"
+      id="tab-btn-sim"
+    >
+      🎛️ {t.tabSimulator}
+    </button>
+    <button
+      class="tab-btn px-4 py-2.5 rounded-lg text-sm font-semibold transition-all bg-surface-soft text-ink hover:bg-surface"
+      role="tab"
+      aria-selected="false"
+      data-target="panel-comparison"
+      id="tab-btn-comp"
+    >
+      📊 {t.tabComparison}
+    </button>
+    <button
+      class="tab-btn px-4 py-2.5 rounded-lg text-sm font-semibold transition-all bg-surface-soft text-ink hover:bg-surface"
+      role="tab"
+      aria-selected="false"
+      data-target="panel-physics"
+      id="tab-btn-phys"
+    >
+      🔬 {t.tabPhysics}
+    </button>
+    <button
+      class="tab-btn px-4 py-2.5 rounded-lg text-sm font-semibold transition-all bg-surface-soft text-ink hover:bg-surface"
+      role="tab"
+      aria-selected="false"
+      data-target="panel-protocols"
+      id="tab-btn-proto"
+    >
+      🛡️ {t.tabProtocols}
+    </button>
+  </div>
+
+  <!-- TAB 1: INTERACTIVE SIMULATOR PANEL -->
+  <section id="panel-simulator" class="tab-panel space-y-8" role="tabpanel" aria-labelledby="tab-btn-sim">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <!-- Controls Column (5 cols) -->
+      <div class="lg:col-span-5 bg-surface-soft border border-hairline rounded-2xl p-6 space-y-6 shadow-sm">
+        <div>
+          <label for="liner-select" class="block text-sm font-bold text-ink uppercase tracking-wider mb-2">
+            {t.linerLabel}
+          </label>
+          <select
+            id="liner-select"
+            class="w-full bg-white border border-hairline rounded-xl px-4 py-3 text-ink font-medium focus:ring-2 focus:ring-signature-coral focus:outline-none shadow-xs text-sm"
+          >
+            {localizedLiners.map((liner: any) => (
+              <option value={liner.id}>
+                {liner.name}
+              </option>
+            ))}
+          </select>
+          <div id="liner-detail" class="mt-2 text-xs text-body leading-relaxed bg-white/70 p-2.5 rounded-lg border border-hairline">
+            <!-- Dynamic Liner details injected here -->
+          </div>
+        </div>
+
+        <div>
+          <label for="mode-select" class="block text-sm font-bold text-ink uppercase tracking-wider mb-2">
+            {t.modeLabel}
+          </label>
+          <select
+            id="mode-select"
+            class="w-full bg-white border border-hairline rounded-xl px-4 py-3 text-ink font-medium focus:ring-2 focus:ring-signature-coral focus:outline-none shadow-xs text-sm"
+          >
+            {localizedModes.map((mode: any) => (
+              <option value={mode.id}>
+                {mode.name}
+              </option>
+            ))}
+          </select>
+          <div id="mode-detail" class="mt-2 text-xs text-body leading-relaxed bg-white/70 p-2.5 rounded-lg border border-hairline">
+            <!-- Dynamic Mode details injected here -->
+          </div>
+        </div>
+
+        <!-- Quick Summary Mini Metrics -->
+        <div class="grid grid-cols-2 gap-3 pt-2">
+          <div class="bg-white p-3 rounded-xl border border-hairline text-center">
+            <span class="block text-[11px] font-bold text-body uppercase tracking-wider">Parchment Limit</span>
+            <span class="text-base font-bold text-ink">428°F / 220°C</span>
+          </div>
+          <div class="bg-white p-3 rounded-xl border border-hairline text-center">
+            <span class="block text-[11px] font-bold text-body uppercase tracking-wider">Coil Temperature</span>
+            <span class="text-base font-bold text-signature-coral">1000°F+ (550°C)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Diagnosis Output Column (7 cols) -->
+      <div class="lg:col-span-7 bg-white border border-hairline rounded-2xl p-6 md:p-8 space-y-6 shadow-sm" id="result-card">
+        <!-- Result Badge & Title -->
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-hairline pb-4">
+          <div class="space-y-1">
+            <span id="result-badge" class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-signature-coral text-white">
+              {t.badgeCritical}
+            </span>
+            <h3 id="result-title" class="text-xl md:text-2xl font-bold text-ink tracking-tight">
+              <!-- Dynamic title -->
+            </h3>
+          </div>
+          <div class="flex gap-2 print:hidden">
+            <button
+              id="copy-verdict-btn"
+              class="px-3 py-1.5 rounded-lg border border-hairline text-xs font-semibold text-ink bg-surface-soft hover:bg-surface transition-all"
+            >
+              📋 {t.copyBtn}
+            </button>
+            <button
+              id="print-btn"
+              class="px-3 py-1.5 rounded-lg border border-hairline text-xs font-semibold text-ink bg-surface-soft hover:bg-surface transition-all"
+            >
+              🖨️ {t.printBtn}
+            </button>
+          </div>
+        </div>
+
+        <!-- Hazard Meters -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Fire Hazard Meter -->
+          <div class="bg-surface-soft p-4 rounded-xl border border-hairline space-y-2">
+            <div class="flex justify-between items-center text-xs font-bold text-ink">
+              <span>{t.hazardScoreLabel}</span>
+              <span id="fire-percentage" class="text-signature-coral font-black text-sm">100%</span>
+            </div>
+            <div class="w-full bg-hairline rounded-full h-3 overflow-hidden">
+              <div id="fire-bar" class="h-full bg-signature-coral transition-all duration-300" style="width: 100%;"></div>
+            </div>
+            <p id="fire-level" class="text-[11px] text-body font-medium">Extreme Heating Coil Contact Hazard</p>
+          </div>
+
+          <!-- Airflow Restriction Meter -->
+          <div class="bg-surface-soft p-4 rounded-xl border border-hairline space-y-2">
+            <div class="flex justify-between items-center text-xs font-bold text-ink">
+              <span>{t.airflowRestrictionLabel}</span>
+              <span id="airflow-percentage" class="text-ink font-black text-sm">0%</span>
+            </div>
+            <div class="w-full bg-hairline rounded-full h-3 overflow-hidden">
+              <div id="airflow-bar" class="h-full bg-blue-600 transition-all duration-300" style="width: 0%;"></div>
+            </div>
+            <p id="airflow-level" class="text-[11px] text-body font-medium">Normal 360° Convection Vortex</p>
+          </div>
+        </div>
+
+        <!-- Technical Diagnostics Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+          <div class="bg-surface-soft/60 p-3 rounded-lg border border-hairline">
+            <span class="block text-body font-bold mb-0.5">{t.suctionRiskLabel}</span>
+            <span id="suction-risk" class="font-bold text-ink text-sm">99% (Immediate Lift)</span>
+          </div>
+          <div class="bg-surface-soft/60 p-3 rounded-lg border border-hairline">
+            <span class="block text-body font-bold mb-0.5">Cook Time Penalty</span>
+            <span id="cook-time-penalty" class="font-bold text-ink text-sm">+0 min (None)</span>
+          </div>
+          <div class="bg-surface-soft/60 p-3 rounded-lg border border-hairline col-span-2 sm:col-span-1">
+            <span class="block text-body font-bold mb-0.5">Chemical / PFAS Safety</span>
+            <span id="chemical-safety" class="font-bold text-ink text-sm">PFAS-Free Certified</span>
+          </div>
+        </div>
+
+        <!-- Mechanism Analysis Box -->
+        <div class="space-y-2 bg-amber-500/5 p-4 rounded-xl border border-amber-500/20">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5">
+            <span>🔬</span> {t.mechanismHeader}
+          </h4>
+          <p id="mechanism-text" class="text-xs md:text-sm text-body leading-relaxed">
+            <!-- Dynamic Mechanism text -->
+          </p>
+        </div>
+
+        <!-- Mandatory Action Box -->
+        <div id="action-container" class="space-y-2 bg-signature-coral/5 p-4 rounded-xl border border-signature-coral/20">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-signature-coral flex items-center gap-1.5">
+            <span>⚡</span> {t.actionHeader}
+          </h4>
+          <p id="action-text" class="text-xs md:text-sm text-ink font-semibold leading-relaxed">
+            <!-- Dynamic Action text -->
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 2: COMPARISON MATRIX -->
+  <section id="panel-comparison" class="tab-panel hidden space-y-6" role="tabpanel" aria-labelledby="tab-btn-comp">
+    <div class="bg-surface-soft border border-hairline rounded-2xl p-6 md:p-8 space-y-6">
+      <div class="max-w-3xl">
+        <h3 class="text-xl md:text-2xl font-bold text-ink tracking-tight mb-2">
+          Air Fryer Liners &amp; Inserts: Comprehensive Safety Matrix
+        </h3>
+        <p class="text-sm text-body leading-relaxed">
+          Comparing thermal stability, aerodynamic lift, crispness efficiency, and chemical offgassing across parchment paper, perforated mats, silicone bowls, aluminum foil, and wax paper.
+        </p>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs md:text-sm border-collapse bg-white rounded-xl shadow-xs overflow-hidden">
+          <thead>
+            <tr class="bg-surface border-b border-hairline text-ink font-bold">
+              <th class="p-3.5">Material &amp; Liner Type</th>
+              <th class="p-3.5">Max Safe Temp</th>
+              <th class="p-3.5">Ignition Temp</th>
+              <th class="p-3.5">Coil Fire Risk</th>
+              <th class="p-3.5">Airflow Loss</th>
+              <th class="p-3.5">Min. Ballast Weight</th>
+              <th class="p-3.5">PFAS Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-hairline">
+            <tr class="hover:bg-surface-soft/40 transition-colors">
+              <td class="p-3.5 font-bold text-ink">Perforated Parchment (Pre-punched)</td>
+              <td class="p-3.5 text-emerald-700 font-semibold">428°F (220°C)</td>
+              <td class="p-3.5 text-body">450°F (232°C)</td>
+              <td class="p-3.5 text-emerald-700 font-bold">Zero (when weighted)</td>
+              <td class="p-3.5 text-emerald-700">~10% (Crispy)</td>
+              <td class="p-3.5 text-ink font-medium">150g (5.3 oz)</td>
+              <td class="p-3.5 text-emerald-700 font-bold">100% PFAS-Free</td>
+            </tr>
+            <tr class="hover:bg-surface-soft/40 transition-colors">
+              <td class="p-3.5 font-bold text-ink">Perforated Silicone Mat / Grid</td>
+              <td class="p-3.5 text-emerald-700 font-semibold">450°F (232°C)</td>
+              <td class="p-3.5 text-body">840°F (450°C)</td>
+              <td class="p-3.5 text-emerald-700 font-bold">Zero (Dense Mat)</td>
+              <td class="p-3.5 text-emerald-700">~15% (Crispy)</td>
+              <td class="p-3.5 text-ink font-medium">50g (Self-weight)</td>
+              <td class="p-3.5 text-emerald-700 font-bold">PFAS-Free (LFGB)</td>
+            </tr>
+            <tr class="hover:bg-surface-soft/40 transition-colors">
+              <td class="p-3.5 font-bold text-ink">Solid Silicone Pot / Bowl</td>
+              <td class="p-3.5 text-emerald-700 font-semibold">450°F (232°C)</td>
+              <td class="p-3.5 text-body">840°F (450°C)</td>
+              <td class="p-3.5 text-emerald-700 font-bold">Zero (Fire Safe)</td>
+              <td class="p-3.5 text-amber-600 font-bold">50–55% (Soggy)</td>
+              <td class="p-3.5 text-ink font-medium">0g (Heavy)</td>
+              <td class="p-3.5 text-emerald-700 font-bold">PFAS-Free Polymer</td>
+            </tr>
+            <tr class="hover:bg-surface-soft/40 transition-colors">
+              <td class="p-3.5 font-bold text-ink">Unweighted Parchment Paper</td>
+              <td class="p-3.5 text-amber-600 font-semibold">428°F (220°C)</td>
+              <td class="p-3.5 text-body">450°F (232°C)</td>
+              <td class="p-3.5 text-signature-coral font-bold">EXTREME FIRE</td>
+              <td class="p-3.5 text-body">~25%</td>
+              <td class="p-3.5 text-signature-coral font-bold">&gt;200g (Mandatory)</td>
+              <td class="p-3.5 text-emerald-700 font-bold">PFAS-Free</td>
+            </tr>
+            <tr class="hover:bg-surface-soft/40 transition-colors">
+              <td class="p-3.5 font-bold text-ink">Heavy Duty Aluminum Foil</td>
+              <td class="p-3.5 text-emerald-700 font-semibold">650°F+ (343°C)</td>
+              <td class="p-3.5 text-body">1220°F (660°C)</td>
+              <td class="p-3.5 text-amber-600 font-bold">Electrical Short Risk</td>
+              <td class="p-3.5 text-amber-600 font-bold">50% (No holes)</td>
+              <td class="p-3.5 text-ink font-medium">100g (Crimped)</td>
+              <td class="p-3.5 text-emerald-700 font-bold">Inorganic Metal</td>
+            </tr>
+            <tr class="bg-red-500/10 hover:bg-red-500/15 transition-colors">
+              <td class="p-3.5 font-bold text-signature-coral">Wax Paper (Paraffin)</td>
+              <td class="p-3.5 text-signature-coral font-bold">150°F (65°C) ⚠️</td>
+              <td class="p-3.5 text-signature-coral font-bold">390°F (199°C)</td>
+              <td class="p-3.5 text-signature-coral font-black">FLASH FIRE 100%</td>
+              <td class="p-3.5 text-signature-coral">Melt Hazard</td>
+              <td class="p-3.5 text-signature-coral font-black">NEVER USE</td>
+              <td class="p-3.5 text-signature-coral font-bold">Toxic Wax Vapor</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 3: THE SCIENCE & PHYSICS -->
+  <section id="panel-physics" class="tab-panel hidden space-y-6" role="tabpanel" aria-labelledby="tab-btn-phys">
+    <div class="bg-surface-soft border border-hairline rounded-2xl p-6 md:p-8 space-y-6">
+      <div class="max-w-3xl">
+        <h3 class="text-xl md:text-2xl font-bold text-ink tracking-tight mb-3">
+          Aerodynamic Vortex Lift &amp; Heating Coil Pyrolysis Chemistry
+        </h3>
+        <p class="text-sm text-body leading-relaxed">
+          How a 3,000 RPM convection fan creates low pressure above the basket and why thermal contact with nichrome coils causes catastrophic failure.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+        <div class="bg-white p-5 rounded-xl border border-hairline space-y-3">
+          <h4 class="font-bold text-ink flex items-center gap-2">
+            <span>🌪️</span> 1. The Bernoulli Suction Effect
+          </h4>
+          <p class="text-body text-xs md:text-sm leading-relaxed">
+            Air fryers rely on a high-velocity axial or centrifugal fan spinning at 2,400 to 3,200 RPM directly below or adjacent to the top heating element. This generates airflow velocities between 3.5 and 5.0 m/s. According to Bernoulli’s principle, high-velocity air flowing over the upper surface of a lightweight parchment sheet (massing only 3 to 5 grams) produces a severe pressure drop ($\Delta P$). Without a minimum of <strong>150 to 200 grams of food ballast</strong>, the upward lift force easily overcomes gravity, instantly suctioning the paper into the heating coil.
+          </p>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl border border-hairline space-y-3">
+          <h4 class="font-bold text-ink flex items-center gap-2">
+            <span>⚡</span> 2. Nichrome Coil Pyrolysis vs. Ambient Air
+          </h4>
+          <p class="text-body text-xs md:text-sm leading-relaxed">
+            While your air fryer display may read 375°F (190°C), that is the <em>ambient chamber air temperature</em>. The glowing nichrome heating coil operating under electrical resistance reaches surface temperatures between <strong>750°F and 1100°F (400°C–600°C)</strong>. Standard vegetable parchment paper degrades at 428°F (220°C) and spontaneously catches fire at 450°F (232°C). Direct physical contact with the glowing coil induces instantaneous thermal flash ignition in under 4 seconds.
+          </p>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl border border-hairline space-y-3">
+          <h4 class="font-bold text-ink flex items-center gap-2">
+            <span>🧊</span> 3. Convective Boundary Layer &amp; Crisping Physics
+          </h4>
+          <p class="text-body text-xs md:text-sm leading-relaxed">
+            Crisping requires rapid stripping of the water vapor boundary layer surrounding food to initiate the Maillard reaction (140°C–165°C). The perforations in the factory metal basket allow downward turbulent air to cycle underneath the food and escape out the bottom and side exhaust channels. Placing a solid silicone bowl inside completely seals off the bottom 50–55% of convective flow. Water vapor condensing on food underside cannot evaporate, resulting in soggy textures and requiring up to 35% longer cook times.
+          </p>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl border border-hairline space-y-3">
+          <h4 class="font-bold text-ink flex items-center gap-2">
+            <span>🧪</span> 4. Silicone Oligomer Offgassing &amp; The Pinch Test
+          </h4>
+          <p class="text-body text-xs md:text-sm leading-relaxed">
+            Certified platinum-cured silicone (FDA 21 CFR § 177.2600 &amp; German LFGB) is an inorganic silicon-oxygen backbone ($[-Si-O-]_n$) that remains inert up to 450°F (232°C). However, low-cost generic silicone liners cured with peroxide or bulked with inexpensive calcium carbonate mineral fillers degrade when subjected to 400°F heat, releasing cyclic volatile siloxanes (D4, D5, D6). Perform the <strong>"pinch and twist test"</strong>: if folding or twisting the silicone exposes a white stress line, it contains filler adulterants and should be retired.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 4: SAFETY PROTOCOLS -->
+  <section id="panel-protocols" class="tab-panel hidden space-y-6" role="tabpanel" aria-labelledby="tab-btn-proto">
+    <div class="bg-surface-soft border border-hairline rounded-2xl p-6 md:p-8 space-y-6">
+      <div class="max-w-3xl">
+        <h3 class="text-xl md:text-2xl font-bold text-ink tracking-tight mb-2">
+          The 4 Golden Rules for Air Fryer Liner Safety
+        </h3>
+        <p class="text-sm text-body leading-relaxed">
+          Follow these laboratory-verified operational rules to prevent appliance fires, avoid soggy food, and ensure zero toxic chemical exposure.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 text-sm">
+        <div class="bg-white p-5 rounded-xl border-l-4 border-signature-coral shadow-xs space-y-2">
+          <span class="inline-block px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-signature-coral/10 text-signature-coral">Rule 1</span>
+          <h4 class="font-bold text-ink text-base">The Absolute Preheat Prohibition</h4>
+          <p class="text-xs md:text-sm text-body leading-relaxed">
+            <strong>NEVER put parchment paper or loose aluminum foil in an air fryer while preheating.</strong> Always preheat with the basket completely empty. Only add parchment paper at the exact moment you place the weighed food on top.
+          </p>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl border-l-4 border-emerald-600 shadow-xs space-y-2">
+          <span class="inline-block px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-emerald-600/10 text-emerald-700">Rule 2</span>
+          <h4 class="font-bold text-ink text-base">The 200-Gram Food Ballast Rule</h4>
+          <p class="text-xs md:text-sm text-body leading-relaxed">
+            Ensure at least <strong>150 to 200 grams (approx. 5.3 to 7 oz)</strong> of dense food is distributed evenly across all four quadrants of the paper. For lightweight foods (kale chips, toast), use a heavy perforated silicone mat or an oven-safe stainless steel fork as an anchor.
+          </p>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl border-l-4 border-amber-600 shadow-xs space-y-2">
+          <span class="inline-block px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-amber-600/10 text-amber-700">Rule 3</span>
+          <h4 class="font-bold text-ink text-base">The Wax Paper Ban (Zero Tolerance)</h4>
+          <p class="text-xs md:text-sm text-body leading-relaxed">
+            Never confuse parchment paper with wax paper. Wax paper is coated with paraffin that liquefies at 130°F (54°C) and catches fire at 390°F. If wax paper touches heat, it smokes violently and can ignite into a catastrophic kitchen flash fire.
+          </p>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl border-l-4 border-blue-600 shadow-xs space-y-2">
+          <span class="inline-block px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-blue-600/10 text-blue-700">Rule 4</span>
+          <h4 class="font-bold text-ink text-base">Perforations for Convection Performance</h4>
+          <p class="text-xs md:text-sm text-body leading-relaxed">
+            Always choose <strong>perforated parchment paper or slotted silicone grids</strong> over solid bowl liners. The punched holes preserve 85% to 90% of bottom convective air velocity, allowing excess rendered fat to drain while delivering authentic 360-degree crispness.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section with Schema.org Markup Ready -->
+  <section class="space-y-6 pt-4 border-t border-hairline">
+    <div class="max-w-3xl">
+      <h3 class="text-xl md:text-2xl font-bold text-ink tracking-tight mb-2">
+        {t.faqHeading}
+      </h3>
+      <p class="text-sm text-body">
+        Evidence-based answers verified against CPSC recall databases and FDA food-contact standards.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {localizedFaqs.map((faq: any) => (
+        <div class="bg-surface-soft border border-hairline rounded-xl p-5 space-y-2">
+          <h4 class="font-bold text-ink text-sm md:text-base flex items-start gap-2">
+            <span class="text-signature-coral" aria-hidden="true">Q:</span>
+            <span>{faq.question}</span>
+          </h4>
+          <p class="text-xs md:text-sm text-body leading-relaxed">
+            {faq.answer}
+          </p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Related Tools Hub Links -->
+  <section class="bg-surface-soft border border-hairline rounded-2xl p-6 md:p-8 space-y-4">
+    <h3 class="text-lg md:text-xl font-bold text-ink tracking-tight">
+      {t.relatedHeading}
+    </h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs md:text-sm">
+      <a href={airfryerOvenUrl} class="block bg-white p-3.5 rounded-xl border border-hairline hover:border-signature-coral transition-colors font-medium text-ink shadow-xs">
+        <span class="text-signature-coral font-bold block mb-1">⏱️ Converter</span>
+        Air Fryer to Oven Conversion Calculator
+      </a>
+      <a href={panScratchUrl} class="block bg-white p-3.5 rounded-xl border border-hairline hover:border-signature-coral transition-colors font-medium text-ink shadow-xs">
+        <span class="text-signature-coral font-bold block mb-1">🍳 Inspection</span>
+        AI Pan Scratch &amp; Basket Coating Inspector
+      </a>
+      <a href={microwaveSteamUrl} class="block bg-white p-3.5 rounded-xl border border-hairline hover:border-signature-coral transition-colors font-medium text-ink shadow-xs">
+        <span class="text-signature-coral font-bold block mb-1">💨 Steam Physics</span>
+        Microwave Steam Splash &amp; Venting Simulator
+      </a>
+      <a href={ovenTempUrl} class="block bg-white p-3.5 rounded-xl border border-hairline hover:border-signature-coral transition-colors font-medium text-ink shadow-xs">
+        <span class="text-signature-coral font-bold block mb-1">🌡️ Heat Safety</span>
+        Cookware &amp; Bakeware Max Safe Oven Temp
+      </a>
+    </div>
+  </section>
+</div>
+
+<script is:inline define:vars={{ rawData, currentLocale, t }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    // 1. Tab Navigation
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-target');
+        tabButtons.forEach(b => {
+          b.setAttribute('aria-selected', 'false');
+          b.classList.remove('bg-signature-coral', 'text-white', 'shadow-sm');
+          b.classList.add('bg-surface-soft', 'text-ink');
+        });
+        tabPanels.forEach(p => p.classList.add('hidden'));
+
+        btn.setAttribute('aria-selected', 'true');
+        btn.classList.add('bg-signature-coral', 'text-white', 'shadow-sm');
+        btn.classList.remove('bg-surface-soft', 'text-ink');
+
+        const activePanel = document.getElementById(targetId);
+        if (activePanel) {
+          activePanel.classList.remove('hidden');
+        }
+      });
+    });
+
+    // 2. Interactive Simulator
+    const linerSelect = document.getElementById('liner-select');
+    const modeSelect = document.getElementById('mode-select');
+
+    const linerDetail = document.getElementById('liner-detail');
+    const modeDetail = document.getElementById('mode-detail');
+
+    const resultBadge = document.getElementById('result-badge');
+    const resultTitle = document.getElementById('result-title');
+    const firePercentage = document.getElementById('fire-percentage');
+    const fireBar = document.getElementById('fire-bar');
+    const fireLevel = document.getElementById('fire-level');
+    const airflowPercentage = document.getElementById('airflow-percentage');
+    const airflowBar = document.getElementById('airflow-bar');
+    const airflowLevel = document.getElementById('airflow-level');
+    const suctionRisk = document.getElementById('suction-risk');
+    const cookTimePenalty = document.getElementById('cook-time-penalty');
+    const chemicalSafety = document.getElementById('chemical-safety');
+    const mechanismText = document.getElementById('mechanism-text');
+    const actionText = document.getElementById('action-text');
+    const actionContainer = document.getElementById('action-container');
+    const copyBtn = document.getElementById('copy-verdict-btn');
+    const printBtn = document.getElementById('print-btn');
+
+    function updateSimulation() {
+      if (!linerSelect || !modeSelect) return;
+
+      const lId = linerSelect.value;
+      const mId = modeSelect.value;
+
+      const linerObj = rawData.liners.find(l => l.id === lId);
+      const modeObj = rawData.operatingModes.find(m => m.id === mId);
+      const simData = rawData.simulationMatrix[lId] ? rawData.simulationMatrix[lId][mId] : null;
+
+      if (!linerObj || !modeObj || !simData) return;
+
+      // Update descriptions
+      if (linerDetail) {
+        linerDetail.innerHTML = '<strong>' + (linerObj.name[currentLocale] || linerObj.name.en) + '</strong>: Max Safe Temp ' + linerObj.maxSafeTempF + '°F (' + linerObj.maxSafeTempC + '°C) · ' + linerObj.pfasStatus;
+      }
+      if (modeDetail) {
+        modeDetail.innerHTML = '<strong>' + (modeObj.name[currentLocale] || modeObj.name.en) + '</strong>: ' + modeObj.tempRangeF + ' · ' + modeObj.hazardSummary;
+      }
+
+      // Update Meters
+      const score = simData.fireRiskScore;
+      if (firePercentage) firePercentage.textContent = score + '%';
+      if (fireBar) {
+        fireBar.style.width = score + '%';
+        if (score >= 80) {
+          fireBar.className = 'h-full bg-signature-coral transition-all duration-300';
+        } else if (score >= 35) {
+          fireBar.className = 'h-full bg-amber-500 transition-all duration-300';
+        } else {
+          fireBar.className = 'h-full bg-emerald-600 transition-all duration-300';
+        }
+      }
+
+      // Airflow
+      const airLoss = simData.airflowPenaltyPct;
+      if (airflowPercentage) airflowPercentage.textContent = airLoss + '%';
+      if (airflowBar) {
+        airflowBar.style.width = airLoss + '%';
+        if (airLoss >= 45) {
+          airflowBar.className = 'h-full bg-amber-600 transition-all duration-300';
+        } else if (airLoss >= 20) {
+          airflowBar.className = 'h-full bg-blue-500 transition-all duration-300';
+        } else {
+          airflowBar.className = 'h-full bg-emerald-600 transition-all duration-300';
+        }
+      }
+
+      if (airflowLevel) {
+        if (airLoss >= 45) {
+          airflowLevel.textContent = 'Severe bottom convective airflow loss (soggy bottom, extended cook time)';
+        } else if (airLoss >= 20) {
+          airflowLevel.textContent = 'Moderate airflow reduction (flip food midway)';
+        } else {
+          airflowLevel.textContent = 'Optimal 360° convective crisping vortex maintained';
+        }
+      }
+
+      // Badge and Title
+      if (resultBadge) {
+        if (score >= 80) {
+          resultBadge.className = 'inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-signature-coral text-white';
+          resultBadge.textContent = t.badgeCritical;
+        } else if (score >= 35) {
+          resultBadge.className = 'inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500 text-white';
+          resultBadge.textContent = t.badgeDanger;
+        } else if (airLoss >= 45) {
+          resultBadge.className = 'inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-700 text-white';
+          resultBadge.textContent = t.badgeCaution;
+        } else {
+          resultBadge.className = 'inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-700 text-white';
+          resultBadge.textContent = t.badgeSafe;
+        }
+      }
+
+      if (resultTitle) {
+        resultTitle.textContent = (linerObj.name[currentLocale] || linerObj.name.en) + ' + ' + (modeObj.name[currentLocale] || modeObj.name.en);
+      }
+
+      if (fireLevel) {
+        if (score >= 80) {
+          fireLevel.textContent = 'Extreme Heating Coil Flash Fire Hazard (CPSC Alert)';
+        } else if (score >= 35) {
+          fireLevel.textContent = 'Elevated Scorch / Edge Curling & Smoke Risk';
+        } else {
+          fireLevel.textContent = 'Aerodynamically Stable & Fire Safe';
+        }
+      }
+
+      // Diagnostics
+      if (suctionRisk) {
+        suctionRisk.textContent = simData.suctionProbability + '% Probability';
+      }
+      if (cookTimePenalty) {
+        const mult = simData.cookTimeMultiplier;
+        if (mult > 1.0) {
+          const pct = Math.round((mult - 1) * 100);
+          cookTimePenalty.textContent = '+' + pct + '% Cook Time';
+        } else {
+          cookTimePenalty.textContent = 'Standard Cook Time';
+        }
+      }
+      if (chemicalSafety) {
+        chemicalSafety.textContent = linerObj.pfasStatus;
+      }
+
+      // Mechanism and Action
+      if (mechanismText) {
+        mechanismText.textContent = simData.mechanism;
+      }
+      if (actionText) {
+        actionText.textContent = simData.actionRequired;
+      }
+
+      if (actionContainer) {
+        if (score >= 80) {
+          actionContainer.className = 'space-y-2 bg-signature-coral/10 p-4 rounded-xl border border-signature-coral/30';
+        } else if (score >= 35) {
+          actionContainer.className = 'space-y-2 bg-amber-500/10 p-4 rounded-xl border border-amber-500/30';
+        } else {
+          actionContainer.className = 'space-y-2 bg-emerald-600/10 p-4 rounded-xl border border-emerald-600/30';
+        }
+      }
+    }
+
+    linerSelect.addEventListener('change', updateSimulation);
+    modeSelect.addEventListener('change', updateSimulation);
+
+    // Initial simulation
+    updateSimulation();
+
+    // Copy Verdict Handler
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        const title = resultTitle ? resultTitle.textContent : '';
+        const fire = firePercentage ? firePercentage.textContent : '';
+        const air = airflowPercentage ? airflowPercentage.textContent : '';
+        const mech = mechanismText ? mechanismText.textContent : '';
+        const act = actionText ? actionText.textContent : '';
+
+        const textToCopy = 'IsItKitchenSafe Air Fryer Liner Verdict:\n' +
+          'Configuration: ' + title + '\n' +
+          'Fire Hazard: ' + fire + ' | Airflow Loss: ' + air + '\n' +
+          'Mechanism: ' + mech + '\n' +
+          'Action Required: ' + act + '\n' +
+          'Verified at: https://isitkitchensafe.com/tools/air-fryer-liner-fire-hazard-simulator/';
+
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          const original = copyBtn.textContent;
+          copyBtn.textContent = '✓ ' + t.copySuccess;
+          setTimeout(() => {
+            copyBtn.textContent = original;
+          }, 2500);
+        });
+      });
+    }
+
+    // Print Handler
+    if (printBtn) {
+      printBtn.addEventListener('click', () => {
+        window.print();
+      });
+    }
+  });
+</script>

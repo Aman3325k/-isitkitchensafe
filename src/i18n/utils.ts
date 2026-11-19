@@ -237,6 +237,7 @@ const SPECIAL_PAGES = [
   'tools/dishwasher-rinse-aid-scale-troubleshooter',
   'tools/kitchen-plastic-leaching-checker',
   'tools/microwave-steam-splash-simulator',
+  'tools/air-fryer-liner-fire-hazard-simulator',
   'methodology',
   'saved'
 ];

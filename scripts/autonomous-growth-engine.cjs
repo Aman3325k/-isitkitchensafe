@@ -235,7 +235,8 @@ const TOOLS_REGISTRY = [
   { slug: 'outdoor-grill-bbq-safety-checker', name: 'Outdoor Grill, BBQ, Smoker & Griddle Safety & Charcoal/Propane Checker', category: 'Consumer Kitchen Safety', component: 'OutdoorGrillBbqSafetyChecker.astro', dataFile: 'outdoor-grill-bbq-safety-data.json' },
   { slug: 'dishwasher-rinse-aid-scale-troubleshooter', name: 'Dishwasher Rinse Aid, Surfactant & Hard Water Scale Troubleshooter', category: 'Consumer Kitchen Safety', component: 'DishwasherRinseAidScaleTroubleshooter.astro', dataFile: 'dishwasher-rinse-aid-scale-data.json' },
   { slug: 'kitchen-plastic-leaching-checker', name: 'Kitchen Plastic Leaching & Hot Food / Acidic Food Safe Container Checker', category: 'Consumer Kitchen Safety', component: 'KitchenPlasticLeachingChecker.astro', dataFile: 'kitchen-plastic-leaching-data.json' },
-  { slug: 'microwave-steam-splash-simulator', name: 'Microwave Steam Splash, Venting & Warped Container Leaching Simulator', category: 'Consumer Kitchen Safety', component: 'MicrowaveSteamSplashSimulator.astro', dataFile: 'microwave-steam-splash-data.json' }
+  { slug: 'microwave-steam-splash-simulator', name: 'Microwave Steam Splash, Venting & Warped Container Leaching Simulator', category: 'Consumer Kitchen Safety', component: 'MicrowaveSteamSplashSimulator.astro', dataFile: 'microwave-steam-splash-data.json' },
+  { slug: 'air-fryer-liner-fire-hazard-simulator', name: 'Air Fryer Parchment vs. Silicone Liner Airflow & Fire Hazard Simulator', category: 'Consumer Kitchen Safety', component: 'AirFryerLinerFireHazardSimulator.astro', dataFile: 'air-fryer-liner-fire-hazard-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
