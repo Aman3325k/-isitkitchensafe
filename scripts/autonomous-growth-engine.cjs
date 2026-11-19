@@ -231,7 +231,8 @@ const TOOLS_REGISTRY = [
   { slug: 'instant-pot-pressure-release-checker', name: 'Pressure Cooker & Instant Pot Fill-Line, Natural vs. Quick Release & Foaming Food Safety Checker', category: 'Consumer Kitchen Safety', component: 'InstantPotPressureReleaseChecker.astro', dataFile: 'instant-pot-pressure-release-data.json' },
   { slug: 'slow-cooker-food-safety-checker', name: 'Slow Cooker & Crock-Pot Food Safety Checker', category: 'Consumer Kitchen Safety', component: 'SlowCookerFoodSafetyChecker.astro', dataFile: 'slow-cooker-food-safety-data.json' },
   { slug: 'knife-care-cutting-board-matcher', name: 'Kitchen Knife Care, Honing vs. Sharpening & Safe Cutting Board Matcher', category: 'Consumer Kitchen Safety', component: 'KnifeCareCuttingBoardMatcher.astro', dataFile: 'knife-care-cutting-board-data.json' },
-  { slug: 'coffee-tea-brew-safety-checker', name: 'Coffee, Espresso, Cold Brew & Tea Safe Brewing, Storage & Kettle Material Checker', category: 'Consumer Kitchen Safety', component: 'CoffeeTeaBrewSafetyChecker.astro', dataFile: 'coffee-tea-brew-safety-data.json' }
+  { slug: 'coffee-tea-brew-safety-checker', name: 'Coffee, Espresso, Cold Brew & Tea Safe Brewing, Storage & Kettle Material Checker', category: 'Consumer Kitchen Safety', component: 'CoffeeTeaBrewSafetyChecker.astro', dataFile: 'coffee-tea-brew-safety-data.json' },
+  { slug: 'outdoor-grill-bbq-safety-checker', name: 'Outdoor Grill, BBQ, Smoker & Griddle Safety & Charcoal/Propane Checker', category: 'Consumer Kitchen Safety', component: 'OutdoorGrillBbqSafetyChecker.astro', dataFile: 'outdoor-grill-bbq-safety-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];

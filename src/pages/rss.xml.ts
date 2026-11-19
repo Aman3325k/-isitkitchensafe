@@ -44,6 +44,20 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/outdoor-grill-bbq-safety-checker/',
+    title: 'Outdoor Grill, BBQ, Smoker & Griddle Safety & Charcoal/Propane Checker',
+    description:
+      'Interactive CDC, NFPA & USDA outdoor grilling safety checker: perform the 50/50 soapy water propane leak test, prevent wire grill brush bristle ingestion emergencies, check indoor carbon monoxide clearance, and verify safe internal meat cooking temperatures.',
+    date: '2026-11-19',
+  },
+  {
+    path: '/tools/coffee-tea-brew-safety-checker/',
+    title: 'Coffee, Espresso, Cold Brew & Tea Safe Brewing, Storage & Kettle Material Checker',
+    description:
+      'Interactive CDC, FDA & SCA coffee, cold brew, kombucha & tea safety checker: inspect 10 drink storage limits (sun tea warnings, botulism cold-brew risks, 2-hour milk coffee rule), compare 7 kettle & brewer materials for microplastics/leaching, and toggle °F/°C brew temperatures.',
+    date: '2026-11-19',
+  },
+  {
     path: '/tools/knife-care-cutting-board-matcher/',
     title: 'Kitchen Knife Care, Honing vs. Sharpening & Safe Cutting Board Matcher',
     description:

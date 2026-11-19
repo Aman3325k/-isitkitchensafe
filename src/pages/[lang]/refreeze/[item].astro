@@ -309,6 +309,35 @@ const uxCopy = {
              isZh ? '所有二次冷冻结论均遵循美国农业部食品安全检验局（USDA FSIS）冷链规范、FDA 准则及 4°C（40°F）冷藏室安全解冻红线。' :
              '再冷凍の可否判定は、USDA食品安全検査局（FSIS）のコールドチェーン基準・FDA規制および4°C（40°F）以下の冷蔵庫内解凍ルールに準拠しています。'
 };
+
+// Dynamic per-page OG social preview card (/api/og.svg)
+function truncateOgText(text: string, maxLen: number): string {
+  const clean = String(text || '').replace(/\s+/g, ' ').trim();
+  if (clean.length <= maxLen) return clean;
+  const sliced = clean.slice(0, maxLen - 1);
+  const lastSpace = sliced.lastIndexOf(' ');
+  const cut = lastSpace > Math.floor(maxLen * 0.6) ? sliced.slice(0, lastSpace) : sliced;
+  return `${cut.replace(/[\s,;:\-—–/]+$/, '')}…`;
+}
+
+const isCjkLocale = lang === 'zh-cn' || lang === 'ja';
+const ogApplianceMap: Record<string, string> = {
+  es: 'Recongelación',
+  pt: 'Recongelamento',
+  'zh-cn': '二次冷冻安全',
+  ja: '再冷凍の安全性'
+};
+const localizedOgAppliance = ogApplianceMap[lang] || currentUi.guideTag;
+const ogTitle = truncateOgText(currentUi.h1Title, isCjkLocale ? 44 : 70);
+const ogVerdict = data.canRefreeze === 'yes' ? 'YES' : data.canRefreeze === 'depends' ? 'DEPENDS' : 'NO';
+const ogSummary = truncateOgText(data.shortAnswer || '', isCjkLocale ? 70 : 115);
+const ogParams = new URLSearchParams({
+  title: ogTitle,
+  verdict: ogVerdict,
+  appliance: localizedOgAppliance,
+  summary: ogSummary,
+});
+const ogImage = `/api/og.svg?${ogParams.toString()}`;
 ---
 
 <Layout 
@@ -317,6 +346,7 @@ const uxCopy = {
   faqs={data.faqs}
   lang={lang}
   availableLocales={availableLocales}
+  ogImage={ogImage}
 >
   <Fragment slot="head">
     {howToSchema && (
