@@ -269,6 +269,29 @@ const howToSchema = (data.safe === 'yes' || data.safe === 'depends') ? {
   }))
 } : null;
 
+// Dynamic per-page OG social preview card (/api/og.svg)
+function truncateOgText(text: string, maxLen: number): string {
+  const clean = String(text || '').replace(/\s+/g, ' ').trim();
+  if (clean.length <= maxLen) return clean;
+  const sliced = clean.slice(0, maxLen - 1);
+  const lastSpace = sliced.lastIndexOf(' ');
+  const cut = lastSpace > Math.floor(maxLen * 0.6) ? sliced.slice(0, lastSpace) : sliced;
+  return `${cut.replace(/[\s,;:\-—–/]+$/, '')}…`;
+}
+
+const isCjkLocale = lang === 'zh-cn' || lang === 'ja';
+const ogTitle = truncateOgText(currentUi.titleQuestion, isCjkLocale ? 44 : 70);
+const ogVerdict = data.safe === 'yes' ? 'YES' : data.safe === 'depends' ? 'DEPENDS' : 'NO';
+const ogAppliance = truncateOgText(currentUi.applianceName, isCjkLocale ? 18 : 32);
+const ogSummary = truncateOgText(data.shortAnswer || '', isCjkLocale ? 70 : 115);
+const ogParams = new URLSearchParams({
+  title: ogTitle,
+  verdict: ogVerdict,
+  appliance: ogAppliance,
+  summary: ogSummary,
+});
+const ogImage = `/api/og.svg?${ogParams.toString()}`;
+
 ---
 
 <Layout 
@@ -277,6 +300,7 @@ const howToSchema = (data.safe === 'yes' || data.safe === 'depends') ? {
   faqs={data.faqs} 
   lang={lang} 
   availableLocales={availableLocales}
+  ogImage={ogImage}
 >
   <Fragment slot="head">
     <script type="application/ld+json" is:inline set:html={JSON.stringify(speakableSchema)} />

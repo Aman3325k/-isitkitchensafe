@@ -234,6 +234,7 @@ const SPECIAL_PAGES = [
   'tools/knife-care-cutting-board-matcher',
   'tools/coffee-tea-brew-safety-checker',
   'tools/outdoor-grill-bbq-safety-checker',
+  'tools/dishwasher-rinse-aid-scale-troubleshooter',
   'methodology',
   'saved'
 ];

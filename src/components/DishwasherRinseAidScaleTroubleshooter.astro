@@ -1,0 +1,922 @@
+---
+import rawData from '../data/dishwasher-rinse-aid-scale-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+import { useTranslatedPath } from '../i18n/utils';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+const translatePath = useTranslatedPath(lang);
+
+const dosageCalculatorUrl = translatePath('/tools/dishwasher-detergent-dosage-calculator/');
+const chemicalSafetyUrl = translatePath('/tools/cleaner-mixing-danger-checker/');
+const waterFilterUrl = translatePath('/tools/water-filter-efficiency-analyzer/');
+const commercialModelerUrl = translatePath('/tools/commercial-dishwasher-rinse-aid-modeler/');
+const methodologyUrl = translatePath('/methodology/');
+const allToolsUrl = translatePath('/tools/');
+
+const currentLocale = (['en', 'es', 'pt', 'zh-cn', 'ja'].includes(lang) ? lang : 'en') as 'en' | 'es' | 'pt' | 'zh-cn' | 'ja';
+
+const bannerData = rawData.safetyBanner[currentLocale] || rawData.safetyBanner.en;
+
+const localizedVinegarSteps = rawData.vinegarTest.steps[currentLocale] || rawData.vinegarTest.steps.en;
+
+const localizedVinegarOutcomes = rawData.vinegarTest.outcomes.map((oc: any) => ({
+  id: oc.id,
+  icon: oc.icon,
+  isPermanent: oc.isPermanent,
+  verdict: oc.verdict,
+  title: oc.i18n[currentLocale]?.title || oc.i18n.en.title,
+  description: oc.i18n[currentLocale]?.description || oc.i18n.en.description,
+  cause: oc.i18n[currentLocale]?.cause || oc.i18n.en.cause,
+  action: oc.i18n[currentLocale]?.action || oc.i18n.en.action
+}));
+
+const localizedHardnessTiers = rawData.waterHardnessTiers.map((tier: any) => ({
+  id: tier.id,
+  gpgRange: tier.gpgRange,
+  ppmRange: tier.ppmRange,
+  etchingRisk: tier.etchingRisk,
+  scaleRisk: tier.scaleRisk,
+  rinseAidSetting: tier.rinseAidSetting,
+  recommendedDetergent: tier.recommendedDetergent,
+  saltRequired: tier.saltRequired,
+  name: tier.i18n[currentLocale]?.name || tier.i18n.en.name,
+  summary: tier.i18n[currentLocale]?.summary || tier.i18n.en.summary,
+  action: tier.i18n[currentLocale]?.action || tier.i18n.en.action
+}));
+
+const localizedPodSafety = rawData.podOverdoseSafety[currentLocale] || rawData.podOverdoseSafety.en;
+
+const localizedDescalingSteps = rawData.descalingGuide.steps[currentLocale] || rawData.descalingGuide.steps.en;
+
+const localizedFaqs = rawData.faqs[currentLocale] || rawData.faqs.en;
+
+const uiStrings: Record<'en' | 'es' | 'pt' | 'zh-cn' | 'ja', {
+  tabVinegar: string;
+  tabHardness: string;
+  tabSurfactant: string;
+  tabDescaling: string;
+  testPrompt: string;
+  selectOutcomeA: string;
+  selectOutcomeB: string;
+  permanentBadge: string;
+  reversibleBadge: string;
+  causeHeading: string;
+  actionHeading: string;
+  hardnessHeading: string;
+  hardnessSub: string;
+  selectHardnessLabel: string;
+  rinseDialLabel: string;
+  detergentLabel: string;
+  saltLabel: string;
+  etchingLabel: string;
+  scaleLabel: string;
+  commercialVsResidentialHeading: string;
+  commercialLabel: string;
+  residentialLabel: string;
+  cycleTimeLabel: string;
+  rinseCyclesLabel: string;
+  residueLabel: string;
+  gutSafetyLabel: string;
+  marangoniHeading: string;
+  diyHeading: string;
+  diySafe: string;
+  vinegarWarning: string;
+  descalingHeading: string;
+  descalingSub: string;
+  bleachAlertHeading: string;
+  bleachAlertText: string;
+  completedCount: string;
+  resetChecklist: string;
+  copyReportBtn: string;
+  copySuccess: string;
+  printBtn: string;
+  faqHeading: string;
+  relatedHeading: string;
+}> = {
+  en: {
+    tabVinegar: 'Cloudy Glass Vinegar Test',
+    tabHardness: 'Water Hardness & Dial Tuning',
+    tabSurfactant: 'Rinse Aid Gut Safety & Pods',
+    tabDescaling: 'Safe Citric Acid Descaling',
+    testPrompt: 'Step 1: Rub cloudy glass with 5% white vinegar for 15s (or soak 5 min). What happened?',
+    selectOutcomeA: '✨ Film disappeared (Glass is crystal clear)',
+    selectOutcomeB: '⚠️ Cloudiness or rainbow sheen remained unchanged',
+    permanentBadge: 'Permanent Glass Corrosion',
+    reversibleBadge: '100% Removable Mineral Scale',
+    causeHeading: 'Underlying Root Cause:',
+    actionHeading: 'Recommended Action Plan:',
+    hardnessHeading: 'Water Hardness & Rinse Aid Dial Calibration',
+    hardnessSub: 'Match your tap water hardness to prevent glass corrosion while preventing mineral spotting.',
+    selectHardnessLabel: 'Select Your Water Hardness Level:',
+    rinseDialLabel: 'Recommended Rinse Aid Dispenser Setting:',
+    detergentLabel: 'Recommended Detergent Format & Dosage:',
+    saltLabel: 'Dishwasher Softener Salt Required:',
+    etchingLabel: 'Glass Etching Hazard:',
+    scaleLabel: 'Mineral Limescale Risk:',
+    commercialVsResidentialHeading: 'Commercial vs. Residential Rinse Aid Residual Safety',
+    commercialLabel: 'Commercial Conveyor Dishwasher (JACI 2022 Study)',
+    residentialLabel: 'Standard Residential Home Dishwasher',
+    cycleTimeLabel: 'Cycle Length:',
+    rinseCyclesLabel: 'Rinse Quality:',
+    residueLabel: 'Surfactant Residue:',
+    gutSafetyLabel: 'Gut Barrier Impact:',
+    marangoniHeading: 'How Rinse Aids Work: The Marangoni Effect',
+    diyHeading: 'Safe DIY Alternative vs. Vinegar Warning',
+    diySafe: 'Safe Citric Acid Recipe:',
+    vinegarWarning: 'Manufacturer Gasket Alert:',
+    descalingHeading: '6-Step Appliance Citric Acid Descaling Protocol',
+    descalingSub: 'Restore internal heating elements, spray nozzles, and circulation pump efficiency.',
+    bleachAlertHeading: 'CRITICAL WARNING: NEVER MIX CHLORINE BLEACH WITH ACID',
+    bleachAlertText: 'Never combine bleach with citric acid or vinegar. The chemical reaction generates lethal chlorine gas (Cl2).',
+    completedCount: 'Steps Completed:',
+    resetChecklist: 'Reset Checklist',
+    copyReportBtn: 'Copy Troubleshooter Report',
+    copySuccess: 'Copied to Clipboard!',
+    printBtn: 'Print Troubleshooting Guide',
+    faqHeading: 'Frequently Asked Dishwasher Safety & Scale Questions',
+    relatedHeading: 'Verified Kitchen Appliance & Water Safety Tools'
+  },
+  es: {
+    tabVinegar: 'Prueba del Vinagre para Vasos',
+    tabHardness: 'Dureza del Agua y Ajuste del Dial',
+    tabSurfactant: 'Seguridad del Abrillantador y Pastillas',
+    tabDescaling: 'Descalcificación con Ácido Cítrico',
+    testPrompt: 'Paso 1: Frota el vaso opaco con vinagre blanco 15 s (o sumerge 5 min). ¿Qué ocurrió?',
+    selectOutcomeA: '✨ La película desapareció (El vidrio está transparente)',
+    selectOutcomeB: '⚠️ La turbidez o brillo arcoíris sigue idéntico',
+    permanentBadge: 'Corrosión Permanente del Vidrio',
+    reversibleBadge: 'Cal Mineral 100% Removible',
+    causeHeading: 'Causa Científica Subyacente:',
+    actionHeading: 'Plan de Acción Recomendado:',
+    hardnessHeading: 'Calibración de Dureza del Agua y Abrillantador',
+    hardnessSub: 'Ajusta el dosificador según el agua para evitar corrosión ácida o manchas de cal.',
+    selectHardnessLabel: 'Selecciona el nivel de dureza de tu agua:',
+    rinseDialLabel: 'Ajuste recomendado del dial de abrillantador:',
+    detergentLabel: 'Formato y dosis de detergente recomendado:',
+    saltLabel: '¿Requiere sal descalcificadora?',
+    etchingLabel: 'Riesgo de corrosión del vidrio:',
+    scaleLabel: 'Riesgo de cal mineral:',
+    commercialVsResidentialHeading: 'Seguridad de Tensioactivos: Hostelería vs. Hogar',
+    commercialLabel: 'Lavavajillas Industrial (Estudio JACI 2022)',
+    residentialLabel: 'Lavavajillas Doméstico Residencial',
+    cycleTimeLabel: 'Duración del ciclo:',
+    rinseCyclesLabel: 'Tipo de aclarado:',
+    residueLabel: 'Residuo de tensioactivo:',
+    gutSafetyLabel: 'Impacto en barrera intestinal:',
+    marangoniHeading: 'Cómo actúa el abrillantador: Efecto Marangoni',
+    diyHeading: 'Alternativa Casera Segura vs. Peligro del Vinagre',
+    diySafe: 'Receta segura de ácido cítrico:',
+    vinegarWarning: 'Alerta del fabricante para juntas:',
+    descalingHeading: 'Protocolo de Descalcificación en 6 Pasos',
+    descalingSub: 'Recupera la resistencia, orificios de aspersores y caudal de la bomba.',
+    bleachAlertHeading: 'ADVERTENCIA CRÍTICA: NUNCA MEZCLES LEJÍA CON ÁCIDOS',
+    bleachAlertText: 'No mezcles lejía con ácido cítrico o vinagre; la reacción química genera gas cloro letal (Cl2).',
+    completedCount: 'Pasos Completados:',
+    resetChecklist: 'Reiniciar Lista',
+    copyReportBtn: 'Copiar Diagnóstico',
+    copySuccess: '¡Copiado al Portapapeles!',
+    printBtn: 'Imprimir Guía de Lavavajillas',
+    faqHeading: 'Preguntas Frecuentes sobre Cal y Lavavajillas',
+    relatedHeading: 'Herramientas de Seguridad del Agua y Electrodomésticos'
+  },
+  pt: {
+    tabVinegar: 'Teste do Vinagre em Copos',
+    tabHardness: 'Dureza da Água e Regulagem do Dial',
+    tabSurfactant: 'Segurança do Secante e Pastilhas',
+    tabDescaling: 'Descalcificação Segura com Ácido Cítrico',
+    testPrompt: 'Passo 1: Esfregue o copo opaco com vinagre branco por 15s (ou deixe 5 min). O que aconteceu?',
+    selectOutcomeA: '✨ A mancha sumiu (Vidro ficou cristalino)',
+    selectOutcomeB: '⚠️ A névoa ou aspecto arco-íris não mudou',
+    permanentBadge: 'Corrosão Permanente do Vidro',
+    reversibleBadge: 'Calcário Mineral 100% Removível',
+    causeHeading: 'Causa Científica Subjacente:',
+    actionHeading: 'Plano de Ação Recomendado:',
+    hardnessHeading: 'Calibração da Dureza da Água e Secante',
+    hardnessSub: 'Ajuste o dosador de secante para evitar corrosão do vidro e manchas brancas.',
+    selectHardnessLabel: 'Selecione o nível de dureza da água:',
+    rinseDialLabel: 'Ajuste recomendado do dial de secante:',
+    detergentLabel: 'Formato e dosagem ideal de sabão:',
+    saltLabel: 'Necessita sal para lava-louças:',
+    etchingLabel: 'Risco de corrosão do vidro:',
+    scaleLabel: 'Risco de incrustação de calcário:',
+    commercialVsResidentialHeading: 'Segurança de Tensoativos: Comercial vs. Residencial',
+    commercialLabel: 'Lava-Louças Comercial (Estudo JACI 2022)',
+    residentialLabel: 'Lava-Louças Doméstica Residencial',
+    cycleTimeLabel: 'Tempo do ciclo:',
+    rinseCyclesLabel: 'Qualidade do enxágue:',
+    residueLabel: 'Resíduo de tensoativo:',
+    gutSafetyLabel: 'Impacto na mucosa intestinal:',
+    marangoniHeading: 'Como funciona o secante: Efeito Marangoni',
+    diyHeading: 'Alternativa Caseira Segura vs. Risco do Vinagre',
+    diySafe: 'Receita com ácido cítrico seguro:',
+    vinegarWarning: 'Alerta sobre borrachas e juntas:',
+    descalingHeading: 'Protocolo de Descalcificação em 6 Etapas',
+    descalingSub: 'Restaure a eficiência da resistência, bicos das hélices e bomba de circulação.',
+    bleachAlertHeading: 'AVISO CRÍTICO: NUNCA MISTURE CLORO/ÁGUA SANITÁRIA COM ÁCIDOS',
+    bleachAlertText: 'Nunca combine água sanitária com ácido cítrico ou vinagre; a reação libera gás cloro mortal (Cl2).',
+    completedCount: 'Etapas Concluídas:',
+    resetChecklist: 'Reiniciar Checklist',
+    copyReportBtn: 'Copiar Diagnóstico',
+    copySuccess: 'Copiado para a Área de Transferência!',
+    printBtn: 'Imprimir Guia de Limpeza',
+    faqHeading: 'Perguntas Frequentes sobre Calcário e Lava-Louças',
+    relatedHeading: 'Calculadoras de Eletrodomésticos e Água'
+  },
+  'zh-cn': {
+    tabVinegar: '玻璃白雾 5 分钟白醋测试',
+    tabHardness: '水质硬度与漂洗剂档位校准',
+    tabSurfactant: '漂洗剂肠道安全与凝珠过量',
+    tabDescaling: '柠檬酸安全除水垢方案',
+    testPrompt: '第一步：用 5% 白醋用力擦拭发雾玻璃 15 秒（或浸泡 5 分钟）。结果如何？',
+    selectOutcomeA: '✨ 白雾彻底消失（玻璃恢复晶莹透亮）',
+    selectOutcomeB: '⚠️ 白雾或彩虹反光依然存在且无法擦除',
+    permanentBadge: '玻璃表面永久化学腐蚀（Etching）',
+    reversibleBadge: '100% 可酸洗恢复的矿物水垢',
+    causeHeading: '底层科学机理：',
+    actionHeading: '推荐解决方案：',
+    hardnessHeading: '进水硬度与洗碗机漂洗剂档位调节',
+    hardnessSub: '根据所在地水质硬度精准调节洗碗盐、漂洗剂与洗涤剂用量，杜绝玻璃腐蚀与水垢结晶。',
+    selectHardnessLabel: '选择您所在家庭的进水硬度：',
+    rinseDialLabel: '推荐漂洗剂分配器旋钮档位：',
+    detergentLabel: '推荐洗涤剂形态与用量：',
+    saltLabel: '是否必须加注专用软水盐：',
+    etchingLabel: '玻璃腐蚀（Etching）风险：',
+    scaleLabel: '矿物水垢结晶风险：',
+    commercialVsResidentialHeading: '商用快洗 vs 家用洗碗机表面活性剂残留对比',
+    commercialLabel: '商用输送带快洗机（JACI 2022 论文）',
+    residentialLabel: '家用标准洗碗机（多循环漂洗）',
+    cycleTimeLabel: '运行洗涤时间：',
+    rinseCyclesLabel: '漂洗水流与阶段：',
+    residueLabel: '表面活性剂残留量：',
+    gutSafetyLabel: '肠道黏膜屏障影响：',
+    marangoniHeading: '漂洗剂物理机理：马兰戈尼效应与水膜铺展',
+    diyHeading: '安全自制替代配方 vs 纯白醋伤胶警示',
+    diySafe: '安全食品级柠檬酸配方：',
+    vinegarWarning: '主机厂商橡胶密封件警报：',
+    descalingHeading: '洗碗机 6 步柠檬酸安全除水垢流程',
+    descalingSub: '恢复加热管热效率、畅通喷淋臂出水微孔、降低循环泵高负荷。',
+    bleachAlertHeading: '致命安全禁忌：严禁混用含氯漂白剂与酸性清洗剂',
+    bleachAlertText: '切勿将含氯 84 消毒液/漂白水与柠檬酸或醋混用，两者混合会瞬间剧烈释放剧毒氯气（Cl2）。',
+    completedCount: '已完成步骤：',
+    resetChecklist: '重置检查项',
+    copyReportBtn: '复制排查诊断报告',
+    copySuccess: '已成功复制到剪贴板！',
+    printBtn: '打印洗碗机安全指南',
+    faqHeading: '洗碗机水垢、漂洗剂与玻璃安全常见问答',
+    relatedHeading: '相关厨房安全计算器与水质排查工具'
+  },
+  ja: {
+    tabVinegar: '5分間ビネガーテスト',
+    tabHardness: '水硬度・リンス目盛り設定',
+    tabSurfactant: 'リンス剤の安全性・洗剤過多',
+    tabDescaling: '安全なクエン酸庫内洗浄',
+    testPrompt: 'ステップ1：白い曇り部分を穀物酢（酢酸5%）で15秒擦る（または5分浸す）。結果はどうなりましたか？',
+    selectOutcomeA: '✨ 白い膜が完全に消えてピカピカになった',
+    selectOutcomeB: '⚠️ 白い曇りや虹色の油膜状が消えない',
+    permanentBadge: 'ガラス浸食（エッチング・不可逆破損）',
+    reversibleBadge: '100% 除去可能なミネラル水垢',
+    causeHeading: '科学的な発生原因：',
+    actionHeading: '推奨される改善対策：',
+    hardnessHeading: '水硬度別のリンス剤・洗剤目盛り設定ガイド',
+    hardnessSub: 'お住まいの地域の水硬度に合わせてリンス量・洗剤量を微調整し、ガラスの白濁や水垢を防ぎます。',
+    selectHardnessLabel: 'ご自宅の水道水の硬度を選択：',
+    rinseDialLabel: '推奨リンス投入口目盛り：',
+    detergentLabel: '推奨される洗剤タイプと適正量：',
+    saltLabel: '食洗機専用軟水塩の必要性：',
+    etchingLabel: 'ガラス浸食（エッチング）危険度：',
+    scaleLabel: 'ミネラル水垢結晶リスク：',
+    commercialVsResidentialHeading: '業務用 vs 家庭用食洗機の界面活性剤残留比較',
+    commercialLabel: '業務用超高速食洗機（JACI 2022論文）',
+    residentialLabel: '家庭用標準食洗機（複数回すすぎ）',
+    cycleTimeLabel: '運転時間：',
+    rinseCyclesLabel: 'すすぎ工程：',
+    residueLabel: '界面活性剤残留量：',
+    gutSafetyLabel: '腸管バリアへの影響：',
+    marangoniHeading: 'リンス剤の物理学：マランゴニ効果と水膜化',
+    diyHeading: '安全な代替クエン酸水 vs お酢投入の危険性',
+    diySafe: '安全な食品用クエン酸レシピ：',
+    vinegarWarning: 'メーカーが警告するゴムパッキン劣化：',
+    descalingHeading: '食洗機6ステップ安全クエン酸除石灰手順',
+    descalingSub: 'ヒーター管の熱伝導率、ノズルの噴射穴、循環ポンプの負荷を改善します。',
+    bleachAlertHeading: '【絶対禁止】塩素系漂白剤と酸性洗剤の混合厳禁',
+    bleachAlertText: 'クエン酸や酢を塩素系漂白剤・カビ取り剤と絶対に混ぜないでください。猛毒の塩素ガス（Cl2）が発生します。',
+    completedCount: '完了ステップ数：',
+    resetChecklist: 'チェックリスト初期化',
+    copyReportBtn: '診断レポートをコピー',
+    copySuccess: 'クリップボードにコピーしました！',
+    printBtn: '食洗機ガイドを印刷',
+    faqHeading: '食洗機の水垢・リンス剤・ガラス曇り Q&A',
+    relatedHeading: '関連キッチン家電・水質安全計算ツール'
+  }
+};
+
+const ui = uiStrings[currentLocale] || uiStrings.en;
+---
+
+<div class="dishwasher-troubleshooter-container" data-lang={currentLocale}>
+  <!-- Top Safety Banner -->
+  <div class="safety-banner bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg mb-8 shadow-xs">
+    <div class="flex items-start gap-3">
+      <span class="text-2xl select-none" aria-hidden="true">🫧</span>
+      <div>
+        <h2 class="text-amber-900 font-bold text-base md:text-lg mb-1">{bannerData.title}</h2>
+        <p class="text-amber-800 text-sm leading-relaxed">{bannerData.text}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Navigation Tabs -->
+  <div class="tabs-nav flex flex-wrap gap-2 border-b border-slate-200 pb-2 mb-8" role="tablist">
+    <button
+      type="button"
+      class="tab-btn active px-4 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2"
+      data-target="tab-vinegar"
+      role="tab"
+      aria-selected="true"
+    >
+      <span>🧪</span>
+      <span>{ui.tabVinegar}</span>
+    </button>
+    <button
+      type="button"
+      class="tab-btn px-4 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2"
+      data-target="tab-hardness"
+      role="tab"
+      aria-selected="false"
+    >
+      <span>💧</span>
+      <span>{ui.tabHardness}</span>
+    </button>
+    <button
+      type="button"
+      class="tab-btn px-4 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2"
+      data-target="tab-surfactant"
+      role="tab"
+      aria-selected="false"
+    >
+      <span>🔬</span>
+      <span>{ui.tabSurfactant}</span>
+    </button>
+    <button
+      type="button"
+      class="tab-btn px-4 py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-2"
+      data-target="tab-descaling"
+      role="tab"
+      aria-selected="false"
+    >
+      <span>⚡</span>
+      <span>{ui.tabDescaling}</span>
+    </button>
+  </div>
+
+  <!-- TAB 1: CLOUDY GLASS VINEGAR TEST -->
+  <section id="tab-vinegar" class="tab-content active" role="tabpanel">
+    <div class="bg-white border border-slate-200 rounded-xl p-6 md:p-8 shadow-sm mb-8">
+      <div class="mb-6">
+        <span class="inline-block px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-sky-100 text-sky-800 mb-2">
+          5-Minute Laboratory Vinegar Test
+        </span>
+        <h3 class="text-xl md:text-2xl font-bold text-slate-900 mb-2">{ui.tabVinegar}</h3>
+        <p class="text-slate-600 text-sm leading-relaxed">{ui.testPrompt}</p>
+      </div>
+
+      <!-- Steps Instructions Box -->
+      <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-6">
+        <ol class="list-decimal list-inside space-y-2 text-sm text-slate-700 font-medium">
+          {localizedVinegarSteps.map((step: string) => (
+            <li>{step}</li>
+          ))}
+        </ol>
+      </div>
+
+      <!-- Test Outcome Selector Buttons -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <button
+          type="button"
+          class="outcome-btn active p-5 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between"
+          data-outcome="scale"
+        >
+          <div class="flex items-center gap-3 mb-2">
+            <span class="text-2xl">✨</span>
+            <span class="font-bold text-base text-slate-900">{ui.selectOutcomeA}</span>
+          </div>
+          <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 w-fit">
+            {ui.reversibleBadge}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="outcome-btn p-5 rounded-xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between"
+          data-outcome="etching"
+        >
+          <div class="flex items-center gap-3 mb-2">
+            <span class="text-2xl">⚠️</span>
+            <span class="font-bold text-base text-slate-900">{ui.selectOutcomeB}</span>
+          </div>
+          <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 w-fit">
+            {ui.permanentBadge}
+          </span>
+        </button>
+      </div>
+
+      <!-- Outcome Detail Panels -->
+      <div id="outcome-scale" class="outcome-panel active bg-emerald-50/60 border border-emerald-200 rounded-xl p-6">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="text-3xl">✨</span>
+          <h4 class="text-lg md:text-xl font-bold text-emerald-950">{localizedVinegarOutcomes[0].title}</h4>
+        </div>
+        <p class="text-emerald-900 text-sm leading-relaxed mb-4">{localizedVinegarOutcomes[0].description}</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-emerald-200/70 text-sm">
+          <div>
+            <strong class="text-emerald-950 block mb-1">{ui.causeHeading}</strong>
+            <p class="text-emerald-800">{localizedVinegarOutcomes[0].cause}</p>
+          </div>
+          <div>
+            <strong class="text-emerald-950 block mb-1">{ui.actionHeading}</strong>
+            <p class="text-emerald-800">{localizedVinegarOutcomes[0].action}</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="outcome-etching" class="outcome-panel hidden bg-rose-50/60 border border-rose-200 rounded-xl p-6">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="text-3xl">⚠️</span>
+          <h4 class="text-lg md:text-xl font-bold text-rose-950">{localizedVinegarOutcomes[1].title}</h4>
+        </div>
+        <p class="text-rose-900 text-sm leading-relaxed mb-4">{localizedVinegarOutcomes[1].description}</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-rose-200/70 text-sm">
+          <div>
+            <strong class="text-rose-950 block mb-1">{ui.causeHeading}</strong>
+            <p class="text-rose-800">{localizedVinegarOutcomes[1].cause}</p>
+          </div>
+          <div>
+            <strong class="text-rose-950 block mb-1">{ui.actionHeading}</strong>
+            <p class="text-rose-800">{localizedVinegarOutcomes[1].action}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 2: WATER HARDNESS & DIAL TUNING -->
+  <section id="tab-hardness" class="tab-content hidden" role="tabpanel">
+    <div class="bg-white border border-slate-200 rounded-xl p-6 md:p-8 shadow-sm mb-8">
+      <div class="mb-6">
+        <span class="inline-block px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-100 text-blue-800 mb-2">
+          Water Quality & Appliance Calibration
+        </span>
+        <h3 class="text-xl md:text-2xl font-bold text-slate-900 mb-2">{ui.hardnessHeading}</h3>
+        <p class="text-slate-600 text-sm leading-relaxed">{ui.hardnessSub}</p>
+      </div>
+
+      <!-- Hardness Tier Buttons -->
+      <div class="mb-6">
+        <label class="block text-sm font-bold text-slate-700 mb-3">{ui.selectHardnessLabel}</label>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+          {localizedHardnessTiers.map((tier: any, idx: number) => (
+            <button
+              type="button"
+              class={`tier-btn p-3 rounded-lg border text-center transition-all cursor-pointer ${idx === 1 ? 'active ring-2 ring-blue-600 bg-blue-50 border-blue-500 font-bold' : 'bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-700'}`}
+              data-tier={tier.id}
+            >
+              <span class="block text-xs font-mono text-slate-500">{tier.gpgRange}</span>
+              <span class="block text-xs font-bold mt-1 text-slate-900">{tier.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <!-- Dynamic Hardness Tier Spec Card -->
+      <div id="tier-display" class="bg-slate-50 border border-slate-200 rounded-xl p-6">
+        {localizedHardnessTiers.map((tier: any, idx: number) => (
+          <div id={`tier-card-${tier.id}`} class={`tier-card ${idx === 1 ? '' : 'hidden'}`}>
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-4 mb-4">
+              <div>
+                <h4 class="text-lg font-bold text-slate-900">{tier.name} ({tier.gpgRange} · {tier.ppmRange})</h4>
+                <p class="text-sm text-slate-600 mt-1">{tier.summary}</p>
+              </div>
+              <div class="flex gap-2">
+                <span class={`text-xs font-bold px-2.5 py-1 rounded-full ${tier.etchingRisk === 'High' ? 'bg-rose-100 text-rose-800' : 'bg-slate-200 text-slate-700'}`}>
+                  Etching: {tier.etchingRisk}
+                </span>
+                <span class={`text-xs font-bold px-2.5 py-1 rounded-full ${tier.scaleRisk === 'High' || tier.scaleRisk === 'Critical' ? 'bg-amber-100 text-amber-800' : 'bg-slate-200 text-slate-700'}`}>
+                  Scale: {tier.scaleRisk}
+                </span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4 text-sm">
+              <div class="bg-white p-3 rounded-lg border border-slate-200">
+                <span class="text-xs text-slate-500 block mb-1">{ui.rinseDialLabel}</span>
+                <strong class="text-blue-700 text-base">{tier.rinseAidSetting}</strong>
+              </div>
+              <div class="bg-white p-3 rounded-lg border border-slate-200">
+                <span class="text-xs text-slate-500 block mb-1">{ui.detergentLabel}</span>
+                <strong class="text-slate-800 text-sm">{tier.recommendedDetergent}</strong>
+              </div>
+              <div class="bg-white p-3 rounded-lg border border-slate-200">
+                <span class="text-xs text-slate-500 block mb-1">{ui.saltLabel}</span>
+                <strong class={`text-sm ${tier.saltRequired ? 'text-amber-700 font-bold' : 'text-slate-600'}`}>
+                  {tier.saltRequired ? 'YES (Mandatory)' : 'Optional / Not Required'}
+                </strong>
+              </div>
+            </div>
+
+            <div class="bg-blue-50/70 border border-blue-200 p-4 rounded-lg text-sm">
+              <strong class="text-blue-950 block mb-1">{ui.actionHeading}</strong>
+              <p class="text-blue-900">{tier.action}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 3: RINSE AID GUT SAFETY & PODS -->
+  <section id="tab-surfactant" class="tab-content hidden" role="tabpanel">
+    <div class="bg-white border border-slate-200 rounded-xl p-6 md:p-8 shadow-sm mb-8">
+      <div class="mb-6">
+        <span class="inline-block px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-purple-100 text-purple-800 mb-2">
+          Toxicology & Surface Chemistry
+        </span>
+        <h3 class="text-xl md:text-2xl font-bold text-slate-900 mb-2">{ui.commercialVsResidentialHeading}</h3>
+        <p class="text-slate-600 text-sm leading-relaxed">{rawData.rinseAidScience.mechanism[currentLocale]}</p>
+      </div>
+
+      <!-- Commercial vs Residential Spec Comparison Table -->
+      <div class="overflow-x-auto mb-8">
+        <table class="w-full text-left text-sm border-collapse">
+          <thead>
+            <tr class="bg-slate-100 text-slate-900 border-b border-slate-200">
+              <th class="p-3 font-bold">Metric / Parameter</th>
+              <th class="p-3 font-bold text-rose-900 bg-rose-50/50">{ui.commercialLabel}</th>
+              <th class="p-3 font-bold text-emerald-900 bg-emerald-50/50">{ui.residentialLabel}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+            <tr>
+              <td class="p-3 font-medium text-slate-700">{ui.cycleTimeLabel}</td>
+              <td class="p-3 text-rose-800 bg-rose-50/30 font-mono">{rawData.rinseAidScience.comparison.commercial.cycleTime}</td>
+              <td class="p-3 text-emerald-800 bg-emerald-50/30 font-mono">{rawData.rinseAidScience.comparison.residential.cycleTime}</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-medium text-slate-700">{ui.rinseCyclesLabel}</td>
+              <td class="p-3 text-rose-800 bg-rose-50/30">{rawData.rinseAidScience.comparison.commercial.rinseType}</td>
+              <td class="p-3 text-emerald-800 bg-emerald-50/30 font-semibold">{rawData.rinseAidScience.comparison.residential.rinseType}</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-medium text-slate-700">{ui.residueLabel}</td>
+              <td class="p-3 text-rose-900 bg-rose-50/30 font-bold font-mono">{rawData.rinseAidScience.comparison.commercial.surfactantResidue}</td>
+              <td class="p-3 text-emerald-900 bg-emerald-50/30 font-bold font-mono">{rawData.rinseAidScience.comparison.residential.surfactantResidue}</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-medium text-slate-700">{ui.gutSafetyLabel}</td>
+              <td class="p-3 text-rose-800 bg-rose-50/30 text-xs leading-relaxed">{rawData.rinseAidScience.comparison.commercial.gutBarrierRisk}</td>
+              <td class="p-3 text-emerald-800 bg-emerald-50/30 text-xs leading-relaxed font-semibold">{rawData.rinseAidScience.comparison.residential.gutBarrierRisk}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pod Overdose Guide Box -->
+      <div class="bg-amber-50/70 border border-amber-200 rounded-xl p-6 mb-6">
+        <h4 class="font-bold text-amber-950 text-base md:text-lg mb-2 flex items-center gap-2">
+          <span>📦</span>
+          <span>{localizedPodSafety.headline}</span>
+        </h4>
+        <p class="text-amber-900 text-sm leading-relaxed mb-4">{localizedPodSafety.explanation}</p>
+        <ul class="space-y-2 text-sm text-amber-950 font-medium">
+          {localizedPodSafety.rules.map((rule: string) => (
+            <li class="flex items-start gap-2">
+              <span class="text-amber-600 mt-0.5">•</span>
+              <span>{rule}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Safe DIY Recipe vs Vinegar Warning -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-5">
+          <h5 class="font-bold text-emerald-950 text-sm md:text-base mb-2 flex items-center gap-2">
+            <span>🍋</span>
+            <span>{ui.diySafe}</span>
+          </h5>
+          <p class="text-emerald-900 text-xs md:text-sm leading-relaxed">{rawData.rinseAidScience.diyAlternative.safeRecipe}</p>
+        </div>
+        <div class="bg-rose-50 border border-rose-200 rounded-xl p-5">
+          <h5 class="font-bold text-rose-950 text-sm md:text-base mb-2 flex items-center gap-2">
+            <span>⚠️</span>
+            <span>{ui.vinegarWarning}</span>
+          </h5>
+          <p class="text-rose-900 text-xs md:text-sm leading-relaxed">{rawData.rinseAidScience.diyAlternative.vinegarWarning}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 4: SAFE ACIDIC DESCALING -->
+  <section id="tab-descaling" class="tab-content hidden" role="tabpanel">
+    <div class="bg-white border border-slate-200 rounded-xl p-6 md:p-8 shadow-sm mb-8">
+      <div class="mb-6">
+        <span class="inline-block px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-100 text-rose-800 mb-2">
+          NSF/ANSI & Manufacturer Protocol
+        </span>
+        <h3 class="text-xl md:text-2xl font-bold text-slate-900 mb-2">{ui.descalingHeading}</h3>
+        <p class="text-slate-600 text-sm leading-relaxed">{ui.descalingSub}</p>
+      </div>
+
+      <!-- Bleach Prohibition Alert -->
+      <div class="bg-red-600 text-white p-4 rounded-xl mb-6 shadow-xs flex items-start gap-3">
+        <span class="text-2xl select-none" aria-hidden="true">☠️</span>
+        <div>
+          <strong class="block text-sm md:text-base font-bold">{ui.bleachAlertHeading}</strong>
+          <p class="text-xs md:text-sm text-red-100 mt-1 leading-relaxed">{ui.bleachAlertText}</p>
+        </div>
+      </div>
+
+      <!-- Interactive Checklist Steps -->
+      <div class="space-y-3 mb-6" id="descaling-checklist">
+        {localizedDescalingSteps.map((step: string, idx: number) => (
+          <label class="flex items-start gap-3 p-3.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer">
+            <input
+              type="checkbox"
+              class="descaling-checkbox mt-1 w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500"
+              data-step={idx}
+            />
+            <span class="text-sm text-slate-700 leading-relaxed font-medium">
+              <strong class="text-slate-900 mr-1.5">Step {idx + 1}:</strong>
+              {step}
+            </span>
+          </label>
+        ))}
+      </div>
+
+      <!-- Checklist Summary & Actions -->
+      <div class="flex flex-wrap items-center justify-between gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+        <div class="text-sm font-semibold text-slate-700">
+          <span>{ui.completedCount}</span>
+          <span id="completed-counter" class="text-blue-700 font-bold ml-1">0 / {localizedDescalingSteps.length}</span>
+        </div>
+        <div class="flex gap-2">
+          <button
+            type="button"
+            id="reset-checklist-btn"
+            class="px-3.5 py-2 text-xs font-bold rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-200 transition-colors cursor-pointer"
+          >
+            {ui.resetChecklist}
+          </button>
+          <button
+            type="button"
+            id="copy-report-btn"
+            class="px-4 py-2 text-xs font-bold rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition-colors cursor-pointer inline-flex items-center gap-1.5"
+          >
+            <span>📋</span>
+            <span id="copy-btn-text">{ui.copyReportBtn}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQS SECTION -->
+  <section class="faqs-section mb-12">
+    <h3 class="text-xl md:text-2xl font-bold text-slate-900 mb-6">{ui.faqHeading}</h3>
+    <div class="space-y-3">
+      {localizedFaqs.map((faq: any) => (
+        <details class="group bg-white border border-slate-200 rounded-xl p-4 transition-all">
+          <summary class="font-bold text-slate-900 cursor-pointer flex items-center justify-between gap-3 text-sm md:text-base select-none">
+            <span>{faq.question}</span>
+            <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <p class="mt-3 text-slate-600 text-xs md:text-sm leading-relaxed border-t border-slate-100 pt-3">
+            {faq.answer}
+          </p>
+        </details>
+      ))}
+    </div>
+  </section>
+
+  <!-- RELATED TOOLS HUB -->
+  <section class="related-tools-section pt-8 border-t border-slate-200">
+    <h3 class="text-lg md:text-xl font-bold text-slate-900 mb-4">{ui.relatedHeading}</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <a
+        href={dosageCalculatorUrl}
+        class="block p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition-all bg-white group"
+      >
+        <div class="text-2xl mb-2">🫧</div>
+        <h4 class="font-bold text-sm text-slate-900 group-hover:text-blue-600 transition-colors mb-1">
+          Detergent Dosage Calculator
+        </h4>
+        <p class="text-xs text-slate-500">Calculate powder, gel and pod grams per water hardness GPG.</p>
+      </a>
+
+      <a
+        href={chemicalSafetyUrl}
+        class="block p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition-all bg-white group"
+      >
+        <div class="text-2xl mb-2">🧪</div>
+        <h4 class="font-bold text-sm text-slate-900 group-hover:text-blue-600 transition-colors mb-1">
+          Chemical Mixing Safety Checker
+        </h4>
+        <p class="text-xs text-slate-500">Screen dangerous gas reactions between bleach, vinegar and ammonia.</p>
+      </a>
+
+      <a
+        href={waterFilterUrl}
+        class="block p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition-all bg-white group"
+      >
+        <div class="text-2xl mb-2">💧</div>
+        <h4 class="font-bold text-sm text-slate-900 group-hover:text-blue-600 transition-colors mb-1">
+          Water Filter Efficiency Analyzer
+        </h4>
+        <p class="text-xs text-slate-500">Evaluate RO, carbon and ion-exchange reduction for heavy metals & scale.</p>
+      </a>
+
+      <a
+        href={commercialModelerUrl}
+        class="block p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition-all bg-white group"
+      >
+        <div class="text-2xl mb-2">🏭</div>
+        <h4 class="font-bold text-sm text-slate-900 group-hover:text-blue-600 transition-colors mb-1">
+          Commercial Rinse Modeler
+        </h4>
+        <p class="text-xs text-slate-500">Inspect flight dishwasher hydrodynamic dilution kinetics.</p>
+      </a>
+    </div>
+  </section>
+</div>
+
+<script>
+  function initDishwasherTroubleshooter() {
+    const container = document.querySelector('.dishwasher-troubleshooter-container');
+    if (!container) return;
+
+    // Tab Switching
+    const tabBtns = container.querySelectorAll('.tab-btn');
+    const tabContents = container.querySelectorAll('.tab-content');
+
+    tabBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-target');
+        tabBtns.forEach((b) => {
+          b.classList.remove('active', 'bg-slate-900', 'text-white');
+          b.classList.add('bg-slate-100', 'text-slate-700');
+          b.setAttribute('aria-selected', 'false');
+        });
+        btn.classList.add('active', 'bg-slate-900', 'text-white');
+        btn.classList.remove('bg-slate-100', 'text-slate-700');
+        btn.setAttribute('aria-selected', 'true');
+
+        tabContents.forEach((c) => {
+          if (c.id === targetId) {
+            c.classList.remove('hidden');
+            c.classList.add('active');
+          } else {
+            c.classList.add('hidden');
+            c.classList.remove('active');
+          }
+        });
+      });
+    });
+
+    // Vinegar Test Outcome Toggle
+    const outcomeBtns = container.querySelectorAll('.outcome-btn');
+    const outcomeScale = container.querySelector('#outcome-scale');
+    const outcomeEtching = container.querySelector('#outcome-etching');
+
+    outcomeBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const outcome = btn.getAttribute('data-outcome');
+        outcomeBtns.forEach((b) => {
+          b.classList.remove('active', 'border-blue-600', 'ring-2', 'ring-blue-500');
+          b.classList.add('border-slate-200');
+        });
+        btn.classList.add('active', 'border-blue-600', 'ring-2', 'ring-blue-500');
+        btn.classList.remove('border-slate-200');
+
+        if (outcome === 'scale') {
+          outcomeScale?.classList.remove('hidden');
+          outcomeEtching?.classList.add('hidden');
+        } else {
+          outcomeEtching?.classList.remove('hidden');
+          outcomeScale?.classList.add('hidden');
+        }
+      });
+    });
+
+    // Hardness Tier Selector
+    const tierBtns = container.querySelectorAll('.tier-btn');
+    const tierCards = container.querySelectorAll('.tier-card');
+
+    tierBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const tierId = btn.getAttribute('data-tier');
+        tierBtns.forEach((b) => {
+          b.classList.remove('active', 'ring-2', 'ring-blue-600', 'bg-blue-50', 'border-blue-500', 'font-bold');
+          b.classList.add('bg-slate-50', 'border-slate-200', 'text-slate-700');
+        });
+        btn.classList.add('active', 'ring-2', 'ring-blue-600', 'bg-blue-50', 'border-blue-500', 'font-bold');
+        btn.classList.remove('bg-slate-50', 'border-slate-200', 'text-slate-700');
+
+        tierCards.forEach((card) => {
+          if (card.id === `tier-card-${tierId}`) {
+            card.classList.remove('hidden');
+          } else {
+            card.classList.add('hidden');
+          }
+        });
+      });
+    });
+
+    // Checklist Progress Counter
+    const checkboxes = container.querySelectorAll('.descaling-checkbox');
+    const counter = container.querySelector('#completed-counter');
+    const resetBtn = container.querySelector('#reset-checklist-btn');
+    const totalSteps = checkboxes.length;
+
+    function updateCounter() {
+      let checked = 0;
+      checkboxes.forEach((cb) => {
+        if ((cb as HTMLInputElement).checked) checked++;
+      });
+      if (counter) {
+        counter.textContent = `${checked} / ${totalSteps}`;
+      }
+    }
+
+    checkboxes.forEach((cb) => {
+      cb.addEventListener('change', updateCounter);
+    });
+
+    resetBtn?.addEventListener('click', () => {
+      checkboxes.forEach((cb) => {
+        (cb as HTMLInputElement).checked = false;
+      });
+      updateCounter();
+    });
+
+    // Copy Report Button
+    const copyBtn = container.querySelector('#copy-report-btn');
+    const copyText = container.querySelector('#copy-btn-text');
+
+    copyBtn?.addEventListener('click', () => {
+      const activeOutcome = container.querySelector('.outcome-btn.active')?.getAttribute('data-outcome') || 'scale';
+      const activeTier = container.querySelector('.tier-btn.active')?.getAttribute('data-tier') || 'moderate';
+      const activeOutcomeTitle = container.querySelector(`#outcome-${activeOutcome} h4`)?.textContent || '';
+      const activeTierText = container.querySelector(`#tier-card-${activeTier} h4`)?.textContent || '';
+
+      const reportText = `[IsItKitchenSafe] Dishwasher Rinse Aid & Scale Diagnostic Report\n` +
+        `• Glass Status: ${activeOutcome === 'scale' ? 'Mineral Limescale Film (Removable with Citric Acid)' : 'Glass Etching / Silica Leaching (Permanent Corrosion)'}\n` +
+        `• Diagnostic Detail: ${activeOutcomeTitle}\n` +
+        `• Water Hardness Calibration: ${activeTierText}\n` +
+        `• Standard: Residential 3-4 freshwater rinses dilute surfactants by >10,000x (<0.1 mg/L).\n` +
+        `• Full Guide: https://isitkitchensafe.com/tools/dishwasher-rinse-aid-scale-troubleshooter/`;
+
+      navigator.clipboard.writeText(reportText).then(() => {
+        if (copyText) {
+          const original = copyText.textContent;
+          copyText.textContent = '✓ Copied!';
+          setTimeout(() => {
+            copyText.textContent = original;
+          }, 2500);
+        }
+      });
+    });
+  }
+
+  // Initialize on load and on Astro page transitions
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDishwasherTroubleshooter);
+  } else {
+    initDishwasherTroubleshooter();
+  }
+  document.addEventListener('astro:page-load', initDishwasherTroubleshooter);
+</script>
+
+<style>
+  .dishwasher-troubleshooter-container {
+    font-family: inherit;
+  }
+  .tab-btn.active {
+    background-color: #0f172a;
+    color: #ffffff;
+  }
+  .tab-btn:not(.active) {
+    background-color: #f1f5f9;
+    color: #334155;
+  }
+  .tab-btn:not(.active):hover {
+    background-color: #e2e8f0;
+  }
+  .outcome-btn.active {
+    border-color: #2563eb;
+    background-color: #eff6ff;
+  }
+</style>

@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/dishwasher-rinse-aid-scale-troubleshooter/',
+    title: 'Dishwasher Rinse Aid, White Film & Water Hardness Scale Troubleshooter',
+    description:
+      'Evidence-based troubleshooter: distinguish removable calcium carbonate limescale from permanent silica glass etching with a 5-minute vinegar soak test, calibrate rinse aid dosage by local water hardness (GPG/PPM), evaluate JACI 2022 alcohol ethoxylate gut barrier safety, and follow safe citric acid descaling protocols.',
+    date: '2026-11-19',
+  },
+  {
     path: '/tools/outdoor-grill-bbq-safety-checker/',
     title: 'Outdoor Grill, BBQ, Smoker & Griddle Safety & Charcoal/Propane Checker',
     description:
