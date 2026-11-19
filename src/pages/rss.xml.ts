@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/electric-kettle-descaling-leaching-simulator/',
+    title: 'Electric Kettle Nickel, Microplastics & Descaling Leaching Simulator',
+    description:
+      'Simulate heavy metal nickel ion leaching (>70 µg/L), boiling polypropylene microplastic shedding, and safe citric acid vs. vinegar limescale descaling in electric kettles. WHO and BfR standards.',
+    date: '2026-11-19',
+  },
+  {
     path: '/tools/air-fryer-liner-fire-hazard-simulator/',
     title: 'Air Fryer Parchment vs. Silicone Liner Airflow Obstruction & Fire Hazard Simulator',
     description:

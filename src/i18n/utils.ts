@@ -238,6 +238,7 @@ const SPECIAL_PAGES = [
   'tools/kitchen-plastic-leaching-checker',
   'tools/microwave-steam-splash-simulator',
   'tools/air-fryer-liner-fire-hazard-simulator',
+  'tools/electric-kettle-descaling-leaching-simulator',
   'methodology',
   'saved'
 ];

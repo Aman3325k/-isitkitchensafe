@@ -1,0 +1,161 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import ElectricKettleDescalingSimulator from '../../../components/ElectricKettleDescalingSimulator.astro';
+import rawData from '../../../data/electric-kettle-descaling-leaching-data.json';
+import type { SupportedLanguage } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+
+interface LocalePageContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  heroSub: string;
+  breadcrumbs: Array<{ label: string; href?: string }>;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocalePageContent> = {
+  es: {
+    pageTitle: "Simulador de Lixiviación de Níquel, Microplásticos y Descalcificación de Hervidores | IsItKitchenSafe",
+    pageDescription: "Calcula la lixiviación de níquel tóxico (>70 µg/L), desprendimiento de microplásticos en hervidores de plástico y la descalcificación segura con ácido cítrico frente a vinagre. Pautas OMS y BfR.",
+    badge: "Pautas OMS · Evaluación Alemana BfR · Estudio Nature Food de Microplásticos",
+    h1: "Simulador de Lixiviación de Níquel, Microplásticos y Descalcificación en Hervidores",
+    heroSub: "Protege tu salud al hervir agua: calcula la migración de iones de níquel desde placas de acero dañadas, estima los microplásticos del polipropileno a 100°C y descubre por qué el ácido cítrico pasiva el metal mientras que el vinagre hirviendo puede desgastarlo.",
+    breadcrumbs: [
+      { label: "Inicio", href: "/es/" },
+      { label: "Herramientas", href: "/es/tools/" },
+      { label: "Simulador de Descalcificación de Hervidores" }
+    ]
+  },
+  pt: {
+    pageTitle: "Simulador de Lixiviação de Níquel, Microplásticos e Descalcificação de Chaleiras | IsItKitchenSafe",
+    pageDescription: "Simule a migração de íons de níquel (>70 µg/L), liberação de microplásticos em chaleiras de plástico e descalcificação segura com ácido cítrico vs vinagre. Padrões OMS e BfR.",
+    badge: "Diretrizes OMS · Avaliação Alemã BfR · Estudo Nature Food sobre Microplásticos",
+    h1: "Simulador de Lixiviação de Níquel, Microplásticos e Descalcificação de Chaleiras",
+    heroSub: "Água fervida com segurança: simule a lixiviação de níquel em placas de inox danificadas, avalie a quebra molecular de plásticos PP a 100°C e aprenda por que o ácido cítrico protege o inox enquanto o vinagre fervente agride o cromo.",
+    breadcrumbs: [
+      { label: "Início", href: "/pt/" },
+      { label: "Ferramentas", href: "/pt/tools/" },
+      { label: "Simulador de Descalcificação de Chaleiras" }
+    ]
+  },
+  'zh-cn': {
+    pageTitle: "电热水壶重金属镍析出、微塑料释放与科学除垢模拟器 | IsItKitchenSafe",
+    pageDescription: "测算电水壶发热盘重金属镍析出浓度（>70 µg/L）、塑料内胆 100°C 沸水微塑料脱落量及柠檬酸与白醋除垢化学反应。依据世卫组织 WHO 饮水标准与德国 BfR 评估报告。",
+    badge: "世卫组织 WHO 饮用水标准 · 德国联邦 BfR 风险评估 · Nature Food 微塑料测试",
+    h1: "电热水壶重金属镍析出、微塑料释放与科学除垢模拟器",
+    heroSub: "彻底告别水垢与重金属恐慌：科学测算 304 不锈钢发热盘在不同水质与酸性溶液下的镍离子溶出速率，精准评估聚丙烯（PP #5）塑料内胆微塑料释放量，掌握食品级柠檬酸螯合钝化黄金清洗法则。",
+    breadcrumbs: [
+      { label: "首页", href: "/zh-cn/" },
+      { label: "安全工具", href: "/zh-cn/tools/" },
+      { label: "电水壶除垢与重金属模拟器" }
+    ]
+  },
+  ja: {
+    pageTitle: "電気ケトルのニッケル溶出・微細プラスチック＆クエン酸洗浄シミュレーター | IsItKitchenSafe",
+    pageDescription: "電気ケトルのヒーター底板からのニッケル溶出（>70 µg/L）、プラスチック内壁の微細プラ放出、クエン酸対食酢の脱スケール化学反応をシミュレート。WHOおよびドイツBfR基準準拠。",
+    badge: "WHO飲料水ガイドライン · ドイツ連邦BfR評価 · Nature Food 微細プラ実証研究",
+    h1: "電気ケトルのニッケル溶出・微細プラスチック＆安全除垢シミュレーター",
+    heroSub: "毎日の湯沸かしを安心に：底面ステンレスの腐食によるニッケルイオン溶出濃度を科学的に予測し、ポリプロピレン製ケトルの熱劣化による微小プラスチック混入を評価。食酢の酸侵食を防ぐクエン酸不動態化洗浄をマスターしましょう。",
+    breadcrumbs: [
+      { label: "ホーム", href: "/ja/" },
+      { label: "ツール一覧", href: "/ja/tools/" },
+      { label: "電気ケトル洗浄・ニッケル溶出シミュレーター" }
+    ]
+  }
+};
+
+const current = CONTENT[lang as Exclude<SupportedLanguage, 'en'>] || CONTENT.es;
+const faqs = (rawData.faqs as any)[lang] || rawData.faqs.en;
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": current.h1,
+  "url": `https://isitkitchensafe.com/${lang}/tools/electric-kettle-descaling-leaching-simulator/`,
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript.",
+  "description": current.pageDescription,
+  "inLanguage": lang,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IsItKitchenSafe",
+    "url": "https://isitkitchensafe.com"
+  }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map((faq: any) => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+};
+---
+
+<Layout
+  title={current.pageTitle}
+  description={current.pageDescription}
+  faqs={faqs}
+  excludeFaqSchema={true}
+  availableLocales={availableLocales}
+  lang={lang}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(webAppSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+  </Fragment>
+
+  <!-- Breadcrumbs -->
+  <div class="bg-surface-soft border-b border-hairline py-1 print:hidden">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <Breadcrumbs items={current.breadcrumbs} className="mb-0" />
+    </div>
+  </div>
+
+  <div class="max-w-[1140px] mx-auto px-6 py-10 md:py-14">
+    <!-- Hero Header -->
+    <header class="mb-10 text-center max-w-3xl mx-auto">
+      <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-signature-coral text-white mb-3">
+        {current.badge}
+      </span>
+      <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-4">
+        {current.h1}
+      </h1>
+      <p class="text-body text-[15px] md:text-[16px] leading-relaxed">
+        {current.heroSub}
+      </p>
+    </header>
+
+    <!-- Main Interactive Simulator Component -->
+    <ElectricKettleDescalingSimulator lang={lang} />
+  </div>
+</Layout>
