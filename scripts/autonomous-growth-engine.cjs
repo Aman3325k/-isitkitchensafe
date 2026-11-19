@@ -230,7 +230,8 @@ const TOOLS_REGISTRY = [
   { slug: 'kitchen-fire-emergency-guide', name: 'Kitchen Grease Fire, Electrical & Burn Emergency First-Response Guide', category: 'Consumer Kitchen Safety', component: 'KitchenFireEmergencyGuide.astro', dataFile: 'kitchen-fire-emergency-guide-data.json' },
   { slug: 'instant-pot-pressure-release-checker', name: 'Pressure Cooker & Instant Pot Fill-Line, Natural vs. Quick Release & Foaming Food Safety Checker', category: 'Consumer Kitchen Safety', component: 'InstantPotPressureReleaseChecker.astro', dataFile: 'instant-pot-pressure-release-data.json' },
   { slug: 'slow-cooker-food-safety-checker', name: 'Slow Cooker & Crock-Pot Food Safety Checker', category: 'Consumer Kitchen Safety', component: 'SlowCookerFoodSafetyChecker.astro', dataFile: 'slow-cooker-food-safety-data.json' },
-  { slug: 'knife-care-cutting-board-matcher', name: 'Kitchen Knife Care, Honing vs. Sharpening & Safe Cutting Board Matcher', category: 'Consumer Kitchen Safety', component: 'KnifeCareCuttingBoardMatcher.astro', dataFile: 'knife-care-cutting-board-data.json' }
+  { slug: 'knife-care-cutting-board-matcher', name: 'Kitchen Knife Care, Honing vs. Sharpening & Safe Cutting Board Matcher', category: 'Consumer Kitchen Safety', component: 'KnifeCareCuttingBoardMatcher.astro', dataFile: 'knife-care-cutting-board-data.json' },
+  { slug: 'coffee-tea-brew-safety-checker', name: 'Coffee, Espresso, Cold Brew & Tea Safe Brewing, Storage & Kettle Material Checker', category: 'Consumer Kitchen Safety', component: 'CoffeeTeaBrewSafetyChecker.astro', dataFile: 'coffee-tea-brew-safety-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];
@@ -551,7 +552,8 @@ function auditDatasets() {
     'kitchen-fire-emergency-guide-data.json',
     'instant-pot-pressure-release-data.json',
     'slow-cooker-food-safety-data.json',
-    'knife-care-cutting-board-data.json'
+    'knife-care-cutting-board-data.json',
+    'coffee-tea-brew-safety-data.json'
 ];
 
   const datasetStats = {};

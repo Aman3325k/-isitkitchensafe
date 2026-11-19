@@ -293,70 +293,428 @@ const translatePath = useTranslatedPath(lang);
 const methodologyUrl = getDirectoryUrl('methodology', lang);
 const contactUrl = getDirectoryUrl('contact', lang);
 
-const materialMatchKey = category.id.toLowerCase();
+type RecommendedToolKey =
+  | 'kitchenFire'
+  | 'instantPot'
+  | 'slowCooker'
+  | 'knifeCare'
+  | 'foodAllergy'
+  | 'dishwasherDosage'
+  | 'induction'
+  | 'castIron'
+  | 'ovenRack'
+  | 'moldyFood'
+  | 'pantry'
+  | 'fridgeZone'
+  | 'oilSmokePoint'
+  | 'babyBottle'
+  | 'cleaner'
+  | 'descaling'
+  | 'plastic'
+  | 'airfryer'
+  | 'microwaveWattage'
+  | 'powerOutage'
+  | 'leftover'
+  | 'thawing'
+  | 'cookingTemp'
+  | 'ovenTemp'
+  | 'symbol';
 
-function getPrimaryMaterialTool(key: string) {
-  if (/(plastic|silicone|melamine|styrofoam|acrylic|resin)/i.test(key)) {
-    return {
-      path: '/tools/plastic-code-checker/',
-      icon: '♻️',
-      title: isEs ? 'Verificador de Códigos de Plástico y Resina (#1–#7)' :
-             isPt ? 'Verificador de Códigos de Plástico e Resina (#1–#7)' :
-             isZh ? '塑料与树脂编号（#1–#7）耐热安全查询器' :
-             'プラスチック・樹脂番号（#1〜#7）耐熱安全性チェッカー',
-      description: isEs ? 'Descifra los códigos de polímeros para comprobar el riesgo de lixiviación y los límites de calor en microondas, lavavajillas y congelador.' :
-                   isPt ? 'Decifre os códigos de polímeros para verificar risco de lixiviação e limites de calor no micro-ondas, lava-louças e freezer.' :
-                   isZh ? '解读容器底部的高分子树脂编号，快速查询析出风险及微波炉、洗碗机、冷冻室安全温度上限。' :
-                   '容器底面の樹脂コードから溶出リスクや電子レンジ・食洗機・冷凍庫での耐熱上限を確認できます。',
-      cta: isEs ? 'Verificar Código' : isPt ? 'Verificar Código' : isZh ? '查询树脂编号' : '樹脂番号を確認'
-    };
+function selectMaterialToolPair(materialIdRaw: string): { primary: RecommendedToolKey; secondary: RecommendedToolKey } {
+  const k = String(materialIdRaw || '').toLowerCase();
+
+  if (/(cast-iron|carbon-steel|enameled-cast)/.test(k)) {
+    return { primary: 'castIron', secondary: 'induction' };
   }
-  if (/(baby|kids)/i.test(key)) {
-    return {
-      path: '/tools/baby-bottle-safety-checker/',
-      icon: '🍼',
-      title: isEs ? 'Verificador de Seguridad de Biberones y Vajilla Infantil' :
-             isPt ? 'Verificador de Segurança de Mamadeiras e Louça Infantil' :
-             isZh ? '奶瓶与儿童餐具安全检查器' :
-             '哺乳瓶・ベビー食器 安全性チェッカー',
-      description: isEs ? 'Evalúa materiales de biberones, límites térmicos de esterilización y prácticas para reducir microplásticos en utensilios infantiles.' :
-                   isPt ? 'Avalie materiais de mamadeiras, limites térmicos de esterilização e cuidados para reduzir microplásticos em utensílios infantis.' :
-                   isZh ? '评估奶瓶材质、高温消毒安全上限以及减少微塑料释放的科学冲泡与清洗方法。' :
-                   '哺乳瓶の素材別リスク、煮沸・レンジ消毒の耐熱上限、マイクロプラスチック低減策を確認できます。',
-      cta: isEs ? 'Verificar Seguridad Infantil' : isPt ? 'Verificar Segurança Infantil' : isZh ? '检查婴儿用品安全' : '安全性を確認'
-    };
+  if (/(copper|induction|ferromagnetic)/.test(k)) {
+    return { primary: 'induction', secondary: 'ovenTemp' };
   }
-  if (/(metal|stainless|cast-iron|aluminum|copper|glass|ceramic|stoneware|pyrex|non-?stick|enamel|terracotta)/i.test(key)) {
-    return {
-      path: '/tools/cookware-oven-temp-lookup/',
-      icon: '🍳',
-      title: isEs ? 'Buscador de Temperatura Máxima de Horno para Menaje' :
-             isPt ? 'Consulta de Temperatura Máxima de Forno para Panelas' :
-             isZh ? '锅具与器皿烤箱最高耐温查询表' :
-             '調理器具・鍋のオーブン耐熱上限検索ツール',
-      description: isEs ? 'Verifica temperaturas máximas seguras de horno, grill y tapas de vidrio para metal, vidrio, cerámica, hierro fundido y antiadherentes.' :
-                   isPt ? 'Confira os limites seguros de forno, grill e tampas de vidro para metal, vidro, cerâmica, ferro fundido e antiaderentes.' :
-                   isZh ? '速查金属、耐热玻璃、陶瓷、铸铁及不粘锅具与玻璃锅盖的烤箱及炙烤最高耐受温度。' :
-                   '金属・ガラス・陶磁器・鋳鉄・フッ素樹脂加工およびガラス蓋の安全なオーブン耐熱温度を一覧で確認できます。',
-      cta: isEs ? 'Consultar Límite de Horno' : isPt ? 'Consultar Limite de Forno' : isZh ? '查询烤箱耐温' : '耐熱上限を確認'
-    };
+  if (/(baby|kids|infant|nursery)/.test(k)) {
+    return { primary: 'babyBottle', secondary: 'plastic' };
   }
-  if (/(wood|bamboo|paper|parchment|foil)/i.test(key)) {
-    return {
-      path: '/tools/air-fryer-oven-converter/',
-      icon: '🔥',
-      title: isEs ? 'Conversor de Tiempo y Temperatura de Horno a Freidora de Aire' :
-             isPt ? 'Conversor de Tempo e Temperatura de Forno para Air Fryer' :
-             isZh ? '空气炸锅与烤箱安全温时换算器' :
-             'ノンフライヤー・オーブン温度＆時間変換ツール',
-      description: isEs ? 'Calcula ajustes seguros de temperatura y tiempo al hornear con papel pergamino, moldes o materiales sensibles al calor.' :
-                   isPt ? 'Calcule ajustes seguros de temperatura e tempo ao assar com papel manteiga, forros ou materiais sensíveis ao calor.' :
-                   isZh ? '使用烘焙油纸、纸托或耐热敏感材质时，精准换算安全的空气炸锅与烤箱温度与时长。' :
-                   'クッキングシートや紙製ライナー等の熱に弱い素材を使う際の安全な温度と加熱時間を正確に換算します。',
-      cta: isEs ? 'Convertir Temperatura' : isPt ? 'Converter Temperatura' : isZh ? '换算烹饪温度' : '温度・時間を変換'
-    };
+  if (/(instant-pot|pressure-cooker)/.test(k)) {
+    return { primary: 'instantPot', secondary: 'dishwasherDosage' };
   }
-  return {
+  if (/(slow-cooker|crock-pot)/.test(k)) {
+    return { primary: 'slowCooker', secondary: 'ovenTemp' };
+  }
+  if (/(knife|knives|cutting-board|wood-paper|wood|bamboo)/.test(k)) {
+    return { primary: 'knifeCare', secondary: 'kitchenFire' };
+  }
+  if (/(glass-ceramic|glass|pyrex|ceramic|stoneware|porcelain|terracotta)/.test(k)) {
+    return { primary: 'ovenRack', secondary: 'ovenTemp' };
+  }
+  if (/(silicone)/.test(k)) {
+    return { primary: 'ovenRack', secondary: 'dishwasherDosage' };
+  }
+  if (/(plastic|melamine|styrofoam|acrylic|resin|polymer)/.test(k)) {
+    return { primary: 'plastic', secondary: 'babyBottle' };
+  }
+  if (/(metal|stainless|aluminum|non-?stick|enamel)/.test(k)) {
+    return { primary: 'ovenTemp', secondary: 'induction' };
+  }
+  if (/(appliance-components|appliance|coffee|kettle|espresso)/.test(k)) {
+    return { primary: 'dishwasherDosage', secondary: 'descaling' };
+  }
+  if (/(paper|parchment|cardboard|foil|fire)/.test(k)) {
+    return { primary: 'kitchenFire', secondary: 'airfryer' };
+  }
+  if (/(allergen|sponge|toaster)/.test(k)) {
+    return { primary: 'foodAllergy', secondary: 'cleaner' };
+  }
+  if (/(oil|grease|fat|butter)/.test(k)) {
+    return { primary: 'oilSmokePoint', secondary: 'kitchenFire' };
+  }
+  if (/(mold|mould)/.test(k)) {
+    return { primary: 'moldyFood', secondary: 'leftover' };
+  }
+  if (/(pantry|canned|dry-goods|spice)/.test(k)) {
+    return { primary: 'pantry', secondary: 'fridgeZone' };
+  }
+  if (/(fridge|refrigerator|produce)/.test(k)) {
+    return { primary: 'fridgeZone', secondary: 'powerOutage' };
+  }
+  if (/(freezer|frozen|thaw)/.test(k)) {
+    return { primary: 'thawing', secondary: 'powerOutage' };
+  }
+  if (/(meat|poultry|seafood|protein)/.test(k)) {
+    return { primary: 'cookingTemp', secondary: 'thawing' };
+  }
+  if (/(leftover)/.test(k)) {
+    return { primary: 'leftover', secondary: 'microwaveWattage' };
+  }
+  if (/(air-?fryer)/.test(k)) {
+    return { primary: 'airfryer', secondary: 'ovenRack' };
+  }
+  if (/(microwave)/.test(k)) {
+    return { primary: 'microwaveWattage', secondary: 'symbol' };
+  }
+  if (/(fabric|footwear|textile|laundry|cleaner)/.test(k)) {
+    return { primary: 'symbol', secondary: 'cleaner' };
+  }
+  return { primary: 'symbol', secondary: 'ovenTemp' };
+}
+
+const toolCatalog: Record<RecommendedToolKey, {
+  path: string;
+  icon: string;
+  title: string;
+  description: string;
+  cta: string;
+}> = {
+  kitchenFire: {
+    path: '/tools/kitchen-fire-emergency-guide/',
+    icon: '🧯',
+    title: isEs ? 'Guía de Emergencia: Fuego de Aceite, Papel y Quemaduras en Cocina' :
+           isPt ? 'Guia de Emergência: Fogo de Óleo, Papel e Queimaduras na Cozinha' :
+           isZh ? '厨房油锅、纸制品起火与电气火灾急救指南' :
+           'キッチン油火災・紙発火・電気火災 応急ガイド',
+    description: isEs ? 'Protocolos paso a paso de la NFPA y Cruz Roja para papel, papel horno, chispas de aluminio, fuego de aceite y llamas en horno.' :
+                 isPt ? 'Protocolos passo a passo da NFPA e Cruz Vermelha para papel, papel manteiga, faíscas de alumínio, fogo de óleo e chamas no forno.' :
+                 isZh ? '基于 NFPA 与红十字会规范提供烘焙纸、纸板、锡纸打火及油锅与烤箱蹿火应急处置步骤。' :
+                 '紙製品・クッキングシート・アルミ火花・油火災やオーブン発火へのNFPA/赤十字準拠の応急手順を確認できます。',
+    cta: isEs ? 'Abrir Guía de Fuego' : isPt ? 'Abrir Guia de Incêndio' : isZh ? '查看灭火急救指南' : '火災応急ガイドを開く'
+  },
+  instantPot: {
+    path: '/tools/instant-pot-pressure-release-checker/',
+    icon: '🍲',
+    title: isEs ? 'Verificador de Llenado y Liberación de Presión para Instant Pot' :
+           isPt ? 'Verificador de Limite e Liberação de Pressão para Instant Pot' :
+           isZh ? '电压力锅 / Instant Pot 水位红线与泄压安全检查器' :
+           '電気圧力鍋・Instant Pot 上限線＆減圧チェッカー',
+    description: isEs ? 'Verifica límites de llenado de 1/2 y 2/3, cuidado de juntas de silicona y liberación natural o rápida de presión.' :
+                 isPt ? 'Confira limites de enchimento de 1/2 e 2/3, cuidados com anéis de silicone e liberação natural ou rápida de pressão.' :
+                 isZh ? '核查 1/2 与 2/3 安全水位红线、硅胶密封圈保养及自然与快速泄压安全规则。' :
+                 '1/2・2/3の上限線、シリコンパッキンのお手入れ、自然減圧とクイック減圧の安全基準を確認できます。',
+    cta: isEs ? 'Verificar Presión' : isPt ? 'Verificar Pressão' : isZh ? '核查泄压安全' : '減圧安全を確認'
+  },
+  slowCooker: {
+    path: '/tools/slow-cooker-food-safety-checker/',
+    icon: '🥘',
+    title: isEs ? 'Verificador de Seguridad en Olla Lenta y Crock-Pot (USDA)' :
+           isPt ? 'Verificador de Segurança na Panela Lenta e Crock-Pot (USDA)' :
+           isZh ? '慢炖锅与电炖盅食品安全烹饪检查器（USDA）' :
+           'スロークッカー＆クロックポット 安全調理チェッカー（USDA）',
+    description: isEs ? 'Consulta tiempos seguros en BAJO y ALTO, prevención de choque térmico en cerámica y prohibición de carne congelada.' :
+                 isPt ? 'Confira tempos no BAIXO e ALTO, prevenção de choque térmico na cerâmica e veto estrito a carne congelada.' :
+                 isZh ? '速查 LOW/HIGH 慢炖时长、陶瓷内胆防热震开裂技巧及 USDA 生冻肉直接入锅禁令。' :
+                 'LOW/HIGH調理時間、陶器内鍋の熱割れ予防、冷凍生肉投入禁止ルールを確認できます。',
+    cta: isEs ? 'Verificar Olla Lenta' : isPt ? 'Verificar Panela Lenta' : isZh ? '检查慢炖安全' : 'スロークッカーを確認'
+  },
+  knifeCare: {
+    path: '/tools/knife-care-cutting-board-matcher/',
+    icon: '🔪',
+    title: isEs ? 'Cuidado de Cuchillos y Selector de Tablas de Cortar Seguras' :
+           isPt ? 'Cuidados com Facas e Combinador de Tábuas de Corte Seguras' :
+           isZh ? '厨刀养护与安全砧板材质匹配器' :
+           '包丁ケア＆安全まな板マッチャー',
+    description: isEs ? 'Compara madera, bambú, plástico HDPE, caucho y vidrio en durabilidad del filo, aptitud para lavavajillas y desinfección USDA.' :
+                 isPt ? 'Compare madeira, bambu, plástico HDPE, borracha e vidro para preservação do fio, uso na lava-louças e higienização USDA.' :
+                 isZh ? '对比实木、竹材、HDPE 塑料、橡胶与玻璃砧板的护刃性、洗碗机耐受度及 USDA 生肉消毒规范。' :
+                 '木製・竹・HDPEプラスチック・合成ゴム・ガラスまな板の刃持ち、食洗機可否、USDA除菌基準を比較診断できます。',
+    cta: isEs ? 'Combinar Cuchillo y Tabla' : isPt ? 'Combinar Faca e Tábua' : isZh ? '匹配厨刀与砧板' : '包丁とまな板を診断'
+  },
+  foodAllergy: {
+    path: '/tools/food-allergy-cross-contact-checker/',
+    icon: '🥜',
+    title: isEs ? 'Verificador de Alergias Alimentarias y Contacto Cruzado' :
+           isPt ? 'Verificador de Alergias Alimentares e Contato Cruzado' :
+           isZh ? '厨房食物过敏原与交叉接触安全检查器' :
+           'キッチン食物アレルギー＆コンタミネーション防止チェッカー',
+    description: isEs ? 'Comprueba qué materiales porosos (madera, bambú, esponjas, tostadoras) retienen alérgenos y requieren uso exclusivo.' :
+                 isPt ? 'Veja quais materiais porosos (madeira, bambu, esponjas, torradeiras) retêm alérgenos e exigem uso exclusivo.' :
+                 isZh ? '核查木质、竹制、海绵与烤面包机等多孔材质是否易残留过敏原，判断是否需专器专用。' :
+                 '木製・竹製・スポンジ・トースター等の多孔質素材にアレルゲンが残留しないか、専用化が必要か判定します。',
+    cta: isEs ? 'Verificar Contacto Cruzado' : isPt ? 'Verificar Contato Cruzado' : isZh ? '检查过敏原风险' : '交差接触を確認'
+  },
+  dishwasherDosage: {
+    path: '/tools/dishwasher-detergent-dosage-calculator/',
+    icon: '🫧',
+    title: isEs ? 'Calculadora de Dosis de Detergente y Abrillantador para Lavavajillas' :
+           isPt ? 'Calculadora de Dosagem de Sabão e Secante para Lava-Louças' :
+           isZh ? '洗碗机洗涤剂与漂洗剂精准用量计算器' :
+           '食洗機用洗剤・リンス剤・水硬度別 最適投与量計算機',
+    description: isEs ? 'Calcula la dosis exacta según dureza del agua para evitar sabor a jabón en silicona, vidrio opaco y oxidación en aluminio.' :
+                 isPt ? 'Calcule a medida exata pela dureza da água para evitar gosto de sabão no silicone, vidro opaco e oxidação em alumínio.' :
+                 isZh ? '按水质硬度精准计算洗涤剂剂量，防止硅胶吸附皂味、玻璃白雾腐蚀与铝制零件发黑氧化。' :
+                 '水の硬度別の最適洗剤量を算出し、シリコンの洗剤臭・グラス白濁・アルミ変色を防ぎます。',
+    cta: isEs ? 'Calcular Dosis' : isPt ? 'Calcular Dosagem' : isZh ? '计算洗涤剂用量' : '最適洗剤量を計算'
+  },
+  induction: {
+    path: '/tools/induction-cookware-compatibility-checker/',
+    icon: '🧲',
+    title: isEs ? 'Verificador de Compatibilidad de Sartenes con Inducción' :
+           isPt ? 'Verificador de Panelas Compatíveis com Indução' :
+           isZh ? '电磁炉锅具兼容性与磁铁测试诊断工具' :
+           'IHクッキングヒーター対応鍋＆マグネット判定チェッカー',
+    description: isEs ? 'Comprueba compatibilidad en inducción para acero inoxidable, hierro fundido, cobre y aluminio con prueba del imán y alertas de rayado.' :
+                 isPt ? 'Confira compatibilidade com indução para inox, ferro fundido, cobre e alumínio com teste do ímã e alerta de riscos no vidro.' :
+                 isZh ? '一键验证不锈钢、铸铁、纯铜与铝合金的电磁炉兼容性，内置 3 秒磁铁吸附测试与微晶玻璃防刮提示。' :
+                 'ステンレス・鋳鉄・銅・アルミのIH対応可否を3秒磁石テストで判定し、ガラス天板の傷防止も確認できます。',
+    cta: isEs ? 'Verificar Inducción' : isPt ? 'Verificar Indução' : isZh ? '检测电磁炉兼容' : 'IH対応を判定'
+  },
+  castIron: {
+    path: '/tools/cast-iron-seasoning-troubleshooter/',
+    icon: '🍳',
+    title: isEs ? 'Solucionador de Curado y Óxido para Hierro Fundido y Acero al Carbono' :
+           isPt ? 'Solucionador de Cura e Ferrugem para Ferro Fundido e Aço Carbono' :
+           isZh ? '铸铁锅与碳钢锅开锅养护及除锈诊断工具' :
+           'キャストアイアン＆鉄鍋 シーズニング・サビ診断ツール',
+    description: isEs ? 'Repara óxido, superficies pegajosas, curado descascarado o manchas ácidas con temperaturas exactas de horno y alertas de esmaltado.' :
+                 isPt ? 'Corrija ferrugem, óleo grudento, cura descamando ou manchas ácidas com temperaturas exatas de forno e alertas de esmaltado.' :
+                 isZh ? '诊断并修复生锈、油膜发黏、掉黑皮与酸蚀变色，提供精准烤箱聚合温度与珐琅锅养护提醒。' :
+                 '赤サビ・ベタつき・被膜剥がれ・変色を即診断し、最適オーブン焼き付け温度とホーロー鍋警告を確認できます。',
+    cta: isEs ? 'Diagnosticar Hierro Fundido' : isPt ? 'Diagnosticar Ferro Fundido' : isZh ? '诊断养护方案' : '鉄鍋・鋳鉄を診断'
+  },
+  ovenRack: {
+    path: '/tools/oven-rack-bakeware-heat-adjuster/',
+    icon: '🥧',
+    title: isEs ? 'Ajustador de Rejilla del Horno, Convección y Material del Molde' :
+           isPt ? 'Ajustador de Grade do Forno, Convecção e Material da Assadeira' :
+           isZh ? '烤箱层位、热风对流与烤盘材质温度调节器' :
+           'オーブン段位置・コンベクション・焼き型材質 温度アジャスター',
+    description: isEs ? 'Calcula la altura segura de rejilla y ajuste térmico (°F/°C) para vidrio Pyrex, cerámica, gres, silicona y moldes metálicos oscuros.' :
+                 isPt ? 'Calcule a altura segura da grade e ajuste de temperatura (°F/°C) para vidro Pyrex, cerâmica, silicone e formas metálicas escuras.' :
+                 isZh ? '针对 Pyrex 玻璃、陶瓷、炻器、硅胶与深色金属烤盘，精准计算安全层位与降温度数（°F/°C）。' :
+                 'Pyrexガラス・陶器・シリコン・濃色金属型に最適なオーブン段位置と温度補正（°F/°C）を算出します。',
+    cta: isEs ? 'Ajustar Rejilla y Horno' : isPt ? 'Ajustar Grade e Forno' : isZh ? '调节层位与烤温' : '段位置と温度を調整'
+  },
+  moldyFood: {
+    path: '/tools/moldy-food-safety-checker/',
+    icon: '🧀',
+    title: isEs ? 'Verificador USDA de Alimentos con Moho: ¿Recortar o Desechar?' :
+           isPt ? 'Verificador USDA de Alimentos Mofados: Cortar ou Jogar Fora?' :
+           isZh ? 'USDA 发霉食物安全检查器：切掉还是整份丢弃？' :
+           'USDA カビ食品チェッカー：切り落とし可 vs. 丸ごと廃棄',
+    description: isEs ? 'Sigue las reglas USDA FSIS para pan, quesos, frutas y embutidos para saber cuándo recortar es seguro o desechar es obligatorio.' :
+                 isPt ? 'Siga as regras USDA FSIS para pão, queijos, frutas e frios para saber quando cortar é seguro ou descartar é obrigatório.' :
+                 isZh ? '遵循 USDA FSIS 规范判断面包、奶酪、浆果与熟肉发霉后是可安全切除还是必须整份丢弃。' :
+                 'パン・チーズ・ベリー・ハムのカビに対し、切り落とし可か丸ごと廃棄すべきかをUSDA FSIS基準で判定します。',
+    cta: isEs ? 'Verificar Moho' : isPt ? 'Verificar Mofo' : isZh ? '排查发霉食物' : 'カビ安全性を確認'
+  },
+  pantry: {
+    path: '/tools/pantry-dry-goods-shelf-life-checker/',
+    icon: '🫙',
+    title: isEs ? 'Buscador de Caducidad y Seguridad de Despensa y Secos' :
+           isPt ? 'Guia de Validade e Segurança para Despensa e Grãos' :
+           isZh ? '常备干货、香料与罐头保质期及安全速查器' :
+           '乾物・スパイス・缶詰の賞味期限＆安全性チェッカー',
+    description: isEs ? 'Consulta reglas USDA y FMI de almacenamiento para latas abolladas, miel, aceites rancios, especias y harina.' :
+                 isPt ? 'Consulte regras USDA e FMI de armazenamento para latas amassadas, mel, óleos rançosos, especiarias e farinha.' :
+                 isZh ? '依据 USDA 与 FMI 标准查询凹陷罐头、蜂蜜、哈败油脂、香料与面粉的安全保存期限。' :
+                 '凹み缶詰・はちみつ・酸化油・スパイス・粉類の安全な保存目安をUSDA/FMI基準で確認できます。',
+    cta: isEs ? 'Consultar Despensa' : isPt ? 'Consultar Despensa' : isZh ? '查询干货保质期' : '乾物の期限を確認'
+  },
+  fridgeZone: {
+    path: '/tools/fridge-organization-zone-planner/',
+    icon: '🥬',
+    title: isEs ? 'Planificador de Organización de Nevera y Zonas Seguras (USDA)' :
+           isPt ? 'Planejador de Organização da Geladeira e Zonas Seguras (USDA)' :
+           isZh ? '互动冰箱分区收纳与安全温区规划器（USDA）' :
+           '冷蔵庫ゾーン別収納＆食品安全プランナー（USDA）',
+    description: isEs ? 'Asigna alimentos y recipientes a las 6 zonas oficiales de temperatura y humedad de la nevera.' :
+                 isPt ? 'Combine alimentos e potes às 6 zonas oficiais de temperatura e umidade da geladeira.' :
+                 isZh ? '将各类食材与保鲜容器精准匹配至冰箱 6 大 USDA 温湿度分区，延长保鲜期。' :
+                 '食品や保存容器をUSDA基準の冷蔵庫6ゾーンに最適配置し、鮮度劣化を防ぎます。',
+    cta: isEs ? 'Planificar Nevera' : isPt ? 'Organizar Geladeira' : isZh ? '规划冰箱分区' : '冷蔵ゾーンを確認'
+  },
+  oilSmokePoint: {
+    path: '/tools/cooking-oil-smoke-point-finder/',
+    icon: '🫒',
+    title: isEs ? 'Buscador de Punto de Humo de Aceites y Fritura Segura' :
+           isPt ? 'Localizador de Ponto de Fumaça de Óleos e Fritura Segura' :
+           isZh ? '食用油烟点与安全煎炸温度查询器' :
+           '食用油の煙点・安全な揚げ焼き温度ファインダー',
+    description: isEs ? 'Consulta puntos de humo USDA/AOCS y límites seguros de temperatura para 28 aceites y grasas culinarias.' :
+                 isPt ? 'Consulte pontos de fumaça USDA/AOCS e limites seguros de temperatura para 28 óleos e gorduras culinárias.' :
+                 isZh ? '查询 28 种常见食用油与油脂的 USDA/AOCS 烟点与安全烹饪温度上限。' :
+                 '28種の食用油・油脂のUSDA/AOCS煙点と安全な加熱上限温度を一覧で確認できます。',
+    cta: isEs ? 'Buscar Punto de Humo' : isPt ? 'Consultar Ponto de Fumaça' : isZh ? '查询食用油烟点' : '煙点を調べる'
+  },
+  babyBottle: {
+    path: '/tools/baby-bottle-safety-checker/',
+    icon: '🍼',
+    title: isEs ? 'Verificador de Seguridad de Biberones y Vajilla Infantil' :
+           isPt ? 'Verificador de Segurança de Mamadeiras e Louça Infantil' :
+           isZh ? '奶瓶与儿童餐具安全检查器' :
+           '哺乳瓶・ベビー食器 安全性チェッカー',
+    description: isEs ? 'Evalúa materiales de biberones, límites térmicos de esterilización, platos de melamina/bambú y prácticas para reducir microplásticos.' :
+                 isPt ? 'Avalie materiais de mamadeiras, limites térmicos de esterilização, pratos de melamina/bambu e cuidados contra microplásticos.' :
+                 isZh ? '评估奶瓶材质、高温消毒安全上限、密胺/竹纤维儿童餐具风险及减少微塑料释放的科学方法。' :
+                 '哺乳瓶の素材別リスク、煮沸・レンジ消毒上限、メラミン/竹製食器の注意点とマイクロプラスチック低減策を確認できます。',
+    cta: isEs ? 'Verificar Seguridad Infantil' : isPt ? 'Verificar Segurança Infantil' : isZh ? '检查婴儿用品安全' : '安全性を確認'
+  },
+  cleaner: {
+    path: '/tools/cleaner-mixing-danger-checker/',
+    icon: '🧪',
+    title: isEs ? 'Verificador de Peligros al Mezclar Productos de Limpieza' :
+           isPt ? 'Verificador de Perigo ao Misturar Produtos de Limpeza' :
+           isZh ? '家用清洁剂混用危险排查器' :
+           '家庭用洗剤・混ぜるな危険チェッカー',
+    description: isEs ? 'Verifica combinaciones de lejía, vinagre, amoníaco y peróxido antes de limpiar superficies o lavar textiles de cocina.' :
+                 isPt ? 'Verifique combinações de água sanitária, vinagre, amônia e peróxido antes de limpar superfícies ou lavar tecidos.' :
+                 isZh ? '清洁厨房台面或洗涤厨房织物前，排查漂白水、白醋、氨水与双氧水混用的有毒气体风险。' :
+                 'キッチン掃除や布製品の洗濯前に、漂白剤・酢・アンモニア・過酸化水素の危険な混合を確認できます。',
+    cta: isEs ? 'Verificar Mezcla' : isPt ? 'Verificar Mistura' : isZh ? '排查清洁剂混用' : '洗剤の危険性を確認'
+  },
+  descaling: {
+    path: '/tools/appliance-descaling-calculator/',
+    icon: '☕',
+    title: isEs ? 'Calculadora de Descalcificación para Cafeteras y Hervidores' :
+           isPt ? 'Calculadora de Descalcificação para Cafeteiras e Chaleiras' :
+           isZh ? '咖啡机与电热水壶除垢配比计算器' :
+           'コーヒーメーカー・電気ケトル クエン酸除垢計算ツール',
+    description: isEs ? 'Calcula proporciones seguras de ácido cítrico o vinagre y ciclos de enjuague para cafeteras, hervidores y piezas de electrodomésticos.' :
+                 isPt ? 'Calcule proporções seguras de ácido cítrico ou vinagre e ciclos de enxágue para cafeteiras, chaleiras e peças de aparelhos.' :
+                 isZh ? '为咖啡机、电热水壶及可拆卸电器组件精准计算柠檬酸或白醋除垢比例与冲洗次数。' :
+                 'コーヒーメーカー・ケトル・家電パーツの安全なクエン酸・酢の除垢比率とすすぎ回数を算出します。',
+    cta: isEs ? 'Calcular Proporción' : isPt ? 'Calcular Proporção' : isZh ? '计算除垢比例' : '除垢比率を計算'
+  },
+  plastic: {
+    path: '/tools/plastic-code-checker/',
+    icon: '♻️',
+    title: isEs ? 'Verificador de Códigos de Plástico y Resina (#1–#7)' :
+           isPt ? 'Verificador de Códigos de Plástico e Resina (#1–#7)' :
+           isZh ? '塑料与树脂编号（#1–#7）耐热安全查询器' :
+           'プラスチック・樹脂番号（#1〜#7）耐熱安全性チェッカー',
+    description: isEs ? 'Descifra los códigos de polímeros para comprobar el riesgo de lixiviación y los límites de calor en microondas, lavavajillas y congelador.' :
+                 isPt ? 'Decifre os códigos de polímeros para verificar risco de lixiviação e limites de calor no micro-ondas, lava-louças e freezer.' :
+                 isZh ? '解读容器底部的高分子树脂编号，快速查询析出风险及微波炉、洗碗机、冷冻室安全温度上限。' :
+                 '容器底面の樹脂コードから溶出リスクや電子レンジ・食洗機・冷凍庫での耐熱上限を確認できます。',
+    cta: isEs ? 'Verificar Código' : isPt ? 'Verificar Código' : isZh ? '查询树脂编号' : '樹脂番号を確認'
+  },
+  airfryer: {
+    path: '/tools/air-fryer-oven-converter/',
+    icon: '🔥',
+    title: isEs ? 'Conversor de Tiempo y Temperatura de Horno a Freidora de Aire' :
+           isPt ? 'Conversor de Tempo e Temperatura de Forno para Air Fryer' :
+           isZh ? '空气炸锅与烤箱安全温时换算器' :
+           'ノンフライヤー・オーブン温度＆時間変換ツール',
+    description: isEs ? 'Calcula ajustes seguros de temperatura y tiempo al hornear con papel pergamino, moldes o materiales sensibles al calor.' :
+                 isPt ? 'Calcule ajustes seguros de temperatura e tempo ao assar com papel manteiga, forros ou materiais sensíveis ao calor.' :
+                 isZh ? '使用烘焙油纸、纸托或耐热敏感材质时，精准换算安全的空气炸锅与烤箱温度与时长。' :
+                 'クッキングシートや紙製ライナー等の熱に弱い素材を使う際の安全な温度と加熱時間を正確に換算します。',
+    cta: isEs ? 'Convertir Temperatura' : isPt ? 'Converter Temperatura' : isZh ? '换算烹饪温度' : '温度・時間を変換'
+  },
+  microwaveWattage: {
+    path: '/tools/microwave-wattage-converter/',
+    icon: '📡',
+    title: isEs ? 'Conversor de Potencia (Vatios) y Tiempo de Microondas' :
+           isPt ? 'Conversor de Potência (Watts) e Tempo de Micro-ondas' :
+           isZh ? '微波炉功率（瓦数）与加热时间换算器' :
+           '電子レンジ ワット数・加熱時間変換ツール',
+    description: isEs ? 'Ajusta tiempos de calentamiento según los vatios de tu microondas (600W–1250W) para evitar sobrecalentar recipientes.' :
+                 isPt ? 'Ajuste tempos de aquecimento pela potência do micro-ondas (600W–1250W) para evitar superaquecer recipientes.' :
+                 isZh ? '按微波炉实际瓦数（600W–1250W）换算加热时间，防止容器过热变形或食物受热不均。' :
+                 '電子レンジの出力（600W〜1250W）に合わせて加熱時間を換算し、容器の過加熱や加熱ムラを防ぎます。',
+    cta: isEs ? 'Convertir Tiempo' : isPt ? 'Converter Tempo' : isZh ? '换算加热时间' : '加熱時間を変換'
+  },
+  powerOutage: {
+    path: '/tools/power-outage-food-safety-checker/',
+    icon: '⚡',
+    title: isEs ? 'Verificador de Seguridad Alimentaria tras un Corte de Luz' :
+           isPt ? 'Verificador de Segurança Alimentar após Queda de Energia' :
+           isZh ? '冰箱停电与断电食品安全排查器' :
+           '停電時 冷蔵庫・冷凍庫の食品安全チェッカー',
+    description: isEs ? 'Aplica las reglas USDA de 4h/24h/48h cuando el refrigerador o congelador pierde electricidad.' :
+                 isPt ? 'Aplique as regras USDA de 4h/24h/48h quando a geladeira ou freezer ficar sem energia.' :
+                 isZh ? '当冷藏或冷冻设备停电断电时，依据 USDA 4h/24h/48h 标准判定食材去留。' :
+                 '停電時の冷蔵・冷凍食品の安全可否をUSDA 4時間/24時間/48時間ルールで判定します。',
+    cta: isEs ? 'Verificar Apagón' : isPt ? 'Verificar Apagão' : isZh ? '排查停电安全' : '停電安全を確認'
+  },
+  leftover: {
+    path: '/tools/leftover-shelf-life-calculator/',
+    icon: '🗓️',
+    title: isEs ? 'Calculadora USDA de Vida Útil de Sobras y Refrigerador' :
+           isPt ? 'Calculadora USDA de Validade de Sobras na Geladeira' :
+           isZh ? 'USDA 剩菜与冰箱保质期倒计时计算器' :
+           'USDA 残り物・冷蔵保存期限カウントダウン計算ツール',
+    description: isEs ? 'Calcula fechas límite exactas del USDA en refrigerador y congelador para sobras y alimentos abiertos.' :
+                 isPt ? 'Calcule datas limite exatas do USDA na geladeira e freezer para sobras e alimentos abertos.' :
+                 isZh ? '计算剩菜与开封食材在冷藏室与冷冻室的 USDA 安全食用截止日期。' :
+                 '残り物や開封済み食品のUSDA基準による冷蔵・冷凍の消費期限を算出します。',
+    cta: isEs ? 'Calcular Fecha Límite' : isPt ? 'Calcular Validade' : isZh ? '计算安全食用日' : '保存期限を計算'
+  },
+  thawing: {
+    path: '/tools/meat-thawing-calculator/',
+    icon: '❄️',
+    title: isEs ? 'Calculadora USDA de Descongelación Segura de Carne y Aves' :
+           isPt ? 'Calculadora USDA de Descongelamento Seguro de Carnes e Aves' :
+           isZh ? 'USDA 肉类与禽肉安全解冻时间计算器' :
+           'USDA 肉・鶏肉の安全な解凍時間計算ツール',
+    description: isEs ? 'Calcula tiempos seguros de descongelación en nevera o agua fría por peso y corte para evitar bacterias.' :
+                 isPt ? 'Calcule tempos seguros de descongelamento na geladeira ou água fria por peso e corte para evitar bactérias.' :
+                 isZh ? '按重量与部位计算 USDA 冷藏与冷水安全解冻时长，预防细菌滋生。' :
+                 '重量と部位に応じたUSDA基準の冷蔵・冷水解凍時間を算出し食中毒を防ぎます。',
+    cta: isEs ? 'Calcular Descongelación' : isPt ? 'Calcular Descongelamento' : isZh ? '计算解冻时间' : '解凍時間を計算'
+  },
+  cookingTemp: {
+    path: '/tools/internal-cooking-temp-chart/',
+    icon: '🌡️',
+    title: isEs ? 'Tabla USDA de Temperaturas Internas Seguras de Cocción' :
+           isPt ? 'Tabela USDA de Temperaturas Internas Seguras de Cozimento' :
+           isZh ? 'USDA 安全烹饪中心温度速查表' :
+           'USDA 安全な調理中心温度チャート',
+    description: isEs ? 'Consulta temperaturas mínimas oficiales del USDA (°F y °C) y tiempos de reposo para carnes, aves, mariscos y huevos.' :
+                 isPt ? 'Consulte temperaturas mínimas oficiais do USDA (°F e °C) e descanso para carnes, aves, frutos do mar e ovos.' :
+                 isZh ? '查阅肉类、禽类、海鲜与蛋类的 USDA 官方最低安全中心温度（°F/°C）与静置时间。' :
+                 '肉・鶏・魚介・卵のUSDA公式最低中心温度（°F・°C）と休ませ時間を一覧で確認できます。',
+    cta: isEs ? 'Ver Temperaturas' : isPt ? 'Ver Temperaturas' : isZh ? '查看安全温度' : '中心温度を確認'
+  },
+  ovenTemp: {
+    path: '/tools/cookware-oven-temp-lookup/',
+    icon: '♨️',
+    title: isEs ? 'Buscador de Temperatura Máxima de Horno para Menaje' :
+           isPt ? 'Consulta de Temperatura Máxima de Forno para Panelas' :
+           isZh ? '锅具与器皿烤箱最高耐温查询表' :
+           '調理器具・鍋のオーブン耐熱上限検索ツール',
+    description: isEs ? 'Verifica temperaturas máximas seguras de horno, grill y tapas de vidrio para metal, vidrio, cerámica, hierro fundido y antiadherentes.' :
+                 isPt ? 'Confira os limites seguros de forno, grill e tampas de vidro para metal, vidro, cerâmica, ferro fundido e antiaderentes.' :
+                 isZh ? '速查金属、耐热玻璃、陶瓷、铸铁及不粘锅具与玻璃锅盖的烤箱及炙烤最高耐受温度。' :
+                 '金属・ガラス・陶磁器・鋳鉄・フッ素樹脂加工およびガラス蓋の安全なオーブン耐熱温度を一覧で確認できます。',
+    cta: isEs ? 'Consultar Límite de Horno' : isPt ? 'Consultar Limite de Forno' : isZh ? '查询烤箱耐温' : '耐熱上限を確認'
+  },
+  symbol: {
     path: '/tools/kitchen-symbol-decoder/',
     icon: '🔍',
     title: isEs ? 'Decodificador de Símbolos de Seguridad en Utensilios de Cocina' :
@@ -368,40 +726,39 @@ function getPrimaryMaterialTool(key: string) {
                  isZh ? '快速识别物品底部标注的洗碗机、微波炉、烤箱、冷冻室及洗涤安全标识，防止误操作损坏。' :
                  '食洗機・電子レンジ・オーブン・冷凍庫・洗濯表示マークの意味を判別し、素材を傷めず安全に使えます。',
     cta: isEs ? 'Decodificar Símbolos' : isPt ? 'Decodificar Símbolos' : isZh ? '解码安全图标' : '安全マークを調べる'
-  };
-}
+  }
+};
 
-const primaryTool = getPrimaryMaterialTool(materialMatchKey);
-const secondaryTool = primaryTool.path === '/tools/kitchen-symbol-decoder/'
-  ? {
-      path: '/tools/cookware-oven-temp-lookup/',
-      icon: '🍳',
-      title: isEs ? 'Buscador de Temperatura Máxima de Horno para Utensilios' :
-             isPt ? 'Consulta de Temperatura Máxima de Forno para Panelas' :
-             isZh ? '锅具与器皿烤箱最高耐温查询表' :
-             '調理器具・鍋のオーブン耐熱上限検索ツール',
-      description: isEs ? 'Comprueba los límites verificados de horno y grill para ollas, fuentes y componentes de electrodomésticos.' :
-                   isPt ? 'Confira os limites verificados de forno e grill para panelas, assadeiras e componentes de eletrodomésticos.' :
-                   isZh ? '速查各类锅具、烤盘与厨房电器配件的烤箱及炙烤最高安全耐温。' :
-                   '鍋・耐熱皿・家電パーツのオーブンおよびグリル耐熱上限温度を確認できます。',
-      cta: isEs ? 'Ver Temperaturas' : isPt ? 'Ver Temperaturas' : isZh ? '查看烤箱耐温' : '耐熱上限を確認'
-    }
-  : {
-      path: '/tools/kitchen-symbol-decoder/',
-      icon: '🔍',
-      title: isEs ? 'Decodificador de Símbolos de Seguridad en Utensilios' :
-             isPt ? 'Decodificador de Símbolos de Segurança em Utensílios' :
-             isZh ? '厨具与容器安全图标解码器' :
-             'キッチン用品・食器の安全マーク解読ツール',
-      description: isEs ? 'Identifica los símbolos de lavavajillas, microondas, congelador y horno grabados en tus utensilios para verificar su cuidado.' :
-                   isPt ? 'Identifique símbolos de lava-louças, micro-ondas, freezer e forno gravados nos utensílios para conferir as regras de uso.' :
-                   isZh ? '对照器皿底部的洗碗机、微波炉、冷冻室和烤箱图标，快速确认安全使用规则。' :
-                   '食器や容器に刻印された食洗機・電子レンジ・冷凍・オーブン対応マークをすぐ照合できます。',
-      cta: isEs ? 'Decodificar Símbolos' : isPt ? 'Decodificar Símbolos' : isZh ? '解码安全图标' : 'マークを調べる'
-    };
+const selectedTools = selectMaterialToolPair(category.id);
+const primaryTool = toolCatalog[selectedTools.primary];
+const secondaryTool = toolCatalog[selectedTools.secondary];
 
 const primaryToolUrl = translatePath(primaryTool.path);
 const secondaryToolUrl = translatePath(secondaryTool.path);
+
+// Dynamic per-page OG social preview card (/api/og.svg)
+function truncateOgText(text: string, maxLen: number): string {
+  const clean = String(text || '').replace(/\s+/g, ' ').trim();
+  if (clean.length <= maxLen) return clean;
+  const sliced = clean.slice(0, maxLen - 1);
+  const lastSpace = sliced.lastIndexOf(' ');
+  const cut = lastSpace > Math.floor(maxLen * 0.6) ? sliced.slice(0, lastSpace) : sliced;
+  return `${cut.replace(/[\s,;:\-—–/]+$/, '')}…`;
+}
+
+const isCjkLocale = lang === 'zh-cn' || lang === 'ja';
+const localizedH1 = (h1Titles[lang] || h1Titles.en)(category.displayName);
+const ogTitle = truncateOgText(localizedH1, isCjkLocale ? 44 : 70);
+const ogVerdict = 'DEPENDS';
+const ogAppliance = truncateOgText(guideBadgeLabels[lang] || guideBadgeLabels.en, isCjkLocale ? 18 : 32);
+const ogSummary = truncateOgText(category.description || pageDescription, isCjkLocale ? 64 : 115);
+const ogParams = new URLSearchParams({
+  title: ogTitle,
+  verdict: ogVerdict,
+  appliance: ogAppliance,
+  summary: ogSummary,
+});
+const ogImage = `/api/og.svg?${ogParams.toString()}`;
 
 const uxCopy = {
   badgeVerified: isEs ? '✓ Verificado FDA 21 CFR y NSF/ANSI' :
@@ -446,7 +803,7 @@ const uxCopy = {
 };
 ---
 
-<Layout title={pageTitle} description={pageDescription} excludeBreadcrumbSchema={true} availableLocales={availableLocales} lang={lang}>
+<Layout title={pageTitle} description={pageDescription} excludeBreadcrumbSchema={true} availableLocales={availableLocales} lang={lang} ogImage={ogImage}>
   <Fragment slot="head">
     <script type="application/ld+json" is:inline set:html={JSON.stringify(itemListSchema)} />
     <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbListSchema)} />

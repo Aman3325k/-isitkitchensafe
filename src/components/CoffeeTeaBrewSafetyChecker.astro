@@ -1,0 +1,1897 @@
+---
+import rawData from '../data/coffee-tea-brew-safety-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+import { useTranslatedPath } from '../i18n/utils';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+const translatePath = useTranslatedPath(lang);
+
+const descalingUrl = translatePath('/tools/appliance-descaling-calculator/');
+const plasticUrl = translatePath('/tools/plastic-code-checker/');
+const moldUrl = translatePath('/tools/moldy-food-safety-checker/');
+const methodologyUrl = translatePath('/methodology/');
+const allToolsUrl = translatePath('/tools/');
+
+type DrinkStatusKey = 'safe' | 'caution' | 'unsafe';
+type DrinkCategoryKey = 'cold-brew' | 'hot-coffee' | 'milk-drink' | 'tea';
+type MaterialRatingKey = 'best' | 'good' | 'caution' | 'avoid';
+type LeachRiskKey = 'zero' | 'low' | 'moderate' | 'high';
+type DishwasherKey = 'yes' | 'check' | 'never';
+
+interface BannerRule {
+  icon: string;
+  title: string;
+  body: string;
+}
+
+interface SafetyBannerData {
+  badge: string;
+  headline: string;
+  subline: string;
+  rules: BannerRule[];
+}
+
+interface LocalizedDrink {
+  id: string;
+  icon: string;
+  status: DrinkStatusKey;
+  category: DrinkCategoryKey;
+  phRange: string;
+  shortName: string;
+  name: string;
+  verdictBadge: string;
+  authorityTag: string;
+  roomTempLimit: string;
+  fridgeLimit: string;
+  verdictHeadline: string;
+  verdictDetail: string;
+  spoilageRedFlags: string;
+  safeTip: string;
+}
+
+interface LocalizedMaterial {
+  id: string;
+  icon: string;
+  safetyRating: MaterialRatingKey;
+  leachRiskLevel: LeachRiskKey;
+  dishwasherStatus: DishwasherKey;
+  shortName: string;
+  name: string;
+  safetyBadge: string;
+  leachRiskBadge: string;
+  dishwasherBadge: string;
+  summary: string;
+  leachDetail: string;
+  dishwasherRule: string;
+  descalingTip: string;
+  replacementTrigger: string;
+}
+
+interface LocalizedBrewTemp {
+  id: string;
+  icon: string;
+  tempF: number;
+  tempC: number;
+  rangeF: string;
+  rangeC: string;
+  category: 'tea' | 'coffee';
+  name: string;
+  steepTime: string;
+  ratio: string;
+  safetyAndFlavorNote: string;
+  whyTempMatters: string;
+}
+
+const safetyBanner: SafetyBannerData =
+  (rawData.safetyBanner as Record<string, SafetyBannerData>)[lang] ||
+  rawData.safetyBanner.en;
+
+const drinks: LocalizedDrink[] = rawData.drinks.map((d) => {
+  const tr = (d.i18n as Record<string, any>)[lang] || d.i18n.en;
+  return {
+    id: d.id,
+    icon: d.icon,
+    status: d.status as DrinkStatusKey,
+    category: d.category as DrinkCategoryKey,
+    phRange: d.phRange,
+    shortName: tr.shortName,
+    name: tr.name,
+    verdictBadge: tr.verdictBadge,
+    authorityTag: tr.authorityTag,
+    roomTempLimit: tr.roomTempLimit,
+    fridgeLimit: tr.fridgeLimit,
+    verdictHeadline: tr.verdictHeadline,
+    verdictDetail: tr.verdictDetail,
+    spoilageRedFlags: tr.spoilageRedFlags,
+    safeTip: tr.safeTip
+  };
+});
+
+const materials: LocalizedMaterial[] = rawData.materials.map((m) => {
+  const tr = (m.i18n as Record<string, any>)[lang] || m.i18n.en;
+  return {
+    id: m.id,
+    icon: m.icon,
+    safetyRating: m.safetyRating as MaterialRatingKey,
+    leachRiskLevel: m.leachRiskLevel as LeachRiskKey,
+    dishwasherStatus: m.dishwasherStatus as DishwasherKey,
+    shortName: tr.shortName,
+    name: tr.name,
+    safetyBadge: tr.safetyBadge,
+    leachRiskBadge: tr.leachRiskBadge,
+    dishwasherBadge: tr.dishwasherBadge,
+    summary: tr.summary,
+    leachDetail: tr.leachDetail,
+    dishwasherRule: tr.dishwasherRule,
+    descalingTip: tr.descalingTip,
+    replacementTrigger: tr.replacementTrigger
+  };
+});
+
+const brewTemps: LocalizedBrewTemp[] = rawData.brewTemps.map((b) => {
+  const tr = (b.i18n as Record<string, any>)[lang] || b.i18n.en;
+  return {
+    id: b.id,
+    icon: b.icon,
+    tempF: b.tempF,
+    tempC: b.tempC,
+    rangeF: b.rangeF,
+    rangeC: b.rangeC,
+    category: b.category as 'tea' | 'coffee',
+    name: tr.name,
+    steepTime: tr.steepTime,
+    ratio: tr.ratio,
+    safetyAndFlavorNote: tr.safetyAndFlavorNote,
+    whyTempMatters: tr.whyTempMatters
+  };
+});
+
+const localizedFaqs: Array<{ question: string; answer: string }> =
+  (rawData.faqs as Record<string, Array<{ question: string; answer: string }>>)[lang] ||
+  rawData.faqs.en;
+
+interface UiDict {
+  ariaLabel: string;
+  toolBadge: string;
+  toolTitle: string;
+  toolSub: string;
+  copyBtn: string;
+  copiedBtn: string;
+  printBtn: string;
+  tabDrinks: string;
+  tabMaterials: string;
+  tabTemps: string;
+  drinksHeading: string;
+  drinksHint: string;
+  drinkCatAll: string;
+  drinkCatColdBrew: string;
+  drinkCatHotCoffee: string;
+  drinkCatMilk: string;
+  drinkCatTea: string;
+  drinkLiveBadge: string;
+  roomTempLabel: string;
+  fridgeLimitLabel: string;
+  spoilageLabel: string;
+  safeTipLabel: string;
+  materialsHeading: string;
+  materialsHint: string;
+  materialLiveBadge: string;
+  leachHeading: string;
+  dishwasherHeading: string;
+  descalingHeading: string;
+  replaceLabel: string;
+  selectMaterialHint: string;
+  tempsHeading: string;
+  tempsHint: string;
+  unitLabel: string;
+  tempFilterAll: string;
+  tempFilterCoffee: string;
+  tempFilterTea: string;
+  steepTimeLabel: string;
+  ratioLabel: string;
+  rangeLabel: string;
+  whyTempLabel: string;
+  printTitle: string;
+  printSub: string;
+  printDrinksHeading: string;
+  printMaterialsHeading: string;
+  printTempsHeading: string;
+  printColDrink: string;
+  printColVerdict: string;
+  printColRoom: string;
+  printColFridge: string;
+  printColMaterial: string;
+  printColLeach: string;
+  printColDishwasher: string;
+  printColDescale: string;
+  printColBrew: string;
+  printColTemp: string;
+  printColSteep: string;
+  printColNote: string;
+  copyHeader: string;
+  copyDrinkLabel: string;
+  copyVerdictLabel: string;
+  copyRoomLabel: string;
+  copyFridgeLabel: string;
+  copySpoilageLabel: string;
+  copyMaterialLabel: string;
+  copyLeachLabel: string;
+  copyDishwasherLabel: string;
+  copyDescaleLabel: string;
+  copyTempHeader: string;
+  copyRulesHeader: string;
+  relatedHeading: string;
+  relatedDescaleTag: string;
+  relatedDescaleTitle: string;
+  relatedDescaleDesc: string;
+  relatedPlasticTag: string;
+  relatedPlasticTitle: string;
+  relatedPlasticDesc: string;
+  relatedMoldTag: string;
+  relatedMoldTitle: string;
+  relatedMoldDesc: string;
+  methodologyStripTitle: string;
+  methodologyStripPrefix: string;
+  methodologyLabel: string;
+  descaleQuickLabel: string;
+  allToolsLabel: string;
+  faqTitle: string;
+}
+
+const UI: Record<SupportedLanguage, UiDict> = {
+  en: {
+    ariaLabel: 'Interactive Coffee, Espresso, Cold Brew & Tea Safe Brewing, Storage & Kettle Material Checker',
+    toolBadge: 'CDC Sun Tea · FDA Cold Brew · SCA Brew Temps · 10 Drinks · 7 Kettle Materials',
+    toolTitle: 'Coffee, Cold Brew & Tea Safe Brewing, Storage & Kettle Checker',
+    toolSub: 'Inspect 10 coffee, cold brew, kombucha & tea storage scenarios against CDC/FDA/USDA safety limits, compare 7 kettle & brewer materials for microplastic/metal leaching, and check exact °F/°C brew temperatures.',
+    copyBtn: 'Copy Coffee & Tea Safety Card',
+    copiedBtn: 'Safety Card Copied ✓',
+    printBtn: 'Print Brew & Kettle Chart',
+    tabDrinks: '☕ 1. Drink & Storage Safety (10)',
+    tabMaterials: '🫖 2. Kettle & Brewer Materials (7)',
+    tabTemps: '🌡️ 3. Water Temp & Steep Chart (8)',
+    drinksHeading: '1. Drink & Storage Safety Inspector (10 Coffee, Cold Brew & Tea Scenarios)',
+    drinksHint: 'Select any drink below to check CDC, FDA & USDA room-temperature limits, safe refrigerator shelf life, and spoilage red flags.',
+    drinkCatAll: 'All Drinks (10)',
+    drinkCatColdBrew: 'Cold Brew',
+    drinkCatHotCoffee: 'Hot Coffee',
+    drinkCatMilk: 'Milk & Lattes',
+    drinkCatTea: 'Tea & Kombucha',
+    drinkLiveBadge: 'LIVE USDA / CDC / FDA STORAGE VERDICT',
+    roomTempLabel: 'Room-Temp Safe Limit',
+    fridgeLimitLabel: 'Refrigerator Limit (≤40°F / 4°C)',
+    spoilageLabel: 'Spoilage & Pathogen Red Flags',
+    safeTipLabel: 'Safe Brewing & Storage Protocol',
+    materialsHeading: '2. Kettle & Coffee Maker Material Safety Checker (7 Materials)',
+    materialsHint: 'Tap any kettle, Moka pot, or brewer material to inspect microplastic shedding at 212°F (100°C), metal leaching, dishwasher safety, and descaling rules.',
+    materialLiveBadge: 'LIVE MATERIAL & LEACHING VERDICT',
+    leachHeading: 'Leaching, Microplastic & Biofilm Risk',
+    dishwasherHeading: 'Dishwasher Safety Verdict',
+    descalingHeading: 'Safe Descaling & Care Protocol',
+    replaceLabel: 'When to Replace:',
+    selectMaterialHint: 'Tap to inspect material ↑',
+    tempsHeading: '3. Interactive Water Temperature & Steep Guide (8 Presets)',
+    tempsHint: 'Toggle °F / °C below to verify Specialty Coffee Association (SCA) coffee targets, hygienic boiling temps for dried herbs, and safe fridge cold-brew steeping.',
+    unitLabel: 'Temperature Unit:',
+    tempFilterAll: 'All Brews (8)',
+    tempFilterCoffee: 'Coffee & Espresso (4)',
+    tempFilterTea: 'Tea & Herbal (4)',
+    steepTimeLabel: 'Steep / Brew Time',
+    ratioLabel: 'Standard Ratio',
+    rangeLabel: 'Safe Range',
+    whyTempLabel: 'Why This Temp:',
+    printTitle: 'COFFEE, COLD BREW, TEA & KETTLE SAFETY REFERENCE CHART (CDC · FDA · SCA)',
+    printSub: 'Never brew Sun Tea outdoors · Refrigerate milk coffee within 2 hrs · Keep homemade cold brew ≤40°F (4°C) · Avoid boiling water in #5 PP plastic kettles · Hand-wash aluminum Moka pots.',
+    printDrinksHeading: '10 Coffee, Cold Brew & Tea Storage Safety Limits',
+    printMaterialsHeading: '7 Kettle & Coffee Maker Materials — Leaching, Dishwasher & Descaling',
+    printTempsHeading: '8 Coffee & Tea Safe Brewing Temperatures (°F / °C)',
+    printColDrink: 'Drink Scenario',
+    printColVerdict: 'Safety Verdict',
+    printColRoom: 'Room Temp Limit',
+    printColFridge: 'Fridge Limit',
+    printColMaterial: 'Kettle / Brewer Material',
+    printColLeach: 'Leaching / Biofilm Risk',
+    printColDishwasher: 'Dishwasher',
+    printColDescale: 'Descaling & Care',
+    printColBrew: 'Brew Type',
+    printColTemp: 'Target Temp (°F / °C)',
+    printColSteep: 'Steep Time',
+    printColNote: 'Safety & Flavor Note',
+    copyHeader: 'IsItKitchenSafe — Coffee, Cold Brew, Tea & Kettle Safety Card',
+    copyDrinkLabel: 'SELECTED DRINK:',
+    copyVerdictLabel: 'SAFETY VERDICT:',
+    copyRoomLabel: 'ROOM TEMP LIMIT:',
+    copyFridgeLabel: 'FRIDGE LIMIT:',
+    copySpoilageLabel: 'SPOILAGE RED FLAGS:',
+    copyMaterialLabel: 'SELECTED KETTLE/BREWER MATERIAL:',
+    copyLeachLabel: 'LEACHING / MICROPLASTIC RISK:',
+    copyDishwasherLabel: 'DISHWASHER VERDICT:',
+    copyDescaleLabel: 'DESCALING TIP:',
+    copyTempHeader: 'BREW TEMPERATURE QUICK CHART:',
+    copyRulesHeader: '3 CRITICAL BREW & KETTLE SAFETY RULES:',
+    relatedHeading: 'Related Descaling, Plastic Leaching & Mold Safety Tools',
+    relatedDescaleTag: 'Appliance Descaling Math',
+    relatedDescaleTitle: 'Appliance Descaling Calculator →',
+    relatedDescaleDesc: 'Calculate exact citric acid or white vinegar ratios for electric kettles, drip brewers, and espresso machines without corroding seals.',
+    relatedPlasticTag: 'Polymer & Microplastic Safety',
+    relatedPlasticTitle: 'Plastic Recycling Code Checker (#1–#7) →',
+    relatedPlasticDesc: 'Check heat tolerance and microplastic shedding risks for #5 PP kettles, travel lids, and cold-brew pitchers.',
+    relatedMoldTag: 'Mold & Spoilage Guide',
+    relatedMoldTitle: 'Moldy Food & Drink Safety Checker →',
+    relatedMoldDesc: 'Know when fuzzy mold on kombucha SCOBYs, cold-brew bottles, or coffee grounds requires discarding the entire batch.',
+    methodologyStripTitle: 'Grounded in CDC Sun Tea Advisories, FDA Low-Acid Cold Brew Rules & SCA Standards',
+    methodologyStripPrefix: 'Every storage threshold, 2-hour Danger Zone rule, botulism low-acid boundary (pH 4.6), polypropylene boiling-water shedding note, and SCA brew target is verified against primary public-health and culinary references. Read our',
+    methodologyLabel: 'Methodology',
+    descaleQuickLabel: 'Appliance Descaling Calculator',
+    allToolsLabel: 'All Kitchen Tools →',
+    faqTitle: 'Frequently Asked Questions: Coffee, Cold Brew, Tea & Kettle Safety'
+  },
+  es: {
+    ariaLabel: 'Verificador Interactivo de Seguridad de Café, Cold Brew, Té y Materiales de Hervidores',
+    toolBadge: 'CDC Té al Sol · FDA Cold Brew · Temperaturas SCA · 10 Bebidas · 7 Materiales',
+    toolTitle: 'Verificador de Seguridad de Café, Cold Brew, Té y Hervidores',
+    toolSub: 'Revisa 10 escenarios de almacenamiento de café, cold brew, kombucha y té según CDC/FDA/USDA, compara 7 materiales de hervidores y cafeteras por microplásticos o metales y consulta temperaturas exactas en °C/°F.',
+    copyBtn: 'Copiar Ficha de Seguridad',
+    copiedBtn: 'Ficha Copiada ✓',
+    printBtn: 'Imprimir Guía de Infusión',
+    tabDrinks: '☕ 1. Seguridad de Bebidas (10)',
+    tabMaterials: '🫖 2. Materiales de Hervidor (7)',
+    tabTemps: '🌡️ 3. Temperaturas y Tiempo (8)',
+    drinksHeading: '1. Inspector de Seguridad y Almacenamiento (10 Bebidas de Café y Té)',
+    drinksHint: 'Elige cualquier bebida para ver límites a temperatura ambiente y refrigerador según CDC/FDA/USDA y señales de deterioro.',
+    drinkCatAll: 'Todas (10)',
+    drinkCatColdBrew: 'Cold Brew',
+    drinkCatHotCoffee: 'Café Caliente',
+    drinkCatMilk: 'Con Leche / Latte',
+    drinkCatTea: 'Té y Kombucha',
+    drinkLiveBadge: 'VEREDICTO DE SEGURIDAD USDA / CDC / FDA',
+    roomTempLabel: 'Límite a Temp. Ambiente',
+    fridgeLimitLabel: 'Límite en Refrigerador (≤4°C)',
+    spoilageLabel: 'Señales de Deterioro y Patógenos',
+    safeTipLabel: 'Protocolo Seguro de Preparación',
+    materialsHeading: '2. Verificador de Materiales de Hervidores y Cafeteras (7 Materiales)',
+    materialsHint: 'Pulsa cualquier material para evaluar liberación de microplásticos a 100°C, metales, seguridad en lavavajillas y descalcificación.',
+    materialLiveBadge: 'ANÁLISIS DE MATERIAL Y LIXIVIACIÓN',
+    leachHeading: 'Riesgo de Microplásticos, Metales y Biopelícula',
+    dishwasherHeading: 'Veredicto de Lavavajillas',
+    descalingHeading: 'Descalcificación y Cuidado Seguro',
+    replaceLabel: 'Cuándo Reemplazar:',
+    selectMaterialHint: 'Pulsa para inspeccionar ↑',
+    tempsHeading: '3. Guía Interactiva de Temperatura del Agua e Infusión (8 Presets)',
+    tempsHint: 'Alterna entre °C y °F para consultar temperaturas SCA de café, hervor seguro para hierbas secas y cold brew en refrigerador.',
+    unitLabel: 'Unidad:',
+    tempFilterAll: 'Todas (8)',
+    tempFilterCoffee: 'Café y Espresso (4)',
+    tempFilterTea: 'Té e Infusiones (4)',
+    steepTimeLabel: 'Tiempo de Infusión',
+    ratioLabel: 'Proporción Estándar',
+    rangeLabel: 'Rango Seguro',
+    whyTempLabel: 'Por Qué Esta Temp.:',
+    printTitle: 'GUÍA DE SEGURIDAD DE CAFÉ, COLD BREW, TÉ Y HERVIDORES (CDC · FDA · SCA)',
+    printSub: 'Nunca té al sol · Refrigera café con leche en <2 h · Cold brew casero siempre ≤4°C · Evita hervir en plástico #5 PP · Lava Moka de aluminio a mano.',
+    printDrinksHeading: '10 Escenarios de Almacenamiento de Café, Cold Brew y Té',
+    printMaterialsHeading: '7 Materiales de Hervidores y Cafeteras — Lixiviación y Descalcificación',
+    printTempsHeading: '8 Temperaturas Seguras de Infusión (°F / °C)',
+    printColDrink: 'Bebida',
+    printColVerdict: 'Veredicto',
+    printColRoom: 'Límite Ambiente',
+    printColFridge: 'Límite Nevera',
+    printColMaterial: 'Material',
+    printColLeach: 'Riesgo Lixiviación',
+    printColDishwasher: 'Lavavajillas',
+    printColDescale: 'Descalcificación',
+    printColBrew: 'Tipo de Bebida',
+    printColTemp: 'Temperatura (°F / °C)',
+    printColSteep: 'Tiempo',
+    printColNote: 'Nota de Seguridad y Sabor',
+    copyHeader: 'IsItKitchenSafe — Ficha de Seguridad de Café, Té y Hervidores',
+    copyDrinkLabel: 'BEBIDA SELECCIONADA:',
+    copyVerdictLabel: 'VEREDICTO:',
+    copyRoomLabel: 'LÍMITE AMBIENTE:',
+    copyFridgeLabel: 'LÍMITE NEVERA:',
+    copySpoilageLabel: 'SEÑALES DE DETERIORO:',
+    copyMaterialLabel: 'MATERIAL DE HERVIDOR/CAFETERA:',
+    copyLeachLabel: 'RIESGO DE LIXIVIACIÓN:',
+    copyDishwasherLabel: 'LAVAVAJILLAS:',
+    copyDescaleLabel: 'DESCALCIFICACIÓN:',
+    copyTempHeader: 'GUÍA RÁPIDA DE TEMPERATURAS:',
+    copyRulesHeader: '3 REGLAS CRÍTICAS DE INFUSIÓN Y HERVIDORES:',
+    relatedHeading: 'Herramientas Relacionadas de Descalcificación, Plásticos y Moho',
+    relatedDescaleTag: 'Cálculo de Descalcificación',
+    relatedDescaleTitle: 'Calculadora de Descalcificación de Electrodomésticos →',
+    relatedDescaleDesc: 'Calcula dosis exactas de ácido cítrico o vinagre para hervidores, cafeteras de goteo y espresso sin dañar juntas.',
+    relatedPlasticTag: 'Seguridad de Polímeros',
+    relatedPlasticTitle: 'Verificador de Códigos de Plástico (#1–#7) →',
+    relatedPlasticDesc: 'Consulta la resistencia térmica y riesgo de microplásticos de plásticos #5 PP en hervidores, tapas y jarras.',
+    relatedMoldTag: 'Guía de Moho en Alimentos',
+    relatedMoldTitle: 'Verificador de Alimentos y Bebidas con Moho →',
+    relatedMoldDesc: 'Comprueba cuándo el moho en kombucha, botellas de cold brew o café molido exige descartar todo el lote.',
+    methodologyStripTitle: 'Basado en Alertas CDC de Té al Sol, Normas FDA de Cold Brew y Estándares SCA',
+    methodologyStripPrefix: 'Cada límite de conservación, regla de 2 horas, umbral de botulismo (pH 4.6), migración de polipropileno en hervor y temperatura SCA está respaldado por fuentes primarias. Consulta nuestra',
+    methodologyLabel: 'Metodología',
+    descaleQuickLabel: 'Calculadora de Descalcificación',
+    allToolsLabel: 'Todas las Herramientas →',
+    faqTitle: 'Preguntas Frecuentes: Seguridad de Café, Cold Brew, Té y Hervidores'
+  },
+  pt: {
+    ariaLabel: 'Verificador Interativo de Segurança de Café, Cold Brew, Chá e Materiais de Chaleiras',
+    toolBadge: 'CDC Sun Tea · FDA Cold Brew · Temperaturas SCA · 10 Bebidas · 7 Materiais',
+    toolTitle: 'Verificador de Segurança de Café, Cold Brew, Chá e Chaleiras',
+    toolSub: 'Consulte 10 cenários de armazenamento de café, cold brew, kombucha e chá segundo CDC/FDA/USDA, compare 7 materiais de chaleiras e cafeteiras quanto a microplásticos/metais e veja temperaturas exatas em °C/°F.',
+    copyBtn: 'Copiar Ficha de Segurança',
+    copiedBtn: 'Ficha Copiada ✓',
+    printBtn: 'Imprimir Guia de Preparo',
+    tabDrinks: '☕ 1. Segurança das Bebidas (10)',
+    tabMaterials: '🫖 2. Materiais de Chaleira (7)',
+    tabTemps: '🌡️ 3. Temperaturas e Tempo (8)',
+    drinksHeading: '1. Inspetor de Segurança e Armazenamento (10 Bebidas de Café e Chá)',
+    drinksHint: 'Escolha qualquer bebida para verificar limites fora e dentro da geladeira (CDC/FDA/USDA) e sinais de deterioração.',
+    drinkCatAll: 'Todas (10)',
+    drinkCatColdBrew: 'Cold Brew',
+    drinkCatHotCoffee: 'Café Quente',
+    drinkCatMilk: 'Com Leite / Latte',
+    drinkCatTea: 'Chá e Kombucha',
+    drinkLiveBadge: 'VEREDICTO DE SEGURANÇA USDA / CDC / FDA',
+    roomTempLabel: 'Limite em Temp. Ambiente',
+    fridgeLimitLabel: 'Limite na Geladeira (≤4°C)',
+    spoilageLabel: 'Sinais de Deterioração e Riscos',
+    safeTipLabel: 'Protocolo Seguro de Preparo',
+    materialsHeading: '2. Verificador de Materiais de Chaleiras e Cafeteiras (7 Materiais)',
+    materialsHint: 'Clique em qualquer material para checar microplásticos a 100°C, lixiviação de metais, lava-louças e descalcificação.',
+    materialLiveBadge: 'ANÁLISE DE MATERIAL E LIXIVIAÇÃO',
+    leachHeading: 'Risco de Microplásticos, Metais e Biofilme',
+    dishwasherHeading: 'Veredicto da Lava-Louças',
+    descalingHeading: 'Descalcificação e Cuidados Seguros',
+    replaceLabel: 'Quando Substituir:',
+    selectMaterialHint: 'Clique para inspecionar ↑',
+    tempsHeading: '3. Guia Interativo de Temperatura da Água e Infusão (8 Presets)',
+    tempsHint: 'Alterne °C / °F para conferir padrões SCA de café, fervura segura para ervas secas e cold brew na geladeira.',
+    unitLabel: 'Unidade:',
+    tempFilterAll: 'Todas (8)',
+    tempFilterCoffee: 'Café e Espresso (4)',
+    tempFilterTea: 'Chá e Ervas (4)',
+    steepTimeLabel: 'Tempo de Infusão',
+    ratioLabel: 'Proporção Padrão',
+    rangeLabel: 'Faixa Segura',
+    whyTempLabel: 'Por Que Esta Temp.:',
+    printTitle: 'GUIA DE SEGURANÇA DE CAFÉ, COLD BREW, CHÁ E CHALEIRAS (CDC · FDA · SCA)',
+    printSub: 'Nunca chá ao sol · Refrigere café com leite em até 2h · Cold brew caseiro sempre ≤4°C · Evite ferver em plástico #5 PP · Lave Moka de alumínio à mão.',
+    printDrinksHeading: '10 Limites de Armazenamento de Café, Cold Brew e Chá',
+    printMaterialsHeading: '7 Materiais de Chaleiras e Cafeteiras — Lixiviação e Descalcificação',
+    printTempsHeading: '8 Temperaturas Seguras de Preparo (°F / °C)',
+    printColDrink: 'Bebida',
+    printColVerdict: 'Veredicto',
+    printColRoom: 'Limite Ambiente',
+    printColFridge: 'Limite Geladeira',
+    printColMaterial: 'Material',
+    printColLeach: 'Risco de Lixiviação',
+    printColDishwasher: 'Lava-Louças',
+    printColDescale: 'Descalcificação',
+    printColBrew: 'Tipo de Preparo',
+    printColTemp: 'Temperatura (°F / °C)',
+    printColSteep: 'Tempo',
+    printColNote: 'Nota de Segurança e Sabor',
+    copyHeader: 'IsItKitchenSafe — Ficha de Segurança de Café, Chá e Chaleiras',
+    copyDrinkLabel: 'BEBIDA SELECIONADA:',
+    copyVerdictLabel: 'VEREDICTO:',
+    copyRoomLabel: 'LIMITE AMBIENTE:',
+    copyFridgeLabel: 'LIMITE GELADEIRA:',
+    copySpoilageLabel: 'SINAIS DE DETERIORAÇÃO:',
+    copyMaterialLabel: 'MATERIAL DA CHALEIRA/CAFETEIRA:',
+    copyLeachLabel: 'RISCO DE LIXIVIAÇÃO:',
+    copyDishwasherLabel: 'LAVA-LOUÇAS:',
+    copyDescaleLabel: 'DICA DE DESCALCIFICAÇÃO:',
+    copyTempHeader: 'TABELA RÁPIDA DE TEMPERATURAS:',
+    copyRulesHeader: '3 REGRAS CRÍTICAS DE PREPARO E CHALEIRAS:',
+    relatedHeading: 'Ferramentas Relacionadas de Descalcificação, Plásticos e Mofo',
+    relatedDescaleTag: 'Dosagem de Descalcificação',
+    relatedDescaleTitle: 'Calculadora de Descalcificação de Eletrodomésticos →',
+    relatedDescaleDesc: 'Calcule proporções exatas de ácido cítrico ou vinagre para chaleiras, cafeteiras elétricas e máquinas de espresso.',
+    relatedPlasticTag: 'Segurança de Polímeros',
+    relatedPlasticTitle: 'Verificador de Códigos de Plástico (#1–#7) →',
+    relatedPlasticDesc: 'Verifique resistência térmica e risco de microplásticos em chaleiras #5 PP, tampas e jarras de cold brew.',
+    relatedMoldTag: 'Guia de Alimentos Mofados',
+    relatedMoldTitle: 'Verificador de Alimentos e Bebidas com Mofo →',
+    relatedMoldDesc: 'Saiba quando mofo em SCOBY de kombucha, cold brew ou pó de café exige descartar todo o lote.',
+    methodologyStripTitle: 'Baseado em Alertas CDC de Chá ao Sol, Regras FDA de Cold Brew e Padrões SCA',
+    methodologyStripPrefix: 'Cada prazo de armazenamento, regra de 2 horas, limite de botulismo (pH 4,6), liberação de polipropileno em fervura e temperatura SCA segue referências primárias. Leia nossa',
+    methodologyLabel: 'Metodologia',
+    descaleQuickLabel: 'Calculadora de Descalcificação',
+    allToolsLabel: 'Todas as Ferramentas →',
+    faqTitle: 'Perguntas Frequentes: Segurança de Café, Cold Brew, Chá e Chaleiras'
+  },
+  'zh-cn': {
+    ariaLabel: '咖啡、浓缩、冷萃与茶饮安全冲泡、储存及烧水壶材质检查器',
+    toolBadge: 'CDC 太阳茶 · FDA 冷萃规范 · SCA 水温标准 · 10 饮品 · 7 器具材质',
+    toolTitle: '咖啡、冷萃与茶饮安全冲泡、储存及水壶材质检查器',
+    toolSub: '对照 CDC/FDA/USDA 权威标准核查 10 种咖啡、冷萃、康普茶与茶饮的室温及冷藏时限，对比 7 种烧水壶与咖啡机材质的微塑料/金属析出风险，并切换查看 8 类冲泡的 °C/°F 精准水温。',
+    copyBtn: '复制咖啡茶饮安全卡',
+    copiedBtn: '安全卡已复制 ✓',
+    printBtn: '打印冲泡与水壶表',
+    tabDrinks: '☕ 1. 饮品储存安全 (10)',
+    tabMaterials: '🫖 2. 水壶与咖啡机材质 (7)',
+    tabTemps: '🌡️ 3. 冲泡水温与时长 (8)',
+    drinksHeading: '1. 饮品与储存安全检查器（10 种常见咖啡、冷萃与茶饮）',
+    drinksHint: '点击下方任意饮品，实时查看 CDC/FDA/USDA 室温与冷藏安全时限及变质预警信号。',
+    drinkCatAll: '全部饮品 (10)',
+    drinkCatColdBrew: '冷萃咖啡',
+    drinkCatHotCoffee: '热黑咖啡',
+    drinkCatMilk: '含奶/拿铁',
+    drinkCatTea: '茶饮与康普茶',
+    drinkLiveBadge: '实时 USDA / CDC / FDA 饮品安全裁定',
+    roomTempLabel: '室温安全时限',
+    fridgeLimitLabel: '冰箱冷藏时限（≤4°C）',
+    spoilageLabel: '变质与致病菌预警信号',
+    safeTipLabel: '安全冲泡与储存建议',
+    materialsHeading: '2. 烧水壶与咖啡机材质安全检查器（7 大材质对比）',
+    materialsHint: '点击任意材质卡片，查看 100°C 沸水微塑料脱落、金属析出、洗碗机禁忌与科学除垢方案。',
+    materialLiveBadge: '实时器具材质与析出评估',
+    leachHeading: '微塑料、重金属与生物膜风险',
+    dishwasherHeading: '洗碗机安全结论',
+    descalingHeading: '安全除垢与养护方法',
+    replaceLabel: '淘汰更换信号：',
+    selectMaterialHint: '点击查看材质详情 ↑',
+    tempsHeading: '3. 交互式冲泡水温与浸泡时间表（8 项预设）',
+    tempsHint: '切换 °C / °F 即可查看 SCA 精品咖啡水温标准、花草茶沸水杀菌要求与冰箱安全冷萃温度。',
+    unitLabel: '温度单位：',
+    tempFilterAll: '全部预设 (8)',
+    tempFilterCoffee: '咖啡与浓缩 (4)',
+    tempFilterTea: '茶饮与花草 (4)',
+    steepTimeLabel: '建议浸泡/萃取时长',
+    ratioLabel: '参考粉水比',
+    rangeLabel: '适宜温区',
+    whyTempLabel: '控温原理：',
+    printTitle: '咖啡、冷萃、茶饮与烧水壶安全速查表（CDC · FDA · SCA）',
+    printSub: '严禁户外晒太阳茶 · 加奶咖啡室温限 2 小时 · 自制冷萃全程 ≤4°C · 避开 #5 PP 塑料内胆沸煮 · 铝制摩卡壶严禁洗碗机',
+    printDrinksHeading: '10 种咖啡、冷萃与茶饮储存安全时限',
+    printMaterialsHeading: '7 种水壶与咖啡机材质 — 析出、洗碗机与除垢',
+    printTempsHeading: '8 类咖啡与茶饮安全冲泡水温（°F / °C）',
+    printColDrink: '饮品场景',
+    printColVerdict: '安全裁定',
+    printColRoom: '室温上限',
+    printColFridge: '冷藏上限',
+    printColMaterial: '器具材质',
+    printColLeach: '析出/生物膜风险',
+    printColDishwasher: '洗碗机',
+    printColDescale: '除垢与保养',
+    printColBrew: '冲泡类型',
+    printColTemp: '目标水温 (°F / °C)',
+    printColSteep: '浸泡时长',
+    printColNote: '安全与风味要点',
+    copyHeader: 'IsItKitchenSafe — 咖啡、冷萃、茶饮与水壶安全卡',
+    copyDrinkLabel: '当前饮品：',
+    copyVerdictLabel: '安全结论：',
+    copyRoomLabel: '室温上限：',
+    copyFridgeLabel: '冷藏上限：',
+    copySpoilageLabel: '变质警报：',
+    copyMaterialLabel: '当前水壶/器具材质：',
+    copyLeachLabel: '析出/微塑料风险：',
+    copyDishwasherLabel: '洗碗机结论：',
+    copyDescaleLabel: '除垢建议：',
+    copyTempHeader: '冲泡水温速查：',
+    copyRulesHeader: '3 条冲泡与水壶安全铁律：',
+    relatedHeading: '相关家电除垢、塑料代码与霉变安全工具',
+    relatedDescaleTag: '精准除垢配比',
+    relatedDescaleTitle: '厨房家电除垢剂配比计算器 →',
+    relatedDescaleDesc: '计算电热水壶、滴滤机与意式咖啡机的柠檬酸或白醋安全用量，除垢同时保护密封圈。',
+    relatedPlasticTag: '塑料耐热与微塑料',
+    relatedPlasticTitle: '塑料回收代码 (#1–#7) 安全检查器 →',
+    relatedPlasticDesc: '核查 #5 PP 塑料水壶、咖啡杯盖与冷萃壶的耐高温上限及微塑料释放风险。',
+    relatedMoldTag: '发霉食品鉴别',
+    relatedMoldTitle: '发霉食物与饮品安全检查器 →',
+    relatedMoldDesc: '判断康普茶菌膜、冷萃瓶或咖啡渣发霉后何时必须整批丢弃、不可仅刮除表面。',
+    methodologyStripTitle: '严格依据 CDC 太阳茶警告、FDA 低酸冷萃规范与 SCA 咖啡冲泡标准',
+    methodologyStripPrefix: '所有饮品储存时限、2 小时危险温度带、肉毒杆菌 pH 4.6 界线、聚丙烯沸水释放数据与 SCA 水温均核验自权威机构与同行评审文献。查阅我们的',
+    methodologyLabel: '科学方法论',
+    descaleQuickLabel: '家电除垢计算器',
+    allToolsLabel: '全部厨房工具 →',
+    faqTitle: '常见问题：咖啡、冷萃、茶饮与烧水壶安全'
+  },
+  ja: {
+    ariaLabel: 'コーヒー・エスプレッソ・水出し＆お茶の安全抽出・保存・ケトル素材チェッカー',
+    toolBadge: 'CDC サンティー警告 · FDA 水出し基準 · SCA 抽出温度 · 10飲料 · 7素材',
+    toolTitle: 'コーヒー・水出し・お茶の安全抽出＆保存・ケトル素材チェッカー',
+    toolSub: 'CDC・FDA・USDA基準で10種類のコーヒー・水出し・コンブチャ・お茶の保存限界を判定し、7種類のケトル・抽出器具素材のマイクロプラスチック/金属溶出と、8種類の適温（°C/°F）を一目で確認できます。',
+    copyBtn: '安全カードをコピー',
+    copiedBtn: 'コピーしました ✓',
+    printBtn: '抽出＆ケトル一覧表を印刷',
+    tabDrinks: '☕ 1. 飲料の保存安全 (10)',
+    tabMaterials: '🫖 2. ケトル・器具素材 (7)',
+    tabTemps: '🌡️ 3. 抽出温度＆時間表 (8)',
+    drinksHeading: '1. 飲料・保存安全インスペクター（コーヒー・水出し・お茶 10種）',
+    drinksHint: '飲料を選ぶと、CDC/FDA/USDAに基づく常温限界・冷蔵期限・腐敗サインを即座に表示します。',
+    drinkCatAll: 'すべて (10)',
+    drinkCatColdBrew: '水出しコーヒー',
+    drinkCatHotCoffee: 'ホットコーヒー',
+    drinkCatMilk: 'ミルク・ラテ',
+    drinkCatTea: 'お茶・コンブチャ',
+    drinkLiveBadge: 'リアルタイム USDA / CDC / FDA 保存判定',
+    roomTempLabel: '常温での安全上限',
+    fridgeLimitLabel: '冷蔵保存上限（4°C以下）',
+    spoilageLabel: '腐敗・食中毒リスクの警告サイン',
+    safeTipLabel: '安全な抽出・保存プロトコル',
+    materialsHeading: '2. ケトル・コーヒーメーカー素材安全チェッカー（7素材）',
+    materialsHint: '素材カードをタップして、100°C沸騰時のマイクロプラスチック放出・金属溶出・食洗機可否・水垢洗浄法を確認できます。',
+    materialLiveBadge: 'リアルタイム素材＆溶出診断',
+    leachHeading: '溶出・マイクロプラスチック・カビリスク',
+    dishwasherHeading: '食洗機可否の判定',
+    descalingHeading: '安全な水垢除去・ケア方法',
+    replaceLabel: '買い替え目安:',
+    selectMaterialHint: 'タップして詳細診断 ↑',
+    tempsHeading: '3. インタラクティブ抽出温度＆蒸らし時間チャート（8種）',
+    tempsHint: '°C / °F を切り替えて、SCA基準のコーヒー適温・乾燥ハーブの沸騰殺菌・冷蔵庫内水出し温度を確認できます。',
+    unitLabel: '温度単位:',
+    tempFilterAll: 'すべて (8)',
+    tempFilterCoffee: 'コーヒー・エスプレッソ (4)',
+    tempFilterTea: 'お茶・ハーブ (4)',
+    steepTimeLabel: '抽出・蒸らし時間',
+    ratioLabel: '標準比率',
+    rangeLabel: '適正範囲',
+    whyTempLabel: 'この温度の理由:',
+    printTitle: 'コーヒー・水出し・お茶＆ケトル安全リファレンス表（CDC・FDA・SCA）',
+    printSub: '日向サンティー厳禁 · ミルク入りは常温2時間以内 · 自家製水出しは常に4°C以下 · #5 PP樹脂ケトル沸騰回避 · アルミ製マキネッタ食洗機厳禁',
+    printDrinksHeading: 'コーヒー・水出し・お茶 10種の保存限界',
+    printMaterialsHeading: 'ケトル・抽出器具 7素材 — 溶出・食洗機・クエン酸洗浄',
+    printTempsHeading: 'コーヒー＆お茶 8種の安全抽出温度（°F / °C）',
+    printColDrink: '飲料シナリオ',
+    printColVerdict: '安全判定',
+    printColRoom: '常温上限',
+    printColFridge: '冷蔵上限',
+    printColMaterial: 'ケトル・器具素材',
+    printColLeach: '溶出・カビリスク',
+    printColDishwasher: '食洗機',
+    printColDescale: '水垢洗浄・ケア',
+    printColBrew: '抽出タイプ',
+    printColTemp: '推奨温度 (°F / °C)',
+    printColSteep: '抽出時間',
+    printColNote: '安全・風味ポイント',
+    copyHeader: 'IsItKitchenSafe — コーヒー・お茶・ケトル安全カード',
+    copyDrinkLabel: '選択中の飲料：',
+    copyVerdictLabel: '安全判定：',
+    copyRoomLabel: '常温上限：',
+    copyFridgeLabel: '冷蔵上限：',
+    copySpoilageLabel: '腐敗サイン：',
+    copyMaterialLabel: '選択中のケトル・器具素材：',
+    copyLeachLabel: '溶出・マイクロプラスチックリスク：',
+    copyDishwasherLabel: '食洗機判定：',
+    copyDescaleLabel: '水垢洗浄アドバイス：',
+    copyTempHeader: '抽出温度クイック表：',
+    copyRulesHeader: 'コーヒー・茶・ケトルの重要安全ルール 3か条：',
+    relatedHeading: '関連する水垢洗浄・プラスチック・カビ安全ツール',
+    relatedDescaleTag: '家電クエン酸洗浄',
+    relatedDescaleTitle: 'キッチン家電 クエン酸・水垢洗浄計算ツール →',
+    relatedDescaleDesc: '電気ケトル・ドリップ機・エスプレッソマシンの安全なクエン酸/酢の希釈量を計算します。',
+    relatedPlasticTag: '樹脂耐熱・溶出診断',
+    relatedPlasticTitle: 'プラスチック識別コード (#1〜#7) チェッカー →',
+    relatedPlasticDesc: '#5 PPケトルやタンブラー蓋・水出しポットの耐熱性とマイクロプラスチックリスクを確認。',
+    relatedMoldTag: 'カビ食品の廃棄判断',
+    relatedMoldTitle: 'カビが生えた食品・飲料 安全チェッカー →',
+    relatedMoldDesc: 'コンブチャのSCOBY、水出しボトル、コーヒーかすのカビで全廃棄が必要なケースを判定。',
+    methodologyStripTitle: 'CDC サンティー警告・FDA 低酸性水出し指針・SCA 抽出基準に準拠',
+    methodologyStripPrefix: '各保存限界、2時間危険温度帯、ボツリヌス菌のpH 4.6境界、ポリプロピレン沸騰時の放出研究、SCA適温は一次公的資料と査読論文に基づき検証しています。詳細は',
+    methodologyLabel: '検証メソドロジー',
+    descaleQuickLabel: '家電水垢洗浄計算ツール',
+    allToolsLabel: 'すべてのツール →',
+    faqTitle: 'よくある質問：コーヒー・水出し・お茶＆ケトルの安全性'
+  }
+};
+
+const t = UI[lang] || UI.en;
+const defaultUnit: 'F' | 'C' = lang === 'en' ? 'F' : 'C';
+const defaultDrink = drinks[0];
+const defaultMaterial = materials[0];
+
+function getDrinkDarkPillClass(status: DrinkStatusKey): string {
+  if (status === 'unsafe') return 'bg-red-500 text-white';
+  if (status === 'caution') return 'bg-amber-400 text-slate-950';
+  return 'bg-emerald-400 text-slate-950';
+}
+
+function getDrinkBorderClass(status: DrinkStatusKey): string {
+  if (status === 'unsafe') return 'border-red-400';
+  if (status === 'caution') return 'border-amber-400';
+  return 'border-emerald-400';
+}
+
+function getDrinkCardPillClass(status: DrinkStatusKey): string {
+  if (status === 'unsafe') return 'bg-red-500/15 text-red-800 dark:text-red-200 border-red-500/45';
+  if (status === 'caution') return 'bg-amber-500/15 text-amber-900 dark:text-amber-200 border-amber-500/45';
+  return 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-200 border-emerald-500/40';
+}
+
+function getMaterialDarkPillClass(rating: MaterialRatingKey): string {
+  if (rating === 'avoid') return 'bg-red-500 text-white';
+  if (rating === 'caution') return 'bg-amber-400 text-slate-950';
+  if (rating === 'good') return 'bg-sky-400 text-slate-950';
+  return 'bg-emerald-400 text-slate-950';
+}
+
+function getMaterialBorderClass(rating: MaterialRatingKey): string {
+  if (rating === 'avoid') return 'border-red-400';
+  if (rating === 'caution') return 'border-amber-400';
+  if (rating === 'good') return 'border-sky-400';
+  return 'border-emerald-400';
+}
+
+function getMaterialCardPillClass(rating: MaterialRatingKey): string {
+  if (rating === 'avoid') return 'bg-red-500/15 text-red-800 dark:text-red-200 border-red-500/45';
+  if (rating === 'caution') return 'bg-amber-500/15 text-amber-900 dark:text-amber-200 border-amber-500/45';
+  if (rating === 'good') return 'bg-sky-500/15 text-sky-800 dark:text-sky-200 border-sky-500/40';
+  return 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-200 border-emerald-500/40';
+}
+
+const drinkCategories: Array<{ key: 'all' | DrinkCategoryKey; label: string }> = [
+  { key: 'all', label: t.drinkCatAll },
+  { key: 'cold-brew', label: t.drinkCatColdBrew },
+  { key: 'hot-coffee', label: t.drinkCatHotCoffee },
+  { key: 'milk-drink', label: t.drinkCatMilk },
+  { key: 'tea', label: t.drinkCatTea }
+];
+
+const tempCategories: Array<{ key: 'all' | 'coffee' | 'tea'; label: string }> = [
+  { key: 'all', label: t.tempFilterAll },
+  { key: 'coffee', label: t.tempFilterCoffee },
+  { key: 'tea', label: t.tempFilterTea }
+];
+
+const clientPayload = {
+  lang,
+  defaultUnit,
+  defaultDrinkId: defaultDrink.id,
+  defaultMaterialId: defaultMaterial.id,
+  drinks,
+  materials,
+  brewTemps,
+  safetyRules: safetyBanner.rules,
+  ui: {
+    copyBtn: t.copyBtn,
+    copiedBtn: t.copiedBtn,
+    copyHeader: t.copyHeader,
+    copyDrinkLabel: t.copyDrinkLabel,
+    copyVerdictLabel: t.copyVerdictLabel,
+    copyRoomLabel: t.copyRoomLabel,
+    copyFridgeLabel: t.copyFridgeLabel,
+    copySpoilageLabel: t.copySpoilageLabel,
+    copyMaterialLabel: t.copyMaterialLabel,
+    copyLeachLabel: t.copyLeachLabel,
+    copyDishwasherLabel: t.copyDishwasherLabel,
+    copyDescaleLabel: t.copyDescaleLabel,
+    copyTempHeader: t.copyTempHeader,
+    copyRulesHeader: t.copyRulesHeader,
+    rangeLabel: t.rangeLabel
+  }
+};
+---
+
+<div id="coffee-tea-checker-root" class="space-y-12">
+  <!-- Top 3-Rule Critical Brew & Kettle Safety Banner -->
+  <aside
+    class="p-5 sm:p-6 rounded-2xl bg-error-bg/80 dark:bg-red-950/45 border-2 border-error-border shadow-sm space-y-4"
+    role="alert"
+    aria-label={safetyBanner.badge}
+  >
+    <div class="space-y-1.5 max-w-4xl">
+      <span class="inline-block px-3 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-error-border text-white">
+        ⚠️ {safetyBanner.badge}
+      </span>
+      <h2 class="text-base sm:text-xl font-extrabold text-ink leading-snug">
+        {safetyBanner.headline}
+      </h2>
+      <p class="text-xs sm:text-[13.5px] font-medium text-body leading-relaxed">
+        {safetyBanner.subline}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      {safetyBanner.rules.map((rule) => (
+        <div class="p-3.5 rounded-xl bg-canvas border border-hairline shadow-xs space-y-1">
+          <div class="flex items-start gap-2">
+            <span aria-hidden="true" class="text-lg leading-none mt-0.5 shrink-0">{rule.icon}</span>
+            <h3 class="text-xs sm:text-[13px] font-extrabold text-ink leading-snug">{rule.title}</h3>
+          </div>
+          <p class="text-xs text-body leading-relaxed">{rule.body}</p>
+        </div>
+      ))}
+    </div>
+  </aside>
+
+  <!-- Main Interactive 3-Tab Brew & Kettle Safety Dashboard -->
+  <section
+    id="coffee-tea-brew-safety-checker"
+    class="bg-canvas border border-hairline rounded-2xl shadow-sm overflow-hidden"
+    aria-label={t.ariaLabel}
+  >
+    <script type="application/json" id="ctbs-payload" set:html={JSON.stringify(clientPayload)} />
+
+    <!-- Header + Action Buttons + 3-Tab Switcher -->
+    <div class="p-5 sm:p-6 border-b border-hairline bg-surface-soft/50 space-y-5">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div class="space-y-1 max-w-2xl">
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-signature-coral text-white">
+            ☕ {t.toolBadge}
+          </span>
+          <h2 class="text-title-md font-bold text-ink">{t.toolTitle}</h2>
+          <p class="text-xs sm:text-[13px] text-muted leading-relaxed">{t.toolSub}</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 print:hidden">
+          <button
+            type="button"
+            id="ctbs-copy-btn"
+            class="min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors cursor-pointer shadow-sm"
+          >
+            <span id="ctbs-copy-label">📋 {t.copyBtn}</span>
+          </button>
+          <button
+            type="button"
+            id="ctbs-print-btn"
+            class="min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-semibold bg-canvas text-ink border border-hairline hover:border-signature-coral transition-colors cursor-pointer"
+          >
+            🖨️ {t.printBtn}
+          </button>
+        </div>
+      </div>
+
+      <!-- 3-Tab Navigation -->
+      <div
+        role="tablist"
+        aria-label={t.toolTitle}
+        class="grid grid-cols-1 sm:grid-cols-3 gap-2 print:hidden"
+      >
+        <button
+          type="button"
+          role="tab"
+          id="ctbs-tab-drinks"
+          aria-controls="ctbs-panel-drinks"
+          aria-selected="true"
+          data-ctbs-tab="drinks"
+          class="ctbs-tab-btn min-h-[44px] px-3.5 py-2.5 rounded-xl text-xs sm:text-[13px] font-extrabold border transition-all cursor-pointer text-left sm:text-center bg-primary text-on-primary border-primary ring-2 ring-signature-coral/50 shadow-xs"
+        >
+          {t.tabDrinks}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          id="ctbs-tab-materials"
+          aria-controls="ctbs-panel-materials"
+          aria-selected="false"
+          data-ctbs-tab="materials"
+          class="ctbs-tab-btn min-h-[44px] px-3.5 py-2.5 rounded-xl text-xs sm:text-[13px] font-extrabold border transition-all cursor-pointer text-left sm:text-center bg-canvas text-ink border-hairline hover:border-signature-coral"
+        >
+          {t.tabMaterials}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          id="ctbs-tab-temps"
+          aria-controls="ctbs-panel-temps"
+          aria-selected="false"
+          data-ctbs-tab="temps"
+          class="ctbs-tab-btn min-h-[44px] px-3.5 py-2.5 rounded-xl text-xs sm:text-[13px] font-extrabold border transition-all cursor-pointer text-left sm:text-center bg-canvas text-ink border-hairline hover:border-signature-coral"
+        >
+          {t.tabTemps}
+        </button>
+      </div>
+    </div>
+
+    <!-- PANEL 1: Drink & Storage Safety Inspector (10 Drinks) -->
+    <div
+      id="ctbs-panel-drinks"
+      role="tabpanel"
+      aria-labelledby="ctbs-tab-drinks"
+      class="p-5 sm:p-6 space-y-5 print:hidden"
+    >
+      <div class="space-y-1">
+        <h3 class="text-base sm:text-lg font-bold text-ink">{t.drinksHeading}</h3>
+        <p class="text-xs sm:text-[13px] text-muted leading-relaxed">{t.drinksHint}</p>
+      </div>
+
+      <!-- Drink Category Filter Pills -->
+      <div class="flex flex-wrap gap-2" role="group" aria-label={t.drinksHeading}>
+        {drinkCategories.map((cat, idx) => (
+          <button
+            type="button"
+            data-ctbs-dcat={cat.key}
+            aria-pressed={idx === 0 ? 'true' : 'false'}
+            class={`ctbs-dcat-btn px-3 py-1.5 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
+              idx === 0
+                ? 'bg-primary text-on-primary border-primary'
+                : 'bg-surface-soft text-ink border-hairline hover:border-signature-coral'
+            }`}
+          >
+            {cat.label}
+          </button>
+        ))}
+      </div>
+
+      <!-- 10 Clickable Drink Cards Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5" role="group" aria-label={t.drinksHeading}>
+        {drinks.map((d) => {
+          const isDefault = d.id === defaultDrink.id;
+          return (
+            <button
+              type="button"
+              data-ctbs-drink={d.id}
+              data-ctbs-drink-cat={d.category}
+              aria-pressed={isDefault ? 'true' : 'false'}
+              class={`ctbs-drink-card text-left w-full p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between gap-2 ${
+                isDefault
+                  ? 'bg-primary text-on-primary border-primary ring-2 ring-signature-coral/60 shadow-xs'
+                  : 'bg-surface-soft/70 text-ink border-hairline hover:border-signature-coral'
+              }`}
+            >
+              <div class="flex items-start gap-2">
+                <span aria-hidden="true" class="text-lg leading-none mt-0.5 shrink-0">{d.icon}</span>
+                <span class="text-xs font-extrabold leading-snug">{d.shortName}</span>
+              </div>
+              <span
+                data-ctbs-dpill
+                class={`inline-block self-start px-2 py-0.5 rounded-md text-[9.5px] font-extrabold uppercase tracking-wider border ${
+                  isDefault ? 'bg-white/20 text-white border-white/30' : getDrinkCardPillClass(d.status)
+                }`}
+              >
+                {d.verdictBadge}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <!-- High-Contrast Dark Live USDA/CDC/FDA Drink Verdict Dashboard -->
+      <div
+        id="ctbs-drink-dashboard"
+        aria-live="polite"
+        class={`w-full rounded-2xl bg-surface-dark text-on-dark p-5 sm:p-6 space-y-5 shadow-sm border-l-4 ${getDrinkBorderClass(defaultDrink.status)}`}
+      >
+        <div class="space-y-2.5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10.5px] font-extrabold uppercase tracking-wider bg-white/12 text-signature-peach border border-white/15">
+                🧪 {t.drinkLiveBadge}
+              </span>
+              <span
+                id="ctbs-drink-verdict-badge"
+                class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider ${getDrinkDarkPillClass(defaultDrink.status)}`}
+              >
+                {defaultDrink.verdictBadge}
+              </span>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-1.5">
+              <span
+                id="ctbs-drink-authority"
+                class="inline-flex items-center px-2 py-0.5 rounded-md border text-[10.5px] font-extrabold uppercase tracking-wider bg-sky-500/20 text-sky-100 border-sky-400/45"
+              >
+                🛡️ {defaultDrink.authorityTag}
+              </span>
+              <span
+                id="ctbs-drink-ph"
+                class="inline-flex items-center px-2 py-0.5 rounded-md border text-[10.5px] font-extrabold uppercase tracking-wider bg-white/10 text-white/90 border-white/20"
+              >
+                ⚗️ {defaultDrink.phRange}
+              </span>
+            </div>
+          </div>
+
+          <h4 id="ctbs-drink-title" class="text-lg sm:text-2xl font-extrabold tracking-tight text-white leading-snug">
+            {defaultDrink.icon} {defaultDrink.name}
+          </h4>
+          <p id="ctbs-drink-headline" class="text-xs sm:text-[14.5px] font-bold text-signature-mint leading-relaxed">
+            {defaultDrink.verdictHeadline}
+          </p>
+          <p id="ctbs-drink-detail" class="text-xs sm:text-[13.5px] text-white/90 leading-relaxed">
+            {defaultDrink.verdictDetail}
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+          <!-- Room & Fridge Time Limits -->
+          <div class="p-4 rounded-xl bg-white/7 border border-white/14 space-y-2.5">
+            <div>
+              <span class="block text-[10.5px] font-extrabold uppercase tracking-wider text-signature-peach">
+                ⏱️ {t.roomTempLabel}
+              </span>
+              <p id="ctbs-drink-room" class="text-xs sm:text-[13px] font-bold text-white mt-0.5 leading-snug">
+                {defaultDrink.roomTempLimit}
+              </p>
+            </div>
+            <div class="pt-2 border-t border-white/10">
+              <span class="block text-[10.5px] font-extrabold uppercase tracking-wider text-sky-200">
+                ❄️ {t.fridgeLimitLabel}
+              </span>
+              <p id="ctbs-drink-fridge" class="text-xs sm:text-[13px] font-bold text-white mt-0.5 leading-snug">
+                {defaultDrink.fridgeLimit}
+              </p>
+            </div>
+          </div>
+
+          <!-- Spoilage Red Flags -->
+          <div class="p-4 rounded-xl bg-red-500/12 border border-red-400/35 space-y-1.5">
+            <span class="block text-[11px] font-extrabold uppercase tracking-wider text-red-200">
+              🚨 {t.spoilageLabel}
+            </span>
+            <p id="ctbs-drink-spoilage" class="text-xs text-white/95 leading-relaxed">
+              {defaultDrink.spoilageRedFlags}
+            </p>
+          </div>
+
+          <!-- Safe Protocol Tip -->
+          <div class="p-4 rounded-xl bg-emerald-500/12 border border-emerald-400/35 space-y-1.5">
+            <span class="block text-[11px] font-extrabold uppercase tracking-wider text-emerald-200">
+              ✅ {t.safeTipLabel}
+            </span>
+            <p id="ctbs-drink-tip" class="text-xs text-white/95 leading-relaxed">
+              {defaultDrink.safeTip}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL 2: Kettle & Brewer Material Safety Checker (7 Materials) -->
+    <div
+      id="ctbs-panel-materials"
+      role="tabpanel"
+      aria-labelledby="ctbs-tab-materials"
+      class="hidden p-5 sm:p-6 space-y-5 print:hidden"
+    >
+      <div class="space-y-1">
+        <h3 class="text-base sm:text-lg font-bold text-ink">{t.materialsHeading}</h3>
+        <p class="text-xs sm:text-[13px] text-muted leading-relaxed">{t.materialsHint}</p>
+      </div>
+
+      <!-- High-Contrast Dark Live Material Inspector Dashboard -->
+      <div
+        id="ctbs-material-dashboard"
+        aria-live="polite"
+        class={`w-full rounded-2xl bg-surface-dark text-on-dark p-5 sm:p-6 space-y-5 shadow-sm border-l-4 ${getMaterialBorderClass(defaultMaterial.safetyRating)}`}
+      >
+        <div class="space-y-2.5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10.5px] font-extrabold uppercase tracking-wider bg-white/12 text-signature-peach border border-white/15">
+                🔬 {t.materialLiveBadge}
+              </span>
+              <span
+                id="ctbs-mat-badge"
+                class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider ${getMaterialDarkPillClass(defaultMaterial.safetyRating)}`}
+              >
+                {defaultMaterial.safetyBadge}
+              </span>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-1.5">
+              <span
+                id="ctbs-mat-leach-pill"
+                class="inline-flex items-center px-2 py-0.5 rounded-md border text-[10.5px] font-extrabold uppercase tracking-wider bg-sky-500/20 text-sky-100 border-sky-400/45"
+              >
+                ⚗️ {defaultMaterial.leachRiskBadge}
+              </span>
+              <span
+                id="ctbs-mat-dw-pill"
+                class="inline-flex items-center px-2 py-0.5 rounded-md border text-[10.5px] font-extrabold uppercase tracking-wider bg-white/10 text-white/90 border-white/20"
+              >
+                🫧 {defaultMaterial.dishwasherBadge}
+              </span>
+            </div>
+          </div>
+
+          <h4 id="ctbs-mat-title" class="text-lg sm:text-2xl font-extrabold tracking-tight text-white leading-snug">
+            {defaultMaterial.icon} {defaultMaterial.name}
+          </h4>
+          <p id="ctbs-mat-summary" class="text-xs sm:text-[14px] text-white/90 leading-relaxed">
+            {defaultMaterial.summary}
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+          <div class="p-4 rounded-xl bg-white/7 border border-white/14 space-y-1.5">
+            <span class="block text-[11px] font-extrabold uppercase tracking-wider text-signature-peach">
+              🧪 {t.leachHeading}
+            </span>
+            <p id="ctbs-mat-leach-detail" class="text-xs text-white/95 leading-relaxed">
+              {defaultMaterial.leachDetail}
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-red-500/12 border border-red-400/35 space-y-1.5">
+            <span class="block text-[11px] font-extrabold uppercase tracking-wider text-red-200">
+              🫧 {t.dishwasherHeading}
+            </span>
+            <p id="ctbs-mat-dw-rule" class="text-xs text-white/95 leading-relaxed">
+              {defaultMaterial.dishwasherRule}
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-emerald-500/12 border border-emerald-400/35 space-y-2">
+            <span class="block text-[11px] font-extrabold uppercase tracking-wider text-emerald-200">
+              ✨ {t.descalingHeading}
+            </span>
+            <p id="ctbs-mat-descale" class="text-xs text-white/95 leading-relaxed">
+              {defaultMaterial.descalingTip}
+            </p>
+            <p class="text-[11.5px] text-amber-200/95 leading-relaxed pt-1.5 border-t border-white/12">
+              <strong class="text-amber-200">{t.replaceLabel}</strong>{' '}
+              <span id="ctbs-mat-replace">{defaultMaterial.replacementTrigger}</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7 Interactive Kettle & Brewer Material Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" role="group" aria-label={t.materialsHeading}>
+        {materials.map((m, idx) => {
+          const isSelected = idx === 0;
+          return (
+            <button
+              type="button"
+              data-ctbs-material={m.id}
+              aria-pressed={isSelected ? 'true' : 'false'}
+              class={`ctbs-mat-card text-left w-full p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-3 ${
+                isSelected
+                  ? 'bg-canvas border-signature-coral ring-2 ring-signature-coral shadow-sm'
+                  : 'bg-surface-soft/65 border-hairline hover:border-signature-coral'
+              }`}
+            >
+              <div class="space-y-2">
+                <div class="flex items-start gap-2">
+                  <span aria-hidden="true" class="text-xl leading-none mt-0.5 shrink-0">{m.icon}</span>
+                  <h4 class="text-sm font-extrabold text-ink leading-snug">{m.shortName}</h4>
+                </div>
+                <span
+                  class={`inline-block px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider border ${getMaterialCardPillClass(m.safetyRating)}`}
+                >
+                  {m.safetyBadge}
+                </span>
+                <p class="text-xs text-body leading-relaxed">{m.summary}</p>
+              </div>
+
+              <div class="pt-2 border-t border-hairline/70 space-y-1 text-[11px]">
+                <p class="font-semibold text-ink">{m.leachRiskBadge}</p>
+                <p class="text-muted">{m.dishwasherBadge}</p>
+                <span class="block text-[10.5px] font-bold text-signature-coral">
+                  {t.selectMaterialHint}
+                </span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+
+    <!-- PANEL 3: Interactive Water Temp & Steep Chart (8 Brew Presets + °F / °C Toggle) -->
+    <div
+      id="ctbs-panel-temps"
+      role="tabpanel"
+      aria-labelledby="ctbs-tab-temps"
+      class="hidden p-5 sm:p-6 space-y-5 print:hidden"
+    >
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div class="space-y-1 max-w-2xl">
+          <h3 class="text-base sm:text-lg font-bold text-ink">{t.tempsHeading}</h3>
+          <p class="text-xs sm:text-[13px] text-muted leading-relaxed">{t.tempsHint}</p>
+        </div>
+
+        <!-- Live °F / °C Unit Toggle -->
+        <div class="flex items-center gap-2 shrink-0" role="group" aria-label={t.unitLabel}>
+          <span class="text-xs font-bold text-muted">{t.unitLabel}</span>
+          <button
+            type="button"
+            data-ctbs-unit="F"
+            aria-pressed={defaultUnit === 'F' ? 'true' : 'false'}
+            class={`ctbs-unit-btn px-3 py-1.5 rounded-xl text-xs font-extrabold border transition-colors cursor-pointer ${
+              defaultUnit === 'F'
+                ? 'bg-primary text-on-primary border-primary'
+                : 'bg-surface-soft text-ink border-hairline hover:border-signature-coral'
+            }`}
+          >
+            °F (Fahrenheit)
+          </button>
+          <button
+            type="button"
+            data-ctbs-unit="C"
+            aria-pressed={defaultUnit === 'C' ? 'true' : 'false'}
+            class={`ctbs-unit-btn px-3 py-1.5 rounded-xl text-xs font-extrabold border transition-colors cursor-pointer ${
+              defaultUnit === 'C'
+                ? 'bg-primary text-on-primary border-primary'
+                : 'bg-surface-soft text-ink border-hairline hover:border-signature-coral'
+            }`}
+          >
+            °C (Celsius)
+          </button>
+        </div>
+      </div>
+
+      <!-- Coffee vs. Tea Filter Pills -->
+      <div class="flex flex-wrap gap-2" role="group" aria-label={t.tempsHeading}>
+        {tempCategories.map((tc, idx) => (
+          <button
+            type="button"
+            data-ctbs-tcat={tc.key}
+            aria-pressed={idx === 0 ? 'true' : 'false'}
+            class={`ctbs-tcat-btn px-3 py-1.5 rounded-full text-xs font-bold border transition-colors cursor-pointer ${
+              idx === 0
+                ? 'bg-signature-coral text-white border-signature-coral'
+                : 'bg-surface-soft text-ink border-hairline hover:border-signature-coral'
+            }`}
+          >
+            {tc.label}
+          </button>
+        ))}
+      </div>
+
+      <!-- 8 Brew Temperature Cards Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        {brewTemps.map((b) => {
+          const isCold = b.tempF <= 45;
+          const displayTemp = defaultUnit === 'F' ? String(b.tempF) + '°F' : String(b.tempC) + '°C';
+          const displayRange = defaultUnit === 'F' ? b.rangeF : b.rangeC;
+          return (
+            <article
+              data-ctbs-temp-card={b.id}
+              data-ctbs-temp-cat={b.category}
+              class="ctbs-temp-card p-4 rounded-2xl bg-surface-soft/75 border border-hairline flex flex-col justify-between gap-3 shadow-xs"
+            >
+              <div class="space-y-2.5">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="flex items-start gap-2">
+                    <span aria-hidden="true" class="text-xl leading-none mt-0.5 shrink-0">{b.icon}</span>
+                    <h4 class="text-sm font-extrabold text-ink leading-snug">{b.name}</h4>
+                  </div>
+                </div>
+
+                <div
+                  class={`p-3 rounded-xl border flex items-baseline justify-between gap-2 ${
+                    isCold
+                      ? 'bg-sky-500/12 border-sky-500/35'
+                      : 'bg-surface-dark text-on-dark border-hairline/40'
+                  }`}
+                >
+                  <span
+                    data-ctbs-temp-val={b.id}
+                    class={`text-2xl font-extrabold tracking-tight ${
+                      isCold ? 'text-sky-800 dark:text-sky-200' : 'text-signature-peach'
+                    }`}
+                  >
+                    {displayTemp}
+                  </span>
+                  <span
+                    data-ctbs-temp-range={b.id}
+                    class={`text-[11px] font-bold ${
+                      isCold ? 'text-sky-900 dark:text-sky-200' : 'text-white/85'
+                    }`}
+                  >
+                    {t.rangeLabel}: {displayRange}
+                  </span>
+                </div>
+
+                <div class="space-y-1 text-xs text-body">
+                  <p>
+                    <strong class="text-ink">⏱️ {t.steepTimeLabel}:</strong> {b.steepTime}
+                  </p>
+                  <p>
+                    <strong class="text-ink">⚖️ {t.ratioLabel}:</strong> {b.ratio}
+                  </p>
+                </div>
+
+                <p class="text-xs text-body leading-relaxed pt-2 border-t border-hairline/70">
+                  {b.safetyAndFlavorNote}
+                </p>
+              </div>
+
+              <p class="text-[11px] font-semibold text-muted pt-2 border-t border-hairline/60">
+                <strong class="text-ink">{t.whyTempLabel}</strong> {b.whyTempMatters}
+              </p>
+            </article>
+          );
+        })}
+      </div>
+    </div>
+
+    <!-- Print-Only Complete Coffee, Tea & Kettle Safety Reference Chart -->
+    <div class="hidden print:block p-5 border-t border-hairline space-y-5">
+      <div class="text-center border-b border-hairline pb-2">
+        <h3 class="text-sm font-extrabold uppercase tracking-wider text-ink">{t.printTitle}</h3>
+        <p class="text-[11px] text-muted">{t.printSub}</p>
+      </div>
+
+      <div class="space-y-2">
+        <h4 class="text-xs font-extrabold uppercase tracking-wider text-ink">{t.printDrinksHeading}</h4>
+        <table class="w-full text-left border-collapse text-[10px]">
+          <thead>
+            <tr class="border-b border-hairline">
+              <th class="py-1.5 pr-2 font-extrabold text-ink">{t.printColDrink}</th>
+              <th class="py-1.5 px-2 font-extrabold text-ink">{t.printColVerdict}</th>
+              <th class="py-1.5 px-2 font-extrabold text-ink">{t.printColRoom}</th>
+              <th class="py-1.5 pl-2 font-extrabold text-ink">{t.printColFridge}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {drinks.map((d) => (
+              <tr class="border-b border-hairline/60 break-inside-avoid">
+                <td class="py-1.5 pr-2 font-bold text-ink">{d.shortName}</td>
+                <td class="py-1.5 px-2 font-bold text-ink">{d.verdictBadge}</td>
+                <td class="py-1.5 px-2 text-body">{d.roomTempLimit}</td>
+                <td class="py-1.5 pl-2 text-body">{d.fridgeLimit}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="space-y-2">
+        <h4 class="text-xs font-extrabold uppercase tracking-wider text-ink">{t.printMaterialsHeading}</h4>
+        <table class="w-full text-left border-collapse text-[10px]">
+          <thead>
+            <tr class="border-b border-hairline">
+              <th class="py-1.5 pr-2 font-extrabold text-ink">{t.printColMaterial}</th>
+              <th class="py-1.5 px-2 font-extrabold text-ink">{t.printColLeach}</th>
+              <th class="py-1.5 px-2 font-extrabold text-ink">{t.printColDishwasher}</th>
+              <th class="py-1.5 pl-2 font-extrabold text-ink">{t.printColDescale}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {materials.map((m) => (
+              <tr class="border-b border-hairline/60 break-inside-avoid">
+                <td class="py-1.5 pr-2 font-bold text-ink">{m.shortName}</td>
+                <td class="py-1.5 px-2 text-body">{m.leachRiskBadge}</td>
+                <td class="py-1.5 px-2 text-body">{m.dishwasherBadge}</td>
+                <td class="py-1.5 pl-2 text-body">{m.descalingTip}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="space-y-2">
+        <h4 class="text-xs font-extrabold uppercase tracking-wider text-ink">{t.printTempsHeading}</h4>
+        <table class="w-full text-left border-collapse text-[10px]">
+          <thead>
+            <tr class="border-b border-hairline">
+              <th class="py-1.5 pr-2 font-extrabold text-ink">{t.printColBrew}</th>
+              <th class="py-1.5 px-2 font-extrabold text-ink">{t.printColTemp}</th>
+              <th class="py-1.5 px-2 font-extrabold text-ink">{t.printColSteep}</th>
+              <th class="py-1.5 pl-2 font-extrabold text-ink">{t.printColNote}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {brewTemps.map((b) => (
+              <tr class="border-b border-hairline/60 break-inside-avoid">
+                <td class="py-1.5 pr-2 font-bold text-ink">{b.name}</td>
+                <td class="py-1.5 px-2 font-bold text-ink">{b.tempF}°F / {b.tempC}°C</td>
+                <td class="py-1.5 px-2 text-body">{b.steepTime}</td>
+                <td class="py-1.5 pl-2 text-body">{b.safetyAndFlavorNote}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Related Companion Tools (Localized via useTranslatedPath) -->
+  <section class="space-y-4 print:hidden">
+    <h2 class="text-title-md font-semibold text-ink">{t.relatedHeading}</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <a
+        href={descalingUrl}
+        class="p-5 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedDescaleTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedDescaleTitle}
+        </h3>
+        <p class="text-[13px] text-body leading-relaxed">{t.relatedDescaleDesc}</p>
+      </a>
+
+      <a
+        href={plasticUrl}
+        class="p-5 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedPlasticTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedPlasticTitle}
+        </h3>
+        <p class="text-[13px] text-body leading-relaxed">{t.relatedPlasticDesc}</p>
+      </a>
+
+      <a
+        href={moldUrl}
+        class="p-5 rounded-2xl bg-surface-soft border border-hairline hover:border-signature-coral transition-all group block"
+      >
+        <span class="text-[11px] font-bold uppercase tracking-wider text-signature-coral block mb-1.5">
+          {t.relatedMoldTag}
+        </span>
+        <h3 class="text-title-sm font-semibold text-ink group-hover:text-signature-coral transition-colors mb-1.5">
+          {t.relatedMoldTitle}
+        </h3>
+        <p class="text-[13px] text-body leading-relaxed">{t.relatedMoldDesc}</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- Methodology & Hub Strip -->
+  <section class="p-6 rounded-2xl bg-surface-soft border border-hairline print:hidden">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-title-sm font-semibold text-ink mb-1">{t.methodologyStripTitle}</h2>
+        <p class="text-[13px] text-muted">
+          {t.methodologyStripPrefix}{' '}
+          <a href={methodologyUrl} class="text-link underline hover:text-link-active">{t.methodologyLabel}</a>.
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a
+          href={descalingUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
+        >
+          {t.descaleQuickLabel}
+        </a>
+        <a
+          href={methodologyUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-canvas border border-hairline text-ink hover:border-signature-coral transition-colors"
+        >
+          {t.methodologyLabel}
+        </a>
+        <a
+          href={allToolsUrl}
+          class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-primary text-on-primary hover:bg-primary-active transition-colors"
+        >
+          {t.allToolsLabel}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Visible 5-Item FAQ Accordion (Matches FAQPage JSON-LD 1:1) -->
+  <section class="print:hidden">
+    <h2 class="text-title-lg font-medium text-ink tracking-tight mb-6">
+      {t.faqTitle}
+    </h2>
+    <div class="space-y-4">
+      {localizedFaqs.map((faq) => (
+        <details class="group p-5 bg-surface-soft border border-hairline rounded-xl" open>
+          <summary class="text-title-sm font-semibold text-ink cursor-pointer list-none flex items-center justify-between gap-3">
+            <span>{faq.question}</span>
+            <span class="text-muted text-sm transition-transform group-open:rotate-180 shrink-0" aria-hidden="true">&#9662;</span>
+          </summary>
+          <p class="text-[14px] text-body leading-relaxed mt-3 pt-3 border-t border-hairline/70">
+            {faq.answer}
+          </p>
+        </details>
+      ))}
+    </div>
+  </section>
+</div>
+
+<script is:inline>
+  (function () {
+    var payloadEl = document.getElementById('ctbs-payload');
+    if (!payloadEl) return;
+
+    var payload;
+    try {
+      payload = JSON.parse(payloadEl.textContent || '{}');
+    } catch (_) {
+      return;
+    }
+
+    var drinks = Array.isArray(payload.drinks) ? payload.drinks : [];
+    var materials = Array.isArray(payload.materials) ? payload.materials : [];
+    var brewTemps = Array.isArray(payload.brewTemps) ? payload.brewTemps : [];
+    var safetyRules = Array.isArray(payload.safetyRules) ? payload.safetyRules : [];
+    var ui = payload.ui || {};
+
+    var drinkMap = {};
+    drinks.forEach(function (d) {
+      if (d && d.id) drinkMap[d.id] = d;
+    });
+
+    var materialMap = {};
+    materials.forEach(function (m) {
+      if (m && m.id) materialMap[m.id] = m;
+    });
+
+    var tempMap = {};
+    brewTemps.forEach(function (b) {
+      if (b && b.id) tempMap[b.id] = b;
+    });
+
+    var state = {
+      activeTab: 'drinks',
+      drinkId: payload.defaultDrinkId || (drinks[0] ? drinks[0].id : ''),
+      drinkCat: 'all',
+      materialId: payload.defaultMaterialId || (materials[0] ? materials[0].id : ''),
+      tempUnit: payload.defaultUnit === 'C' ? 'C' : 'F',
+      tempCat: 'all'
+    };
+
+    var tabBtns = Array.from(document.querySelectorAll('.ctbs-tab-btn'));
+    var panelDrinks = document.getElementById('ctbs-panel-drinks');
+    var panelMaterials = document.getElementById('ctbs-panel-materials');
+    var panelTemps = document.getElementById('ctbs-panel-temps');
+
+    var drinkCatBtns = Array.from(document.querySelectorAll('.ctbs-dcat-btn'));
+    var drinkCards = Array.from(document.querySelectorAll('.ctbs-drink-card'));
+    var elDrinkDash = document.getElementById('ctbs-drink-dashboard');
+    var elDrinkBadge = document.getElementById('ctbs-drink-verdict-badge');
+    var elDrinkAuth = document.getElementById('ctbs-drink-authority');
+    var elDrinkPh = document.getElementById('ctbs-drink-ph');
+    var elDrinkTitle = document.getElementById('ctbs-drink-title');
+    var elDrinkHeadline = document.getElementById('ctbs-drink-headline');
+    var elDrinkDetail = document.getElementById('ctbs-drink-detail');
+    var elDrinkRoom = document.getElementById('ctbs-drink-room');
+    var elDrinkFridge = document.getElementById('ctbs-drink-fridge');
+    var elDrinkSpoilage = document.getElementById('ctbs-drink-spoilage');
+    var elDrinkTip = document.getElementById('ctbs-drink-tip');
+
+    var matCards = Array.from(document.querySelectorAll('.ctbs-mat-card'));
+    var elMatDash = document.getElementById('ctbs-material-dashboard');
+    var elMatBadge = document.getElementById('ctbs-mat-badge');
+    var elMatLeachPill = document.getElementById('ctbs-mat-leach-pill');
+    var elMatDwPill = document.getElementById('ctbs-mat-dw-pill');
+    var elMatTitle = document.getElementById('ctbs-mat-title');
+    var elMatSummary = document.getElementById('ctbs-mat-summary');
+    var elMatLeachDetail = document.getElementById('ctbs-mat-leach-detail');
+    var elMatDwRule = document.getElementById('ctbs-mat-dw-rule');
+    var elMatDescale = document.getElementById('ctbs-mat-descale');
+    var elMatReplace = document.getElementById('ctbs-mat-replace');
+
+    var unitBtns = Array.from(document.querySelectorAll('.ctbs-unit-btn'));
+    var tempCatBtns = Array.from(document.querySelectorAll('.ctbs-tcat-btn'));
+    var tempCards = Array.from(document.querySelectorAll('.ctbs-temp-card'));
+
+    var copyBtn = document.getElementById('ctbs-copy-btn');
+    var copyLabel = document.getElementById('ctbs-copy-label');
+    var printBtn = document.getElementById('ctbs-print-btn');
+
+    function getDrinkDarkPillClass(status) {
+      var base = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider ';
+      if (status === 'unsafe') return base + 'bg-red-500 text-white';
+      if (status === 'caution') return base + 'bg-amber-400 text-slate-950';
+      return base + 'bg-emerald-400 text-slate-950';
+    }
+
+    function getDrinkCardPillClass(status) {
+      var base = 'inline-block self-start px-2 py-0.5 rounded-md text-[9.5px] font-extrabold uppercase tracking-wider border ';
+      if (status === 'unsafe') return base + 'bg-red-500/15 text-red-800 dark:text-red-200 border-red-500/45';
+      if (status === 'caution') return base + 'bg-amber-500/15 text-amber-900 dark:text-amber-200 border-amber-500/45';
+      return base + 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-200 border-emerald-500/40';
+    }
+
+    function getMaterialDarkPillClass(rating) {
+      var base = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider ';
+      if (rating === 'avoid') return base + 'bg-red-500 text-white';
+      if (rating === 'caution') return base + 'bg-amber-400 text-slate-950';
+      if (rating === 'good') return base + 'bg-sky-400 text-slate-950';
+      return base + 'bg-emerald-400 text-slate-950';
+    }
+
+    function renderTabs() {
+      tabBtns.forEach(function (btn) {
+        var tab = btn.getAttribute('data-ctbs-tab');
+        var active = tab === state.activeTab;
+        btn.setAttribute('aria-selected', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('ring-2', active);
+        btn.classList.toggle('ring-signature-coral/50', active);
+        btn.classList.toggle('shadow-xs', active);
+        btn.classList.toggle('bg-canvas', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      if (panelDrinks) panelDrinks.classList.toggle('hidden', state.activeTab !== 'drinks');
+      if (panelMaterials) panelMaterials.classList.toggle('hidden', state.activeTab !== 'materials');
+      if (panelTemps) panelTemps.classList.toggle('hidden', state.activeTab !== 'temps');
+    }
+
+    function renderDrinkInspector() {
+      var drink = drinkMap[state.drinkId] || drinks[0];
+      if (!drink) return;
+
+      drinkCatBtns.forEach(function (btn) {
+        var active = btn.getAttribute('data-ctbs-dcat') === state.drinkCat;
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('bg-surface-soft', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      drinkCards.forEach(function (card) {
+        var id = card.getAttribute('data-ctbs-drink') || '';
+        var cat = card.getAttribute('data-ctbs-drink-cat') || '';
+        var show = state.drinkCat === 'all' || cat === state.drinkCat;
+        card.classList.toggle('hidden', !show);
+
+        var active = id === drink.id;
+        card.setAttribute('aria-pressed', active ? 'true' : 'false');
+        card.classList.toggle('bg-primary', active);
+        card.classList.toggle('text-on-primary', active);
+        card.classList.toggle('border-primary', active);
+        card.classList.toggle('ring-2', active);
+        card.classList.toggle('ring-signature-coral/60', active);
+        card.classList.toggle('shadow-xs', active);
+        card.classList.toggle('bg-surface-soft/70', !active);
+        card.classList.toggle('text-ink', !active);
+        card.classList.toggle('border-hairline', !active);
+
+        var pill = card.querySelector('[data-ctbs-dpill]');
+        var dItem = drinkMap[id];
+        if (pill && dItem) {
+          if (active) {
+            pill.className = 'inline-block self-start px-2 py-0.5 rounded-md text-[9.5px] font-extrabold uppercase tracking-wider border bg-white/20 text-white border-white/30';
+          } else {
+            pill.className = getDrinkCardPillClass(dItem.status);
+          }
+        }
+      });
+
+      if (elDrinkDash) {
+        elDrinkDash.classList.toggle('border-red-400', drink.status === 'unsafe');
+        elDrinkDash.classList.toggle('border-amber-400', drink.status === 'caution');
+        elDrinkDash.classList.toggle('border-emerald-400', drink.status === 'safe');
+      }
+
+      if (elDrinkBadge) {
+        elDrinkBadge.textContent = drink.verdictBadge || '';
+        elDrinkBadge.className = getDrinkDarkPillClass(drink.status);
+      }
+      if (elDrinkAuth) elDrinkAuth.textContent = '🛡️ ' + (drink.authorityTag || '');
+      if (elDrinkPh) elDrinkPh.textContent = '⚗️ ' + (drink.phRange || '');
+      if (elDrinkTitle) elDrinkTitle.textContent = (drink.icon ? drink.icon + ' ' : '') + (drink.name || '');
+      if (elDrinkHeadline) elDrinkHeadline.textContent = drink.verdictHeadline || '';
+      if (elDrinkDetail) elDrinkDetail.textContent = drink.verdictDetail || '';
+      if (elDrinkRoom) elDrinkRoom.textContent = drink.roomTempLimit || '';
+      if (elDrinkFridge) elDrinkFridge.textContent = drink.fridgeLimit || '';
+      if (elDrinkSpoilage) elDrinkSpoilage.textContent = drink.spoilageRedFlags || '';
+      if (elDrinkTip) elDrinkTip.textContent = drink.safeTip || '';
+    }
+
+    function renderMaterialInspector() {
+      var mat = materialMap[state.materialId] || materials[0];
+      if (!mat) return;
+
+      matCards.forEach(function (card) {
+        var active = card.getAttribute('data-ctbs-material') === mat.id;
+        card.setAttribute('aria-pressed', active ? 'true' : 'false');
+        card.classList.toggle('bg-canvas', active);
+        card.classList.toggle('border-signature-coral', active);
+        card.classList.toggle('ring-2', active);
+        card.classList.toggle('ring-signature-coral', active);
+        card.classList.toggle('shadow-sm', active);
+        card.classList.toggle('bg-surface-soft/65', !active);
+        card.classList.toggle('border-hairline', !active);
+      });
+
+      if (elMatDash) {
+        elMatDash.classList.toggle('border-red-400', mat.safetyRating === 'avoid');
+        elMatDash.classList.toggle('border-amber-400', mat.safetyRating === 'caution');
+        elMatDash.classList.toggle('border-sky-400', mat.safetyRating === 'good');
+        elMatDash.classList.toggle('border-emerald-400', mat.safetyRating === 'best');
+      }
+
+      if (elMatBadge) {
+        elMatBadge.textContent = mat.safetyBadge || '';
+        elMatBadge.className = getMaterialDarkPillClass(mat.safetyRating);
+      }
+      if (elMatLeachPill) elMatLeachPill.textContent = '⚗️ ' + (mat.leachRiskBadge || '');
+      if (elMatDwPill) elMatDwPill.textContent = '🫧 ' + (mat.dishwasherBadge || '');
+      if (elMatTitle) elMatTitle.textContent = (mat.icon ? mat.icon + ' ' : '') + (mat.name || '');
+      if (elMatSummary) elMatSummary.textContent = mat.summary || '';
+      if (elMatLeachDetail) elMatLeachDetail.textContent = mat.leachDetail || '';
+      if (elMatDwRule) elMatDwRule.textContent = mat.dishwasherRule || '';
+      if (elMatDescale) elMatDescale.textContent = mat.descalingTip || '';
+      if (elMatReplace) elMatReplace.textContent = mat.replacementTrigger || '';
+    }
+
+    function renderTemps() {
+      unitBtns.forEach(function (btn) {
+        var active = btn.getAttribute('data-ctbs-unit') === state.tempUnit;
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        btn.classList.toggle('bg-primary', active);
+        btn.classList.toggle('text-on-primary', active);
+        btn.classList.toggle('border-primary', active);
+        btn.classList.toggle('bg-surface-soft', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      tempCatBtns.forEach(function (btn) {
+        var active = btn.getAttribute('data-ctbs-tcat') === state.tempCat;
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        btn.classList.toggle('bg-signature-coral', active);
+        btn.classList.toggle('text-white', active);
+        btn.classList.toggle('border-signature-coral', active);
+        btn.classList.toggle('bg-surface-soft', !active);
+        btn.classList.toggle('text-ink', !active);
+        btn.classList.toggle('border-hairline', !active);
+      });
+
+      tempCards.forEach(function (card) {
+        var id = card.getAttribute('data-ctbs-temp-card') || '';
+        var cat = card.getAttribute('data-ctbs-temp-cat') || '';
+        var show = state.tempCat === 'all' || cat === state.tempCat;
+        card.classList.toggle('hidden', !show);
+
+        var item = tempMap[id];
+        if (!item) return;
+
+        var valEl = card.querySelector('[data-ctbs-temp-val]');
+        var rangeEl = card.querySelector('[data-ctbs-temp-range]');
+        if (valEl) {
+          valEl.textContent = state.tempUnit === 'F' ? String(item.tempF) + '°F' : String(item.tempC) + '°C';
+        }
+        if (rangeEl) {
+          var rangeStr = state.tempUnit === 'F' ? item.rangeF : item.rangeC;
+          rangeEl.textContent = (ui.rangeLabel || 'Safe Range') + ': ' + rangeStr;
+        }
+      });
+    }
+
+    function buildCopyCard() {
+      var drink = drinkMap[state.drinkId] || drinks[0];
+      var mat = materialMap[state.materialId] || materials[0];
+      var lines = [];
+
+      lines.push(ui.copyHeader || 'IsItKitchenSafe — Coffee, Cold Brew, Tea & Kettle Safety Card');
+      lines.push('');
+
+      if (drink) {
+        lines.push((ui.copyDrinkLabel || 'SELECTED DRINK:') + ' ' + drink.name);
+        lines.push((ui.copyVerdictLabel || 'SAFETY VERDICT:') + ' [' + drink.verdictBadge + '] ' + drink.verdictHeadline);
+        lines.push((ui.copyRoomLabel || 'ROOM TEMP LIMIT:') + ' ' + drink.roomTempLimit);
+        lines.push((ui.copyFridgeLabel || 'FRIDGE LIMIT:') + ' ' + drink.fridgeLimit);
+        lines.push((ui.copySpoilageLabel || 'SPOILAGE RED FLAGS:') + ' ' + drink.spoilageRedFlags);
+        lines.push('');
+      }
+
+      if (mat) {
+        lines.push((ui.copyMaterialLabel || 'SELECTED KETTLE/BREWER MATERIAL:') + ' ' + mat.name + ' [' + mat.safetyBadge + ']');
+        lines.push((ui.copyLeachLabel || 'LEACHING / MICROPLASTIC RISK:') + ' ' + mat.leachRiskBadge + ' — ' + mat.leachDetail);
+        lines.push((ui.copyDishwasherLabel || 'DISHWASHER VERDICT:') + ' ' + mat.dishwasherBadge + ' — ' + mat.dishwasherRule);
+        lines.push((ui.copyDescaleLabel || 'DESCALING TIP:') + ' ' + mat.descalingTip);
+        lines.push('');
+      }
+
+      if (brewTemps.length > 0) {
+        lines.push(ui.copyTempHeader || 'BREW TEMPERATURE QUICK CHART:');
+        brewTemps.forEach(function (b) {
+          var tempStr = state.tempUnit === 'F' ? String(b.tempF) + '°F' : String(b.tempC) + '°C';
+          lines.push('  - ' + b.name + ': ' + tempStr + ' (' + b.steepTime + ')');
+        });
+      }
+
+      if (safetyRules.length > 0) {
+        lines.push('');
+        lines.push(ui.copyRulesHeader || '3 CRITICAL BREW & KETTLE SAFETY RULES:');
+        safetyRules.forEach(function (r, idx) {
+          lines.push('  ' + String(idx + 1) + '. ' + r.title + ' — ' + r.body);
+        });
+      }
+
+      return lines.join('\n');
+    }
+
+    tabBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var tab = btn.getAttribute('data-ctbs-tab');
+        if (tab) {
+          state.activeTab = tab;
+          renderTabs();
+        }
+      });
+    });
+
+    drinkCatBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var cat = btn.getAttribute('data-ctbs-dcat');
+        if (cat) {
+          state.drinkCat = cat;
+          renderDrinkInspector();
+        }
+      });
+    });
+
+    drinkCards.forEach(function (card) {
+      card.addEventListener('click', function () {
+        var id = card.getAttribute('data-ctbs-drink');
+        if (id && drinkMap[id]) {
+          state.drinkId = id;
+          renderDrinkInspector();
+        }
+      });
+    });
+
+    matCards.forEach(function (card) {
+      card.addEventListener('click', function () {
+        var id = card.getAttribute('data-ctbs-material');
+        if (id && materialMap[id]) {
+          state.materialId = id;
+          renderMaterialInspector();
+          if (elMatDash && elMatDash.getBoundingClientRect) {
+            var rect = elMatDash.getBoundingClientRect();
+            if (rect.top < 16 || rect.top > window.innerHeight) {
+              elMatDash.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }
+        }
+      });
+    });
+
+    unitBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var u = btn.getAttribute('data-ctbs-unit');
+        if (u === 'F' || u === 'C') {
+          state.tempUnit = u;
+          renderTemps();
+        }
+      });
+    });
+
+    tempCatBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var tc = btn.getAttribute('data-ctbs-tcat');
+        if (tc) {
+          state.tempCat = tc;
+          renderTemps();
+        }
+      });
+    });
+
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        var text = buildCopyCard();
+        var showCopied = function () {
+          if (copyLabel) copyLabel.textContent = ui.copiedBtn || 'Safety Card Copied ✓';
+          window.setTimeout(function () {
+            if (copyLabel) copyLabel.textContent = '📋 ' + (ui.copyBtn || 'Copy Coffee & Tea Safety Card');
+          }, 2200);
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(showCopied).catch(showCopied);
+        } else {
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'absolute';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          try {
+            document.execCommand('copy');
+          } catch (_) {
+            // ignore
+          }
+          document.body.removeChild(ta);
+          showCopied();
+        }
+      });
+    }
+
+    if (printBtn) {
+      printBtn.addEventListener('click', function () {
+        window.print();
+      });
+    }
+
+    renderTabs();
+    renderDrinkInspector();
+    renderMaterialInspector();
+    renderTemps();
+  })();
+</script>

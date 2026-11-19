@@ -232,6 +232,7 @@ const SPECIAL_PAGES = [
   'tools/instant-pot-pressure-release-checker',
   'tools/slow-cooker-food-safety-checker',
   'tools/knife-care-cutting-board-matcher',
+  'tools/coffee-tea-brew-safety-checker',
   'methodology',
   'saved'
 ];

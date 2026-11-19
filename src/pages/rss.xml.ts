@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/knife-care-cutting-board-matcher/',
+    title: 'Kitchen Knife Care, Honing vs. Sharpening & Safe Cutting Board Matcher',
+    description:
+      'Interactive Rockwell HRC knife care & USDA FSIS cutting board matcher: test 5 knife steel profiles (15° Japanese vs. 20° Western, serrated, ceramic) against 8 board materials (end-grain wood, Hinoki, Hasegawa rubber, HDPE plastic, bamboo, glass/titanium) for honing rods, whetstones, dishwasher safety & raw-meat sanitation.',
+    date: '2026-11-18',
+  },
+  {
     path: '/tools/slow-cooker-food-safety-checker/',
     title: 'Slow Cooker & Crock-Pot Food Safety Checker: Frozen Meat, Kidney Beans & Power Outage Guide',
     description:
