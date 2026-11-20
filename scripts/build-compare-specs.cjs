@@ -117,7 +117,92 @@ cmpItems.forEach(item => {
         guideline: "Air fryers (4–8 qt capacity, ~1,500W) preheat in 2 minutes and cook small batches efficiently; full-size ovens (4–6 cu. ft., ~3,000W) excel at large roasts, multi-rack baking, and sheet cakes."
       }
     });
-  } else {
+    } else if (s === 'platinum-cured-vs-peroxide-cured-silicone') {
+    addSpec(s, {
+      materialThermal: {
+        property: "Addition Hydrosilylation vs. Free-Radical Cross-Linking",
+        threshold: "Platinum Stable to 450°F (232°C); Peroxide Softens >375°F (190°C)",
+        details: "Platinum addition cure leaves zero organic acid residues and ultra-low cyclic siloxanes (<0.5%); peroxide curing decomposes into 2,4-dichlorobenzoic acid that volatilizes bitter odors under high oven heat."
+      },
+      safetyStandard: {
+        organization: "German BfR / US FDA",
+        standard: "BfR XV (Silicones) & 21 CFR § 177.2600",
+        citation: "European BfR XV imposes strict volatile organic extractable limits, recommending platinum curing for culinary bakeware."
+      },
+      applianceSpecs: {
+        parameter: "High-Heat Oven Baking & Infant Contact",
+        guideline: "Use platinum-cured silicone for high-heat baking mats, candy molds, and bottle nipples; use peroxide silicone strictly for ambient cold covers."
+      }
+    });
+  } else if (s === 'hard-anodized-aluminum-vs-stainless-steel') {
+    addSpec(s, {
+      materialThermal: {
+        property: "Electrochemical Anodic Oxide vs. Clad Austenitic Stainless",
+        threshold: "Al₂O₃ Layer Vickers HV 450; 3-Ply Stainless Vickers HV 180",
+        details: "Hard anodization creates a diamond-hard sapphire ceramic barrier (Al₂O₃) that conducts heat 14x faster than steel; clad stainless steel sandwiches aluminum for lifetime durability and machine dishwashing."
+      },
+      safetyStandard: {
+        organization: "FDA / NSF International",
+        standard: "NSF/ANSI Standard 51 & MIL-A-8625 Type III",
+        citation: "Anodized aluminum seals raw metal to prevent acid food migration; passivated chromium oxide provides non-reactive steel cooking."
+      },
+      applianceSpecs: {
+        parameter: "Dishwasher vs. Hand-Wash Maintenance",
+        guideline: "Hand-wash hard-anodized cookware to preserve the anodic seal; stainless steel is 100% commercial dishwasher and induction cooktop safe."
+      }
+    });
+  } else if (s === 'lead-free-crystal-vs-lead-crystal-glassware') {
+    addSpec(s, {
+      materialThermal: {
+        property: "Titanium Dioxide / Barium Silicate vs. Lead Monoxide Flux",
+        threshold: "Lead-Free 0.00% Lead; Lead Crystal 24%–32% PbO",
+        details: "Titanium dioxide matches lead's refractive index (1.52–1.55) and bell-like chime without leaching toxic heavy metals into acidic wines or long-term liquor decanters."
+      },
+      safetyStandard: {
+        organization: "FDA / California Prop 65",
+        standard: "FDA Compliance Policy Guide Sec. 545.450 & Prop 65",
+        citation: "FDA warns against daily drinking from lead crystal; decanted spirits absorb >500 µg/L neurotoxic lead within weeks."
+      },
+      applianceSpecs: {
+        parameter: "Decanter Spirits Storage & Dishwasher Durability",
+        guideline: "Store whiskey, bourbon, and wine indefinitely in lead-free crystal; avoid dishwashing vintage lead crystal to prevent surface etching."
+      }
+    });
+  } else if (s === 'glazed-ceramic-vs-unglazed-clay-cookware') {
+    addSpec(s, {
+      materialThermal: {
+        property: "Vitrified Silica Glass Flux vs. Microporous Terracotta",
+        threshold: "Glazed <0.5% Absorption; Unglazed 5%–15% Water Porosity",
+        details: "Vitrified glass glaze creates an impermeable barrier impervious to bacteria and tomato acids; unglazed clay absorbs soaking water to emit moist steam during baking but absorbs dish soap surfactants."
+      },
+      safetyStandard: {
+        organization: "FDA / California Prop 65",
+        standard: "FDA 21 CFR § 109.16 (Glazed Ceramicware Lead/Cadmium)",
+        citation: "Certified glazes prevent heavy metal migration; unglazed clay requires zero-soap cleaning to prevent surfactant ingestion."
+      },
+      applianceSpecs: {
+        parameter: "Thermal Shock Protocol & Cleaning Methods",
+        guideline: "Always place pre-soaked unglazed clay into a COLD oven; clean unglazed pots with hot water and baking soda only, while glazed stoneware is dishwasher safe."
+      }
+    });
+  } else if (s === 'bamboo-vs-hardwood-cutting-board') {
+    addSpec(s, {
+      materialThermal: {
+        property: "Xylem Capillary Desiccation vs. Laminated Phytolith Silica Grass",
+        threshold: "Maple Janka 1,450 lbf; Bamboo Janka 1,400 lbf (Silica Abrasive)",
+        details: "North American Sugar Maple uses capillary action to desiccate and kill 99.9% of bacteria within 3 minutes; laminated bamboo contains micro-silica crystals (SiO₂) that dull fine chef knife edges."
+      },
+      safetyStandard: {
+        organization: "USDA FSIS / UC Davis Food Safety",
+        standard: "FDA Food Code 2022 § 4-101.17 & Cliver Microbial Study",
+        citation: "Dr. Cliver's landmark microbiological research proved natural hardwoods suppress pathogen cross-contamination better than plastic or composite boards."
+      },
+      applianceSpecs: {
+        parameter: "Knife Edge Preservation & Hand-Wash Protocol",
+        guideline: "Use end-grain hardwood for high-end chef knives; hand-wash both with warm soapy water and treat monthly with food-grade USP mineral oil."
+      }
+    });
+} else {
     addSpec(s, {
       materialThermal: {
         property: "Thermodynamic Heat Transfer Comparison",
