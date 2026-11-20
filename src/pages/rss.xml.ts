@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/electric-kettle-nickel-modeler/',
+    title: 'Electric Kettle Nickel Leaching & Scale Thermal Decoupling Modeler',
+    description:
+      'Model heavy metal nickel leaching kinetics into boiled drinking water against WHO 20 µg/L limits, calcium carbonate limescale thermal impedance, and heating element burnout.',
+    date: '2026-11-20',
+  },
+  {
     path: '/tools/wooden-cutting-board-pathogen-modeler/',
     title: 'Wooden Cutting Board Deep-Groove Pathogen Desorption & Sanitization Modeler',
     description:
