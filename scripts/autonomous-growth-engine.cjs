@@ -237,7 +237,8 @@ const TOOLS_REGISTRY = [
   { slug: 'kitchen-plastic-leaching-checker', name: 'Kitchen Plastic Leaching & Hot Food / Acidic Food Safe Container Checker', category: 'Consumer Kitchen Safety', component: 'KitchenPlasticLeachingChecker.astro', dataFile: 'kitchen-plastic-leaching-data.json' },
   { slug: 'microwave-steam-splash-simulator', name: 'Microwave Steam Splash, Venting & Warped Container Leaching Simulator', category: 'Consumer Kitchen Safety', component: 'MicrowaveSteamSplashSimulator.astro', dataFile: 'microwave-steam-splash-data.json' },
   { slug: 'air-fryer-liner-fire-hazard-simulator', name: 'Air Fryer Parchment vs. Silicone Liner Airflow & Fire Hazard Simulator', category: 'Consumer Kitchen Safety', component: 'AirFryerLinerFireHazardSimulator.astro', dataFile: 'air-fryer-liner-fire-hazard-data.json' },
-  { slug: 'electric-kettle-descaling-leaching-simulator', name: 'Electric Kettle Nickel, Microplastics & Descaling Leaching Simulator', category: 'Consumer Kitchen Safety', component: 'ElectricKettleDescalingSimulator.astro', dataFile: 'electric-kettle-descaling-leaching-data.json' }
+  { slug: 'electric-kettle-descaling-leaching-simulator', name: 'Electric Kettle Nickel, Microplastics & Descaling Leaching Simulator', category: 'Consumer Kitchen Safety', component: 'ElectricKettleDescalingSimulator.astro', dataFile: 'electric-kettle-descaling-leaching-data.json' },
+  { slug: 'dishwasher-melamine-leaching-simulator', name: 'Dishwasher Melamine Formaldehyde & Cyanuric Acid Leaching Simulator', category: 'Consumer Kitchen Safety', component: 'DishwasherMelamineLeachingSimulator.astro', dataFile: 'dishwasher-melamine-leaching-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];

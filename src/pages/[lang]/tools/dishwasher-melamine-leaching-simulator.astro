@@ -1,0 +1,161 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import DishwasherMelamineLeachingSimulator from '../../../components/DishwasherMelamineLeachingSimulator.astro';
+import rawData from '../../../data/dishwasher-melamine-leaching-data.json';
+import type { SupportedLanguage } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+
+interface LocalePageContent {
+  pageTitle: string;
+  pageDescription: string;
+  badge: string;
+  h1: string;
+  heroSub: string;
+  breadcrumbs: Array<{ label: string; href?: string }>;
+}
+
+const CONTENT: Record<Exclude<SupportedLanguage, 'en'>, LocalePageContent> = {
+  es: {
+    pageTitle: "Simulador de Lixiviación de Formaldehído y Melamina en Lavavajillas | IsItKitchenSafe",
+    pageDescription: "Calcula la migración de formaldehído tóxico (HCHO) y melamina por calor de lavavajillas (>70°C), detergentes alcalinos cáusticos y microondas. Límites UE 10/2011 y BfR.",
+    badge: "Dictamen BfR Alemán Nº 046/2019 · Reglamento UE 10/2011 · Notificación FDA",
+    h1: "Simulador de Lixiviación de Formaldehído y Melamina en Lavavajillas",
+    heroSub: "Protege la salud de tu familia al usar vajilla plástica: calcula la migración de formaldehído y melamina en ciclos de agua caliente (>70°C), detergentes agresivos (pH > 10.5), microfisuras de cubiertos y sobrecalentamiento en microondas.",
+    breadcrumbs: [
+      { label: "Inicio", href: "/es/" },
+      { label: "Herramientas", href: "/es/tools/" },
+      { label: "Simulador de Lixiviación de Melamina" }
+    ]
+  },
+  pt: {
+    pageTitle: "Simulador de Lixiviação de Formaldeído e Melamina em Lava-Louças | IsItKitchenSafe",
+    pageDescription: "Simule a migração de formaldeído (HCHO) e melamina sob ciclos térmicos de lava-louças (>70°C), pastilhas alcalinas e danos de micro-ondas. Padrões UE 10/2011 e BfR.",
+    badge: "Parecer Alemão BfR Nº 046/2019 · Regulamento UE 10/2011 · Notificação FDA",
+    h1: "Simulador de Lixiviação de Formaldeído e Melamina em Lava-Louças",
+    heroSub: "Evite contaminação química em pratos e tigelas: calcule a migração de formaldeído e monômero de melamina provocada por lavagens em alta temperatura (>70°C), detergentes cáusticos (pH > 10.5), riscos de talheres e ondas de micro-ondas.",
+    breadcrumbs: [
+      { label: "Início", href: "/pt/" },
+      { label: "Ferramentas", href: "/pt/tools/" },
+      { label: "Simulador de Lixiviação de Melamina" }
+    ]
+  },
+  'zh-cn': {
+    pageTitle: "洗碗机密胺餐具甲醛与三聚氰胺溶出化学模拟器 | IsItKitchenSafe",
+    pageDescription: "科学测算密胺（仿瓷）餐具在洗碗机高温烘干（>70°C）、强碱性洗碗块（pH > 10.5）及微波加热下的甲醛与三聚氰胺单体迁移浓度。依据欧盟 No 10/2011 与德国联邦 BfR 评估报告。",
+    badge: "德国 BfR 第 046/2019 号评估 · 欧盟 No 10/2011 法规 · 美国 FDA 食品接触通报",
+    h1: "洗碗机密胺餐具甲醛与三聚氰胺溶出化学模拟器",
+    heroSub: "远离仿瓷餐具隐形毒素：精准测算洗碗机高温消毒程序（>70°C）、碱性强效洗碗粉侵蚀、刀叉划痕微孔隙及微波诱电自发热对甲醛与三聚氰胺析出浓度的剧烈放大效应，掌握科学淘汰准则。",
+    breadcrumbs: [
+      { label: "首页", href: "/zh-cn/" },
+      { label: "安全工具", href: "/zh-cn/tools/" },
+      { label: "密胺餐具甲醛溶出模拟器" }
+    ]
+  },
+  ja: {
+    pageTitle: "食洗機メラミン食器のホルムアルデヒド溶出シミュレーター | IsItKitchenSafe",
+    pageDescription: "食洗機の高温洗浄乾燥（70°C以上）、強アルカリ洗剤、レンジ誤加熱によるメラミンおよびホルムアルデヒドの食品移行濃度を科学的に予測。EU規則 10/2011＆ドイツBfR基準準拠。",
+    badge: "ドイツBfR見解第046/2019号 · EU規則 No 10/2011 · 米国FDA食品接触ガイダンス",
+    h1: "食洗機メラミン食器のホルムアルデヒド・メラミン溶出シミュレーター",
+    heroSub: "プラスチック漆器や子供用食器の安全性を検証：食洗機の高温除菌コース（70°C以上）、強アルカリ洗剤（pH 10.5以上）による表面エッチング、カトラリー傷、電子レンジの異常誘電加熱に伴う有害物質溶出量を算出します。",
+    breadcrumbs: [
+      { label: "ホーム", href: "/ja/" },
+      { label: "ツール一覧", href: "/ja/tools/" },
+      { label: "メラミン食器溶出シミュレーター" }
+    ]
+  }
+};
+
+const current = CONTENT[lang as Exclude<SupportedLanguage, 'en'>] || CONTENT.es;
+const faqs = (rawData.faqs as any)[lang] || rawData.faqs.en;
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": current.h1,
+  "url": `https://isitkitchensafe.com/${lang}/tools/dishwasher-melamine-leaching-simulator/`,
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript.",
+  "description": current.pageDescription,
+  "inLanguage": lang,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IsItKitchenSafe",
+    "url": "https://isitkitchensafe.com"
+  }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map((faq: any) => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+};
+---
+
+<Layout
+  title={current.pageTitle}
+  description={current.pageDescription}
+  faqs={faqs}
+  excludeFaqSchema={true}
+  availableLocales={availableLocales}
+  lang={lang}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(webAppSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+  </Fragment>
+
+  <!-- Breadcrumbs -->
+  <div class="bg-surface-soft border-b border-hairline py-1 print:hidden">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <Breadcrumbs items={current.breadcrumbs} className="mb-0" />
+    </div>
+  </div>
+
+  <div class="max-w-[1140px] mx-auto px-6 py-10 md:py-14">
+    <!-- Hero Header -->
+    <header class="mb-10 text-center max-w-3xl mx-auto">
+      <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-signature-coral text-white mb-3">
+        {current.badge}
+      </span>
+      <h1 class="text-display-md md:text-display-lg font-medium text-ink tracking-tight mb-4">
+        {current.h1}
+      </h1>
+      <p class="text-body text-[15px] md:text-[16px] leading-relaxed">
+        {current.heroSub}
+      </p>
+    </header>
+
+    <!-- Main Interactive Simulator Component -->
+    <DishwasherMelamineLeachingSimulator lang={lang} />
+  </div>
+</Layout>

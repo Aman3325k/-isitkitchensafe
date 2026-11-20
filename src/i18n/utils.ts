@@ -239,6 +239,7 @@ const SPECIAL_PAGES = [
   'tools/microwave-steam-splash-simulator',
   'tools/air-fryer-liner-fire-hazard-simulator',
   'tools/electric-kettle-descaling-leaching-simulator',
+  'tools/dishwasher-melamine-leaching-simulator',
   'methodology',
   'saved'
 ];

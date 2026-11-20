@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/dishwasher-melamine-leaching-simulator/',
+    title: 'Dishwasher Melamine Formaldehyde & Cyanuric Acid Leaching Simulator',
+    description:
+      'Calculate formaldehyde (HCHO) and melamine monomer migration from dishwasher heat cycles (>70°C / 158°F), caustic alkaline detergents, and microwave damage. EU Regulation 10/2011 & German BfR standards.',
+    date: '2026-11-19',
+  },
+  {
     path: '/tools/electric-kettle-descaling-leaching-simulator/',
     title: 'Electric Kettle Nickel, Microplastics & Descaling Leaching Simulator',
     description:
