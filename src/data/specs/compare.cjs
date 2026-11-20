@@ -1649,5 +1649,85 @@ module.exports = {
       "parameter": "Knife Edge Preservation & Hand-Wash Protocol",
       "guideline": "Use end-grain hardwood for high-end chef knives; hand-wash both with warm soapy water and treat monthly with food-grade USP mineral oil."
     }
+  },
+  "304-vs-316-stainless-steel-cookware": {
+    "materialThermal": {
+      "property": "Molybdenum Alloying & Pitting Resistance Equivalent (PREN)",
+      "threshold": "Grade 304 PREN ~19 (0% Mo) vs. Grade 316/316Ti PREN ~25 (2.0%–3.0% Mo)",
+      "details": "Grade 316 adds molybdenum to passivate against chloride pitting corrosion and aggressive tomato acid etching, whereas Grade 304 (18/10) provides exceptional daily durability but micro-pits under boiling brine or prolonged acid simmering."
+    },
+    "safetyStandard": {
+      "organization": "ASTM International / NSF / Council of Europe",
+      "standard": "ASTM A240 / NSF/ANSI 51 / CoE Resolution CM/Res(2013)9",
+      "citation": "European Directorate for the Quality of Medicines (EDQM) establishes Specific Release Limits (SRL) for nickel (0.14 mg/kg) and chromium (0.25 mg/kg); 316 exhibits virtually zero ion migration in 5-hour citric acid reflux testing."
+    },
+    "applianceSpecs": {
+      "parameter": "Thermal Resistance & Acid-Salt Culinary Operations",
+      "guideline": "Both 304 and 316 withstand 800°F+ (425°C+) oven temperatures; reserve 316 for slow tomato reductions, high-saline seafood boils, and commercial sous-vide baths."
+    }
+  },
+  "pure-ceramic-vs-ceramic-coated-cookware": {
+    "materialThermal": {
+      "property": "Vitrified Inorganic Mineral Matrix vs. Thin Sol-Gel Silica Layer",
+      "threshold": "100% Ceramic 2,500°F (1,370°C) Kiln-Fired vs. Sol-Gel Non-Stick 450°F–500°F (232°C–260°C)",
+      "details": "Pure ceramic is crafted from 100% solid clay, quartz, and mineral oxides vitrified into an indestructible, non-scratchable, metal-free substrate; ceramic-coated pans use an organosilicon sol-gel spray (~30 microns) over soft aluminum that loses slickness within 12–24 months."
+    },
+    "safetyStandard": {
+      "organization": "FDA / California Prop 65 / LFGB",
+      "standard": "FDA 21 CFR § 109.16 (Glazed Ceramicware) & EPA PFAS Guidelines",
+      "citation": "Both options are 100% PTFE/PFAS-free; certified 100% ceramic cookware is tested for zero lead/cadmium leachability under ASTM C738 standards."
+    },
+    "applianceSpecs": {
+      "parameter": "Thermal Shock Protocol & Heat Distribution",
+      "guideline": "Pure ceramic requires gradual preheating and zero cold-water immersion to avoid thermal shock cracking; ceramic-coated aluminum heats rapidly but must never exceed 450°F to prevent sol-gel polymer breakdown."
+    }
+  },
+  "tin-lined-vs-stainless-lined-copper": {
+    "materialThermal": {
+      "property": "Low-Melting Crystalline Lining vs. High-Tensile Austenitic Stainless Cladding",
+      "threshold": "Pure Tin Melts at 450°F (232°C) vs. 18/10 Stainless Steel Stable to 800°F+ (425°C+)",
+      "details": "Hand-wiped tin forms a naturally non-reactive, lubricious molecular bond with copper but liquefies if dry-heated above 450°F; patented bi-metal stainless-clad copper bonds a 0.2mm layer of 18/10 steel that tolerates extreme searing, metal whisks, and aggressive scouring."
+    },
+    "safetyStandard": {
+      "organization": "FDA / ANSES / French DGCCRF",
+      "standard": "FDA Food Code 2022 § 4-101.14 & French Decree 92-631",
+      "citation": "Bare copper leaching causes acute gastrointestinal toxicity (nausea/vomiting at >1.0 mg/L copper ions); FDA strictly prohibits unlined copper food contact below pH 6.0."
+    },
+    "applianceSpecs": {
+      "parameter": "Heat Searing Limits & Maintenance Cadence",
+      "guideline": "Use tin-lined copper exclusively with wooden/silicone tools under low-to-medium heat (re-tin every 5–10 years); use stainless-clad copper for high-heat pan searing, fond deglazing, and commercial dishwasher cleaning."
+    }
+  },
+  "tritan-vs-polypropylene-food-storage": {
+    "materialThermal": {
+      "property": "Amorphous Copolyester vs. Semicrystalline Aliphatic Polyolefin",
+      "threshold": "Tritan HDT ~185°F (85°C–100°C) vs. Polypropylene (#5 PP) Melting Point ~320°F (160°C)",
+      "details": "Polypropylene consists strictly of saturated hydrocarbon propylene chains ([C₃H₆]ₙ) with zero aromatic rings or plasticizers, withstanding boiling sauces and microwaves; Tritan (TMCD/CHDM/DMT copolyester) provides glass-like clarity but undergoes polymer micro-crazing and oligomer release under repeated microwave thermal cycling."
+    },
+    "safetyStandard": {
+      "organization": "FDA / EFSA / Environmental Health Perspectives",
+      "standard": "FDA 21 CFR § 177.1520 (Olefin Polymers) & 21 CFR § 177.1240",
+      "citation": "Peer-reviewed research by Bittner et al. (EHP) confirmed PP #5 is the lowest-migration commodity food plastic; Tritan is certified BPA/BPS-free but is chemically optimized for cold storage rather than intense microwave re-heating."
+    },
+    "applianceSpecs": {
+      "parameter": "Microwave & Dishwasher Thermal Stress Limits",
+      "guideline": "Use PP #5 containers for reheating leftovers and fatty/acidic foods in microwaves; reserve Tritan for clear pantry organization, cold salads, fruit storage, and hydration bottles."
+    }
+  },
+  "paper-composite-vs-hardwood-cutting-board": {
+    "materialThermal": {
+      "property": "Thermoset Phenolic-Cellulose Matrix vs. Natural Xylem Vascular Capillaries",
+      "threshold": "Richlite Heat Proof to 350°F (176°C) vs. Maple Hardness 1,450 lbf Janka",
+      "details": "Paper composite boards fuse hundreds of resin-treated craft sheets under 1,000+ psi into an ultra-dense, non-porous slab that withstands commercial dishwashers but causes accelerated knife dulling; end-grain hardwood fibers part under blade strikes, self-healing and maintaining blade apex geometry."
+    },
+    "safetyStandard": {
+      "organization": "NSF International / USDA FSIS / UC Davis Food Safety",
+      "standard": "NSF/ANSI Standard 2 (Food Equipment) & FDA Food Code 2022 § 4-101.17",
+      "citation": "Paper composite is NSF certified for commercial sanitization; Dr. Cliver (UC Davis) proved natural hardwood xylem vessels pull pathogens away from the cutting plane, desiccating 99.9% of bacteria within minutes without bleach."
+    },
+    "applianceSpecs": {
+      "parameter": "Sanitization Protocol & Cutlery Preservation",
+      "guideline": "Run paper composite boards through the dishwasher for effortless post-poultry thermal sterilization; hand-wash end-grain hardwood with mild soap and condition monthly with food-grade USP mineral oil to preserve chef knives."
+    }
   }
 };
