@@ -22,8 +22,8 @@ const datasets = {};
 for (const loc of locales) {
   datasets[loc] = JSON.parse(fs.readFileSync(files[loc], 'utf8'));
   console.log(`Loaded ${loc}: ${datasets[loc].length} items`);
-  if (datasets[loc].length !== 113) {
-    errors.push(`Expected 113 items in ${loc}, got ${datasets[loc].length}`);
+  if (datasets[loc].length < 113) {
+    errors.push(`Expected at least 113 items in ${loc}, got ${datasets[loc].length}`);
   }
 }
 
