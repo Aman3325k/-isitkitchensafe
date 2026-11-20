@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/microwave-plastic-steam-cover-modeler/',
+    title: 'Microwave Plastic Steam Cover Phthalate Condensate Modeler',
+    description:
+      'Model microwave steam condensation reflux, plasticizer and bisphenol extraction kinetics, fat-splatter lipid partitioning, and endocrine toxicity risk under EU Regulation 10/2011 and EFSA standards.',
+    date: '2026-11-20',
+  },
+  {
     path: '/tools/electric-kettle-nickel-modeler/',
     title: 'Electric Kettle Nickel Leaching & Scale Thermal Decoupling Modeler',
     description:

@@ -4,7 +4,7 @@ A static kitchen safety reference platform and interactive consumer tool suite a
 
 ## Overview
 
-IsItKitchenSafe delivers **11,340+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **210 interactive tools** (**1,050 localized tool pages**, including **61 Google-indexed Everyday Consumer Kitchen Safety Tools**), **56 evergreen guides × 5 languages = 280 localized articles**, **103 comparisons × 5 languages = 515 localized pages**, **1,307 item pages per language (6,535 localized reference pages)**, **WCAG 2.1 AA accessibility**, and transparent E-E-A-T verification standards.
+IsItKitchenSafe delivers **11,340+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **210 interactive tools** (**1,050 localized tool pages**, including **62 Google-indexed Everyday Consumer Kitchen Safety Tools**), **56 evergreen guides × 5 languages = 280 localized articles**, **103 comparisons × 5 languages = 515 localized pages**, **1,307 item pages per language (6,535 localized reference pages)**, **WCAG 2.1 AA accessibility**, and transparent E-E-A-T verification standards.
 
 ## Tech Stack
 - **Framework**: Astro.js (MPA static generation)
@@ -14,8 +14,9 @@ IsItKitchenSafe delivers **11,340+ static pages** across **11 verticals** and **
 
 ## Consumer Growth, E-E-A-T & Retention Architecture
 
-### Everyday Consumer Kitchen Safety Tools (61 Google-Indexed Tools)
-All 210 interactive tools are split cleanly between everyday consumer utilities and specialized commercial/lab simulators (**92 Home Kitchen Safety** + **118 Commercial & Industrial Engineering Lab** = **1,050 localized tool pages** across 5 languages). **61 high-utility consumer tools** are explicitly allowlisted for search indexing in [`src/data/consumer-tools-allowlist.json`](src/data/consumer-tools-allowlist.json) across all 5 languages, including:
+### Everyday Consumer Kitchen Safety Tools (62 Google-Indexed Tools)
+All 210 interactive tools are split cleanly between everyday consumer utilities and specialized commercial/lab simulators (**92 Home Kitchen Safety** + **118 Commercial & Industrial Engineering Lab** = **1,050 localized tool pages** across 5 languages). **62 high-utility consumer tools** are explicitly allowlisted for search indexing in [`src/data/consumer-tools-allowlist.json`](src/data/consumer-tools-allowlist.json) across all 5 languages, including:
+- **Microwave Plastic Steam Cover Phthalate Condensate Modeler** (`microwave-plastic-steam-cover-modeler`)
 - **Electric Kettle Nickel Leaching & Scale Thermal Decoupling Modeler** (`electric-kettle-nickel-modeler`)
 - **Wooden Cutting Board Deep-Groove Pathogen Desorption & Sanitization Modeler** (`wooden-cutting-board-pathogen-modeler`)
 - **Plastic Water Kettle Micro-Crack Heating Element Leaching Simulator** (`plastic-water-kettle-microplastic-simulator`)
@@ -127,7 +128,7 @@ npm run ops:engine
 
 ## Scale & Metrics
 - **11,320+ Static Pages** across 11 verticals and 5 languages (EN, ES, PT, ZH-CN, JA)
-- **210 Interactive Tools** across 5 languages (**1,050 Localized Tool Pages**; 100% 5-language parity: **92 Home Kitchen Safety** + **118 Commercial Engineering**), including **60 Google-indexed Consumer Utilities** (`src/data/consumer-tools-allowlist.json`)
+- **210 Interactive Tools** across 5 languages (**1,050 Localized Tool Pages**; 100% 5-language parity: **92 Home Kitchen Safety** + **118 Commercial Engineering**), including **62 Google-indexed Consumer Utilities** (`src/data/consumer-tools-allowlist.json`)
 - **56 Evergreen Guides × 5 Languages = 280 Articles** with 100% slug parity + **103 Comparisons × 5 Languages = 515 Pages**
 - **1,307 Items per Language (6,535 Localized Reference Pages)** with 100% slug parity including modern kitchenware (Le Creuset, Yeti Rambler, HexClad, Caraway, Owala FreeSip, Ninja Creami, Always Pan, Stasher, Instant Pot)
 - **WCAG 2.1 AA Accessibility** (`:focus-visible`, `prefers-reduced-motion`, ARIA landmarks) + **Live Instant Search** across `/tools/`, `/blog/`, `/how-long/`, `/refreeze/`, `/compare/`, `/material/`, and `/what-happens/`
