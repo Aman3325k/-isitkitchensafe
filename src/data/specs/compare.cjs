@@ -1890,4 +1890,84 @@ module.exports = {
           "guideline": "Brew daily coffee on induction, glass-ceramic, or gas stoves using 18/10 stainless steel moka pots for pure taste and dishwasher sanitization; never place aluminum moka pots in dishwashers to prevent toxic caustic black smudge formation."
       }
   },
+  "stainless-steel-vs-plastic-colander": {
+      "materialThermal": {
+          "property": "Hydrothermal Polymer Softening vs. Austenitic Passivated Chromium Oxide Barrier",
+          "threshold": "Polypropylene Heat Deflection Temp 85°C–100°C vs. 18/8 Stainless Steel 815°C (1,500°F)",
+          "details": "Pouring boiling water (212°F / 100°C) over food-grade polypropylene triggers polymer relaxation and micro/nanoplastic shedding (10^4–10^6 particles/L); 18/8 stainless steel forms an imperviously dense Cr2O3 passive film with zero chemical dissolution and zero microplastic migration."
+      },
+      "safetyStandard": {
+          "organization": "FDA / EFSA / NSF",
+          "standard": "FDA 21 CFR § 177.1520 (Olefin Polymers) & NSF/ANSI 51 (Food Equipment Materials)",
+          "citation": "EFSA food-contact migration threshold standards for high-temperature polyolefins; NSF/ANSI 51 sanitation standards for commercial food-contact metals."
+      },
+      "applianceSpecs": {
+          "parameter": "Boiling Liquid Straining & Dishwasher Heat Sanitation",
+          "guideline": "Use 18/8 stainless steel colanders for straining boiling pasta, hot stocks, and deep-fryer grease; reserve polypropylene colanders strictly for cold-water berry, salad, and canned bean rinsing."
+      }
+  },
+  "glass-vs-wood-cutting-board": {
+      "materialThermal": {
+          "property": "Mineral Hardness Blade Deflection vs. Capillary Antimicrobial Cellular Matrix",
+          "threshold": "Soda-Lime Glass Mohs 5.5–6.0 vs. Hard Rock Maple Janka 1,450 lbf (Rockwell C 56–62 Knife Steel)",
+          "details": "Tempered glass is harder than cutlery steel, instantly rolling and micro-chipping sharp knife edges; hardwood fibers yield under cutting pressure, preserving blade apexes while capillary xylem vessels dehydrate and inactivate 99.9% of bacteria within hours."
+      },
+      "safetyStandard": {
+          "organization": "USDA / UC Davis / FDA",
+          "standard": "FDA Food Code 2022 § 4-101.11 & University of Wisconsin Cliver Microbiological Standard",
+          "citation": "Peer-reviewed antimicrobial efficacy standards of hard maple vs non-porous surfaces; ASTM C373 porosity and sanitation criteria."
+      },
+      "applianceSpecs": {
+          "parameter": "Knife Edge Preservation & Surface Traction Safety",
+          "guideline": "Prepare raw meats, vegetables, and herbs exclusively on seasoned hardwood or end-grain blocks; reserve tempered glass exclusively for rolling cold pastry dough or as heat-resistant countertop trivets."
+      }
+  },
+  "ceramic-vs-stainless-steel-knife": {
+      "materialThermal": {
+          "property": "Ultra-Hard Ceramic Crystalline Lattice vs. Ductile Martensitic High-Carbon Alloy",
+          "threshold": "Zirconium Dioxide Mohs 8.5 / ~75 HRC vs. High-Carbon Cutlery Steel 56–60 HRC (K1c 8 vs 30 MPa·m^1/2)",
+          "details": "Zirconia ceramic offers extraordinary edge retention on soft produce with 100% chemical inertness preventing enzymatic browning; high-carbon stainless steel provides high fracture toughness, preventing catastrophic blade snapping on bones and hard squash."
+      },
+      "safetyStandard": {
+          "organization": "ISO / DIN / FDA",
+          "standard": "ISO 8442 (Materials and Articles in Contact with Foodstuffs - Cutlery) & DIN EN ISO 8442-1",
+          "citation": "International standards for blade sharpness retention, edge corrosion resistance, and fracture toughness thresholds for domestic cutlery."
+      },
+      "applianceSpecs": {
+          "parameter": "Produce Slicing Precision vs. Heavy Kitchen Butchery",
+          "guideline": "Deploy ceramic knives strictly for precision slicing of boneless poultry, ripe tomatoes, and oxidation-sensitive produce; use forged stainless steel chef's knives for heavy chopping, deboning, hard squash, and universal meal prep."
+      }
+  },
+  "stainless-steel-vs-glass-mixing-bowls": {
+      "materialThermal": {
+          "property": "High-Conductivity Austenitic Alloy vs. Amorphous Soda-Lime Thermal Insulator",
+          "threshold": "18/10 Stainless Steel Thermal Conductivity 16.2 W/m·K vs. Soda-Lime Glass 1.0 W/m·K",
+          "details": "Stainless steel transfers heat 16x faster for precision bain-marie chocolate melting and instantaneous ice-bath cooling with unbreakable ductile yield strength; tempered glass provides microwave transparency and clear 360° visual monitoring."
+      },
+      "safetyStandard": {
+          "organization": "ASTM / NSF / FDA",
+          "standard": "ASTM C149 (Thermal Shock Resistance of Glass Containers) & NSF/ANSI 51",
+          "citation": "Safety standards for commercial food prep containers, maximum allowable thermal shock gradients, and non-reactive food-contact metallurgy."
+      },
+      "applianceSpecs": {
+          "parameter": "Double-Boiler Heat Control vs. Microwave Cooking",
+          "guideline": "Use stainless steel bowls for high-volume baking, beating, double-boiler melting, and ice baths; use tempered glass bowls exclusively for microwave heating, melting butter, and visually monitoring yeast dough rise."
+      }
+  },
+  "enameled-cast-iron-vs-stainless-steel-dutch-oven": {
+      "materialThermal": {
+          "property": "High Volumetric Thermal Inertia Flywheel vs. Low-Tare Convective Clad Transfer",
+          "threshold": "Cast Iron Volumetric Heat Capacity ~3.63 J/cm^3·K vs. Tri-Ply Stainless Steel ~2.85 J/cm^3·K",
+          "details": "Heavy cast iron stores 27% more thermal energy per unit volume, creating steady radiant braising temperatures and high-humidity steam chambers for sourdough oven spring; tri-ply stainless steel heats 30% faster with 50% lighter weight for boiling and broths."
+      },
+      "safetyStandard": {
+          "organization": "FDA / ISO / NSF",
+          "standard": "FDA Food Code 2022 § 4-101.11 & ISO 4531 (Vitreous and Porcelain Enamels in Food Contact)",
+          "citation": "Strict heavy metal release limits for vitreous enamel glazes; NSF/ANSI 36 commercial cookware sanitation and thermal cycling standards."
+      },
+      "applianceSpecs": {
+          "parameter": "Low-and-Slow Braising vs. High-Volume Liquid Boiling",
+          "guideline": "Use enameled cast iron Dutch ovens for multi-hour braises, acidic tomato stews, and 450°F+ artisan sourdough bread baking; choose tri-ply stainless steel Dutch ovens for boiling stocks, blanching vegetables, and everyday soups."
+      }
+  },
 };
