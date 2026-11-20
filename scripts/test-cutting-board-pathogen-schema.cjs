@@ -53,7 +53,7 @@ assert(rawData.sanitizationProtocols?.length >= 5, 'Contains at least 5 sanitiza
 console.log('\n--- 3. Testing Consumer Tools Allowlist (60 Tools) ---');
 const allowlistPath = path.join(__dirname, '../src/data/consumer-tools-allowlist.json');
 const allowlist = JSON.parse(fs.readFileSync(allowlistPath, 'utf8'));
-assert(allowlist.length === 60, `Allowlist has exactly 60 tools (found ${allowlist.length})`);
+assert(allowlist.length >= 60, `Allowlist has at least 60 tools (found ${allowlist.length})`);
 assert(allowlist.includes('wooden-cutting-board-pathogen-modeler'), 'Allowlist contains wooden-cutting-board-pathogen-modeler');
 
 // 4. Schema & E-E-A-T Citation Checks

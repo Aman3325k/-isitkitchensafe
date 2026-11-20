@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/aluminum-foil-acidic-leaching-simulator/',
+    title: 'Aluminum Foil & Cookware Acidic Leaching & Neurotoxicity Simulator',
+    description:
+      'Model amphoteric oxide breakdown, organic acid chelation (citric, malic, acetic), thermal Arrhenius kinetics at 220°C, galvanic pitting, and EFSA Tolerable Weekly Intake exceedance.',
+    date: '2026-11-20',
+  },
+  {
     path: '/tools/microwave-plastic-steam-cover-modeler/',
     title: 'Microwave Plastic Steam Cover Phthalate Condensate Modeler',
     description:

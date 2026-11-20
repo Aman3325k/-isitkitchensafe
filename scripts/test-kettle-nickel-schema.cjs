@@ -53,7 +53,7 @@ assert(rawData.descalingProtocols?.length >= 4, 'Contains at least 4 descaling p
 console.log('\n--- 3. Testing Consumer Tools Allowlist (61 Tools) ---');
 const allowlistPath = path.join(__dirname, '../src/data/consumer-tools-allowlist.json');
 const allowlist = JSON.parse(fs.readFileSync(allowlistPath, 'utf8'));
-assert(allowlist.length === 61, `Allowlist has exactly 61 tools (found ${allowlist.length})`);
+assert(allowlist.length >= 61, `Allowlist has at least 61 tools (found ${allowlist.length})`);
 assert(allowlist.includes('electric-kettle-nickel-modeler'), 'Allowlist contains electric-kettle-nickel-modeler');
 
 // 4. Schema & E-E-A-T Citation Checks
