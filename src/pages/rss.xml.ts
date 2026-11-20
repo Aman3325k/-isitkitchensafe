@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/microwave-popcorn-pfas-modeler/',
+    title: 'Microwave Popcorn Bag Fluorinated PFOA / PFAS Surfactant Modeler',
+    description:
+      'Model fluorotelomer alcohol (FTOH) and perfluoroalkyl acid (PFAA) greaseproofing migration into molten fats at 200°C, microwave susceptor thermal kinetics, and steam puff inhalation exposure.',
+    date: '2026-11-20',
+  },
+  {
     path: '/tools/air-fryer-teflon-fluoropolymer-modeler/',
     title: 'Air Fryer Teflon Basket Fluoropolymer Degradation & Thermal Micro-Plume Modeler',
     description:
