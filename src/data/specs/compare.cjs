@@ -1729,5 +1729,85 @@ module.exports = {
       "parameter": "Sanitization Protocol & Cutlery Preservation",
       "guideline": "Run paper composite boards through the dishwasher for effortless post-poultry thermal sterilization; hand-wash end-grain hardwood with mild soap and condition monthly with food-grade USP mineral oil to preserve chef knives."
     }
+  },
+  "enameled-steel-vs-enameled-cast-iron": {
+    "materialThermal": {
+      "property": "Core Substrate Thermal Mass vs. Vitreous Enamel Shear Boundary",
+      "threshold": "Cast Iron Heat Retention (Volumetric Heat Capacity 3.7 MJ/m³·K) vs. Stamped Steel Flexure (1.5mm thickness)",
+      "details": "Cast iron's 4.5–6.0mm rigid substrate closely matches vitreous borosilicate enamel thermal expansion (CTE 8.5–10 × 10⁻⁶/K), eliminating crazing; stamped carbon steel flexes under thermal gradients, causing shear-induced enamel chipping."
+    },
+    "safetyStandard": {
+      "organization": "ISO / FDA / ASTM",
+      "standard": "ISO 4531:2022 (Vitreous and porcelain enamels) & FDA Compliance Policy Guide Sec 545.400",
+      "citation": "Both materials provide non-reactive vitreous glass surfaces releasing zero lead, cadmium, or heavy metals into acidic tomato/wine solutions, but chipped steel poses laceration and oxide contamination risks."
+    },
+    "applianceSpecs": {
+      "parameter": "Braising Stability & Thermal Shock Avoidance",
+      "guideline": "Select enameled cast iron for long oven braises and sourdough bread baking; use enameled steel for lightweight high-volume water boiling and canning. Never quench either vessel under cold tap water while hot."
+    }
+  },
+  "stoneware-vs-porcelain-bakeware": {
+    "materialThermal": {
+      "property": "Vitrification Porosity Matrix & Microwave Dielectric Permittivity",
+      "threshold": "Culinary Porcelain Fired at 2,500°F (Water Absorption <0.1%) vs. Stoneware (Water Absorption 1.0%–3.0%)",
+      "details": "High-fired porcelain eliminates internal capillary voids, allowing immediate freezer-to-oven transitions (-4°F to 500°F / -20°C to 260°C); stoneware retains microscopic moisture that boils in microwaves, overheating dish handles."
+    },
+    "safetyStandard": {
+      "organization": "ASTM / FDA / French DGCCRF",
+      "standard": "ASTM C373 (Water Absorption of Ceramic Whitewares) & FDA CPG Sec 545.450",
+      "citation": "Culinary porcelain achieves complete vitrification meeting ASTM commercial food service standards; glazed stoneware requires lead/cadmium leach compliance testing under FDA standards."
+    },
+    "applianceSpecs": {
+      "parameter": "Freezer-to-Oven & Microwave Handling Protocol",
+      "guideline": "Transfer vitrified porcelain directly from freezer to preheated ovens without thermal breakage; preheat stoneware gradually and avoid handling microwave-heated stoneware without oven mitts due to moisture-driven handle boiling."
+    }
+  },
+  "silicone-sponge-vs-cellulose-sponge": {
+    "materialThermal": {
+      "property": "Capillary Pore Matrix Absorption vs. Non-Porous Hydrophobic Polydimethylsiloxane",
+      "threshold": "Cellulose Water Absorption 1,500%–2,000% vs. Silicone Surface Porosity 0.0%",
+      "details": "Natural plant cellulose draws surfactant lather into open pores to mechanically emulsify lipids; non-porous silicone bristles lack capillary action, shedding detergent and smearing greasy residues rather than lifting them."
+    },
+    "safetyStandard": {
+      "organization": "Nature Scientific Reports / CDC / USDA FSIS",
+      "standard": "Cardinale et al. Nature Microbiome Standards & USDA Kitchen Sanitization Guidelines",
+      "citation": "Cardinale et al. (Nature 2017) proved domestic cellulose sponges harbor up to 5.4 × 10¹⁰ CFU/cm³ (Moraxella osloensis); non-porous silicone reduces bacterial colonization by 99% and withstands 450°F (232°C) thermal autoclave sanitization."
+    },
+    "applianceSpecs": {
+      "parameter": "Dishwashing Lathering & Thermal Sterilization Regimen",
+      "guideline": "Use natural cellulose for daily grease-cutting dishwashing and replace every 2–3 weeks; sanitize wet in microwave for 60 seconds (never dry). Use silicone sponges for odor-free produce washing and sanitize in dishwashers indefinitely."
+    }
+  },
+  "cast-iron-vs-nonstick-waffle-maker": {
+    "materialThermal": {
+      "property": "Cross-Linked Triglyceride Patina vs. Fluoropolymer (PTFE) Pyrolysis Threshold",
+      "threshold": "Cast Iron Stable to 700°F+ (371°C) vs. PTFE Thermal Breakdown Boundary 450°F–500°F (232°C–260°C)",
+      "details": "Electric waffle irons operate at 425°F–475°F (218°C–246°C), directly entering PTFE micro-pyrolysis release of fluorinated ultrafine particulates; cast iron relies on a non-toxic natural polymerized oil seasoning that withstands high heat indefinitely."
+    },
+    "safetyStandard": {
+      "organization": "EPA / NIH NTP / American Veterinary Medical Association (AVMA)",
+      "standard": "EPA PFAS Action Plan & AVMA Avian Polytetrafluoroethylene Toxicosis Protocols",
+      "citation": "AVMA warns airborne fluoropolymer fumes cause fatal avian pulmonary hemorrhaging in pet birds; NIH identifies polymer fume fever risks in humans; seasoned cast iron is 100% PFAS/PTFE-free and indefinitely renewable."
+    },
+    "applianceSpecs": {
+      "parameter": "Waffle Crisping & Appliance Longevity Management",
+      "guideline": "Preheat cast iron stovetop irons thoroughly to caramelize sugars and produce authentic Belgian Liège crunch without synthetic coatings; operate electric nonstick makers strictly below 450°F and never use in homes with pet birds."
+    }
+  },
+  "sous-vide-bag-vs-silicone-bag": {
+    "materialThermal": {
+      "property": "Convective Water Boundary Air Displacement vs. Platinum Silicone Permeability",
+      "threshold": "Coextruded PE/PA Pouch 99.8% Vacuum Evacuation vs. Manual Water Displacement ~85%–90%",
+      "details": "Mechanical vacuum sealing removes insulating air pockets, guaranteeing thermal conductivity 25x higher than stagnant air to follow USDA FSIS Appendix A pasteurization curves; silicone pouches trap air pockets, causing buoyancy and slower core heat penetration."
+    },
+    "safetyStandard": {
+      "organization": "USDA FSIS / FDA / EU EFSA",
+      "standard": "USDA FSIS Appendix A (Lethality Performance) & FDA 21 CFR § 177.1520 / 177.2600",
+      "citation": "USDA FSIS requires strict temperature monitoring to eliminate Clostridium botulinum and Salmonella; certified PE/PA pouches and platinum silicone are certified BPA/phthalate-free under FDA and EU regulations up to boiling temperatures."
+    },
+    "applianceSpecs": {
+      "parameter": "Water Bath Submersion & Long-Duration Seal Integrity",
+      "guideline": "Use hermetically heat-sealed PE/PA vacuum bags for cooks exceeding 2 hours or cuts over 2 inches thick to prevent seal failure and buoyancy; use reusable platinum silicone bags for short-duration weeknight cooking, weighting them down with stainless steel sinkers."
+    }
   }
 };
