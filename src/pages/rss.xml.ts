@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/air-fryer-teflon-fluoropolymer-modeler/',
+    title: 'Air Fryer Teflon Basket Fluoropolymer Degradation & Thermal Micro-Plume Modeler',
+    description:
+      'Simulate PTFE pyrolysis kinetics at 200°C–240°C in high-velocity forced convection air streams, radiant dry-run overheating, ultrafine particle (UFP) outgassing, and avian toxicity risks under FDA 21 CFR 177.1550.',
+    date: '2026-11-20',
+  },
+  {
     path: '/tools/aluminum-foil-acidic-leaching-simulator/',
     title: 'Aluminum Foil & Cookware Acidic Leaching & Neurotoxicity Simulator',
     description:
