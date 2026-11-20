@@ -1,5 +1,45 @@
+const jsonHeaders = {
+  'Content-Type': 'application/json; charset=utf-8',
+  'X-Content-Type-Options': 'nosniff',
+  'Cache-Control': 'no-store, no-cache, must-revalidate',
+  'Referrer-Policy': 'strict-origin-when-cross-origin'
+};
+
 export async function onRequestPost(context) {
   try {
+    // CSRF / Cross-Origin abuse check
+    const secFetchSite = context.request.headers.get('sec-fetch-site');
+    if (secFetchSite === 'cross-site') {
+      return new Response(JSON.stringify({ 
+        success: false, 
+        message: 'Cross-origin requests are not permitted.' 
+      }), {
+        status: 403,
+        headers: jsonHeaders
+      });
+    }
+
+    const origin = context.request.headers.get('origin');
+    if (origin) {
+      try {
+        const originUrl = new URL(origin);
+        const reqUrl = new URL(context.request.url);
+        if (
+          originUrl.hostname !== reqUrl.hostname &&
+          !originUrl.hostname.endsWith('.isitkitchensafe.com') &&
+          !originUrl.hostname.endsWith('.pages.dev')
+        ) {
+          return new Response(JSON.stringify({ 
+            success: false, 
+            message: 'Cross-origin requests are not permitted.' 
+          }), {
+            status: 403,
+            headers: jsonHeaders
+          });
+        }
+      } catch {}
+    }
+
     const contentType = context.request.headers.get('content-type') || '';
     let name = '';
     let email = '';
@@ -31,7 +71,7 @@ export async function onRequestPost(context) {
         message: 'Message sent successfully.' 
       }), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' }
+        headers: jsonHeaders
       });
     }
 
@@ -42,7 +82,7 @@ export async function onRequestPost(context) {
         message: 'Please provide your name.' 
       }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' }
+        headers: jsonHeaders
       });
     }
 
@@ -53,7 +93,7 @@ export async function onRequestPost(context) {
         message: 'Please provide a valid email address.' 
       }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' }
+        headers: jsonHeaders
       });
     }
 
@@ -63,7 +103,7 @@ export async function onRequestPost(context) {
         message: 'Please enter a message of at least 5 characters.' 
       }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' }
+        headers: jsonHeaders
       });
     }
 
@@ -79,7 +119,7 @@ export async function onRequestPost(context) {
         message: 'The contact form is temporarily unavailable. Please email us directly at support@isitkitchensafe.com.'
       }), {
         status: 503,
-        headers: { 'Content-Type': 'application/json' }
+        headers: jsonHeaders
       });
     }
 
@@ -113,7 +153,7 @@ export async function onRequestPost(context) {
         message: 'Failed to deliver message via email provider. Please email us directly at support@isitkitchensafe.com.'
       }), {
         status: 502,
-        headers: { 'Content-Type': 'application/json' }
+        headers: jsonHeaders
       });
     }
 
@@ -122,7 +162,7 @@ export async function onRequestPost(context) {
       message: 'Message sent successfully.'
     }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' }
+      headers: jsonHeaders
     });
   } catch (err) {
     console.error('Contact endpoint exception:', err);
@@ -131,7 +171,7 @@ export async function onRequestPost(context) {
       message: 'An unexpected error occurred. Please email us directly at support@isitkitchensafe.com.'
     }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: jsonHeaders
     });
   }
 }

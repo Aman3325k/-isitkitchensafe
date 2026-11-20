@@ -4,7 +4,7 @@ A static kitchen safety reference platform and interactive consumer tool suite a
 
 ## Overview
 
-IsItKitchenSafe delivers **11,250+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **209 interactive tools** (**1,045 localized tool pages**, including **58 Google-indexed Everyday Consumer Kitchen Safety Tools**), **50 evergreen guides × 5 languages = 250 localized articles**, **93 comparisons × 5 languages = 465 localized pages**, **1,307 item pages per language (6,535 localized reference pages)**, **WCAG 2.1 AA accessibility**, and transparent E-E-A-T verification standards.
+IsItKitchenSafe delivers **11,275+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **209 interactive tools** (**1,045 localized tool pages**, including **58 Google-indexed Everyday Consumer Kitchen Safety Tools**), **53 evergreen guides × 5 languages = 265 localized articles**, **93 comparisons × 5 languages = 465 localized pages**, **1,307 item pages per language (6,535 localized reference pages)**, **WCAG 2.1 AA accessibility**, and transparent E-E-A-T verification standards.
 
 ## Tech Stack
 - **Framework**: Astro.js (MPA static generation)
@@ -54,8 +54,8 @@ All 209 interactive tools are split cleanly between everyday consumer utilities 
 - Plus recall scanning, thermal shock, culinary oil smoke point, cookware brand transparency, and hazard triage tools.
 
 ### Content & Comparison Verticals
-- **47 Evergreen Multilingual Blog Guides** (**47 evergreen guides × 5 languages = 235 localized articles**) with **100% 5-language slug parity** across EN, ES, PT, ZH-CN, and JA.
-- **88 High-Intent Brand & Material Comparisons** (`/compare/`, **88 comparisons × 5 languages = 440 localized pages**), covering popular cookware, drinkware, and kitchen material matchups across 5 languages.
+- **53 Evergreen Multilingual Blog Guides** (**53 evergreen guides × 5 languages = 265 localized articles**) with **100% 5-language slug parity** across EN, ES, PT, ZH-CN, and JA.
+- **93 High-Intent Brand & Material Comparisons** (`/compare/`, **93 comparisons × 5 languages = 465 localized pages**), covering popular cookware, drinkware, and kitchen material matchups across 5 languages.
 - **Original SVG Visual Safety Diagrams** embedded across all **7 appliance hubs** (Dishwasher, Microwave, Freezer, Oven, Dryer, Air Fryer, Refrigerator).
 
 ### E-E-A-T, Discovery, Accessibility & Retention Features
@@ -122,9 +122,9 @@ npm run ops:engine
 ```
 
 ## Scale & Metrics
-- **11,207+ Static Pages** across 11 verticals and 5 languages (EN, ES, PT, ZH-CN, JA)
-- **206 Interactive Tools** across 5 languages (**1,030 Localized Tool Pages**; 100% 5-language parity: **88 Home Kitchen Safety** + **118 Commercial Engineering**), including **55 Google-indexed Consumer Utilities** (`src/data/consumer-tools-allowlist.json`)
-- **47 Evergreen Guides × 5 Languages = 235 Articles** with 100% slug parity + **88 Comparisons × 5 Languages = 440 Pages**
+- **11,275+ Static Pages** across 11 verticals and 5 languages (EN, ES, PT, ZH-CN, JA)
+- **209 Interactive Tools** across 5 languages (**1,045 Localized Tool Pages**; 100% 5-language parity: **91 Home Kitchen Safety** + **118 Commercial Engineering**), including **58 Google-indexed Consumer Utilities** (`src/data/consumer-tools-allowlist.json`)
+- **53 Evergreen Guides × 5 Languages = 265 Articles** with 100% slug parity + **93 Comparisons × 5 Languages = 465 Pages**
 - **1,307 Items per Language (6,535 Localized Reference Pages)** with 100% slug parity including modern kitchenware (Le Creuset, Yeti Rambler, HexClad, Caraway, Owala FreeSip, Ninja Creami, Always Pan, Stasher, Instant Pot)
 - **WCAG 2.1 AA Accessibility** (`:focus-visible`, `prefers-reduced-motion`, ARIA landmarks) + **Live Instant Search** across `/tools/`, `/blog/`, `/how-long/`, `/refreeze/`, `/compare/`, `/material/`, and `/what-happens/`
 - **1,331,530+ Audited Links / 0 Broken Links** (100% internal href resolution verified)
