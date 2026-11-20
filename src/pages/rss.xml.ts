@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/wooden-cutting-board-pathogen-modeler/',
+    title: 'Wooden Cutting Board Deep-Groove Pathogen Desorption & Sanitization Modeler',
+    description:
+      'Model Salmonella and Campylobacter capillary trapping within wood xylem vessels vs knife scars in plastic, calculating dehydration kinetics and sanitization efficacy across maple, teak, and acacia.',
+    date: '2026-11-20',
+  },
+  {
     path: '/tools/plastic-water-kettle-microplastic-simulator/',
     title: 'Plastic Water Kettle Micro-Crack & Leaching Simulator',
     description:
