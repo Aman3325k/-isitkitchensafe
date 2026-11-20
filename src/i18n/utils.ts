@@ -240,6 +240,7 @@ const SPECIAL_PAGES = [
   'tools/air-fryer-liner-fire-hazard-simulator',
   'tools/electric-kettle-descaling-leaching-simulator',
   'tools/dishwasher-melamine-leaching-simulator',
+  'tools/plastic-water-kettle-microplastic-simulator',
   'methodology',
   'saved'
 ];

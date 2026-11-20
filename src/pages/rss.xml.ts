@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/plastic-water-kettle-microplastic-simulator/',
+    title: 'Plastic Water Kettle Micro-Crack & Leaching Simulator',
+    description:
+      'Calculate microplastic particle shedding (particles/L) and nickel leaching from polypropylene electric kettles, micro-crack degradation, boiling cycles, and acidic descaling. Nature Food (2020) & WHO standards.',
+    date: '2026-11-20',
+  },
+  {
     path: '/tools/dishwasher-melamine-leaching-simulator/',
     title: 'Dishwasher Melamine Formaldehyde & Cyanuric Acid Leaching Simulator',
     description:

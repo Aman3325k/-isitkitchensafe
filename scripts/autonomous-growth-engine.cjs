@@ -2,7 +2,7 @@
  * IsItKitchenSafe Autonomous Growth & Ops Engine (v2.0 - All-Day Smart Engine)
  * 
  * Continuous Operations & Growth Engine:
- * - 209 Interactive Diagnostic Tools Health & 5-Language Slug Parity (EN, ES, PT, JA, ZH-CN)
+ * - 210 Interactive Diagnostic Tools Health & 5-Language Slug Parity (EN, ES, PT, JA, ZH-CN)
  * - Cloudflare Pages _redirects budget monitor (2,000 line ceiling) & Edge Middleware sync
  * - Multi-Language Corpus & Database Integrity (66+ critical data assets)
  * - Structured Data (JSON-LD FAQPage, BreadcrumbList & Article/WebApplication) compliance audit
@@ -27,7 +27,7 @@ if (!fs.existsSync(LOGS_DIR)) {
   fs.mkdirSync(LOGS_DIR, { recursive: true });
 }
 
-// 209 Flagship Interactive Tools Registry
+// 210 Flagship Interactive Tools Registry
 const TOOLS_REGISTRY = [
   { slug: 'pan-scratch-inspector', name: 'AI Pan Scratch & Coating Damage Inspector', category: 'Materials', component: 'PanScratchInspector.astro' },
   { slug: 'cookware-brand-transparency-index', name: 'Cookware Brand Transparency & Greenwashing Index', category: 'Materials', component: 'CookwareBrandIndex.astro' },
@@ -238,7 +238,8 @@ const TOOLS_REGISTRY = [
   { slug: 'microwave-steam-splash-simulator', name: 'Microwave Steam Splash, Venting & Warped Container Leaching Simulator', category: 'Consumer Kitchen Safety', component: 'MicrowaveSteamSplashSimulator.astro', dataFile: 'microwave-steam-splash-data.json' },
   { slug: 'air-fryer-liner-fire-hazard-simulator', name: 'Air Fryer Parchment vs. Silicone Liner Airflow & Fire Hazard Simulator', category: 'Consumer Kitchen Safety', component: 'AirFryerLinerFireHazardSimulator.astro', dataFile: 'air-fryer-liner-fire-hazard-data.json' },
   { slug: 'electric-kettle-descaling-leaching-simulator', name: 'Electric Kettle Nickel, Microplastics & Descaling Leaching Simulator', category: 'Consumer Kitchen Safety', component: 'ElectricKettleDescalingSimulator.astro', dataFile: 'electric-kettle-descaling-leaching-data.json' },
-  { slug: 'dishwasher-melamine-leaching-simulator', name: 'Dishwasher Melamine Formaldehyde & Cyanuric Acid Leaching Simulator', category: 'Consumer Kitchen Safety', component: 'DishwasherMelamineLeachingSimulator.astro', dataFile: 'dishwasher-melamine-leaching-data.json' }
+  { slug: 'dishwasher-melamine-leaching-simulator', name: 'Dishwasher Melamine Formaldehyde & Cyanuric Acid Leaching Simulator', category: 'Consumer Kitchen Safety', component: 'DishwasherMelamineLeachingSimulator.astro', dataFile: 'dishwasher-melamine-leaching-data.json' },
+  { slug: 'plastic-water-kettle-microplastic-simulator', name: 'Plastic Water Kettle Micro-Crack Heating Element Leaching Simulator', category: 'Consumer Kitchen Safety', component: 'PlasticWaterKettleMicroplasticSimulator.astro', dataFile: 'plastic-water-kettle-microplastic-data.json' }
 ];
 
 const LOCALES = ['en', 'es', 'pt', 'zh-cn', 'ja'];

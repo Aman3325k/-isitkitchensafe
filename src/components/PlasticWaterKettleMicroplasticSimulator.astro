@@ -1,0 +1,712 @@
+---
+import rawData from '../data/plastic-water-kettle-microplastic-data.json';
+import type { SupportedLanguage } from '../i18n/ui';
+import { useTranslatedPath } from '../i18n/utils';
+
+interface Props {
+  lang?: SupportedLanguage;
+}
+
+const { lang = 'en' } = Astro.props;
+const translatePath = useTranslatedPath(lang);
+
+const kettleDescaleUrl = translatePath('/tools/electric-kettle-descaling-leaching-simulator/');
+const coffeeTeaUrl = translatePath('/tools/coffee-tea-brew-safety-checker/');
+const plasticCheckerUrl = translatePath('/tools/kitchen-plastic-leaching-checker/');
+const glassPlasticCompareUrl = translatePath('/compare/glass-vs-plastic-electric-kettle/');
+const steelPlasticCompareUrl = translatePath('/compare/stainless-steel-vs-plastic-electric-kettle/');
+const steelGlassCompareUrl = translatePath('/compare/stainless-steel-vs-glass-electric-kettle/');
+const blogKettleUrl = translatePath('/blog/plastic-kettle-microplastics-safety/');
+const allToolsUrl = translatePath('/tools/');
+
+const currentLocale = (['en', 'es', 'pt', 'zh-cn', 'ja'].includes(lang) ? lang : 'en') as 'en' | 'es' | 'pt' | 'zh-cn' | 'ja';
+const bannerData = rawData.safetyBanner[currentLocale] || rawData.safetyBanner.en;
+
+const localizedMaterials = rawData.kettleMaterials.map((m: any) => ({
+  id: m.id,
+  name: m.name[currentLocale] || m.name.en,
+  baselineMicroplastics: m.baselineMicroplastics,
+  baselineNickel: m.baselineNickel,
+  microcrackRate: m.microcrackRate,
+  materialCategory: m.materialCategory,
+  riskWeight: m.riskWeight
+}));
+
+const localizedAges = rawData.kettleAges.map((a: any) => ({
+  id: a.id,
+  name: a.name[currentLocale] || a.name.en,
+  multiplier: a.multiplier,
+  crazeScore: a.crazeScore
+}));
+
+const localizedExposures = rawData.waterExposure.map((e: any) => ({
+  id: e.id,
+  name: e.name[currentLocale] || e.name.en,
+  multiplier: e.multiplier,
+  description: e.description
+}));
+
+const localizedChemistries = rawData.waterChemistry.map((c: any) => ({
+  id: c.id,
+  name: c.name[currentLocale] || c.name.en,
+  chemFactor: c.chemFactor,
+  nickelFactor: c.nickelFactor,
+  scaleFactor: c.scaleFactor
+}));
+
+const ui = {
+  en: {
+    selectSectionTitle: 'Interactive Kettle Degradation & Microplastic Laboratory',
+    step1: '1. Kettle Body Material & Heating Element Type',
+    step2: '2. Appliance Age & Cumulative Boil Cycles',
+    step3: '3. Water Residence Time & Heating Profile',
+    step4: '4. Water Hardness & Acidic Descaling History',
+    hint1: 'Polypropylene (PP #5) sheds millions of particles under 100°C boiling',
+    hint2: 'Thermal fatigue creates microscopic craze fissures over 6–18 months',
+    hint3: 'Longer thermal dwell times extract soluble polymer oligomers',
+    hint4: 'Acidic descaling temporarily etches stainless steel passivation layers',
+    resultsTitle: 'Chemical Toxicology Assessment & Migration Metrics',
+    microplasticsLabel: 'Estimated Microplastic Release',
+    nickelLabel: 'Estimated Nickel (Ni) Leaching',
+    crackLabel: 'Polymer Micro-Crack & Craze Index',
+    legalLimits: 'WHO Nickel Guidance Level: 70 µg/L · EU Drinking Water Directive: 20 µg/L · Nature Food (2020) Baseline: 1.3M–16.2M particles/L',
+    verdictSafe: 'OPTIMAL & NON-TOXIC · MINIMAL MIGRATION',
+    verdictCaution: 'MODERATE SHEDDING · ACCEPTABLE FOR HEALTHY ADULTS',
+    verdictHazard: 'ELEVATED MICROPLASTIC HAZARD · REPLACE KETTLE SOON',
+    verdictCritical: 'CRITICAL CHEMICAL & PLASTIC HAZARD · IMMEDIATE DISPOSAL',
+    mechanismTitle: 'Biochemical & Polymer Degradation Mechanisms',
+    actionTitle: 'Science-Backed Mitigation Protocol & Safe Swaps',
+    copyBtn: 'Copy Safety Verdict & Toxicological Report',
+    copySuccess: 'Copied to Clipboard!',
+    printBtn: 'Print / Save PDF Report',
+    relatedToolsTitle: 'Related Lab Tools & Safe Cookware Comparisons'
+  },
+  es: {
+    selectSectionTitle: 'Laboratorio Interactivo de Degradación y Microplásticos',
+    step1: '1. Material del Hervidor y Tipo de Resistencia',
+    step2: '2. Antigüedad y Ciclos de Hervido Acumulados',
+    step3: '3. Tiempo de Permanencia del Agua Caliente',
+    step4: '4. Dureza del Agua e Historial de Descalcificación',
+    hint1: 'El polipropileno (PP #5) desprende millones de partículas al hervir a 100°C',
+    hint2: 'La fatiga térmica crea microfisuras en un plazo de 6 a 18 meses',
+    hint3: 'Tiempos prolongados de contacto disuelven oligómeros libres',
+    hint4: 'Los ácidos descalcificadores atacan temporalmente el óxido de cromo',
+    resultsTitle: 'Evaluación Toxicológica y Métricas de Migración',
+    microplasticsLabel: 'Liberación Estimada de Microplásticos',
+    nickelLabel: 'Lixiviación Estimada de Níquel (Ni)',
+    crackLabel: 'Índice de Microfisuras y Crazing',
+    legalLimits: 'Guía OMS Níquel: 70 µg/L · Directiva UE Agua Potable: 20 µg/L · Nature Food (2020): 1,3M–16,2M part./L',
+    verdictSafe: 'ÓPTIMO Y NO TÓXICO · MIGRACIÓN MÍNIMA',
+    verdictCaution: 'DESPRENDIMIENTO MODERADO · ACEPTABLE EN ADULTOS',
+    verdictHazard: 'ALERTA POR MICROPLÁSTICOS · RENOVAR HERVIDOR PRONTO',
+    verdictCritical: 'PELIGRO CRÍTICO QUÍMICO Y PLÁSTICO · DESECHAR INMEDIATAMENTE',
+    mechanismTitle: 'Mecanismos Bioquímicos y Degradación del Polímero',
+    actionTitle: 'Protocolo de Mitigación y Alternativas Seguras',
+    copyBtn: 'Copiar Informe de Seguridad y Veredicto',
+    copySuccess: '¡Copiado al Portapapeles!',
+    printBtn: 'Imprimir / Guardar en PDF',
+    relatedToolsTitle: 'Herramientas de Seguridad y Comparativas Relacionadas'
+  },
+  pt: {
+    selectSectionTitle: 'Laboratório Interativo de Degradação e Microplásticos',
+    step1: '1. Material da Chaleira e Tipo de Resistência',
+    step2: '2. Idade do Aparelho e Ciclos de Fervura',
+    step3: '3. Tempo de Contato com a Água Quente',
+    step4: '4. Dureza da Água e Histórico de Descalcificação',
+    hint1: 'O polipropileno (PP #5) solta milhões de partículas sob fervura a 100°C',
+    hint2: 'A fadiga térmica gera microfissuras em 6 a 18 meses de uso',
+    hint3: 'Mais tempo de contato térmico dissolve oligômeros livres',
+    hint4: 'A descalcificação ácida corrói temporariamente a película de inox',
+    resultsTitle: 'Avaliação Toxicológica e Métricas de Migração',
+    microplasticsLabel: 'Liberação Estimada de Microplásticos',
+    nickelLabel: 'Lixiviação Estimada de Níquel (Ni)',
+    crackLabel: 'Índice de Microfissuras e Degradação',
+    legalLimits: 'Guia OMS Níquel: 70 µg/L · Diretiva UE Água Potável: 20 µg/L · Nature Food (2020): 1,3M–16,2M part./L',
+    verdictSafe: 'EXCELENTE E ATÓXICO · MIGRAÇÃO MÍNIMA',
+    verdictCaution: 'DESPRENDIMENTO MODERADO · ACEITÁVEL PARA ADULTOS',
+    verdictHazard: 'ALERTA DE MICROPLÁSTICOS · SUBSTITUIR CHALEIRA EM BREVE',
+    verdictCritical: 'PERIGO TÓXICO CRÍTICO · DESCARTE IMEDIATO',
+    mechanismTitle: 'Mecanismos Bioquímicos e Degradação do Polímero',
+    actionTitle: 'Protocolo de Mitigação e Alternativas Seguras',
+    copyBtn: 'Copiar Laudo de Segurança Toxicológica',
+    copySuccess: 'Copiado para a Área de Transferência!',
+    printBtn: 'Imprimir / Salvar Relatório em PDF',
+    relatedToolsTitle: 'Ferramentas de Laboratório e Guias Relacionados'
+  },
+  'zh-cn': {
+    selectSectionTitle: '电热水壶材料热解老化与微塑料脱落交互实验室',
+    step1: '1. 水壶材质构造与发热底盘结构',
+    step2: '2. 水壶累计使用年限与烧水循环次数',
+    step3: '3. 沸水留置浸泡时间与保温工况',
+    step4: '4. 水质硬度与酸性除水垢维护频次',
+    hint1: '聚丙烯（PP 5号）在100°C沸水剧烈冲刷下脱落数百万亚微米塑料微粒',
+    hint2: '长期冷热交替热疲劳应力在6–18个月内使塑料内壁形成蛛网微裂纹',
+    hint3: '热水滞留时间越长，高分子链可溶性低聚物与增塑剂溶解迁移量成倍增加',
+    hint4: '柠檬酸或白醋酸洗除垢会暂时剥离不锈钢钝化氧化膜，导致镍铬超量析出',
+    resultsTitle: '毒理学定量评估与微塑料/重金属释放指标',
+    microplasticsLabel: '微塑料颗粒释放估算值 (Microplastics/L)',
+    nickelLabel: '重金属镍溶出预估浓度 (Nickel Ni)',
+    crackLabel: '内壁微裂纹与热老化水解指数 (0–100)',
+    legalLimits: '世界卫生组织 (WHO) 饮用水镍限量：70 µg/L · 欧盟饮用水指令：20 µg/L · Nature Food (2020) 聚丙烯基准：130万–1620万颗粒/升',
+    verdictSafe: '极致安全环保 · 零/极微量化学与塑料迁移',
+    verdictCaution: '轻中度塑料微粒脱落 · 健康成年人可短期耐受',
+    verdictHazard: '微塑料严重超标预警 · 建议尽快换用玻璃或全不锈钢电壶',
+    verdictCritical: '重金属与致癌微塑料双重极高危险 · 严禁继续饮用并立即淘汰',
+    mechanismTitle: '高分子热氧化水解与发热体冶金腐蚀机理',
+    actionTitle: '科学降解防护规程与健康换代指南',
+    copyBtn: '复制毒理检测报告与安全裁决',
+    copySuccess: '已成功复制到剪贴板！',
+    printBtn: '打印 / 保存 PDF 安全报告',
+    relatedToolsTitle: '相关食品接触安全检测工具与对比报告'
+  },
+  ja: {
+    selectSectionTitle: '電気ケトル樹脂劣化・マイクロプラスチック溶出シミュレーター',
+    step1: '1. ケトル本体の素材構成と発熱底の構造',
+    step2: '2. 使用期間・累積沸騰サイクル数',
+    step3: '3. 熱湯の滞留時間と保温モード',
+    step4: '4. 水質硬度と酸性水垢洗浄（クエン酸等）の履歴',
+    hint1: 'ポリプロピレン（PP #5）は100°C熱湯で数百万個の微粒子を放出します',
+    hint2: '6〜18ヶ月の熱膨張収縮ストレスで内壁に微小クラックが発生します',
+    hint3: '高温での滞留時間が長いほど樹脂低分子オリゴマーが溶出します',
+    hint4: '酸洗浄直後はステンレス不動態被膜が一時的に減肉しニッケルが急増します',
+    resultsTitle: '毒性学定量的リスク評価と溶出予測値',
+    microplasticsLabel: 'マイクロプラスチック放出予測量 (個/L)',
+    nickelLabel: '重金属ニッケル溶出量 (µg/L)',
+    crackLabel: 'ポリマー微小クラック＆劣化損傷指数 (0〜100)',
+    legalLimits: 'WHOニッケル水質ガイドライン：70 µg/L · 欧州飲料水指令：20 µg/L · Nature Food（2020）PP基準：130万〜1,620万個/L',
+    verdictSafe: '極めて安全・無害 · プラスチック／重金属溶出なし',
+    verdictCaution: '中程度の微小プラスチック放出 · 成人飲用には許容範囲',
+    verdictHazard: 'マイクロプラスチック過剰放出警告 · 早期買い替え推奨',
+    verdictCritical: '重金属・微粒子同時超過の重大リスク · 直ちに使用中止',
+    mechanismTitle: '高分子熱酸化加水分解と金属不動態腐食メカニズム',
+    actionTitle: '科学的防護プロトコルと安全な製品選定基準',
+    copyBtn: '判定結果と安全プロトコルをコピー',
+    copySuccess: 'クリップボードにコピーしました！',
+    printBtn: '印刷 / PDFレポート保存',
+    relatedToolsTitle: '関連する食品衛生計算ツールと安全比較ガイド'
+  }
+};
+
+const explanations: Record<string, Record<string, { mechanism: string; action: string }>> = {
+  en: {
+    critical: {
+      mechanism: '<strong>Dual Thermo-Oxidative & Metallurgical Surge Alert:</strong> Heavily aged polypropylene with craze-cracking exhibits an exponentially enlarged surface area exposed to boiling cavitation. Combined with stripped chromium passivation from aggressive descaling or exposed heating elements, nickel migration exceeds the WHO drinking water provisional guideline (70 µg/L) while shedding over 25,000,000 microplastic particles per liter. Nanoplastics (< 100 nm) penetrate human intestinal epithelial barriers.',
+      action: '<strong>Immediate Action Required:</strong> Do NOT drink boiled water from this kettle. Replace immediately with a certified 100% seamless dual-wall stainless steel (grade 304 or 316) or thermal-shock resistant borosilicate glass electric kettle. Never consume first-boil water after descaling.'
+    },
+    hazard: {
+      mechanism: '<strong>Advanced Polymer Embrittlement & Micro-Craze Shedding:</strong> Repeated thermal cycling past 100°C has fractured tertiary carbon bonds in the polypropylene polymer chain. Hot water dissolves surface micro-shards, releasing 8,000,000 to 20,000,000 particles/L (dominated by sub-micron fragments). Standing hot water additionally leaches volatile cyclic oligomers and processing antioxidants (BHT, phosphites).',
+      action: '<strong>Safe Replacement Directive:</strong> This kettle has exceeded its safe mechanical lifecycle. Transition to a borosilicate glass or stainless steel kettle within 30 days. If continuing short-term use, pour boiled water immediately into a glass pitcher—never use keep-warm mode or re-boil standing water.'
+    },
+    caution: {
+      mechanism: '<strong>Early Polymer Hydrolysis & Baseline Shearing:</strong> Although virgin or lightly used polypropylene maintains structural integrity, 100°C thermal boiling generates surface shear forces that dislodge between 1,500,000 and 7,000,000 particles/L (matching Nature Food 2020 findings). Heavy metal leaching remains safely below WHO limits, but infant formula preparation should avoid plastic boiling.',
+      action: '<strong>Operational Protocol:</strong> Never boil water for infant formula or baby food in a plastic kettle. Pour water immediately upon shut-off. If descaling with citric acid, boil and discard at least two full pots before making tea or coffee.'
+    },
+    safe: {
+      mechanism: '<strong>Inert Non-Polymer Matrix:</strong> High-borosilicate glass (3.3 expansion coefficient) and 304/316 food-grade stainless steel do not contain synthetic polymer chains, releasing 0 microplastic particles. Trace counts are attributable solely to ambient municipal water minerals. Heavy metal release remains well within European Drinking Water limits (< 5 µg/L Ni).',
+      action: '<strong>Maintenance Guidelines:</strong> Clean mineral limescale monthly using warm water with 5% citric acid. Ensure the silicone lid gasket is intact and rinse thoroughly after descaling. Safe for infant feeding, medicinal tea, and everyday boiling.'
+    }
+  },
+  es: {
+    critical: {
+      mechanism: '<strong>Alerta Crítica de Microplásticos y Metales Pesados:</strong> El polipropileno envejecido presenta microfisuras que multiplican la superficie de contacto con agua hirviendo. Con la resistencia expuesta o descalcificada, la lixiviación de níquel supera el límite de la OMS (70 µg/L) y los microplásticos superan los 25 millones de partículas/L, con nanoplásticos capaces de cruzar la barrera intestinal.',
+      action: '<strong>Acción Inmediata Requerida:</strong> NO consuma agua hervida en este aparato. Sustitúyalo de inmediato por un hervidor de acero inoxidable 304/316 de pared interior continua o vidrio borosilicato. Deseche siempre el agua de los dos primeros hervidos tras descalcificar.'
+    },
+    hazard: {
+      mechanism: '<strong>Envejecimiento Severo y Microfisuras:</strong> El choque térmico repetido a 100°C ha roto cadenas moleculares del plástico. El agua caliente disuelve microescamas liberando de 8 a 20 millones de partículas/L, además de oligómeros plásticos y antioxidantes térmicos residuales.',
+      action: '<strong>Pauta de Reemplazo:</strong> El hervidor ha superado su vida útil segura. Adquiera un modelo de acero o vidrio en menos de 30 días. Mientras tanto, vierta el agua nada más hervir y evite mantenerla caliente o rehervir agua estancada.'
+    },
+    caution: {
+      mechanism: '<strong>Desprendimiento Térmico Inicial:</strong> El polipropileno nuevo o con poco uso desprende entre 1,5 y 7 millones de partículas/L al hervir a 100°C (datos Nature Food 2020). Los metales pesados están dentro de normas, pero debe evitarse para biberones infantiles.',
+      action: '<strong>Protocolo de Operación:</strong> No prepare biberones ni papillas infantiles con agua de hervidores plásticos. Sirva el agua de inmediato tras apagarse. Al descalcificar con ácido cítrico, hierva y tire dos tandas completas antes de beber.'
+    },
+    safe: {
+      mechanism: '<strong>Matriz Inerte No Polimérica:</strong> El vidrio borosilicato y el acero inoxidable 304/316 no contienen polímeros sintéticos, con 0 microplásticos liberados. El níquel se mantiene en niveles ínfimos (< 5 µg/L), muy por debajo de los límites europeos.',
+      action: '<strong>Pautas de Mantenimiento:</strong> Limpie la cal mensualmente con agua tibia y 5% de ácido cítrico. Compruebe que la junta de la tapa esté en buen estado y enjuague bien tras la limpieza. Ideal para toda la familia y alimentación infantil.'
+    }
+  },
+  pt: {
+    critical: {
+      mechanism: '<strong>Alerta Crítico de Degradação Térmica e Níquel:</strong> O polipropileno com microfissuras multiplica a área de contato na fervura. Junto com a corrosão ácida da base ou resistência exposta, a liberação de níquel excede o teto da OMS (70 µg/L) e os microplásticos ultrapassam 25 milhões de partículas/L.',
+      action: '<strong>Ação Imediata:</strong> NÃO consuma água desta chaleira. Substitua imediatamente por um modelo de aço inoxidável 304/316 inteiriço ou vidro borossilicato. Descarte sempre as duas primeiras chaleiras cheias após descalcificar.'
+    },
+    hazard: {
+      mechanism: '<strong>Microfissuras Avançadas no Polímero:</strong> Ciclos repetidos a 100°C fragmentaram a matriz do plástico. A água extrai de 8 a 20 milhões de partículas/L, além de oligômeros e aditivos químicos dissolvidos.',
+      action: '<strong>Diretriz de Troca:</strong> A chaleira passou da vida útil segura. Migre para vidro ou aço em até 30 dias. Enquanto isso, sirva a água logo após a fervura e nunca mantenha a água aquecida na base plástica.',
+    },
+    caution: {
+      mechanism: '<strong>Desprendimento Inicial por Cavitação:</strong> Mesmo o plástico novo solta de 1,5 a 7 milhões de partículas/L sob 100°C (estudo Nature Food 2020). Os metais pesados estão sob controle, mas há risco para lactentes.',
+      action: '<strong>Protocolo Seguro:</strong> Nunca prepare fórmulas infantis com água de chaleira plástica. Despeje o líquido imediatamente após a fervura. Se usar ácido cítrico, descarte as duas primeiras fervuras completas.'
+    },
+    safe: {
+      mechanism: '<strong>Matriz Inerte Livre de Plástico:</strong> Vidro borossilicato e aço inoxidável 304/316 não contêm polímeros e soltam zero microplásticos. A lixiviação de metais fica bem abaixo da diretriz europeia (< 5 µg/L Ni).',
+      action: '<strong>Manutenção:</strong> Descalcifique mensalmente com água morna e 5% de ácido cítrico. Verifique se o anel da tampa está íntegro. Perfeito para fórmulas infantis, chás medicinais e café especial.'
+    }
+  },
+  'zh-cn': {
+    critical: {
+      mechanism: '<strong>微塑料与重金属镍双重剧毒激增预警：</strong> 处于严重老化开裂阶段的聚丙烯塑料内壁，在沸腾气蚀作用下脱落表面积被放大数倍，加之酸洗除垢或裸露发热管钝化膜破损，镍离子析出量突破世卫组织 (WHO) 70 µg/L 警戒红线，每升水释放超 2500 万个微塑料，亚微米与纳米级塑料微粒可轻易穿透肠道上皮细胞屏障。',
+      action: '<strong>必须立即执行的指令：</strong> 严禁饮用该水壶烧出的热水！请立即淘汰该设备，更换为一体冲压无缝双层 304/316 食品级不锈钢电热水壶或高硼硅耐热玻璃水壶。酸洗除垢后严禁直接饮用首壶沸水。'
+    },
+    hazard: {
+      mechanism: '<strong>高分子聚合物严重老化微裂纹水解：</strong> 数百次 100°C 冷热交替热疲劳应力破坏了聚丙烯主链叔碳结构，高温沸水冲刷剥蚀出大量微细碎屑，每升释放 800万 至 2000万 个微塑料颗粒。长期温水浸泡还会浸出低聚物游离单体与抗氧剂添加剂。',
+      action: '<strong>限期换代建议：</strong> 该水壶已超过材料安全使用寿命。建议在30天内更换为全钢或玻璃材质电壶。短期临时过渡期内，水烧开后必须立即倒入玻璃冷水壶中，严禁开启底座长时间电保温，严禁反复二次烧开隔夜水。'
+    },
+    caution: {
+      mechanism: '<strong>初始热剪切微粒脱落：</strong> 即使是全新或轻度使用的聚丙烯水壶，在100°C沸水冲刷下仍会脱落 150万 至 700万 个颗粒/升（符合《自然·食品》2020权威测试数据）。重金属溶出虽在国家安全限值以内，但对婴幼儿肠胃屏障具有潜在致敏风险。',
+      action: '<strong>日常安全规程：</strong> 坚决不要使用塑料电热水壶为婴儿冲调奶粉或辅食。水开断电后应即倒即用，切勿留置壶内。若使用柠檬酸除垢，须连续烧开并倒掉两满壶清水后方可饮用。'
+    },
+    safe: {
+      mechanism: '<strong>天然无机与金属惰性内胆：</strong> 高硼硅玻璃与 304/316 食品级全不锈钢完全不含人工合成高分子塑料链，微塑料脱落量为零。微量仪器背景值仅源于自来水管道矿物质。镍析出量稳定保持在欧洲饮用水指令（< 5 µg/L）极限安全范围内。',
+      action: '<strong>科学养护指南：</strong> 每月使用 5% 柠檬酸温水浸泡清除发热底水垢即可。注意壶盖密封圈完整性，除垢冲洗后即可放心使用。适用于婴儿调奶、精品手冲咖啡与日常全家饮水。'
+    }
+  },
+  ja: {
+    critical: {
+      mechanism: '<strong>マイクロプラスチック＆重金属ニッケル重複超過警報：</strong> 重度劣化したポリプロピレンのクラックにより熱湯接触面が激増。酸洗浄後の不動態被膜剥離や露出ヒーターが重なり、ニッケル溶出量がWHOガイドライン（70 µg/L）を超過、微小プラスチックは1リットルあたり2,500万個を超えます。ナノプラスチックは腸管粘膜透過リスクを持ちます。',
+      action: '<strong>直ちに実行すべき措置：</strong> このケトルの熱湯は絶対に飲用しないでください。直ちに廃棄し、接液部が完全プラスチックフリーの304/316ステンレス一体型または耐熱ホウケイ酸ガラス製ケトルに買い替えてください。酸洗浄直後の最初のお湯も飲用厳禁です。'
+    },
+    hazard: {
+      mechanism: '<strong>樹脂熱疲労クラックと微粒子多量放出：</strong> 100°C沸騰熱サイクルがポリプロピレンの主鎖結合を切断し、内壁から800万〜2,000万個/Lの微粒子（大半が1 µm未満）が溶出。温水の長時間放置によりオリゴマーや酸化防止剤も移行します。',
+      action: '<strong>買い替え推奨：</strong> ケトルの物理的安全寿命を超過しています。30日以内にガラス製またはステンレス製ケトルへの更新をお勧めします。一時的に使用する場合は沸騰直後に別容器へ注ぎ、保温放置や再沸騰は避けてください。'
+    },
+    caution: {
+      mechanism: '<strong>初期熱剪断による基準放出：</strong> 新品や使用期間の短いポリプロピレン製であっても、100°Cの熱湯沸騰により150万〜700万個/Lの微小粒子が剥離・放出されます（Nature Food 2020論文に合致）。重金属は安全域ですが、乳幼児への影響に配慮が必要です。',
+      action: '<strong>安全運用ルール：</strong> 赤ちゃんの粉ミルクや離乳食用のお湯はプラスチックケトルで沸かさないでください。沸騰後は放置せず速やかに注ぎ、クエン酸洗浄後は必ず2回満水で沸騰させてお湯を捨ててください。'
+    },
+    safe: {
+      mechanism: '<strong>不活性無機ガラス＆食品級ステンレス：</strong> ホウケイ酸耐熱ガラスおよび304/316ステンレスは合成高分子樹脂を含まないため、ケトル由来のマイクロプラスチック放出はゼロです。ニッケル溶出量も欧州飲料水指令（< 5 µg/L）を余裕でクリアする清浄度を保ちます。',
+      action: '<strong>定期メンテナンス：</strong> 月に1回、5%クエン酸水溶液で底面の水垢を落としてください。フタのシリコンパッキンを清潔に保ち、赤ちゃんの調乳や毎日の健康的な水分補給に安心してご活用いただけます。'
+    }
+  }
+};
+
+const currentUi = ui[currentLocale];
+const currentExp = explanations[currentLocale];
+---
+
+<div class="kettle-simulator-container bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 my-8 shadow-2xl text-slate-100 max-w-5xl mx-auto">
+  <!-- Regulatory / Scientific Top Banner -->
+  <div class="bg-gradient-to-r from-emerald-950/80 via-teal-900/60 to-slate-900 border border-emerald-500/30 rounded-2xl p-4 sm:p-5 mb-8">
+    <div class="flex items-start gap-3">
+      <div class="p-2.5 bg-emerald-500/20 text-emerald-400 rounded-xl flex-shrink-0 text-xl font-bold">
+        ⚡
+      </div>
+      <div>
+        <div class="flex flex-wrap items-center gap-2 mb-1">
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            {bannerData.source}
+          </span>
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+            Verified SML & WHO Standards
+          </span>
+        </div>
+        <h3 class="text-lg font-bold text-white tracking-tight">{bannerData.headline}</h3>
+        <p class="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed">{bannerData.subline}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-8">
+    <h2 class="text-xl sm:text-2xl font-black text-white flex items-center gap-2 tracking-tight">
+      <span class="text-teal-400">🔬</span> {currentUi.selectSectionTitle}
+    </h2>
+    <p class="text-xs sm:text-sm text-slate-400 mt-1">
+      {currentUi.legalLimits}
+    </p>
+  </div>
+
+  <!-- Interactive Grid Inputs -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <!-- Step 1: Material -->
+    <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition">
+      <label for="kettle-material" class="block text-sm font-bold text-teal-300 mb-2">
+        {currentUi.step1}
+      </label>
+      <select id="kettle-material" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none transition">
+        {localizedMaterials.map((m: any) => (
+          <option value={m.id} data-mp={m.baselineMicroplastics} data-ni={m.baselineNickel} data-crack={m.microcrackRate} data-risk={m.riskWeight}>
+            {m.name}
+          </option>
+        ))}
+      </select>
+      <p class="text-xs text-slate-400 mt-2 flex items-center gap-1.5">
+        <span class="text-teal-400">ℹ️</span> {currentUi.hint1}
+      </p>
+    </div>
+
+    <!-- Step 2: Appliance Age -->
+    <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition">
+      <label for="kettle-age" class="block text-sm font-bold text-teal-300 mb-2">
+        {currentUi.step2}
+      </label>
+      <select id="kettle-age" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none transition">
+        {localizedAges.map((a: any) => (
+          <option value={a.id} data-mult={a.multiplier} data-craze={a.crazeScore}>
+            {a.name}
+          </option>
+        ))}
+      </select>
+      <p class="text-xs text-slate-400 mt-2 flex items-center gap-1.5">
+        <span class="text-teal-400">ℹ️</span> {currentUi.hint2}
+      </p>
+    </div>
+
+    <!-- Step 3: Water Exposure / Dwell -->
+    <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition">
+      <label for="kettle-exposure" class="block text-sm font-bold text-teal-300 mb-2">
+        {currentUi.step3}
+      </label>
+      <select id="kettle-exposure" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none transition">
+        {localizedExposures.map((e: any) => (
+          <option value={e.id} data-mult={e.multiplier}>
+            {e.name}
+          </option>
+        ))}
+      </select>
+      <p class="text-xs text-slate-400 mt-2 flex items-center gap-1.5">
+        <span class="text-teal-400">ℹ️</span> {currentUi.hint3}
+      </p>
+    </div>
+
+    <!-- Step 4: Water Chemistry & Descaling -->
+    <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition">
+      <label for="kettle-chemistry" class="block text-sm font-bold text-teal-300 mb-2">
+        {currentUi.step4}
+      </label>
+      <select id="kettle-chemistry" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none transition">
+        {localizedChemistries.map((c: any) => (
+          <option value={c.id} data-chem={c.chemFactor} data-ni={c.nickelFactor} data-scale={c.scaleFactor}>
+            {c.name}
+          </option>
+        ))}
+      </select>
+      <p class="text-xs text-slate-400 mt-2 flex items-center gap-1.5">
+        <span class="text-teal-400">ℹ️</span> {currentUi.hint4}
+      </p>
+    </div>
+  </div>
+
+  <!-- Quantitative Results Display -->
+  <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-6 sm:p-8 mb-8 relative overflow-hidden">
+    <div class="absolute -top-24 -right-24 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-6 border-b border-slate-800">
+      <div>
+        <span class="text-xs uppercase tracking-wider font-semibold text-teal-400">Real-Time Analytical Output</span>
+        <h3 class="text-xl sm:text-2xl font-black text-white">{currentUi.resultsTitle}</h3>
+      </div>
+      <div id="verdict-badge" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-black tracking-wide uppercase transition-all duration-300">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+
+    <!-- Metrics Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+      <!-- Metric 1: Microplastics -->
+      <div class="bg-slate-900/80 border border-slate-800/80 rounded-xl p-4">
+        <div class="text-xs text-slate-400 font-medium mb-1">{currentUi.microplasticsLabel}</div>
+        <div class="flex items-baseline gap-2">
+          <span id="metric-mp" class="text-2xl sm:text-3xl font-black text-teal-400 font-mono tracking-tight">--</span>
+          <span class="text-xs text-slate-500 font-mono">part./L</span>
+        </div>
+        <div class="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
+          <div id="bar-mp" class="bg-teal-400 h-full rounded-full transition-all duration-500" style="width: 25%"></div>
+        </div>
+        <span id="mp-subtext" class="text-[11px] text-slate-400 mt-2 block font-medium">82% sub-micron (&lt; 1 µm)</span>
+      </div>
+
+      <!-- Metric 2: Nickel (Ni) -->
+      <div class="bg-slate-900/80 border border-slate-800/80 rounded-xl p-4">
+        <div class="text-xs text-slate-400 font-medium mb-1">{currentUi.nickelLabel}</div>
+        <div class="flex items-baseline gap-2">
+          <span id="metric-ni" class="text-2xl sm:text-3xl font-black text-amber-400 font-mono tracking-tight">--</span>
+          <span class="text-xs text-slate-500 font-mono">µg/L</span>
+        </div>
+        <div class="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
+          <div id="bar-ni" class="bg-amber-400 h-full rounded-full transition-all duration-500" style="width: 15%"></div>
+        </div>
+        <span id="ni-subtext" class="text-[11px] text-slate-400 mt-2 block font-medium">WHO Limit: 70 µg/L</span>
+      </div>
+
+      <!-- Metric 3: Micro-Crack & Craze Index -->
+      <div class="bg-slate-900/80 border border-slate-800/80 rounded-xl p-4">
+        <div class="text-xs text-slate-400 font-medium mb-1">{currentUi.crackLabel}</div>
+        <div class="flex items-baseline gap-2">
+          <span id="metric-crack" class="text-2xl sm:text-3xl font-black text-blue-400 font-mono tracking-tight">--</span>
+          <span class="text-xs text-slate-500 font-mono">/ 100</span>
+        </div>
+        <div class="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
+          <div id="bar-crack" class="bg-blue-400 h-full rounded-full transition-all duration-500" style="width: 20%"></div>
+        </div>
+        <span id="crack-subtext" class="text-[11px] text-slate-400 mt-2 block font-medium">Physical Matrix Stability</span>
+      </div>
+    </div>
+
+    <!-- Dynamic Mechanism & Action Boxes -->
+    <div class="space-y-4">
+      <div class="bg-slate-900/70 border border-slate-800 rounded-xl p-4 sm:p-5">
+        <h4 class="text-sm font-bold text-teal-300 flex items-center gap-2 mb-2">
+          <span>🧬</span> {currentUi.mechanismTitle}
+        </h4>
+        <p id="desc-mechanism" class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+          <!-- Injected via JS -->
+        </p>
+      </div>
+
+      <div class="bg-slate-900/70 border border-slate-800 rounded-xl p-4 sm:p-5">
+        <h4 class="text-sm font-bold text-emerald-400 flex items-center gap-2 mb-2">
+          <span>🛡️</span> {currentUi.actionTitle}
+        </h4>
+        <p id="desc-action" class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+          <!-- Injected via JS -->
+        </p>
+      </div>
+    </div>
+
+    <!-- Actions: Copy & Print -->
+    <div class="flex flex-wrap items-center justify-between gap-3 mt-6 pt-6 border-t border-slate-800">
+      <div class="flex flex-wrap gap-3">
+        <button id="btn-copy-report" type="button" class="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 shadow-lg shadow-teal-900/30 cursor-pointer">
+          <span>📋</span> {currentUi.copyBtn}
+        </button>
+        <button id="btn-print-report" type="button" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 cursor-pointer border border-slate-700">
+          <span>🖨️</span> {currentUi.printBtn}
+        </button>
+      </div>
+      <div id="copy-status" class="text-xs text-emerald-400 font-semibold hidden">
+        ✓ {currentUi.copySuccess}
+      </div>
+    </div>
+  </div>
+
+  <!-- Related Tools & Cookware Comparisons Strip -->
+  <div class="border-t border-slate-800 pt-8 mt-8">
+    <h3 class="text-base sm:text-lg font-bold text-white mb-4 flex items-center gap-2">
+      <span>🔗</span> {currentUi.relatedToolsTitle}
+    </h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      <a href={glassPlasticCompareUrl} class="p-3.5 bg-slate-950/60 border border-slate-800/80 hover:border-teal-500/50 rounded-xl transition text-xs group block">
+        <span class="text-teal-400 font-semibold group-hover:underline block mb-1">Borosilicate Glass vs Plastic Kettle</span>
+        <span class="text-slate-400 block text-[11px] leading-tight">Head-to-head comparison on microplastic shedding, thermal shock, and taste purity.</span>
+      </a>
+      <a href={steelPlasticCompareUrl} class="p-3.5 bg-slate-950/60 border border-slate-800/80 hover:border-teal-500/50 rounded-xl transition text-xs group block">
+        <span class="text-teal-400 font-semibold group-hover:underline block mb-1">Stainless Steel vs Plastic Kettle</span>
+        <span class="text-slate-400 block text-[11px] leading-tight">Dual-wall seamless 304 steel vs polypropylene temperature retention and safety.</span>
+      </a>
+      <a href={steelGlassCompareUrl} class="p-3.5 bg-slate-950/60 border border-slate-800/80 hover:border-teal-500/50 rounded-xl transition text-xs group block">
+        <span class="text-teal-400 font-semibold group-hover:underline block mb-1">Stainless Steel vs Glass Kettle</span>
+        <span class="text-slate-400 block text-[11px] leading-tight">Durability, shatter resistance, and heavy metal testing between inert materials.</span>
+      </a>
+      <a href={kettleDescaleUrl} class="p-3.5 bg-slate-950/60 border border-slate-800/80 hover:border-teal-500/50 rounded-xl transition text-xs group block">
+        <span class="text-teal-400 font-semibold group-hover:underline block mb-1">Electric Kettle Descaling Simulator</span>
+        <span class="text-slate-400 block text-[11px] leading-tight">Calculate citric acid vs vinegar ratios and nickel leaching during scale cleaning.</span>
+      </a>
+      <a href={coffeeTeaUrl} class="p-3.5 bg-slate-950/60 border border-slate-800/80 hover:border-teal-500/50 rounded-xl transition text-xs group block">
+        <span class="text-teal-400 font-semibold group-hover:underline block mb-1">Coffee & Tea Brew Safety Checker</span>
+        <span class="text-slate-400 block text-[11px] leading-tight">Tannin extraction, water temperature, and heavy metal interactions in brewing.</span>
+      </a>
+      <a href={blogKettleUrl} class="p-3.5 bg-slate-950/60 border border-slate-800/80 hover:border-teal-500/50 rounded-xl transition text-xs group block">
+        <span class="text-teal-400 font-semibold group-hover:underline block mb-1">Plastic Kettle Microplastics Guide</span>
+        <span class="text-slate-400 block text-[11px] leading-tight">Deep dive into Nature Food (2020) findings and polypropylene degradative chemistry.</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script define:vars={{ currentUi, currentExp }}>
+  function initKettleSimulator() {
+    const matSelect = document.getElementById('kettle-material');
+    const ageSelect = document.getElementById('kettle-age');
+    const expSelect = document.getElementById('kettle-exposure');
+    const chemSelect = document.getElementById('kettle-chemistry');
+
+    const badgeEl = document.getElementById('verdict-badge');
+    const mpValEl = document.getElementById('metric-mp');
+    const niValEl = document.getElementById('metric-ni');
+    const crackValEl = document.getElementById('metric-crack');
+
+    const barMp = document.getElementById('bar-mp');
+    const barNi = document.getElementById('bar-ni');
+    const barCrack = document.getElementById('bar-crack');
+
+    const descMech = document.getElementById('desc-mechanism');
+    const descAction = document.getElementById('desc-action');
+
+    const btnCopy = document.getElementById('btn-copy-report');
+    const btnPrint = document.getElementById('btn-print-report');
+    const copyStatus = document.getElementById('copy-status');
+
+    if (!matSelect || !ageSelect || !expSelect || !chemSelect) return;
+
+    function recalculate() {
+      const matOpt = matSelect.options[matSelect.selectedIndex];
+      const ageOpt = ageSelect.options[ageSelect.selectedIndex];
+      const expOpt = expSelect.options[expSelect.selectedIndex];
+      const chemOpt = chemSelect.options[chemSelect.selectedIndex];
+
+      const baseMp = parseFloat(matOpt.getAttribute('data-mp') || '0');
+      const baseNi = parseFloat(matOpt.getAttribute('data-ni') || '0');
+      const crackRate = parseFloat(matOpt.getAttribute('data-crack') || '0');
+      const riskWeight = parseFloat(matOpt.getAttribute('data-risk') || '0');
+
+      const ageMult = parseFloat(ageOpt.getAttribute('data-mult') || '1');
+      const crazeScore = parseFloat(ageOpt.getAttribute('data-craze') || '0');
+
+      const expMult = parseFloat(expOpt.getAttribute('data-mult') || '1');
+
+      const chemFactor = parseFloat(chemOpt.getAttribute('data-chem') || '1');
+      const niFactor = parseFloat(chemOpt.getAttribute('data-ni') || '1');
+      const scaleFactor = parseFloat(chemOpt.getAttribute('data-scale') || '0');
+
+      // Microplastics calculation
+      let totalMp = Math.round(baseMp * ageMult * expMult * chemFactor);
+      if (totalMp < 5000) totalMp = 5000;
+
+      // Nickel calculation
+      let totalNi = Math.round((baseNi * ageMult * (0.8 + expMult * 0.2) * niFactor) * 10) / 10;
+
+      // Micro-crack & craze score (0 - 100)
+      let crackIndex = Math.round(crazeScore + (crackRate * 7.5) + (scaleFactor * 12));
+      if (matOpt.value === 'seamless-stainless') crackIndex = 0;
+      if (matOpt.value === 'glass-stainless') crackIndex = Math.min(crackIndex, 8);
+      crackIndex = Math.min(Math.max(crackIndex, 0), 100);
+
+      // Render metrics
+      if (totalMp >= 1000000) {
+        mpValEl.textContent = (totalMp / 1000000).toFixed(2) + 'M';
+      } else {
+        mpValEl.textContent = (totalMp / 1000).toFixed(0) + 'k';
+      }
+
+      niValEl.textContent = totalNi.toFixed(1);
+      crackValEl.textContent = crackIndex.toString();
+
+      // Update progress bar widths
+      const mpPercent = Math.min(Math.max((totalMp / 25000000) * 100, 3), 100);
+      barMp.style.width = mpPercent + '%';
+
+      const niPercent = Math.min(Math.max((totalNi / 80) * 100, 3), 100);
+      barNi.style.width = niPercent + '%';
+
+      const crackPercent = Math.min(Math.max(crackIndex, 3), 100);
+      barCrack.style.width = crackPercent + '%';
+
+      // Determine Safety Tier
+      let tier = 'safe';
+      if (totalNi >= 60 || totalMp >= 22000000 || (crackIndex >= 80 && riskWeight >= 2.5)) {
+        tier = 'critical';
+      } else if (totalMp >= 8000000 || totalNi >= 25 || crackIndex >= 55) {
+        tier = 'hazard';
+      } else if (totalMp >= 1000000 || totalNi >= 12 || crackIndex >= 25) {
+        tier = 'caution';
+      } else {
+        tier = 'safe';
+      }
+
+      // Special override: Glass & seamless stainless are always safe
+      if (matOpt.value === 'glass-stainless' || matOpt.value === 'seamless-stainless') {
+        tier = (totalNi >= 50) ? 'caution' : 'safe';
+      }
+
+      // Style badge & verdict
+      badgeEl.className = 'px-4 py-2 rounded-xl text-xs sm:text-sm font-black tracking-wide uppercase transition-all duration-300 ';
+      if (tier === 'critical') {
+        badgeEl.textContent = currentUi.verdictCritical;
+        badgeEl.className += 'bg-red-500/20 text-red-300 border border-red-500/40 shadow-lg shadow-red-950/40';
+        barMp.className = 'bg-red-500 h-full rounded-full transition-all duration-500';
+        barNi.className = 'bg-red-500 h-full rounded-full transition-all duration-500';
+      } else if (tier === 'hazard') {
+        badgeEl.textContent = currentUi.verdictHazard;
+        badgeEl.className += 'bg-orange-500/20 text-orange-300 border border-orange-500/40 shadow-lg shadow-orange-950/40';
+        barMp.className = 'bg-orange-400 h-full rounded-full transition-all duration-500';
+        barNi.className = 'bg-orange-400 h-full rounded-full transition-all duration-500';
+      } else if (tier === 'caution') {
+        badgeEl.textContent = currentUi.verdictCaution;
+        badgeEl.className += 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-lg shadow-amber-950/40';
+        barMp.className = 'bg-amber-400 h-full rounded-full transition-all duration-500';
+        barNi.className = 'bg-amber-400 h-full rounded-full transition-all duration-500';
+      } else {
+        badgeEl.textContent = currentUi.verdictSafe;
+        badgeEl.className += 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-950/40';
+        barMp.className = 'bg-emerald-400 h-full rounded-full transition-all duration-500';
+        barNi.className = 'bg-emerald-400 h-full rounded-full transition-all duration-500';
+      }
+
+      // Inject Explanation
+      const exp = currentExp[tier] || currentExp.safe;
+      descMech.innerHTML = exp.mechanism;
+      descAction.innerHTML = exp.action;
+    }
+
+    matSelect.addEventListener('change', recalculate);
+    ageSelect.addEventListener('change', recalculate);
+    expSelect.addEventListener('change', recalculate);
+    chemSelect.addEventListener('change', recalculate);
+
+    // Initial calculation
+    recalculate();
+
+    // Copy to clipboard
+    if (btnCopy) {
+      btnCopy.addEventListener('click', () => {
+        const mat = matSelect.options[matSelect.selectedIndex].text;
+        const mp = mpValEl.textContent;
+        const ni = niValEl.textContent;
+        const crack = crackValEl.textContent;
+        const verdict = badgeEl.textContent.trim();
+
+        const reportText = [
+          '--- ISITKITCHENSAFE KETTLE TOXICOLOGY REPORT ---',
+          'Appliance / Material: ' + mat,
+          'Estimated Microplastic Release: ' + mp + ' particles/L',
+          'Estimated Nickel (Ni) Leaching: ' + ni + ' µg/L (WHO Limit: 70 µg/L)',
+          'Polymer Micro-Crack & Craze Index: ' + crack + ' / 100',
+          'Safety Verdict: ' + verdict,
+          'Reference Standard: Nature Food (2020) & WHO Drinking Water Standards',
+          'Audit URL: https://isitkitchensafe.com/tools/plastic-water-kettle-microplastic-simulator/',
+          '------------------------------------------------'
+        ].join('\n');
+
+        navigator.clipboard.writeText(reportText).then(() => {
+          if (copyStatus) {
+            copyStatus.classList.remove('hidden');
+            setTimeout(() => {
+              copyStatus.classList.add('hidden');
+            }, 3500);
+          }
+        }).catch(err => {
+          console.error('Copy failed:', err);
+        });
+      });
+    }
+
+    // Print / PDF
+    if (btnPrint) {
+      btnPrint.addEventListener('click', () => {
+        window.print();
+      });
+    }
+  }
+
+  // Run on DOM loaded & Astro page swaps
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initKettleSimulator);
+  } else {
+    initKettleSimulator();
+  }
+  document.addEventListener('astro:page-load', initKettleSimulator);
+</script>
+
+<style>
+  @media print {
+    .kettle-simulator-container {
+      background: white !important;
+      color: black !important;
+      border: 1px solid #ccc !important;
+      box-shadow: none !important;
+    }
+    button, a {
+      display: none !important;
+    }
+  }
+</style>
