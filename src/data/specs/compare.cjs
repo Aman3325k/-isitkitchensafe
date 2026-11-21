@@ -1970,4 +1970,84 @@ module.exports = {
           "guideline": "Use enameled cast iron Dutch ovens for multi-hour braises, acidic tomato stews, and 450°F+ artisan sourdough bread baking; choose tri-ply stainless steel Dutch ovens for boiling stocks, blanching vegetables, and everyday soups."
       }
   },
+  "glass-vs-stainless-steel-french-press": {
+      "materialThermal": {
+          "property": "Thermal Heat Retention & Dual-Wall Vacuum Boundary vs. Borosilicate Single-Wall Convection",
+          "threshold": "Double-Wall Vacuum Insulation (<2°C loss/10 min) vs. Single-Wall Borosilicate Glass (10°C–14°C drop)",
+          "details": "Double-wall austenitic 18/8 stainless steel eliminates thermal shock rupture while locking brew temperature in the optimal SCA 90°C–96°C extraction window; borosilicate glass permits visual blooming observation but suffers rapid convective cooling."
+      },
+      "safetyStandard": {
+          "organization": "ASTM / ISO / FDA",
+          "standard": "ASTM C149 (Thermal Shock Resistance of Glass Containers) & NSF/ANSI 51 (Food Equipment Materials)",
+          "citation": "Standard test method for thermal shock resistance in beverage ware; NSF/ANSI 51 standards for commercial food-contact alloys."
+      },
+      "applianceSpecs": {
+          "parameter": "Brew Temperature Preservation & Shatter Hazard Eradication",
+          "guideline": "Deploy double-wall stainless steel French presses for daily home brewing with children or high kitchen traffic; reserve borosilicate glass carafes strictly for visual cupping demos and table-side service with gentle non-metal stirring."
+      }
+  },
+  "silicone-vs-stainless-steel-tongs": {
+      "materialThermal": {
+          "property": "Soft Shore-A Elastomer Coating Protection vs. High-Temperature Austenitic Yield Strength",
+          "threshold": "Silicone Continuous Thermal Limit 232°C (450°F) vs. 18/8 Stainless Steel Yielding >815°C (1,500°F)",
+          "details": "Food-grade silicone tips (Shore A 60–70) eliminate micro-scratching on PTFE and ceramic cookware; solid 18/8 stainless steel withstands direct charcoal flames and smoking grates where silicone would undergo thermal depolymerization."
+      },
+      "safetyStandard": {
+          "organization": "FDA / EU / NSF",
+          "standard": "FDA 21 CFR § 177.2600 (Rubber Articles for Repeated Use) & EU Regulation 10/2011",
+          "citation": "Standards for total extractive limitations of food-contact elastomers; NSF commercial food utensil sanitization criteria."
+      },
+      "applianceSpecs": {
+          "parameter": "Cookware Surface Preservation vs. Extreme Heat Searing",
+          "guideline": "Use silicone-tipped tongs for all indoor nonstick, ceramic, and enameled Dutch ovens; reserve solid stainless steel tongs for raw cast iron, carbon steel woks, and outdoor charcoal grilling."
+      }
+  },
+  "bamboo-vs-stainless-steel-steamer": {
+      "materialThermal": {
+          "property": "Vascular Cellulose Moisture Absorption vs. Impermeable Metal Condensation Runoff",
+          "threshold": "Natural Bamboo 25% Moisture Absorption by Weight vs. Stainless Steel 0% Absorption (Drip Cascade)",
+          "details": "Woven bamboo lids absorb rising steam vapor, preventing heavy condensation droplets from soaking and collapsing delicate dumpling skins; 18/8 stainless steel steamer pots provide lifetime non-porous durability and zero mold risk."
+      },
+      "safetyStandard": {
+          "organization": "FDA / ASTM / ISO",
+          "standard": "FDA Food Code 2022 § 4-101.11 & ASTM A240/A240M (Chromium Stainless Steel Plate)",
+          "citation": "Sanitation requirements for multi-use food-contact surfaces; international corrosion specifications for food-grade stainless steels."
+      },
+      "applianceSpecs": {
+          "parameter": "Delicate Dim Sum Texture vs. Dishwasher Sanitization",
+          "guideline": "Use traditional bamboo steamers for dumplings, bao, and delicate fish with parchment liners; use tiered stainless steel steamer pots for root vegetables, tamales, crab legs, and humid environments requiring dishwasher sanitization."
+      }
+  },
+  "silicone-vs-stainless-steel-tea-infuser": {
+      "materialThermal": {
+          "property": "Deep Cylindrical Expansion Basket vs. Cramped Molded Polymeric Chamber",
+          "threshold": "304 Micro-Mesh Volume (~150 cm^3 / <0.5mm) vs. Molded Silicone (~20 cm^3 / Coarse Holes)",
+          "details": "Laser-etched 304 stainless steel baskets allow whole-leaf teas to expand up to 400% for full polyphenol extraction with zero chemical migration in 100°C water; novelty silicone infusers cramp leaves and risk siloxane oligomer migration in acidic hot brews."
+      },
+      "safetyStandard": {
+          "organization": "BfR / FDA / ISO",
+          "standard": "German BfR Recommendation XV (Silicones) & ISO 8442 (Food-Contact Cutlery & Wire Mesh)",
+          "citation": "BfR toxicological threshold limits for volatile organic compounds and siloxanes; ISO standards for food-contact stainless steel wire mesh."
+      },
+      "applianceSpecs": {
+          "parameter": "Whole-Leaf Expansion & Chemical Purity in Boiling Tisanes",
+          "guideline": "Deploy ultra-fine 304 stainless steel basket infusers for loose-leaf black, oolong, and fine rooibos teas; restrict novelty silicone infusers to coarse-cut dried fruit infusions or casual room-temperature steeping."
+      }
+  },
+  "copper-core-vs-tri-ply-stainless-steel": {
+      "materialThermal": {
+          "property": "Electrolytic Copper Core Thermal Diffusivity vs. Tri-Ply Aluminum Thermal Mass Inertia",
+          "threshold": "99.9% Pure Copper 385 W/m·K vs. Food-Grade Aluminum 205 W/m·K (Thermal Response Speed <3s vs ~8s)",
+          "details": "5-ply copper core cookware transfers heat nearly twice as fast as aluminum, allowing instant temperature reductions for delicate sauces and caramel; tri-ply stainless steel provides greater heat retention for searing proteins with lighter tare weight."
+      },
+      "safetyStandard": {
+          "organization": "ASTM / ISO / NSF",
+          "standard": "ASTM B152 (Copper Sheet/Strip) & NSF/ANSI 51 (Food Equipment Materials)",
+          "citation": "Standard specification for copper architectural and culinary cladding; NSF criteria for clad multi-layer commercial cookware metallurgy."
+      },
+      "applianceSpecs": {
+          "parameter": "Precision Sauce Temperature Modulation vs. Heavy Everyday Sautéing",
+          "guideline": "Use 5-ply copper core cookware for delicate reductions, hollandaise, and sugar work; choose tri-ply clad stainless steel for high-volume weeknight cooking, searing meats, and seamless automated dishwasher cleaning."
+      }
+  },
 };
