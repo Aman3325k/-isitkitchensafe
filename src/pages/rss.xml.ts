@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/cast-iron-seasoning-degradation-modeler/',
+    title: 'Cast Iron & Carbon Steel Seasoning Degradation Modeler',
+    description:
+      'Model lipid polymer crosslinking degradation, acid-catalyzed ester hydrolysis, ferrous vs ferric ion leaching kinetics, and dietary iron intake during acidic cooking.',
+    date: '2026-11-21',
+  },
+  {
     path: '/tools/melamine-tableware-formaldehyde-modeler/',
     title: 'Melamine Tableware Formaldehyde & Cyanuric Acid Leaching Modeler',
     description:
