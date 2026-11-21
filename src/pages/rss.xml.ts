@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/charcoal-gas-grill-pah-hca-modeler/',
+    title: 'Charcoal vs Gas Grill PAH & HCA Carcinogen Modeler',
+    description:
+      'Model fat drip pyrolysis on 750°C embers, volatile Benzo[a]pyrene convective smoke condensation, surface creatine-amino Maillard condensation (PhIP/MeIQx), and antioxidant marinade reduction under EU Regulation 835/2011.',
+    date: '2026-11-21',
+  },
+  {
     path: '/tools/canned-food-bpa-leaching-modeler/',
     title: 'Canned Food BPA & Epoxy Phenolic Liner Leaching Modeler',
     description:
