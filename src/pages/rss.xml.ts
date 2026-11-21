@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/oven-self-cleaning-pyrolysis-simulator/',
+    title: 'Oven Self-Cleaning Pyrolysis Fume & Off-Gassing Simulator',
+    description:
+      'Model 500°C pyrolytic thermal decomposition, PTFE gasket fluoropolymer degradation, toxic carbon monoxide spikes, and avian respiratory lethality risks.',
+    date: '2026-11-21',
+  },
+  {
     path: '/tools/air-fryer-lipid-oxidation-modeler/',
     title: 'Air Fryer vs Deep Fryer Lipid Oxidation & 4-HNE Modeler',
     description:
