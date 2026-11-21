@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/canned-food-bpa-leaching-modeler/',
+    title: 'Canned Food BPA & Epoxy Phenolic Liner Leaching Modeler',
+    description:
+      'Model BADGE epoxy resin degradation, acid-hydrolysis kinetics in canned tomatoes, lipophilic extraction in oily fish, can dent micro-fracturing, and EFSA 2023 Tolerable Daily Intake thresholds.',
+    date: '2026-11-21',
+  },
+  {
     path: '/tools/microwave-popcorn-pfas-modeler/',
     title: 'Microwave Popcorn Bag Fluorinated PFOA / PFAS Surfactant Modeler',
     description:
