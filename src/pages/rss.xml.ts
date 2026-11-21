@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/air-fryer-lipid-oxidation-modeler/',
+    title: 'Air Fryer vs Deep Fryer Lipid Oxidation & 4-HNE Modeler',
+    description:
+      'Model forced-air convection oxygen flux, polyunsaturated fatty acid bis-allylic radical cascades, cytotoxic 4-hydroxy-2-nonenal (4-HNE) generation, and oil reuse degradation thresholds.',
+    date: '2026-11-21',
+  },
+  {
     path: '/tools/charcoal-gas-grill-pah-hca-modeler/',
     title: 'Charcoal vs Gas Grill PAH & HCA Carcinogen Modeler',
     description:
