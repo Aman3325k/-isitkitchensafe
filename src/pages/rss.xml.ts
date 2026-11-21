@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/melamine-tableware-formaldehyde-modeler/',
+    title: 'Melamine Tableware Formaldehyde & Cyanuric Acid Leaching Modeler',
+    description:
+      'Model formaldehyde and melamine resin thermal breakdown kinetics, dielectric microwave superheating, acid hydrolysis, and cyanurate nephrolithiasis risk.',
+    date: '2026-11-21',
+  },
+  {
     path: '/tools/oven-self-cleaning-pyrolysis-simulator/',
     title: 'Oven Self-Cleaning Pyrolysis Fume & Off-Gassing Simulator',
     description:
