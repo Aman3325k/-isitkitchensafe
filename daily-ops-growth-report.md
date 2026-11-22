@@ -89,7 +89,7 @@ All newly published safety guides and tools are grounded in empirical toxicology
 | **Total Blog Safety Guides** | 92 (460 pages) | **95 (475 pages)** | **+3 Guides / +15 Pages** |
 | **Published Comparisons** | 168 (840 pages) | **168 (840 pages)** | **Stable** |
 | **Cloudflare Redirect Lines** | 1,980 / 2,000 | **1,980 / 2,000** | **20 Lines Headroom PASS** |
-| **Git Commit Hash** | `484ef61` | Pending Clean Commit | **Ready** |
+| **Git Commit Hash** | `484ef61` | `0127352` | **Committed Cleanly PASS** |
 
 ---
 
