@@ -1811,803 +1811,883 @@ module.exports = {
     }
   },
   "aluminum-vs-stainless-steel-pressure-cooker": {
-      "materialThermal": {
-          "property": "Amphoteric Hydrothermal Acid Leaching vs. Passivated Chromium Oxide Barrier",
-          "threshold": "Annealed Aluminum Yield Strength 110 MPa vs. 18/10 Stainless Steel 505 MPa at 250°F (15 PSI)",
-          "details": "High pressure steam (15 PSI / 121°C) and acidic food matrix (pH < 4.5) drive aluminum ion migration above EFSA TWI limits; 18/10 stainless steel forms a self-healing Cr2O3 passive film preventing all chemical dissolution and vessel warping."
-      },
-      "safetyStandard": {
-          "organization": "EFSA / FDA / ISO",
-          "standard": "ISO 136 (Pressure Cookers for Domestic Use) & EFSA Dietary Aluminum Standards",
-          "citation": "EFSA Tolerable Weekly Intake (1 mg/kg bw/week); UL 136 pressure cooker mechanical integrity and overpressure safety standards."
-      },
-      "applianceSpecs": {
-          "parameter": "Steam Pressure Cycling & Dishwasher Alkaline Safety",
-          "guideline": "Use 18/10 stainless steel for high-acid culinary pressure cooking and effortless dishwasher sanitization; reserve large aluminum vessels strictly for water-bath and pressure canning where food is isolated inside glass Mason jars."
-      }
+    "materialThermal": {
+      "property": "Amphoteric Hydrothermal Acid Leaching vs. Passivated Chromium Oxide Barrier",
+      "threshold": "Annealed Aluminum Yield Strength 110 MPa vs. 18/10 Stainless Steel 505 MPa at 250°F (15 PSI)",
+      "details": "High pressure steam (15 PSI / 121°C) and acidic food matrix (pH < 4.5) drive aluminum ion migration above EFSA TWI limits; 18/10 stainless steel forms a self-healing Cr2O3 passive film preventing all chemical dissolution and vessel warping."
+    },
+    "safetyStandard": {
+      "organization": "EFSA / FDA / ISO",
+      "standard": "ISO 136 (Pressure Cookers for Domestic Use) & EFSA Dietary Aluminum Standards",
+      "citation": "EFSA Tolerable Weekly Intake (1 mg/kg bw/week); UL 136 pressure cooker mechanical integrity and overpressure safety standards."
+    },
+    "applianceSpecs": {
+      "parameter": "Steam Pressure Cycling & Dishwasher Alkaline Safety",
+      "guideline": "Use 18/10 stainless steel for high-acid culinary pressure cooking and effortless dishwasher sanitization; reserve large aluminum vessels strictly for water-bath and pressure canning where food is isolated inside glass Mason jars."
+    }
   },
   "pizza-stone-vs-baking-steel": {
-      "materialThermal": {
-          "property": "High Thermal Conductivity Conductive Heat Flux vs. Ceramic Diffusion Buffer",
-          "threshold": "Carbon Steel Thermal Conductivity ~54 W/m·K vs. Cordierite Ceramic ~1.3–2.5 W/m·K",
-          "details": "Steel transfers thermal energy 18x faster with double the volumetric heat capacity, instantly vaporizing bottom crust moisture for explosive oven spring; porous cordierite acts as a gentle heat buffer and is susceptible to thermal shock fracture."
-      },
-      "safetyStandard": {
-          "organization": "ASTM / FDA",
-          "standard": "ASTM C373 (Porosity and Water Absorption) & FDA Food Code 2022 § 4-101.11",
-          "citation": "Non-porous seasoned carbon steel plate meets commercial food-contact sanitation standards; porous ceramic stones absorb rancid lipid volatiles that smoke upon heating."
-      },
-      "applianceSpecs": {
-          "parameter": "Oven Spring Maximization & Thermal Shock Avoidance",
-          "guideline": "Position seasoned baking steel on the lowest oven rack for rapid 500°F (260°C) Neapolitan pizza; use ceramic stones for gentle sourdough loaf hearth baking. Never quench a hot ceramic stone with cold water."
-      }
+    "materialThermal": {
+      "property": "High Thermal Conductivity Conductive Heat Flux vs. Ceramic Diffusion Buffer",
+      "threshold": "Carbon Steel Thermal Conductivity ~54 W/m·K vs. Cordierite Ceramic ~1.3–2.5 W/m·K",
+      "details": "Steel transfers thermal energy 18x faster with double the volumetric heat capacity, instantly vaporizing bottom crust moisture for explosive oven spring; porous cordierite acts as a gentle heat buffer and is susceptible to thermal shock fracture."
+    },
+    "safetyStandard": {
+      "organization": "ASTM / FDA",
+      "standard": "ASTM C373 (Porosity and Water Absorption) & FDA Food Code 2022 § 4-101.11",
+      "citation": "Non-porous seasoned carbon steel plate meets commercial food-contact sanitation standards; porous ceramic stones absorb rancid lipid volatiles that smoke upon heating."
+    },
+    "applianceSpecs": {
+      "parameter": "Oven Spring Maximization & Thermal Shock Avoidance",
+      "guideline": "Position seasoned baking steel on the lowest oven rack for rapid 500°F (260°C) Neapolitan pizza; use ceramic stones for gentle sourdough loaf hearth baking. Never quench a hot ceramic stone with cold water."
+    }
   },
   "stainless-steel-vs-plastic-blender-jar": {
-      "materialThermal": {
-          "property": "Hydrodynamic Cavitation Shear Resistance vs. Polymer Micro-Abrasion Erosion",
-          "threshold": "SUS304 Hardness Mohs 5.5 (0.0% Microplastic Shedding) vs. Tritan Copolyester Mohs 2.5",
-          "details": "Blender blades rotating at 25,000 RPM generate intense cavitation and frictional shear; hard seeds and ice scour plastic walls releasing millions of micro/nanoplastics; electropolished 304 stainless steel resists all abrasive wear and hot soup pressure."
-      },
-      "safetyStandard": {
-          "organization": "NSF / FDA / EFSA",
-          "standard": "NSF/ANSI 8 (Commercial Food Equipment) & FDA 21 CFR § 177.1020",
-          "citation": "Electropolished stainless steel meets Class I commercial sanitation without risk of microplastic shedding, VOC migration, or carotenoid/allium oil sorption."
-      },
-      "applianceSpecs": {
-          "parameter": "High-Velocity Pureeing & Boiling Liquid Safety",
-          "guideline": "Puree steaming soups (up to 212°F / 100°C) exclusively in stainless steel jars with vented lid caps to eliminate plasticizer leaching; use transparent Tritan jars for room-temperature smoothies requiring visual texture assessment."
-      }
+    "materialThermal": {
+      "property": "Hydrodynamic Cavitation Shear Resistance vs. Polymer Micro-Abrasion Erosion",
+      "threshold": "SUS304 Hardness Mohs 5.5 (0.0% Microplastic Shedding) vs. Tritan Copolyester Mohs 2.5",
+      "details": "Blender blades rotating at 25,000 RPM generate intense cavitation and frictional shear; hard seeds and ice scour plastic walls releasing millions of micro/nanoplastics; electropolished 304 stainless steel resists all abrasive wear and hot soup pressure."
+    },
+    "safetyStandard": {
+      "organization": "NSF / FDA / EFSA",
+      "standard": "NSF/ANSI 8 (Commercial Food Equipment) & FDA 21 CFR § 177.1020",
+      "citation": "Electropolished stainless steel meets Class I commercial sanitation without risk of microplastic shedding, VOC migration, or carotenoid/allium oil sorption."
+    },
+    "applianceSpecs": {
+      "parameter": "High-Velocity Pureeing & Boiling Liquid Safety",
+      "guideline": "Puree steaming soups (up to 212°F / 100°C) exclusively in stainless steel jars with vented lid caps to eliminate plasticizer leaching; use transparent Tritan jars for room-temperature smoothies requiring visual texture assessment."
+    }
   },
   "unbleached-vs-bleached-parchment-paper": {
-      "materialThermal": {
-          "property": "Totally Chlorine Free (TCF) Virgin Cellulose Matrix vs. Elemental Chlorine Free (ECF) Treated Pulp",
-          "threshold": "Continuous Thermal Endurance 428°F–450°F (220°C–232°C); Pyrolysis Boundary 451°F",
-          "details": "TCF unbleached parchment eliminates all organochlorine processing byproducts and optical brighteners; food-grade polydimethylsiloxane coating provides identical 450°F non-stick barrier properties to bleached white parchment."
-      },
-      "safetyStandard": {
-          "organization": "FDA / EPA / BfR",
-          "standard": "FDA 21 CFR § 176.170 (Components of Paper and Paperboard) & German BfR XXXVI",
-          "citation": "Unbleached parchment paper adheres to totally chlorine-free pulp standards and is certified 100% home compostable without heavy metal or chlorinated organic residues."
-      },
-      "applianceSpecs": {
-          "parameter": "High-Heat Oven Roasting & Fire Hazard Mitigation",
-          "guideline": "Use unbleached parchment for toxic-free daily roasting and baking up to 450°F; never use under direct broilers or allow paper edges to contact electric oven heating elements or air fryer coils."
-      }
+    "materialThermal": {
+      "property": "Totally Chlorine Free (TCF) Virgin Cellulose Matrix vs. Elemental Chlorine Free (ECF) Treated Pulp",
+      "threshold": "Continuous Thermal Endurance 428°F–450°F (220°C–232°C); Pyrolysis Boundary 451°F",
+      "details": "TCF unbleached parchment eliminates all organochlorine processing byproducts and optical brighteners; food-grade polydimethylsiloxane coating provides identical 450°F non-stick barrier properties to bleached white parchment."
+    },
+    "safetyStandard": {
+      "organization": "FDA / EPA / BfR",
+      "standard": "FDA 21 CFR § 176.170 (Components of Paper and Paperboard) & German BfR XXXVI",
+      "citation": "Unbleached parchment paper adheres to totally chlorine-free pulp standards and is certified 100% home compostable without heavy metal or chlorinated organic residues."
+    },
+    "applianceSpecs": {
+      "parameter": "High-Heat Oven Roasting & Fire Hazard Mitigation",
+      "guideline": "Use unbleached parchment for toxic-free daily roasting and baking up to 450°F; never use under direct broilers or allow paper edges to contact electric oven heating elements or air fryer coils."
+    }
   },
   "stainless-steel-vs-aluminum-moka-pot": {
-      "materialThermal": {
-          "property": "Organic Acid Dissolution Resistance vs. Amphoteric Metal Corrosion",
-          "threshold": "18/10 Stainless Steel Migration <0.01 mg/L vs. Cast Aluminum Leaching 0.2–1.5 mg/L in Acidic Coffee (pH 5.0)",
-          "details": "Roasted coffee chlorogenic acids chemically pit bare cast aluminum under 1.5–2 bar steam extraction at 95°C; 18/10 stainless steel forms an imperviously dense Cr2O3 passive layer that remains 100% inert and dishwasher safe."
-      },
-      "safetyStandard": {
-          "organization": "Council of Europe / EFSA / DIN",
-          "standard": "Resolution CM/Res(2013)9 on Metals and Alloys in Food Contact & DIN EN 601",
-          "citation": "Limits aluminum release to <5.0 mg/kg; stainless steel guarantees zero detectable metal ion transfer into acidic hot brews and native magnetic induction coupling."
-      },
-      "applianceSpecs": {
-          "parameter": "Steam Extraction Dynamics & Dishwasher Sanitization",
-          "guideline": "Brew daily coffee on induction, glass-ceramic, or gas stoves using 18/10 stainless steel moka pots for pure taste and dishwasher sanitization; never place aluminum moka pots in dishwashers to prevent toxic caustic black smudge formation."
-      }
+    "materialThermal": {
+      "property": "Organic Acid Dissolution Resistance vs. Amphoteric Metal Corrosion",
+      "threshold": "18/10 Stainless Steel Migration <0.01 mg/L vs. Cast Aluminum Leaching 0.2–1.5 mg/L in Acidic Coffee (pH 5.0)",
+      "details": "Roasted coffee chlorogenic acids chemically pit bare cast aluminum under 1.5–2 bar steam extraction at 95°C; 18/10 stainless steel forms an imperviously dense Cr2O3 passive layer that remains 100% inert and dishwasher safe."
+    },
+    "safetyStandard": {
+      "organization": "Council of Europe / EFSA / DIN",
+      "standard": "Resolution CM/Res(2013)9 on Metals and Alloys in Food Contact & DIN EN 601",
+      "citation": "Limits aluminum release to <5.0 mg/kg; stainless steel guarantees zero detectable metal ion transfer into acidic hot brews and native magnetic induction coupling."
+    },
+    "applianceSpecs": {
+      "parameter": "Steam Extraction Dynamics & Dishwasher Sanitization",
+      "guideline": "Brew daily coffee on induction, glass-ceramic, or gas stoves using 18/10 stainless steel moka pots for pure taste and dishwasher sanitization; never place aluminum moka pots in dishwashers to prevent toxic caustic black smudge formation."
+    }
   },
   "stainless-steel-vs-plastic-colander": {
-      "materialThermal": {
-          "property": "Hydrothermal Polymer Softening vs. Austenitic Passivated Chromium Oxide Barrier",
-          "threshold": "Polypropylene Heat Deflection Temp 85°C–100°C vs. 18/8 Stainless Steel 815°C (1,500°F)",
-          "details": "Pouring boiling water (212°F / 100°C) over food-grade polypropylene triggers polymer relaxation and micro/nanoplastic shedding (10^4–10^6 particles/L); 18/8 stainless steel forms an imperviously dense Cr2O3 passive film with zero chemical dissolution and zero microplastic migration."
-      },
-      "safetyStandard": {
-          "organization": "FDA / EFSA / NSF",
-          "standard": "FDA 21 CFR § 177.1520 (Olefin Polymers) & NSF/ANSI 51 (Food Equipment Materials)",
-          "citation": "EFSA food-contact migration threshold standards for high-temperature polyolefins; NSF/ANSI 51 sanitation standards for commercial food-contact metals."
-      },
-      "applianceSpecs": {
-          "parameter": "Boiling Liquid Straining & Dishwasher Heat Sanitation",
-          "guideline": "Use 18/8 stainless steel colanders for straining boiling pasta, hot stocks, and deep-fryer grease; reserve polypropylene colanders strictly for cold-water berry, salad, and canned bean rinsing."
-      }
+    "materialThermal": {
+      "property": "Hydrothermal Polymer Softening vs. Austenitic Passivated Chromium Oxide Barrier",
+      "threshold": "Polypropylene Heat Deflection Temp 85°C–100°C vs. 18/8 Stainless Steel 815°C (1,500°F)",
+      "details": "Pouring boiling water (212°F / 100°C) over food-grade polypropylene triggers polymer relaxation and micro/nanoplastic shedding (10^4–10^6 particles/L); 18/8 stainless steel forms an imperviously dense Cr2O3 passive film with zero chemical dissolution and zero microplastic migration."
+    },
+    "safetyStandard": {
+      "organization": "FDA / EFSA / NSF",
+      "standard": "FDA 21 CFR § 177.1520 (Olefin Polymers) & NSF/ANSI 51 (Food Equipment Materials)",
+      "citation": "EFSA food-contact migration threshold standards for high-temperature polyolefins; NSF/ANSI 51 sanitation standards for commercial food-contact metals."
+    },
+    "applianceSpecs": {
+      "parameter": "Boiling Liquid Straining & Dishwasher Heat Sanitation",
+      "guideline": "Use 18/8 stainless steel colanders for straining boiling pasta, hot stocks, and deep-fryer grease; reserve polypropylene colanders strictly for cold-water berry, salad, and canned bean rinsing."
+    }
   },
   "glass-vs-wood-cutting-board": {
-      "materialThermal": {
-          "property": "Mineral Hardness Blade Deflection vs. Capillary Antimicrobial Cellular Matrix",
-          "threshold": "Soda-Lime Glass Mohs 5.5–6.0 vs. Hard Rock Maple Janka 1,450 lbf (Rockwell C 56–62 Knife Steel)",
-          "details": "Tempered glass is harder than cutlery steel, instantly rolling and micro-chipping sharp knife edges; hardwood fibers yield under cutting pressure, preserving blade apexes while capillary xylem vessels dehydrate and inactivate 99.9% of bacteria within hours."
-      },
-      "safetyStandard": {
-          "organization": "USDA / UC Davis / FDA",
-          "standard": "FDA Food Code 2022 § 4-101.11 & University of Wisconsin Cliver Microbiological Standard",
-          "citation": "Peer-reviewed antimicrobial efficacy standards of hard maple vs non-porous surfaces; ASTM C373 porosity and sanitation criteria."
-      },
-      "applianceSpecs": {
-          "parameter": "Knife Edge Preservation & Surface Traction Safety",
-          "guideline": "Prepare raw meats, vegetables, and herbs exclusively on seasoned hardwood or end-grain blocks; reserve tempered glass exclusively for rolling cold pastry dough or as heat-resistant countertop trivets."
-      }
+    "materialThermal": {
+      "property": "Mineral Hardness Blade Deflection vs. Capillary Antimicrobial Cellular Matrix",
+      "threshold": "Soda-Lime Glass Mohs 5.5–6.0 vs. Hard Rock Maple Janka 1,450 lbf (Rockwell C 56–62 Knife Steel)",
+      "details": "Tempered glass is harder than cutlery steel, instantly rolling and micro-chipping sharp knife edges; hardwood fibers yield under cutting pressure, preserving blade apexes while capillary xylem vessels dehydrate and inactivate 99.9% of bacteria within hours."
+    },
+    "safetyStandard": {
+      "organization": "USDA / UC Davis / FDA",
+      "standard": "FDA Food Code 2022 § 4-101.11 & University of Wisconsin Cliver Microbiological Standard",
+      "citation": "Peer-reviewed antimicrobial efficacy standards of hard maple vs non-porous surfaces; ASTM C373 porosity and sanitation criteria."
+    },
+    "applianceSpecs": {
+      "parameter": "Knife Edge Preservation & Surface Traction Safety",
+      "guideline": "Prepare raw meats, vegetables, and herbs exclusively on seasoned hardwood or end-grain blocks; reserve tempered glass exclusively for rolling cold pastry dough or as heat-resistant countertop trivets."
+    }
   },
   "ceramic-vs-stainless-steel-knife": {
-      "materialThermal": {
-          "property": "Ultra-Hard Ceramic Crystalline Lattice vs. Ductile Martensitic High-Carbon Alloy",
-          "threshold": "Zirconium Dioxide Mohs 8.5 / ~75 HRC vs. High-Carbon Cutlery Steel 56–60 HRC (K1c 8 vs 30 MPa·m^1/2)",
-          "details": "Zirconia ceramic offers extraordinary edge retention on soft produce with 100% chemical inertness preventing enzymatic browning; high-carbon stainless steel provides high fracture toughness, preventing catastrophic blade snapping on bones and hard squash."
-      },
-      "safetyStandard": {
-          "organization": "ISO / DIN / FDA",
-          "standard": "ISO 8442 (Materials and Articles in Contact with Foodstuffs - Cutlery) & DIN EN ISO 8442-1",
-          "citation": "International standards for blade sharpness retention, edge corrosion resistance, and fracture toughness thresholds for domestic cutlery."
-      },
-      "applianceSpecs": {
-          "parameter": "Produce Slicing Precision vs. Heavy Kitchen Butchery",
-          "guideline": "Deploy ceramic knives strictly for precision slicing of boneless poultry, ripe tomatoes, and oxidation-sensitive produce; use forged stainless steel chef's knives for heavy chopping, deboning, hard squash, and universal meal prep."
-      }
+    "materialThermal": {
+      "property": "Ultra-Hard Ceramic Crystalline Lattice vs. Ductile Martensitic High-Carbon Alloy",
+      "threshold": "Zirconium Dioxide Mohs 8.5 / ~75 HRC vs. High-Carbon Cutlery Steel 56–60 HRC (K1c 8 vs 30 MPa·m^1/2)",
+      "details": "Zirconia ceramic offers extraordinary edge retention on soft produce with 100% chemical inertness preventing enzymatic browning; high-carbon stainless steel provides high fracture toughness, preventing catastrophic blade snapping on bones and hard squash."
+    },
+    "safetyStandard": {
+      "organization": "ISO / DIN / FDA",
+      "standard": "ISO 8442 (Materials and Articles in Contact with Foodstuffs - Cutlery) & DIN EN ISO 8442-1",
+      "citation": "International standards for blade sharpness retention, edge corrosion resistance, and fracture toughness thresholds for domestic cutlery."
+    },
+    "applianceSpecs": {
+      "parameter": "Produce Slicing Precision vs. Heavy Kitchen Butchery",
+      "guideline": "Deploy ceramic knives strictly for precision slicing of boneless poultry, ripe tomatoes, and oxidation-sensitive produce; use forged stainless steel chef's knives for heavy chopping, deboning, hard squash, and universal meal prep."
+    }
   },
   "stainless-steel-vs-glass-mixing-bowls": {
-      "materialThermal": {
-          "property": "High-Conductivity Austenitic Alloy vs. Amorphous Soda-Lime Thermal Insulator",
-          "threshold": "18/10 Stainless Steel Thermal Conductivity 16.2 W/m·K vs. Soda-Lime Glass 1.0 W/m·K",
-          "details": "Stainless steel transfers heat 16x faster for precision bain-marie chocolate melting and instantaneous ice-bath cooling with unbreakable ductile yield strength; tempered glass provides microwave transparency and clear 360° visual monitoring."
-      },
-      "safetyStandard": {
-          "organization": "ASTM / NSF / FDA",
-          "standard": "ASTM C149 (Thermal Shock Resistance of Glass Containers) & NSF/ANSI 51",
-          "citation": "Safety standards for commercial food prep containers, maximum allowable thermal shock gradients, and non-reactive food-contact metallurgy."
-      },
-      "applianceSpecs": {
-          "parameter": "Double-Boiler Heat Control vs. Microwave Cooking",
-          "guideline": "Use stainless steel bowls for high-volume baking, beating, double-boiler melting, and ice baths; use tempered glass bowls exclusively for microwave heating, melting butter, and visually monitoring yeast dough rise."
-      }
+    "materialThermal": {
+      "property": "High-Conductivity Austenitic Alloy vs. Amorphous Soda-Lime Thermal Insulator",
+      "threshold": "18/10 Stainless Steel Thermal Conductivity 16.2 W/m·K vs. Soda-Lime Glass 1.0 W/m·K",
+      "details": "Stainless steel transfers heat 16x faster for precision bain-marie chocolate melting and instantaneous ice-bath cooling with unbreakable ductile yield strength; tempered glass provides microwave transparency and clear 360° visual monitoring."
+    },
+    "safetyStandard": {
+      "organization": "ASTM / NSF / FDA",
+      "standard": "ASTM C149 (Thermal Shock Resistance of Glass Containers) & NSF/ANSI 51",
+      "citation": "Safety standards for commercial food prep containers, maximum allowable thermal shock gradients, and non-reactive food-contact metallurgy."
+    },
+    "applianceSpecs": {
+      "parameter": "Double-Boiler Heat Control vs. Microwave Cooking",
+      "guideline": "Use stainless steel bowls for high-volume baking, beating, double-boiler melting, and ice baths; use tempered glass bowls exclusively for microwave heating, melting butter, and visually monitoring yeast dough rise."
+    }
   },
   "enameled-cast-iron-vs-stainless-steel-dutch-oven": {
-      "materialThermal": {
-          "property": "High Volumetric Thermal Inertia Flywheel vs. Low-Tare Convective Clad Transfer",
-          "threshold": "Cast Iron Volumetric Heat Capacity ~3.63 J/cm^3·K vs. Tri-Ply Stainless Steel ~2.85 J/cm^3·K",
-          "details": "Heavy cast iron stores 27% more thermal energy per unit volume, creating steady radiant braising temperatures and high-humidity steam chambers for sourdough oven spring; tri-ply stainless steel heats 30% faster with 50% lighter weight for boiling and broths."
-      },
-      "safetyStandard": {
-          "organization": "FDA / ISO / NSF",
-          "standard": "FDA Food Code 2022 § 4-101.11 & ISO 4531 (Vitreous and Porcelain Enamels in Food Contact)",
-          "citation": "Strict heavy metal release limits for vitreous enamel glazes; NSF/ANSI 36 commercial cookware sanitation and thermal cycling standards."
-      },
-      "applianceSpecs": {
-          "parameter": "Low-and-Slow Braising vs. High-Volume Liquid Boiling",
-          "guideline": "Use enameled cast iron Dutch ovens for multi-hour braises, acidic tomato stews, and 450°F+ artisan sourdough bread baking; choose tri-ply stainless steel Dutch ovens for boiling stocks, blanching vegetables, and everyday soups."
-      }
+    "materialThermal": {
+      "property": "High Volumetric Thermal Inertia Flywheel vs. Low-Tare Convective Clad Transfer",
+      "threshold": "Cast Iron Volumetric Heat Capacity ~3.63 J/cm^3·K vs. Tri-Ply Stainless Steel ~2.85 J/cm^3·K",
+      "details": "Heavy cast iron stores 27% more thermal energy per unit volume, creating steady radiant braising temperatures and high-humidity steam chambers for sourdough oven spring; tri-ply stainless steel heats 30% faster with 50% lighter weight for boiling and broths."
+    },
+    "safetyStandard": {
+      "organization": "FDA / ISO / NSF",
+      "standard": "FDA Food Code 2022 § 4-101.11 & ISO 4531 (Vitreous and Porcelain Enamels in Food Contact)",
+      "citation": "Strict heavy metal release limits for vitreous enamel glazes; NSF/ANSI 36 commercial cookware sanitation and thermal cycling standards."
+    },
+    "applianceSpecs": {
+      "parameter": "Low-and-Slow Braising vs. High-Volume Liquid Boiling",
+      "guideline": "Use enameled cast iron Dutch ovens for multi-hour braises, acidic tomato stews, and 450°F+ artisan sourdough bread baking; choose tri-ply stainless steel Dutch ovens for boiling stocks, blanching vegetables, and everyday soups."
+    }
   },
   "glass-vs-stainless-steel-french-press": {
-      "materialThermal": {
-          "property": "Thermal Heat Retention & Dual-Wall Vacuum Boundary vs. Borosilicate Single-Wall Convection",
-          "threshold": "Double-Wall Vacuum Insulation (<2°C loss/10 min) vs. Single-Wall Borosilicate Glass (10°C–14°C drop)",
-          "details": "Double-wall austenitic 18/8 stainless steel eliminates thermal shock rupture while locking brew temperature in the optimal SCA 90°C–96°C extraction window; borosilicate glass permits visual blooming observation but suffers rapid convective cooling."
-      },
-      "safetyStandard": {
-          "organization": "ASTM / ISO / FDA",
-          "standard": "ASTM C149 (Thermal Shock Resistance of Glass Containers) & NSF/ANSI 51 (Food Equipment Materials)",
-          "citation": "Standard test method for thermal shock resistance in beverage ware; NSF/ANSI 51 standards for commercial food-contact alloys."
-      },
-      "applianceSpecs": {
-          "parameter": "Brew Temperature Preservation & Shatter Hazard Eradication",
-          "guideline": "Deploy double-wall stainless steel French presses for daily home brewing with children or high kitchen traffic; reserve borosilicate glass carafes strictly for visual cupping demos and table-side service with gentle non-metal stirring."
-      }
+    "materialThermal": {
+      "property": "Thermal Heat Retention & Dual-Wall Vacuum Boundary vs. Borosilicate Single-Wall Convection",
+      "threshold": "Double-Wall Vacuum Insulation (<2°C loss/10 min) vs. Single-Wall Borosilicate Glass (10°C–14°C drop)",
+      "details": "Double-wall austenitic 18/8 stainless steel eliminates thermal shock rupture while locking brew temperature in the optimal SCA 90°C–96°C extraction window; borosilicate glass permits visual blooming observation but suffers rapid convective cooling."
+    },
+    "safetyStandard": {
+      "organization": "ASTM / ISO / FDA",
+      "standard": "ASTM C149 (Thermal Shock Resistance of Glass Containers) & NSF/ANSI 51 (Food Equipment Materials)",
+      "citation": "Standard test method for thermal shock resistance in beverage ware; NSF/ANSI 51 standards for commercial food-contact alloys."
+    },
+    "applianceSpecs": {
+      "parameter": "Brew Temperature Preservation & Shatter Hazard Eradication",
+      "guideline": "Deploy double-wall stainless steel French presses for daily home brewing with children or high kitchen traffic; reserve borosilicate glass carafes strictly for visual cupping demos and table-side service with gentle non-metal stirring."
+    }
   },
   "silicone-vs-stainless-steel-tongs": {
-      "materialThermal": {
-          "property": "Soft Shore-A Elastomer Coating Protection vs. High-Temperature Austenitic Yield Strength",
-          "threshold": "Silicone Continuous Thermal Limit 232°C (450°F) vs. 18/8 Stainless Steel Yielding >815°C (1,500°F)",
-          "details": "Food-grade silicone tips (Shore A 60–70) eliminate micro-scratching on PTFE and ceramic cookware; solid 18/8 stainless steel withstands direct charcoal flames and smoking grates where silicone would undergo thermal depolymerization."
-      },
-      "safetyStandard": {
-          "organization": "FDA / EU / NSF",
-          "standard": "FDA 21 CFR § 177.2600 (Rubber Articles for Repeated Use) & EU Regulation 10/2011",
-          "citation": "Standards for total extractive limitations of food-contact elastomers; NSF commercial food utensil sanitization criteria."
-      },
-      "applianceSpecs": {
-          "parameter": "Cookware Surface Preservation vs. Extreme Heat Searing",
-          "guideline": "Use silicone-tipped tongs for all indoor nonstick, ceramic, and enameled Dutch ovens; reserve solid stainless steel tongs for raw cast iron, carbon steel woks, and outdoor charcoal grilling."
-      }
+    "materialThermal": {
+      "property": "Soft Shore-A Elastomer Coating Protection vs. High-Temperature Austenitic Yield Strength",
+      "threshold": "Silicone Continuous Thermal Limit 232°C (450°F) vs. 18/8 Stainless Steel Yielding >815°C (1,500°F)",
+      "details": "Food-grade silicone tips (Shore A 60–70) eliminate micro-scratching on PTFE and ceramic cookware; solid 18/8 stainless steel withstands direct charcoal flames and smoking grates where silicone would undergo thermal depolymerization."
+    },
+    "safetyStandard": {
+      "organization": "FDA / EU / NSF",
+      "standard": "FDA 21 CFR § 177.2600 (Rubber Articles for Repeated Use) & EU Regulation 10/2011",
+      "citation": "Standards for total extractive limitations of food-contact elastomers; NSF commercial food utensil sanitization criteria."
+    },
+    "applianceSpecs": {
+      "parameter": "Cookware Surface Preservation vs. Extreme Heat Searing",
+      "guideline": "Use silicone-tipped tongs for all indoor nonstick, ceramic, and enameled Dutch ovens; reserve solid stainless steel tongs for raw cast iron, carbon steel woks, and outdoor charcoal grilling."
+    }
   },
   "bamboo-vs-stainless-steel-steamer": {
-      "materialThermal": {
-          "property": "Vascular Cellulose Moisture Absorption vs. Impermeable Metal Condensation Runoff",
-          "threshold": "Natural Bamboo 25% Moisture Absorption by Weight vs. Stainless Steel 0% Absorption (Drip Cascade)",
-          "details": "Woven bamboo lids absorb rising steam vapor, preventing heavy condensation droplets from soaking and collapsing delicate dumpling skins; 18/8 stainless steel steamer pots provide lifetime non-porous durability and zero mold risk."
-      },
-      "safetyStandard": {
-          "organization": "FDA / ASTM / ISO",
-          "standard": "FDA Food Code 2022 § 4-101.11 & ASTM A240/A240M (Chromium Stainless Steel Plate)",
-          "citation": "Sanitation requirements for multi-use food-contact surfaces; international corrosion specifications for food-grade stainless steels."
-      },
-      "applianceSpecs": {
-          "parameter": "Delicate Dim Sum Texture vs. Dishwasher Sanitization",
-          "guideline": "Use traditional bamboo steamers for dumplings, bao, and delicate fish with parchment liners; use tiered stainless steel steamer pots for root vegetables, tamales, crab legs, and humid environments requiring dishwasher sanitization."
-      }
+    "materialThermal": {
+      "property": "Vascular Cellulose Moisture Absorption vs. Impermeable Metal Condensation Runoff",
+      "threshold": "Natural Bamboo 25% Moisture Absorption by Weight vs. Stainless Steel 0% Absorption (Drip Cascade)",
+      "details": "Woven bamboo lids absorb rising steam vapor, preventing heavy condensation droplets from soaking and collapsing delicate dumpling skins; 18/8 stainless steel steamer pots provide lifetime non-porous durability and zero mold risk."
+    },
+    "safetyStandard": {
+      "organization": "FDA / ASTM / ISO",
+      "standard": "FDA Food Code 2022 § 4-101.11 & ASTM A240/A240M (Chromium Stainless Steel Plate)",
+      "citation": "Sanitation requirements for multi-use food-contact surfaces; international corrosion specifications for food-grade stainless steels."
+    },
+    "applianceSpecs": {
+      "parameter": "Delicate Dim Sum Texture vs. Dishwasher Sanitization",
+      "guideline": "Use traditional bamboo steamers for dumplings, bao, and delicate fish with parchment liners; use tiered stainless steel steamer pots for root vegetables, tamales, crab legs, and humid environments requiring dishwasher sanitization."
+    }
   },
   "silicone-vs-stainless-steel-tea-infuser": {
-      "materialThermal": {
-          "property": "Deep Cylindrical Expansion Basket vs. Cramped Molded Polymeric Chamber",
-          "threshold": "304 Micro-Mesh Volume (~150 cm^3 / <0.5mm) vs. Molded Silicone (~20 cm^3 / Coarse Holes)",
-          "details": "Laser-etched 304 stainless steel baskets allow whole-leaf teas to expand up to 400% for full polyphenol extraction with zero chemical migration in 100°C water; novelty silicone infusers cramp leaves and risk siloxane oligomer migration in acidic hot brews."
-      },
-      "safetyStandard": {
-          "organization": "BfR / FDA / ISO",
-          "standard": "German BfR Recommendation XV (Silicones) & ISO 8442 (Food-Contact Cutlery & Wire Mesh)",
-          "citation": "BfR toxicological threshold limits for volatile organic compounds and siloxanes; ISO standards for food-contact stainless steel wire mesh."
-      },
-      "applianceSpecs": {
-          "parameter": "Whole-Leaf Expansion & Chemical Purity in Boiling Tisanes",
-          "guideline": "Deploy ultra-fine 304 stainless steel basket infusers for loose-leaf black, oolong, and fine rooibos teas; restrict novelty silicone infusers to coarse-cut dried fruit infusions or casual room-temperature steeping."
-      }
+    "materialThermal": {
+      "property": "Deep Cylindrical Expansion Basket vs. Cramped Molded Polymeric Chamber",
+      "threshold": "304 Micro-Mesh Volume (~150 cm^3 / <0.5mm) vs. Molded Silicone (~20 cm^3 / Coarse Holes)",
+      "details": "Laser-etched 304 stainless steel baskets allow whole-leaf teas to expand up to 400% for full polyphenol extraction with zero chemical migration in 100°C water; novelty silicone infusers cramp leaves and risk siloxane oligomer migration in acidic hot brews."
+    },
+    "safetyStandard": {
+      "organization": "BfR / FDA / ISO",
+      "standard": "German BfR Recommendation XV (Silicones) & ISO 8442 (Food-Contact Cutlery & Wire Mesh)",
+      "citation": "BfR toxicological threshold limits for volatile organic compounds and siloxanes; ISO standards for food-contact stainless steel wire mesh."
+    },
+    "applianceSpecs": {
+      "parameter": "Whole-Leaf Expansion & Chemical Purity in Boiling Tisanes",
+      "guideline": "Deploy ultra-fine 304 stainless steel basket infusers for loose-leaf black, oolong, and fine rooibos teas; restrict novelty silicone infusers to coarse-cut dried fruit infusions or casual room-temperature steeping."
+    }
   },
   "copper-core-vs-tri-ply-stainless-steel": {
-      "materialThermal": {
-          "property": "Electrolytic Copper Core Thermal Diffusivity vs. Tri-Ply Aluminum Thermal Mass Inertia",
-          "threshold": "99.9% Pure Copper 385 W/m·K vs. Food-Grade Aluminum 205 W/m·K (Thermal Response Speed <3s vs ~8s)",
-          "details": "5-ply copper core cookware transfers heat nearly twice as fast as aluminum, allowing instant temperature reductions for delicate sauces and caramel; tri-ply stainless steel provides greater heat retention for searing proteins with lighter tare weight."
-      },
-      "safetyStandard": {
-          "organization": "ASTM / ISO / NSF",
-          "standard": "ASTM B152 (Copper Sheet/Strip) & NSF/ANSI 51 (Food Equipment Materials)",
-          "citation": "Standard specification for copper architectural and culinary cladding; NSF criteria for clad multi-layer commercial cookware metallurgy."
-      },
-      "applianceSpecs": {
-          "parameter": "Precision Sauce Temperature Modulation vs. Heavy Everyday Sautéing",
-          "guideline": "Use 5-ply copper core cookware for delicate reductions, hollandaise, and sugar work; choose tri-ply clad stainless steel for high-volume weeknight cooking, searing meats, and seamless automated dishwasher cleaning."
-      }
+    "materialThermal": {
+      "property": "Electrolytic Copper Core Thermal Diffusivity vs. Tri-Ply Aluminum Thermal Mass Inertia",
+      "threshold": "99.9% Pure Copper 385 W/m·K vs. Food-Grade Aluminum 205 W/m·K (Thermal Response Speed <3s vs ~8s)",
+      "details": "5-ply copper core cookware transfers heat nearly twice as fast as aluminum, allowing instant temperature reductions for delicate sauces and caramel; tri-ply stainless steel provides greater heat retention for searing proteins with lighter tare weight."
+    },
+    "safetyStandard": {
+      "organization": "ASTM / ISO / NSF",
+      "standard": "ASTM B152 (Copper Sheet/Strip) & NSF/ANSI 51 (Food Equipment Materials)",
+      "citation": "Standard specification for copper architectural and culinary cladding; NSF criteria for clad multi-layer commercial cookware metallurgy."
+    },
+    "applianceSpecs": {
+      "parameter": "Precision Sauce Temperature Modulation vs. Heavy Everyday Sautéing",
+      "guideline": "Use 5-ply copper core cookware for delicate reductions, hollandaise, and sugar work; choose tri-ply clad stainless steel for high-volume weeknight cooking, searing meats, and seamless automated dishwasher cleaning."
+    }
   },
   "granite-vs-marble-mortar-and-pestle": {
-      "materialThermal": {
-          "property": "Igneous Quartz-Feldspar Acid Insoluble Matrix vs. Metamorphic Calcite Dissolution",
-          "threshold": "Granite 0.00% Mass Loss in 5% Acetic Acid vs. Marble Rapid Effervescent Calcium Leaching",
-          "details": "Dense igneous granite (Mohs 6–7) resists aggressive dietary acids (citric, acetic, malic) and pounding forces (>130 MPa), eliminating mineral chalk shedding; soft metamorphic marble (Mohs 3) dissolves in acids (<pH 4.0), releasing chalky calcium salts and etching micro-cavities that harbor biofilms."
-      },
-      "safetyStandard": {
-          "organization": "FDA / NSF / ISO",
-          "standard": "FDA 21 CFR § 174.5 (Food Contact Surfaces) & NSF/ANSI 51 (Food Equipment Materials)",
-          "citation": "Standard criteria for cleanable, non-absorbent food-contact surfaces; NSF commercial wear and toxicity standards."
-      },
-      "applianceSpecs": {
-          "parameter": "Acidic Wet Paste Grinding vs. Soft Herb Bruising",
-          "guideline": "Use natural unpolished granite for all wet acidic salsas, curry pastes, and hard spice crushing; reserve smooth marble strictly for gentle dry herb pounding or non-acidic room-temperature pestos."
-      }
+    "materialThermal": {
+      "property": "Igneous Quartz-Feldspar Acid Insoluble Matrix vs. Metamorphic Calcite Dissolution",
+      "threshold": "Granite 0.00% Mass Loss in 5% Acetic Acid vs. Marble Rapid Effervescent Calcium Leaching",
+      "details": "Dense igneous granite (Mohs 6–7) resists aggressive dietary acids (citric, acetic, malic) and pounding forces (>130 MPa), eliminating mineral chalk shedding; soft metamorphic marble (Mohs 3) dissolves in acids (<pH 4.0), releasing chalky calcium salts and etching micro-cavities that harbor biofilms."
+    },
+    "safetyStandard": {
+      "organization": "FDA / NSF / ISO",
+      "standard": "FDA 21 CFR § 174.5 (Food Contact Surfaces) & NSF/ANSI 51 (Food Equipment Materials)",
+      "citation": "Standard criteria for cleanable, non-absorbent food-contact surfaces; NSF commercial wear and toxicity standards."
+    },
+    "applianceSpecs": {
+      "parameter": "Acidic Wet Paste Grinding vs. Soft Herb Bruising",
+      "guideline": "Use natural unpolished granite for all wet acidic salsas, curry pastes, and hard spice crushing; reserve smooth marble strictly for gentle dry herb pounding or non-acidic room-temperature pestos."
+    }
   },
   "silicone-vs-stainless-steel-whisk": {
-      "materialThermal": {
-          "property": "Elastomeric Coating Coating Protection vs. Austenitic High-Modulus Fluid Shear",
-          "threshold": "Silicone Shore A 60–70 (Max 232°C / 450°F) vs. Spring Steel Modulus 193 GPa (>815°C / 1,500°F)",
-          "details": "Food-grade silicone sheathing protects delicate PTFE and ceramic non-stick coatings from gouging and microplastic abrasion; rigid spring-tempered 18/8 stainless steel wires slice through liquids with high Reynolds turbulence for 3x faster aeration and stiffer egg white meringues."
-      },
-      "safetyStandard": {
-          "organization": "FDA / ISO / NSF",
-          "standard": "FDA 21 CFR § 177.2600 (Rubber Articles for Repeated Use) & ISO 8442 (Cutlery and Food Hollowware)",
-          "citation": "Extraction thresholds for repeated-use food elastomers; ISO standards for food-contact spring wire metallurgy."
-      },
-      "applianceSpecs": {
-          "parameter": "Coated Pan Surface Protection vs. High-Velocity Foam Aeration",
-          "guideline": "Deploy silicone-coated whisks for stirring rouxs, custards, and gravies in non-stick or enameled cookware; use solid spring stainless steel whisks in metal bowls for rapid egg white, cream, and emulsion whipping."
-      }
+    "materialThermal": {
+      "property": "Elastomeric Coating Coating Protection vs. Austenitic High-Modulus Fluid Shear",
+      "threshold": "Silicone Shore A 60–70 (Max 232°C / 450°F) vs. Spring Steel Modulus 193 GPa (>815°C / 1,500°F)",
+      "details": "Food-grade silicone sheathing protects delicate PTFE and ceramic non-stick coatings from gouging and microplastic abrasion; rigid spring-tempered 18/8 stainless steel wires slice through liquids with high Reynolds turbulence for 3x faster aeration and stiffer egg white meringues."
+    },
+    "safetyStandard": {
+      "organization": "FDA / ISO / NSF",
+      "standard": "FDA 21 CFR § 177.2600 (Rubber Articles for Repeated Use) & ISO 8442 (Cutlery and Food Hollowware)",
+      "citation": "Extraction thresholds for repeated-use food elastomers; ISO standards for food-contact spring wire metallurgy."
+    },
+    "applianceSpecs": {
+      "parameter": "Coated Pan Surface Protection vs. High-Velocity Foam Aeration",
+      "guideline": "Deploy silicone-coated whisks for stirring rouxs, custards, and gravies in non-stick or enameled cookware; use solid spring stainless steel whisks in metal bowls for rapid egg white, cream, and emulsion whipping."
+    }
   },
   "silicone-vs-cotton-oven-mitts": {
-      "materialThermal": {
-          "property": "Hydrophobic Steam-Proof Thermal Barrier vs. Cellulosic Convective Steam Scald Conduction",
-          "threshold": "Silicone Continuous Limit 260°C (500°F, 100% Waterproof) vs. Cotton Dry Limit 180°C (Wet Drops to 0°C)",
-          "details": "Textured silicone mitts provide an impermeable moisture barrier that completely prevents catastrophic steam scalds and withstands boiling spills up to 500°F; woven cotton mitts instantly absorb moisture, converting trapped water into 212°F+ scalding steam when contacting hot baking dishes."
-      },
-      "safetyStandard": {
-          "organization": "ASTM / OSHA / FDA",
-          "standard": "ASTM F1060 (Thermal Protective Performance) & OSHA 1910.138 (Hand Thermal Protection)",
-          "citation": "Standard test method for conductive and convective thermal protection for hot surface contact."
-      },
-      "applianceSpecs": {
-          "parameter": "High-Heat Heavy Cookware Handling & Boiling Water Retrieval",
-          "guideline": "Mandate textured silicone mitts when retrieving heavy cast iron Dutch ovens, boiling canning jars, or baking sheets above 400°F; reserve dry cotton mitts exclusively for rapid handling of light cookie sheets below 350°F."
-      }
+    "materialThermal": {
+      "property": "Hydrophobic Steam-Proof Thermal Barrier vs. Cellulosic Convective Steam Scald Conduction",
+      "threshold": "Silicone Continuous Limit 260°C (500°F, 100% Waterproof) vs. Cotton Dry Limit 180°C (Wet Drops to 0°C)",
+      "details": "Textured silicone mitts provide an impermeable moisture barrier that completely prevents catastrophic steam scalds and withstands boiling spills up to 500°F; woven cotton mitts instantly absorb moisture, converting trapped water into 212°F+ scalding steam when contacting hot baking dishes."
+    },
+    "safetyStandard": {
+      "organization": "ASTM / OSHA / FDA",
+      "standard": "ASTM F1060 (Thermal Protective Performance) & OSHA 1910.138 (Hand Thermal Protection)",
+      "citation": "Standard test method for conductive and convective thermal protection for hot surface contact."
+    },
+    "applianceSpecs": {
+      "parameter": "High-Heat Heavy Cookware Handling & Boiling Water Retrieval",
+      "guideline": "Mandate textured silicone mitts when retrieving heavy cast iron Dutch ovens, boiling canning jars, or baking sheets above 400°F; reserve dry cotton mitts exclusively for rapid handling of light cookie sheets below 350°F."
+    }
   },
   "stainless-steel-vs-plastic-citrus-juicer": {
-      "materialThermal": {
-          "property": "Chromium Oxide Passivated Corrosion Immunity vs. d-Limonene Environmental Stress Cracking",
-          "threshold": "Grade 304 Stainless Steel <0.001 mm/yr Corrosion in 5% Citric Acid vs. Thermoplastic Crazing & Fatigue",
-          "details": "Passivated 18/8 stainless steel is completely immune to citric acid (pH 2.0) and peel terpene solvents (d-limonene), tolerating >50 Nm torque without yield; plastic squeezers suffer solvent crazing, hinge fatigue fracture, and abrade microplastics into fresh citrus juice."
-      },
-      "safetyStandard": {
-          "organization": "NSF / FDA / EC",
-          "standard": "NSF/ANSI 51 (Food Equipment Materials) & FDA 21 CFR § 175.300 / EC 1935/2004",
-          "citation": "Commercial food equipment certification for high-acid food contact metallurgy and polymer extraction safety."
-      },
-      "applianceSpecs": {
-          "parameter": "High-Torque Extraction & Chemical Immersion Safety",
-          "guideline": "Use heavy-duty 304 stainless steel presses for daily bar prep, canning, and high-acid citrus squeezing; avoid plastic squeezers or chipped painted aluminum presses that shed toxic gray metal salts into juice."
-      }
+    "materialThermal": {
+      "property": "Chromium Oxide Passivated Corrosion Immunity vs. d-Limonene Environmental Stress Cracking",
+      "threshold": "Grade 304 Stainless Steel <0.001 mm/yr Corrosion in 5% Citric Acid vs. Thermoplastic Crazing & Fatigue",
+      "details": "Passivated 18/8 stainless steel is completely immune to citric acid (pH 2.0) and peel terpene solvents (d-limonene), tolerating >50 Nm torque without yield; plastic squeezers suffer solvent crazing, hinge fatigue fracture, and abrade microplastics into fresh citrus juice."
+    },
+    "safetyStandard": {
+      "organization": "NSF / FDA / EC",
+      "standard": "NSF/ANSI 51 (Food Equipment Materials) & FDA 21 CFR § 175.300 / EC 1935/2004",
+      "citation": "Commercial food equipment certification for high-acid food contact metallurgy and polymer extraction safety."
+    },
+    "applianceSpecs": {
+      "parameter": "High-Torque Extraction & Chemical Immersion Safety",
+      "guideline": "Use heavy-duty 304 stainless steel presses for daily bar prep, canning, and high-acid citrus squeezing; avoid plastic squeezers or chipped painted aluminum presses that shed toxic gray metal salts into juice."
+    }
   },
   "glass-vs-stainless-steel-oil-dispenser": {
-      "materialThermal": {
-          "property": "100% Optical Light Blockade vs. Singlet Oxygen Photosensitized Lipid Peroxidation",
-          "threshold": "18/8 Stainless Steel 0.00% Light Transmittance vs. Clear Borosilicate Glass >90% Visible Transmittance",
-          "details": "Opaque 18/8 stainless steel completely blocks all UV and visible wavelengths, halting chlorophyll-photosensitized singlet oxygen attack on polyunsaturated fatty acids; clear glass allows rapid lipid hydroperoxide formation, destroying polyphenols and generating rancid hexanal off-flavors."
-      },
-      "safetyStandard": {
-          "organization": "IOC / Codex / FDA",
-          "standard": "IOC Trade Standard COI/T.15/NC No 3 (Olive Oil Storage) & Codex Alimentarius CXS 33-1981",
-          "citation": "International standards specifying dark, light-impervious packaging for extra virgin olive oil preservation."
-      },
-      "applianceSpecs": {
-          "parameter": "Lipid Oxidation Preservation & Stovetop Radiant Heat Protection",
-          "guideline": "Station opaque food-grade 18/8 stainless steel dispensers near cooking areas to block ambient light and deflect cooktop heat; restrict clear glass cruets to rapid-turnover neutral oils or dark pantry storage."
-      }
+    "materialThermal": {
+      "property": "100% Optical Light Blockade vs. Singlet Oxygen Photosensitized Lipid Peroxidation",
+      "threshold": "18/8 Stainless Steel 0.00% Light Transmittance vs. Clear Borosilicate Glass >90% Visible Transmittance",
+      "details": "Opaque 18/8 stainless steel completely blocks all UV and visible wavelengths, halting chlorophyll-photosensitized singlet oxygen attack on polyunsaturated fatty acids; clear glass allows rapid lipid hydroperoxide formation, destroying polyphenols and generating rancid hexanal off-flavors."
+    },
+    "safetyStandard": {
+      "organization": "IOC / Codex / FDA",
+      "standard": "IOC Trade Standard COI/T.15/NC No 3 (Olive Oil Storage) & Codex Alimentarius CXS 33-1981",
+      "citation": "International standards specifying dark, light-impervious packaging for extra virgin olive oil preservation."
+    },
+    "applianceSpecs": {
+      "parameter": "Lipid Oxidation Preservation & Stovetop Radiant Heat Protection",
+      "guideline": "Station opaque food-grade 18/8 stainless steel dispensers near cooking areas to block ambient light and deflect cooktop heat; restrict clear glass cruets to rapid-turnover neutral oils or dark pantry storage."
+    }
   },
   "ceramic-vs-stainless-steel-burr-coffee-grinder": {
-      "materialThermal": {
-          "property": "Micro-Machined Cutting Geometry vs. Sintered Alumina Thermal Retention",
-          "threshold": "CNC 420 Martensitic Steel (55–58 HRC) vs. Alumina Ceramic (Mohs 9, k = 18–30 W/m·K)",
-          "details": "Razor-sharp 5-axis CNC stainless steel cutting facets cleanly slice coffee endosperm into unimodal particle distributions with up to 60% fewer micro-fines; molded ceramic burrs crush beans under compression, trapping frictional heat that volatilizes delicate aromatic terpenes."
-      },
-      "safetyStandard": {
-          "organization": "EC / FDA / ISO",
-          "standard": "Framework Regulation (EC) No 1935/2004 & FDA 21 CFR § 174.5 / ISO 8442",
-          "citation": "European and FDA standards for repeated food contact metallurgy, heavy metal limits, and cutting tool safety."
-      },
-      "applianceSpecs": {
-          "parameter": "Uniform Particle Distribution & Chipping Ingestion Prevention",
-          "guideline": "Mandate hardened stainless steel burrs for specialty espresso and pour-over brewing to eliminate bitter fines and prevent ceramic chipping from incidental farm pebbles."
-      }
+    "materialThermal": {
+      "property": "Micro-Machined Cutting Geometry vs. Sintered Alumina Thermal Retention",
+      "threshold": "CNC 420 Martensitic Steel (55–58 HRC) vs. Alumina Ceramic (Mohs 9, k = 18–30 W/m·K)",
+      "details": "Razor-sharp 5-axis CNC stainless steel cutting facets cleanly slice coffee endosperm into unimodal particle distributions with up to 60% fewer micro-fines; molded ceramic burrs crush beans under compression, trapping frictional heat that volatilizes delicate aromatic terpenes."
+    },
+    "safetyStandard": {
+      "organization": "EC / FDA / ISO",
+      "standard": "Framework Regulation (EC) No 1935/2004 & FDA 21 CFR § 174.5 / ISO 8442",
+      "citation": "European and FDA standards for repeated food contact metallurgy, heavy metal limits, and cutting tool safety."
+    },
+    "applianceSpecs": {
+      "parameter": "Uniform Particle Distribution & Chipping Ingestion Prevention",
+      "guideline": "Mandate hardened stainless steel burrs for specialty espresso and pour-over brewing to eliminate bitter fines and prevent ceramic chipping from incidental farm pebbles."
+    }
   },
   "silicone-vs-stainless-steel-ice-cube-tray": {
-      "materialThermal": {
-          "property": "Passivated Chromium Oxide VOC Barrier vs. Polysiloxane Lipophilic Odor Adsorption",
-          "threshold": "18/8 Stainless Steel (k = 16 W/m·K, 0.00% VOC Permeability) vs. Silicone (k = 0.2 W/m·K)",
-          "details": "18/8 stainless steel completely halts lipophilic freezer gas adsorption, freezing water 3x faster with zero chemical migration; porous polysiloxane silicone matrices adsorb stale sulfur and fatty freezer odors, transferring off-flavors into ice."
-      },
-      "safetyStandard": {
-          "organization": "Council of Europe / FDA / LFGB",
-          "standard": "Council of Europe Resolution CM/Res(2013)9 & FDA 21 CFR § 177.2600 / LFGB § 31",
-          "citation": "European guidelines for metals in contact with food and German LFGB extraction thresholds for food-contact elastomers."
-      },
-      "applianceSpecs": {
-          "parameter": "Freezer VOC Infiltration & Rapid Potable Freezing",
-          "guideline": "Deploy 18/8 stainless steel lever ice trays for daily odorless beverage ice; reserve platinum-cured silicone exclusively for flexible craft spherical molds and bake at 300°F to desorb odors."
-      }
+    "materialThermal": {
+      "property": "Passivated Chromium Oxide VOC Barrier vs. Polysiloxane Lipophilic Odor Adsorption",
+      "threshold": "18/8 Stainless Steel (k = 16 W/m·K, 0.00% VOC Permeability) vs. Silicone (k = 0.2 W/m·K)",
+      "details": "18/8 stainless steel completely halts lipophilic freezer gas adsorption, freezing water 3x faster with zero chemical migration; porous polysiloxane silicone matrices adsorb stale sulfur and fatty freezer odors, transferring off-flavors into ice."
+    },
+    "safetyStandard": {
+      "organization": "Council of Europe / FDA / LFGB",
+      "standard": "Council of Europe Resolution CM/Res(2013)9 & FDA 21 CFR § 177.2600 / LFGB § 31",
+      "citation": "European guidelines for metals in contact with food and German LFGB extraction thresholds for food-contact elastomers."
+    },
+    "applianceSpecs": {
+      "parameter": "Freezer VOC Infiltration & Rapid Potable Freezing",
+      "guideline": "Deploy 18/8 stainless steel lever ice trays for daily odorless beverage ice; reserve platinum-cured silicone exclusively for flexible craft spherical molds and bake at 300°F to desorb odors."
+    }
   },
   "cast-iron-vs-cordierite-pizza-pan": {
-      "materialThermal": {
-          "property": "Ferrous Volumetric Conductive Heat Flux vs. Refractory Silicate Thermal Shock",
-          "threshold": "Cast Iron (k = 52 W/m·K, C_vol = 3.6 J/cm³·K) vs. Cordierite Ceramic (k = 2.0 W/m·K)",
-          "details": "Dense ductile cast iron transfers conductive heat into wet raw dough over 20x faster than ceramic, triggering rapid Maillard crust blistering and explosive oven spring; cordierite cools upon dough contact, is vulnerable to thermal shock shattering, and irreversibly absorbs smoking grease."
-      },
-      "safetyStandard": {
-          "organization": "ASTM / NSF / FDA",
-          "standard": "ASTM C484 (Thermal Shock Resistance) & NSF/ANSI 51 (Food Equipment Materials) / FDA 21 CFR § 175.300",
-          "citation": "Standard test methods for ceramic thermal shock and NSF commercial cookware material sanitization."
-      },
-      "applianceSpecs": {
-          "parameter": "Instant Conductive Crust Searing & Thermal Fracture Immunity",
-          "guideline": "Preheat heavy cast iron pizza pans in 500°F home ovens or open-flame grills for maximum bottom crust crispness; avoid using dish soap or cold water on porous cordierite ceramic stones."
-      }
+    "materialThermal": {
+      "property": "Ferrous Volumetric Conductive Heat Flux vs. Refractory Silicate Thermal Shock",
+      "threshold": "Cast Iron (k = 52 W/m·K, C_vol = 3.6 J/cm³·K) vs. Cordierite Ceramic (k = 2.0 W/m·K)",
+      "details": "Dense ductile cast iron transfers conductive heat into wet raw dough over 20x faster than ceramic, triggering rapid Maillard crust blistering and explosive oven spring; cordierite cools upon dough contact, is vulnerable to thermal shock shattering, and irreversibly absorbs smoking grease."
+    },
+    "safetyStandard": {
+      "organization": "ASTM / NSF / FDA",
+      "standard": "ASTM C484 (Thermal Shock Resistance) & NSF/ANSI 51 (Food Equipment Materials) / FDA 21 CFR § 175.300",
+      "citation": "Standard test methods for ceramic thermal shock and NSF commercial cookware material sanitization."
+    },
+    "applianceSpecs": {
+      "parameter": "Instant Conductive Crust Searing & Thermal Fracture Immunity",
+      "guideline": "Preheat heavy cast iron pizza pans in 500°F home ovens or open-flame grills for maximum bottom crust crispness; avoid using dish soap or cold water on porous cordierite ceramic stones."
+    }
   },
   "stainless-steel-vs-plastic-measuring-cups": {
-      "materialThermal": {
-          "property": "Austenitic Dimensional Creep Resistance vs. Thermoplastic Heat Deflection Warping",
-          "threshold": "Grade 304 Stainless Steel (17.3 × 10^-6 /K) vs. Polypropylene/ABS (100–150 × 10^-6 /K)",
-          "details": "Seamless stamped 18/8 stainless steel maintains permanent NIST Handbook 105-2 baking volumetric accuracy through high-heat dishwasher drying; polypropylene measuring cups warp at >65°C, introducing 5%–15% recipe volume errors while shedding microplastics from knife leveling."
-      },
-      "safetyStandard": {
-          "organization": "NIST / ASTM / FDA",
-          "standard": "NIST Handbook 105-2 (Specifications for Field Standard Measures) & ASTM E1272 / FDA 21 CFR § 177.1520",
-          "citation": "National volumetric measurement tolerances for laboratory/baking standards and FDA olefin polymer contact safety."
-      },
-      "applianceSpecs": {
-          "parameter": "Volumetric Stoichiometric Calibration & Microplastic Shedding Elimination",
-          "guideline": "Utilize heavy-gauge stamped 18/8 stainless steel measuring sets with etched markings for precision baking; replace warped or scratched plastic measuring cups to prevent leavening failures and microplastic ingestion."
-      }
+    "materialThermal": {
+      "property": "Austenitic Dimensional Creep Resistance vs. Thermoplastic Heat Deflection Warping",
+      "threshold": "Grade 304 Stainless Steel (17.3 × 10^-6 /K) vs. Polypropylene/ABS (100–150 × 10^-6 /K)",
+      "details": "Seamless stamped 18/8 stainless steel maintains permanent NIST Handbook 105-2 baking volumetric accuracy through high-heat dishwasher drying; polypropylene measuring cups warp at >65°C, introducing 5%–15% recipe volume errors while shedding microplastics from knife leveling."
+    },
+    "safetyStandard": {
+      "organization": "NIST / ASTM / FDA",
+      "standard": "NIST Handbook 105-2 (Specifications for Field Standard Measures) & ASTM E1272 / FDA 21 CFR § 177.1520",
+      "citation": "National volumetric measurement tolerances for laboratory/baking standards and FDA olefin polymer contact safety."
+    },
+    "applianceSpecs": {
+      "parameter": "Volumetric Stoichiometric Calibration & Microplastic Shedding Elimination",
+      "guideline": "Utilize heavy-gauge stamped 18/8 stainless steel measuring sets with etched markings for precision baking; replace warped or scratched plastic measuring cups to prevent leavening failures and microplastic ingestion."
+    }
   },
   "stainless-steel-vs-plastic-salad-spinner": {
-      "materialThermal": {
-          "property": "Electropolished Biofilm Pathogen Barrier vs. High-RPM Centrifugal Vibration Stability",
-          "threshold": "18/8 Stainless Steel (Ra < 0.25 μm, Tare Mass ~1.5 kg) vs. Resin (Ra > 0.8 μm, Mass ~0.5 kg)",
-          "details": "Electropolished non-porous 18/8 stainless steel outer basins eliminate 99.9% of Listeria and E. coli biofilms, resisting soil sand micro-scratching and absorbing 800 RPM centrifugal wobbling; lightweight plastic spinners vibrate violently, develop pathogen-harboring micro-furrows, and craze in dishwashers."
-      },
-      "safetyStandard": {
-          "organization": "CDC / FDA / NSF",
-          "standard": "FDA Food Code § 4-101.11 (Food-Contact Cleanability) & NSF/ANSI 2 (Food Equipment Sanitation)",
-          "citation": "Federal food hygiene requirements for smooth, cleanable, non-absorbent surfaces for ready-to-eat produce."
-      },
-      "applianceSpecs": {
-          "parameter": "Post-Harvest Produce Biofilm Sanitation & Centrifugal Inertial Stability",
-          "guideline": "Select stainless steel salad spinners for washing raw garden greens to eliminate bacterial biofilm survival in scratches; utilize the heavy metallic outer basin as a chilled serving salad bowl."
-      }
+    "materialThermal": {
+      "property": "Electropolished Biofilm Pathogen Barrier vs. High-RPM Centrifugal Vibration Stability",
+      "threshold": "18/8 Stainless Steel (Ra < 0.25 μm, Tare Mass ~1.5 kg) vs. Resin (Ra > 0.8 μm, Mass ~0.5 kg)",
+      "details": "Electropolished non-porous 18/8 stainless steel outer basins eliminate 99.9% of Listeria and E. coli biofilms, resisting soil sand micro-scratching and absorbing 800 RPM centrifugal wobbling; lightweight plastic spinners vibrate violently, develop pathogen-harboring micro-furrows, and craze in dishwashers."
+    },
+    "safetyStandard": {
+      "organization": "CDC / FDA / NSF",
+      "standard": "FDA Food Code § 4-101.11 (Food-Contact Cleanability) & NSF/ANSI 2 (Food Equipment Sanitation)",
+      "citation": "Federal food hygiene requirements for smooth, cleanable, non-absorbent surfaces for ready-to-eat produce."
+    },
+    "applianceSpecs": {
+      "parameter": "Post-Harvest Produce Biofilm Sanitation & Centrifugal Inertial Stability",
+      "guideline": "Select stainless steel salad spinners for washing raw garden greens to eliminate bacterial biofilm survival in scratches; utilize the heavy metallic outer basin as a chilled serving salad bowl."
+    }
   },
   "stainless-steel-vs-plastic-dish-drying-rack": {
-      "materialThermal": {
-          "property": "Passivated Chromium Oxide Barrier vs. Polypropylene Limescale Adsorption",
-          "threshold": "SUS304 Stainless Steel (Cr2O3 Passivated, Ra < 0.2 μm) vs. Polypropylene (ESC Threshold ~65°C)",
-          "details": "Electropolished 18/8 stainless steel wire frames prevent 99.9% of bacterial biofilm attachment (Serratia marcescens and Pseudomonas) and completely resist alkaline dish detergents and UV embrittlement; molded plastic trays trap mineral limescale, harbor pathogenic pink slime, and warp under thermal dishwasher exposure."
-      },
-      "safetyStandard": {
-          "organization": "FDA / NSF / ISO",
-          "standard": "FDA Food Code § 4-101.11 & NSF/ANSI Standard 2 (Food Equipment Sanitation)",
-          "citation": "Sanitary design criteria for cleanable, non-absorbent, corrosion-resistant food contact and drying equipment surfaces."
-      },
-      "applianceSpecs": {
-          "parameter": "Countertop Biofilm Elimination & Heavy Cookware Load Bearing",
-          "guideline": "Deploy heavy-gauge SUS304 stainless steel dish drying racks with sloped drainage spouts for daily family cookware; wash removable plastic caddies weekly with diluted hydrogen peroxide to eliminate opportunistic pink slime biofilms."
-      }
+    "materialThermal": {
+      "property": "Passivated Chromium Oxide Barrier vs. Polypropylene Limescale Adsorption",
+      "threshold": "SUS304 Stainless Steel (Cr2O3 Passivated, Ra < 0.2 μm) vs. Polypropylene (ESC Threshold ~65°C)",
+      "details": "Electropolished 18/8 stainless steel wire frames prevent 99.9% of bacterial biofilm attachment (Serratia marcescens and Pseudomonas) and completely resist alkaline dish detergents and UV embrittlement; molded plastic trays trap mineral limescale, harbor pathogenic pink slime, and warp under thermal dishwasher exposure."
+    },
+    "safetyStandard": {
+      "organization": "FDA / NSF / ISO",
+      "standard": "FDA Food Code § 4-101.11 & NSF/ANSI Standard 2 (Food Equipment Sanitation)",
+      "citation": "Sanitary design criteria for cleanable, non-absorbent, corrosion-resistant food contact and drying equipment surfaces."
+    },
+    "applianceSpecs": {
+      "parameter": "Countertop Biofilm Elimination & Heavy Cookware Load Bearing",
+      "guideline": "Deploy heavy-gauge SUS304 stainless steel dish drying racks with sloped drainage spouts for daily family cookware; wash removable plastic caddies weekly with diluted hydrogen peroxide to eliminate opportunistic pink slime biofilms."
+    }
   },
   "ceramic-vs-glass-fermentation-crock": {
-      "materialThermal": {
-          "property": "Opaque Vitrified Stoneware Thermal Mass vs. Type I Borosilicate Chemical Inertness",
-          "threshold": "Vitrified Stoneware (C_vol ~ 2.2 J/cm³·K, 0.0% UV Transmittance) vs. Borosilicate (Type I Class A, 0.00 ppm Leaching)",
-          "details": "Certified lead-free high-fired stoneware (1250°C) provides complete light blockage protecting photosensitive vitamins and buffers ambient room temperature swings during anaerobic lactic acid fermentation (pH 3.2–3.6); Type I borosilicate glass offers 360° visual inspection with zero risk of heavy metal migration into acidic brines."
-      },
-      "safetyStandard": {
-          "organization": "FDA / EFSA / ASTM",
-          "standard": "FDA 21 CFR § 109.16 (Glazed Ceramicware Leachable Lead & Cadmium) & ASTM C738",
-          "citation": "Mandatory regulatory limits and atomic absorption test procedures for extractable lead (<0.5 μg/mL) and cadmium (<0.25 μg/mL) in acidic food containers."
-      },
-      "applianceSpecs": {
-          "parameter": "Anaerobic Water-Lock Maintenance & Acidic Brine Heavy Metal Verification",
-          "guideline": "Verify certified lead-free testing before fermenting in stoneware crocks; maintain water in the moat groove to preserve hermetic anaerobic CO2 seals; store transparent glass fermenters in dark pantries to prevent photolytic nutrient breakdown."
-      }
+    "materialThermal": {
+      "property": "Opaque Vitrified Stoneware Thermal Mass vs. Type I Borosilicate Chemical Inertness",
+      "threshold": "Vitrified Stoneware (C_vol ~ 2.2 J/cm³·K, 0.0% UV Transmittance) vs. Borosilicate (Type I Class A, 0.00 ppm Leaching)",
+      "details": "Certified lead-free high-fired stoneware (1250°C) provides complete light blockage protecting photosensitive vitamins and buffers ambient room temperature swings during anaerobic lactic acid fermentation (pH 3.2–3.6); Type I borosilicate glass offers 360° visual inspection with zero risk of heavy metal migration into acidic brines."
+    },
+    "safetyStandard": {
+      "organization": "FDA / EFSA / ASTM",
+      "standard": "FDA 21 CFR § 109.16 (Glazed Ceramicware Leachable Lead & Cadmium) & ASTM C738",
+      "citation": "Mandatory regulatory limits and atomic absorption test procedures for extractable lead (<0.5 μg/mL) and cadmium (<0.25 μg/mL) in acidic food containers."
+    },
+    "applianceSpecs": {
+      "parameter": "Anaerobic Water-Lock Maintenance & Acidic Brine Heavy Metal Verification",
+      "guideline": "Verify certified lead-free testing before fermenting in stoneware crocks; maintain water in the moat groove to preserve hermetic anaerobic CO2 seals; store transparent glass fermenters in dark pantries to prevent photolytic nutrient breakdown."
+    }
   },
   "stainless-steel-vs-plastic-meat-grinder": {
-      "materialThermal": {
-          "property": "Austenitic Pre-Chill Heat Sink vs. Thermoplastic Shear Microplastic Abrasion",
-          "threshold": "SUS304 Stainless Steel (k = 16.2 W/m·K, Hardness HV > 180) vs. Polycarbonate/ABS (Tensile Yield 35–65 MPa)",
-          "details": "Solid forged SUS304 stainless steel grinding housings can be freezer-chilled to -18°C to absorb frictional heat and keep animal fats solid (<4°C), preventing grease smearing and preserving burger texture; thermoplastic bodies insulate heat, warm fat, and suffer abrasive surface gouging from bone fragments that shed microplastics into ground meat."
-      },
-      "safetyStandard": {
-          "organization": "USDA FSIS / NSF / FDA",
-          "standard": "NSF/ANSI Standard 8 (Commercial Powered Food Preparation Equipment) & USDA 9 CFR § 417",
-          "citation": "Commercial standards for cleanability, micro-cavity elimination, and pathogen prevention (E. coli O157:H7 and Salmonella) in raw meat processing."
-      },
-      "applianceSpecs": {
-          "parameter": "Sub-4°C Cold Grinding Physics & Microplastic Elimination",
-          "guideline": "Pre-chill all-metal grinder attachments and receiving bowls for 60 minutes at 0°F (-18°C) before grinding; never wash cast-aluminum attachments in automated dishwashers to prevent toxic black aluminum oxide soot contamination."
-      }
+    "materialThermal": {
+      "property": "Austenitic Pre-Chill Heat Sink vs. Thermoplastic Shear Microplastic Abrasion",
+      "threshold": "SUS304 Stainless Steel (k = 16.2 W/m·K, Hardness HV > 180) vs. Polycarbonate/ABS (Tensile Yield 35–65 MPa)",
+      "details": "Solid forged SUS304 stainless steel grinding housings can be freezer-chilled to -18°C to absorb frictional heat and keep animal fats solid (<4°C), preventing grease smearing and preserving burger texture; thermoplastic bodies insulate heat, warm fat, and suffer abrasive surface gouging from bone fragments that shed microplastics into ground meat."
+    },
+    "safetyStandard": {
+      "organization": "USDA FSIS / NSF / FDA",
+      "standard": "NSF/ANSI Standard 8 (Commercial Powered Food Preparation Equipment) & USDA 9 CFR § 417",
+      "citation": "Commercial standards for cleanability, micro-cavity elimination, and pathogen prevention (E. coli O157:H7 and Salmonella) in raw meat processing."
+    },
+    "applianceSpecs": {
+      "parameter": "Sub-4°C Cold Grinding Physics & Microplastic Elimination",
+      "guideline": "Pre-chill all-metal grinder attachments and receiving bowls for 60 minutes at 0°F (-18°C) before grinding; never wash cast-aluminum attachments in automated dishwashers to prevent toxic black aluminum oxide soot contamination."
+    }
   },
   "glass-vs-metal-loaf-pan": {
-      "materialThermal": {
-          "property": "Aluminized Carbon Steel Conductive Heat Flux vs. Borosilicate Radiative Infrared Heat",
-          "threshold": "Aluminized Carbon Steel (k ≈ 54 W/m·K, Aluminum Clad k ≈ 205 W/m·K) vs. Glass (k ≈ 1.05 W/m·K)",
-          "details": "Aluminized carbon steel transfers conductive heat up to 100x faster than glass, driving explosive early oven spring and uniform Maillard caramelization before the starch matrix solidifies; insulating glass pans rely on long-wave infrared radiation, causing scorched, tough crusts and undercooked, gummy centers unless oven temperature is reduced by 25°F."
-      },
-      "safetyStandard": {
-          "organization": "ASTM / ISO / FDA",
-          "standard": "ASTM C149 (Standard Test Method for Thermal Shock Resistance of Glass Containers) & FDA 21 CFR § 175.300",
-          "citation": "Thermal shock failure thresholds for glass bakeware and resin coating safety specifications for commercial baking pans."
-      },
-      "applianceSpecs": {
-          "parameter": "Oven Spring Maximization & Thermal Shock Countertop Safety",
-          "guideline": "Deploy 0.8 mm commercial folded aluminized steel pans for tall, tender sandwich breads and quick cakes; reduce oven temperature by 25°F (15°C) and extend baking time by 10 minutes when baking meatloaves in glass dishes, and never rest hot glass on cold granite or damp cloths."
-      }
+    "materialThermal": {
+      "property": "Aluminized Carbon Steel Conductive Heat Flux vs. Borosilicate Radiative Infrared Heat",
+      "threshold": "Aluminized Carbon Steel (k ≈ 54 W/m·K, Aluminum Clad k ≈ 205 W/m·K) vs. Glass (k ≈ 1.05 W/m·K)",
+      "details": "Aluminized carbon steel transfers conductive heat up to 100x faster than glass, driving explosive early oven spring and uniform Maillard caramelization before the starch matrix solidifies; insulating glass pans rely on long-wave infrared radiation, causing scorched, tough crusts and undercooked, gummy centers unless oven temperature is reduced by 25°F."
+    },
+    "safetyStandard": {
+      "organization": "ASTM / ISO / FDA",
+      "standard": "ASTM C149 (Standard Test Method for Thermal Shock Resistance of Glass Containers) & FDA 21 CFR § 175.300",
+      "citation": "Thermal shock failure thresholds for glass bakeware and resin coating safety specifications for commercial baking pans."
+    },
+    "applianceSpecs": {
+      "parameter": "Oven Spring Maximization & Thermal Shock Countertop Safety",
+      "guideline": "Deploy 0.8 mm commercial folded aluminized steel pans for tall, tender sandwich breads and quick cakes; reduce oven temperature by 25°F (15°C) and extend baking time by 10 minutes when baking meatloaves in glass dishes, and never rest hot glass on cold granite or damp cloths."
+    }
   },
   "cast-aluminum-vs-stainless-steel-garlic-press": {
-      "materialThermal": {
-          "property": "Allicin/Pyruvic Acid Electrochemical Passivation vs. Cast Alloy Alkaline Oxidation",
-          "threshold": "SUS304 Stainless Steel (Cr2O3 Passivation, Yield > 205 MPa) vs. Die-Cast Aluminum (Al-Si-Cu Alloy, Yield ~100 MPa)",
-          "details": "Forged 18/10 stainless steel is completely immune to the aggressive enzymatic chemistry of crushed garlic (alliinase hydrolyzing alliin into allicin and pyruvic acid), preserving sweet natural aromatics without metallic off-flavors; bare die-cast aluminum pits under garlic acidity and blisters plating into food, while turning jet-black from alkaline dishwasher oxidation."
-      },
-      "safetyStandard": {
-          "organization": "FDA / BfR / Council of Europe",
-          "standard": "FDA Food Code § 4-101.14 (Limitation on Bare Aluminum Contact) & Council of Europe CM/Res(2013)9",
-          "citation": "Federal and European food safety limitations prohibiting unanodized or bare cast aluminum contact with acidic foodstuffs (pH < 4.5)."
-      },
-      "applianceSpecs": {
-          "parameter": "Unpeeled Clove Extrusion Mechanical Leverage & Dishwasher Immunity",
-          "guideline": "Select solid forged 18/10 stainless steel garlic presses for crushing whole unpeeled garlic cloves without hinge pin deformation; immediately discard peeling chrome-plated or painted aluminum presses to prevent metallic flake ingestion."
-      }
+    "materialThermal": {
+      "property": "Allicin/Pyruvic Acid Electrochemical Passivation vs. Cast Alloy Alkaline Oxidation",
+      "threshold": "SUS304 Stainless Steel (Cr2O3 Passivation, Yield > 205 MPa) vs. Die-Cast Aluminum (Al-Si-Cu Alloy, Yield ~100 MPa)",
+      "details": "Forged 18/10 stainless steel is completely immune to the aggressive enzymatic chemistry of crushed garlic (alliinase hydrolyzing alliin into allicin and pyruvic acid), preserving sweet natural aromatics without metallic off-flavors; bare die-cast aluminum pits under garlic acidity and blisters plating into food, while turning jet-black from alkaline dishwasher oxidation."
+    },
+    "safetyStandard": {
+      "organization": "FDA / BfR / Council of Europe",
+      "standard": "FDA Food Code § 4-101.14 (Limitation on Bare Aluminum Contact) & Council of Europe CM/Res(2013)9",
+      "citation": "Federal and European food safety limitations prohibiting unanodized or bare cast aluminum contact with acidic foodstuffs (pH < 4.5)."
+    },
+    "applianceSpecs": {
+      "parameter": "Unpeeled Clove Extrusion Mechanical Leverage & Dishwasher Immunity",
+      "guideline": "Select solid forged 18/10 stainless steel garlic presses for crushing whole unpeeled garlic cloves without hinge pin deformation; immediately discard peeling chrome-plated or painted aluminum presses to prevent metallic flake ingestion."
+    }
   },
   "stainless-steel-vs-plastic-water-filter-pitcher": {
-      "materialThermal": {
-          "property": "Austenitic Cr2O3 / Mo Passivation vs. Polycarbonate/SAN Environmental Stress Cracking",
-          "threshold": "SUS304/SUS316 (0.00 ppm Extraction, Ra < 0.2 μm) vs. Polycarbonate/SAN (ESC Threshold ~50°C)",
-          "details": "Medical-grade SUS304 and SUS316 austenitic stainless steel creates an electropolished, self-healing chromium(III) oxide boundary layer that provides 100% light blockage—halting photosynthetic bacterial proliferation and green algae colonization—while eliminating microplastic particulate shedding and hormone-disrupting bisphenol/phthalate leaching into drinking water."
-      },
-      "safetyStandard": {
-          "organization": "NSF / ANSI / EPA",
-          "standard": "NSF/ANSI Standard 42 & 53 (Drinking Water Treatment Units) & EPA Safe Drinking Water Act",
-          "citation": "Health and aesthetic performance standards for material safety, chemical extraction limits, and zero-endocrine-disruption compliance in household water filtration."
-      },
-      "applianceSpecs": {
-          "parameter": "Zero-Microplastic Hydration & Sunlight Algae Prevention",
-          "guideline": "Deploy opaque SUS304/SUS316 stainless steel filter pitchers on sunny kitchen countertops to prevent algal blooms in de-chlorinated water; clean hopper seals fortnightly and replace carbon cartridges every 60 days."
-      }
+    "materialThermal": {
+      "property": "Austenitic Cr2O3 / Mo Passivation vs. Polycarbonate/SAN Environmental Stress Cracking",
+      "threshold": "SUS304/SUS316 (0.00 ppm Extraction, Ra < 0.2 μm) vs. Polycarbonate/SAN (ESC Threshold ~50°C)",
+      "details": "Medical-grade SUS304 and SUS316 austenitic stainless steel creates an electropolished, self-healing chromium(III) oxide boundary layer that provides 100% light blockage—halting photosynthetic bacterial proliferation and green algae colonization—while eliminating microplastic particulate shedding and hormone-disrupting bisphenol/phthalate leaching into drinking water."
+    },
+    "safetyStandard": {
+      "organization": "NSF / ANSI / EPA",
+      "standard": "NSF/ANSI Standard 42 & 53 (Drinking Water Treatment Units) & EPA Safe Drinking Water Act",
+      "citation": "Health and aesthetic performance standards for material safety, chemical extraction limits, and zero-endocrine-disruption compliance in household water filtration."
+    },
+    "applianceSpecs": {
+      "parameter": "Zero-Microplastic Hydration & Sunlight Algae Prevention",
+      "guideline": "Deploy opaque SUS304/SUS316 stainless steel filter pitchers on sunny kitchen countertops to prevent algal blooms in de-chlorinated water; clean hopper seals fortnightly and replace carbon cartridges every 60 days."
+    }
   },
   "cast-iron-vs-stainless-steel-grill-grates": {
-      "materialThermal": {
-          "property": "Austenitic Solid Round Bar Ductility vs. Gray Cast Iron Volumetric Thermal Mass",
-          "threshold": "SUS304 Round Bars (k ~ 16 W/m·K, Yield > 205 MPa) vs. Gray Cast Iron (C_vol ~ 3.5 J/cm³·K, Yield ~150 MPa)",
-          "details": "Solid 8 mm heavy-gauge SUS304 austenitic stainless steel rods provide complete immunity to atmospheric rain oxidation, withstand acidic vinegar and citrus glazes without seasoning stripping, and eliminate life-threatening wire bristle brush ingestion hazards; seasoned cast iron offers exceptional thermal heat inertia for steakhouse searing but requires continuous oil maintenance to prevent red ferric oxide rust."
-      },
-      "safetyStandard": {
-          "organization": "FDA / CDC / NSF",
-          "standard": "FDA Food Code § 4-101.11 & CDC Emergency Ingestion Hazard Guidance",
-          "citation": "Commercial food equipment cleanability standards and clinical directives warning against wire bristle brush contamination and gastrointestinal perforation hazards in outdoor grilling."
-      },
-      "applianceSpecs": {
-          "parameter": "Weatherproof Outdoor Grilling & Non-Wire Safety Maintenance",
-          "guideline": "Equip backyard grills with solid 8 mm SUS304 stainless steel grates; preheat to 230°C (450°F) before grilling and clean exclusively with grooved hardwood paddles or coil-free scouring pads to eliminate wire ingestion risks."
-      }
+    "materialThermal": {
+      "property": "Austenitic Solid Round Bar Ductility vs. Gray Cast Iron Volumetric Thermal Mass",
+      "threshold": "SUS304 Round Bars (k ~ 16 W/m·K, Yield > 205 MPa) vs. Gray Cast Iron (C_vol ~ 3.5 J/cm³·K, Yield ~150 MPa)",
+      "details": "Solid 8 mm heavy-gauge SUS304 austenitic stainless steel rods provide complete immunity to atmospheric rain oxidation, withstand acidic vinegar and citrus glazes without seasoning stripping, and eliminate life-threatening wire bristle brush ingestion hazards; seasoned cast iron offers exceptional thermal heat inertia for steakhouse searing but requires continuous oil maintenance to prevent red ferric oxide rust."
+    },
+    "safetyStandard": {
+      "organization": "FDA / CDC / NSF",
+      "standard": "FDA Food Code § 4-101.11 & CDC Emergency Ingestion Hazard Guidance",
+      "citation": "Commercial food equipment cleanability standards and clinical directives warning against wire bristle brush contamination and gastrointestinal perforation hazards in outdoor grilling."
+    },
+    "applianceSpecs": {
+      "parameter": "Weatherproof Outdoor Grilling & Non-Wire Safety Maintenance",
+      "guideline": "Equip backyard grills with solid 8 mm SUS304 stainless steel grates; preheat to 230°C (450°F) before grilling and clean exclusively with grooved hardwood paddles or coil-free scouring pads to eliminate wire ingestion risks."
+    }
   },
   "stainless-steel-vs-aluminum-stock-pot": {
-      "materialThermal": {
-          "property": "Tri-Ply Clad Passivated Barrier vs. Drawn Bare Aluminum Acidic Dissolution",
-          "threshold": "Tri-Ply Clad (SUS304 Interior + Pure Al Core, k ~ 205 W/m·K) vs. Bare 3003-H14 Aluminum",
-          "details": "Tri-ply clad stock pots bond an encapsulated high-conductivity aluminum core between non-reactive SUS304 stainless steel sheets: the cooking surface remains 100% chemically inert, completely preventing toxic aluminum ion extraction into 24-hour acidic bone broths and tomato marinara, while the core distributes heat uniformly to prevent scorch hot-spots."
-      },
-      "safetyStandard": {
-          "organization": "EFSA / Council of Europe / FDA",
-          "standard": "EFSA Dietary Aluminum Safety Threshold (TWI 1 mg/kg bw) & Council of Europe CM/Res(2013)9",
-          "citation": "Regulatory guidelines establishing tolerable human intake limits for dietary aluminum and prohibiting unanodized bare aluminum contact with acidic foodstuffs (pH < 4.5)."
-      },
-      "applianceSpecs": {
-          "parameter": "Acidic Stock Boiling Isolation & Induction Cooktop Coupling",
-          "guideline": "Utilize heavy-gauge tri-ply stainless steel stock pots for simmering tomato sauce, bone broths, and acidic preserves; add cooking salt only to actively rolling boiling water to prevent localized chloride pitting."
-      }
+    "materialThermal": {
+      "property": "Tri-Ply Clad Passivated Barrier vs. Drawn Bare Aluminum Acidic Dissolution",
+      "threshold": "Tri-Ply Clad (SUS304 Interior + Pure Al Core, k ~ 205 W/m·K) vs. Bare 3003-H14 Aluminum",
+      "details": "Tri-ply clad stock pots bond an encapsulated high-conductivity aluminum core between non-reactive SUS304 stainless steel sheets: the cooking surface remains 100% chemically inert, completely preventing toxic aluminum ion extraction into 24-hour acidic bone broths and tomato marinara, while the core distributes heat uniformly to prevent scorch hot-spots."
+    },
+    "safetyStandard": {
+      "organization": "EFSA / Council of Europe / FDA",
+      "standard": "EFSA Dietary Aluminum Safety Threshold (TWI 1 mg/kg bw) & Council of Europe CM/Res(2013)9",
+      "citation": "Regulatory guidelines establishing tolerable human intake limits for dietary aluminum and prohibiting unanodized bare aluminum contact with acidic foodstuffs (pH < 4.5)."
+    },
+    "applianceSpecs": {
+      "parameter": "Acidic Stock Boiling Isolation & Induction Cooktop Coupling",
+      "guideline": "Utilize heavy-gauge tri-ply stainless steel stock pots for simmering tomato sauce, bone broths, and acidic preserves; add cooking salt only to actively rolling boiling water to prevent localized chloride pitting."
+    }
   },
   "stainless-steel-vs-plastic-potato-ricer": {
-      "materialThermal": {
-          "property": "Forged High-Yield Mechanical Leverage vs. Thermoplastic 100°C Tensile Softening",
-          "threshold": "Forged SUS304 (Yield > 205 MPa, 100°C Stable) vs. Polypropylene/Nylon (Yield 30–45 MPa, Tg Drop at 90°C)",
-          "details": "Forged commercial SUS304 stainless steel handles generate over 200 psi extrusion force with zero frame deflection, allowing whole unpeeled hot russet potatoes and fibrous sweet potatoes to pass cleanly through perforated discs without blow-by or lumping; molded plastic ricers soften under 100°C steam, flex under pressure, and scrape microplastics into hot purees."
-      },
-      "safetyStandard": {
-          "organization": "FDA / EU / ISO",
-          "standard": "FDA 21 CFR § 177.1520 & EU Regulation 10/2011 (Food Contact Plastics / Specific Migration Limits)",
-          "citation": "Specific migration limits and structural thresholds governing polymeric materials exposed to high mechanical shear and boiling food contact temperatures."
-      },
-      "applianceSpecs": {
-          "parameter": "Zero-Microplastic Tuber Extrusion & Lump-Free Pomme Purée",
-          "guideline": "Deploy heavy-duty forged stainless steel ricers for silky, lump-free potato purees and organic infant food; rinse perforated discs with cold water immediately after pressing to prevent amylose starch gelatin hardening."
-      }
+    "materialThermal": {
+      "property": "Forged High-Yield Mechanical Leverage vs. Thermoplastic 100°C Tensile Softening",
+      "threshold": "Forged SUS304 (Yield > 205 MPa, 100°C Stable) vs. Polypropylene/Nylon (Yield 30–45 MPa, Tg Drop at 90°C)",
+      "details": "Forged commercial SUS304 stainless steel handles generate over 200 psi extrusion force with zero frame deflection, allowing whole unpeeled hot russet potatoes and fibrous sweet potatoes to pass cleanly through perforated discs without blow-by or lumping; molded plastic ricers soften under 100°C steam, flex under pressure, and scrape microplastics into hot purees."
+    },
+    "safetyStandard": {
+      "organization": "FDA / EU / ISO",
+      "standard": "FDA 21 CFR § 177.1520 & EU Regulation 10/2011 (Food Contact Plastics / Specific Migration Limits)",
+      "citation": "Specific migration limits and structural thresholds governing polymeric materials exposed to high mechanical shear and boiling food contact temperatures."
+    },
+    "applianceSpecs": {
+      "parameter": "Zero-Microplastic Tuber Extrusion & Lump-Free Pomme Purée",
+      "guideline": "Deploy heavy-duty forged stainless steel ricers for silky, lump-free potato purees and organic infant food; rinse perforated discs with cold water immediately after pressing to prevent amylose starch gelatin hardening."
+    }
   },
   "stainless-steel-vs-plastic-bento-box": {
-      "materialThermal": {
-          "property": "Austenitic Hydrophobic Metallic Crystal Matrix vs. Polypropylene Lipophilic Sorption",
-          "threshold": "SUS304/SUS316 (Vickers HV > 180, Zero Sorption) vs. PP #5 (Shore D ~70, High Lipophilic Sorption)",
-          "details": "Medical-grade SUS304 and SUS316 stainless steel bento boxes provide an impenetrable non-porous barrier against warm dietary lipids (50°C–80°C), eliminating plasticizer/antioxidant migration, persistent curry odors, and indelible tomato lycopene stains; extreme surface hardness resists fork scraping that otherwise shreds microplastics from polypropylene containers."
-      },
-      "safetyStandard": {
-          "organization": "FDA / California Prop 65 / EU",
-          "standard": "FDA 21 CFR § 177.2600 & California Proposition 65 (Bisphenol & Phthalate Free)",
-          "citation": "Zero-endocrine-disruption safety mandates and specific migration limits for repeated-use food containers subject to fatty food contact."
-      },
-      "applianceSpecs": {
-          "parameter": "Child Lunch Microplastic Elimination & Hermetic Seal Hygiene",
-          "guideline": "Pack daily school and workplace lunches in SUS304/SUS316 airtight stainless bento boxes; allow steaming food to vent for 5 minutes before latching lids; wash removable platinum silicone gaskets weekly to prevent mold biofilms."
-      }
+    "materialThermal": {
+      "property": "Austenitic Hydrophobic Metallic Crystal Matrix vs. Polypropylene Lipophilic Sorption",
+      "threshold": "SUS304/SUS316 (Vickers HV > 180, Zero Sorption) vs. PP #5 (Shore D ~70, High Lipophilic Sorption)",
+      "details": "Medical-grade SUS304 and SUS316 stainless steel bento boxes provide an impenetrable non-porous barrier against warm dietary lipids (50°C–80°C), eliminating plasticizer/antioxidant migration, persistent curry odors, and indelible tomato lycopene stains; extreme surface hardness resists fork scraping that otherwise shreds microplastics from polypropylene containers."
+    },
+    "safetyStandard": {
+      "organization": "FDA / California Prop 65 / EU",
+      "standard": "FDA 21 CFR § 177.2600 & California Proposition 65 (Bisphenol & Phthalate Free)",
+      "citation": "Zero-endocrine-disruption safety mandates and specific migration limits for repeated-use food containers subject to fatty food contact."
+    },
+    "applianceSpecs": {
+      "parameter": "Child Lunch Microplastic Elimination & Hermetic Seal Hygiene",
+      "guideline": "Pack daily school and workplace lunches in SUS304/SUS316 airtight stainless bento boxes; allow steaming food to vent for 5 minutes before latching lids; wash removable platinum silicone gaskets weekly to prevent mold biofilms."
+    }
   },
   "stainless-steel-vs-plastic-box-grater": {
     "materialThermal": {
-        "property": "Photo-Etched Austenitic Chromium(III) Oxide Edge Retention vs. Thermoplastic Shear Abrasion",
-        "threshold": "SUS304 (Tensile Yield > 205 MPa, Vickers HV > 180) vs. Molded ABS/PP (Shear Modulus ~1.2 GPa, ASTM D8332 Shedding)",
-        "details": "Chemical photo-etched SUS304 cutting teeth cleanly slice through dense Parmigiano-Reggiano and fibrous root vegetables without cell wall crushing, eliminating the 50–200+ microplastic polymer shavings scraped off plastic grating chutes under manual torque."
+      "property": "Photo-Etched Austenitic Chromium(III) Oxide Edge Retention vs. Thermoplastic Shear Abrasion",
+      "threshold": "SUS304 (Tensile Yield > 205 MPa, Vickers HV > 180) vs. Molded ABS/PP (Shear Modulus ~1.2 GPa, ASTM D8332 Shedding)",
+      "details": "Chemical photo-etched SUS304 cutting teeth cleanly slice through dense Parmigiano-Reggiano and fibrous root vegetables without cell wall crushing, eliminating the 50–200+ microplastic polymer shavings scraped off plastic grating chutes under manual torque."
     },
     "safetyStandard": {
-        "organization": "NSF / FDA / ASTM",
-        "standard": "NSF/ANSI Standard 51 (Food Equipment Materials) & ASTM D8332 (Standard Practice for Microplastic Enumeration)",
-        "citation": "Food contact materials durability and physical extraction criteria preventing polymer particulate migration under mechanical abrasion."
+      "organization": "NSF / FDA / ASTM",
+      "standard": "NSF/ANSI Standard 51 (Food Equipment Materials) & ASTM D8332 (Standard Practice for Microplastic Enumeration)",
+      "citation": "Food contact materials durability and physical extraction criteria preventing polymer particulate migration under mechanical abrasion."
     },
     "applianceSpecs": {
-        "parameter": "Zero-Microplastic Dairy Grating & Cut-Resistant Hand Safety",
-        "guideline": "Deploy solid SUS304 box graters over rigid cutting boards; always equip an ANSI Cut-Level 5 protective glove when grating small food ends to eliminate hand lacerations; wash vertically in dishwasher to flush cheese fats."
+      "parameter": "Zero-Microplastic Dairy Grating & Cut-Resistant Hand Safety",
+      "guideline": "Deploy solid SUS304 box graters over rigid cutting boards; always equip an ANSI Cut-Level 5 protective glove when grating small food ends to eliminate hand lacerations; wash vertically in dishwasher to flush cheese fats."
     }
-},
+  },
   "stainless-steel-vs-plastic-mandoline-slicer": {
     "materialThermal": {
-        "property": "Structural Chassis Deflection Resistance vs. Molded Thermoplastic Beam Bending",
-        "threshold": "All-Metal SUS304 Chassis (Young's Modulus ~193 GPa) vs. ABS/Polycarbonate (Modulus ~2.3 GPa, High Deflection)",
-        "details": "Heavy-gauge solid SUS304 stainless steel runway eliminates chassis deflection under downward slicing load, preventing blade stalls and sudden catastrophic hand slippage across martensitic cutting edges while ensuring strict 0.5 mm slice thickness uniformity."
+      "property": "Structural Chassis Deflection Resistance vs. Molded Thermoplastic Beam Bending",
+      "threshold": "All-Metal SUS304 Chassis (Young's Modulus ~193 GPa) vs. ABS/Polycarbonate (Modulus ~2.3 GPa, High Deflection)",
+      "details": "Heavy-gauge solid SUS304 stainless steel runway eliminates chassis deflection under downward slicing load, preventing blade stalls and sudden catastrophic hand slippage across martensitic cutting edges while ensuring strict 0.5 mm slice thickness uniformity."
     },
     "safetyStandard": {
-        "organization": "OSHA / ANSI / FDA",
-        "standard": "ANSI/ISEA 105 (Cut Resistance Standards) & FDA Food Code 2022 § 4-101.11 (Food Contact Durability)",
-        "citation": "Occupational kitchen safety standards and mechanical precision specifications for high-risk cutting and slicing equipment."
+      "organization": "OSHA / ANSI / FDA",
+      "standard": "ANSI/ISEA 105 (Cut Resistance Standards) & FDA Food Code 2022 § 4-101.11 (Food Contact Durability)",
+      "citation": "Occupational kitchen safety standards and mechanical precision specifications for high-risk cutting and slicing equipment."
     },
     "applianceSpecs": {
-        "parameter": "Zero-Flex Slicing Geometry & Cut-Level 5 Operator Protection",
-        "guideline": "Mandatory deployment of ANSI Cut-Level 5 Kevlar gloves and track-locked safety pushers during all mandoline operation; clean surgical blades using long-handled stiff brushes; never wash with bare hands or sponges."
+      "parameter": "Zero-Flex Slicing Geometry & Cut-Level 5 Operator Protection",
+      "guideline": "Mandatory deployment of ANSI Cut-Level 5 Kevlar gloves and track-locked safety pushers during all mandoline operation; clean surgical blades using long-handled stiff brushes; never wash with bare hands or sponges."
     }
-},
+  },
   "silicone-vs-metal-muffin-pan": {
     "materialThermal": {
-        "property": "Addition-Cured Siloxane Elastomeric Thermal Buffer vs. Aluminized Carbon Steel High Heat Flux",
-        "threshold": "Platinum-Cured Silicone (Thermal Conductivity k ~ 0.2 W/m·K, Max 230°C) vs. Aluminized Steel (k ~ 50 W/m·K, Max 260°C)",
-        "details": "European LFGB platinum-cured silicone provides gentle, uniform thermal diffusion that prevents scorched muffin bottoms and eliminates fluoropolymer (PTFE/PFAS) flaking, while flexible inverted cup geometry ejects delicate egg bites without single-use paper liners."
+      "property": "Addition-Cured Siloxane Elastomeric Thermal Buffer vs. Aluminized Carbon Steel High Heat Flux",
+      "threshold": "Platinum-Cured Silicone (Thermal Conductivity k ~ 0.2 W/m·K, Max 230°C) vs. Aluminized Steel (k ~ 50 W/m·K, Max 260°C)",
+      "details": "European LFGB platinum-cured silicone provides gentle, uniform thermal diffusion that prevents scorched muffin bottoms and eliminates fluoropolymer (PTFE/PFAS) flaking, while flexible inverted cup geometry ejects delicate egg bites without single-use paper liners."
     },
     "safetyStandard": {
-        "organization": "BfR / LFGB / FDA",
-        "standard": "German LFGB § 30/31 & BfR Recommendation XV (Silicones for Food Contact) & FDA 21 CFR § 177.2600",
-        "citation": "European and US food-contact elastomer migration standards limiting volatile organic compounds (VOC < 0.5%) and extractables."
+      "organization": "BfR / LFGB / FDA",
+      "standard": "German LFGB § 30/31 & BfR Recommendation XV (Silicones for Food Contact) & FDA 21 CFR § 177.2600",
+      "citation": "European and US food-contact elastomer migration standards limiting volatile organic compounds (VOC < 0.5%) and extractables."
     },
     "applianceSpecs": {
-        "parameter": "PFAS-Free Paperless Baking & Steel Rim Stability",
-        "guideline": "Bake in LFGB-certified platinum silicone muffin pans with integrated steel rims at temperatures up to 220°C (425°F); perform an initial 4-hour 200°C conditioning bake prior to food use; wash in top rack of dishwasher."
+      "parameter": "PFAS-Free Paperless Baking & Steel Rim Stability",
+      "guideline": "Bake in LFGB-certified platinum silicone muffin pans with integrated steel rims at temperatures up to 220°C (425°F); perform an initial 4-hour 200°C conditioning bake prior to food use; wash in top rack of dishwasher."
     }
-},
+  },
   "ceramic-vs-glass-pie-dish": {
     "materialThermal": {
-        "property": "Dense Vitrified Mineral Stoneware Volumetric Heat Capacity vs. Radiant Glass Heat Transmission",
-        "threshold": "Vitrified Stoneware (C_vol ~ 3.0 J/cm³·K, High Thermal Mass) vs. Tempered Soda-Lime (C_vol ~ 2.1 J/cm³·K, Rapid Radiative Flux)",
-        "details": "High-fired non-porous ceramic stoneware steadily absorbs and re-radiates deep volumetric heat into the pastry base, thoroughly crisping bottom crusts and eliminating soggy raw dough without burning sugars, while resisting catastrophic thermal shock shatter on damp countertops."
+      "property": "Dense Vitrified Mineral Stoneware Volumetric Heat Capacity vs. Radiant Glass Heat Transmission",
+      "threshold": "Vitrified Stoneware (C_vol ~ 3.0 J/cm³·K, High Thermal Mass) vs. Tempered Soda-Lime (C_vol ~ 2.1 J/cm³·K, Rapid Radiative Flux)",
+      "details": "High-fired non-porous ceramic stoneware steadily absorbs and re-radiates deep volumetric heat into the pastry base, thoroughly crisping bottom crusts and eliminating soggy raw dough without burning sugars, while resisting catastrophic thermal shock shatter on damp countertops."
     },
     "safetyStandard": {
-        "organization": "FDA / ASTM / California Prop 65",
-        "standard": "FDA CPG Sec. 545.450 & California Proposition 65 (Lead & Cadmium Extraction Limits in Ceramicware)",
-        "citation": "Toxicological standards limiting heavy metal glaze migration and thermal shock structural integrity in oven-to-table bakeware."
+      "organization": "FDA / ASTM / California Prop 65",
+      "standard": "FDA CPG Sec. 545.450 & California Proposition 65 (Lead & Cadmium Extraction Limits in Ceramicware)",
+      "citation": "Toxicological standards limiting heavy metal glaze migration and thermal shock structural integrity in oven-to-table bakeware."
     },
     "applianceSpecs": {
-        "parameter": "Soggy Bottom Prevention & Countertop Thermal Shock Protection",
-        "guideline": "Preheat a heavy baking sheet on the lowest oven rack at 220°C (425°F) and place ceramic pie dish directly on top for immediate crust crisping; always rest blistering-hot pie pans on dry wooden trivets, never wet countertops."
+      "parameter": "Soggy Bottom Prevention & Countertop Thermal Shock Protection",
+      "guideline": "Preheat a heavy baking sheet on the lowest oven rack at 220°C (425°F) and place ceramic pie dish directly on top for immediate crust crisping; always rest blistering-hot pie pans on dry wooden trivets, never wet countertops."
     }
-},
+  },
   "stainless-steel-vs-plastic-fine-mesh-strainer": {
     "materialThermal": {
-        "property": "Austenitic Double-Woven Twill Wire Stability vs. Polyamide 100°C Hydrothermal Softening",
-        "threshold": "SUS304 Double-Woven Twill (Stable to 800°C) vs. Nylon 6,6/PP Mesh (Tg ~50°C, Hydrothermal Softening at 100°C)",
-        "details": "Double-woven twill SUS304 wire mesh withstands boiling stocks, hot rendered fats, and aggressive spoon pressing without microplastic shedding or frame sagging, while non-porous electropolished wire repels carotenoid stains and allium odors."
+      "property": "Austenitic Double-Woven Twill Wire Stability vs. Polyamide 100°C Hydrothermal Softening",
+      "threshold": "SUS304 Double-Woven Twill (Stable to 800°C) vs. Nylon 6,6/PP Mesh (Tg ~50°C, Hydrothermal Softening at 100°C)",
+      "details": "Double-woven twill SUS304 wire mesh withstands boiling stocks, hot rendered fats, and aggressive spoon pressing without microplastic shedding or frame sagging, while non-porous electropolished wire repels carotenoid stains and allium odors."
     },
     "safetyStandard": {
-        "organization": "FDA / EU / ACS",
-        "standard": "FDA 21 CFR § 177.1500 (Nylon Resins) & EU Regulation 10/2011 & ACS Nano 2023 Microplastic Benchmarks",
-        "citation": "Hydrothermal migration limits and mechanical integrity standards governing food contact filter media in boiling aqueous and lipophilic systems."
+      "organization": "FDA / EU / ACS",
+      "standard": "FDA 21 CFR § 177.1500 (Nylon Resins) & EU Regulation 10/2011 & ACS Nano 2023 Microplastic Benchmarks",
+      "citation": "Hydrothermal migration limits and mechanical integrity standards governing food contact filter media in boiling aqueous and lipophilic systems."
     },
     "applianceSpecs": {
-        "parameter": "Zero-Microplastic Boiling Broth Clarification & Grease Sanitization",
-        "guideline": "Use SUS304 double-twill wire strainers for clarifying boiling bone broths, hot tea, and frying oil; clean immediately after straining dairy or meat stocks with a stiff nylon brush under warm water before proteins dry."
+      "parameter": "Zero-Microplastic Boiling Broth Clarification & Grease Sanitization",
+      "guideline": "Use SUS304 double-twill wire strainers for clarifying boiling bone broths, hot tea, and frying oil; clean immediately after straining dairy or meat stocks with a stiff nylon brush under warm water before proteins dry."
     }
-},
+  },
   "stainless-steel-vs-nylon-cooking-ladle": {
     "materialThermal": {
-        "property": "Austenitic Chromium-Nickel Crystal Matrix Stability vs. Polyamide 6,6 Thermal Softening & PAA Pyrolysis",
-        "threshold": "SUS304 (Melting >1400°C, Tensile Yield >205 MPa) vs. PA66 Nylon (Heat Deflection 180°C–210°C, Melting 255°C, PAA Leaching >70°C)",
-        "details": "Solid SUS304 austenitic stainless steel maintains complete metallurgical integrity during prolonged soup boiling and hot fat contact without chemical leaching, eliminating carcinogenic Primary Aromatic Amines (4,4'-MDA and aniline) and microplastics released by thermal breakdown of black nylon."
+      "property": "Austenitic Chromium-Nickel Crystal Matrix Stability vs. Polyamide 6,6 Thermal Softening & PAA Pyrolysis",
+      "threshold": "SUS304 (Melting >1400°C, Tensile Yield >205 MPa) vs. PA66 Nylon (Heat Deflection 180°C–210°C, Melting 255°C, PAA Leaching >70°C)",
+      "details": "Solid SUS304 austenitic stainless steel maintains complete metallurgical integrity during prolonged soup boiling and hot fat contact without chemical leaching, eliminating carcinogenic Primary Aromatic Amines (4,4'-MDA and aniline) and microplastics released by thermal breakdown of black nylon."
     },
     "safetyStandard": {
-        "organization": "BfR / EU Commission / FDA",
-        "standard": "EU Regulation No 10/2011 & Commission Regulation (EU) No 284/2011 & BfR Opinion No. 028/2019",
-        "citation": "Food contact toxicological standards setting strict specific migration limits (SML < 0.002 mg/kg) on primary aromatic amines in polyamide kitchenware."
+      "organization": "BfR / EU Commission / FDA",
+      "standard": "EU Regulation No 10/2011 & Commission Regulation (EU) No 284/2011 & BfR Opinion No. 028/2019",
+      "citation": "Food contact toxicological standards setting strict specific migration limits (SML < 0.002 mg/kg) on primary aromatic amines in polyamide kitchenware."
     },
     "applianceSpecs": {
-        "parameter": "Zero-PAA Boiling Broth Immersion & Commercial Dishwasher Sanitization",
-        "guideline": "Deploy solid SUS304 stainless steel ladles for all boiling stocks, simmering stews, and deep-fry skimming; never rest nylon ladles inside hot pots over open burners; wash in commercial dishwashers up to 85°C."
+      "parameter": "Zero-PAA Boiling Broth Immersion & Commercial Dishwasher Sanitization",
+      "guideline": "Deploy solid SUS304 stainless steel ladles for all boiling stocks, simmering stews, and deep-fry skimming; never rest nylon ladles inside hot pots over open burners; wash in commercial dishwashers up to 85°C."
     }
-},
+  },
   "stainless-steel-vs-plastic-kitchen-funnel": {
     "materialThermal": {
-        "property": "Austenitic Acid-Passivated Boundary Layer vs. Polyolefin Hydrothermal Expansion & Additive Migration",
-        "threshold": "SUS304 Cr2O3 Film (Inert to 100°C Boiling 10% Acetic Acid) vs. Polypropylene (Softening 95°C–120°C, Additive Diffusion >80°C)",
-        "details": "Passivated SUS304 chromium(III) oxide boundary layer provides total immunity to boiling vinegar and acidic fruit purees during home canning, eliminating antioxidant migration (Irganox) and polyolefin oligomers extracted from thin plastic funnels under boiling pack temperatures."
+      "property": "Austenitic Acid-Passivated Boundary Layer vs. Polyolefin Hydrothermal Expansion & Additive Migration",
+      "threshold": "SUS304 Cr2O3 Film (Inert to 100°C Boiling 10% Acetic Acid) vs. Polypropylene (Softening 95°C–120°C, Additive Diffusion >80°C)",
+      "details": "Passivated SUS304 chromium(III) oxide boundary layer provides total immunity to boiling vinegar and acidic fruit purees during home canning, eliminating antioxidant migration (Irganox) and polyolefin oligomers extracted from thin plastic funnels under boiling pack temperatures."
     },
     "safetyStandard": {
-        "organization": "USDA / FDA / ASTM",
-        "standard": "USDA Complete Guide to Home Canning & FDA 21 CFR § 175.300 & ASTM D8332",
-        "citation": "Food preservation thermal processing standards and food contact material migration limits governing boiling acidic food transfers."
+      "organization": "USDA / FDA / ASTM",
+      "standard": "USDA Complete Guide to Home Canning & FDA 21 CFR § 175.300 & ASTM D8332",
+      "citation": "Food preservation thermal processing standards and food contact material migration limits governing boiling acidic food transfers."
     },
     "applianceSpecs": {
-        "parameter": "Anti-Vapor-Lock Fluted Stem & Aseptic Canning Sterilization",
-        "guideline": "Utilize fluted-stem SUS304 stainless funnels to prevent dangerous vapor-lock boiling liquid eruptions during jar filling; boil funnels for 10 minutes prior to canning low-acid foods to achieve aseptic microbial control."
+      "parameter": "Anti-Vapor-Lock Fluted Stem & Aseptic Canning Sterilization",
+      "guideline": "Utilize fluted-stem SUS304 stainless funnels to prevent dangerous vapor-lock boiling liquid eruptions during jar filling; boil funnels for 10 minutes prior to canning low-acid foods to achieve aseptic microbial control."
     }
-},
+  },
   "stainless-steel-vs-plastic-measuring-spoons": {
     "materialThermal": {
-        "property": "Stamped Cold-Rolled Austenitic Volumetric Stability vs. Molded Thermoplastic Wash-Cycle Creep",
-        "threshold": "SUS304 Sheet (Yield Strength >205 MPa, Zero Thermal Creep <400°C) vs. Molded Polypropylene (Creep Strain >12% at 65°C)",
-        "details": "Die-stamped SUS304 stainless steel maintains rigorous ±0.5% volumetric calibration indefinitely through commercial dishwashing cycles, whereas thin polypropylene spoons warp and ovalize, creating up to 25% measurement errors in chemical leaveners."
+      "property": "Stamped Cold-Rolled Austenitic Volumetric Stability vs. Molded Thermoplastic Wash-Cycle Creep",
+      "threshold": "SUS304 Sheet (Yield Strength >205 MPa, Zero Thermal Creep <400°C) vs. Molded Polypropylene (Creep Strain >12% at 65°C)",
+      "details": "Die-stamped SUS304 stainless steel maintains rigorous ±0.5% volumetric calibration indefinitely through commercial dishwashing cycles, whereas thin polypropylene spoons warp and ovalize, creating up to 25% measurement errors in chemical leaveners."
     },
     "safetyStandard": {
-        "organization": "NIST / ASTM / FDA",
-        "standard": "NIST Handbook 105-3 (Specifications for Volumetric Measures) & ASTM E542 & FDA 21 CFR § 177.1520",
-        "citation": "Metrological accuracy standards and solvent extractive limitations governing culinary volumetric dosing instruments."
+      "organization": "NIST / ASTM / FDA",
+      "standard": "NIST Handbook 105-3 (Specifications for Volumetric Measures) & ASTM E542 & FDA 21 CFR § 177.1520",
+      "citation": "Metrological accuracy standards and solvent extractive limitations governing culinary volumetric dosing instruments."
     },
     "applianceSpecs": {
-        "parameter": "Ethanol Solvent Resistance & Permanent Laser Metrology",
-        "guideline": "Use laser-engraved SUS304 spoons when measuring solvent-rich vanilla extracts, citrus essential oils, and coarse abrasive salts to prevent ink flaking and plastic crazing; dry nested magnetic sets before storage."
+      "parameter": "Ethanol Solvent Resistance & Permanent Laser Metrology",
+      "guideline": "Use laser-engraved SUS304 spoons when measuring solvent-rich vanilla extracts, citrus essential oils, and coarse abrasive salts to prevent ink flaking and plastic crazing; dry nested magnetic sets before storage."
     }
-},
+  },
   "porcelain-vs-melamine-dinnerware": {
     "materialThermal": {
-        "property": "Dense Vitrified Mullite-Glass Silicate Matrix vs. Thermoset Melamine-Formaldehyde Acid Hydrolysis",
-        "threshold": "Vitrified Hard Porcelain (Firing 1,350°C–1,400°C, Mohs Hardness 7, Zero Formaldehyde) vs. Melamine Resin (Acid Hydrolysis >70°C, Dielectric Microwave Heating)",
-        "details": "High-temperature vitrified feldspathic porcelain is completely non-porous (<0.1% water absorption) and microwave transparent, eliminating the nephrotoxic melamine monomer and carcinogenic formaldehyde leaching triggered when melamine resin contacts hot acidic foods (>70°C, pH <4.5)."
+      "property": "Dense Vitrified Mullite-Glass Silicate Matrix vs. Thermoset Melamine-Formaldehyde Acid Hydrolysis",
+      "threshold": "Vitrified Hard Porcelain (Firing 1,350°C–1,400°C, Mohs Hardness 7, Zero Formaldehyde) vs. Melamine Resin (Acid Hydrolysis >70°C, Dielectric Microwave Heating)",
+      "details": "High-temperature vitrified feldspathic porcelain is completely non-porous (<0.1% water absorption) and microwave transparent, eliminating the nephrotoxic melamine monomer and carcinogenic formaldehyde leaching triggered when melamine resin contacts hot acidic foods (>70°C, pH <4.5)."
     },
     "safetyStandard": {
-        "organization": "FDA / EFSA / IARC",
-        "standard": "FDA CPG Sec. 545.400 / 545.450 & EU Regulation 10/2011 & IARC Monograph Vol. 100F (Formaldehyde)",
-        "citation": "Specific migration limits (SML 15 mg/kg formaldehyde, 2.5 mg/kg melamine) and microwave radiation exclusion standards for food contact tableware."
+      "organization": "FDA / EFSA / IARC",
+      "standard": "FDA CPG Sec. 545.400 / 545.450 & EU Regulation 10/2011 & IARC Monograph Vol. 100F (Formaldehyde)",
+      "citation": "Specific migration limits (SML 15 mg/kg formaldehyde, 2.5 mg/kg melamine) and microwave radiation exclusion standards for food contact tableware."
     },
     "applianceSpecs": {
-        "parameter": "Microwave Safety & Cutlery Scratch Resistance",
-        "guideline": "Serve hot acidic meals (soups, pasta, curries) exclusively on vitrified porcelain; never place melamine dinnerware into microwave ovens; replace scratched melamine tableware immediately to prevent bacterial harboring."
+      "parameter": "Microwave Safety & Cutlery Scratch Resistance",
+      "guideline": "Serve hot acidic meals (soups, pasta, curries) exclusively on vitrified porcelain; never place melamine dinnerware into microwave ovens; replace scratched melamine tableware immediately to prevent bacterial harboring."
     }
-},
+  },
   "silicone-vs-plastic-popsicle-molds": {
     "materialThermal": {
-        "property": "Addition-Cured Polydimethylsiloxane Cryogenic Elastomeric Flexibility vs. Polyolefin Sub-Zero Embrittlement",
-        "threshold": "Platinum Siloxane (Glass Transition Tg < -120°C, Operating -40°C to +230°C) vs. Polystyrene/PP (Tg 0°C to -10°C, Cryogenic Embrittlement at -18°C)",
-        "details": "LFGB European standard platinum-cured silicone retains full elastomeric flexibility at -18°C freezer temperatures, allowing instant thumb-press demolding without warm water thawing, while completely resisting chemical extraction into acidic berry and citrus fruit purees (pH 2.5–3.5)."
+      "property": "Addition-Cured Polydimethylsiloxane Cryogenic Elastomeric Flexibility vs. Polyolefin Sub-Zero Embrittlement",
+      "threshold": "Platinum Siloxane (Glass Transition Tg < -120°C, Operating -40°C to +230°C) vs. Polystyrene/PP (Tg 0°C to -10°C, Cryogenic Embrittlement at -18°C)",
+      "details": "LFGB European standard platinum-cured silicone retains full elastomeric flexibility at -18°C freezer temperatures, allowing instant thumb-press demolding without warm water thawing, while completely resisting chemical extraction into acidic berry and citrus fruit purees (pH 2.5–3.5)."
     },
     "safetyStandard": {
-        "organization": "BfR / LFGB / FDA",
-        "standard": "German LFGB § 31 & BfR XV (Silicones) & FDA 21 CFR § 177.2600",
-        "citation": "European and US food-contact elastomer migration standards limiting volatile organic compounds (VOC < 0.5%) and extractables in sub-zero and elevated temperatures."
+      "organization": "BfR / LFGB / FDA",
+      "standard": "German LFGB § 31 & BfR XV (Silicones) & FDA 21 CFR § 177.2600",
+      "citation": "European and US food-contact elastomer migration standards limiting volatile organic compounds (VOC < 0.5%) and extractables in sub-zero and elevated temperatures."
     },
     "applianceSpecs": {
-        "parameter": "Cold-Release Cryogenic Flexibility & Dual Bake/Freeze Capability",
-        "guideline": "Peel LFGB platinum silicone molds directly away from frozen popsicles without warm water submersion to preserve crisp frozen details; utilize dual-temperature capacity to bake cakeicles at temperatures up to 230°C."
+      "parameter": "Cold-Release Cryogenic Flexibility & Dual Bake/Freeze Capability",
+      "guideline": "Peel LFGB platinum silicone molds directly away from frozen popsicles without warm water submersion to preserve crisp frozen details; utilize dual-temperature capacity to bake cakeicles at temperatures up to 230°C."
     }
-},
+  },
   "glass-vs-plastic-oil-sprayer": {
     "materialThermal": {
-        "property": "Inorganic Silicate Network Stability vs. Polyolefin/Polycarbonate Hydrothermal Plasticizer Diffusion",
-        "threshold": "Borosilicate Glass (Strain Point 510°C, Hydrolytic Class 1) vs. PET/PC Polymer (Heat Deflection 65°C–80°C, Lipophilic Migration >25°C)",
-        "details": "Dense vitreous borosilicate silica network exhibits zero chemical solubility in non-polar lipid matrices, eliminating phthalate ester plasticizers (DEHP, DINP) and bisphenol analogs extracted from thin plastic bottles under ambient kitchen temperatures (25°C–35°C)."
+      "property": "Inorganic Silicate Network Stability vs. Polyolefin/Polycarbonate Hydrothermal Plasticizer Diffusion",
+      "threshold": "Borosilicate Glass (Strain Point 510°C, Hydrolytic Class 1) vs. PET/PC Polymer (Heat Deflection 65°C–80°C, Lipophilic Migration >25°C)",
+      "details": "Dense vitreous borosilicate silica network exhibits zero chemical solubility in non-polar lipid matrices, eliminating phthalate ester plasticizers (DEHP, DINP) and bisphenol analogs extracted from thin plastic bottles under ambient kitchen temperatures (25°C–35°C)."
     },
     "safetyStandard": {
-        "organization": "EU Commission / FDA / ISO",
-        "standard": "Commission Regulation (EU) No 10/2011 & FDA 21 CFR § 177.1520 & ISO 3960",
-        "citation": "Food contact material overall migration limits in fatty food simulants (simulant D2) and lipid peroxide induction period standards governing edible oils."
+      "organization": "EU Commission / FDA / ISO",
+      "standard": "Commission Regulation (EU) No 10/2011 & FDA 21 CFR § 177.1520 & ISO 3960",
+      "citation": "Food contact material overall migration limits in fatty food simulants (simulant D2) and lipid peroxide induction period standards governing edible oils."
     },
     "applianceSpecs": {
-        "parameter": "Aerosol-Free Mechanical Misting & High-Heat Degreasing Sanitization",
-        "guideline": "Utilize propellant-free borosilicate sprayers for misting cooking oils in air fryers and convection ovens; degrease nozzles periodically with hot water and baking soda to prevent rancid lipid bacterial biofilms."
+      "parameter": "Aerosol-Free Mechanical Misting & High-Heat Degreasing Sanitization",
+      "guideline": "Utilize propellant-free borosilicate sprayers for misting cooking oils in air fryers and convection ovens; degrease nozzles periodically with hot water and baking soda to prevent rancid lipid bacterial biofilms."
     }
-},
+  },
   "stainless-steel-vs-glass-straws": {
     "materialThermal": {
-        "property": "Annealed Borosilicate Low Thermal Diffusivity vs. Austenitic High Thermal Conduction & Tissue Impaction",
-        "threshold": "Borosilicate (Thermal Conductivity 1.14 W/m·K, Fracture Strain 0.1%) vs. SUS304 (Conductivity 16.2 W/m·K, Yield Strength >205 MPa)",
-        "details": "Thermally insulating borosilicate glass prevents acute oral contact scalds from boiling hot beverages and eliminates catastrophic impaction and palatal puncture trauma associated with rigid, unyielding metal cylinders during accidental falls."
+      "property": "Annealed Borosilicate Low Thermal Diffusivity vs. Austenitic High Thermal Conduction & Tissue Impaction",
+      "threshold": "Borosilicate (Thermal Conductivity 1.14 W/m·K, Fracture Strain 0.1%) vs. SUS304 (Conductivity 16.2 W/m·K, Yield Strength >205 MPa)",
+      "details": "Thermally insulating borosilicate glass prevents acute oral contact scalds from boiling hot beverages and eliminates catastrophic impaction and palatal puncture trauma associated with rigid, unyielding metal cylinders during accidental falls."
     },
     "safetyStandard": {
-        "organization": "CPSC / ASTM / FDA",
-        "standard": "CPSC Safety Alert No. 5128 & ASTM F963 / ASTM C149 & FDA 21 CFR § 175.300",
-        "citation": "Federal consumer product safety impaction warnings and thermal shock/optical transmittance standards governing reusable drinking straws."
+      "organization": "CPSC / ASTM / FDA",
+      "standard": "CPSC Safety Alert No. 5128 & ASTM F963 / ASTM C149 & FDA 21 CFR § 175.300",
+      "citation": "Federal consumer product safety impaction warnings and thermal shock/optical transmittance standards governing reusable drinking straws."
     },
     "applianceSpecs": {
-        "parameter": "Internal Lumen Biofilm Inspection & Dual-Temperature Immersion",
-        "guideline": "Inspect transparent borosilicate straws under direct light prior to use to ensure zero fungal biofilm retention; clean interior lumens with dedicated nylon wire brushes; safe for boiling tea and iced cold brew."
+      "parameter": "Internal Lumen Biofilm Inspection & Dual-Temperature Immersion",
+      "guideline": "Inspect transparent borosilicate straws under direct light prior to use to ensure zero fungal biofilm retention; clean interior lumens with dedicated nylon wire brushes; safe for boiling tea and iced cold brew."
     }
-},
+  },
   "stainless-steel-vs-plastic-can-opener": {
     "materialThermal": {
-        "property": "Austenitic Open-Frame Sanitary Cleanability vs. Molded Clamshell Micro-Void Pathogen Harboring",
-        "threshold": "SUS304 Open Frame (0 Log Biofilm Retention, Tensile Yield >205 MPa) vs. Molded ABS/PP (Creep Strain >15%, Bacterial Biofilm >4.2 Log CFU/cm²)",
-        "details": "Open-frame solid austenitic stainless steel architecture allows complete fluid drainage and brush washability, eliminating foodborne pathogen reservoirs (Salmonella, Listeria) trapped inside unsealed hollow plastic gear clamshells."
+      "property": "Austenitic Open-Frame Sanitary Cleanability vs. Molded Clamshell Micro-Void Pathogen Harboring",
+      "threshold": "SUS304 Open Frame (0 Log Biofilm Retention, Tensile Yield >205 MPa) vs. Molded ABS/PP (Creep Strain >15%, Bacterial Biofilm >4.2 Log CFU/cm²)",
+      "details": "Open-frame solid austenitic stainless steel architecture allows complete fluid drainage and brush washability, eliminating foodborne pathogen reservoirs (Salmonella, Listeria) trapped inside unsealed hollow plastic gear clamshells."
     },
     "safetyStandard": {
-        "organization": "NSF / ANSI / FDA",
-        "standard": "NSF/ANSI Standard 2 (Food Equipment Sanitation) & FDA Food Code § 4-201.11 & ASTM B117",
-        "citation": "Sanitary design criteria requiring smooth, easily cleanable, corrosion-resistant surfaces without inaccessible internal voids in food contact tools."
+      "organization": "NSF / ANSI / FDA",
+      "standard": "NSF/ANSI Standard 2 (Food Equipment Sanitation) & FDA Food Code § 4-201.11 & ASTM B117",
+      "citation": "Sanitary design criteria requiring smooth, easily cleanable, corrosion-resistant surfaces without inaccessible internal voids in food contact tools."
     },
     "applianceSpecs": {
-        "parameter": "High-Heat Commercial Sanitization & Burr-Free Can Shearing",
-        "guideline": "Wash solid SUS304 can openers in commercial dishwashers up to 85°C to achieve full thermal sanitization; inspect cutter wheels periodically to ensure clean shearing without producing microscopic metal burrs."
+      "parameter": "High-Heat Commercial Sanitization & Burr-Free Can Shearing",
+      "guideline": "Wash solid SUS304 can openers in commercial dishwashers up to 85°C to achieve full thermal sanitization; inspect cutter wheels periodically to ensure clean shearing without producing microscopic metal burrs."
     }
-},
+  },
   "stainless-steel-vs-plastic-food-mill": {
     "materialThermal": {
-        "property": "Chromium Oxide Tribological Abrasion Resistance vs. Thermoplastic High-Temperature Shear Wear",
-        "threshold": "SUS304 (Hardness >170 HV, Wear Rate <0.001 mm³/N·m at 100°C) vs. Polypropylene (Hardness <75 Shore D, Wear Rate >1.85 mm³/N·m)",
-        "details": "Austenitic stainless steel provides absolute immunity to mechanical microplastic shedding and plasticizer migration during high-friction pureeing of boiling hot acidic tomato and fruit preparations (90°C–100°C, pH 3.2–4.5)."
+      "property": "Chromium Oxide Tribological Abrasion Resistance vs. Thermoplastic High-Temperature Shear Wear",
+      "threshold": "SUS304 (Hardness >170 HV, Wear Rate <0.001 mm³/N·m at 100°C) vs. Polypropylene (Hardness <75 Shore D, Wear Rate >1.85 mm³/N·m)",
+      "details": "Austenitic stainless steel provides absolute immunity to mechanical microplastic shedding and plasticizer migration during high-friction pureeing of boiling hot acidic tomato and fruit preparations (90°C–100°C, pH 3.2–4.5)."
     },
     "safetyStandard": {
-        "organization": "Council of Europe / FDA / ASTM",
-        "standard": "Council of Europe CM/Res(2013)9 & FDA 21 CFR § 177.1520 & ASTM G99",
-        "citation": "International guidelines on metals and alloys used in food contact materials and pin-on-disk polymer tribological wear standards."
+      "organization": "Council of Europe / FDA / ASTM",
+      "standard": "Council of Europe CM/Res(2013)9 & FDA 21 CFR § 177.1520 & ASTM G99",
+      "citation": "International guidelines on metals and alloys used in food contact materials and pin-on-disk polymer tribological wear standards."
     },
     "applianceSpecs": {
-        "parameter": "Direct Boiling Pot Suspension & Aseptic Canning Pureeing",
-        "guideline": "Seat stainless steel pot hooks firmly over simmering stockpots when pureeing hot tomato paste or baby food; sterilize entire unit in boiling water baths prior to home canning low-acid preserves."
+      "parameter": "Direct Boiling Pot Suspension & Aseptic Canning Pureeing",
+      "guideline": "Seat stainless steel pot hooks firmly over simmering stockpots when pureeing hot tomato paste or baby food; sterilize entire unit in boiling water baths prior to home canning low-acid preserves."
     }
-},
+  },
   "stainless-steel-vs-cast-aluminum-tortilla-press": {
     "materialThermal": {
-        "property": "Passivated Austenitic Alkaline Stability vs. Amphoteric Aluminum Chemical Dissolution",
-        "threshold": "SUS304 Cr2O3 Film (Stable at pH 1.0–13.0, Zero Al³⁺ Dissolution) vs. Sand-Cast Aluminum (Dissolution Rate >40 mg/dm²·day at pH 11.5)",
-        "details": "Passive chromium(III) oxide boundary layer remains completely inert to calcium hydroxide in alkaline nixtamalized corn dough (pH 10.5–12.0), eliminating dark toxic aluminum hydroxide transfers and lever fracturing common in sand-cast aluminum."
+      "property": "Passivated Austenitic Alkaline Stability vs. Amphoteric Aluminum Chemical Dissolution",
+      "threshold": "SUS304 Cr2O3 Film (Stable at pH 1.0–13.0, Zero Al³⁺ Dissolution) vs. Sand-Cast Aluminum (Dissolution Rate >40 mg/dm²·day at pH 11.5)",
+      "details": "Passive chromium(III) oxide boundary layer remains completely inert to calcium hydroxide in alkaline nixtamalized corn dough (pH 10.5–12.0), eliminating dark toxic aluminum hydroxide transfers and lever fracturing common in sand-cast aluminum."
     },
     "safetyStandard": {
-        "organization": "EFSA / WHO / ASTM",
-        "standard": "EFSA Scientific Opinion on Aluminum in Food & WHO Food Additives Series 65 & ASTM A370",
-        "citation": "Tolerable weekly intake limits for dietary aluminum (TWI 1 mg/kg bw/week) and mechanical fracture testing standards for culinary pressing equipment."
+      "organization": "EFSA / WHO / ASTM",
+      "standard": "EFSA Scientific Opinion on Aluminum in Food & WHO Food Additives Series 65 & ASTM A370",
+      "citation": "Tolerable weekly intake limits for dietary aluminum (TWI 1 mg/kg bw/week) and mechanical fracture testing standards for culinary pressing equipment."
     },
     "applianceSpecs": {
-        "parameter": "Alkaline Masa Isolation & High-Force Mechanical Compression",
-        "guideline": "Use food-grade plastic or parchment liners to facilitate dough release during pressing; wipe solid stainless plates with damp cloth; never place raw aluminum presses in alkaline dishwashers."
+      "parameter": "Alkaline Masa Isolation & High-Force Mechanical Compression",
+      "guideline": "Use food-grade plastic or parchment liners to facilitate dough release during pressing; wipe solid stainless plates with damp cloth; never place raw aluminum presses in alkaline dishwashers."
     }
-},
+  },
+  "stainless-steel-vs-cast-iron-meat-press": {
+    "materialThermal": {
+      "property": "Passivated Austenitic Steam Immersion Stability vs. Porous Sand-Cast Steam Oxidation",
+      "threshold": "SUS304 Cr2O3 Film (Dissolution <0.01 mg/dm²·day at pH 3.0) vs. Bare Cast Iron (Rust Initiation <2 hours under condensation)",
+      "details": "Dense passivated chromium(III) oxide boundary layer provides complete chemical resistance against acidic mustard, vinegar, and cured nitrates, eliminating rust formation under 200°C steam pressure and preventing loose charred carbon soot transfer onto seared smash burgers."
+    },
+    "safetyStandard": {
+      "organization": "FDA / NSF / ASTM",
+      "standard": "FDA Food Code § 4-101.11 & NSF/ANSI Standard 2 & ASTM B117",
+      "citation": "Sanitary standards requiring non-corrosive, easily cleanable food contact surfaces without porous crevices capable of trapping animal grease and bacterial pathogens."
+    },
+    "applianceSpecs": {
+      "parameter": "High-Heat Griddle Compression & Automated Dishwasher Degreasing",
+      "guideline": "Apply vertical downward pressure at center of press during first 15 seconds of cooking; wash in automated dishwashers up to 85°C with alkaline detergent for total lipid removal."
+    }
+  },
+  "glass-vs-stainless-steel-cold-brew-maker": {
+    "materialThermal": {
+      "property": "Vitreous Silicate Chemical Inertness vs. Double-Walled Vacuum Photon & Thermal Shielding",
+      "threshold": "Borosilicate Glass (0.00 µg/L organic acid migration) vs. SUS304 (0.00% UV Transmittance at 200–400 nm)",
+      "details": "Non-porous borosilicate silica network guarantees absolute taste neutrality and zero metal ion migration during 24-hour acidic extraction (pH 4.8–5.2), while double-walled vacuum stainless steel prevents photo-oxidation of delicate diterpenes and maintains cold chain temperatures (<5°C) without refrigeration."
+    },
+    "safetyStandard": {
+      "organization": "Council of Europe / FDA / ISO",
+      "standard": "Council of Europe CM/Res(2013)9 & FDA 21 CFR § 175.300 & ISO 7086",
+      "citation": "Specific release limits (SRLs) for metals in contact with acidic food simulants and permissible limits on heavy metal release from glass food contact articles."
+    },
+    "applianceSpecs": {
+      "parameter": "Refrigerated Anaerobic Steeping & Valve Lumen Sanitation",
+      "guideline": "Steep coffee grounds under refrigeration (below 4°C) for 18–24 hours to prevent microbial spoilage; brush stainless dispenser spigots periodically with warm water to prevent biofilm build-up."
+    }
+  },
+  "stainless-steel-vs-plastic-pasta-maker": {
+    "materialThermal": {
+      "property": "Hardened Alloy Roller Tribological Abrasion Resistance vs. POM Thermoplastic Extrusion Friction Degradation",
+      "threshold": "Austenitic Stainless / Chrome Steel (Wear Rate <0.0001 mm³/N·m) vs. Polyoxymethylene / POM (Wear Rate >1.45 mm³/N·m)",
+      "details": "Solid hardened steel rollers withstand high shear forces (>1,500 psi) from low-hydration durum semolina dough without microplastic shedding or friction heating, eliminating polymer abrasion particles and formaldehyde risk associated with overheated polyoxymethylene extrusion dies."
+    },
+    "safetyStandard": {
+      "organization": "EU Commission / FDA / ASTM",
+      "standard": "Commission Regulation (EU) No 10/2011 & FDA 21 CFR § 177.2470 & ASTM G99",
+      "citation": "Overall migration limits and specific migration thresholds for formaldehyde and trioxane from polyoxymethylene food contact resins under high mechanical shear."
+    },
+    "applianceSpecs": {
+      "parameter": "Dry-Brush Roller Maintenance & Gear Train Sanitation",
+      "guideline": "Never submerge manual metal pasta machines in water; allow residual dough to dry completely for 2 hours, then sweep clean with a stiff pastry brush to protect internal bronze bushings."
+    }
+  },
+  "glass-vs-plastic-fermentation-weights": {
+    "materialThermal": {
+      "property": "Annealed Solid Glass Zero Porosity vs. Porous Ceramic Micro-Capillary Biofilm Trapping",
+      "threshold": "Vitrified Soda-Lime Glass (0.00% Water Absorption, Density 2.52 g/cm³) vs. Unglazed Ceramic (3.5%–7.8% Absorption, Mold Spore Retention)",
+      "details": "Non-porous lead-free glass provides complete chemical immunity to aggressive lacto-fermentation brine (pH 3.2–3.6, 2%–5% NaCl) and delivers superior gravitational ballast to keep buoyant vegetables anaerobically submerged, preventing surface Kahm yeast and toxic mold colonization."
+    },
+    "safetyStandard": {
+      "organization": "FDA / USDA / ISO",
+      "standard": "FDA Compliance Policy Guide § 7117.06 & USDA Complete Guide to Home Canning & ISO 6486",
+      "citation": "Regulatory guidelines establishing strict limits for extractable lead and cadmium in food contact ceramics and anaerobic submerged fermentation protocols."
+    },
+    "applianceSpecs": {
+      "parameter": "Boiling Thermal Sterilization & Anaerobic Brine Submersion",
+      "guideline": "Sterilize glass weights in boiling water for 10 minutes prior to packing Mason jars; ensure all vegetable shreds remain completely below the brine line throughout fermentation."
+    }
+  },
+  "stainless-steel-vs-plastic-ice-cream-maker-bowl": {
+    "materialThermal": {
+      "property": "Austenitic Cryogenic Thermal Conductivity vs. PTFE Fluoropolymer Mechanical Gouging & Acid Pitting",
+      "threshold": "SUS304 Stainless (Conductivity 16.2 W/m·K, Hardness >180 HV) vs. PTFE Coated Aluminum (Conductivity 0.2 W/m·K, Hardness <25 HV)",
+      "details": "Solid uncoated SUS304 stainless steel eliminates PTFE fluoropolymer flaking from aggressive metal ice cream scoops, delivers ultra-rapid heat extraction for micro-crystalline velvety gelato texture, and resists severe pitting corrosion from acidic lemon and berry sorbets (pH 2.5–3.5)."
+    },
+    "safetyStandard": {
+      "organization": "FDA / NSF / ASTM",
+      "standard": "FDA 21 CFR § 175.300 & NSF/ANSI Standard 51 & ASTM G48",
+      "citation": "Sanitary food equipment material standards governing pitting and crevice corrosion resistance in refrigerated and frozen food processing contact zones."
+    },
+    "applianceSpecs": {
+      "parameter": "Rapid Cryogenic Churning & Seal Integrity Verification",
+      "guideline": "Pre-freeze stainless churn bowl at -18°C for 16–24 hours prior to churning; discard immediately if any oily coolant fluid or bubbling occurs along laser-welded seams."
+    }
+  }
 };
