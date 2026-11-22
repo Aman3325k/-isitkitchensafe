@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/espresso-machine-heavy-metal-modeler/',
+    title: 'Espresso Machine Thermoblock Heavy Metal Leaching & Lead Descaling Modeler',
+    description:
+      'Model brass boiler and thermoblock lead and copper leaching during 92°C–96°C 9-bar extraction, citric acid descaling corrosion, and certified post-clean flushing protocols.',
+    date: '2026-11-22'
+  },
+  {
     path: '/tools/blender-blade-cavitation-safety-modeler/',
     title: 'Blender Blade Friction Thermal Degradation & Micro-Cavitation Safety Modeler',
     description:
