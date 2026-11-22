@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/copper-cookware-toxicity-modeler/',
+    title: 'Copper Cookware & Acidic Food Leaching & Verdigris Modeler',
+    description:
+      'Model copper ion dissolution in acidic reductions (pH < 6.0), tin lining erosion, toxic verdigris salt formation, and evaluate gastric irritation thresholds against the FDA Food Code Quarter Rule.',
+    date: '2026-11-22',
+  },
+  {
     path: '/tools/cast-iron-seasoning-degradation-modeler/',
     title: 'Cast Iron & Carbon Steel Seasoning Degradation Modeler',
     description:
