@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/silicone-spatula-oligomer-leaching-modeler/',
+    title: 'Silicone Spatula & Utensil High-Heat Oligomer Leaching Modeler',
+    description:
+      'Simulate thermal depolymerization of silicone spatulas in 200°C+ cooking oils, model lipophilic extraction of cyclic siloxanes (D4–D6), evaluate pinch-test mineral fillers, and detect dishwasher detergent absorption.',
+    date: '2026-11-22'
+  },
+  {
     path: '/tools/stainless-steel-heavy-metal-leaching-modeler/',
     title: 'Stainless Steel Heavy Metal (Nickel & Chromium) Acidic Leaching Modeler',
     description:
