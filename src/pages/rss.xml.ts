@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/immersion-blender-grease-leaching-modeler/',
+    title: 'Immersion Blender Bearing Grease & Shaft Seal Leaching Modeler',
+    description:
+      'Simulate high-rpm rotor cavitation, sub-surface NBR lip seal thermal wear, petroleum hydrocarbon grease leaching into hot soup emulsions, and NSF H1 vs non-food-grade grease toxicity thresholds.',
+    date: '2026-11-22'
+  },
+  {
     path: '/tools/silicone-spatula-oligomer-leaching-modeler/',
     title: 'Silicone Spatula & Utensil High-Heat Oligomer Leaching Modeler',
     description:
