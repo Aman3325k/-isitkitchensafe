@@ -2769,5 +2769,85 @@ module.exports = {
       "parameter": "High-Heat Automated Dishwasher Sanitization & Splatter Containment",
       "guideline": "Place raw poultry breasts inside heavy zip bags or parchment before pounding to prevent bacterial aerosolization; sanitize stainless mallet in high-heat dishwashers immediately after use."
     }
+  },
+  "glass-vs-stainless-steel-blender-pitcher": {
+    "materialThermal": {
+      "property": "Cold-Ductility Tensile Strength vs. High-Velocity Mechanical Cavitation Shock",
+      "threshold": "SUS304 Stainless (Tensile >515 MPa, 0.00% shatter risk) vs. Glass (Brittle Fracture threshold ~35–45 MPa)",
+      "details": "Austenitic chromium-nickel alloy absorbs turbulent fluid cavitation energy and blunt ingredient impacts (ice cubes, dried pulses) without micro-flaking or brittle notch propagation, completely eliminating catastrophic glass fracture risks during 25,000 RPM vortex shearing."
+    },
+    "safetyStandard": {
+      "organization": "FDA / NSF / ASTM",
+      "standard": "ASTM C149-14 (Thermal Shock Resistance) & NSF/ANSI Standard 8 (Commercial Food Equipment)",
+      "citation": "Standard test methods evaluating thermal shock failure in glass containers and sanitary cleanability standards for high-speed commercial blending containers."
+    },
+    "applianceSpecs": {
+      "parameter": "Boiling Soup Puréeing (>95°C) & Vortex Steam Venting",
+      "guideline": "Fill blender jar to no more than 50% capacity when puréeing hot liquids; vent lid plug and cover with kitchen towel to avoid steam pressure surges."
+    }
+  },
+  "brass-vs-stainless-steel-espresso-portafilter": {
+    "materialThermal": {
+      "property": "Solid Austenitic Hydrothermal Purity vs. Acidic De-Zincification & Chromium Flaking",
+      "threshold": "SUS304 Unleaded Steel (<0.001 µg/L Pb/Ni leaching) vs. Plated Brass (BfR spikes: 80–160 µg/L Pb after descaling)",
+      "details": "Unplated austenitic SUS304 alloy resists hot organic coffee acids (pH 4.8–5.2) and commercial backflush detergents without pitting, eliminating toxic lead and copper leaching caused by flaking electroplated chromium layers on traditional CW617N leaded brass."
+    },
+    "safetyStandard": {
+      "organization": "FDA / BfR / Council of Europe",
+      "standard": "BfR Toxicological Release Limits (Opinion No. 024/2015) & Council of Europe CM/Res(2013)9 & DIN 10531",
+      "citation": "International regulatory limits governing heavy metal migration (lead, nickel, copper) from professional and domestic coffee extraction appliances."
+    },
+    "applianceSpecs": {
+      "parameter": "Thermal Group Stability & Daily Cafiza Chemical Backflushing",
+      "guideline": "Preheat portafilter in grouphead for 15 minutes to reach 93°C extraction equilibrium; soak solid stainless portafilter in hot Cafiza detergent nightly without surface discoloration."
+    }
+  },
+  "glass-vs-plastic-food-processor-bowl": {
+    "materialThermal": {
+      "property": "Vitrified Silicate Chemical Immunity vs. Hydrothermal Ester Cleavage & Crazing",
+      "threshold": "Borosilicate Glass (0.00 µg/L bisphenols/nanoplastics) vs. Polycarbonate/Tritan (>10⁴ microplastic particles/L)",
+      "details": "Non-porous vitrified borosilicate matrix resists caustic dishwasher detergents (pH 10–11.5) and essential citrus oils without clouding, micro-crazing, or releasing endocrine-disrupting bisphenols and synthetic polymer oligomers during heavy dough kneading."
+    },
+    "safetyStandard": {
+      "organization": "FDA / EFSA / ISO",
+      "standard": "FDA 21 CFR § 177.1580 & EFSA Regulation (EU) No 10/2011 & ISO 6486",
+      "citation": "Food contact materials legislation defining overall and specific migration limits for plasticizers, bisphenols, and heavy metals under dynamic mechanical food prep."
+    },
+    "applianceSpecs": {
+      "parameter": "High-Torque Blade Engagement & Cold Ingredient Processing",
+      "guideline": "Lock glass bowl firmly onto drive shaft; process hard spices, parmesan rinds, and frozen items in short pulses to minimize mechanical impact on glass sidewalls."
+    }
+  },
+  "ceramic-coated-vs-stainless-steel-inner-pot": {
+    "materialThermal": {
+      "property": "Tri-Ply Austenitic Impact Hardness vs. Sol-Gel Inorganic Fissuring & Abrasive Wear",
+      "threshold": "SUS304 Clad (Mohs 5.5, indestructible) vs. Sol-Gel Ceramic Coating (25–45 µm, micro-cracks at >220°C)",
+      "details": "Heavy 18/8 austenitic stainless steel with encapsulated aluminum core provides flawless high-heat searing fond development, withstands sharp stainless utensils and abrasive scouring pads, and resists acidic chili and tomato braises under 15 PSI steam without blister delamination."
+    },
+    "safetyStandard": {
+      "organization": "FDA / NSF / UL",
+      "standard": "FDA Food Code § 4-101.11 & UL 136 (Standard for Pressure Cookers) & NSF/ANSI Standard 51",
+      "citation": "Safety standards for pressurized cooking vessels, food contact surface cleanability, and thermal shock integrity under steam containment."
+    },
+    "applianceSpecs": {
+      "parameter": "High-Pressure Sauté & Quick Pressure Release Venting",
+      "guideline": "Deglaze browned fond with broth or wine before sealing lid to prevent 'Burn' error codes; use stainless steel wire scrubbers and Bar Keepers Friend for periodic mineral descaling."
+    }
+  },
+  "stainless-steel-vs-enameled-aluminum-lemon-squeezer": {
+    "materialThermal": {
+      "property": "Austenitic Acid Passivation vs. Enamel Hinge Flaking & Citric Acid Leaching",
+      "threshold": "SUS304 Solid Steel (0.00 mg/kg Al migration at pH 2.2) vs. Enameled Aluminum (12–35 mg/kg Al leaching when chipped)",
+      "details": "Forged chromium-nickel steel provides permanent chemical immunity to concentrated citric and malic acids (pH 2.0–2.4), resists severe mechanical hinge torque without paint flaking, and survives automated dishwashers without producing hazardous black aluminum smut."
+    },
+    "safetyStandard": {
+      "organization": "FDA / EFSA / Council of Europe",
+      "standard": "FDA 21 CFR § 175.300 & Council of Europe CM/Res(2013)9 & EFSA Tolerable Weekly Intake Guidelines",
+      "citation": "Sanitary food equipment standards establishing strict migration thresholds for aluminum ions in contact with highly acidic foods and beverages."
+    },
+    "applianceSpecs": {
+      "parameter": "High-Leverage Seed Retention & Dishwasher Decontamination",
+      "guideline": "Cut citrus halves horizontally and place cut-side down in cup; apply firm downward pressure to invert fruit; wash in automated dishwasher immediately after squeezing."
+    }
   }
 };
