@@ -102,7 +102,7 @@ All newly published comparisons are grounded in empirical toxicology, microbiolo
 | **Total Blog Safety Guides** | 95 (475 pages) | **95 (475 pages)** | **Stable** |
 | **Published Comparisons** | 168 (840 pages) | **173 (865 pages)** | **+5 Matchups / +25 Pages** |
 | **Cloudflare Redirect Lines** | 1,980 / 2,000 | **1,980 / 2,000** | **20 Lines Headroom PASS** |
-| **Git Commit Hash** | `0127352` | `PENDING_COMMIT` | **Ready for Clean Commit** |
+| **Git Commit Hash** | `0127352` | `317b652` | **Committed Cleanly PASS** |
 
 ---
 
