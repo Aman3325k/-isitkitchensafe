@@ -86,4 +86,4 @@ All newly published comparison specs are grounded in peer-reviewed materials sci
 - Roadmap advanced: **Wave 65 COMPLETED** &rarr; **Wave 66 QUEUED** (`TOOL-CONSUMER-093`: Consumer Tool #77 Elevation & High-Impact Safety Guide 98->101 / 5 langs).
 
 ---
-**Git Commit Hash:** PENDING_COMMIT
+**Git Commit Hash:** 7c73bba
