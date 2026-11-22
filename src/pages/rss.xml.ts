@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/blender-blade-cavitation-safety-modeler/',
+    title: 'Blender Blade Friction Thermal Degradation & Micro-Cavitation Safety Modeler',
+    description:
+      'Model 20,000+ RPM blade tip vortex cavitation, viscous friction heating, sealed bullet cup steam explosion hazards, and blade bearing grease migration risks.',
+    date: '2026-11-22'
+  },
+  {
     path: '/tools/immersion-blender-grease-leaching-modeler/',
     title: 'Immersion Blender Bearing Grease & Shaft Seal Leaching Modeler',
     description:

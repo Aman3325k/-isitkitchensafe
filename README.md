@@ -4,7 +4,7 @@ A static kitchen safety reference platform and interactive consumer tool suite a
 
 ## Overview
 
-IsItKitchenSafe delivers **11892+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **210 interactive tools** (**1,050 localized tool pages**, including **75 Google-indexed Everyday Consumer Kitchen Safety Tools**), **95 evergreen guides × 5 languages = 475 localized articles**, **173 comparisons × 5 languages = 865 localized pages**, **1,307 item pages per language (6,535 localized reference pages)**, **WCAG 2.1 AA accessibility**, and transparent E-E-A-T verification standards.
+IsItKitchenSafe delivers **11907+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **210 interactive tools** (**1,050 localized tool pages**, including **76 Google-indexed Everyday Consumer Kitchen Safety Tools**), **98 evergreen guides × 5 languages = 490 localized articles**, **173 comparisons × 5 languages = 865 localized pages**, **1,307 item pages per language (6,535 localized reference pages)**, **WCAG 2.1 AA accessibility**, and transparent E-E-A-T verification standards.
 
 ## Tech Stack
 - **Framework**: Astro.js (MPA static generation)
