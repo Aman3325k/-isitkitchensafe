@@ -2450,4 +2450,84 @@ module.exports = {
         "guideline": "Use SUS304 double-twill wire strainers for clarifying boiling bone broths, hot tea, and frying oil; clean immediately after straining dairy or meat stocks with a stiff nylon brush under warm water before proteins dry."
     }
 },
+  "stainless-steel-vs-nylon-cooking-ladle": {
+    "materialThermal": {
+        "property": "Austenitic Chromium-Nickel Crystal Matrix Stability vs. Polyamide 6,6 Thermal Softening & PAA Pyrolysis",
+        "threshold": "SUS304 (Melting >1400°C, Tensile Yield >205 MPa) vs. PA66 Nylon (Heat Deflection 180°C–210°C, Melting 255°C, PAA Leaching >70°C)",
+        "details": "Solid SUS304 austenitic stainless steel maintains complete metallurgical integrity during prolonged soup boiling and hot fat contact without chemical leaching, eliminating carcinogenic Primary Aromatic Amines (4,4'-MDA and aniline) and microplastics released by thermal breakdown of black nylon."
+    },
+    "safetyStandard": {
+        "organization": "BfR / EU Commission / FDA",
+        "standard": "EU Regulation No 10/2011 & Commission Regulation (EU) No 284/2011 & BfR Opinion No. 028/2019",
+        "citation": "Food contact toxicological standards setting strict specific migration limits (SML < 0.002 mg/kg) on primary aromatic amines in polyamide kitchenware."
+    },
+    "applianceSpecs": {
+        "parameter": "Zero-PAA Boiling Broth Immersion & Commercial Dishwasher Sanitization",
+        "guideline": "Deploy solid SUS304 stainless steel ladles for all boiling stocks, simmering stews, and deep-fry skimming; never rest nylon ladles inside hot pots over open burners; wash in commercial dishwashers up to 85°C."
+    }
+},
+  "stainless-steel-vs-plastic-kitchen-funnel": {
+    "materialThermal": {
+        "property": "Austenitic Acid-Passivated Boundary Layer vs. Polyolefin Hydrothermal Expansion & Additive Migration",
+        "threshold": "SUS304 Cr2O3 Film (Inert to 100°C Boiling 10% Acetic Acid) vs. Polypropylene (Softening 95°C–120°C, Additive Diffusion >80°C)",
+        "details": "Passivated SUS304 chromium(III) oxide boundary layer provides total immunity to boiling vinegar and acidic fruit purees during home canning, eliminating antioxidant migration (Irganox) and polyolefin oligomers extracted from thin plastic funnels under boiling pack temperatures."
+    },
+    "safetyStandard": {
+        "organization": "USDA / FDA / ASTM",
+        "standard": "USDA Complete Guide to Home Canning & FDA 21 CFR § 175.300 & ASTM D8332",
+        "citation": "Food preservation thermal processing standards and food contact material migration limits governing boiling acidic food transfers."
+    },
+    "applianceSpecs": {
+        "parameter": "Anti-Vapor-Lock Fluted Stem & Aseptic Canning Sterilization",
+        "guideline": "Utilize fluted-stem SUS304 stainless funnels to prevent dangerous vapor-lock boiling liquid eruptions during jar filling; boil funnels for 10 minutes prior to canning low-acid foods to achieve aseptic microbial control."
+    }
+},
+  "stainless-steel-vs-plastic-measuring-spoons": {
+    "materialThermal": {
+        "property": "Stamped Cold-Rolled Austenitic Volumetric Stability vs. Molded Thermoplastic Wash-Cycle Creep",
+        "threshold": "SUS304 Sheet (Yield Strength >205 MPa, Zero Thermal Creep <400°C) vs. Molded Polypropylene (Creep Strain >12% at 65°C)",
+        "details": "Die-stamped SUS304 stainless steel maintains rigorous ±0.5% volumetric calibration indefinitely through commercial dishwashing cycles, whereas thin polypropylene spoons warp and ovalize, creating up to 25% measurement errors in chemical leaveners."
+    },
+    "safetyStandard": {
+        "organization": "NIST / ASTM / FDA",
+        "standard": "NIST Handbook 105-3 (Specifications for Volumetric Measures) & ASTM E542 & FDA 21 CFR § 177.1520",
+        "citation": "Metrological accuracy standards and solvent extractive limitations governing culinary volumetric dosing instruments."
+    },
+    "applianceSpecs": {
+        "parameter": "Ethanol Solvent Resistance & Permanent Laser Metrology",
+        "guideline": "Use laser-engraved SUS304 spoons when measuring solvent-rich vanilla extracts, citrus essential oils, and coarse abrasive salts to prevent ink flaking and plastic crazing; dry nested magnetic sets before storage."
+    }
+},
+  "porcelain-vs-melamine-dinnerware": {
+    "materialThermal": {
+        "property": "Dense Vitrified Mullite-Glass Silicate Matrix vs. Thermoset Melamine-Formaldehyde Acid Hydrolysis",
+        "threshold": "Vitrified Hard Porcelain (Firing 1,350°C–1,400°C, Mohs Hardness 7, Zero Formaldehyde) vs. Melamine Resin (Acid Hydrolysis >70°C, Dielectric Microwave Heating)",
+        "details": "High-temperature vitrified feldspathic porcelain is completely non-porous (<0.1% water absorption) and microwave transparent, eliminating the nephrotoxic melamine monomer and carcinogenic formaldehyde leaching triggered when melamine resin contacts hot acidic foods (>70°C, pH <4.5)."
+    },
+    "safetyStandard": {
+        "organization": "FDA / EFSA / IARC",
+        "standard": "FDA CPG Sec. 545.400 / 545.450 & EU Regulation 10/2011 & IARC Monograph Vol. 100F (Formaldehyde)",
+        "citation": "Specific migration limits (SML 15 mg/kg formaldehyde, 2.5 mg/kg melamine) and microwave radiation exclusion standards for food contact tableware."
+    },
+    "applianceSpecs": {
+        "parameter": "Microwave Safety & Cutlery Scratch Resistance",
+        "guideline": "Serve hot acidic meals (soups, pasta, curries) exclusively on vitrified porcelain; never place melamine dinnerware into microwave ovens; replace scratched melamine tableware immediately to prevent bacterial harboring."
+    }
+},
+  "silicone-vs-plastic-popsicle-molds": {
+    "materialThermal": {
+        "property": "Addition-Cured Polydimethylsiloxane Cryogenic Elastomeric Flexibility vs. Polyolefin Sub-Zero Embrittlement",
+        "threshold": "Platinum Siloxane (Glass Transition Tg < -120°C, Operating -40°C to +230°C) vs. Polystyrene/PP (Tg 0°C to -10°C, Cryogenic Embrittlement at -18°C)",
+        "details": "LFGB European standard platinum-cured silicone retains full elastomeric flexibility at -18°C freezer temperatures, allowing instant thumb-press demolding without warm water thawing, while completely resisting chemical extraction into acidic berry and citrus fruit purees (pH 2.5–3.5)."
+    },
+    "safetyStandard": {
+        "organization": "BfR / LFGB / FDA",
+        "standard": "German LFGB § 31 & BfR XV (Silicones) & FDA 21 CFR § 177.2600",
+        "citation": "European and US food-contact elastomer migration standards limiting volatile organic compounds (VOC < 0.5%) and extractables in sub-zero and elevated temperatures."
+    },
+    "applianceSpecs": {
+        "parameter": "Cold-Release Cryogenic Flexibility & Dual Bake/Freeze Capability",
+        "guideline": "Peel LFGB platinum silicone molds directly away from frozen popsicles without warm water submersion to preserve crisp frozen details; utilize dual-temperature capacity to bake cakeicles at temperatures up to 230°C."
+    }
+},
 };
