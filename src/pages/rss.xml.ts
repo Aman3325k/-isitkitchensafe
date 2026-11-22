@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/stainless-steel-heavy-metal-leaching-modeler/',
+    title: 'Stainless Steel Heavy Metal (Nickel & Chromium) Acidic Leaching Modeler',
+    description:
+      'Simulate nickel and chromium ion dissolution during acidic simmering (pH < 4.0), compare 304 vs 316 vs 430 alloys, model new pan leaching spikes, and evaluate systemic nickel allergy risks.',
+    date: '2026-11-22'
+  },
+  {
     path: '/tools/copper-cookware-toxicity-modeler/',
     title: 'Copper Cookware & Acidic Food Leaching & Verdigris Modeler',
     description:
