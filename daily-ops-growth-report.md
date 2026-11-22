@@ -82,6 +82,6 @@ Every new guide and tool elevation was mirrored across English, Spanish, Portugu
 ---
 
 ## 6. Site Growth Roadmap & Next Objective
-- **Current Completed Task:** `TOOL-CONSUMER-087` (Wave 60: Consumer Tool #74 Elevation & High-Impact Safety Guide [89->92 / 5 langs])
+- **Current Completed Task:** `TOOL-CONSUMER-087` (Wave 60: Consumer Tool #74 Elevation & High-Impact Safety Guide [89->92 / 5 langs] | Git Commit: `be57145`)
 - **Next Active Task (WIP = 1):** `TOOL-CONSUMER-088` (Wave 61: 5 High-Intent Material & Appliance Comparisons [163->168 / 5 langs])
 - **Queue Status:** Next task cleanly scheduled in `logs/autonomous-growth-history.json` and `logs/website_growth_roadmap.json`.
