@@ -1,0 +1,581 @@
+const fs = require('fs');
+const path = require('path');
+
+console.log('=== ELEVATING CONSUMER TOOL #80: Air Fryer PAH Thermal Resuspension & Inhalation Modeler ===');
+
+// 1. Update src/data/consumer-tools-allowlist.json
+const allowlistPath = path.resolve('src/data/consumer-tools-allowlist.json');
+const allowlist = JSON.parse(fs.readFileSync(allowlistPath, 'utf8'));
+const toolSlug = 'air-fryer-pah-resuspension-modeler';
+
+if (!allowlist.includes(toolSlug)) {
+  allowlist.push(toolSlug);
+  fs.writeFileSync(allowlistPath, JSON.stringify(allowlist, null, 2) + '\n', 'utf8');
+  console.log(`✅ Added '${toolSlug}' to allowlist. Total count: ${allowlist.length}`);
+} else {
+  console.log(`ℹ️ Already in allowlist. Total count: ${allowlist.length}`);
+}
+
+// 2. EN tool page schema injection
+const enPath = path.resolve('src/pages/tools/air-fryer-pah-resuspension-modeler.astro');
+let en = fs.readFileSync(enPath, 'utf8');
+
+const enTarget = `---
+
+<Layout title={pageTitle} description={pageDescription} faqs={faqs} availableLocales={['en', 'es', 'pt', 'zh-cn', 'ja']}>`;
+
+const enReplacement = `
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://isitkitchensafe.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Tools",
+      "item": "https://isitkitchensafe.com/tools/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Air Fryer PAH Resuspension Modeler",
+      "item": "https://isitkitchensafe.com/tools/air-fryer-pah-resuspension-modeler/"
+    }
+  ]
+};
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Air Fryer Polycyclic Aromatic Hydrocarbon (PAH) Thermal Resuspension & Inhalation Modeler",
+  "url": "https://isitkitchensafe.com/tools/air-fryer-pah-resuspension-modeler/",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript. Requires HTML5.",
+  "description": pageDescription,
+  "inLanguage": "en",
+  "isAccessibleForFree": true,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IsItKitchenSafe",
+    "url": "https://isitkitchensafe.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://isitkitchensafe.com/favicon.svg"
+    }
+  }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map(faq => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+};
+---
+
+<Layout
+  title={pageTitle}
+  description={pageDescription}
+  faqs={faqs}
+  excludeFaqSchema={true}
+  excludeBreadcrumbSchema={true}
+  availableLocales={['en', 'es', 'pt', 'zh-cn', 'ja']}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(webAppSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
+  </Fragment>`;
+
+if (en.includes(enTarget)) {
+  en = en.replace(enTarget, enReplacement);
+  fs.writeFileSync(enPath, en, 'utf8');
+  console.log('✅ Injected schemas into EN air-fryer-pah-resuspension-modeler.astro');
+} else {
+  console.log('ℹ️ EN page target not found or already injected');
+}
+
+// 3. Create localized page src/pages/[lang]/tools/air-fryer-pah-resuspension-modeler.astro
+const langPagePath = path.resolve('src/pages/[lang]/tools/air-fryer-pah-resuspension-modeler.astro');
+const langPageContent = `---
+import Layout from '../../../layouts/Layout.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import AirFryerPahResuspensionModeler from '../../../components/AirFryerPahResuspensionModeler.astro';
+import type { SupportedLanguage } from '../../../i18n/ui';
+import { useTranslations, useTranslatedPath } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  const availableLocales: SupportedLanguage[] = ['en', 'es', 'pt', 'zh-cn', 'ja'];
+  return [
+    { params: { lang: 'es' }, props: { lang: 'es' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'pt' }, props: { lang: 'pt' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'zh-cn' }, props: { lang: 'zh-cn' as SupportedLanguage, availableLocales } },
+    { params: { lang: 'ja' }, props: { lang: 'ja' as SupportedLanguage, availableLocales } }
+  ];
+}
+
+interface Props {
+  lang: SupportedLanguage;
+  availableLocales: SupportedLanguage[];
+}
+
+const { lang, availableLocales } = Astro.props;
+const t = useTranslations(lang);
+const tp = useTranslatedPath(lang);
+
+interface LocaleContent {
+  pageTitle: string;
+  pageDescription: string;
+  breadcrumbs: Array<{ label: string; href?: string }>;
+  faqs: Array<{ question: string; answer: string }>;
+  monoBadge: string;
+  monoTitle: string;
+  monoSub: string;
+  section1Title: string;
+  section1Body: string;
+  section2Title: string;
+  section2Body: string;
+  section3Title: string;
+  section3Body: string;
+}
+
+const CONTENT: Record<SupportedLanguage, LocaleContent> = {
+  en: {} as any,
+  es: {
+    pageTitle: "Simulador de Resuspensión Térmica e Inhalación de HAP en Freidoras de Aire | IsItKitchenSafe",
+    pageDescription: "Modele la aerosolización pirolítica de ácidos grasos y residuos incrustados en la resistencia y ventilador de la freidora de aire, calculando tasas de emisión de Benzo[a]pireno y PM2.5.",
+    breadcrumbs: [
+      { label: 'Inicio', href: '/es/' },
+      { label: 'Herramientas', href: '/es/tools/' },
+      { label: 'Simulador de HAP en Freidora de Aire' }
+    ],
+    faqs: [
+      {
+        question: "¿Por qué mi freidora de aire emite humo gris o azul incluso cocinando alimentos bajos en grasa?",
+        answer: "El humo emitido al cocinar alimentos magros suele deberse a la resuspensión pirolítica de grasas de usos anteriores. Al cocinar carnes grasas, microgotas de lípidos salpican hacia la resistencia superior (300°C–450°C). Los ciclos posteriores calientan este barniz orgánico más allá de su punto de humo y descomposición, vaporizándolo en humo acre."
+      },
+      {
+        question: "¿Qué compuestos tóxicos se liberan cuando la grasa se quema en la resistencia de la freidora?",
+        answer: "Las grasas sometidas repetidamente a 350°C sufren pirólisis incompleta y craqueo térmico. Se generan hidrocarburos aromáticos policíclicos (HAP) como el Benzo[a]pireno (carcinógeno Grupo 1 de la IARC), aldehídos volátiles citotóxicos (acroleína, 4-HNE) y altas concentraciones de partículas respirables ultrafinas PM2.5 y PM0.1."
+      },
+      {
+        question: "¿Cuánto pueden aumentar los niveles de PM2.5 en la cocina al usar una freidora sin limpiar?",
+        answer: "En una cocina cerrada sin ventilación activa (aprox. 30 m³), operar una freidora con residuos carbonizados puede disparar las partículas PM2.5 de 10 µg/m³ a más de 250–500 µg/m³ en 15 a 20 minutos. Esto supera la pauta de 24 horas de la OMS (15 µg/m³) por 15 a 30 veces, entrando en categoría 'Peligrosa' según la EPA."
+      },
+      {
+        question: "¿Son eficaces las campanas extractoras con recirculación y filtro de carbón para este humo?",
+        answer: "No. Las campanas de recirculación sin salida al exterior solo atrapan gotas macroscópicas en la malla metálica. Dejan pasar más del 65% de las nanopartículas PM2.5 y los HAP gaseosos, recirculando los aerosoles tóxicos por todo el hogar."
+      },
+      {
+        question: "¿Cómo limpiar de forma segura la resistencia superior de la freidora sin dañarla?",
+        answer: "Desconecte el aparato y déjelo enfriar totalmente. Colóquelo boca abajo sobre un paño suave. Prepare una pasta con 3 cucharadas de bicarbonato de sodio, 1 de agua y unas gotas de lavavajillas suave, cepillando suavemente con un cepillo dental. Para barniz rebelde, caliente previamente un cuenco apto para horno con agua y rodajas de limón a 180°C durante 5 minutos y luego frote con microfibra húmeda."
+      },
+      {
+        question: "¿El aceite de oliva o de aguacate genera menos humo tóxico que los aceites de semillas?",
+        answer: "Sí. Los aceites de semillas poliinsaturados (soja, maíz, girasol) contienen altas concentraciones de ácido linoleico susceptible a oxidación y craqueo en acroleína a alta temperatura. Los aceites ricos en ácido oleico monoinsaturado (oliva virgen y aguacate) exhiben mayor estabilidad termooxidativa y emiten menos aldehídos volátiles."
+      }
+    ],
+    monoBadge: "Toxicología Térmica y Calidad del Aire Interior",
+    monoTitle: "Simulador de Resuspensión Térmica e Inhalación de HAP en Freidoras de Aire",
+    monoSub: "Modele la aerosolización pirolítica de grasas incrustadas, emisiones de Benzo[a]pireno y picos de PM2.5 en ambientes cerrados.",
+    section1Title: "Termodinámica de la Convección y Salpicaduras de Grasa",
+    section1Body: "Durante la cocción a alta temperatura, el agua de los alimentos hierve violentamente produciendo microexplosiones de vapor que proyectan gotas de grasa contra la resistencia superior descubierta a más de 380°C.",
+    section2Title: "Perfil Toxicológico: Benzo[a]pireno (BaP-TEQ) y Nanopartículas PM2.5",
+    section2Body: "La pirólisis incompleta de triglicéridos genera Benzo[a]pireno, clasificado como carcinógeno humano Grupo 1 por la IARC, junto con acroleína y partículas ultrafinas PM0.1 que penetran directamente en el torrente sanguíneo.",
+    section3Title: "Aerodinámica de Cocina y Ventilación Recomendada",
+    section3Body: "Colocar la freidora debajo de muebles de cocina crea vórtices de aire que dispersan el humo por la zona de respiración. Se recomienda operarla directamente sobre la placa con la campana extractora encendida y con salida al exterior."
+  },
+  pt: {
+    pageTitle: "Simulador de Ressuspensão Térmica e Inalação de HAP em Air Fryers | IsItKitchenSafe",
+    pageDescription: "Simule a aerossolização pirolítica de gorduras incrustadas na resistência e hélice da air fryer, calculando taxas de emissão de Benzo[a]pireno e material particulado PM2.5.",
+    breadcrumbs: [
+      { label: 'Início', href: '/pt/' },
+      { label: 'Ferramentas', href: '/pt/tools/' },
+      { label: 'Simulador de HAP em Air Fryer' }
+    ],
+    faqs: [
+      {
+        question: "Por que minha air fryer solta fumaça cinza ou azul mesmo com alimentos sem gordura?",
+        answer: "A fumaça ao preparar alimentos magros decorre da ressuspensão pirolítica de gordura residual de preparos anteriores. Gotículas de óleo espirram na resistência incandescente (300°C–450°C). Em usos seguintes, esse verniz orgânico é aquecido acima do seu ponto de fumaça, vaporizando-se em fumaça irritante."
+      },
+      {
+        question: "Quais compostos tóxicos são liberados quando a gordura queima na resistência da air fryer?",
+        answer: "Óleos submetidos repetidamente a 350°C sofrem pirólise incompleta e craqueamento térmico, liberando hidrocarbonetos aromáticos policíclicos (HAP) como o Benzo[a]pireno (carcinógeno Grupo 1 pela IARC), acroleína tóxica e partículas inaláveis ultrafinas PM2.5 e PM0.1."
+      },
+      {
+        question: "Qual o aumento de PM2.5 na cozinha ao usar uma air fryer suja sem ventilação?",
+        answer: "Numa cozinha fechada (30 m³), uma air fryer com gordura incrustada pode elevar o PM2.5 de 10 µg/m³ para 250–500 µg/m³ em 15–20 minutos. Isso ultrapassa a diretriz de 24h da OMS (15 µg/m³) por 15 a 30 vezes, entrando na faixa 'Perigosa' da EPA."
+      },
+      {
+        question: "Coifas sem duto com filtro de carvão ativado eliminam a fumaça da air fryer?",
+        answer: "Não. Coifas de recirculação apenas retêm gotas macroscópicas na tela metálica, deixando passar mais de 65% das nanopartículas PM2.5 e HAPs voláteis, recirculando os aerossóis na residência."
+      },
+      {
+        question: "Como higienizar com segurança a resistência superior da air fryer?",
+        answer: "Desligue e aguarde esfriar. Vire a air fryer sobre um pano macio. Faça uma pasta com 3 colheres de bicarbonato, 1 de água e detergente neutro, escovando levemente com escova de dentes macia. Para gordura resistente, vaporize uma tigela refratária com água e rodelas de limão a 180°C por 5 minutos antes de passar pano de microfibra."
+      },
+      {
+        question: "Azeite de oliva ou óleo de abacate geram menos compostos tóxicos que óleos de sementes?",
+        answer: "Sim. Óleos poli-insaturados (soja, milho) ricos em ácido linoleico sofrem rápida oxidação e degradação em acroleína. O azeite de oliva e o óleo de abacate, ricos em ácido oleico monoinsaturado, oferecem maior estabilidade térmica e produzem menos aldeídos nocivos."
+      }
+    ],
+    monoBadge: "Toxicologia Térmica e Qualidade do Ar Interno",
+    monoTitle: "Simulador de Ressuspensão Térmica e Inalação de HAP em Air Fryers",
+    monoSub: "Modele a aerossolização pirolítica de gorduras incrustadas, emissões de Benzo[a]pireno e picos de PM2.5 em cozinhas.",
+    section1Title: "Termodinâmica de Convecção e Micro-Ejeção de Lipídios",
+    section1Body: "A ebulição rápida da umidade dos alimentos projeta microgotículas de lipídios diretamente contra a serpentina de aquecimento superior a 380°C, formando camadas de verniz carbonizado.",
+    section2Title: "Perfil Toxicológico: Benzo[a]pireno (BaP-TEQ) e Nanopartículas PM2.5",
+    section2Body: "A queima incompleta libera Benzo[a]pireno, carcinógeno humano comprovado, além de acroleína corrosiva para as vias aéreas e partículas ultrafinas que atingem os alvéolos pulmonares.",
+    section3Title: "Aerodinâmica da Cozinha e Práticas de Exaustão Segura",
+    section3Body: "Utilizar a air fryer sob armários suspensos gera recirculação nociva de poluentes. A recomendação médica e de engenharia é posicioná-la sob coifa com exaustão externa ligada na potência máxima."
+  },
+  'zh-cn': {
+    pageTitle: "空气炸锅残留油脂热重悬与多环芳烃(PAH)吸入暴露模拟器 | IsItKitchenSafe",
+    pageDescription: "精密模拟空气炸锅加热管与顶部风道附着陈旧油脂在350°C–450°C高温下的二次热裂解气溶胶化动力学，计算苯并[a]芘致癌毒性当量(BaP-TEQ)与室内PM2.5暴增浓度。",
+    breadcrumbs: [
+      { label: '首页', href: '/zh-cn/' },
+      { label: '实用工具', href: '/zh-cn/tools/' },
+      { label: '空气炸锅PAH热重悬模拟器' }
+    ],
+    faqs: [
+      {
+        question: "为什么空气炸锅在烹饪无油低脂食物时依然会散发刺鼻蓝烟或灰白烟雾？",
+        answer: "空气炸锅在烹制低脂食物时冒烟，几乎百分之百源于之前烹制五花肉、鸡翅等高脂食材时溅射到顶部未加防护的金属加热管（工作温度300°C–450°C）上的陈旧积碳油脂。后续加热时，这些附着油脂被迅速加热至烟点和热解温度以上，发生二次闪蒸裂解，生成刺鼻蓝烟。"
+      },
+      {
+        question: "空气炸锅加热管积碳油脂二次热裂解会产生哪些高危有毒化学物质？",
+        answer: "油脂在350°C以上长时间缺氧或不完全燃烧时，会发生热裂解与环化反应，释放多环芳烃（PAH，包括IARC一类确定人类致癌物苯并[a]芘）、高毒性挥发性醛类（丙烯醛、4-羟基壬烯醛4-HNE）以及超细颗粒物（PM2.5及PM0.1纳米级微粒）。"
+      },
+      {
+        question: "在密闭厨房中使用未彻底清洁的空气炸锅，室内PM2.5会暴增多少？",
+        answer: "在典型30立方米密闭无排风厨房中，运行带有严重积碳油脂的空气炸锅可在15至20分钟内使室内PM2.5从10 µg/m³基线暴增至250–500 µg/m³以上，超出世界卫生组织（WHO）24小时安全限值（15 µg/m³）15至30倍以上，进入美国EPA空气质量极度危险区间。"
+      },
+      {
+        question: "公寓内循环式活性炭油烟机能有效过滤空气炸锅的烟气和致癌物吗？",
+        answer: "无法有效过滤。普通内循环油烟机仅通过金属滤网捕集大颗粒油脂微滴，其活性炭层极薄，超过65%的PM2.5超细颗粒物和气态多环芳烃会直接穿透并重新喷回室内，造成全屋空气二次污染。"
+      },
+      {
+        question: "如何安全彻底清洁空气炸锅顶部加热管和风扇，避免电气损坏？",
+        answer: "务必拔掉电源并彻底冷却。将机身倒置在柔软毛巾上，用手电筒照亮加热管。使用3勺小苏打加1勺水和少许洗洁精调成糊状，用软毛牙刷轻轻刷洗发热管。顽固积碳可先将耐热玻璃碗装柠檬水放入炸锅内以180°C蒸煮5分钟软化油脂，再用湿微纤维布擦拭干净。"
+      },
+      {
+        question: "使用特级初榨橄榄油或牛油果油是否比普通大豆色拉油烟气毒性更低？",
+        answer: "是的。普通大豆油、玉米油富含多不饱和亚油酸，化学双键不稳定，在350°C高温极易发生氧化断裂生成剧毒丙烯醛。高油酸橄榄油和牛油果油以单不饱和油酸为主，并富含天然多酚抗氧化物质，热氧化稳定性显著更高，挥发性有害醛类释放量大幅降低。"
+      }
+    ],
+    monoBadge: "热解毒理学与室内空气动力学",
+    monoTitle: "空气炸锅残留油脂热重悬与多环芳烃(PAH)吸入暴露模拟器",
+    monoSub: "精密模拟加热管陈旧积碳油脂二次热裂解动力学、苯并[a]芘致癌物释放与室内PM2.5暴增曲线。",
+    section1Title: "高速热风对流动力学与油脂微滴溅射吸附机制",
+    section1Body: "食物表面水分在剧烈加热下瞬时沸腾产生微爆裂，将油脂液滴高速弹射至仅数厘米之遥的380°C裸露加热管，经历多次使用形成高硬度焦黑聚合物漆层。",
+    section2Title: "毒理学剖析：苯并[a]芘(BaP-TEQ)与纳米级PM2.5呼吸道损伤",
+    section2Body: "热解产生的苯并[a]芘吸附于超细碳核微粒表面，直接穿透人体肺泡屏障进入微血管系统，诱发DNA加合物形成并增加心血管与呼吸系统致突变风险。",
+    section3Title: "厨房微环境空气动力学与工程排风规程",
+    section3Body: "在吊柜下方使用空气炸锅会导致涡流滞留。科学操作规程要求必须将炸锅置于灶台上并开启外排式抽油烟机最大风量运行。"
+  },
+  ja: {
+    pageTitle: "ノンフライヤー蓄積油脂熱再浮遊＆多環芳香族炭化水素(PAH)吸入リスクモデラー | IsItKitchenSafe",
+    pageDescription: "ノンフライヤーのヒーター線や上部ファンに焼き付いた陳旧油脂が350°C〜450°Cで二次熱分解・エアロゾル化する物理動態をモデル化。ベンゾ[a]ピレン致癌当量とPM2.5急上昇を解析。",
+    breadcrumbs: [
+      { label: 'ホーム', href: '/ja/' },
+      { label: 'ツール', href: '/ja/tools/' },
+      { label: 'ノンフライヤーPAH熱再浮遊モデラー' }
+    ],
+    faqs: [
+      {
+        question: "油を使わない低脂質食材を調理しているのにノンフライヤーから青白い煙が出るのはなぜですか？",
+        answer: "低脂質の食材調理時に発生する煙は、過去の調理で上部の露出ヒーター（作動時300°C〜450°C）に飛び散り焼き付いた油脂の熱再浮遊が原因です。次回以降の加熱により蓄積油脂が発煙点を超えて急激に二次熱分解を起こし、刺激性の煙として気化します。"
+      },
+      {
+        question: "ノンフライヤーのヒーターに焼き付いた油脂の二次加熱で生成される有害物質は何ですか？",
+        answer: "油脂が350°C以上で繰り返し不完全熱分解されると、IARCグループ1発がん性物質であるベンゾ[a]ピレンを含む多環芳香族炭化水素（PAH）、アクロレインなどの細胞毒性アルデヒド、およびPM2.5・PM0.1微小粒子状物質が大量に生成されます。"
+      },
+      {
+        question: "換気のないキッチンで汚れたノンフライヤーを使用するとPM2.5濃度はどれほど上がりますか？",
+        answer: "換気扇を作動させない密閉キッチン（約30m³）では、焦げ付き油脂のあるノンフライヤーの使用により15〜20分以内にPM2.5が通常10 µg/m³から250〜500 µg/m³以上に跳ね上がります。これはWHOの24時間安全基準（15 µg/m³）の15〜30倍以上であり、極めて危険な水準です。"
+      },
+      {
+        question: "ダクトのない循環式換気扇はノンフライヤーの煙や毒素を十分に捕集できますか？",
+        answer: "できません。循環式換気扇は金網で大きな油滴を捕集するのみで、微小なPM2.5ナノ粒子や気体状PAHの65%以上がフィルターを素通りして室内に再循環します。"
+      },
+      {
+        question: "故障させずにノンフライヤーの上部ヒーターを安全に掃除するにはどうすればよいですか？",
+        answer: "必ず電源プラグを抜き完全に冷まします。本体を柔らかいタオルの上に逆さまに置きます。重曹大さじ3、水大さじ1、中性洗剤数滴を混ぜたペーストを柔らかい歯ブラシにつけてヒーターを優しく磨きます。頑固な焦げにはレモン水を入れた耐熱ボウルを180°Cで5分加熱して蒸気を当ててから拭き取ります。"
+      },
+      {
+        question: "オリーブオイルやアボカドオイルはサラダ油と比べて有害煙の発生を抑えられますか？",
+        answer: "はい。大豆油などの多価不飽和脂肪酸（リノール酸）は二重結合が多く熱酸化分解を受けやすくアクロレインを生じやすい一方、一価不飽和オレイン酸を主成分とするオリーブ油やアボカド油は熱酸化安定性に優れ、有害アルデヒドの発生が大幅に少なくなります。"
+      }
+    ],
+    monoBadge: "熱分解毒性学＆室内空気質物理学",
+    monoTitle: "ノンフライヤー蓄積油脂熱再浮遊＆多環芳香族炭化水素(PAH)吸入リスクモデラー",
+    monoSub: "ヒーター焼き付き陳旧油脂の二次熱分解、ベンゾ[a]ピレン放出、室内PM2.5急上昇動態をシミュレーション。",
+    section1Title: "高速熱風対流と油脂微細飛沫の衝突付着機構",
+    section1Body: "食材水分の突沸現象により微小油滴が至近距離にある380°Cの露出ヒーターに激しく衝突し、回数を重ねるごとに高分子ワニス状の炭化皮膜を形成します。",
+    section2Title: "毒性プロファイル：ベンゾ[a]ピレン(BaP-TEQ)と吸入性PM2.5ナノ粒子",
+    section2Body: "不完全燃焼により生じるベンゾ[a]ピレンは炭素微粒子に吸着して肺胞深部に到達し、DNA損傷を引き起こすリスクがあります。またアクロレインは気道粘膜を激しく刺激します。",
+    section3Title: "キッチン流体力学と適切な排気配置の重要性",
+    section3Body: "吊戸棚の下など空気の滞留しやすい場所での使用は有害煙の滞留を招きます。必ず外気排気ダクト付き換気扇の真下で作動させることが強く推奨されます。"
+  }
+};
+
+const c = CONTENT[lang];
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": lang === 'es' ? 'Inicio' : lang === 'pt' ? 'Início' : lang === 'zh-cn' ? '首页' : 'ホーム',
+      "item": \`https://isitkitchensafe.com/\${lang === 'en' ? '' : lang + '/'}\`
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": lang === 'es' ? 'Herramientas' : lang === 'pt' ? 'Ferramentas' : lang === 'zh-cn' ? '实用工具' : 'ツール',
+      "item": \`https://isitkitchensafe.com/\${lang === 'en' ? '' : lang + '/'}tools/\`
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": c.breadcrumbs && c.breadcrumbs[2] ? c.breadcrumbs[2].label : c.pageTitle,
+      "item": \`https://isitkitchensafe.com/\${lang === 'en' ? '' : lang + '/'}tools/air-fryer-pah-resuspension-modeler/\`
+    }
+  ]
+};
+
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": c.pageTitle,
+  "url": \`https://isitkitchensafe.com/\${lang === 'en' ? '' : lang + '/'}tools/air-fryer-pah-resuspension-modeler/\`,
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript. Requires HTML5.",
+  "description": c.pageDescription,
+  "inLanguage": lang,
+  "isAccessibleForFree": true,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "IsItKitchenSafe",
+    "url": "https://isitkitchensafe.com",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://isitkitchensafe.com/favicon.svg"
+    }
+  }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": c.faqs.map((faq) => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+};
+---
+
+<Layout
+  title={c.pageTitle}
+  description={c.pageDescription}
+  faqs={c.faqs}
+  excludeFaqSchema={true}
+  excludeBreadcrumbSchema={true}
+  availableLocales={availableLocales}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(webAppSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
+  </Fragment>
+
+  <!-- Breadcrumbs -->
+  <div class="bg-surface-soft border-b border-hairline py-1">
+    <div class="max-w-[1280px] mx-auto px-6">
+      <Breadcrumbs items={c.breadcrumbs} className="mb-0" />
+    </div>
+  </div>
+
+  <div class="max-w-[1280px] mx-auto px-6 py-10 md:py-16">
+    <!-- Header -->
+    <header class="max-w-4xl mb-10">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-amber-500/10 text-amber-950 mb-3 border border-amber-500/20">
+        <span>⚡</span> {c.monoBadge}
+      </div>
+      <h1 class="text-3xl md:text-5xl font-black tracking-tight mb-4 text-ink">
+        {c.monoTitle}
+      </h1>
+      <p class="text-base md:text-xl text-muted leading-relaxed">
+        {c.monoSub}
+      </p>
+    </header>
+
+    <!-- Modeler Component -->
+    <div class="mb-16">
+      <AirFryerPahResuspensionModeler lang={lang} />
+    </div>
+
+    <!-- Scientific Articles & Research Notes -->
+    <section class="max-w-4xl space-y-12 border-t border-hairline pt-12">
+      <article>
+        <h2 class="text-2xl md:text-3xl font-bold tracking-tight mb-4 text-ink">
+          {c.section1Title}
+        </h2>
+        <p class="text-sm md:text-base leading-relaxed text-muted mb-4">
+          {c.section1Body}
+        </p>
+      </article>
+
+      <article>
+        <h2 class="text-2xl md:text-3xl font-bold tracking-tight mb-4 text-ink">
+          {c.section2Title}
+        </h2>
+        <p class="text-sm md:text-base leading-relaxed text-muted mb-4">
+          {c.section2Body}
+        </p>
+      </article>
+
+      <article>
+        <h2 class="text-2xl md:text-3xl font-bold tracking-tight mb-4 text-ink">
+          {c.section3Title}
+        </h2>
+        <p class="text-sm md:text-base leading-relaxed text-muted mb-4">
+          {c.section3Body}
+        </p>
+      </article>
+    </section>
+  </div>
+</Layout>
+`;
+
+fs.writeFileSync(langPagePath, langPageContent, 'utf8');
+console.log('✅ Created localized page at src/pages/[lang]/tools/air-fryer-pah-resuspension-modeler.astro');
+
+// 4. Update src/pages/tools/index.astro featuredHeroTools
+const toolsIndexEnPath = path.resolve('src/pages/tools/index.astro');
+let toolsIndexEn = fs.readFileSync(toolsIndexEnPath, 'utf8');
+
+const heroMarkerEn = `const featuredHeroTools: SpotlightTool[] = [`;
+const heroEntryEn = `const featuredHeroTools: SpotlightTool[] = [
+  {
+    slug: 'air-fryer-pah-resuspension-modeler',
+    isNew: true,
+    badge: 'Pyrolytic Aerosolization · 380°C Coil Flash Point · Inhalation PM2.5 Spike',
+    badgeClass: 'bg-amber-800 text-white',
+    title: 'Air Fryer PAH Thermal Resuspension & Aerosol Inhalation Modeler',
+    desc: 'Model baked-on grease flash pyrolysis on 380°C unshielded air fryer heating coils, Benzo[a]pyrene BaP-TEQ aerosolization, indoor PM2.5 spikes (>250 µg/m³), and ducted ventilation exhaust requirements.',
+    cta: 'Model Air Fryer PAH Resuspension',
+    ctaClass: 'bg-amber-800 hover:bg-amber-900 text-white'
+  },`;
+
+if (!toolsIndexEn.includes("'air-fryer-pah-resuspension-modeler'") && toolsIndexEn.includes(heroMarkerEn)) {
+  toolsIndexEn = toolsIndexEn.replace(heroMarkerEn, heroEntryEn);
+  fs.writeFileSync(toolsIndexEnPath, toolsIndexEn, 'utf8');
+  console.log('✅ Added air-fryer-pah-resuspension-modeler to featuredHeroTools in tools/index.astro');
+} else {
+  console.log('ℹ️ Already in featuredHeroTools or marker missing in tools/index.astro');
+}
+
+// 5. Update src/pages/[lang]/tools/index.astro for es, pt, zh-cn, ja
+const toolsIndexLangPath = path.resolve('src/pages/[lang]/tools/index.astro');
+let toolsIndexLang = fs.readFileSync(toolsIndexLangPath, 'utf8');
+
+const esSpotlightCard = `      {
+        slug: 'air-fryer-pah-resuspension-modeler',
+        badge: 'Pirólisis Térmica · Resistencia a 380°C · Pico de PM2.5 en Cocina',
+        badgeClass: 'bg-amber-800 text-white',
+        title: 'Modelador de Resuspensión Térmica e Inhalación de HAP en Freidoras de Aire',
+        desc: 'Modele la pirólisis instantánea de grasas incrustadas en resistencias a 380°C, aerosolización de Benzo[a]pireno, picos de PM2.5 (>250 µg/m³) y requisitos de extracción con campana exterior.',
+        cta: 'Simular HAP en Freidora de Aire',
+        ctaClass: 'bg-amber-800 hover:bg-amber-900 text-white'
+      },\n`;
+
+const ptSpotlightCard = `      {
+        slug: 'air-fryer-pah-resuspension-modeler',
+        badge: 'Pirólise Térmica · Resistência a 380°C · Pico de PM2.5 em Cozinha',
+        badgeClass: 'bg-amber-800 text-white',
+        title: 'Modelador de Ressuspensão Térmica e Inalação de HAP em Air Fryers',
+        desc: 'Simule a pirólise instantânea de gordura incrustada na resistência a 380°C, emissão de Benzo[a]pireno, picos de PM2.5 (>250 µg/m³) e ventilação por exaustão externa.',
+        cta: 'Simular HAP em Air Fryer',
+        ctaClass: 'bg-amber-800 hover:bg-amber-900 text-white'
+      },\n`;
+
+const zhSpotlightCard = `      {
+        slug: 'air-fryer-pah-resuspension-modeler',
+        badge: '油脂二次闪蒸热解 · 380°C加热管 · 室内PM2.5暴增超250µg/m³',
+        badgeClass: 'bg-amber-800 text-white',
+        title: '空气炸锅残留油脂热重悬与多环芳烃(PAH)气溶胶吸入暴露模拟器',
+        desc: '精密模拟空气炸锅380°C裸露加热管陈旧积碳油脂二次热解动力学、强致癌物苯并[a]芘气溶胶化浓度及外排式排风净化防护规程。',
+        cta: '模拟空气炸锅PAH热重悬风险',
+        ctaClass: 'bg-amber-800 hover:bg-amber-900 text-white'
+      },\n`;
+
+const jaSpotlightCard = `      {
+        slug: 'air-fryer-pah-resuspension-modeler',
+        badge: '油脂熱分解エアロゾル · 380°Cヒーター · 室内PM2.5急上昇(>250µg/m³)',
+        badgeClass: 'bg-amber-800 text-white',
+        title: 'ノンフライヤー蓄積油脂熱再浮遊＆多環芳香族炭化水素(PAH)吸入リスクモデラー',
+        desc: '380°C露出ヒーターに焼き付いた陳旧油脂の二次熱分解、ベンゾ[a]ピレンエアロゾル放出動態、室内PM2.5汚染および換気ダクト要件を精密解析。',
+        cta: 'ノンフライヤーPAH再浮遊を解析',
+        ctaClass: 'bg-amber-800 hover:bg-amber-900 text-white'
+      },\n`;
+
+if (!toolsIndexLang.includes("slug: 'air-fryer-pah-resuspension-modeler'")) {
+  // Replace in ES
+  toolsIndexLang = toolsIndexLang.replace(
+    /(\n\s+{\s+slug:\s+'cold-brew-nitro-biofilm-modeler',\s+badge:\s+'Higiene NSF\/ANSI 18)/,
+    esSpotlightCard + '$1'
+  );
+  // Replace in PT
+  toolsIndexLang = toolsIndexLang.replace(
+    /(\n\s+{\s+slug:\s+'cold-brew-nitro-biofilm-modeler',\s+badge:\s+'Higiene NSF\/ANSI 18)/,
+    ptSpotlightCard + '$1'
+  );
+  // Replace in ZH
+  toolsIndexLang = toolsIndexLang.replaceAll(
+    /(\n\s+{\s+slug:\s+'cold-brew-nitro-biofilm-modeler',\s+badge:\s+'NSF\/ANSI 18卫生标准)/g,
+    zhSpotlightCard + '$1'
+  );
+  // Replace in JA
+  toolsIndexLang = toolsIndexLang.replaceAll(
+    /(\n\s+{\s+slug:\s+'cold-brew-nitro-biofilm-modeler',\s+badge:\s+'NSF\/ANSI 18衛生基準)/g,
+    jaSpotlightCard + '$1'
+  );
+
+  fs.writeFileSync(toolsIndexLangPath, toolsIndexLang, 'utf8');
+  console.log('✅ Injected spotlight cards into [lang]/tools/index.astro for es, pt, zh-cn, ja');
+} else {
+  console.log('ℹ️ Spotlight cards already present in [lang]/tools/index.astro');
+}
+
+console.log('=== CONSUMER TOOL #80 ELEVATION SCRIPT READY ===');

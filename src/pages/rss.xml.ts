@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/air-fryer-pah-resuspension-modeler/',
+    title: 'Air Fryer Polycyclic Aromatic Hydrocarbon (PAH) Thermal Resuspension & Inhalation Modeler',
+    description:
+      'Model fatty acid pyrolytic aerosolization from previous cooking residue baked onto air fryer heating elements and fan cowls, calculating resuspension rates of Benzo[a]pyrene and particulate PM2.5.',
+    date: '2026-11-23'
+  },
+  {
     path: '/tools/cold-brew-nitro-biofilm-modeler/',
     title: 'Cold Brew Commercial Nitro Dispenser Biofilm & Pressure Line Modeler',
     description:
