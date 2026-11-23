@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/induction-cooktop-delamination-modeler/',
+    title: 'Induction Cooktop Thermal Shock Delamination & Acoustic Micro-Crack Modeler',
+    description:
+      'Model glass-ceramic interfacial acoustic stress, mechanical resonance from warped cookware bases, thermal shock gradients, and micro-crack expansion under rapid induction heating transients (20°C to 280°C in 30s).',
+    date: '2026-11-23'
+  },
+  {
     path: '/tools/air-fryer-pah-resuspension-modeler/',
     title: 'Air Fryer Polycyclic Aromatic Hydrocarbon (PAH) Thermal Resuspension & Inhalation Modeler',
     description:
