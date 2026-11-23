@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/cold-brew-nitro-biofilm-modeler/',
+    title: 'Cold Brew Commercial Nitro Dispenser Biofilm & Pressure Line Modeler',
+    description:
+      'Model high-pressure N2/N2O draft line biofilm kinetics, psychrotrophic bacterial proliferation (Pseudomonas, Acetobacter), fungal hyphae stagnation, and CIP chemical sanitization failure under NSF/ANSI Standard 18.',
+    date: '2026-11-23'
+  },
+  {
     path: '/tools/food-processor-blade-fatigue-modeler/',
     title: 'Food Processor Centrifugal Stress & Polycarbonate Blade Fatigue Modeler',
     description:
