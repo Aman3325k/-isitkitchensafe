@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/food-processor-blade-fatigue-modeler/',
+    title: 'Food Processor Centrifugal Stress & Polycarbonate Blade Fatigue Modeler',
+    description:
+      'Model rotational biomechanics, S-blade centrifugal g-forces up to 1,000g, dishwasher alkaline crazing in polycarbonate work bowls, and stainless steel micro-chipping hazards.',
+    date: '2026-11-22'
+  },
+  {
     path: '/tools/espresso-machine-heavy-metal-modeler/',
     title: 'Espresso Machine Thermoblock Heavy Metal Leaching & Lead Descaling Modeler',
     description:
