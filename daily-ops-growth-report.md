@@ -88,4 +88,4 @@ All newly authored comparisons and technical specifications are grounded in peer
 - **Upcoming Target:** Elevate consumer tool #79 into allowlist across 5 languages, publish 3 authoritative fact-checked safety guides (104 -> 107 per language, 535 localized articles total), compile clean production build across 12,027+ pages with 0 dead links.
 
 ---
-**Git Commit Hash:** bd47a62
+**Git Commit Hash:** `1c5867a` (Wave 69 Core: `bd47a62`)
