@@ -92,4 +92,4 @@ All newly authored comparison specs are grounded in peer-reviewed materials scie
 - **Upcoming Target:** Elevate consumer tool #80 into allowlist across 5 languages, publish 3 authoritative fact-checked safety guides (107 -> 110 per language, 550 localized articles total), compile clean production build across 12,067+ pages with 0 dead links.
 
 ---
-**Git Commit Hash:** `PENDING_COMMIT` (Wave 71 Core)
+**Git Commit Hash:** `de64b43` (Wave 71 Core)
