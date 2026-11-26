@@ -52,5 +52,5 @@
 ---
 
 ## GIT COMMIT & ROADMAP PROGRESSION
-- **Wave 87 Main Commit:** `PENDING_COMMIT_HASH` (`feat(growth-wave-87): expand comparisons to 233 (5 langs), wire E-E-A-T specs & contextual tools (12,372 pages)`)
+- **Wave 87 Main Commit:** `608c6c5` (`feat(growth-wave-87): expand comparisons to 233 (5 langs), wire E-E-A-T specs & contextual tools (12,372 pages)`)
 - **Next Active Task (`TOOL-CONSUMER-115`):** `Wave 88: Consumer Tool #88 Elevation (refrigerator-defrost-safety-modeler) & High-Impact Safety Guides (131->134 / 5 langs)` (next comparisons batch queued as `TOOL-CONSUMER-116`: `233 -> 238`).
