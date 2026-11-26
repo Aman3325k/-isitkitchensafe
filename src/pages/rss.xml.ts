@@ -44,6 +44,12 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/range-hood-extraction-efficiency-modeler/',
+    title: 'Kitchen Exhaust Range Hood VOC, NO2 & PM2.5 Extraction Efficiency Modeler',
+    description: 'Model gas stove nitrogen dioxide plumes, cooking oil PM2.5 aerosol dispersal, duct aerodynamic friction, capture velocity, and pediatric asthma inhalation risks.',
+    date: '2026-11-26'
+  },
+  {
     path: '/tools/freezer-burn-sublimation-modeler/',
     title: 'Freezer Burn, Ice Sublimation & Lipid Peroxidation Modeler',
     description:
