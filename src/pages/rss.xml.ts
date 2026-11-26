@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/dishwasher-thermal-sanitize-calculator/',
+    title: 'Dishwasher Thermal Sanitize & Norovirus Lethality Calculator',
+    description:
+      'Model NSF/ANSI 184 residential sanitize cycles (≥150°F), Bigelow D-value thermal inactivation kinetics, sodium percarbonate oxygen bleach synergy, blocked spray-arm shadow zones, and C. botulinum spore canning limits.',
+    date: '2026-11-26'
+  },
+  {
     path: '/tools/glass-cooktop-fracture-simulator/',
     title: 'Glass Cooktop Point-Load & Thermal Shock Fracture Simulator',
     description:
