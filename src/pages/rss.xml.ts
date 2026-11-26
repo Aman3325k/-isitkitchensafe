@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/plastic-blender-jar-hydrolysis-modeler/',
+    title: 'Plastic Blender Jar Microcrack Bisphenol-A & Phthalate Hydrolysis Modeler',
+    description:
+      'Model hydrolytic polymer cleavage, cavitation shear erosion, and chemical leaching (BPA, phthalates, and cyclic oligomers) from micro-cracked blender jars during hot soup and acidic smoothie preparation.',
+    date: '2026-11-26'
+  },
+  {
     path: '/tools/induction-cooktop-delamination-modeler/',
     title: 'Induction Cooktop Thermal Shock Delamination & Acoustic Micro-Crack Modeler',
     description:
