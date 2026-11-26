@@ -56,5 +56,5 @@
 ---
 
 ## GIT COMMIT & ROADMAP PROGRESSION
-- **Wave 86 Main Commit:** `Pending commit`
+- **Wave 86 Main Commit:** `03edd69` (`feat(growth-wave-86): elevate Range Hood Modeler (#87 / 5 langs), publish 3 safety guides (128->131) & sync link graph (12,347 pages)`)
 - **Next Active Task (`TOOL-CONSUMER-114`):** `Wave 87: 5 High-Intent Material & Appliance Comparisons (228->233 / 5 langs)` (next candidate tool queued for Wave 88: `refrigerator-defrost-safety-modeler`).
