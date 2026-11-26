@@ -85,6 +85,6 @@ The autonomous growth run for **Wave 75** executed under strict **Single-Task Fo
 ---
 
 ## 3. Git Operations & Verification
-- **Commit Target:** `feat(growth-wave-75): expand comparisons to 203 (5 langs), inject E-E-A-T specs & sync link graph (12,132 pages)`
+- **Commit Hash:** `0b5eb4b` (`feat(growth-wave-75): expand comparisons to 203 (5 langs), inject E-E-A-T specs & sync link graph (12,132 pages)`)
 - **Remote Target:** `origin/main` (Pushed cleanly)
 - **Zero-Defect Verification:** 12,132 static pages compiled with 0 errors; 1,464,255 links audited with 0 broken links.
