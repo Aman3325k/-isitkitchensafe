@@ -3486,5 +3486,85 @@ module.exports = {
       "parameter": "Deep Basket Flow & Non-Bleach Tannin Descaling",
       "guideline": "Replace nylon/PET pyramid bags and PP-sealed paper bags with a wide 304/316 stainless steel basket infuser; clean tea tannins with warm baking soda or citric acid instead of chlorine bleach."
     }
+  },
+  "dishwasher-sanitize-cycle-vs-eco-mode": {
+    "materialThermal": {
+      "property": "Thermal Lethality Thresholds (NSF/ANSI 184 vs. Eco Mode)",
+      "threshold": "Sanitize Cycle: ≥150°F (65.6°C) 5-log kill vs. Eco Mode: 113°F–122°F (45°C–50°C) below 50°C hygiene drop-off",
+      "details": "Sustained final rinse temperatures above 65.6°C combined with alkaline oxygen bleach break down non-enveloped viral capsids and vegetative bacteria that survive cooler Eco cycles."
+    },
+    "safetyStandard": {
+      "organization": "NSF International / CDC / USDA NCHFP",
+      "standard": "NSF/ANSI Standard 184 (Residential Dishwashers), CDC Norovirus Guidelines & USDA Canning Thermal Limits",
+      "citation": "Five-log bacterial sanitation certification criteria, non-enveloped viral thermal inactivation curves, and home canning sterilization prohibitions."
+    },
+    "applianceSpecs": {
+      "parameter": "Unobstructed Spray-Arm Clearance & Monthly Biofilm Purge",
+      "guideline": "Use Sanitize mode with oxygen-bleach detergent for raw meat prep and sick households; clear all spray-arm obstructions and run monthly 65°C+ gasket/filter maintenance cleans."
+    }
+  },
+  "pla-bioplastic-vs-borosilicate-glass-containers": {
+    "materialThermal": {
+      "property": "Glass-Transition Softening vs. Borosilicate Thermal Inertness",
+      "threshold": "PLA Bioplastic (Tg ~55°C–60°C; EU cap ≤40°C / ≤10 days) vs. Type 3.3 Borosilicate (rigid >500°C, CTE 3.3 × 10⁻⁶/°C)",
+      "details": "Newly plasticized PLA hydrolyzes and sheds oligomers/particles under hot food contact, whereas low-expansion borosilicate glass remains chemically inert across freezer, microwave, and oven loads."
+    },
+    "safetyStandard": {
+      "organization": "European Commission / EFSA / US FDA",
+      "standard": "Commission Regulation (EU) 2026/2412 (amending Reg. (EU) No 10/2011), EFSA FCM Microplastic Reviews & ASTM C149",
+      "citation": "November 2026 PLA ≤40°C/≤10-day food-contact cap, infant nano-CaCO₃ exclusion (FCM No. 1087), and borosilicate cookware thermal standards."
+    },
+    "applianceSpecs": {
+      "parameter": "Cold-Only PLA Restriction & Hot Transfer Rule",
+      "guideline": "Restrict PLA bioplastic boxes strictly to cold foods (≤40°C) for short durations; transfer takeout to borosilicate glass before microwaving or storing hot leftovers."
+    }
+  },
+  "pressure-canner-vs-instant-pot-canning": {
+    "materialThermal": {
+      "property": "12D Botulinum Thermal Lethality Kinetics (Jar Cold-Spot Physics)",
+      "threshold": "Stovetop Canner: 240°F–250°F (116°C–121°C) validated vs. Electric Cooker: unvalidated ~10–11.6 PSI rapid-cool chamber",
+      "details": "USDA low-acid canning calculations rely on both holding temperature and slow thermal inertia during natural cool-down inside ≥16-quart stovetop pressure canners."
+    },
+    "safetyStandard": {
+      "organization": "USDA / NCHFP / Utah State Univ. Extension",
+      "standard": "USDA Complete Guide to Home Canning & NCHFP Electric Multi-Cooker Canning Advisory",
+      "citation": "Official federal prohibition against pressure canning low-acid foods in electric multi-cookers and countertop pressure cookers."
+    },
+    "applianceSpecs": {
+      "parameter": "pH 4.6 Acidity Cut-Off & Minimum 4-Quart-Jar Chamber",
+      "guideline": "Process all pH > 4.6 foods strictly in calibrated weighted/dial-gauge stovetop pressure canners; restrict electric multi-cookers to meal prep and safe 1/2 MAX foaming fill rules."
+    }
+  },
+  "tempered-glass-lid-vs-stainless-steel-lid": {
+    "materialThermal": {
+      "property": "NiS Phase-Change Fracture & Oven Tempering Ceiling",
+      "threshold": "Tempered Soda-Lime Glass Lid (350°F–425°F max; CTE ~9.0 × 10⁻⁶/°C; NiS 4% expansion risk) vs. 304 Stainless Lid (>500°F, zero shatter)",
+      "details": "High-tension tempered glass cores risk brittle detonation under thermal shock or NiS inclusion growth, while ductile stainless steel lids resist high oven heat and rim-gap fouling."
+    },
+    "safetyStandard": {
+      "organization": "ASTM / CPSC / Manufacturer OEM",
+      "standard": "ASTM C149 Thermal Shock Standards, Heat Soak Testing (290°C HST) & Cookware Oven Ratings",
+      "citation": "Tempered glass internal compression-tension fracture mechanics, thermal shock differentials, and OEM oven temperature ceilings."
+    },
+    "applianceSpecs": {
+      "parameter": "Dry Trivet Cooldown & Zero Broiler Exposure for Glass Lids",
+      "guideline": "Switch to solid 304 stainless steel lids for high-heat oven braises and broiling; keep existing glass lids below OEM °F limits and cool completely on dry wood or silicone trivets."
+    }
+  },
+  "single-serve-pod-coffee-maker-vs-glass-pour-over": {
+    "materialThermal": {
+      "property": "Pressurized Polypropylene Pod Contact vs. Atmospheric Borosilicate Pour-Over",
+      "threshold": "Pod Brewer (90°C–96°C pressurized PP pod + damp pump lines) vs. Glass Pour-Over (0 plastic contact, open atmospheric drip)",
+      "details": "Eliminating pressurized plastic reservoirs, damp internal tubes, and heated #5 PP capsules removes both microplastic shedding pathways and clogged-needle steam burn hazards."
+    },
+    "safetyStandard": {
+      "organization": "US CPSC / UL / FDA",
+      "standard": "CPSC Recall #26-557 (June 11, 2026 Kidisle KC101B), UL 1082 Coffee Makers & FDA 21 CFR Polymer Contact Rules",
+      "citation": "2026 single-serve coffee maker pressurized steam ejection recall, household brewer safety standards, and non-plastic food contact benchmarks."
+    },
+    "applianceSpecs": {
+      "parameter": "Recall Verification, Monthly Citric Descaling & Plastic-Free Kettle Pairing",
+      "guideline": "Switch to borosilicate glass pour-over fed by a glass or 304 stainless kettle; if operating a pod brewer, inspect against CPSC recalls, empty water nightly, and descale regularly."
+    }
   }
 };
