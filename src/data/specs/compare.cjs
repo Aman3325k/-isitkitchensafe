@@ -3246,5 +3246,85 @@ module.exports = {
       "parameter": "100°C (212°F) Boiling Infusions & High-Temp Dishwasher Sanitization",
       "guideline": "Never leave plastic bottles in summer vehicles exceeding 60°C; inspect glass drinking rim for chips before use."
     }
+  },
+  "nylon-vs-platinum-silicone-cooking-utensils": {
+    "materialThermal": {
+      "property": "Polymer Backbone Bond Energy & Thermal Deflection Ceiling",
+      "threshold": "Platinum Silicone (Si–O–Si 445 kJ/mol, max 220°C–260°C) vs. Nylon PA6 (melting ~220°C, softens 190°C)",
+      "details": "Addition-cured polydimethylsiloxane resists thermal softening in hot cooking oils, whereas recycled black polyamide risks NIR e-waste flame retardant carryover (BDE-209) and thermal tip melting."
+    },
+    "safetyStandard": {
+      "organization": "FDA / German BfR",
+      "standard": "FDA 21 CFR § 177.2600, FDA 21 CFR § 177.1500 & German BfR Recommendation XV",
+      "citation": "Food-contact elastomer extraction ceilings for repeated-use silicone rubber and polyamide resin migration limits in fatty food simulants."
+    },
+    "applianceSpecs": {
+      "parameter": "Skillet Surface Contact & Dishwasher Thermal Sanitization",
+      "guideline": "Keep platinum silicone below 260°C (500°F) away from open flames; retire any melted, frayed, or blistered black nylon spatulas immediately."
+    }
+  },
+  "stainless-steel-vs-ceramic-slow-cooker-insert": {
+    "materialThermal": {
+      "property": "Thermal Shock Tolerance & Substrate Fracture Toughness",
+      "threshold": "304 Stainless Steel (ductile, melting >1,400°C, zero thermal fracture) vs. Stoneware Glaze (ΔT limit ~110°C)",
+      "details": "Monolithic austenitic 304 steel eliminates brittle silicate glaze crazing and thermal crack propagation, whereas vitrified stoneware requires gradual heating and cooling transitions."
+    },
+    "safetyStandard": {
+      "organization": "FDA / ISO / EDQM",
+      "standard": "FDA 21 CFR § 109.16, FDA CPG 7117.06/07 & ISO 4531 / EDQM CM/Res(2013)9",
+      "citation": "Regulatory extractable lead and cadmium glaze thresholds for ceramic foodware and metal ion specific release limits for stainless steel food contact."
+    },
+    "applianceSpecs": {
+      "parameter": "Slow Cooker Fill Ratio (1/2–2/3) & Food Temperature Safety",
+      "guideline": "Fill insert 1/2 to 2/3 full to keep food out of the 4°C–60°C (40°F–140°F) danger zone; never start slow cooking with solidly frozen meat or unboiled dry kidney beans."
+    }
+  },
+  "reverse-osmosis-vs-activated-carbon-water-filter": {
+    "materialThermal": {
+      "property": "Membrane Molecular Weight Cut-Off (MWCO) & Sorption Kinetics",
+      "threshold": "RO TFC Membrane (~0.0001 µm / 100 Da MWCO) vs. Granular Carbon Block (~0.5–5.0 µm adsorption pores)",
+      "details": "Reverse osmosis combines pressurized physical size exclusion and Donnan electrostatic repulsion to reject dissolved ions and nanoplastics, whereas gravity carbon relies on surface van der Waals adsorption prone to short-chain breakthrough."
+    },
+    "safetyStandard": {
+      "organization": "NSF International / US EPA",
+      "standard": "NSF/ANSI 58 (RO), NSF/ANSI 53 & 401 (Carbon) & US EPA 40 CFR Part 141 (PFAS NPDWR)",
+      "citation": "Verified contaminant reduction protocols under the 2024 EPA 4.0 ppt PFOA/PFOS drinking water rule and NSF/ANSI 58 membrane rejection criteria."
+    },
+    "applianceSpecs": {
+      "parameter": "Cartridge Replacement Cadence & Langelier Saturation Index (LSI)",
+      "guideline": "Refrigerate dechlorinated carbon pitchers and swap cartridges every 40 gal / 2 months; pair RO systems with calcite remineralizers (35–75 ppm TDS) for espresso boiler protection."
+    }
+  },
+  "borosilicate-glass-vs-polypropylene-baby-bottle": {
+    "materialThermal": {
+      "property": "Thermal Expansion & High-Temp Sterilization Particle Stability",
+      "threshold": "Type 3.3 Borosilicate (CTE 3.3 × 10⁻⁶/K, 0 microplastics) vs. #5 PP (Tg -10°C, micro-crazing >70°C)",
+      "details": "Vitreous borosilicate glass resists 100°C boiling and thermal shock without polymer degradation, whereas polyolefin surface chains shed millions of sub-micron flakes under 70°C formula agitation."
+    },
+    "safetyStandard": {
+      "organization": "FDA / EFSA / AAP",
+      "standard": "ISO 3585, ASTM E438 Type I Class A & Commission Regulation (EU) 2024/3190 / FDA 21 CFR § 177.1520",
+      "citation": "Low-expansion borosilicate glass laboratory standards, European Union BPA prohibition in food contact materials, and FDA olefin polymer specifications."
+    },
+    "applianceSpecs": {
+      "parameter": "Water-Bath Warming (Max 37°C Feeding) & Non-Microwave AAP Rule",
+      "guideline": "Warm bottles exclusively in warm water baths or calibrated warmers (never microwave); discard any chipped glass bottles or scratched/cloudy #5 PP bottles immediately."
+    }
+  },
+  "ceramic-nonstick-vs-carbon-steel-skillet": {
+    "materialThermal": {
+      "property": "Substrate Thermal Expansion vs. Surface Patina/Coating Stability",
+      "threshold": "Carbon Steel (CTE ~12 × 10⁻⁶/K, safe >350°C) vs. Sol-Gel SiO2 on Aluminum (CTE 23 × 10⁻⁶/K mismatch)",
+      "details": "Thermal expansion mismatch between aluminum bases and rigid sol-gel silica causes micro-cracking above 250°C, whereas carbon steel forms ductile magnetite (Fe3O4) passivation and cross-linked oil patinas."
+    },
+    "safetyStandard": {
+      "organization": "FDA / ASTM / US State PFAS Laws",
+      "standard": "FDA 21 CFR § 175.300, ASTM A1008 & EU REACH / MN Amara's Law PFAS Ban",
+      "citation": "Food-contact resinous coating criteria, cold-rolled carbon steel metallurgy standards, and 2025–2027 state fluoropolymer cookware restrictions."
+    },
+    "applianceSpecs": {
+      "parameter": "Low-Medium Ceramic Heat Limit vs. High-Heat Carbon Steel Searing",
+      "guideline": "Keep ceramic non-stick pans on low-to-medium heat without aerosol sprays; preheat carbon steel gradually on induction to avoid warping and dry immediately after hand-washing."
+    }
   }
 };
