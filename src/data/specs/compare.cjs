@@ -3566,5 +3566,85 @@ module.exports = {
       "parameter": "Recall Verification, Monthly Citric Descaling & Plastic-Free Kettle Pairing",
       "guideline": "Switch to borosilicate glass pour-over fed by a glass or 304 stainless kettle; if operating a pod brewer, inspect against CPSC recalls, empty water nightly, and descale regularly."
     }
+  },
+  "chest-freezer-vs-frost-free-upright-freezer": {
+    "materialThermal": {
+      "property": "Sublimation Vapor Gradient & Outage Thermal Retention",
+      "threshold": "Manual Chest: Steady -18°C (48h full outage hold) vs. Frost-Free Upright: 0°F–25°F defrost swings (24h hold)",
+      "details": "Eliminating periodic defrost heating cycles suppresses ice vapor-pressure spikes and lipid oxidation (MDA > 2.0 mg/kg) while top-lid air stratification doubles blackout safety margins."
+    },
+    "safetyStandard": {
+      "organization": "USDA FSIS / FDA Seafood HACCP",
+      "standard": "USDA 0°F Freezing Guidelines, 48h/24h Outage Rules & FDA 38°F Vacuum-Thaw Botulism Protocol",
+      "citation": "Federal consumer food preservation standards governing safe freezer outage retention, 40°F Danger Zone triage, and vacuum-sealed fish thawing."
+    },
+    "applianceSpecs": {
+      "parameter": "EVOH Barrier Packaging & Appliance Thermometer Placement",
+      "guideline": "Keep freezers ≤0°F (-18°C) at ≥75% fill mass; use high-barrier EVOH vacuum bags or freezer paper in frost-free uprights and always slit fish vacuum bags before fridge thawing."
+    }
+  },
+  "ducted-range-hood-vs-recirculating-charcoal-filter": {
+    "materialThermal": {
+      "property": "Outdoor Pollutant Capture Efficiency (LBNL) & Gas Adsorption Breakthrough",
+      "threshold": "Exterior-Ducted: 50%–85%+ CE outdoors vs. Recirculating Charcoal: 0% outdoor CE (<20% transient NO₂ scrubbing)",
+      "details": "Thin activated-carbon mats saturate quickly with moisture and kitchen grease vapors, allowing thermal NO₂ (>100 ppb spikes), benzene, and sub-micron PM2.5 to re-enter breathing zones."
+    },
+    "safetyStandard": {
+      "organization": "LBNL / ASHRAE / US EPA",
+      "standard": "ASHRAE Standard 62.2 (≥100 CFM Local Exhaust) & EPA 1-Hour NO₂ Benchmark (100 ppb)",
+      "citation": "Lawrence Berkeley National Laboratory Capture Efficiency testing protocols and national residential kitchen ventilation indoor air quality standards."
+    },
+    "applianceSpecs": {
+      "parameter": "Rigid Smooth-Metal Exhaust Ducting & Monthly Grease Baffle Cleaning",
+      "guideline": "Install rigid smooth-walled exterior ducting covering front burners (≥200–400 CFM); clean grease traps monthly to prevent hood ignition and run rear burners for maximum plume capture."
+    }
+  },
+  "propane-gas-grill-vs-charcoal-grill": {
+    "materialThermal": {
+      "property": "PAH Smoke Condensation vs. Creatine-Amino HCA Pyrolysis",
+      "threshold": "Charcoal Embers (~750°F fat pyrolysis -> peak PAHs) vs. Propane Burners (controlled flame, minimal PAH smoke; >300°F HCA zone)",
+      "details": "Direct fat dripping onto incandescent charcoal creates volatile benzo[a]pyrene smoke plumes, whereas indirect gas zones and antioxidant marinades suppress both PAH and HCA yield."
+    },
+    "safetyStandard": {
+      "organization": "NCI / US CPSC / NFPA / USDA FSIS",
+      "standard": "NCI High-Heat Meat Carcinogen Advisories, NFPA 58 LP-Gas Leak Rules & USDA 160°F/165°F Grill Temps",
+      "citation": "Federal cancer research guidance on PAH/HCA mitigation paired with CPSC carbon monoxide clearance and NFPA propane cylinder inspection protocols."
+    },
+    "applianceSpecs": {
+      "parameter": "Outdoor 10-ft Clearance, Soapy Leak Test & Bristle-Free Cleaning",
+      "guideline": "Grill ≥10 ft from structures outdoors only; soap-test propane fittings seasonally; clean grates with bristle-free wood/pumice scrapers and verify 160°F/165°F internal meat temps."
+    }
+  },
+  "magnetic-knife-strip-vs-wooden-knife-block": {
+    "materialThermal": {
+      "property": "Slot Biofilm Retention vs. Neodymium Cladding Tribology",
+      "threshold": "Magnetic Strip (Wood/Silicone face: open-air evaporation, 0 bevel drag) vs. Slotted Block (dark anaerobic moisture trap + wood-grit edge friction)",
+      "details": "Open-air convective drying eliminates fungal spore persistence while soft wood/silicone faces prevent HRC 58–64 steel micro-chipping caused by bare steel magnetic rails."
+    },
+    "safetyStandard": {
+      "organization": "NSF / USDA FSIS Sanitation Principles",
+      "standard": "Cleanable Food-Contact & Cutlery Storage Hygiene Principles",
+      "citation": "Food-service sanitation design principles favoring non-porous, inspectable, open-air drying cutlery storage over un-cleanable blind crevices."
+    },
+    "applianceSpecs": {
+      "parameter": "Spine-First Magnetic Pivoting & 100% Hand-Dry Rule",
+      "guideline": "Hand-wash and towel-dry knives immediately (never dishwash); mount wood-clad magnetic strips safely above child reach and pivot blades off spine-first."
+    }
+  },
+  "steam-bottle-sterilizer-vs-uv-c-sterilizer": {
+    "materialThermal": {
+      "property": "3D Steam Vapor Penetration vs. 254–275 nm Polymer Photo-Oxidation",
+      "threshold": "Steam (100°C / 212°F all-surface contact) vs. UV-C (line-of-sight only + PP photo-oxidation cracking)",
+      "details": "Thermal steam reaches shadowed internal bottle threads and anti-colic vents, whereas high-energy UV-C photons cleave C–C bonds in #5 PP plastics and fail in optical shadow zones."
+    },
+    "safetyStandard": {
+      "organization": "US CDC / AAP / FDA",
+      "standard": "CDC Infant Feeding Item Cleaning & Cronobacter Prevention Guidelines",
+      "citation": "Federal pediatric guidance endorsing boiling, steam sterilization, and dishwasher thermal sanitize cycles for newborn feeding gear."
+    },
+    "applianceSpecs": {
+      "parameter": "Pre-Wash Soap Scrub, Citric Plate Descaling & Yellowed-Plastic Retirement",
+      "guideline": "Wash all milk fats off with soap first; use steam or boiling for valves/nipples; replace any UV-yellowed, crazed, or brittle polypropylene bottles immediately."
+    }
   }
 };

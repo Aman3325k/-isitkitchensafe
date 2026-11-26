@@ -1,30 +1,30 @@
 # IsItKitchenSafe Executive Daily Operations & Growth Engine Report
-**Autonomous Growth Engine v2.0 | Wave 84 Execution**  
-**Cycle Timestamp:** 2026-11-26T16:54:00+05:30 (Cadence: Hourly CRON `CRON_TZ=Asia/Kolkata 0 * * * *`)  
+**Autonomous Growth Engine v2.0 | Wave 85 Execution**  
+**Cycle Timestamp:** 2026-11-26T17:51:00+05:30 (Cadence: Hourly CRON `CRON_TZ=Asia/Kolkata 0 * * * *`)  
 **Site:** [isitkitchensafe.com](https://isitkitchensafe.com) | **Branch:** `main`
 
 ---
 
 ## 1. Executive Summary & Zero-Defect Quality Gate
-The hourly autonomous growth run for **Wave 84** executed under strict **Single-Task Focus (WIP = 1)** and **Zero-Defect** policies, completing the active task **`TOOL-CONSUMER-111`** (`Wave 84: Consumer Tool #86 Elevation & High-Impact Safety Guide (125->128 / 5 langs)`) across all 5 supported languages (`en`, `es`, `pt`, `zh-cn`, `ja`):
+The hourly autonomous growth run for **Wave 85** executed under strict **Single-Task Focus (WIP = 1)** and **Zero-Defect** policies, completing the active task **`TOOL-CONSUMER-112`** (`Wave 85: 5 High-Intent Material & Appliance Comparisons (223->228 / 5 langs)`) across all 5 supported languages (`en`, `es`, `pt`, `zh-cn`, `ja`):
 
-1. **Consumer Tool #86 Elevated & Full 5-Language Localization (`85 -> 86` Google-Indexed Consumer Tools):**
-   - Added [`freezer-burn-sublimation-modeler`](https://isitkitchensafe.com/tools/freezer-burn-sublimation-modeler/) to [`src/data/consumer-tools-allowlist.json`](src/data/consumer-tools-allowlist.json) (**86** Google-indexed consumer tools across **5** languages = **430** indexed consumer tool pages out of **1,050** total tool pages).
-   - Upgraded [`src/pages/tools/freezer-burn-sublimation-modeler.astro`](src/pages/tools/freezer-burn-sublimation-modeler.astro) and [`src/pages/[lang]/tools/freezer-burn-sublimation-modeler.astro`](src/pages/[lang]/tools/freezer-burn-sublimation-modeler.astro) with explicit `WebApplication`, `FAQPage`, and `BreadcrumbList` JSON-LD schemas (`excludeFaqSchema={true}`, `excludeBreadcrumbSchema={true}`) and stripped raw `$...$` LaTeX tokens (`$I_h$`, `$-SH$`, `$-S-S-$`, `$P_{冰} > P_{空气}$`) for clean HTML rendering.
-   - Upgraded [`src/components/FreezerBurnSublimationModeler.astro`](src/components/FreezerBurnSublimationModeler.astro) with `data-lang={lang}`, full `ITEM_I18N` and `JS_STATUS_I18N` localization across `en`, `es`, `pt`, `zh-cn`, and `ja` (dropdown options, benchmarks table, USDA FSIS clearance seal, slider units, severity badges, trimming/salvage guidance, and localized diagnostic clipboard report).
+1. **5 New High-Intent Material & Appliance Comparisons (`223 -> 228` / +25 Localized Pages = 1,140 Total):**
+   - **`chest-freezer-vs-frost-free-upright-freezer`** (`appliance-safety`): Contrasts manual-defrost chest freezers (`-18°C` constant, **~48-hour** USDA FSIS full-unit power-outage cold hold, minimal vapor sublimation) against frost-free upright freezers (**~24-hour** outage hold, `2–3` daily auto-defrost heater cycles driving `0°F–25°F` thermal swings, ice sublimation, and TBARS malondialdehyde `>2.0 mg/kg` lipid oxidation), plus FDA Seafood HACCP `38°F` vacuum-pouch slitting rules.
+   - **`ducted-range-hood-vs-recirculating-charcoal-filter`** (`appliance-safety`): Evaluates exterior-ducted hoods (**50%–85%+** Lawrence Berkeley National Laboratory Capture Efficiency, ASHRAE Standard `62.2` `≥100 CFM` compliance, permanent removal of gas-stove `NO₂ >100 ppb`, benzene, CO, and frying acrolein/PM2.5) against ductless recirculating charcoal filters (`0%` outdoor Capture Efficiency, rapid carbon saturation within weeks, rear-burner mitigation).
+   - **`propane-gas-grill-vs-charcoal-grill`** (`cooking-method`): Grounds National Cancer Institute (NCI) data comparing benzo[a]pyrene PAH smoke formation from fat dripping onto `750°F+` glowing charcoal embers against cleaner propane burners with flavorizer bars, meat protein HCA pyrolysis (`>300°F`), CPSC indoor/garage carbon monoxide prohibitions, NFPA `50/50` soapy-water LP hose leak checks, and bristle-free wood/pumice grate cleaning.
+   - **`magnetic-knife-strip-vs-wooden-knife-block`** (`container-material`): Analyzes enclosed dark slotted block moisture trapping and fungal/bacterial (*Aspergillus*, *Staphylococcus*, *Salmonella*) biofilm risks plus HRC `58–64` bevel friction wear against open-air wood- or silicone-clad neodymium magnetic strips using spine-first pivoting and child-safe mounting height rules.
+   - **`steam-bottle-sterilizer-vs-uv-c-sterilizer`** (`appliance-safety`): Contrasts CDC-endorsed `100°C (212°F)` penetrating steam sterilization against *Cronobacter sakazakii* inside narrow anti-colic vents and breast-pump duckbill valves versus line-of-sight `254–275 nm` UV-C shadowing and photo-oxidative polymer chain scission/yellowing/microplastic shedding in polypropylene (`#5 PP`) bottles.
 
-2. **3 New Fact-Checked Safety Guides Across 5 Languages (`125 -> 128` / +15 Localized Articles = 640 Total):**
-   - **`freezing-mason-jars-vacuum-bags-frost-free-freezer-burn-safety`** (`freezer`): Details 9% water-to-ice hexagonal expansion shattering shouldered glass jars vs. straight-sided wide-mouth freezer pint rules (`≥1 inch` headspace), frost-free auto-defrost cycling (`0°F–25°F`) driving vapor-pressure ice sublimation & `>2.0 mg/kg` TBARS malondialdehyde (MDA) rancidity, USDA FSIS 0°F microbiological safety + `2 mm` semi-frozen knife trimming & wet-heat braising salvage, and the **FDA Seafood HACCP mandate** to slit/open vacuum-sealed fish pouches before refrigerator thawing to prevent non-proteolytic *Clostridium botulinum* Type E toxin above `38°F (3.3°C)`.
-   - **`recycled-cardboard-mosh-moah-bamboo-melamine-eu-2026-safety`** (`materials`): Breaks down the **May 13, 2026 EU SCoPAFF vote** adopting binding **MOAH ($\text{C}_{10}\text{–C}_{50}$)** maximum limits under Regulation (EU) 2023/915 effective **January 1, 2027** (`0.50 mg/kg` low-fat `≤4%`, `1.0 mg/kg` medium-fat `4%–50%`, `2.0 mg/kg` high-fat `>50%`, plus `2026–2029` MOSH monitoring), **EFSA's 40 µg/kg styrene SML re-assessment**, and EU-wide enforcement bans withdrawing unauthorized **"bamboo-melamine" composite mugs/plates** leaching formaldehyde (`>15 mg/kg` SML) and melamine (`>2.5 mg/kg` SML).
-   - **`galanz-retro-fridge-frigidaire-range-2026-cpsc-recalls-guide`** (`appliances`): Covers active 2026 U.S. CPSC large-appliance recalls—**Galanz Retro Refrigerators** (July 30, 2026, `~121,680` U.S. units, `34` fire reports including **1 fatality**, models `BCD-215V-62H`, `GLR76TRDER`, `GLR76TBKER`, `GLR76TBEER`, `GLR76TWEER`, date codes `201812–202012`), **Frigidaire Gas Ranges** (March 19, 2026 **CPSC Recall #26-333**, `~174,800` U.S. units, `62` delayed bake-burner ignitions & `30` burn injuries, serials `VF52200000–VF54399999`), **LG (~500,000) & Samsung front-knob slide-in electric range** accidental activation fire recalls, and the **November 19, 2026 CPSC holiday cooking fire alert**.
+2. **E-E-A-T Technical Specs, Contextual Tool Routing & Discovery Sync:**
+   - Updated [`src/data/comparisons.json`](src/data/comparisons.json), [`src/data/comparisons.es.json`](src/data/comparisons.es.json), [`src/data/comparisons.pt.json`](src/data/comparisons.pt.json), [`src/data/comparisons.zh-cn.json`](src/data/comparisons.zh-cn.json), [`src/data/comparisons.ja.json`](src/data/comparisons.ja.json), and [`src/data/specs/compare.cjs`](src/data/specs/compare.cjs) (`223 -> 228` technical spec entries with **100% 5-language slug parity**).
+   - Added localized `freezerBurn` (`/tools/freezer-burn-sublimation-modeler/`) and `charcoalGasGrillPah` (`/tools/charcoal-gas-grill-pah-hca-modeler/`) interactive tool cards and wired contextual routing for all 5 Wave 85 slugs in [`src/pages/compare/[slug].astro`](src/pages/compare/[slug].astro) and [`src/pages/[lang]/compare/[slug].astro`](src/pages/[lang]/compare/[slug].astro).
+   - Updated [`public/llms.txt`](public/llms.txt) and [`README.md`](README.md) with the 5 new Wave 85 comparisons and refreshed `12,332+` page metrics.
 
-3. **Discovery, Contextual Routing & Schema Verification:**
-   - Featured `freezer-burn-sublimation-modeler` in [`src/pages/tools/index.astro`](src/pages/tools/index.astro) (`featuredHeroTools`) and all 3 `SPOTLIGHT_HUB_UI` `heroTools` blocks in [`src/pages/[lang]/tools/index.astro`](src/pages/[lang]/tools/index.astro), synced [`src/pages/rss.xml.ts`](src/pages/rss.xml.ts), [`public/llms.txt`](public/llms.txt), and [`README.md`](README.md).
-   - Wired `freezerBurn` contextual routing plus `galanz-retro-fridge` / `recycled-cardboard-mosh-moah` routing in [`src/pages/blog/[slug].astro`](src/pages/blog/[slug].astro) and [`src/pages/[lang]/blog/[slug].astro`](src/pages/[lang]/blog/[slug].astro).
-   - **Pre-Build & Post-Build Schema Verification (`scripts/test-wave84-schema.cjs --dist`):** **235 PASSED, 0 FAILED** across allowlist count (`86`), LaTeX-free templates, 5-locale component i18n, 128-article parity, spotlight hubs, RSS, `llms.txt`, and rendered `dist/` JSON-LD + contextual tool routing across all 20 Wave 84 URLs.
-   - **i18n Health & Parity (`scripts/test-i18n-health.mjs --all --allow-legacy-2-faqs`):** **203,539 checks, 0 failures** (`764` legacy FAQ warnings).
-   - **Total Pages Compiled:** **12,307 static pages** (built in 2m 10s with **0 errors**).
-   - **Total Hrefs Audited:** **1,487,079 links** inspected across `dist/` with **0 broken links** (`100%` slug parity across `1,907` items per language).
+3. **Schema, i18n & Full Production Build Verification:**
+   - **Pre-Build & Post-Build Schema Verification (`scripts/test-wave85-schema.cjs --dist`):** **571 PASSED, 0 FAILED** across dataset parity (`228 × 5`), `TechnicalSpecs` schema, `src/data/specs/compare.cjs`, `public/llms.txt`, and rendered `dist/` JSON-LD (`ItemList`, `BreadcrumbList`, `WebPage`, `Article`, `FAQPage`) + contextual tool links across all 25 Wave 85 URLs.
+   - **i18n Health & Parity (`scripts/test-i18n-health.mjs --all --allow-legacy-2-faqs`):** **203,554 checks, 0 failures** (`764` legacy FAQ warnings).
+   - **Total Pages Compiled:** **12,332 static pages** (built in 2m 13s with **0 errors**).
+   - **Total Hrefs Audited:** **1,490,272 links** inspected across `dist/` with **0 broken links** (`100%` slug parity across `1,907` items per language).
 
 ---
 
@@ -32,43 +32,42 @@ The hourly autonomous growth run for **Wave 84** executed under strict **Single-
 
 ### Track 1: Live Health & SRE Audit
 - **Target URL:** `https://isitkitchensafe.com`
-- **HTTP Status:** `200 OK` (`HTTP/1.1 200 OK`)
-- **Time To First Byte (TTFB):** `429.0ms` (`0.429017s` TTFB, `0.429051s` total)
-- **Edge CDN Provider:** Cloudflare (`Server: cloudflare`, `CF-RAY: a6086d83ef5af518-SIN`, `cf-cache-status: DYNAMIC`)
-- **SSL / Transport Validity:** Active P-256 ECDSA certificate (`authorized: true`, issuer `Google Trust Services` `WE1`, valid `Oct 15 18:06:17 2026 GMT` through `Jan 13 19:06:15 2027 GMT`, `alt-svc: h3=":443"; ma=86400`)
+- **HTTP Status:** `200 OK`
+- **Time To First Byte (TTFB):** `692ms` (`HEAD` request)
+- **Edge CDN Provider:** Cloudflare (`Server: cloudflare`, `CF-RAY: a608c576cfd2fd32-SIN`, `cf-cache-status: DYNAMIC`)
+- **SSL / Transport Validity:** Active P-256 ECDSA certificate (`authorized: true`, issuer `Google Trust Services` `CN=WE1`, valid `Oct 15 18:06:17 2026 GMT` through `Jan 13 19:06:15 2027 GMT`, `alt-svc: h3=":443"; ma=86400`)
 - **Observed Response Headers:**
   - `Strict-Transport-Security`: `max-age=31536000; includeSubDomains; preload`
-  - `X-Content-Type-Options`: `nosniff`
-  - `Referrer-Policy`: `strict-origin-when-cross-origin`
-  - `Permissions-Policy`: `camera=(), microphone=(), geolocation=(), payment=(), usb=(), display-capture=()`
+  - `x-content-type-options`: `nosniff`
+  - `referrer-policy`: `strict-origin-when-cross-origin`
+  - `permissions-policy`: `camera=(), microphone=(), geolocation=(), payment=(), usb=(), display-capture=()`
   - `Content-Type`: `text/html; charset=utf-8`
-  - *Header & Dependency Advisory Note:* Explicit `Content-Security-Policy` and `X-Frame-Options` headers remain unemitted on edge HTML responses; `npm audit --omit=dev` logged **9 vulnerabilities** (`2` moderate, `7` high, `0` critical) in static build tooling with zero runtime exposure on Cloudflare Pages.
+  - *Header & Dependency Advisory Note:* Explicit `Content-Security-Policy` and `X-Frame-Options` headers remain unemitted on edge HTML responses; `npm audit --omit=dev` logged **9 vulnerabilities** (`2` moderate, `7` high, `0` critical) across static/dev build packages (`vite`, `undici`, `sharp`, `zod`, `smol-toml`, `source-map-js`, `fast-uri`) with zero runtime exposure on Cloudflare Pages.
 
 ### Track 2: Scientific Fact-Checking & Recall Monitoring
-- **2026 CPSC Large-Appliance Fire & Burn Recalls:** Verified and documented **July 30, 2026 CPSC Galanz Retro Refrigerator Recall** (`~121,680` U.S. units, `34` fires, `1` fatality), **March 19, 2026 CPSC Recall #26-333 Frigidaire Gas Ranges** (`~174,800` U.S. units, `62` delayed ignition reports, `30` burns), LG/Samsung front-knob range recalls, and **November 19, 2026 CPSC holiday cooking fire advisory**.
-- **2026 EU/EFSA Food Contact & FDA/USDA Safety Standards:** Grounded Wave 84 guides and Tool #86 in **May 13, 2026 EU SCoPAFF binding MOAH limits** (amending Reg. 2023/915, effective Jan 1, 2027), EU **bamboo-melamine** composite enforcement bans (`EU 10/2011`), EFSA `40 µg/kg` styrene SML, FDA Seafood HACCP anaerobic *C. botulinum* Type E (`38°F`) vacuum-thawing rules, and USDA FSIS `0°F` freezing + PubMed MDA/TBARS (`2.0 mg/kg`) lipid peroxidation kinetics.
+- **2026 Cold-Chain, Ventilation, Grill & Pediatric Standards Grounded:** Verified Wave 85 comparisons against **USDA FSIS** `0°F` freezing & `48h/24h` power-outage cold-hold rules, **FDA Seafood HACCP** `38°F` anaerobic *C. botulinum* Type E vacuum-thawing protocol, **Lawrence Berkeley National Laboratory (LBNL)** Capture Efficiency & **ASHRAE Standard 62.2** (`≥100 CFM` local kitchen exhaust), **NCI** meat PAH/HCA carcinogenesis & **CPSC/NFPA** grill CO/propane safety rules, and **CDC/AAP** *Cronobacter sakazakii* infant bottle sterilization guidelines.
 
 ### Track 3: SEO Dominance & Schema Markup
-- **Structured Data Validated:** `WebApplication`, `BlogPosting`, `FAQPage`, and `BreadcrumbList` schemas verified across all 20 Wave 84 URLs (`235/235` assertions passed); `npm run ops:seo` confirmed `810 / 1050` tool pages compliant (`77.1%`).
-- **Sitemap & IndexNow Readiness:** `dist/sitemap-0.xml` indexed **10,504 canonical URLs** (`7,089,600` bytes). `npm run ops:indexnow -- --dry-run` verified **10,592 deduplicated URLs** (**3,027** priority consumer URLs including **86/86** allowlisted consumer tools = **430** tool pages, **128 × 5** blogs, **223** comparisons) across **11 batches** (`645.0 KB`).
+- **Structured Data Validated:** `ItemList`, `BreadcrumbList`, `WebPage`, `Article`, and `FAQPage` schemas verified across all 25 Wave 85 URLs (`571/571` assertions passed); `npm run ops:seo` confirmed `810 / 1050` tool pages compliant (`77.1%`).
+- **Sitemap & IndexNow Readiness:** `dist/sitemap-0.xml` indexed **10,529 canonical URLs** (`7,110,035` bytes). `npm run ops:indexnow -- --dry-run` verified **10,617 deduplicated URLs** (**3,032** priority consumer URLs including **86/86** allowlisted consumer tools = **430** tool pages, **128 × 5** blogs, **228** comparisons) across **11 batches** (`647.0 KB`).
 
 ### Track 4: Multilingual Localization (i18n) & Parity
 - Verified **100% slug parity** across all 5 languages (`en`, `es`, `pt`, `zh-cn`, `ja`):
   - **86 allowlisted consumer tools** per locale (**430** Google-indexed tool pages out of 1,050 total tool pages).
   - **128 evergreen guides** per locale (**640** localized articles).
-  - **223 comparisons** per locale (**1,115** localized comparison pages).
-  - **12,307 static pages** compiled cleanly in `dist/`.
+  - **228 comparisons** per locale (**1,140** localized comparison pages).
+  - **12,332 static pages** compiled cleanly in `dist/`.
 
 ### Track 5: Breakthrough Viral Tools Roadmap
 - **Active Consumer Tools:** **86** deployed and Google-indexed consumer tools in [`src/data/consumer-tools-allowlist.json`](src/data/consumer-tools-allowlist.json) (all 7 core viral roadmap tools deployed and active).
-- **Contextual Tool Routing:** Added `freezerBurn` contextual tool routing (plus updated `recallsScanner` and `plasticLeaching` regex matchers) across English and localized `/blog/` templates.
+- **Contextual Tool Routing:** Added `freezerBurn` and `charcoalGasGrillPah` contextual tool routing across English and localized `/compare/` templates, routing all 5 Wave 85 comparisons directly to matching interactive calculators.
 
 ### Track 6: Executive Reporting & Roadmap Advance
-- Roadmap advanced: **Wave 84 COMPLETED** (`TOOL-CONSUMER-111`) &rarr; **Wave 85 QUEUED** (`TOOL-CONSUMER-112`: 5 High-Intent Material & Appliance Comparisons `223->228` / 5 langs).
+- Roadmap advanced: **Wave 85 COMPLETED** (`TOOL-CONSUMER-112`) &rarr; **Wave 86 QUEUED** (`TOOL-CONSUMER-113`: Consumer Tool #87 Elevation `range-hood-extraction-efficiency-modeler` & High-Impact Safety Guides `128->131 / 5 langs`).
 
 ---
 
 ## 3. Git Operations & Verification
-- **Commit Hash:** `6eed7c4` (`feat(growth-wave-84): elevate Freezer Burn Sublimation Modeler (#86 / 5 langs), publish 3 safety guides (125->128) & sync link graph (12,307 pages)`)
+- **Commit Hash:** `PENDING_COMMIT_HASH` (`feat(growth-wave-85): expand comparisons to 228 (5 langs), wire E-E-A-T specs & contextual tools (12,332 pages)`)
 - **Remote Target:** `origin/main`
-- **Zero-Defect Verification:** **12,307 static pages** compiled with **0 errors**; **1,487,079 links** audited with **0 broken links**; **235/235** Wave 84 schema & HTML assertions passed; **203,539** i18n checks with **0 errors**.
+- **Zero-Defect Verification:** **12,332 static pages** compiled with **0 errors**; **1,490,272 links** audited with **0 broken links**; **571/571** Wave 85 schema & HTML assertions passed; **203,554** i18n checks with **0 errors**.
