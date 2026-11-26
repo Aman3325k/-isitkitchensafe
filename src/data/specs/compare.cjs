@@ -3726,5 +3726,85 @@ module.exports = {
       "parameter": "Shallow Borosilicate/304 Stainless Trays & Airflow Spacing",
       "guideline": "Split hot food into ≤2 in. shallow metal or borosilicate glass trays; space apart on upper/middle fridge shelves for airflow, seal tightly once chilled, and eat leftovers within 3–4 days."
     }
+  },
+  "frost-free-vs-manual-defrost-refrigerator": {
+    "materialThermal": {
+      "property": "Evaporator Heat Transfer & Frost Thermal Resistance",
+      "threshold": "Manual Frost Limit: ≤1/4 in. (6 mm) | Safe Fresh-Food Target: 35°F–38°F (1.7°C–3.3°C; Max ≤40°F)",
+      "details": "Ice blankets (>6 mm) on manual plates cut heat exchange sharply; in frost-free units, failed bi-metal defrost thermostats (0.0–0.5 Ω closed cold / OL warm) freeze dampers shut while fresh-food zones exceed 48°F."
+    },
+    "safetyStandard": {
+      "organization": "USDA FSIS / FDA Food Code",
+      "standard": "USDA 40°F (4°C) Max Refrigeration & 2-Hour / 1-Hour (>90°F) Perishable Rule",
+      "citation": "Federal cold-chain benchmarks preventing Listeria monocytogenes doubling at 48°F and irreversible Staphylococcus aureus enterotoxin synthesis."
+    },
+    "applianceSpecs": {
+      "parameter": "Water-Glass Middle-Shelf Thermometer & Safe Thaw Protocol",
+      "guideline": "Keep a liquid-submerged thermometer at 35°F–38°F on a middle shelf; never use sharp metal tools or hairdryers inside wet defrosting cabinets."
+    }
+  },
+  "electric-kettle-vs-stovetop-kettle": {
+    "materialThermal": {
+      "property": "UL 1082 Boil-Dry Thermal Cutoff vs. Unattended Stovetop Heat",
+      "threshold": "Electric Kettle: Auto shut-off at 100°C / dry thermal fuse (~80%–85% eff.) vs. Gas Stovetop: ~40% eff., no cutoff",
+      "details": "Seamless 304/316 stainless steel or Type 3.3 borosilicate chambers prevent both polypropylene microplastic shedding (>10M particles/L) and WHO >20 µg/L bare nickel-coil leaching."
+    },
+    "safetyStandard": {
+      "organization": "UL / IEC / WHO",
+      "standard": "UL 1082 / IEC 60335-2-15 Boil-Dry Safety & WHO 20 µg/L Drinking Water Nickel Limit",
+      "citation": "Electrical appliance abnormal-operation thermal cutoff standards paired with drinking-water heavy-metal leaching limits during acid descaling."
+    },
+    "applianceSpecs": {
+      "parameter": "Zero-Plastic Interior, MAX Fill Line & Citric Acid Descaling",
+      "guideline": "Select seamless 304/316 steel or glass interiors; never exceed the MAX water line; descale with food-grade citric acid and run 2 fresh rinse boils before drinking."
+    }
+  },
+  "plastic-wrap-vs-silicone-stretch-lids": {
+    "materialThermal": {
+      "property": "Platinum PDMS Cross-Linking vs. Plasticized PVC / LDPE Film Melting",
+      "threshold": "Platinum Silicone: -40°C to 220°C–230°C (zero plasticizers) vs. LDPE/PVC Film: 105°C–115°C melt, DEHA fat migration",
+      "details": "Addition-cured platinum polysiloxane eliminates free-radical peroxide residues and phthalate/adipate plasticizers that migrate into fatty dairy and meat surfaces."
+    },
+    "safetyStandard": {
+      "organization": "US FDA / German BfR / EU",
+      "standard": "FDA 21 CFR § 177.2600 (Repeated-Use Rubber/Silicone) & BfR Recommendation XV",
+      "citation": "Food-contact extraction ceilings governing cyclic siloxane (D4–D6) volatiles and repeated-use elastomeric polymer safety vs. PVC plasticizer limits."
+    },
+    "applianceSpecs": {
+      "parameter": "Pinch-Test Purity, Corner Steam Venting & Fragrance-Free Wash",
+      "guideline": "Reject silicone that turns white when pinched; bake empty at 200°C for 2h on arrival; always vent one corner during microwave reheating; wash with unscented soap."
+    }
+  },
+  "boiling-tap-water-vs-water-filter": {
+    "materialThermal": {
+      "property": "Pathogen Thermal Lethality vs. Non-Volatile Solute Concentration",
+      "threshold": "Boiling: 100°C (1 min / 3 min >2,000 m) kills microbes, concentrates Pb/PFAS | NSF 58 RO: 0.0001 µm blocks Pb/PFAS/NMPs",
+      "details": "Steam vaporization lowers liquid volume without volatilizing dissolved lead or fluorochemicals; ES&T Letters (2024) notes hard-water CaCO3 co-precipitation traps up to ~90% NMPs only when filtered."
+    },
+    "safetyStandard": {
+      "organization": "US EPA / US CDC / NSF International",
+      "standard": "EPA 4.0 ppt PFOA/PFOS MCL, 15 ppb Lead Action Level, CDC Boil Advisory & NSF/ANSI 53 / 58",
+      "citation": "Federal safe drinking water contaminant ceilings and microbiological emergency sterilization protocols."
+    },
+    "applianceSpecs": {
+      "parameter": "Cold-Line Flush, Filter-Before-Boil Formula & Timely Cartridge Swap",
+      "guideline": "Always start cooking/drinking water from the cold tap; filter for lead/PFAS BEFORE boiling infant formula; replace carbon/RO stages on schedule."
+    }
+  },
+  "induction-adapter-plate-vs-induction-ready-cookware": {
+    "materialThermal": {
+      "property": "Direct Eddy-Current Pan Coupling vs. Trapped Converter-Disc Flux",
+      "threshold": "430-Clad Induction Pan: ~84%–90% eff., glass <200°C vs. Adapter Plate: ~50% eff., trapped glass load >350°C–450°C",
+      "details": "Converter plates create an air-gap thermal resistance above the disc, forcing intense downward conductive/radiant heat onto Schott Ceran glass and under-glass thermal limiters."
+    },
+    "safetyStandard": {
+      "organization": "OEM Induction Manuals / UL 858 / IEC 60335-2-9",
+      "standard": "Cooktop High-Limit Thermal Cutoff & OEM Diffuser-Plate Warranty Prohibitions",
+      "citation": "Appliance thermal-limiter safety engineering and manufacturer exclusions governing external ferromagnetic interface plates."
+    },
+    "applianceSpecs": {
+      "parameter": "3-Second Magnet Check, Zero Boost-on-Disc & Lift-Not-Slide Rule",
+      "guideline": "Upgrade to ferromagnetic 430-clad stainless, carbon steel, or cast iron; never run an adapter disc dry or on Boost; always match base diameter to coil rings."
+    }
   }
 };
