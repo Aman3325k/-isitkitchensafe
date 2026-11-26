@@ -3406,5 +3406,85 @@ module.exports = {
       "parameter": "Dishwasher Ban on Hardwood vs. Beater-Knife Rule on Metal",
       "guideline": "Hand-wash end-grain wood and oil with mineral oil; verify authentic non-magnetic Grade 1/2 titanium and reserve it for rugged utility blades rather than thin Japanese edges."
     }
+  },
+  "brass-vs-stainless-steel-cookware": {
+    "materialThermal": {
+      "property": "Alloy Lead Purity & Acidic Corrosion Passivity",
+      "threshold": "304/316 Stainless (Cr₂O₃ passive film, 0% Pb, >1,400°C) vs. Unlined Brass / Tin Lining (232°C tin melt / pH < 5.0 copper attack)",
+      "details": "Austenitic stainless steel eliminates artisanal tin wear limits and unregulated scrap-smelted lead inclusions confirmed in FDA 2025–2026 brass and Hindalium cookware alerts."
+    },
+    "safetyStandard": {
+      "organization": "US FDA / CDC / EDQM",
+      "standard": "2025–2026 FDA Imported Cookware Lead Alerts, FDA Food Code § 4-101.14 & EDQM CM/Res(2013)9",
+      "citation": "FDA import advisories on lead-leaching brass/Hindalium vessels, copper contact restrictions below pH 6.0, and stainless alloy migration limits."
+    },
+    "applianceSpecs": {
+      "parameter": "Unlined Acid Ban & 232°C Tin Melting Ceiling",
+      "guideline": "Discard unverified imported brass/Hindalium pots flagged in FDA alerts; reserve verified tin-lined brass solely for low-acid cooking below 232°C or upgrade to clad 304/316 stainless steel."
+    }
+  },
+  "gas-oven-vs-electric-convection-oven": {
+    "materialThermal": {
+      "property": "Combustion Flue Gas Generation vs. Sealed Electric Heat Transfer",
+      "threshold": "Gas Oven (NO₂ >100 ppb indoor peaks + 10–25× benzene + H₂O combustion vapor) vs. Electric Convection (0 fuel emissions, ±3°C PID)",
+      "details": "Stanford and PSE Healthy Energy indoor air sampling links natural gas/propane appliance combustion to asthma-triggering NO₂ spikes and residential benzene migration."
+    },
+    "safetyStandard": {
+      "organization": "US EPA / WHO / Stanford-PSE",
+      "standard": "EPA 1-Hour NO₂ Benchmark (100 ppb), WHO Indoor NO₂ Guidelines & ANSI Z21.1 Gas Range Standards",
+      "citation": "Outdoor/indoor nitrogen dioxide health benchmarks, benzene emission factors, and safe household gas appliance venting rules."
+    },
+    "applianceSpecs": {
+      "parameter": "Mandatory Exterior Exhaust & -25°F Convection Conversion",
+      "guideline": "Vent gas ovens outdoors continuously during operation and never heat rooms with open oven doors; convert standard recipes by -25°F (-15°C) on electric convection."
+    }
+  },
+  "glass-carafe-vs-stainless-steel-coffee-maker": {
+    "materialThermal": {
+      "property": "Griffith Crack Thermal Fracture vs. Vacuum-Insulated Austenitic Steel",
+      "threshold": "Glass Carafe (scratched ΔT failure + 85°C–95°C hot plate) vs. 304 Double-Wall Vacuum Steel (shatterproof, zero hot plate)",
+      "details": "Surface micro-flaws from metal utensils halve glass tensile strength under 95°C thermal loads, whereas vacuum-insulated 304 steel retains heat passively without continuous element scorching."
+    },
+    "safetyStandard": {
+      "organization": "US CPSC / UL / FDA",
+      "standard": "2026 CPSC Bodum Glass Carafe Recall Docket, UL 1082 Household Coffee Makers & FDA 21 CFR Stainless Contact",
+      "citation": "October 29, 2026 CPSC ~5.9M French press glass fracture advisory, household drip coffee maker thermal safety, and food-contact stainless standards."
+    },
+    "applianceSpecs": {
+      "parameter": "Wooden/Silicone Stirrer Rule & Non-Bleach Carafe Soak",
+      "guideline": "Discard scratched or chipped glass pots immediately, never use metal spoons inside glass carafes, and clean thermal steel interiors with baking soda or sodium percarbonate rather than bleach."
+    }
+  },
+  "rubber-vs-plastic-cutting-board": {
+    "materialThermal": {
+      "property": "Shore Hardness Elastic Recovery & Brittle Microplastic Fracture",
+      "threshold": "Synthetic Elastomer (Shore A ~65–75 yielding cushion) vs. Rigid HDPE (Shore D ~65 brittle gouging; 1,000–5,000 particles/session)",
+      "details": "Elastomeric give absorbs 58–64 HRC knife-edge impact without brittle polyolefin chip shedding, while wood-core ribs prevent thermal bowing up to 90°C."
+    },
+    "safetyStandard": {
+      "organization": "NSF International / FDA / USDA FSIS",
+      "standard": "NSF/ANSI Standard 51 (Food Equipment Polymers), FDA 21 CFR § 177.2600 / 177.1520 & USDA Board Sanitation Rules",
+      "citation": "Food-contact elastomer compliance, non-porous cleanability criteria, and USDA scarred plastic cutting board replacement advisories."
+    },
+    "applianceSpecs": {
+      "parameter": "90°C Dishwasher Ceiling (Wood-Core Only) & Cold Bleach Sanitization",
+      "guideline": "Check manufacturer heat ratings before dishwashing synthetic rubber; sanitize raw meat boards with 1 tbsp unscented bleach per gallon of cool water and retire deeply scarred HDPE."
+    }
+  },
+  "plastic-tea-bags-vs-stainless-steel-tea-infuser": {
+    "materialThermal": {
+      "property": "Hydrothermal Polymer Fragmentation vs. Austenitic Mesh Inertness",
+      "threshold": "Nylon/PET/PLA Tea Bags (95°C release: ~11.6B MP + ~3.1B NP/cup) vs. 304/316 Mesh (>1,400°C melt, 0 microplastics)",
+      "details": "Boiling water near polymer glass-transition temperatures triggers rapid surface flaking in nylon/PET/PP tea sachets, whereas chromium-passivated stainless steel mesh stays structurally inert."
+    },
+    "safetyStandard": {
+      "organization": "EU PPWR / EFSA / Peer-Reviewed ES&T",
+      "standard": "Regulation (EU) 2024/2462 (Oct 2026 PFHxA Paper Ban), McGill ES&T 2019 & UAB PlasticHeal Microplastic Studies",
+      "citation": "October 2026 EU PFHxA food-contact paper restrictions, 95°C polymer tea bag nanoplastic quantification, and intestinal cellular uptake toxicology."
+    },
+    "applianceSpecs": {
+      "parameter": "Deep Basket Flow & Non-Bleach Tannin Descaling",
+      "guideline": "Replace nylon/PET pyramid bags and PP-sealed paper bags with a wide 304/316 stainless steel basket infuser; clean tea tannins with warm baking soda or citric acid instead of chlorine bleach."
+    }
   }
 };
