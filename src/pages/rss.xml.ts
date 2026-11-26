@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/silicone-bakeware-oligomer-analyzer/',
+    title: 'Silicone Bakeware Cyclic Thermal Breakdown & Oligomer Volatilization Analyzer',
+    description:
+      'Model cyclic siloxane oligomer (D4, D5, D6) thermal volatilization, fatty food lipid extraction kinetics, and post-curing tempering purity against BfR Recommendation XV and FDA limits.',
+    date: '2026-11-26'
+  },
+  {
     path: '/tools/plastic-blender-jar-hydrolysis-modeler/',
     title: 'Plastic Blender Jar Microcrack Bisphenol-A & Phthalate Hydrolysis Modeler',
     description:
