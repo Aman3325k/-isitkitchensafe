@@ -1,15 +1,15 @@
-# Daily Ops & Autonomous Growth Report — Wave 86 (`TOOL-CONSUMER-113`)
-**Date:** 2026-11-26 (IST Run #2 — Wave 86: Consumer Tool #87 Elevation & 3 Authoritative Safety Guides)  
+# Daily Ops & Autonomous Growth Report — Wave 87 (`TOOL-CONSUMER-114`)
+**Date:** 2026-11-26 (IST Run #3 — Wave 87: 5 High-Intent Material & Appliance Comparisons `228 -> 233` across 5 Languages)  
 **Target Domain:** [https://isitkitchensafe.com](https://isitkitchensafe.com)  
-**Roadmap Task Executed:** `TOOL-CONSUMER-113` — *Wave 86: Consumer Tool #87 Elevation (`range-hood-extraction-efficiency-modeler`) & High-Impact Safety Guides (`128 -> 131` per locale = `655` localized articles)*  
+**Roadmap Task Executed:** `TOOL-CONSUMER-114` — *Wave 87: 5 High-Intent Material & Appliance Comparisons (`228 -> 233` per locale = `1,165` localized comparison pages)*  
 **Status:** ✅ **COMPLETED (0 Build Errors • 0 Broken Links • 100% 5-Language Parity)**
 
 ---
 
 ## TRACK 1: LIVE HEALTH & SRE AUDIT
-- **HTTP & Origin Availability:** `HTTP/1.1 200 OK` on `https://isitkitchensafe.com` via Cloudflare edge (`Server: cloudflare`, `CF-RAY: a6091d58bf2dfd88-SIN`, `cf-cache-status: DYNAMIC`, `alt-svc: h3=":443"; ma=86400`)
-- **TTFB & Total Latency:** `0.475s` TTFB / `0.475s` total transfer time (`curl.exe` verification, `ssl_verify: 0`)
-- **TLS / SSL Validity:** Authorized (`authorized: true`, CN=`isitkitchensafe.com`, issuer Google Trust Services `WE1`, valid `2026-10-15` to `2027-01-13`)
+- **HTTP & Origin Availability:** `HTTP/1.1 200 OK` on `https://isitkitchensafe.com` via Cloudflare edge (`Server: cloudflare`, `CF-RAY: a6097573dcfbe17d-MRS`, `cf-cache-status: DYNAMIC`, `alt-svc: h3=":443"; ma=86400`)
+- **TTFB & Total Latency:** `0.491s` TTFB / `0.676s` total transfer time (`curl.exe` verification, `ssl_verify: 0`)
+- **TLS / SSL Validity:** Authorized (`authorized: true`, CN=`isitkitchensafe.com`, issuer `WE1`, valid `Oct 15 18:06:17 2026 GMT` to `Jan 13 19:06:15 2027 GMT`)
 - **Security Headers Verified on Origin:**
   - `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`
   - `x-content-type-options: nosniff`
@@ -20,41 +20,37 @@
 
 ---
 
-## TRACK 2 & 3: WAVE 86 DELIVERABLES — TOOL #87 ELEVATION, 3 AUTHORITATIVE GUIDES & SCHEMA
-### 1. Consumer Tool #87 Elevated & Localized (`range-hood-extraction-efficiency-modeler`)
-- **Allowlist Expansion (`86 -> 87` consumer tools):** Appended `range-hood-extraction-efficiency-modeler` to [`src/data/consumer-tools-allowlist.json`](src/data/consumer-tools-allowlist.json) (`435` localized indexed consumer tool pages across `en`, `es`, `pt`, `zh-cn`, `ja`).
-- **Component Full 5-Language Parity (`src/components/RangeHoodExtractionModeler.astro`):**
-  - Added `ITEM_I18N`, `JS_STATUS_I18N`, `RULE5_I18N` (Pre-Start Fan 2 Min Early & >400 CFM Make-Up Air), localized `<select>` options, localized slider markers/units, dynamic telemetry status updates for ACH / NO2 / PM2.5, localized clipboard reports, and `localePrefix`-aware cross-tool links across `en`, `es`, `pt`, `zh-cn`, `ja`.
-- **Rich Snippet JSON-LD Upgrades:** Added explicit `WebApplication`, `FAQPage`, and `BreadcrumbList` JSON-LD schemas (with `excludeFaqSchema={true}`, `excludeBreadcrumbSchema={true}`, and `lang` flags) on [`src/pages/tools/range-hood-extraction-efficiency-modeler.astro`](src/pages/tools/range-hood-extraction-efficiency-modeler.astro) and [`src/pages/[lang]/tools/range-hood-extraction-efficiency-modeler.astro`](src/pages/%5Blang%5D/tools/range-hood-extraction-efficiency-modeler.astro).
+## TRACK 2 & 3: WAVE 87 DELIVERABLES — 5 LOCALIZED COMPARISONS, E-E-A-T SPECS & CONTEXTUAL TOOL ROUTING
+### 1. Five New High-Intent Comparisons (`228 -> 233` / 5 Languages = `1,165` Pages, `+25` New Pages)
+1. **[`over-the-range-microwave-vs-under-cabinet-range-hood`](https://isitkitchensafe.com/compare/over-the-range-microwave-vs-under-cabinet-range-hood/)** (`appliance-safety`) — Compares LBNL Capture Efficiency (`20–24 in.` inverted canopy sump covering front burners at `60%–95%+` vs. `15–16 in.` shallow flat OTR overhang where front-burner capture drops sharply), ASHRAE `62.2` (`≥100 CFM` exterior exhaust vs. `0%` outdoor NO2/CO removal in recirculating OTRs), HVI `100 CFM / 10,000 BTU`, smooth rigid ducting vs. `-35%` to `-50%` flex duct drag, and IRC `M1503.6 >400 CFM` make-up air. *(Routes contextual CTA to Tool #87: `rangeHood` -> `/tools/range-hood-extraction-efficiency-modeler/`)*
+2. **[`self-cleaning-pyrolytic-oven-vs-steam-clean-oven`](https://isitkitchensafe.com/compare/self-cleaning-pyrolytic-oven-vs-steam-clean-oven/)** (`appliance-safety`) — Contrasts `800°F–1,000°F (425°C–540°C)` pyrolytic grease incineration (CO, acrolein, formaldehyde, PM2.5 plumes, UL 858 control-board/thermal-fuse stress, and `>260°C` PTFE avian pulmonary lethality) against zero-fume `212°F–250°F (100°C–120°C)` steam cleaning plus overnight baking-soda saponification. *(Routes contextual CTA to `ovenPyrolysis` -> `/tools/oven-self-cleaning-pyrolysis-simulator/`)*
+3. **[`microwave-popcorn-bag-vs-borosilicate-glass-popper`](https://isitkitchensafe.com/compare/microwave-popcorn-bag-vs-borosilicate-glass-popper/)** (`container-material`) — Covers the February 28, 2024 FDA voluntary market phase-out of PFAS grease-proofing agents in U.S. food-contact packaging (and early 2025 abandoned authorizations), `215°C–232°C (420°F–450°F)` metallized PET susceptor heating above PET's `70°C–80°C` glass transition, and `95°C` steam-puff exposure vs. inert Type 3.3 borosilicate glass poppers. *(Routes contextual CTA to `microwavePopcornPfas` -> `/tools/microwave-popcorn-pfas-modeler/`)*
+4. **[`stainless-steel-boiler-vs-aluminum-boiler-espresso-machine`](https://isitkitchensafe.com/compare/stainless-steel-boiler-vs-aluminum-boiler-espresso-machine/)** (`appliance-safety`) — Evaluates German BfR post-descaling heavy metal release spikes (`1.5%–3.0%` Pb in traditional CW614N/CW617N machining brass vs. `≤0.25%` Pb NSF/ANSI 372 Eco Brass and `10 µg/L` WHO drinking water guideline), citric-acid `Al2O3` pitting in bare aluminum, and white-vinegar copper/lead acetate hazards vs. `Cr2O3` passivated `304 / 316L` stainless steel boilers. *(Routes contextual CTA to `espressoHeavyMetal` -> `/tools/espresso-machine-heavy-metal-modeler/`)*
+5. **[`hot-food-in-fridge-vs-counter-cooling`](https://isitkitchensafe.com/compare/hot-food-in-fridge-vs-counter-cooling/)** (`food-storage`) — Grounds the USDA FSIS `2-Hour / 1-Hour Rule` (`90°F / 32°C` ambient cutoff), `40°F–140°F (4°C–60°C)` Bacterial Danger Zone lag in deep pots (*Clostridium perfringens* & heat-stable *Bacillus cereus* / *Staph* enterotoxins), and `≤2 in. (5 cm)` shallow borosilicate/304 stainless trays or sink ice-water bath rapid chilling. *(Routes contextual CTA to `fridgeZone` -> `/tools/fridge-organization-zone-planner/`)*
 
-### 2. Three New Multilingual Scientific & Recall Safety Guides (`128 -> 131` / 5 Langs = `655` Articles)
-1. **[`range-hood-cfm-make-up-air-back-burner-capture-safety`](https://isitkitchensafe.com/blog/range-hood-cfm-make-up-air-back-burner-capture-safety/)** — HVI `100 CFM per 10,000 BTU` & ASHRAE `62.2` sizing, LBNL `15"` OTR microwave overhang gap vs `22"` canopy sump, back-burner Coanda backsplash capture (`85%–95%`), `-35%` to `-50%` corrugated flex duct airflow loss & chimney fire traps, `2-min` hood pre-starts, and IRC `M1503.6 >400 CFM` make-up air CO backdraft prevention. *(Routes contextual CTA to Tool #87: `rangeHood`)*
-2. **[`cuisinart-grill-charbroil-ambiano-2026-cpsc-recalls-guide`](https://isitkitchensafe.com/blog/cuisinart-grill-charbroil-ambiano-2026-cpsc-recalls-guide/)** — Grounded CPSC 2025–2026 recall verification guide covering `~12,660` US (`+83` Canada) **Cuisinart Propel+ 4-Burner 3-in-1 Gas Grills** (`Model CGG-6331`, Recall `#26-605`, shattering pizza-oven tempered glass, `$500` refund), **Char-Broil Bistro Pro Electric Grills** (`Sep 2026` grounding-wire `120V` shock recall, date codes `2510`, `2511`, `2512`), and `~46,660` **ALDI Ambiano Electric Pressure Cookers** (Recall `#26-007`, Models `93550`, `96775`, `98527`). *(Routes contextual CTA to `recallsScanner`)*
-3. **[`eu-2026-2376-recycled-food-plastic-fda-spice-lead-safety-guide`](https://isitkitchensafe.com/blog/eu-2026-2376-recycled-food-plastic-fda-spice-lead-safety-guide/)** — Breaks down **Commission Regulation (EU) 2026/2376** (published Oct 29, 2026, amending Reg. `(EU) 2022/1616` on Union register rules, Declarations P & C, and recycled food-contact plastic decontamination compliance) alongside late-2026 **FDA ground cinnamon lead recalls & alerts** (**Wise Wife** `2.118 ppm` Pb, UPC `0688474302754`, Best Before `4/25/2027`; **Lior** Lot `GAP11304`, UPC `794711005484`; **Spice Class**; **La Frontera**) and borosilicate 3.3 glass storage swaps. *(Routes contextual CTA to `plasticLeaching`)*
-
-### 3. Contextual Routing, Hub Spotlights, Syndication & AI Discovery Sync
-- Updated contextual blog routing and localized `toolCatalog` in [`src/pages/blog/[slug].astro`](src/pages/blog/%5Bslug%5D.astro) and [`src/pages/[lang]/blog/[slug].astro`](src/pages/%5Blang%5D/blog/%5Bslug%5D.astro).
-- Prepended `range-hood-extraction-efficiency-modeler` hero spotlight cards in [`src/pages/tools/index.astro`](src/pages/tools/index.astro) and [`src/pages/[lang]/tools/index.astro`](src/pages/%5Blang%5D/tools/index.astro) (`es`, `zh-cn`, `ja`).
-- Updated [`src/pages/rss.xml.ts`](src/pages/rss.xml.ts), [`public/llms.txt`](public/llms.txt), and [`README.md`](README.md).
-- Added Wave 86 schema & build verification suite in [`scripts/test-wave86-schema.cjs`](scripts/test-wave86-schema.cjs).
+### 2. E-E-A-T Specs, Contextual Tool Routing & Discovery Sync
+- Updated [`src/data/comparisons.json`](src/data/comparisons.json), [`src/data/comparisons.es.json`](src/data/comparisons.es.json), [`src/data/comparisons.pt.json`](src/data/comparisons.pt.json), [`src/data/comparisons.zh-cn.json`](src/data/comparisons.zh-cn.json), and [`src/data/comparisons.ja.json`](src/data/comparisons.ja.json) (`228 -> 233` items each, 100% slug parity).
+- Updated [`src/data/specs/compare.cjs`](src/data/specs/compare.cjs) (`228 -> 233` structured `TechnicalSpecs` entries).
+- Added localized contextual tool routing (`rangeHood`, `ovenPyrolysis`, `microwavePopcornPfas`, `espressoHeavyMetal`, plus explicit `hot-food-in-fridge-vs-counter-cooling` -> `fridgeZone`) in [`src/pages/compare/[slug].astro`](src/pages/compare/%5Bslug%5D.astro) and [`src/pages/[lang]/compare/[slug].astro`](src/pages/%5Blang%5D/compare/%5Bslug%5D.astro).
+- Updated [`public/llms.txt`](public/llms.txt) and [`README.md`](README.md) (`12,372+` static pages, `233` comparisons / `1,165` localized pages).
+- Added Wave 87 authoring, build, schema, and logging scripts under `scripts/*wave87*.cjs`.
 
 ---
 
 ## TRACK 4 & 5: BUILD, LINK INTEGRITY, I18N & SEO VERIFICATION METRICS
 | Verification Check | Observed Result |
 |---|---|
-| `npm run build` | **12,347 static pages** built in **2m 14s** (**0 errors**) |
+| `npm run build` | **12,372 static pages** built in **2m 12s** (**0 errors**) |
 | Edge Middleware & `_redirects` | **1,427** edge entries + **1,980 / 2,000** static redirect lines (**20** headroom) |
-| Slug Parity Audit | **PASSED:** `1,907` items/lang (`2,226 x 3 = 6,678` items — **100% symmetric**) |
-| Full Build Link Audit | **1,492,283 hrefs audited** -> **0 dead link occurrences** |
-| `node scripts/test-wave86-schema.cjs --dist` | **ALL PASSED** (5 localized tool pages, 15 blog pages, 5 hubs, RSS, `llms.txt`, `README.md`) |
-| `node scripts/test-wave85-schema.cjs --dist` | **571 PASSED, 0 FAILED** |
-| `node scripts/test-i18n-health.mjs --all --allow-legacy-2-faqs` | **203,563 checks, 0 errors** (`764` legacy FAQ warnings) |
+| Slug Parity Audit | **PASSED:** `2,231 × 3 = 6,693` symmetric items (**100% symmetric**) |
+| Full Build Link Audit | **1,495,488 hrefs audited** -> **0 dead link occurrences** |
+| `node scripts/test-wave87-schema.cjs --dist` | **571 PASSED, 0 FAILED** (all 5 locales, `compare.cjs`, `llms.txt`, rendered HTML `ItemList`, `BreadcrumbList`, `WebPage`, `Article`, `FAQPage`, contextual tools) |
+| `node scripts/test-i18n-health.mjs --all --allow-legacy-2-faqs` | **203,578 checks, 0 errors** (`764` legacy FAQ warnings) |
 | `npm run ops:seo` | **810 / 1,050 tool pages compliant (`77.1%`)** |
-| `npm run ops:indexnow -- --dry-run` | **PASS** — `10,549` URLs in `dist/sitemap-0.xml` (`6,960.3 KB`), `10,637` total deduplicated URLs (`3,052` consumer priority URLs, `87/87` allowlisted tools), **11 batches** (`648.9 KB`), exit code `0` |
+| `npm run ops:indexnow -- --dry-run` | **PASS** — `10,574` URLs in `dist/sitemap-0.xml`, `10,662` total deduplicated URLs (`3,057` consumer priority URLs, `87/87` allowlisted tools, `233` comparisons), **11 batches (`651.1 KB`)**, exit code `0` |
 
 ---
 
 ## GIT COMMIT & ROADMAP PROGRESSION
-- **Wave 86 Main Commit:** `03edd69` (`feat(growth-wave-86): elevate Range Hood Modeler (#87 / 5 langs), publish 3 safety guides (128->131) & sync link graph (12,347 pages)`)
-- **Next Active Task (`TOOL-CONSUMER-114`):** `Wave 87: 5 High-Intent Material & Appliance Comparisons (228->233 / 5 langs)` (next candidate tool queued for Wave 88: `refrigerator-defrost-safety-modeler`).
+- **Wave 87 Main Commit:** `PENDING_COMMIT_HASH` (`feat(growth-wave-87): expand comparisons to 233 (5 langs), wire E-E-A-T specs & contextual tools (12,372 pages)`)
+- **Next Active Task (`TOOL-CONSUMER-115`):** `Wave 88: Consumer Tool #88 Elevation (refrigerator-defrost-safety-modeler) & High-Impact Safety Guides (131->134 / 5 langs)` (next comparisons batch queued as `TOOL-CONSUMER-116`: `233 -> 238`).

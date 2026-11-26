@@ -3646,5 +3646,85 @@ module.exports = {
       "parameter": "Pre-Wash Soap Scrub, Citric Plate Descaling & Yellowed-Plastic Retirement",
       "guideline": "Wash all milk fats off with soap first; use steam or boiling for valves/nipples; replace any UV-yellowed, crazed, or brittle polypropylene bottles immediately."
     }
+  },
+  "over-the-range-microwave-vs-under-cabinet-range-hood": {
+    "materialThermal": {
+      "property": "LBNL Canopy Capture Geometry & Plume Entrainment",
+      "threshold": "Under-Cabinet Canopy (20–24 in. depth, 60%–95%+ CE) vs. OTR Microwave (15–16 in. flat bottom, front-burner spill)",
+      "details": "Deep capture volumes pool buoyant cooking plumes even over front burners, whereas flat-bottom OTR chassis lack containment reservoirs and often recirculate 100% of gaseous NO2 and CO."
+    },
+    "safetyStandard": {
+      "organization": "LBNL / ASHRAE / HVI / IRC",
+      "standard": "ASHRAE 62.2 (≥100 CFM Exterior Exhaust), HVI 100 CFM/10k BTU & IRC M1503.6 Make-Up Air (>400 CFM)",
+      "citation": "National residential indoor air quality and mechanical ventilation standards governing kitchen combustion-pollutant capture and depressurization backdraft safety."
+    },
+    "applianceSpecs": {
+      "parameter": "Smooth Rigid Metal Ducting & Back-Burner Priority",
+      "guideline": "Use 6–8 in. smooth galvanized steel ducting (never corrugated foil flex); pre-run fans 2 min early and prioritize rear burners when venting via flat OTR undersides."
+    }
+  },
+  "self-cleaning-pyrolytic-oven-vs-steam-clean-oven": {
+    "materialThermal": {
+      "property": "Thermal Pyrolysis vs. Alkaline Saponification & Low-Heat Steam",
+      "threshold": "Steam Clean: 100°C–120°C (0 pyrolysis fumes) vs. Pyrolytic Clean: 425°C–540°C (exceeds 260°C PTFE threshold)",
+      "details": "Low-heat steam and sodium bicarbonate saponify esterified oil films safely, whereas 500°C pyrolysis generates CO, acrolein, and severe control-board thermal fatigue."
+    },
+    "safetyStandard": {
+      "organization": "UL / ASTM / AAV (Avian Veterinarians)",
+      "standard": "UL 858 Household Electric Range Structural Fire Containment & PTFE >260°C Avian Toxicity Thresholds",
+      "citation": "Appliance electrical/fire enclosure standards paired with veterinary toxicology thresholds prohibiting avian exposure to pyrolytic and fluoropolymer off-gassing."
+    },
+    "applianceSpecs": {
+      "parameter": "Rack Removal, Foil Ban & Overnight Baking Soda Protocol",
+      "guideline": "Never line oven floors with foil or leave PTFE liners/chrome racks inside during high heat; maintain ovens safely with cool-cavity baking soda paste and 250°F steam cycles."
+    }
+  },
+  "microwave-popcorn-bag-vs-borosilicate-glass-popper": {
+    "materialThermal": {
+      "property": "Inorganic Borosilicate 3.3 vs. 215°C–232°C Metallized PET Susceptor",
+      "threshold": "Borosilicate Glass: Zero organic migration, ΔT >165°C vs. Popcorn Bag: Susceptor hits 215°C–232°C (PET Tg ~75°C)",
+      "details": "Eliminating metallized PET susceptors and paper greaseproofers prevents lipophilic hot-oil extraction of packaging additives and 95°C aerosol steam puff inhalation."
+    },
+    "safetyStandard": {
+      "organization": "US FDA / EFSA",
+      "standard": "FDA Feb 28, 2024 PFAS Packaging Phase-Out & EFSA 4.4 ng/kg bw/week Sum-PFAS TWI",
+      "citation": "Federal food-contact phase-out milestones for fluorochemical greaseproofers alongside European tolerable weekly intake toxicology benchmarks."
+    },
+    "applianceSpecs": {
+      "parameter": "Vented Lid Steam Relief & Post-Pop Butter Drizzling",
+      "guideline": "Use a loosely vented silicone/glass lid (never sealed), stop popping at 2-second intervals, rest hot glass on a dry trivet, and add dairy butter only after popping."
+    }
+  },
+  "stainless-steel-boiler-vs-aluminum-boiler-espresso-machine": {
+    "materialThermal": {
+      "property": "Cr2O3 Stainless Passivity vs. Brass Pb/Ni Dissolution & Al2O3 Pitting",
+      "threshold": "304/316L Steel: <0.01% Pb, acid-passive vs. Legacy Brass: 1.5%–3% Pb (≤0.25% NSF 372) & Aluminum: chelates in hot acid",
+      "details": "Austenitic stainless steel eliminates grain-boundary lead globules and aluminum oxide pitting during citric/sulfamic acid descaling under 9-bar 92°C–96°C operation."
+    },
+    "safetyStandard": {
+      "organization": "NSF/ANSI 372 / NSF 51 / BfR / WHO",
+      "standard": "NSF/ANSI 372 Lead-Free (≤0.25% Weighted Avg Pb) & WHO 10 µg/L Drinking Water Lead Guideline",
+      "citation": "Potable wetted-component alloy certification limits alongside German BfR post-descaling espresso heavy-metal release testing."
+    },
+    "applianceSpecs": {
+      "parameter": "Cool Descaling, Multi-Tank 4.5 L Flush & Morning Group Purge",
+      "guideline": "Use remineralized soft water (40–70 ppm hardness), never use vinegar, descale lukewarm, flush ≥3 full reservoirs after descaling, and purge morning standing water."
+    }
+  },
+  "hot-food-in-fridge-vs-counter-cooling": {
+    "materialThermal": {
+      "property": "Core Thermal Diffusion Half-Time (Shallow ≤2 in. Pan vs. Deep Stockpot)",
+      "threshold": "Shallow Pan (≤2 in. / 5 cm): Rapid chill <40°F inside 2h vs. Deep Counter Pot: 4–8h core lag in 40°F–140°F Danger Zone",
+      "details": "Increasing surface-to-volume ratio accelerates conductive and convective cooling past the peak 70°F–125°F bacterial germination band before C. perfringens or B. cereus toxin synthesis."
+    },
+    "safetyStandard": {
+      "organization": "USDA FSIS / FDA Food Code",
+      "standard": "USDA 2-Hour / 1-Hour Rule, ≤40°F (4°C) Refrigeration & FDA § 3-501.14 Rapid Cooling (135°F->70°F in 2h, ->41°F in 6h)",
+      "citation": "Federal consumer and food-service time-temperature control standards governing safe leftover cooling and spore-forming toxin prevention."
+    },
+    "applianceSpecs": {
+      "parameter": "Shallow Borosilicate/304 Stainless Trays & Airflow Spacing",
+      "guideline": "Split hot food into ≤2 in. shallow metal or borosilicate glass trays; space apart on upper/middle fridge shelves for airflow, seal tightly once chilled, and eat leftovers within 3–4 days."
+    }
   }
 };
