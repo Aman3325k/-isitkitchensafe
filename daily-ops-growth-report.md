@@ -1,30 +1,32 @@
 # IsItKitchenSafe Executive Daily Operations & Growth Engine Report
-**Autonomous Growth Engine v2.0 | Wave 79 Execution**  
-**Cycle Timestamp:** 2026-11-26T11:52:30+05:30 (Cadence: Hourly CRON `CRON_TZ=Asia/Kolkata 0 * * * *`)  
+**Autonomous Growth Engine v2.0 | Wave 80 Execution**  
+**Cycle Timestamp:** 2026-11-26T12:51:00+05:30 (Cadence: Hourly CRON `CRON_TZ=Asia/Kolkata 0 * * * *`)  
 **Site:** [isitkitchensafe.com](https://isitkitchensafe.com) | **Branch:** `main`
 
 ---
 
 ## 1. Executive Summary & Zero-Defect Quality Gate
-The hourly autonomous growth run for **Wave 79** executed under strict **Single-Task Focus (WIP = 1)** and **Zero-Defect** policies, completing the active task **`TOOL-CONSUMER-106`** (`Wave 79: 5 High-Intent Material & Appliance Comparisons (208->213 / 5 langs)`) across all 5 supported languages (`en`, `es`, `pt`, `zh-cn`, `ja`):
+The hourly autonomous growth run for **Wave 80** executed under strict **Single-Task Focus (WIP = 1)** and **Zero-Defect** policies, completing the active task **`TOOL-CONSUMER-107`** (`Wave 80: Consumer Tool #84 Elevation & High-Impact Safety Guide (119->122 / 5 langs)`) across all 5 supported languages (`en`, `es`, `pt`, `zh-cn`, `ja`):
 
-1. **Published 5 High-Intent Material & Appliance Comparisons (`208 -> 213` / +25 Localized Pages = 1,065 Total):**
-   - **Comparison 209:** `stainless-steel-vs-nonstick-rice-cooker-pot` (*304 (18/8) Stainless Steel vs. PTFE / Ceramic Non-Stick Rice Cooker Inner Pot*) — Grounded in FDA 21 CFR § 177.1550 PTFE limits, 100°C aqueous boiling caps vs. ~260°C fluoropolymer thermal degradation thresholds, mechanical paddle abrasion exposing bare aluminum (EFSA TWI 1 mg/kg bw/week) in acidic sushi vinegar rice, and EDQM CM/Res(2013)9 stainless steel passivity.
-   - **Comparison 210:** `basket-air-fryer-vs-french-door-air-fryer-oven` (*Pull-Out Basket Air Fryer vs. French-Door Air Fryer Toaster Oven*) — Grounded in October–November 2026 US CPSC burn advisories & recalls (**Kalorik MAXX** French-Door ovens & **Gourmia 9-Slice Digital `GTF7530`** spring-door forearm burns), legacy electrical crimp recalls (**Cosori**, **Insignia**, **PowerXL**), UL 1026 safety boundaries, and bare 304 stainless rack vs. PTFE basket wear.
-   - **Comparison 211:** `glass-jar-vs-canned-food-packaging` (*Glass Jars with Plastisol-Free / BPA-NI Lids vs. Metal Food Cans*) — Grounded in **Commission Regulation (EU) 2024/3190** (main BPA food-contact ban deadline July 20, 2026; clarifying **EU 2026/250**; extended January 20, 2028 transitions for specific fruit/vegetable/fish cans), EFSA's 0.2 ng/kg bw/day TDI, regrettable BPS/BPF substitutions, acidic tomato pH < 4.5 tin dissolution, and USDA/CDC *Clostridium botulinum* dent seam triage.
-   - **Comparison 212:** `stainless-steel-vs-silicone-kids-plates` (*304 (18/8) Stainless Steel Kids Plates vs. Platinum-Cured Silicone Suction Plates*) — Explains lipophilic PDMS dish-soap surfactant & fragrance absorption ("soapy taste"), compares German **BfR Recommendation XV / LFGB** cyclic siloxane (D4–D6) rules against FDA 21 CFR § 177.2600, highlights non-microwave steel rules vs. AAP scald checks, and details hybrid removable suction designs.
-   - **Comparison 213:** `titanium-vs-hardwood-cutting-board` (*Commercially Pure Titanium Grade 1/2 vs. End-Grain Hardwood Cutting Board*) — Contrasts Grade 1/2 titanium (~30–40 HRB / ~36 HRC rigid metal) edge-rolling on 55–62 HRC chef knives and widespread online stainless/plastic-core counterfeits against Dr. Dean O. Cliver's UC Davis 99.9% capillary bacterial desiccation in end-grain maple/walnut (FDA Food Code § 4-101.17).
+1. **Elevated Consumer Tool #84 (`glass-cooktop-fracture-simulator` / 5 Localized Pages):**
+   - Added `"glass-cooktop-fracture-simulator"` to [`src/data/consumer-tools-allowlist.json`](src/data/consumer-tools-allowlist.json) (`83 -> 84` Google-indexed consumer utilities; removed `noindex` meta across all 5 locales).
+   - Upgraded [`src/pages/tools/glass-cooktop-fracture-simulator.astro`](src/pages/tools/glass-cooktop-fracture-simulator.astro) and [`src/pages/[lang]/tools/glass-cooktop-fracture-simulator.astro`](src/pages/[lang]/tools/glass-cooktop-fracture-simulator.astro) with explicit `WebApplication` (`isAccessibleForFree: true`), `FAQPage`, and `BreadcrumbList` JSON-LD schemas (with `excludeFaqSchema={true}`, `excludeBreadcrumbSchema={true}`, and `lang={lang}`), plus cleaned raw `$R$` / `$Fe_3C$` / `$Si-O-Si$` markup in tool templates, [`src/data/glass-cooktop-fracture-data.json`](src/data/glass-cooktop-fracture-data.json), and [`src/components/GlassCooktopFractureSimulator.astro`](src/components/GlassCooktopFractureSimulator.astro) (with localized runtime JS scorecard statuses across all 5 languages).
+   - Featured `glass-cooktop-fracture-simulator` at the top of `featuredHeroTools` in [`src/pages/tools/index.astro`](src/pages/tools/index.astro) and all 3 `SPOTLIGHT_HUB_UI` `heroTools` blocks in [`src/pages/[lang]/tools/index.astro`](src/pages/[lang]/tools/index.astro).
 
-2. **Schema, E-E-A-T Specs & Contextual Tool Routing:**
-   - Updated `src/data/specs/compare.cjs` (`208 -> 213` canonical specs) and localized comparison datasets (`src/data/comparisons*.json`) across all 5 languages (`100%` slug parity).
-   - Wired `recallsScanner` (`/tools/product-recalls-scanner/`) and `knifeCare` (`/tools/knife-care-cutting-board-matcher/`) into `src/pages/compare/[slug].astro` and `src/pages/[lang]/compare/[slug].astro`, updated contextual regex ordering (`babyBottle` before `silicone` so `kids-plates` routes cleanly to `/tools/baby-bottle-safety-checker/`, `rice-cooker` -> `toxicScorecard`, `canned-food-packaging` -> `pantry`), and injected explicit `WebPage` JSON-LD alongside `BreadcrumbList`, `Article`, `FAQPage`, and `/compare/` `ItemList` schemas.
-   - Synchronized `public/llms.txt` and `README.md` with **12,212+ static pages** and **213 comparisons per language (1,065 localized pages)**.
+2. **Published 3 Authoritative, Fact-Checked Safety Guides (`119 -> 122` / +15 Localized Pages = 610 Total):**
+   - **Guide 120:** `glass-cooktop-sugar-pitting-razor-scraping-silicone-mat-safety` (*Glass Cooktop Sugar Spills, Hairline Cracks & Silicone Protector Mats*) — Details molten sucrose silicate bonding and >100× differential contraction spalling (>80 MPa shear), 30° single-edge hot razor scraping, induction-only (<230°C) vs. radiant burner (400°C–550°C+) silicone mat fire/melt limits, dropped-can Hertzian impact (>900 MPa) and Mohs-7 quartz grit notches, and immediate 240V/50A breaker isolation for hairline cracks.
+   - **Guide 121:** `imported-aluminum-brass-cookware-lead-fda-2026-safety-guide` (*Imported Aluminum, Brass & Hindalium Cookware Lead Warnings (2025–2026 FDA Alerts)*) — Grounded in active 2025–2026 US FDA Safety & Import Alerts (Rashko Baba, Saraswati Strips Tiger White, IKM, and unbranded Hindalium/Indolium/brass pots and kadhais), secondary scrap smelting lead segregation, acidic food (tomato/tamarind/lemon) Pb²⁺ mobilization, CDC's zero safe blood lead standard, paint-swab false-negative/positive pitfalls vs. XRF/ICP-MS testing, and 304/316 stainless steel swaps.
+   - **Guide 122:** `bodum-french-press-granitestone-pan-panasonic-toaster-2026-recalls-guide` (*Late 2026 Kitchen Recalls Guide: 5.9M Bodum French Presses, Granitestone Sauté Pans & Panasonic Toaster Ovens*) — Grounded in verified 2026 US CPSC recalls: **Bodum** replaceable glass-carafe French presses (Oct 29, 2026; ~5.9M units across Bistro, Brazil, Caffettiera, Chambord, Crema, Java, Jesper, Kenya; metal spoon Griffith scratch shatter repair recall), **Granitestone Diamond Pro Blue** stainless sauté pans (Apr 2, 2026; ~740,000 sets, UPC `0-80313-08131-6`, handle screw cap thermal ejection refund), and **Panasonic NB-G200** electric toaster ovens (Jul 16, 2026; ~11,480 units, power cord fiberglass sleeve shock/fire hazard refund).
 
-3. **Zero-Defect Verification Gate:**
-   - **Pre-Build & Post-Build Schema Integrity (`scripts/test-wave79-schema.cjs --dist`):** **566 PASSED, 0 FAILED** across all 213 comparisons, 5 locales, E-E-A-T specs, contextual tool links, `ItemList`, `WebPage`, `Article`, `BreadcrumbList`, and `FAQPage` HTML outputs.
-   - **i18n Health & Parity (`scripts/test-i18n-health.mjs --all --allow-legacy-2-faqs`):** **203,482 checks, 0 failures**.
-   - **Total Pages Compiled:** **12,212 static pages** (built in 2m 15s with **0 errors**).
-   - **Total Hrefs Audited:** **1,474,647 links** inspected across `dist/` with **0 broken links** (`100%` slug parity across `1,907` items per language).
+3. **Contextual Routing, Syndication & AI Discovery Sync:**
+   - Wired `glassCooktop` (`/tools/glass-cooktop-fracture-simulator/`) into [`src/pages/blog/[slug].astro`](src/pages/blog/[slug].astro) and [`src/pages/[lang]/blog/[slug].astro`](src/pages/[lang]/blog/[slug].astro), and routed Guides 120–122 cleanly to `glassCooktop`, `toxicScorecard`, and `recallsScanner` across all 5 languages.
+   - Registered `/tools/glass-cooktop-fracture-simulator/` in [`src/pages/rss.xml.ts`](src/pages/rss.xml.ts) and updated [`public/llms.txt`](public/llms.txt) and [`README.md`](README.md) with **12,227+ static pages**, **84 Google-indexed consumer tools**, and **122 evergreen guides (610 localized articles)**.
+
+4. **Zero-Defect Verification Gate:**
+   - **Pre-Build & Post-Build Schema Integrity (`scripts/test-wave80-schema.cjs --dist`):** **212 PASSED, 0 FAILED** across allowlist, EN/`[lang]` tool schemas, blog schema & quality gates, contextual routing, RSS/`llms.txt`, and all 20 rendered `dist/` URLs.
+   - **i18n Health & Parity (`scripts/test-i18n-health.mjs --all --allow-legacy-2-faqs`):** **203,491 checks, 0 failures**.
+   - **Total Pages Compiled:** **12,227 static pages** (built in 2m 11s with **0 errors**).
+   - **Total Hrefs Audited:** **1,476,655 links** inspected across `dist/` with **0 broken links** (`100%` slug parity across `1,907` items per language).
 
 ---
 
@@ -33,42 +35,42 @@ The hourly autonomous growth run for **Wave 79** executed under strict **Single-
 ### Track 1: Live Health & SRE Audit
 - **Target URL:** `https://isitkitchensafe.com`
 - **HTTP Status:** `200 OK` (`HTTP/1.1 200 OK`)
-- **Time To First Byte (TTFB):** `570.9ms` (`0.570940s` TTFB, `0.570987s` total)
-- **Edge CDN Provider:** Cloudflare (`Server: cloudflare`, `CF-RAY: a606b5fa9d48e237-MRS`, `cf-cache-status: DYNAMIC`)
-- **SSL / Transport Validity:** Active HTTPS (`alt-svc: h3=":443"; ma=86400`)
+- **Time To First Byte (TTFB):** `557.1ms` (`0.557061s` TTFB, `0.557108s` total)
+- **Edge CDN Provider:** Cloudflare (`Server: cloudflare`, `CF-RAY: a6070e6bc9f13d70-MRS`, `cf-cache-status: DYNAMIC`)
+- **SSL / Transport Validity:** Active TLSv1.3 (`Google Trust Services`, valid `Oct 15 18:06:17 2026 GMT` through `Jan 13 19:06:15 2027 GMT`, `alt-svc: h3=":443"; ma=86400`)
 - **Observed Response Headers:**
   - `Strict-Transport-Security`: `max-age=31536000; includeSubDomains; preload`
   - `X-Content-Type-Options`: `nosniff`
   - `Referrer-Policy`: `strict-origin-when-cross-origin`
   - `Permissions-Policy`: `camera=(), microphone=(), geolocation=(), payment=(), usb=(), display-capture=()`
   - `Content-Type`: `text/html; charset=utf-8`
-  - *Header & Dependency Advisory Note:* Explicit `Content-Security-Policy` and `X-Frame-Options` headers remain unemitted on edge HTML responses; `npm audit --omit=dev` logged **9 vulnerabilities** (`2` moderate, `7` high, `0` critical) in static build dependencies (`astro`, `devalue`, `source-map-js`, `undici`, `vite`, `zod`) with zero runtime exposure on Cloudflare Pages.
+  - *Header & Dependency Advisory Note:* Explicit `Content-Security-Policy` and `X-Frame-Options` headers remain unemitted on edge HTML responses; `npm audit --omit=dev` logged **9 vulnerabilities** (`2` moderate, `7` high, `0` critical) in static build tooling with zero runtime exposure on Cloudflare Pages.
 
 ### Track 2: Scientific Fact-Checking & Recall Monitoring
-- **CPSC 2025–2026 Kitchen Appliance Surveillance:** Verified **Kalorik MAXX French-Door Air Fryer Ovens (Oct 2026)** and **Gourmia 9-Slice Digital Air Fryer Ovens (`Model GTF7530`, Nov 2026)** spring-door burn alerts alongside prior **Cosori (>2M units) / Insignia / PowerXL** drawer electrical recalls, integrated directly into Comparison #210 (`basket-air-fryer-vs-french-door-air-fryer-oven`) with direct routing to `/tools/product-recalls-scanner/`.
-- **EU/EFSA & FDA Food-Contact Regulatory Updates (2026):** Grounded Comparison #211 in **Regulation (EU) 2024/3190** (July 20, 2026 BPA ban & Jan 20, 2028 canned fruit/veg/fish transitions; **EU 2026/250** clarifications), EFSA's `0.2 ng/kg bw/day` BPA TDI & alternative bisphenol guidance, **German BfR XV** siloxane limits (#212), **FDA 21 CFR § 177.1550** (#209), and **FDA Food Code § 4-101.17** (#213).
+- **2026 US CPSC Recall Surveillance:** Verified and documented **Bodum** replaceable glass-carafe French presses (~5.9M units, Oct 29, 2026), **Granitestone Diamond Pro Blue** stainless sauté pans (~740,000 sets, UPC `0-80313-08131-6`, Apr 2, 2026), and **Panasonic NB-G200** electric toaster ovens (~11,480 units, Jul 16, 2026) in Guide #122 (`bodum-french-press-granitestone-pan-panasonic-toaster-2026-recalls-guide`).
+- **2025–2026 FDA Lead & EU Food-Contact Surveillance:** Verified active FDA safety & import alerts covering imported aluminum, brass, and Hindalium/Indolium cookware (Rashko Baba, Saraswati Strips Tiger White, IKM) grounded in CDC zero safe blood lead guidance and XRF/ICP-MS methodology in Guide #121, plus EU Regulation (EU) 2023/915 May 2026 SCoPAFF MOAH limit monitoring tracked for upcoming waves.
 
 ### Track 3: SEO Dominance & Schema Markup
-- **Structured Data Validated:** `WebPage` (with `SpeakableSpecification`), `Article`, `BreadcrumbList`, and `FAQPage` verified in rendered HTML across all 25 new localized Wave 79 comparison pages, plus `ItemList` across all 5 localized `/compare/` index hubs; `npm run ops:seo` confirmed `810 / 1050` tool pages compliant (`77.1%`).
-- **Sitemap & IndexNow Readiness:** `dist/sitemap-0.xml` indexed **10,394 canonical URLs** (`6,996,890` bytes / `6,832.9 KB`). `npm run ops:indexnow -- --dry-run` verified **10,482 deduplicated URLs** (`2,957` priority consumer URLs including **83/83** allowlisted consumer tools = **415** tool pages, **119 × 5** guides, **213** comparisons) across 11 batches (`635.3 KB`).
+- **Structured Data Validated:** `WebApplication`, `FAQPage`, and `BreadcrumbList` verified in rendered HTML across all 5 localized `/tools/glass-cooktop-fracture-simulator/` pages (zero `noindex` tags), plus `BlogPosting`, `FAQPage`, `BreadcrumbList`, and styled callout boxes across all 15 new Wave 80 guide pages; `npm run ops:seo` confirmed `810 / 1050` tool pages compliant (`77.1%`).
+- **Sitemap & IndexNow Readiness:** `dist/sitemap-0.xml` indexed **10,414 canonical URLs** (`7,014,570` bytes). `npm run ops:indexnow -- --dry-run` verified **10,502 deduplicated URLs** (`2,977` priority consumer URLs including **84/84** allowlisted consumer tools = **420** tool pages, **122 × 5** guides, **213** comparisons) across 11 batches (`637.2 KB`).
 
 ### Track 4: Multilingual Localization (i18n) & Parity
 - Verified **100% slug parity** across all 5 languages (`en`, `es`, `pt`, `zh-cn`, `ja`):
-  - **83 allowlisted consumer tools** per locale (**415** Google-indexed tool pages out of 1,050 total tool pages).
-  - **119 evergreen guides** per locale (**595** localized articles).
+  - **84 allowlisted consumer tools** per locale (**420** Google-indexed tool pages out of 1,050 total tool pages).
+  - **122 evergreen guides** per locale (**610** localized articles).
   - **213 comparisons** per locale (**1,065** localized comparison pages).
-  - **12,212 static pages** compiled cleanly in `dist/`.
+  - **12,227 static pages** compiled cleanly in `dist/`.
 
 ### Track 5: Breakthrough Viral Tools Roadmap
-- **Active Consumer Tools:** **83** deployed and Google-indexed consumer tools in `src/data/consumer-tools-allowlist.json` (plus all 7 core viral roadmap tools deployed and active).
-- **Contextual Tool Routing:** Wired `recallsScanner` (`/tools/product-recalls-scanner/`), `knifeCare` (`/tools/knife-care-cutting-board-matcher/`), `toxicScorecard`, `pantry`, and `babyBottle` across English and localized `/compare/` templates for all 5 Wave 79 comparisons.
+- **Active Consumer Tools:** **84** deployed and Google-indexed consumer tools in [`src/data/consumer-tools-allowlist.json`](src/data/consumer-tools-allowlist.json) (plus all 7 core viral roadmap tools deployed and active).
+- **Contextual Tool Routing:** Wired `glassCooktop` (`/tools/glass-cooktop-fracture-simulator/`), `toxicScorecard` (`/tools/toxic-leaching-scorecard/`), and `recallsScanner` (`/tools/product-recalls-scanner/`) across English and localized `/blog/` templates.
 
 ### Track 6: Executive Reporting & Roadmap Advance
-- Roadmap advanced: **Wave 79 COMPLETED** (`TOOL-CONSUMER-106`) &rarr; **Wave 80 QUEUED** (`TOOL-CONSUMER-107`: Consumer Tool #84 `glass-cooktop-fracture-simulator` Elevation & High-Impact Safety Guides `119->122` / 5 langs).
+- Roadmap advanced: **Wave 80 COMPLETED** (`TOOL-CONSUMER-107`) &rarr; **Wave 81 QUEUED** (`TOOL-CONSUMER-108`: 5 High-Intent Material & Appliance Comparisons `213->218` / 5 langs).
 
 ---
 
 ## 3. Git Operations & Verification
-- **Commit Hash:** `50cf1d0` (`feat(growth-wave-79): expand comparisons to 213 (5 langs), wire E-E-A-T specs, WebPage schema & contextual tools (12,212 pages)`)
-- **Remote Target:** `origin/main` (Pushed cleanly)
-- **Zero-Defect Verification:** **12,212 static pages** compiled with **0 errors**; **1,474,647 links** audited with **0 broken links**; **566/566** Wave 79 schema & HTML assertions passed.
+- **Commit Hash:** `pending` (Wave 80 commit pending verification)
+- **Remote Target:** `origin/main`
+- **Zero-Defect Verification:** **12,227 static pages** compiled with **0 errors**; **1,476,655 links** audited with **0 broken links**; **212/212** Wave 80 schema & HTML assertions passed; **203,491** i18n checks with **0 errors**.

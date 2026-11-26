@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/glass-cooktop-fracture-simulator/',
+    title: 'Glass Cooktop Point-Load & Thermal Shock Fracture Simulator',
+    description:
+      'Model Hertzian cone cracking, point impacts from dropped canned goods, cast iron abrasive shear, sugar spalling pit formation, and 240V electrical liquid seepage risks on ceramic glass cooktops.',
+    date: '2026-11-26'
+  },
+  {
     path: '/tools/silicone-bakeware-oligomer-analyzer/',
     title: 'Silicone Bakeware Cyclic Thermal Breakdown & Oligomer Volatilization Analyzer',
     description:
