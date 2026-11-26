@@ -3326,5 +3326,85 @@ module.exports = {
       "parameter": "Low-Medium Ceramic Heat Limit vs. High-Heat Carbon Steel Searing",
       "guideline": "Keep ceramic non-stick pans on low-to-medium heat without aerosol sprays; preheat carbon steel gradually on induction to avoid warping and dry immediately after hand-washing."
     }
+  },
+  "stainless-steel-vs-nonstick-rice-cooker-pot": {
+    "materialThermal": {
+      "property": "Substrate Passivation & Fluoropolymer Degradation Threshold",
+      "threshold": "304 Steel (Cr2O3 passive film, >1,400°C) vs. PTFE Coating (260°C pyrolysis limit / soft Mohs < 2)",
+      "details": "Boiling rice caps aqueous cooking at 100°C, preventing PTFE pyrolysis, yet mechanical grain/paddle abrasion exposes underlying aluminum (EFSA TWI 1 mg/kg bw/week limit)."
+    },
+    "safetyStandard": {
+      "organization": "FDA / EFSA / EDQM",
+      "standard": "FDA 21 CFR § 177.1550 (PTFE), EFSA Aluminum TWI & EDQM CM/Res(2013)9",
+      "citation": "Perfluorocarbon resin food-contact rules, European aluminum tolerable weekly intake thresholds, and stainless steel alloy migration limits."
+    },
+    "applianceSpecs": {
+      "parameter": "100°C Boiling Cap & Keep-Warm Starch Hydration",
+      "guideline": "Wash rice in a separate colander before loading non-stick bowls; retire peeled pots promptly or upgrade to a clad-bottom 304 stainless steel insert."
+    }
+  },
+  "basket-air-fryer-vs-french-door-air-fryer-oven": {
+    "materialThermal": {
+      "property": "Heating Element Proximity & Hinge Mechanical Burn Risk",
+      "threshold": "1,500W–1,800W Exposed Coil (400°C–600°C element) vs. Spring-Door Closure Force",
+      "details": "Countertop ovens expose radiant elements and glass doors exceeding 90°C, whereas drawer air fryers isolate coils inside an insulated plenum but depend on basket coating durability."
+    },
+    "safetyStandard": {
+      "organization": "US CPSC / UL",
+      "standard": "UL 1026 Household Electric Cooking Appliances & 2025–2026 CPSC Recall Dockets",
+      "citation": "CPSC safety advisories for Kalorik MAXX & Gourmia GTF7530 spring-door burns and Cosori/Insignia internal wire-crimp overheating hazards."
+    },
+    "applianceSpecs": {
+      "parameter": "13 cm (5 in) Exhaust Clearance & Weighted Parchment Rule",
+      "guideline": "Plug directly into a wall outlet (no extension cords), check bottom rating plates against CPSC recalls, and keep foods weighted on any perforated parchment liner."
+    }
+  },
+  "glass-jar-vs-canned-food-packaging": {
+    "materialThermal": {
+      "property": "Packaging Matrix Inertness & Acidic Corrosion Barrier",
+      "threshold": "Vitreous Silica Glass (0 monomers, pH 1–12 resistant) vs. Polymer Can Varnish (5–15 µm epoxy/acrylic)",
+      "details": "Glass provides a monolithic inorganic barrier against pH < 4.5 tomato acids, whereas thin metal can lacquers depend on intact resin cross-linking and undented double seams."
+    },
+    "safetyStandard": {
+      "organization": "EU Commission / EFSA / USDA FSIS",
+      "standard": "Regulation (EU) 2024/3190 (Amended EU 2026/250), EFSA BPA TDI (0.2 ng/kg bw/day) & USDA Can Integrity Rules",
+      "citation": "European Union BPA food-contact ban timelines (July 20, 2026 / Jan 20, 2028), EFSA bisphenol guidance, and USDA botulism dent triage."
+    },
+    "applianceSpecs": {
+      "parameter": "Upright Jar Lid Clearance & Post-Opening Glass Transfer",
+      "guideline": "Keep oily jars upright to minimize lid gasket contact; transfer opened canned food into sealed glass containers for refrigeration within 2 hours."
+    }
+  },
+  "stainless-steel-vs-silicone-kids-plates": {
+    "materialThermal": {
+      "property": "Surface Polarity (Lipophilic Sorption) vs. Non-Porous Passivity",
+      "threshold": "304 Stainless Steel (0% surfactant uptake) vs. PDMS Silicone (high lipophilic soap/oil sorption)",
+      "details": "Non-polar PDMS elastomer chains retain hydrophobic detergent fragrances and food lipids under 65°C–75°C dishwasher heat, whereas chromium-passivated 304 steel stays taste-neutral."
+    },
+    "safetyStandard": {
+      "organization": "German BfR / FDA / AAP",
+      "standard": "BfR Recommendation XV (Silicones), FDA 21 CFR § 177.2600 & AAP Pediatric Thermal Rules",
+      "citation": "Volatile cyclic siloxane (D4–D6) limits for food-contact elastomers and American Academy of Pediatrics safe warming guidelines."
+    },
+    "applianceSpecs": {
+      "parameter": "Non-Microwave Metal Rule & Fragrance-Free Wash Protocol",
+      "guideline": "Never microwave stainless steel plates; wash silicone baby plates solely with fragrance-free detergent and avoid heated dry cycles."
+    }
+  },
+  "titanium-vs-hardwood-cutting-board": {
+    "materialThermal": {
+      "property": "Rockwell Hardness Mismatch & Elastic Apex Cushioning",
+      "threshold": "Chef Knife (55–62 HRC) vs. Grade 1/2 Titanium (~36 HRC rigid metal) vs. End-Grain Maple (Janka 1,450 lbf, elastic yield)",
+      "details": "Rigid titanium causes micro-apex edge rolling despite lower bulk hardness than steel, whereas vertical hardwood xylem absorbs impact and kills 99.9% of surface bacteria via capillary desiccation."
+    },
+    "safetyStandard": {
+      "organization": "FDA Food Code / ASTM",
+      "standard": "FDA Food Code § 4-101.17 (Hard Maple Wood), ASTM B265 Grade 1/2 Titanium & USDA FSIS Sanitation",
+      "citation": "Regulatory approval of close-grained hardwood food-contact surfaces, commercial unalloyed titanium specs, and raw-meat cross-contamination separation protocols."
+    },
+    "applianceSpecs": {
+      "parameter": "Dishwasher Ban on Hardwood vs. Beater-Knife Rule on Metal",
+      "guideline": "Hand-wash end-grain wood and oil with mineral oil; verify authentic non-magnetic Grade 1/2 titanium and reserve it for rugged utility blades rather than thin Japanese edges."
+    }
   }
 };
