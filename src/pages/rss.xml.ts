@@ -44,6 +44,12 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/refrigerator-defrost-safety-modeler/',
+    title: 'Refrigerator Warm / Freezer Cold Defrost Failure & Pathogen Modeler',
+    description: 'Model blocked evaporator air ducts, bi-metal defrost thermostat continuity (0.0-0.5 Ω vs. OL), Listeria 48°F proliferation, heat-stable S. aureus Enterotoxin A/B irreversibility, and USDA cold-chain food triage.',
+    date: '2026-11-26'
+  },
+  {
     path: '/tools/range-hood-extraction-efficiency-modeler/',
     title: 'Kitchen Exhaust Range Hood VOC, NO2 & PM2.5 Extraction Efficiency Modeler',
     description: 'Model gas stove nitrogen dioxide plumes, cooking oil PM2.5 aerosol dispersal, duct aerodynamic friction, capture velocity, and pediatric asthma inhalation risks.',

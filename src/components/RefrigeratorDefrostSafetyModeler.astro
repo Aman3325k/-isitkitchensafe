@@ -7,6 +7,7 @@ interface Props {
 }
 
 const { lang = 'en' } = Astro.props;
+const localePrefix = lang === 'en' ? '' : `/${lang}`;
 
 interface Dict {
   badge: string;
@@ -232,7 +233,7 @@ const dict: Record<SupportedLanguage, Dict> = {
     crossLinkTitle: "Explore Outros Simuladores Científicos",
     crossLinkSlowCooker: "Simulador de Slow Cooker e Esporos de Chumbo",
     crossLinkSousVide: "Modelador de Sous Vide, Plásticos e Botulismo",
-    crossLinkPressureCooker: "Simulador de Olla de Pressão e Instant Pot"
+    crossLinkPressureCooker: "Simulador de Panela de Pressão e Instant Pot"
   },
   'zh-cn': {
     badge: "热力学与食源性致病菌繁殖动力学模拟器",
@@ -285,7 +286,7 @@ const dict: Record<SupportedLanguage, Dict> = {
     step4Title: "4. 机械化霜定时器手动顺时针旋转跳档测试",
     copyReportBtn: "复制食品损失与故障诊断报告",
     reportCopied: "诊断报告已成功复制到剪贴板！",
-    crossLinkTitle: "探索更多厨房热力学与物理安全模拟器",
+    crossLinkTitle: "探索其他厨房热力学与物理安全模拟器",
     crossLinkSlowCooker: "慢炖锅重金属釉质析出与细菌孢子模拟器",
     crossLinkSousVide: "低温真空慢煮塑料迁移与肉毒杆菌模型",
     crossLinkPressureCooker: "高压锅与电压力锅爆炸风险模拟器"
@@ -348,11 +349,801 @@ const dict: Record<SupportedLanguage, Dict> = {
   }
 };
 
+const ITEM_I18N: Record<SupportedLanguage, {
+  modelNames: Record<string, string>;
+  modelVulns: Record<string, string>;
+  failureNames: Record<string, string>;
+  failureTrajs: Record<string, string>;
+  foodCats: Record<string, string>;
+  foodItems: Record<string, string>;
+  foodRats: Record<string, string>;
+  guideComps: Record<number, string>;
+  guideLocs: Record<number, string>;
+  guideConds: Record<number, string>;
+  guideNorms: Record<number, string>;
+  guideDefs: Record<number, string>;
+}> = {
+  en: {
+    modelNames: {}, modelVulns: {}, failureNames: {}, failureTrajs: {},
+    foodCats: {}, foodItems: {}, foodRats: {},
+    guideComps: {}, guideLocs: {}, guideConds: {}, guideNorms: {}, guideDefs: {}
+  },
+  es: {
+    modelNames: {
+      'french-door-bottom-freezer': 'Puerta Francesa con Congelador Inferior (Samsung, LG, Whirlpool, GE)',
+      'top-freezer-traditional': 'Congelador Superior Tradicional (Frigidaire, Whirlpool, Kenmore)',
+      'side-by-side-dual-zone': 'Dos Puertas Verticales Side-by-Side (KitchenAid, GE Profile, Bosch)',
+      'compact-mini-dorm-fridge': 'Mini Nevera Compacta / de Dormitorio con Congelador Interno',
+      'commercial-reach-in': 'Refrigerador Comercial de Acero Inoxidable (True, Turbo Air)'
+    },
+    modelVulns: {
+      'french-door-bottom-freezer': 'Alto riesgo de congelación del drenaje del evaporador y bloqueo del damper motorizado, elevando el refrigerador a >50°F (10°C) mientras el congelador sigue helado.',
+      'top-freezer-traditional': 'El termostato bimetálico se hincha y pierde estanqueidad por humedad, impidiendo activar la resistencia. El evaporador forma un bloque de hielo sólido en 96 horas.',
+      'side-by-side-dual-zone': 'El conducto de retorno entre ambos compartimentos se obstruye fácilmente con hielo. Juntas gastadas aceleran la entrada de aire húmedo.',
+      'compact-mini-dorm-fridge': 'Sin resistencia de descongelación activa; el hielo grueso aísla la placa fría y sube la temperatura interna por encima de 45°F (7°C) sin aviso.',
+      'commercial-reach-in': 'Las aperturas frecuentes en cocina comercial sobrecargan las aletas con vapor y grasa, provocando congelación rápida del evaporador.'
+    },
+    failureNames: {
+      'bimetal-open-iced-coils': 'Termostato Bimetálico en Circuito Abierto (Serpentinas Congeladas)',
+      'bimetal-welded-heater-runaway': 'Contactos Soldados Cerrados / Resistencia Descontrolada',
+      'timer-motor-burnt-out': 'Temporizador de Descongelación Atascado en Modo Calor',
+      'evaporator-fan-seized': 'Motor del Ventilador del Evaporador Agarrotado o Bloqueado por Hielo',
+      'drain-tube-frozen-clogged': 'Drenaje de Condensados Congelado / Obstruido por Biofilm'
+    },
+    failureTrajs: {
+      'bimetal-open-iced-coils': 'El congelador sigue a 15°F–24°F inicialmente, pero el evaporador se convierte en un bloque sólido de hielo en 3–5 días y la nevera sube a 48°F–58°F (9°C–14°C).',
+      'bimetal-welded-heater-runaway': 'La temperatura del congelador sube a 50°F–65°F durante la descongelación; el plástico interior se deforma y la nevera supera los 52°F (11°C).',
+      'timer-motor-burnt-out': 'El compresor y el ventilador nunca vuelven a arrancar. Ambos compartimentos suben hacia temperatura ambiente (68°F–75°F / 20°C–24°C) en 8–16 horas.',
+      'evaporator-fan-seized': 'El congelador permanece frío (0°F–10°F), pero no pasa aire frío hacia el compartimento fresco, que asciende a 54°F–62°F (12°C–17°C).',
+      'drain-tube-frozen-clogged': 'La temperatura se mantiene cerca de 38°F–42°F, pero el agua de deshielo rebosa sobre los cajones de verduras creando charcos de moho y biofilm.'
+    },
+    foodCats: {
+      'raw-poultry-meat': 'Aves Crudas y Carnes Picadas',
+      'pasteurized-dairy-milk': 'Leche Pasteurizada y Nata Líquida',
+      'soft-cheeses': 'Quesos Blandos y Madurados con Moho',
+      'hard-cheeses': 'Quesos Duros y Curados',
+      'shell-eggs': 'Huevos Frescos con Cáscara',
+      'cooked-leftovers-starches': 'Arroz, Pasta Cocida y Guisos',
+      'commercial-condiments': 'Condimentos Ácidos y Mermeladas',
+      'infant-formula-breastmilk': 'Fórmula Infantil y Leche Materna'
+    },
+    foodItems: {
+      'raw-poultry-meat': 'Pechuga y muslos de pollo, pavo picado, carne molida',
+      'pasteurized-dairy-milk': 'Leche entera, semidesnatada, desnatada, crema para batir',
+      'soft-cheeses': 'Brie, Camembert, Ricotta, Mozzarella fresca, Queso Fresco, Feta',
+      'hard-cheeses': 'Cheddar, Parmesano, Pecorino, Suizo, Gouda, Provolone',
+      'shell-eggs': 'Huevos comerciales lavados en cáscara',
+      'cooked-leftovers-starches': 'Arroz frito, pasta cocida, lasaña, estofados, sopas',
+      'commercial-condiments': 'Ketchup, mostaza, mayonesa comercial, encurtidos, mermelada',
+      'infant-formula-breastmilk': 'Fórmula preparada en polvo, leche materna descongelada'
+    },
+    foodRats: {
+      'raw-poultry-meat': 'Alta humedad superficial permite multiplicación exponencial de Salmonella y Campylobacter. Cocinar carne en mal estado NO destruye toxinas.',
+      'pasteurized-dairy-milk': 'Lactococcus y Pseudomonas psicrotróficas fermentan la lactosa generando cuajado y sabores amargos.',
+      'soft-cheeses': 'Alta actividad de agua (aw > 0,95) y pH neutro crean el medio ideal para Listeria monocytogenes.',
+      'hard-cheeses': 'Baja actividad de agua (aw < 0,85) y alta salinidad impiden el crecimiento de patógenos entéricos.',
+      'shell-eggs': 'La condensación al entibiar huevos lavados succiona bacterias superficiales por los poros de la cáscara.',
+      'cooked-leftovers-starches': 'Las esporas de Bacillus cereus sobreviven a la cocción y liberan la toxina emética cereulida en almidones tibios.',
+      'commercial-condiments': 'Alta acidez titulable (pH < 4,0) y baja actividad de agua frenan patógenos bacterianos.',
+      'infant-formula-breastmilk': 'Inmunidad neonatal vulnerable; Cronobacter sakazakii y Listeria pueden causar sepsis letal.'
+    },
+    guideComps: {
+      1: 'Termostato Bimetálico de Descongelación',
+      2: 'Resistencia Calefactora de Descongelación',
+      3: 'Temporizador Mecánico de Descongelación',
+      4: 'Motor del Ventilador del Evaporador'
+    },
+    guideLocs: {
+      1: 'Sujeto con clip metálico al tubo superior o lateral del evaporador del congelador.',
+      2: 'A lo largo del borde inferior o entrelazado bajo las aletas del evaporador.',
+      3: 'En la consola de control superior o en el compartimento inferior trasero del compresor.',
+      4: 'Montado sobre soporte metálico justo encima del evaporador en el fondo del congelador.'
+    },
+    guideConds: {
+      1: 'Medir siempre en frío/congelado (< -6°C / 20°F). Si ya está tibio, sumergir 5 min en agua con hielo.',
+      2: 'Desconectar ambos terminales de pala antes de medir con el multímetro.',
+      3: 'Girar el tornillo de avance manual en sentido horario hasta oír un clic claro.',
+      4: 'Comprobar voltaje en el conector con el interruptor de puerta pulsado y medir bobinado.'
+    },
+    guideNorms: {
+      1: '0,0 a 0,5 Ohmios (pitido de continuidad cerrada).',
+      2: '15 a 35 Ohmios según potencia nominal (450W–600W).',
+      3: 'El compresor se detiene al instante y la resistencia calienta; el ciclo acaba en 25–35 min.',
+      4: '1,5K a 3K Ohmios en bobinado; el eje gira libremente con los dedos.'
+    },
+    guideDefs: {
+      1: 'Resistencia infinita (O.L.) en frío confirma termostato abierto/dañado: nunca activará la resistencia.',
+      2: 'O.L. (circuito abierto) indica filamento interno fundido y requiere reemplazo.',
+      3: 'Si el compresor no vuelve a encender tras 45 min, el motor o engranaje del temporizador falló.',
+      4: 'Eje trabado o bobinado en O.L. confirma motor quemado.'
+    }
+  },
+  pt: {
+    modelNames: {
+      'french-door-bottom-freezer': 'French Door com Freezer Inferior (Samsung, LG, Whirlpool, GE)',
+      'top-freezer-traditional': 'Freezer Superior Tradicional (Brastemp, Consul, Electrolux, Whirlpool)',
+      'side-by-side-dual-zone': 'Side-by-Side Duas Portas Verticais (KitchenAid, GE Profile, Bosch)',
+      'compact-mini-dorm-fridge': 'Frigobar Compacto / Mini Geladeira com Congelador Interno',
+      'commercial-reach-in': 'Refrigerador Comercial Inox (True, Turbo Air)'
+    },
+    modelVulns: {
+      'french-door-bottom-freezer': 'Alto risco de congelamento do dreno do evaporador e travamento do damper motorizado, elevando a geladeira para >50°F (10°C) com freezer congelado.',
+      'top-freezer-traditional': 'O termostato bimetálico incha com umidade e abre o circuito, impedindo o acionamento da resistência. Bloco de gelo fecha o fluxo em 96 horas.',
+      'side-by-side-dual-zone': 'O túnel de retorno de ar na divisória entope facilmente com gelo. Borrachas gastas aceleram a entrada de umidade.',
+      'compact-mini-dorm-fridge': 'Sem resistência ativa de degelo; o acúmulo espesso de gelo isola a placa fria e eleva a temperatura acima de 45°F (7°C) sem aviso.',
+      'commercial-reach-in': 'Aberturas constantes em cozinha profissional sobrecarregam as aletas com vapor e gordura, acelerando o congelamento do evaporador.'
+    },
+    failureNames: {
+      'bimetal-open-iced-coils': 'Termostato Bimetálico em Circuito Aberto (Serpentina Congelada)',
+      'bimetal-welded-heater-runaway': 'Contatos Colados Fechados / Resistência Descontrolada',
+      'timer-motor-burnt-out': 'Timer de Degelo Travado em Modo Aquecimento',
+      'evaporator-fan-seized': 'Ventilador do Evaporador Travado ou Preso no Gelo',
+      'drain-tube-frozen-clogged': 'Dreno de Degelo Congelado / Entupido por Biofilme'
+    },
+    failureTrajs: {
+      'bimetal-open-iced-coils': 'O freezer permanece a 15°F–24°F inicialmente, mas as serpentinas viram bloco sólido de gelo em 3–5 dias e a geladeira sobe para 48°F–58°F (9°C–14°C).',
+      'bimetal-welded-heater-runaway': 'A temperatura do freezer dispara para 50°F–65°F no degelo; o plástico interno empena e o refrigerador passa de 52°F (11°C).',
+      'timer-motor-burnt-out': 'Compressor e ventilador nunca religam. Ambos os compartimentos sobem à temperatura ambiente (68°F–75°F / 20°C–24°C) em 8–16 horas.',
+      'evaporator-fan-seized': 'O freezer fica frio (0°F–10°F), mas nenhum ar frio chega à geladeira, que sobe rapidamente para 54°F–62°F (12°C–17°C).',
+      'drain-tube-frozen-clogged': 'A temperatura fica em 38°F–42°F, porém a água derretida transborda sobre a gaveta de legumes formando poças propícias a mofo e biofilme.'
+    },
+    foodCats: {
+      'raw-poultry-meat': 'Aves Cruas e Carnes Moídas',
+      'pasteurized-dairy-milk': 'Leite Pasteurizado e Creme de Leite',
+      'soft-cheeses': 'Queijos Moles e Maturados por Fungos',
+      'hard-cheeses': 'Queijos Duros e Curados',
+      'shell-eggs': 'Ovos Intactos com Casca',
+      'cooked-leftovers-starches': 'Arroz, Massas Cozidas e Ensopados',
+      'commercial-condiments': 'Condimentos Ácidos e Geleias',
+      'infant-formula-breastmilk': 'Fórmula Infantil e Leite Materno'
+    },
+    foodItems: {
+      'raw-poultry-meat': 'Peito e coxa de frango, peru moído, carne bovina moída',
+      'pasteurized-dairy-milk': 'Leite integral, semidesnatado, desnatado, creme de leite fresco',
+      'soft-cheeses': 'Brie, Camembert, Ricota, Mussarela fresca, Queijo Minas Frescal, Feta',
+      'hard-cheeses': 'Cheddar, Parmesão, Pecorino, Suíço, Gouda, Provolone',
+      'shell-eggs': 'Ovos comerciais lavados com casca',
+      'cooked-leftovers-starches': 'Arroz cozido, macarrão, lasanha, ensopados, sopas',
+      'commercial-condiments': 'Ketchup, mostarda amarela, maionese industrial, picles, geleia',
+      'infant-formula-breastmilk': 'Fórmula em pó preparada, leite materno descongelado'
+    },
+    foodRats: {
+      'raw-poultry-meat': 'Umidade superficial elevada permite multiplicação exponencial de Salmonella e Campylobacter. Cozinhar carne estragada NÃO elimina toxinas.',
+      'pasteurized-dairy-milk': 'Lactococcus e Pseudomonas psicrotróficas fermentam a lactose causando talhamento e amargor.',
+      'soft-cheeses': 'Alta atividade de água (aw > 0,95) e pH quase neutro criam meio ideal para Listeria monocytogenes.',
+      'hard-cheeses': 'Baixa atividade de água (aw < 0,85) e alto teor de sal impedem proliferação bacteriana.',
+      'shell-eggs': 'A condensação ao aquecer ovos lavados puxa bactérias superficiais pelos poros da casca.',
+      'cooked-leftovers-starches': 'Endósporos de Bacillus cereus resistem ao cozimento e liberam a toxina emética cereulida em amidos mornos.',
+      'commercial-condiments': 'Alta acidez (pH < 4,0) e baixa atividade de água bloqueiam patógenos bacterianos.',
+      'infant-formula-breastmilk': 'Imunidade neonatal extremamente sensível; Cronobacter sakazakii e Listeria oferecem risco fatal.'
+    },
+    guideComps: {
+      1: 'Termostato Bimetálico de Degelo',
+      2: 'Resistência de Aquecimento do Degelo',
+      3: 'Temporizador (Timer) Mecânico de Degelo',
+      4: 'Motor do Ventilador do Evaporador'
+    },
+    guideLocs: {
+      1: 'Preso com clipe metálico diretamente ao tubo superior ou lateral do evaporador do freezer.',
+      2: 'Instalada na borda inferior ou entrelaçada sob as serpentinas do evaporador.',
+      3: 'No console de controle superior ou no compartimento traseiro inferior próximo ao compressor.',
+      4: 'Montado em suporte metálico centralizado acima do evaporador na parede traseira do freezer.'
+    },
+    guideConds: {
+      1: 'Testar obrigatoriamente congelado (< -6°C / 20°F). Se já descongelou, mergulhe em água com gelo por 5 minutos.',
+      2: 'Desconectar ambos os terminais antes de aplicar as pontas do multímetro.',
+      3: 'Girar o parafuso de avanço manual no sentido horário até ouvir um estalo nítido.',
+      4: 'Verificar tensão no chicote com o interruptor da porta pressionado e medir resistência.'
+    },
+    guideNorms: {
+      1: '0,0 a 0,5 Ohms (bip de continuidade fechada).',
+      2: '15 a 35 Ohms dependendo da potência (450W–600W).',
+      3: 'O compressor desliga na hora e a resistência aquece; o motor avança em 25–35 minutos.',
+      4: '1,5K a 3K Ohms no enrolamento; eixo gira livremente ao toque.'
+    },
+    guideDefs: {
+      1: 'Resistência infinita (O.L.) a frio indica bimetal queimado: nunca acionará a resistência.',
+      2: 'Leitura O.L. (circuito aberto) confirma filamento rompido e exige troca da resistência.',
+      3: 'Se o compressor não religar após 45 min, a engrenagem ou motor do timer queimou.',
+      4: 'Eixo travado ou bobina em O.L. confirma motor queimado.'
+    }
+  },
+  'zh-cn': {
+    modelNames: {
+      'french-door-bottom-freezer': '法式对开门下冷冻冰箱（三星 / LG / 惠而浦 / GE）',
+      'top-freezer-traditional': '传统双门上冷冻冰箱（美菱 / 惠而浦 / 海尔 / Kenmore）',
+      'side-by-side-dual-zone': '对开双门冰箱（KitchenAid / GE Profile / 博世）',
+      'compact-mini-dorm-fridge': '迷你单门小冰箱 / 宿舍带内置冰格冰箱',
+      'commercial-reach-in': '商用立式不锈钢冷柜（True / Turbo Air）'
+    },
+    modelVulns: {
+      'french-door-bottom-freezer': '蒸发器接水盘与步进电机风门极易结冰卡死，导致冷冻室看似结冰而冷藏室悄悄升至 10°C (50°F) 以上。',
+      'top-freezer-traditional': '双金属化霜温控器进水受潮膨胀失效，化霜加热管无法通电。蒸发器将在 96 小时内冻成一整块实心冰墙。',
+      'side-by-side-dual-zone': '隔墙回风道极易被冰霜堵塞；门封条老化漏气会急剧加速结霜。',
+      'compact-mini-dorm-fridge': '无主动电加热化霜系统；厚重白霜包裹冷板产生隔热效应，内胆温度可悄然升破 7°C (45°F)。',
+      'commercial-reach-in': '商用厨房频繁开门使大量油烟湿热空气涌入，引发蒸发器翅片快速结冰堵塞。'
+    },
+    failureNames: {
+      'bimetal-open-iced-coils': '双金属化霜温控器开路失效（蒸发器盘管彻底冻死）',
+      'bimetal-welded-heater-runaway': '温控器触点电弧粘连闭合 / 化霜加热管失控狂烧',
+      'timer-motor-burnt-out': '化霜定时器电机烧毁卡死在化霜档位',
+      'evaporator-fan-seized': '蒸发器循环风机轴承咬死或扇叶被冰块打死',
+      'drain-tube-frozen-clogged': '化霜冷凝排水孔结冰或被微生物粘液堵塞'
+    },
+    failureTrajs: {
+      'bimetal-open-iced-coils': '冷冻室初期仍保持 -9°C 至 -4°C，但 3–5 天内风道被实心冰块彻底封死，冷藏室悄悄升温至 9°C–14°C (48°F–58°F)。',
+      'bimetal-welded-heater-runaway': '化霜阶段冷冻室温度飙升至 10°C–18°C (50°F–65°F)，塑料内胆变形起泡，冷藏室快速突破 11°C (52°F)。',
+      'timer-motor-burnt-out': '压缩机与风扇无法重启制冷；8–16 小时内冷藏和冷冻双室均回升至厨房室温 20°C–24°C (68°F–75°F)。',
+      'evaporator-fan-seized': '冷冻室依靠静冷保持低温（-18°C 至 -12°C），但冷气完全吹不进冷藏室，导致冷藏室骤升至 12°C–17°C (54°F–62°F)。',
+      'drain-tube-frozen-clogged': '箱内温度维持在 3°C–5°C，但化霜水倒灌至果蔬保鲜盒积水，诱发严重霉菌与生物膜滋生。'
+    },
+    foodCats: {
+      'raw-poultry-meat': '生禽肉与肉馅',
+      'pasteurized-dairy-milk': '巴氏杀菌鲜奶与稀奶油',
+      'soft-cheeses': '软质与霉菌成熟奶酪',
+      'hard-cheeses': '硬质与陈年发酵奶酪',
+      'shell-eggs': '完整带壳清洗鸡蛋',
+      'cooked-leftovers-starches': '熟米饭、意面与炖菜剩菜',
+      'commercial-condiments': '高酸性调味酱与果酱',
+      'infant-formula-breastmilk': '冲调婴儿配方奶与解冻母乳'
+    },
+    foodItems: {
+      'raw-poultry-meat': '生鸡胸肉、鸡腿、火鸡肉糜、牛肉馅',
+      'pasteurized-dairy-milk': '全脂牛奶、低脂奶、脱脂奶、淡奶油',
+      'soft-cheeses': '布里、卡门贝尔、里科塔、鲜马苏里拉、菲达奶酪',
+      'hard-cheeses': '切达、帕玛森、佩科里诺、瑞士奶酪、高达、波萝伏洛',
+      'shell-eggs': '超市清洗消毒带壳鸡蛋',
+      'cooked-leftovers-starches': '蛋炒饭、煮熟意大利面、千层面、浓汤炖肉',
+      'commercial-condiments': '番茄酱、黄芥末酱、工业蛋黄酱、酸黄瓜、果酱',
+      'infant-formula-breastmilk': '冲泡好的配方奶、解冻的泵出母乳'
+    },
+    foodRats: {
+      'raw-poultry-meat': '高表面水分与丰富营养液极易诱发沙门氏菌与弯曲菌对数级爆发。绝不可指望高温煮熟来“拯救”变质肉类。',
+      'pasteurized-dairy-milk': '乳酸菌与嗜冷假单胞菌发酵乳糖，导致牛奶结块变酸发苦。',
+      'soft-cheeses': '极高水分活度 (aw > 0.95) 与中性 pH 是单核细胞增生李斯特菌的理想温床。',
+      'hard-cheeses': '极低水分活度 (aw < 0.85) 与高盐分从物理上抑制肠道致病菌增殖。',
+      'shell-eggs': '清洗后的鸡蛋失去蛋壳保护膜，升温冷凝水产生负压将壳表细菌吸入蛋内。',
+      'cooked-leftovers-starches': '蜡样芽孢杆菌芽孢耐高温蒸煮，在温热淀粉中迅速萌发并分泌耐热催吐肠毒素。',
+      'commercial-condiments': '强酸度 (pH < 4.0) 与低水分活度能有效抑杀致病细菌。',
+      'infant-formula-breastmilk': '新生儿免疫系统极度脆弱；阪崎肠杆菌与李斯特菌可导致致命败血症。'
+    },
+    guideComps: {
+      1: '双金属化霜温控器',
+      2: '化霜发热管（加热元件）',
+      3: '机械式化霜定时器',
+      4: '蒸发器送风风扇电机'
+    },
+    guideLocs: {
+      1: '直接用金属卡扣固定在冷冻室蒸发器盘管顶部或侧边铜铝管上。',
+      2: '横卧于蒸发器盘管底部边缘或穿插在金属翅片下方。',
+      3: '位于冷藏室顶部控制盒内部或冰箱背部下方压缩机仓内。',
+      4: '安装在冷冻室后背板内侧蒸发器盘管正上方的钢制支架上。'
+    },
+    guideConds: {
+      1: '必须在低温结霜状态下（低于 -6°C / 20°F）测试；若冰箱已化冻升温，须浸入冰水混合物中 5 分钟后再测。',
+      2: '测量阻值前务必拔掉两侧接线插片端子。',
+      3: '用一字螺丝刀顺时针缓慢拨动手动调节凸轮螺钉，直至听到清脆的咔哒切换声。',
+      4: '按住门开关测插头供电电压（老款 120V AC，变频款 12V DC）并测线圈阻值。'
+    },
+    guideNorms: {
+      1: '0.0 至 0.5 欧姆（万用表通断档蜂鸣导通）。',
+      2: '15 至 35 欧姆（视 450W–600W 额定功率而定）。',
+      3: '压缩机立刻停机、加热管开始通电化霜；正常 25–35 分钟后应自动跳回制冷。',
+      4: '绕组阻值 1.5K 至 3K 欧姆；手指轻拨扇叶转轴顺滑无阻滞。'
+    },
+    guideDefs: {
+      1: '低温状态下仍显示无穷大 (O.L. 开路) 证实温控器内部触点已损坏，加热管永远无法通电。',
+      2: '显示 O.L.（断路）说明内部电阻丝已烧断，必须更换整根加热管。',
+      3: '超过 45 分钟压缩机仍不自动恢复启动，说明定时器齿轮滑牙或微电机已烧毁。',
+      4: '转轴发涩卡死或线圈显示 O.L. 均表明风机已报废。'
+    }
+  },
+  ja: {
+    modelNames: {
+      'french-door-bottom-freezer': 'フレンチドア・ボトムフリーザー型（Samsung / LG / Whirlpool / GE）',
+      'top-freezer-traditional': '従来型トップフリーザー（上段冷凍室・Frigidaire / Whirlpool）',
+      'side-by-side-dual-zone': '観音開きサイドバイサイド型（KitchenAid / GE Profile / Bosch）',
+      'compact-mini-dorm-fridge': '小型ミニ冷蔵庫・ワンドア直冷式（製氷ボックス付き）',
+      'commercial-reach-in': '業務用ステンレス縦型冷蔵庫（True / Turbo Air）'
+    },
+    modelVulns: {
+      'french-door-bottom-freezer': 'ドレンパン凍結と電動ダンパー固着リスクが高く、冷凍室が冷えたまま冷蔵室が 10°C (50°F) 超へ急上昇しやすい構造です。',
+      'top-freezer-traditional': 'バイメタルサーモの膨張・浸水で接点が切れると除霜ヒーターが作動せず、96時間以内にエバポレーターが氷塊化します。',
+      'side-by-side-dual-zone': '仕切り壁の還気ダクトが氷で詰まりやすく、ドアパッキンの劣化が着霜を急加速させます。',
+      'compact-mini-dorm-fridge': '自動ヒーターがなく、冷却板に分厚い霜が付着すると断熱材のように働き庫内が 7°C (45°F) 以上へ上昇します。',
+      'commercial-reach-in': '頻繁なドア開閉により厨房の油煙と湿気が流入し、エバポレーターフィンの急速着氷を招きます。'
+    },
+    failureNames: {
+      'bimetal-open-iced-coils': 'バイメタル除霜サーモスタット断線故障（冷却器完全氷結）',
+      'bimetal-welded-heater-runaway': 'サーモ接点溶着による除霜ヒーター連続暴走',
+      'timer-motor-burnt-out': 'デフロストタイマーが除霜モードのまま停止',
+      'evaporator-fan-seized': 'エバポレーター循環ファン軸受焼き付き・氷噛みロック',
+      'drain-tube-frozen-clogged': 'ドレン排水口凍結・バイオフィルムスライム詰まり'
+    },
+    failureTrajs: {
+      'bimetal-open-iced-coils': '初期は冷凍室が -9°C〜-4°C に保たれますが、3〜5日で氷の壁が風道を塞ぎ、冷蔵室のみ 9°C〜14°C (48°F–58°F) へ上昇します。',
+      'bimetal-welded-heater-runaway': '除霜中に冷凍室内が 10°C〜18°C (50°F–65°F) へ急騰し、樹脂製内壁が熱変形し冷蔵室も 11°C 超へ悪化します。',
+      'timer-motor-burnt-out': 'コンプレッサーとファンが一切再起動せず、8〜16時間で冷凍室・冷蔵室ともに室温 20°C〜24°C へ到達します。',
+      'evaporator-fan-seized': '冷凍室は低温（-18°C〜-12°C）を維持しますが、冷気が冷蔵室へ送られず冷蔵室のみ 12°C〜17°C へ上昇します。',
+      'drain-tube-frozen-clogged': '庫内温度は 3°C〜5°C に保たれますが、融解水が野菜室へ溢れ出し、カビと細菌バイオフィルムが繁殖します。'
+    },
+    foodCats: {
+      'raw-poultry-meat': '生鶏肉・ひき肉類',
+      'pasteurized-dairy-milk': '殺菌済み牛乳・生クリーム',
+      'soft-cheeses': '軟質・白カビ熟成チーズ',
+      'hard-cheeses': '硬質・長期熟成チーズ',
+      'shell-eggs': '市販の殻付き洗卵',
+      'cooked-leftovers-starches': '調理済みご飯・パスタ・シチュー',
+      'commercial-condiments': '高酸性調味料・ジャム類',
+      'infant-formula-breastmilk': '調乳済み粉ミルク・搾母乳'
+    },
+    foodItems: {
+      'raw-poultry-meat': '鶏むね肉、もも肉、七面鳥ひき肉、牛ひき肉',
+      'pasteurized-dairy-milk': '普通牛乳、低脂肪乳、無脂肪乳、ホイップクリーム',
+      'soft-cheeses': 'ブリー、カマンベール、リコッタ、生モッツァレラ、フェタ',
+      'hard-cheeses': 'チェダー、パルメザン、ペコリーノ、スイス、ゴーダ、プロヴォローネ',
+      'shell-eggs': '洗浄殺菌済みパック入り生卵',
+      'cooked-leftovers-starches': 'チャーハン、茹でパスタ、ラザニア、シチュー、スープ',
+      'commercial-condiments': 'ケチャップ、マスタード、市販マヨネーズ、ピクルス、ジャム',
+      'infant-formula-breastmilk': '調乳済みミルク、解凍した母乳'
+    },
+    foodRats: {
+      'raw-poultry-meat': '表面の水分と栄養分によりサルモネラ菌やカンピロバクターが対数増殖します。傷んだ肉を加熱殺菌して食べることは厳禁です。',
+      'pasteurized-dairy-milk': '乳酸菌と好冷シュードモナス属が乳糖を発酵させ、凝固と苦味・腐敗を引き起こします。',
+      'soft-cheeses': '高い水分活性（aw > 0.95）と中性に近いpHはリステリア菌の最適な培地となります。',
+      'hard-cheeses': '低い水分活性（aw < 0.85）と高い塩分濃度により腸管病原菌の増殖が物理的に阻止されます。',
+      'shell-eggs': '洗浄卵はクチクラ層がないため、結露の陰圧で殻表面の細菌が気孔から内部へ引き込まれます。',
+      'cooked-leftovers-starches': 'セレウス菌芽胞は加熱を生き延び、温かいデンプン中で急激に発芽し耐熱性嘔吐毒セレウリドを産生します。',
+      'commercial-condiments': '高酸度（pH < 4.0）と低水分活性が病原性細菌の増殖を完全に抑制します。',
+      'infant-formula-breastmilk': '乳児の免疫系は極めて脆弱であり、クロノバクター菌やリステリア菌が致死的敗血症を引き起こします。'
+    },
+    guideComps: {
+      1: 'バイメタル除霜サーモスタット',
+      2: '除霜カルロッドヒーター',
+      3: '機械式デフロストタイマー',
+      4: 'エバポレーター循環ファンモーター'
+    },
+    guideLocs: {
+      1: '冷凍室エバポレーターコイル上部または側面の金属配管にクリップ留めされています。',
+      2: 'エバポレーターの下端に沿って、またはフィン下部へ織り込まれる形で配置されています。',
+      3: '冷蔵室天井の温度調節コンソール内部、または背面下部コンプレッサー室内にあります。',
+      4: '冷凍室背面パネル裏のエバポレーター真上の金属ブラケットに取り付けられています。'
+    },
+    guideConds: {
+      1: '必ず低温凍結状態（-6°C / 20°F未満）で測定してください。温まっている場合は氷水に5分浸してから測定します。',
+      2: '測定前に必ず両側の平型端子（ファストン端子）を引き抜いて絶縁してください。',
+      3: '手動送りネジをマイナスドライバーで時計回りに回し、カチッと大きな切替音が鳴るまで進めます。',
+      4: 'ドアスイッチを押した状態でコネクタ電圧（従来機120V AC / インバーター機12V DC）と巻線抵抗を測定します。'
+    },
+    guideNorms: {
+      1: '0.0〜0.5 Ω（テスター導通ブザーが鳴る閉回路状態）。',
+      2: '出力（450W〜600W）に応じて 15〜35 Ω。',
+      3: 'コンプレッサーが即停止してヒーターへ通電。25〜35分以内に自動で冷却運転へ復帰します。',
+      4: 'コイル巻線 1.5K〜3K Ω。指で羽根を軽く回すと抵抗なくスムーズに回転します。'
+    },
+    guideDefs: {
+      1: '冷却状態でも無限大（O.L.）を示す場合は内部接点の故障であり、除霜ヒーターが作動しません。',
+      2: 'O.L.（オープン回路）の場合はヒーター内部の電熱線断線のため交換が必要です。',
+      3: '45分経過してもコンプレッサーが再起動しない場合、タイマー内蔵モーターまたはギアが破損しています。',
+      4: '軸が重い・固着している、または巻線が O.L. の場合はファンモーター焼損です。'
+    }
+  }
+};
+
+const JS_STATUS_I18N: Record<SupportedLanguage, {
+  tempUnitDisplay: string;
+  hrsUnit: string;
+  optLabel: string;
+  usdaLimitLabel: string;
+  staphLimitLabel: string;
+  ambientLimitLabel: string;
+  perishLimitLabel: string;
+  staphAxisLabel: string;
+  auditHint: string;
+  stepPrefix: string;
+  multimeterBadge: string;
+  locLabel: string;
+  condLabel: string;
+  normalLabel: string;
+  defectLabel: string;
+  warnModTitle: string;
+  warnModText: string;
+  warnHighTitle: string;
+  listeriaNegligible: string;
+  listeriaNegSub: string;
+  listeriaElevated: string;
+  listeriaElevSubTpl: string;
+  listeriaCritTpl: string;
+  listeriaCritSub: string;
+  salDormant: string;
+  salDormantSub: string;
+  salSlow: string;
+  salSlowSub: string;
+  salRapid: string;
+  salRapidSub: string;
+  staphZero: string;
+  staphZeroSub: string;
+  staphLag: string;
+  staphLagSubTpl: string;
+  staphCrit: string;
+  staphCritSub: string;
+  lossSuffix: string;
+  lossFullSub: string;
+  lossAccSub: string;
+  verdictKeep: string;
+  verdictCook: string;
+  verdictDiscard: string;
+  repHeader: string;
+  repGenerated: string;
+  repStd: string;
+  repSec1: string;
+  repModel: string;
+  repFailure: string;
+  repTemp: string;
+  repHours: string;
+  repHoursSuffix: string;
+  repScore: string;
+  repSec2: string;
+  repSec3: string;
+  repUsdaRule: string;
+  repHeatWarn: string;
+  repSec4: string;
+  repStep1: string;
+  repStep2: string;
+  repStep3: string;
+  repVerify: string;
+}> = {
+  en: {
+    tempUnitDisplay: "°F",
+    hrsUnit: "hrs",
+    optLabel: "34°F (Optimal)",
+    usdaLimitLabel: "40°F (USDA Limit)",
+    staphLimitLabel: "50°F (Staph Limit)",
+    ambientLimitLabel: "75°F (Ambient)",
+    perishLimitLabel: "2 hrs (Max Perishables)",
+    staphAxisLabel: "4 hrs (Staph Toxin)",
+    auditHint: "Need an itemized audit for landlord repairs, technician dispatch, or homeowners insurance food loss claim?",
+    stepPrefix: "Step",
+    multimeterBadge: "Multimeter Test",
+    locLabel: "Location:",
+    condLabel: "Condition:",
+    normalLabel: "✓ Normal:",
+    defectLabel: "✗ Defect:",
+    warnModTitle: "MODERATE PERISHABLE SPOILAGE WARNING",
+    warnModText: "Temperatures between 41°F and 46°F accelerate milk souring and raw meat bacterial proliferation. Consume or cook immediately within 2 hours.",
+    warnHighTitle: "DANGEROUS PATHOGEN MULTIPLICATION DETECTED",
+    listeriaNegligible: "NEGLIGIBLE",
+    listeriaNegSub: "Doubling requires >32 hours",
+    listeriaElevated: "ELEVATED (2.5x)",
+    listeriaElevSubTpl: "Doubling in ~12 hrs; {hrs} hrs exposure",
+    listeriaCritTpl: "CRITICAL ({fold}x Multiplier)",
+    listeriaCritSub: "Psychrotrophic exponential expansion",
+    salDormant: "DORMANT (INHIBITED)",
+    salDormantSub: "Replication halted below 41.5°F",
+    salSlow: "ACTIVE SLOW LOG",
+    salSlowSub: "Generation time ~6-8 hours",
+    salRapid: "RAPID LOG PHASE",
+    salRapidSub: "Doubling every 90-120 minutes",
+    staphZero: "ZERO TOXIN",
+    staphZeroSub: "Toxin synthesis suppressed below 50°F",
+    staphLag: "PRE-TOXIN LAG",
+    staphLagSubTpl: "{rem} hrs until toxin threshold",
+    staphCrit: "CRITICAL SYNTHESIS",
+    staphCritSub: "Heat-stable enterotoxin present (Do not eat)",
+    lossSuffix: "% LOSS",
+    lossFullSub: "Complete microbiological discard",
+    lossAccSub: "Accelerated proteolytic rancidity",
+    verdictKeep: "SAFE TO KEEP",
+    verdictCook: "COOK IMMEDIATELY (>165°F)",
+    verdictDiscard: "DISCARD IMMEDIATELY",
+    repHeader: "ISITKITCHENSAFE COLD CHAIN & DEFROST DIAGNOSTIC REPORT",
+    repGenerated: "Generated",
+    repStd: "Standard: USDA-FSIS & FDA Food Code § 3-501.16 Compliance",
+    repSec1: "1. APPLIANCE & FAILURE TELEMETRY:",
+    repModel: "Model / Configuration",
+    repFailure: "Diagnostic Failure Mode",
+    repTemp: "Measured Fridge Temp",
+    repHours: "Cold Chain Breach Duration",
+    repHoursSuffix: "hours above 40°F",
+    repScore: "Cold Chain Integrity Score",
+    repSec2: "2. MICROBIOLOGICAL PATHOGEN THREAT ASSESSMENT:",
+    repSec3: "3. PRIMARY CLINICAL / SANITARY VERDICT:",
+    repUsdaRule: "USDA Rule: Any perishable food held >40°F for >2 hours (or >50°F for >1 hour) must be discarded.",
+    repHeatWarn: "Heat Warning: Staph enterotoxins are heat-stable and cannot be eliminated by cooking.",
+    repSec4: "4. MULTIMETER REPAIR DIRECTIVES:",
+    repStep1: "Test bi-metal thermostat while frosty (<20°F): Normal = 0.0 Ω (closed); Defect = O.L. (open)",
+    repStep2: "Test defrost heater: Normal = 15 to 35 Ω; Defect = O.L. (burned calrod)",
+    repStep3: "Check mechanical timer: Turn manual advance notch until loud click; motor should advance in 25-35 min.",
+    repVerify: "Verify full diagnostic tools at:"
+  },
+  es: {
+    tempUnitDisplay: "°F",
+    hrsUnit: "h",
+    optLabel: "34°F (Óptimo)",
+    usdaLimitLabel: "40°F (Límite USDA)",
+    staphLimitLabel: "50°F (Límite Staph)",
+    ambientLimitLabel: "75°F (Ambiente)",
+    perishLimitLabel: "2 h (Máx. Perecederos)",
+    staphAxisLabel: "4 h (Toxina Staph)",
+    auditHint: "¿Necesita un informe detallado para el casero, técnico o reclamación al seguro del hogar por pérdida de alimentos?",
+    stepPrefix: "Paso",
+    multimeterBadge: "Prueba Multímetro",
+    locLabel: "Ubicación:",
+    condLabel: "Condición:",
+    normalLabel: "✓ Normal:",
+    defectLabel: "✗ Fallo:",
+    warnModTitle: "ALERTA MODERADA DE DETERIORO DE PERECEDEROS",
+    warnModText: "Temperaturas entre 41°F y 46°F (5°C–8°C) aceleran el agriado lácteo y la proliferación en carnes. Consumir o cocinar de inmediato antes de 2 horas.",
+    warnHighTitle: "MULTIPLICACIÓN PELIGROSA DE PATÓGENOS DETECTADA",
+    listeriaNegligible: "INSIGNIFICANTE",
+    listeriaNegSub: "Duplicación >32 horas",
+    listeriaElevated: "ELEVADO (2,5x)",
+    listeriaElevSubTpl: "Duplicación en ~12 h; {hrs} h exposición",
+    listeriaCritTpl: "CRÍTICO (Factor {fold}x)",
+    listeriaCritSub: "Expansión exponencial psicrotrófica",
+    salDormant: "INACTIVA (INHIBIDA)",
+    salDormantSub: "Replicación detenida bajo 41,5°F",
+    salSlow: "FASE LOG LENTA ACTIVA",
+    salSlowSub: "Tiempo de generación ~6–8 horas",
+    salRapid: "FASE LOG RÁPIDA",
+    salRapidSub: "Duplicación cada 90–120 minutos",
+    staphZero: "CERO TOXINA",
+    staphZeroSub: "Síntesis bloqueada bajo 50°F (10°C)",
+    staphLag: "FASE DE LATENCIA",
+    staphLagSubTpl: "{rem} h para umbral de toxina",
+    staphCrit: "SÍNTESIS CRÍTICA",
+    staphCritSub: "Enterotoxina termoestable (NO consumir)",
+    lossSuffix: "% PÉRDIDA",
+    lossFullSub: "Descarte microbiológico completo",
+    lossAccSub: "Rancidez proteolítica acelerada",
+    verdictKeep: "SEGURO CONSERVAR",
+    verdictCook: "COCINAR YA (>74°C / 165°F)",
+    verdictDiscard: "DESECHAR DE INMEDIATO",
+    repHeader: "INFORME DIAGNÓSTICO DE CADENA DE FRÍO Y DESCONGELACIÓN",
+    repGenerated: "Generado",
+    repStd: "Normativa: USDA-FSIS y Código Alimentario FDA § 3-501.16",
+    repSec1: "1. TELEMETRÍA DEL EQUIPO Y FALLA:",
+    repModel: "Modelo / Configuración",
+    repFailure: "Modo de Falla Diagnosticado",
+    repTemp: "Temperatura Medida",
+    repHours: "Duración sobre 40°F",
+    repHoursSuffix: "horas por encima de 40°F",
+    repScore: "Puntuación de Integridad",
+    repSec2: "2. EVALUACIÓN MICROBIOLÓGICA DE PATÓGENOS:",
+    repSec3: "3. VEREDICTO CLÍNICO Y SANITARIO:",
+    repUsdaRule: "Regla USDA: Todo alimento perecedero >40°F por >2 h (o >50°F por >1 h) debe desecharse.",
+    repHeatWarn: "Advertencia Térmica: Las enterotoxinas de Staph resisten la ebullición y no se eliminan cocinando.",
+    repSec4: "4. DIRECTIVAS ELÉCTRICAS DE MULTÍMETRO:",
+    repStep1: "Probar bimetal en frío (<20°F / -6°C): Normal = 0,0 Ω; Fallo = O.L. (abierto)",
+    repStep2: "Probar resistencia de descongelación: Normal = 15 a 35 Ω; Fallo = O.L.",
+    repStep3: "Revisar temporizador mecánico: Girar avance manual hasta oír clic; debe salir en 25–35 min.",
+    repVerify: "Verifique herramientas diagnósticas completas en:"
+  },
+  pt: {
+    tempUnitDisplay: "°F",
+    hrsUnit: "h",
+    optLabel: "34°F (Ideal)",
+    usdaLimitLabel: "40°F (Limite USDA)",
+    staphLimitLabel: "50°F (Limite Staph)",
+    ambientLimitLabel: "75°F (Ambiente)",
+    perishLimitLabel: "2 h (Máx. Perecíveis)",
+    staphAxisLabel: "4 h (Toxina Staph)",
+    auditHint: "Precisa de um relatório detalhado para técnico, proprietário ou pedido de reembolso no seguro residencial?",
+    stepPrefix: "Etapa",
+    multimeterBadge: "Teste Multímetro",
+    locLabel: "Local:",
+    condLabel: "Condição:",
+    normalLabel: "✓ Normal:",
+    defectLabel: "✗ Defeito:",
+    warnModTitle: "AVISO MODERADO DE DETERIORAÇÃO DE PERECÍVEIS",
+    warnModText: "Temperaturas entre 41°F e 46°F (5°C–8°C) aceleram a deterioração de leite e carnes. Consuma ou cozinhe imediatamente em até 2 horas.",
+    warnHighTitle: "MULTIPLICAÇÃO PERIGOSA DE PATÓGENOS DETECTADA",
+    listeriaNegligible: "INSIGNIFICANTE",
+    listeriaNegSub: "Duplicação leva >32 horas",
+    listeriaElevated: "ELEVADO (2,5x)",
+    listeriaElevSubTpl: "Duplicação em ~12 h; {hrs} h de exposição",
+    listeriaCritTpl: "CRÍTICO (Fator {fold}x)",
+    listeriaCritSub: "Expansão exponencial psicrotrófica",
+    salDormant: "DORMENTE (INIBIDA)",
+    salDormantSub: "Replicação parada abaixo de 41,5°F",
+    salSlow: "FASE LOG LENTA ATIVA",
+    salSlowSub: "Tempo de geração ~6–8 horas",
+    salRapid: "FASE LOG RÁPIDA",
+    salRapidSub: "Duplicação a cada 90–120 minutos",
+    staphZero: "ZERO TOXINA",
+    staphZeroSub: "Síntese suprimida abaixo de 50°F",
+    staphLag: "ATRASO PRÉ-TOXINA",
+    staphLagSubTpl: "{rem} h até limiar de toxina",
+    staphCrit: "SÍNTESE CRÍTICA",
+    staphCritSub: "Enterotoxina termoestável (NÃO ingerir)",
+    lossSuffix: "% PERDA",
+    lossFullSub: "Descarte microbiológico total",
+    lossAccSub: "Rancidez proteolítica acelerada",
+    verdictKeep: "SEGURO MANTER",
+    verdictCook: "COZINHAR JÁ (>74°C / 165°F)",
+    verdictDiscard: "DESCARTAR IMEDIATAMENTE",
+    repHeader: "RELATÓRIO DE DIAGNÓSTICO DE CADEIA DE FRIO E DEGELO",
+    repGenerated: "Gerado em",
+    repStd: "Norma: Conformidade USDA-FSIS e FDA Food Code § 3-501.16",
+    repSec1: "1. TELEMETRIA DO APARELHO E FALHA:",
+    repModel: "Modelo / Configuração",
+    repFailure: "Modo de Falha Diagnosticado",
+    repTemp: "Temperatura Medida",
+    repHours: "Duração da Quebra >40°F",
+    repHoursSuffix: "horas acima de 40°F",
+    repScore: "Pontuação de Integridade",
+    repSec2: "2. AVALIAÇÃO MICROBIOLÓGICA DE PATÓGENOS:",
+    repSec3: "3. VEREDITO CLÍNICO / SANITÁRIO PRINCIPAL:",
+    repUsdaRule: "Regra USDA: Alimentos perecíveis >40°F por >2 h (ou >50°F por >1 h) devem ser descartados.",
+    repHeatWarn: "Alerta Térmico: Enterotoxinas de Staph resistem ao cozimento e não são eliminadas pelo calor.",
+    repSec4: "4. DIRETRIZES DE REPARO COM MULTÍMETRO:",
+    repStep1: "Testar bimetal congelado (<20°F): Normal = 0,0 Ω; Defeito = O.L. (aberto)",
+    repStep2: "Testar resistência de degelo: Normal = 15 a 35 Ω; Defeito = O.L.",
+    repStep3: "Checar timer mecânico: Girar avanço manual até estalo; motor deve avançar em 25–35 min.",
+    repVerify: "Verifique ferramentas diagnósticas completas em:"
+  },
+  'zh-cn': {
+    tempUnitDisplay: "°F",
+    hrsUnit: "小时",
+    optLabel: "34°F (理想低温)",
+    usdaLimitLabel: "40°F (USDA红线)",
+    staphLimitLabel: "50°F (葡萄球菌毒素线)",
+    ambientLimitLabel: "75°F (室温)",
+    perishLimitLabel: "2 小时 (易腐上限)",
+    staphAxisLabel: "4 小时 (产毒警戒)",
+    auditHint: "需要用于家电报修派单、房东沟通或家庭财产险食材损失理赔的逐项诊断报告？",
+    stepPrefix: "步骤",
+    multimeterBadge: "万用表实测",
+    locLabel: "安装位置：",
+    condLabel: "检测前提：",
+    normalLabel: "✓ 正常读数：",
+    defectLabel: "✗ 故障判定：",
+    warnModTitle: "中度易腐食品变质警报",
+    warnModText: "41°F 至 46°F (5°C–8°C) 会加速鲜奶变酸与生肉细菌滋生，请在 2 小时内立刻彻底烹熟食用。",
+    warnHighTitle: "检测到危险食源性致病菌指数级扩增",
+    listeriaNegligible: "风险极低",
+    listeriaNegSub: "世代倍增时间 >32 小时",
+    listeriaElevated: "显著升高 (2.5x)",
+    listeriaElevSubTpl: "约 12 小时倍增；已暴露 {hrs} 小时",
+    listeriaCritTpl: "极度危险 ({fold}x 倍增)",
+    listeriaCritSub: "嗜冷菌指数级爆发繁殖",
+    salDormant: "休眠抑制状态",
+    salDormantSub: "41.5°F 以下繁殖停止",
+    salSlow: "活跃缓慢对数期",
+    salSlowSub: "世代时间约 6–8 小时",
+    salRapid: "高速对数爆发期",
+    salRapidSub: "每 90–120 分钟倍增一次",
+    staphZero: "零肠毒素",
+    staphZeroSub: "50°F 以下产毒受抑制",
+    staphLag: "产毒前潜伏期",
+    staphLagSubTpl: "距产毒临界还剩 {rem} 小时",
+    staphCrit: "高危毒素合成",
+    staphCritSub: "耐热肠毒素已形成（严禁食用）",
+    lossSuffix: "% 折损",
+    lossFullSub: "微生物污染需彻底废弃",
+    lossAccSub: "蛋白酶解与酸败急剧加速",
+    verdictKeep: "可安全保留",
+    verdictCook: "立刻彻底烹熟 (>74°C)",
+    verdictDiscard: "立即全部丢弃",
+    repHeader: "ISITKITCHENSAFE 冰箱冷链断链与化霜故障诊断报告",
+    repGenerated: "生成时间",
+    repStd: "合规依据：USDA-FSIS 与美国 FDA Food Code § 3-501.16",
+    repSec1: "1. 设备参数与故障遥测：",
+    repModel: "冰箱类型 / 架构",
+    repFailure: "诊断故障模式",
+    repTemp: "实测冷藏室温度",
+    repHours: "冷链超标持续时长",
+    repHoursSuffix: "小时（高于 40°F）",
+    repScore: "冷链完整度评分",
+    repSec2: "2. 微生物致病菌风险评估：",
+    repSec3: "3. 核心临床与卫生处置结论：",
+    repUsdaRule: "USDA 准则：易腐食品处于 >40°F 超过 2 小时（或 >50°F 超过 1 小时）必须丢弃。",
+    repHeatWarn: "高温警示：金黄色葡萄球菌肠毒素极其耐热，烹饪煮沸亦无法灭活。",
+    repSec4: "4. 万用表电气检修指令：",
+    repStep1: "低温结霜状态下测双金属温控器（<20°F）：正常 0.0 Ω；故障 O.L.（开路）",
+    repStep2: "测化霜加热管：正常 15–35 Ω；故障 O.L.（发热丝烧断）",
+    repStep3: "检机械化霜定时器：手动顺时针拧至响声跳档，25–35 分钟内应恢复制冷。",
+    repVerify: "完整在线诊断工具详见："
+  },
+  ja: {
+    tempUnitDisplay: "°F",
+    hrsUnit: "時間",
+    optLabel: "34°F (最適冷蔵)",
+    usdaLimitLabel: "40°F (USDA限界)",
+    staphLimitLabel: "50°F (ブドウ球菌警戒)",
+    ambientLimitLabel: "75°F (室温)",
+    perishLimitLabel: "2時間 (生鮮安全上限)",
+    staphAxisLabel: "4時間 (毒素産生)",
+    auditHint: "修理業者への依頼、大家への報告、または保険申請向けの食品損失・診断レポートが必要ですか？",
+    stepPrefix: "ステップ",
+    multimeterBadge: "テスター点検",
+    locLabel: "設置場所:",
+    condLabel: "点検条件:",
+    normalLabel: "✓ 正常値:",
+    defectLabel: "✗ 故障判定:",
+    warnModTitle: "軽度 生鮮食品劣化・細菌増殖警報",
+    warnModText: "41°F〜46°F (5°C〜8°C) では牛乳の酸敗や生肉の細菌増殖が早まります。2時間以内に直ちに加熱調理または消費してください。",
+    warnHighTitle: "危険な食中毒病原体の対数増殖を検出",
+    listeriaNegligible: "ごく微小",
+    listeriaNegSub: "倍加に32時間以上を要する",
+    listeriaElevated: "警戒上昇 (2.5倍)",
+    listeriaElevSubTpl: "約12時間で倍加（{hrs}時間経過）",
+    listeriaCritTpl: "極めて危険 ({fold}倍増殖)",
+    listeriaCritSub: "好冷菌による指数関数的増殖",
+    salDormant: "休眠（増殖抑制）",
+    salDormantSub: "41.5°F未満で増殖停止",
+    salSlow: "緩徐対数増殖フェーズ",
+    salSlowSub: "世代時間 約6〜8時間",
+    salRapid: "急速対数増殖フェーズ",
+    salRapidSub: "90〜120分ごとに倍加",
+    staphZero: "毒素産生ゼロ",
+    staphZeroSub: "50°F未満では毒素産生抑制",
+    staphLag: "毒素産生前ラグ期",
+    staphLagSubTpl: "毒素閾値まで残り {rem} 時間",
+    staphCrit: "毒素合成クライシス",
+    staphCritSub: "耐熱性エンテロトキシン生成（摂食厳禁）",
+    lossSuffix: "% 劣化消失",
+    lossFullSub: "微生物学的完全廃棄レベル",
+    lossAccSub: "タンパク分解と酸敗が急速進行",
+    verdictKeep: "保存可能",
+    verdictCook: "直ちに加熱調理 (>74°C)",
+    verdictDiscard: "直ちに廃棄",
+    repHeader: "ISITKITCHENSAFE 冷蔵庫コールドチェーン・除霜故障診断レポート",
+    repGenerated: "生成日時",
+    repStd: "準拠基準: USDA-FSIS および FDA Food Code § 3-501.16",
+    repSec1: "1. 機器構成および温度逸脱テレメトリ:",
+    repModel: "冷蔵庫タイプ / 構造",
+    repFailure: "診断された故障モード",
+    repTemp: "測定された冷蔵室温度",
+    repHours: "40°F超過の継続時間",
+    repHoursSuffix: "時間（40°F超）",
+    repScore: "コールドチェーン健全性スコア",
+    repSec2: "2. 病原微生物・毒素リスク評価:",
+    repSec3: "3. 衛生・廃棄トリアージ総合判定:",
+    repUsdaRule: "USDA基準: 40°F超で2時間以上（または50°F超で1時間以上）経過した生鮮食品は廃棄してください。",
+    repHeatWarn: "加熱警告: 黄色ブドウ球菌の耐熱性エンテロトキシンは再加熱しても無毒化できません。",
+    repSec4: "4. デジタルテスター修理チェック指針:",
+    repStep1: "低温凍結状態（20°F未満）でバイメタル計測: 正常 = 0.0 Ω / 故障 = O.L.（開放）",
+    repStep2: "除霜ヒーター抵抗測定: 正常 = 15〜35 Ω / 故障 = O.L.（断線）",
+    repStep3: "機械式タイマー点検: 手動ダイヤルをカチッと音がするまで回し、25〜35分で再始動するか確認。",
+    repVerify: "詳細診断シミュレーター URL:"
+  }
+};
+
 const t = dict[lang] || dict.en;
-const data = defrostData;
+const itemLoc = ITEM_I18N[lang] || ITEM_I18N.en;
+const jsI18n = JS_STATUS_I18N[lang] || JS_STATUS_I18N.en;
+
+const localizedData = {
+  ...defrostData,
+  applianceModels: defrostData.applianceModels.map((m) => ({
+    ...m,
+    i18nName: itemLoc.modelNames[m.id] || m.name,
+    i18nVuln: itemLoc.modelVulns[m.id] || m.failureVulnerability
+  })),
+  failureModes: defrostData.failureModes.map((f) => ({
+    ...f,
+    i18nName: itemLoc.failureNames[f.id] || f.name,
+    i18nTraj: itemLoc.failureTrajs[f.id] || f.tempTrajectory
+  })),
+  foodTriageList: defrostData.foodTriageList.map((food) => ({
+    ...food,
+    i18nCategory: itemLoc.foodCats[food.id] || food.category,
+    i18nItems: itemLoc.foodItems[food.id] || food.items,
+    i18nRationale: itemLoc.foodRats[food.id] || food.rationale
+  })),
+  multimeterDiagnosticGuide: defrostData.multimeterDiagnosticGuide.map((g) => ({
+    ...g,
+    i18nComponent: itemLoc.guideComps[g.step] || g.component,
+    i18nLocation: itemLoc.guideLocs[g.step] || g.location,
+    i18nCondition: itemLoc.guideConds[g.step] || g.testCondition,
+    i18nExpected: itemLoc.guideNorms[g.step] || g.expectedReading,
+    i18nDefect: itemLoc.guideDefs[g.step] || g.failureIndication
+  }))
+};
 ---
 
-<div class="refrigerator-defrost-simulator bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 text-slate-100 shadow-2xl my-8">
+<div id="refrigerator-defrost-simulator" data-lang={lang} class="refrigerator-defrost-simulator bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 text-slate-100 shadow-2xl my-8">
   <!-- Header Badge -->
   <div class="flex flex-wrap items-center justify-between gap-3 mb-6 pb-6 border-b border-slate-800">
     <div class="flex items-center space-x-2">
@@ -419,12 +1210,12 @@ const data = defrostData;
           {t.modelLabel}
         </label>
         <select id="model-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-xs sm:text-sm text-slate-100 focus:outline-none focus:border-cyan-500">
-          {data.applianceModels.map((m) => (
-            <option value={m.id}>{m.name}</option>
+          {localizedData.applianceModels.map((m) => (
+            <option value={m.id}>{m.i18nName}</option>
           ))}
         </select>
         <p id="model-desc" class="text-[11px] text-slate-400 mt-1 italic">
-          {data.applianceModels[0].failureVulnerability}
+          {localizedData.applianceModels[0].i18nVuln}
         </p>
       </div>
 
@@ -434,12 +1225,12 @@ const data = defrostData;
           {t.failureLabel}
         </label>
         <select id="failure-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-xs sm:text-sm text-slate-100 focus:outline-none focus:border-cyan-500">
-          {data.failureModes.map((f) => (
-            <option value={f.id}>{f.name}</option>
+          {localizedData.failureModes.map((f) => (
+            <option value={f.id}>{f.i18nName}</option>
           ))}
         </select>
         <p id="failure-desc" class="text-[11px] text-amber-400/90 mt-1">
-          {data.failureModes[0].tempTrajectory}
+          {localizedData.failureModes[0].i18nTraj}
         </p>
       </div>
 
@@ -449,8 +1240,8 @@ const data = defrostData;
           {t.foodLabel}
         </label>
         <select id="food-select" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-xs sm:text-sm text-slate-100 focus:outline-none focus:border-cyan-500">
-          {data.foodTriageList.map((food) => (
-            <option value={food.id}>{food.category} ({food.items})</option>
+          {localizedData.foodTriageList.map((food) => (
+            <option value={food.id}>{food.i18nCategory} ({food.i18nItems})</option>
           ))}
         </select>
       </div>
@@ -481,10 +1272,10 @@ const data = defrostData;
           class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-500"
         />
         <div class="flex justify-between text-[10px] text-slate-500 mt-1 font-mono">
-          <span class="text-emerald-400">34°F (Optimal)</span>
-          <span class="text-yellow-400">40°F (USDA Limit)</span>
-          <span class="text-orange-400">50°F (Staph Limit)</span>
-          <span class="text-red-400">75°F (Ambient)</span>
+          <span class="text-emerald-400">{jsI18n.optLabel}</span>
+          <span class="text-yellow-400">{jsI18n.usdaLimitLabel}</span>
+          <span class="text-orange-400">{jsI18n.staphLimitLabel}</span>
+          <span class="text-red-400">{jsI18n.ambientLimitLabel}</span>
         </div>
       </div>
 
@@ -492,7 +1283,7 @@ const data = defrostData;
       <div>
         <div class="flex justify-between items-center text-xs font-medium text-slate-300 mb-1.5">
           <span>{t.hoursLabel}</span>
-          <span id="hours-display" class="font-mono text-cyan-400 text-sm font-bold">8.0 hrs</span>
+          <span id="hours-display" class="font-mono text-cyan-400 text-sm font-bold">8.0 {jsI18n.hrsUnit}</span>
         </div>
         <input
           id="hours-slider"
@@ -504,10 +1295,10 @@ const data = defrostData;
           class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-500"
         />
         <div class="flex justify-between text-[10px] text-slate-500 mt-1 font-mono">
-          <span>0 hrs</span>
-          <span class="text-yellow-400">2 hrs (Max Perishables)</span>
-          <span class="text-orange-400">4 hrs (Staph Toxin)</span>
-          <span class="text-red-400">48 hrs</span>
+          <span>0 {jsI18n.hrsUnit}</span>
+          <span class="text-yellow-400">{jsI18n.perishLimitLabel}</span>
+          <span class="text-orange-400">{jsI18n.staphAxisLabel}</span>
+          <span class="text-red-400">48 {jsI18n.hrsUnit}</span>
         </div>
       </div>
 
@@ -580,10 +1371,10 @@ const data = defrostData;
             {t.listeriaRiskLabel}
           </div>
           <div id="listeria-val" class="font-mono text-lg font-bold text-red-400">
-            HIGH (6.2x Multiplier)
+            {jsI18n.listeriaCritTpl.replace('{fold}', '6')}
           </div>
           <div id="listeria-sub" class="text-[10px] text-slate-500 mt-1">
-            Doubling every 4.8 hrs
+            {jsI18n.listeriaCritSub}
           </div>
         </div>
 
@@ -593,10 +1384,10 @@ const data = defrostData;
             {t.salmonellaRiskLabel}
           </div>
           <div id="salmonella-val" class="font-mono text-lg font-bold text-red-400">
-            RAPID LOG PHASE
+            {jsI18n.salRapid}
           </div>
           <div id="salmonella-sub" class="text-[10px] text-slate-500 mt-1">
-            Active replication above 41.5°F
+            {jsI18n.salRapidSub}
           </div>
         </div>
 
@@ -606,10 +1397,10 @@ const data = defrostData;
             {t.staphToxinLabel}
           </div>
           <div id="staph-val" class="font-mono text-lg font-bold text-orange-400">
-            CRITICAL SYNTHESIS
+            {jsI18n.staphCrit}
           </div>
           <div id="staph-sub" class="text-[10px] text-slate-500 mt-1">
-            >4 hrs above 50°F threshold breached
+            {jsI18n.staphCritSub}
           </div>
         </div>
 
@@ -619,10 +1410,10 @@ const data = defrostData;
             {t.shelfLifeLossLabel}
           </div>
           <div id="shelflife-val" class="font-mono text-lg font-bold text-red-400">
-            -85% LOSS
+            -58{jsI18n.lossSuffix}
           </div>
           <div id="shelflife-sub" class="text-[10px] text-slate-500 mt-1">
-            Quality & microbial half-life collapsed
+            {jsI18n.lossAccSub}
           </div>
         </div>
       </div>
@@ -655,17 +1446,17 @@ const data = defrostData;
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-800/60" id="triage-table-body">
-          {data.foodTriageList.map((item) => (
+          {localizedData.foodTriageList.map((item) => (
             <tr class="hover:bg-slate-900/40 transition food-row" data-food-id={item.id} data-max-hours={item.maxSafeHoursAbove40F}>
-              <td class="py-3 px-3 sm:px-4 font-bold text-slate-200">{item.category}</td>
-              <td class="py-3 px-3 sm:px-4 text-slate-400">{item.items}</td>
-              <td class="py-3 px-3 sm:px-4 text-center font-mono text-cyan-400">{item.maxSafeHoursAbove40F} hrs</td>
+              <td class="py-3 px-3 sm:px-4 font-bold text-slate-200">{item.i18nCategory}</td>
+              <td class="py-3 px-3 sm:px-4 text-slate-400">{item.i18nItems}</td>
+              <td class="py-3 px-3 sm:px-4 text-center font-mono text-cyan-400">{item.maxSafeHoursAbove40F} {jsI18n.hrsUnit}</td>
               <td class="py-3 px-3 sm:px-4 text-center">
                 <span class="food-verdict-badge inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-950 text-red-400 border border-red-800">
-                  {item.verdictAt4HoursAt48F}
+                  {jsI18n.verdictDiscard}
                 </span>
               </td>
-              <td class="py-3 px-3 sm:px-4 text-slate-300 text-[11px]">{item.rationale}</td>
+              <td class="py-3 px-3 sm:px-4 text-slate-300 text-[11px]">{item.i18nRationale}</td>
             </tr>
           ))}
         </tbody>
@@ -688,30 +1479,30 @@ const data = defrostData;
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {data.multimeterDiagnosticGuide.map((guide) => (
+      {localizedData.multimeterDiagnosticGuide.map((guide) => (
         <div class="p-4 bg-slate-900/90 rounded-lg border border-slate-800 flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between mb-2">
               <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider">
-                Step {guide.step}: {guide.component}
+                {jsI18n.stepPrefix} {guide.step}: {guide.i18nComponent}
               </span>
               <span class="text-[10px] font-mono bg-slate-800 px-2 py-0.5 rounded text-slate-300">
-                Multimeter Test
+                {jsI18n.multimeterBadge}
               </span>
             </div>
             <p class="text-xs text-slate-300 mb-2">
-              <strong class="text-slate-100">Location:</strong> {guide.location}
+              <strong class="text-slate-100">{jsI18n.locLabel}</strong> {guide.i18nLocation}
             </p>
             <p class="text-xs text-slate-400 mb-2">
-              <strong class="text-slate-300">Condition:</strong> {guide.testCondition}
+              <strong class="text-slate-300">{jsI18n.condLabel}</strong> {guide.i18nCondition}
             </p>
           </div>
           <div class="mt-3 pt-3 border-t border-slate-800 text-[11px]">
             <div class="text-emerald-400 font-medium mb-1">
-              ✓ Normal: {guide.expectedReading}
+              {jsI18n.normalLabel} {guide.i18nExpected}
             </div>
             <div class="text-red-400 font-medium">
-              ✗ Defect: {guide.failureIndication}
+              {jsI18n.defectLabel} {guide.i18nDefect}
             </div>
           </div>
         </div>
@@ -722,7 +1513,7 @@ const data = defrostData;
   <!-- Copyable Loss Report Button -->
   <div class="flex flex-wrap items-center justify-between gap-4 p-4 bg-slate-950/80 rounded-xl border border-slate-800 mb-8">
     <div class="text-xs text-slate-400">
-      Need an itemized audit for landlord repairs, technician dispatch, or homeowners insurance food loss claim?
+      {jsI18n.auditHint}
     </div>
     <button
       id="copy-report-btn"
@@ -742,27 +1533,29 @@ const data = defrostData;
       {t.crossLinkTitle}
     </h4>
     <div class="flex flex-wrap gap-2 text-xs">
-      <a href={lang === 'en' ? "/tools/slow-cooker-safety-simulator" : `/${lang}/tools/slow-cooker-safety-simulator`} class="px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-cyan-300 border border-slate-700/60 transition">
+      <a href={`${localePrefix}/tools/slow-cooker-safety-simulator/`} class="px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-cyan-300 border border-slate-700/60 transition">
         🍲 {t.crossLinkSlowCooker} &rarr;
       </a>
-      <a href={lang === 'en' ? "/tools/sous-vide-plastic-microbial-modeler" : `/${lang}/tools/sous-vide-plastic-microbial-modeler`} class="px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-cyan-300 border border-slate-700/60 transition">
+      <a href={`${localePrefix}/tools/sous-vide-plastic-microbial-modeler/`} class="px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-cyan-300 border border-slate-700/60 transition">
         🥩 {t.crossLinkSousVide} &rarr;
       </a>
-      <a href={lang === 'en' ? "/tools/pressure-cooker-instant-pot-safety-simulator" : `/${lang}/tools/pressure-cooker-instant-pot-safety-simulator`} class="px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-cyan-300 border border-slate-700/60 transition">
+      <a href={`${localePrefix}/tools/pressure-cooker-instant-pot-safety-simulator/`} class="px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-cyan-300 border border-slate-700/60 transition">
         ⚡ {t.crossLinkPressureCooker} &rarr;
       </a>
     </div>
   </div>
 </div>
 
-<script define:vars={{ data, t }}>
-  document.addEventListener('DOMContentLoaded', () => {
+<script is:inline define:vars={{ data: localizedData, t, jsI18n, localePrefix }}>
+(function() {
+  function initDefrostModeler() {
     const modelSelect = document.getElementById('model-select');
     const failureSelect = document.getElementById('failure-select');
     const foodSelect = document.getElementById('food-select');
     const tempSlider = document.getElementById('temp-slider');
     const hoursSlider = document.getElementById('hours-slider');
     const ambientSlider = document.getElementById('ambient-slider');
+    if (!modelSelect || !failureSelect || !tempSlider || !hoursSlider || !ambientSlider) return;
 
     const tempDisplay = document.getElementById('temp-display');
     const hoursDisplay = document.getElementById('hours-display');
@@ -797,35 +1590,29 @@ const data = defrostData;
       const tempC = ((tempF - 32) * 5 / 9).toFixed(1);
       const ambientC = ((ambientF - 32) * 5 / 9).toFixed(1);
 
-      // Display updates
-      tempDisplay.textContent = `${tempF.toFixed(1)}°F (${tempC}°C)`;
-      hoursDisplay.textContent = `${hours.toFixed(1)} hrs`;
-      ambientDisplay.textContent = `${ambientF.toFixed(0)}°F (${ambientC}°C)`;
+      if (tempDisplay) tempDisplay.textContent = `${tempF.toFixed(1)}°F (${tempC}°C)`;
+      if (hoursDisplay) hoursDisplay.textContent = `${hours.toFixed(1)} ${jsI18n.hrsUnit}`;
+      if (ambientDisplay) ambientDisplay.textContent = `${ambientF.toFixed(0)}°F (${ambientC}°C)`;
 
-      // Model & Failure descriptions
       const selectedModel = data.applianceModels.find(m => m.id === modelSelect.value);
       if (selectedModel && modelDesc) {
-        modelDesc.textContent = selectedModel.failureVulnerability;
+        modelDesc.textContent = selectedModel.i18nVuln || selectedModel.failureVulnerability;
       }
       const selectedFailure = data.failureModes.find(f => f.id === failureSelect.value);
       if (selectedFailure && failureDesc) {
-        failureDesc.textContent = selectedFailure.tempTrajectory;
+        failureDesc.textContent = selectedFailure.i18nTraj || selectedFailure.tempTrajectory;
       }
 
-      // Cold Chain Integrity Score (100 = perfect, 0 = ruined)
       let score = 100;
       if (tempF > 40) {
         const excessTemp = tempF - 40;
-        // Exponential penalty based on temp and duration
         const penalty = Math.min(100, (excessTemp * 2.8) + (hours * excessTemp * 0.45));
         score = Math.max(0, Math.round(100 - penalty));
       } else {
-        // Temperature safe, minimal penalty
         score = Math.max(90, 100 - Math.round(hours * 0.2));
       }
-      scoreVal.textContent = score;
+      if (scoreVal) scoreVal.textContent = String(score);
 
-      // Status Level Determination
       if (tempF <= 40.0) {
         statusBadge.innerHTML = `<span class="w-3 h-3 rounded-full bg-emerald-400"></span> ${t.statusSafe}`;
         statusBadge.className = 'text-lg sm:text-xl font-extrabold text-emerald-400 tracking-wide flex items-center gap-2';
@@ -838,15 +1625,15 @@ const data = defrostData;
         scoreVal.className = 'font-mono text-3xl sm:text-4xl font-extrabold text-yellow-400';
         statusGlow.className = 'absolute -right-20 -top-20 w-64 h-64 bg-yellow-500/10 rounded-full blur-3xl pointer-events-none transition-all duration-700';
         criticalAlertBox.className = 'mb-6 p-4 rounded-lg bg-yellow-950/60 border border-yellow-800/80 flex items-start gap-3';
-        alertTitle.textContent = "MODERATE PERISHABLE SPOILAGE WARNING";
-        alertText.textContent = "Temperatures between 41°F and 46°F accelerate milk souring and raw meat bacterial proliferation. Consume or cook immediately within 2 hours.";
+        alertTitle.textContent = jsI18n.warnModTitle;
+        alertText.textContent = jsI18n.warnModText;
       } else if (tempF <= 52.0 && hours <= 6.0) {
         statusBadge.innerHTML = `<span class="w-3 h-3 rounded-full bg-orange-400 animate-pulse"></span> ${t.statusHigh}`;
         statusBadge.className = 'text-lg sm:text-xl font-extrabold text-orange-400 tracking-wide flex items-center gap-2';
         scoreVal.className = 'font-mono text-3xl sm:text-4xl font-extrabold text-orange-400';
         statusGlow.className = 'absolute -right-20 -top-20 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none transition-all duration-700';
         criticalAlertBox.className = 'mb-6 p-4 rounded-lg bg-orange-950/60 border border-orange-800/80 flex items-start gap-3';
-        alertTitle.textContent = "DANGEROUS PATHOGEN MULTIPLICATION DETECTED";
+        alertTitle.textContent = jsI18n.warnHighTitle;
         alertText.textContent = t.alertListeriaText;
       } else {
         statusBadge.innerHTML = `<span class="w-3 h-3 rounded-full bg-red-500 animate-pulse"></span> ${t.statusCatastrophic}`;
@@ -858,88 +1645,82 @@ const data = defrostData;
         alertText.textContent = t.alertStaphText;
       }
 
-      // Listeria Kinetics
       if (tempF <= 40.0) {
-        listeriaVal.textContent = "NEGLIGIBLE";
-        listeriaVal.className = "font-mono text-lg font-bold text-emerald-400";
-        listeriaSub.textContent = "Doubling requires >32 hours";
+        listeriaVal.textContent = jsI18n.listeriaNegligible;
+        listeriaVal.className = 'font-mono text-lg font-bold text-emerald-400';
+        listeriaSub.textContent = jsI18n.listeriaNegSub;
       } else if (tempF <= 46.0) {
-        listeriaVal.textContent = "ELEVATED (2.5x)";
-        listeriaVal.className = "font-mono text-lg font-bold text-yellow-400";
-        listeriaSub.textContent = `Doubling in ~12 hrs; ${hours} hrs exposure`;
+        listeriaVal.textContent = jsI18n.listeriaElevated;
+        listeriaVal.className = 'font-mono text-lg font-bold text-yellow-400';
+        listeriaSub.textContent = jsI18n.listeriaElevSubTpl.replace('{hrs}', String(hours));
       } else {
         const fold = Math.min(48, Math.round(Math.pow(1.6, (tempF - 40) / 3)));
-        listeriaVal.textContent = `CRITICAL (${fold}x Multiplier)`;
-        listeriaVal.className = "font-mono text-lg font-bold text-red-400";
-        listeriaSub.textContent = "Psychrotrophic exponential expansion";
+        listeriaVal.textContent = jsI18n.listeriaCritTpl.replace('{fold}', String(fold));
+        listeriaVal.className = 'font-mono text-lg font-bold text-red-400';
+        listeriaSub.textContent = jsI18n.listeriaCritSub;
       }
 
-      // Salmonella Kinetics
       if (tempF <= 41.5) {
-        salmonellaVal.textContent = "DORMANT (INHIBITED)";
-        salmonellaVal.className = "font-mono text-lg font-bold text-emerald-400";
-        salmonellaSub.textContent = "Replication halted below 41.5°F";
+        salmonellaVal.textContent = jsI18n.salDormant;
+        salmonellaVal.className = 'font-mono text-lg font-bold text-emerald-400';
+        salmonellaSub.textContent = jsI18n.salDormantSub;
       } else if (tempF <= 48.0) {
-        salmonellaVal.textContent = "ACTIVE SLOW LOG";
-        salmonellaVal.className = "font-mono text-lg font-bold text-yellow-400";
-        salmonellaSub.textContent = "Generation time ~6-8 hours";
+        salmonellaVal.textContent = jsI18n.salSlow;
+        salmonellaVal.className = 'font-mono text-lg font-bold text-yellow-400';
+        salmonellaSub.textContent = jsI18n.salSlowSub;
       } else {
-        salmonellaVal.textContent = "RAPID LOG PHASE";
-        salmonellaVal.className = "font-mono text-lg font-bold text-red-400";
-        salmonellaSub.textContent = "Doubling every 90-120 minutes";
+        salmonellaVal.textContent = jsI18n.salRapid;
+        salmonellaVal.className = 'font-mono text-lg font-bold text-red-400';
+        salmonellaSub.textContent = jsI18n.salRapidSub;
       }
 
-      // Staph Enterotoxin Kinetics
       if (tempF < 50.0) {
-        staphVal.textContent = "ZERO TOXIN";
-        staphVal.className = "font-mono text-lg font-bold text-emerald-400";
-        staphSub.textContent = "Toxin synthesis suppressed below 50°F";
+        staphVal.textContent = jsI18n.staphZero;
+        staphVal.className = 'font-mono text-lg font-bold text-emerald-400';
+        staphSub.textContent = jsI18n.staphZeroSub;
       } else if (hours < 4.0) {
-        staphVal.textContent = "PRE-TOXIN LAG";
-        staphVal.className = "font-mono text-lg font-bold text-yellow-400";
-        staphSub.textContent = `${(4 - hours).toFixed(1)} hrs until toxin threshold`;
+        staphVal.textContent = jsI18n.staphLag;
+        staphVal.className = 'font-mono text-lg font-bold text-yellow-400';
+        staphSub.textContent = jsI18n.staphLagSubTpl.replace('{rem}', (4 - hours).toFixed(1));
       } else {
-        staphVal.textContent = "CRITICAL SYNTHESIS";
-        staphVal.className = "font-mono text-lg font-bold text-red-500 animate-pulse";
-        staphSub.textContent = "Heat-stable enterotoxin present (Do not eat)";
+        staphVal.textContent = jsI18n.staphCrit;
+        staphVal.className = 'font-mono text-lg font-bold text-red-500 animate-pulse';
+        staphSub.textContent = jsI18n.staphCritSub;
       }
 
-      // Shelf-Life Loss
       let lossPct = 0;
       if (tempF <= 40.0) {
         lossPct = Math.min(10, Math.round(hours * 0.2));
       } else {
         lossPct = Math.min(100, Math.round((tempF - 40) * 2.5 + hours * 3.5));
       }
-      shelflifeVal.textContent = `-${lossPct}% LOSS`;
-      shelflifeVal.className = lossPct < 25 ? "font-mono text-lg font-bold text-emerald-400" : lossPct < 60 ? "font-mono text-lg font-bold text-yellow-400" : "font-mono text-lg font-bold text-red-400";
-      shelflifeSub.textContent = lossPct >= 100 ? "Complete microbiological discard" : "Accelerated proteolytic rancidity";
+      shelflifeVal.textContent = `-${lossPct}${jsI18n.lossSuffix}`;
+      shelflifeVal.className = lossPct < 25 ? 'font-mono text-lg font-bold text-emerald-400' : lossPct < 60 ? 'font-mono text-lg font-bold text-yellow-400' : 'font-mono text-lg font-bold text-red-400';
+      shelflifeSub.textContent = lossPct >= 100 ? jsI18n.lossFullSub : jsI18n.lossAccSub;
 
-      // Update Triage Table Rows
       foodRows.forEach((row) => {
         const maxHours = parseFloat(row.getAttribute('data-max-hours'));
         const verdictBadge = row.querySelector('.food-verdict-badge');
         if (!verdictBadge) return;
 
         if (tempF <= 40.0) {
-          verdictBadge.textContent = "SAFE TO KEEP";
-          verdictBadge.className = "food-verdict-badge inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800";
+          verdictBadge.textContent = jsI18n.verdictKeep;
+          verdictBadge.className = 'food-verdict-badge inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800';
         } else if (hours <= maxHours) {
           if (maxHours <= 2.0 && tempF > 46.0) {
-            verdictBadge.textContent = "COOK IMMEDIATELY (>165°F)";
-            verdictBadge.className = "food-verdict-badge inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-yellow-950 text-yellow-400 border border-yellow-800";
+            verdictBadge.textContent = jsI18n.verdictCook;
+            verdictBadge.className = 'food-verdict-badge inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-yellow-950 text-yellow-400 border border-yellow-800';
           } else {
-            verdictBadge.textContent = "SAFE TO KEEP";
-            verdictBadge.className = "food-verdict-badge inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800";
+            verdictBadge.textContent = jsI18n.verdictKeep;
+            verdictBadge.className = 'food-verdict-badge inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800';
           }
         } else {
-          verdictBadge.textContent = "DISCARD IMMEDIATELY";
-          verdictBadge.className = "food-verdict-badge inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-950 text-red-400 border border-red-800";
+          verdictBadge.textContent = jsI18n.verdictDiscard;
+          verdictBadge.className = 'food-verdict-badge inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-950 text-red-400 border border-red-800';
         }
       });
     }
 
-    // Preset Handlers
     presetButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
         const preset = btn.getAttribute('data-preset');
@@ -978,67 +1759,73 @@ const data = defrostData;
       });
     });
 
-    // Copy Report Generator
-    copyReportBtn.addEventListener('click', () => {
-      const tempF = parseFloat(tempSlider.value);
-      const hours = parseFloat(hoursSlider.value);
-      const model = modelSelect.options[modelSelect.selectedIndex].text;
-      const failure = failureSelect.options[failureSelect.selectedIndex].text;
+    if (copyReportBtn) {
+      copyReportBtn.addEventListener('click', () => {
+        const tempF = parseFloat(tempSlider.value);
+        const hours = parseFloat(hoursSlider.value);
+        const model = modelSelect.options[modelSelect.selectedIndex]?.text || '';
+        const failure = failureSelect.options[failureSelect.selectedIndex]?.text || '';
 
-      const report = `=====================================================
-ISITKITCHENSAFE COLD CHAIN & DEFROST DIAGNOSTIC REPORT
-Generated: ${new Date().toISOString()}
-Standard: USDA-FSIS & FDA Food Code § 3-501.16 Compliance
+        const report = `=====================================================
+${jsI18n.repHeader}
+${jsI18n.repGenerated}: ${new Date().toISOString()}
+${jsI18n.repStd}
 =====================================================
 
-1. APPLIANCE & FAILURE TELEMETRY:
-   - Model / Configuration: ${model}
-   - Diagnostic Failure Mode: ${failure}
-   - Measured Fridge Temp: ${tempF.toFixed(1)}°F (${((tempF - 32) * 5 / 9).toFixed(1)}°C)
-   - Cold Chain Breach Duration: ${hours.toFixed(1)} hours above 40°F
-   - Cold Chain Integrity Score: ${scoreVal.textContent} / 100
+${jsI18n.repSec1}
+   - ${jsI18n.repModel}: ${model}
+   - ${jsI18n.repFailure}: ${failure}
+   - ${jsI18n.repTemp}: ${tempF.toFixed(1)}°F (${((tempF - 32) * 5 / 9).toFixed(1)}°C)
+   - ${jsI18n.repHours}: ${hours.toFixed(1)} ${jsI18n.repHoursSuffix}
+   - ${jsI18n.repScore}: ${scoreVal.textContent} / 100
 
-2. MICROBIOLOGICAL PATHOGEN THREAT ASSESSMENT:
+${jsI18n.repSec2}
    - Listeria monocytogenes: ${listeriaVal.textContent} (${listeriaSub.textContent})
    - Salmonella / Campylobacter: ${salmonellaVal.textContent} (${salmonellaSub.textContent})
-   - Staphylococcus aureus Enterotoxin: ${staphVal.textContent} (${staphSub.textContent})
-   - Perishable Shelf Life Loss: ${shelflifeVal.textContent}
+   - Staphylococcus aureus: ${staphVal.textContent} (${staphSub.textContent})
+   - ${t.shelfLifeLossLabel}: ${shelflifeVal.textContent}
 
-3. PRIMARY CLINICAL / SANITARY VERDICT:
+${jsI18n.repSec3}
    - ${statusBadge.textContent.trim()}
-   - USDA Rule: Any perishable food held >40°F for >2 hours (or >50°F for >1 hour) must be discarded.
-   - Heat Warning: Staph enterotoxins are heat-stable and cannot be eliminated by cooking.
+   - ${jsI18n.repUsdaRule}
+   - ${jsI18n.repHeatWarn}
 
-4. MULTIMETER REPAIR DIRECTIVES:
-   - Test bi-metal thermostat while frosty (<20°F): Normal = 0.0 Ω (closed); Defect = O.L. (open)
-   - Test defrost heater: Normal = 15 to 35 Ω; Defect = O.L. (burned calrod)
-   - Check mechanical timer: Turn manual advance notch until loud click; motor should advance in 25-35 min.
+${jsI18n.repSec4}
+   - ${jsI18n.repStep1}
+   - ${jsI18n.repStep2}
+   - ${jsI18n.repStep3}
 
-Verify full diagnostic tools at: https://isitkitchensafe.com/tools/refrigerator-defrost-safety-modeler
+${jsI18n.repVerify} https://isitkitchensafe.com${localePrefix}/tools/refrigerator-defrost-safety-modeler/
 =====================================================`;
 
-      navigator.clipboard.writeText(report).then(() => {
-        const originalText = copyReportBtn.innerHTML;
-        copyReportBtn.innerHTML = `✓ ${t.reportCopied}`;
-        copyReportBtn.classList.remove('bg-cyan-600', 'hover:bg-cyan-500');
-        copyReportBtn.classList.add('bg-emerald-600', 'hover:bg-emerald-500');
-        setTimeout(() => {
-          copyReportBtn.innerHTML = originalText;
-          copyReportBtn.classList.remove('bg-emerald-600', 'hover:bg-emerald-500');
-          copyReportBtn.classList.add('bg-cyan-600', 'hover:bg-cyan-500');
-        }, 3000);
+        navigator.clipboard.writeText(report).then(() => {
+          const originalText = copyReportBtn.innerHTML;
+          copyReportBtn.innerHTML = `✓ ${t.reportCopied}`;
+          copyReportBtn.classList.remove('bg-cyan-600', 'hover:bg-cyan-500');
+          copyReportBtn.classList.add('bg-emerald-600', 'hover:bg-emerald-500');
+          setTimeout(() => {
+            copyReportBtn.innerHTML = originalText;
+            copyReportBtn.classList.remove('bg-emerald-600', 'hover:bg-emerald-500');
+            copyReportBtn.classList.add('bg-cyan-600', 'hover:bg-cyan-500');
+          }, 3000);
+        });
       });
-    });
+    }
 
-    // Event listeners
     tempSlider.addEventListener('input', calculateDiagnostics);
     hoursSlider.addEventListener('input', calculateDiagnostics);
     ambientSlider.addEventListener('input', calculateDiagnostics);
     modelSelect.addEventListener('change', calculateDiagnostics);
     failureSelect.addEventListener('change', calculateDiagnostics);
-    foodSelect.addEventListener('change', calculateDiagnostics);
+    if (foodSelect) foodSelect.addEventListener('change', calculateDiagnostics);
 
-    // Initial run
     calculateDiagnostics();
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDefrostModeler);
+  } else {
+    initDefrostModeler();
+  }
+})();
 </script>
