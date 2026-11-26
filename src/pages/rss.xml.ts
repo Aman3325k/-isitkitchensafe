@@ -44,6 +44,13 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/freezer-burn-sublimation-modeler/',
+    title: 'Freezer Burn, Ice Sublimation & Lipid Peroxidation Modeler',
+    description:
+      'Model solid-to-vapor ice sublimation kinetics in frost-free freezers, TBARS malondialdehyde (MDA) lipid peroxidation, EVOH vacuum vs. store-wrap moisture loss, 2mm knife trimming, and wet-heat salvage protocols.',
+    date: '2026-11-26'
+  },
+  {
     path: '/tools/dishwasher-thermal-sanitize-calculator/',
     title: 'Dishwasher Thermal Sanitize & Norovirus Lethality Calculator',
     description:
