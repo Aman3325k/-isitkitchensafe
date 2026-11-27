@@ -52,7 +52,7 @@
 | **SEO / Schema Audit (`npm run ops:seo`)** | **810 / 1,050 compliant (77.1%)** | Automated JSON-LD & canonical/hreflang scan |
 | **IndexNow Dry-Run (`npm run ops:indexnow -- --dry-run`)** | **10,862 URLs ready (exit 0)** | **3,177** consumer URLs (`92/92` tools), 11 batches, `0` HTTP sent |
 | **Consumer Tools Indexed (`consumer-tools-allowlist.json`)** | **92 tools (460 localized pages)** | 210 total interactive tools across 5 langs |
-| **Git Commit Hash (Wave 96)** | **Pending final commit** | Branch `main`, auto-pushed to `origin/main` |
+| **Git Commit Hash (Wave 96)** | **`a7ac33e`** | Primary Wave 96 commit on `main`, pushed to `origin/main` |
 
 ---
 
