@@ -44,6 +44,12 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/refrigerator-cross-contamination-modeler/',
+    title: 'Refrigerator Raw Meat Cross-Contamination & Bio-Aerosol Modeler',
+    description: 'Model raw meat drip capillarity, wire shelf liquid cascade, convection fan airborne bio-aerosol dispersal, 4°C psychrotrophic Listeria proliferation, and 200 ppm NaOCl vs. 5% vinegar sanitization kinetics.',
+    date: '2026-11-27'
+  },
+  {
     path: '/tools/refrigerator-defrost-safety-modeler/',
     title: 'Refrigerator Warm / Freezer Cold Defrost Failure & Pathogen Modeler',
     description: 'Model blocked evaporator air ducts, bi-metal defrost thermostat continuity (0.0-0.5 Ω vs. OL), Listeria 48°F proliferation, heat-stable S. aureus Enterotoxin A/B irreversibility, and USDA cold-chain food triage.',
