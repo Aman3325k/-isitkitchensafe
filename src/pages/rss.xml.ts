@@ -44,6 +44,12 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/sous-vide-pouch-delamination-modeler/',
+    title: 'Sous Vide High-Temperature Pouch Seam Delamination & Microplastic Modeler',
+    description: 'Model LDPE/LLDPE pouch Vicat softening (85°C–88°C), ASTM F88 seal peel burst limits, Arrhenius microplastic shedding (up to 450,000 particles/dm²), and Fickian lipid migration against EU 10/2011 and FDA 21 CFR 177.1520.',
+    date: '2026-11-27'
+  },
+  {
     path: '/tools/wooden-utensil-biofilm-modeler/',
     title: 'Wooden Spoon & Utensil Micro-Crack Bacterial Biofilm & Moisture Modeler',
     description: 'Model hardwood grain porosity, dishwasher hygroscopic stress cracking, laminated bamboo glue hydrolysis, USP mineral oil vs. rancid cooking oils, Staph Enterotoxin A survival, and the 1-mm retirement rule.',

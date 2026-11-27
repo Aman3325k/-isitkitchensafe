@@ -331,11 +331,640 @@ const DICTIONARY: Record<SupportedLanguage, Dict> = {
 };
 
 const d = DICTIONARY[lang] || DICTIONARY.en;
-const materials = pouchData.pouchMaterials;
+
+interface ItemLocaleMap {
+  materials: Record<string, {
+    name: string;
+    shedding85C: string;
+    standard: string;
+  }>;
+  seals: Record<string, {
+    name: string;
+    creepVuln: string;
+  }>;
+  matrices: Record<string, string>;
+}
+
+const ITEM_I18N: Record<SupportedLanguage, ItemLocaleMap> = {
+  en: {
+    materials: {
+      ldpe_ziploc: {
+        name: 'Domestic Polyethylene (LDPE/LLDPE) Zipper Bag',
+        shedding85C: 'Extreme (180,000–450,000 particles/dm²)',
+        standard: 'FDA 21 CFR 177.1520 ambient/freezer only; NOT high-temp (>75°C)'
+      },
+      pa_pe_multilayer: {
+        name: 'Commercial Multi-Layer (PA/PE) Vacuum Pouch',
+        shedding85C: 'Low to Moderate (12,000–28,000 particles/dm²)',
+        standard: 'EU Reg. 10/2011 & FDA 21 CFR 177.1500/1520 up to 85°C'
+      },
+      boilable_pp_retort: {
+        name: 'High-Barrier Retort Polypropylene (CPP/BOPA) Pouch',
+        shedding85C: 'Very Low (1,500–4,000 particles/dm²)',
+        standard: 'FDA 21 CFR 177.1390 & EU 10/2011 Boil-in-Bag / 121°C Retort'
+      },
+      platinum_silicone: {
+        name: 'Reusable Platinum-Cured Food-Grade Silicone Bag',
+        shedding85C: 'Near-Zero (<50 particles/dm²; non-thermoplastic)',
+        standard: 'FDA 21 CFR 177.2600 & German LFGB § 30/31 Certified'
+      },
+      plasticized_pvc: {
+        name: 'Plasticized PVC / Low-Grade Multipurpose Wrap',
+        shedding85C: 'Catastrophic (>850,000 particles/dm²)',
+        standard: 'PROHIBITED for high-temp fatty food contact (EU 10/2011 & FDA)'
+      }
+    },
+    seals: {
+      single_1mm: { name: 'Single 1mm Thermal Wire Impulse Seal (Entry-level)', creepVuln: 'Very High' },
+      standard_3mm: { name: 'Standard 3mm Flat Heating Band Seal (Mid-tier)', creepVuln: 'Moderate' },
+      dual_5mm: { name: 'Dual 5mm Industrial Chamber Impulse Seal (Commercial)', creepVuln: 'Very Low' },
+      zipper_mechanical: { name: 'Mechanical Press-to-Close Zipper (Freezer Bag)', creepVuln: 'Extreme' }
+    },
+    matrices: {
+      neutral_aqueous: 'Aqueous Low-Acid Food (Water, stock, lean poultry, carrots)',
+      fatty_lipid: 'Lipid-Rich Oil / Butter Bath (Duck confit, butter-poached)',
+      acidic_sauce: 'Acidic Marinade / Glaze (Citrus, red wine, tomato, pH < 3.5)'
+    }
+  },
+  es: {
+    materials: {
+      ldpe_ziploc: {
+        name: 'Bolsa Doméstica de Polietileno (LDPE/LLDPE) con Zipper',
+        shedding85C: 'Extremo (180.000–450.000 partículas/dm²)',
+        standard: 'FDA 21 CFR 177.1520 solo congelación/frío; NO apta >75°C'
+      },
+      pa_pe_multilayer: {
+        name: 'Bolsa al Vacío Multicapa Comercial (PA/PE)',
+        shedding85C: 'Bajo a Moderado (12.000–28.000 partículas/dm²)',
+        standard: 'Reglamento UE 10/2011 y FDA 21 CFR 177.1500/1520 hasta 85°C'
+      },
+      boilable_pp_retort: {
+        name: 'Bolsa Retort de Polipropileno Alta Barrera (CPP/BOPA)',
+        shedding85C: 'Muy Bajo (1.500–4.000 partículas/dm²)',
+        standard: 'FDA 21 CFR 177.1390 y UE 10/2011 Autoclave 121°C'
+      },
+      platinum_silicone: {
+        name: 'Bolsa Reutilizable de Silicona Platino Grado Alimentario',
+        shedding85C: 'Casi Cero (<50 partículas/dm²; no termoplástica)',
+        standard: 'Certificada FDA 21 CFR 177.2600 y LFGB § 30/31 Alemania'
+      },
+      plasticized_pvc: {
+        name: 'Film de PVC Plastificado / Bolsa Multiuso Baja Calidad',
+        shedding85C: 'Catastrófico (>850.000 partículas/dm²)',
+        standard: 'PROHIBIDO en alimentos calientes o grasos (UE 10/2011 y FDA)'
+      }
+    },
+    seals: {
+      single_1mm: { name: 'Sellado Simple Hilo Térmico 1mm (Doméstico básico)', creepVuln: 'Muy Alta' },
+      standard_3mm: { name: 'Sellado Plano Estándar 3mm (Succión media)', creepVuln: 'Moderada' },
+      dual_5mm: { name: 'Sellado Doble Cámara Industrial 5mm (Comercial)', creepVuln: 'Muy Baja' },
+      zipper_mechanical: { name: 'Cierre Mecánico Zipper a Presión (Bolsa congelador)', creepVuln: 'Extrema' }
+    },
+    matrices: {
+      neutral_aqueous: 'Alimento Acuoso Bajo en Ácido (Caldo, ave magra, zanahoria)',
+      fatty_lipid: 'Baño Rico en Lípidos / Mantequilla (Confit de pato, mantequilla)',
+      acidic_sauce: 'Marinada o Glaseado Ácido (Cítricos, vino tinto, tomate pH < 3,5)'
+    }
+  },
+  pt: {
+    materials: {
+      ldpe_ziploc: {
+        name: 'Saco Doméstico de Polietileno (LDPE/LLDPE) com Zipper',
+        shedding85C: 'Extremo (180.000–450.000 partículas/dm²)',
+        standard: 'FDA 21 CFR 177.1520 apenas frio/freezer; NÃO usar >75°C'
+      },
+      pa_pe_multilayer: {
+        name: 'Saco a Vácuo Multicamadas Comercial (PA/PE)',
+        shedding85C: 'Baixo a Moderado (12.000–28.000 partículas/dm²)',
+        standard: 'Regulamento UE 10/2011 e FDA 21 CFR 177.1500/1520 até 85°C'
+      },
+      boilable_pp_retort: {
+        name: 'Saco Retort de Polipropileno Alta Barreira (CPP/BOPA)',
+        shedding85C: 'Muito Baixo (1.500–4.000 partículas/dm²)',
+        standard: 'FDA 21 CFR 177.1390 e UE 10/2011 Esterilização 121°C'
+      },
+      platinum_silicone: {
+        name: 'Saco Reutilizável de Silicone Curado a Platina',
+        shedding85C: 'Quase Zero (<50 partículas/dm²; não termoplástico)',
+        standard: 'Certificado FDA 21 CFR 177.2600 e LFGB § 30/31 Alemanha'
+      },
+      plasticized_pvc: {
+        name: 'Filme de PVC Plastificado / Embalagem Genérica',
+        shedding85C: 'Catastrófico (>850.000 partículas/dm²)',
+        standard: 'PROIBIDO para contato quente/gorduroso (UE 10/2011 e FDA)'
+      }
+    },
+    seals: {
+      single_1mm: { name: 'Selagem Simples Fio Térmico 1mm (Entrada)', creepVuln: 'Muito Alta' },
+      standard_3mm: { name: 'Selagem Plana Padrão 3mm (Sucção intermediária)', creepVuln: 'Moderada' },
+      dual_5mm: { name: 'Selagem Dupla Câmara Industrial 5mm (Comercial)', creepVuln: 'Muito Baixa' },
+      zipper_mechanical: { name: 'Fecho Mecânico Zipper de Pressão (Saco freezer)', creepVuln: 'Extrema' }
+    },
+    matrices: {
+      neutral_aqueous: 'Alimento Aquoso Pouco Ácido (Caldo, ave magra, cenoura)',
+      fatty_lipid: 'Banho Rico em Lipídios / Manteiga (Confit de pato, manteiga)',
+      acidic_sauce: 'Marinada ou Molho Ácido (Cítricos, vinho tinto, tomate pH < 3,5)'
+    }
+  },
+  'zh-cn': {
+    materials: {
+      ldpe_ziploc: {
+        name: '家用低密度聚乙烯 (LDPE/LLDPE) 拉链密封袋',
+        shedding85C: '极高 (180,000–450,000 颗/dm²)',
+        standard: 'FDA 21 CFR 177.1520 仅限冷藏/冷冻；严禁 >75°C 热水浴'
+      },
+      pa_pe_multilayer: {
+        name: '商用共挤尼龙/聚乙烯多层复合真空袋 (PA/PE)',
+        shedding85C: '低至中度 (12,000–28,000 颗/dm²)',
+        standard: '符合欧盟 EU 10/2011 及 FDA 21 CFR 177.1500/1520（限 85°C 内）'
+      },
+      boilable_pp_retort: {
+        name: '高阻隔耐高温蒸煮级流延聚丙烯袋 (CPP/BOPA Retort)',
+        shedding85C: '极低 (1,500–4,000 颗/dm²)',
+        standard: 'FDA 21 CFR 177.1390 & 欧盟 10/2011 认证 121°C 高温灭菌蒸煮袋'
+      },
+      platinum_silicone: {
+        name: '可重复使用铂金硫化食品级硅胶密封袋',
+        shedding85C: '接近零 (<50 颗/dm²；无热塑性微塑料)',
+        standard: '通过 FDA 21 CFR 177.2600 与德国 LFGB § 30/31 食品接触认证'
+      },
+      plasticized_pvc: {
+        name: '增塑聚氯乙烯 PVC 保鲜膜 / 杂用塑料袋',
+        shedding85C: '灾难级 (>850,000 颗/dm²)',
+        standard: '欧盟 EU 10/2011 与 FDA 严禁用于高温油脂食材接触'
+      }
+    },
+    seals: {
+      single_1mm: { name: '单道 1mm 细热丝脉冲封口（入门级家用真空机）', creepVuln: '极高' },
+      standard_3mm: { name: '标准 3mm 扁平加热带封口（中端外抽式真空机）', creepVuln: '中等' },
+      dual_5mm: { name: '双道 5mm 商用真空舱脉冲封口（商用腔体真空机）', creepVuln: '极低' },
+      zipper_mechanical: { name: '按压凹凸槽机械拉链封口（普通冷冻自封袋）', creepVuln: '极度危险' }
+    },
+    matrices: {
+      neutral_aqueous: '水性低酸食材（清水、高汤、瘦禽肉、胡萝卜）',
+      fatty_lipid: '高脂油浴/黄油介质（油封鸭腿、黄油水波料理）',
+      acidic_sauce: '酸性腌料/浓汁（柑橘汁、红酒浓缩汁、番茄 pH < 3.5）'
+    }
+  },
+  ja: {
+    materials: {
+      ldpe_ziploc: {
+        name: '家庭用低密度ポリエチレン (LDPE/LLDPE) ジッパー保存袋',
+        shedding85C: '極めて高い (180,000–450,000 粒子/dm²)',
+        standard: 'FDA 21 CFR 177.1520 冷蔵・冷凍専用（75°C以上の加熱不可）'
+      },
+      pa_pe_multilayer: {
+        name: '業務用多層共押出ナイロン/ポリエチレン真空袋 (PA/PE)',
+        shedding85C: '低〜中程度 (12,000–28,000 粒子/dm²)',
+        standard: 'EU 10/2011・FDA 21 CFR 177.1500/1520 適合（85°Cまで）'
+      },
+      boilable_pp_retort: {
+        name: '高バリア耐熱レトルトポリプロピレン袋 (CPP/BOPA)',
+        shedding85C: '極めて低い (1,500–4,000 粒子/dm²)',
+        standard: 'FDA 21 CFR 177.1390・EU 10/2011 121°Cレトルト殺菌認定'
+      },
+      platinum_silicone: {
+        name: '繰り返し使えるプラチナ硬化食品用シリコーンバッグ',
+        shedding85C: 'ほぼゼロ (<50 粒子/dm²；非熱可塑性)',
+        standard: 'FDA 21 CFR 177.2600・ドイツLFGB § 30/31 食品接触認定'
+      },
+      plasticized_pvc: {
+        name: '可塑剤入り塩化ビニル (PVC) ラップ / 汎用ポリ袋',
+        shedding85C: '壊滅的 (>850,000 粒子/dm²)',
+        standard: '高温油脂食品への接触禁止（EU 10/2011・FDA規制違反）'
+      }
+    },
+    seals: {
+      single_1mm: { name: '単線 1mm 細幅ヒーター溶着（家庭用エントリー機）', creepVuln: '極めて高い' },
+      standard_3mm: { name: '標準 3mm フラット熱溶着バンド（中位吸気式シーラー）', creepVuln: '中程度' },
+      dual_5mm: { name: 'デュアル 5mm 業務用チャンバー溶着（真空包装機）', creepVuln: '極めて低い' },
+      zipper_mechanical: { name: '機械式押し込みジッパー（家庭用フリーザーバッグ）', creepVuln: '極度（破裂危険）' }
+    },
+    matrices: {
+      neutral_aqueous: '水性・低酸性食材（だし汁、鶏むね肉、ニンジン）',
+      fatty_lipid: '高脂質オイル・バター浴（鴨コンフィ、バターポッシェ）',
+      acidic_sauce: '酸性マリネ・ソース（柑橘果汁、赤ワイン、トマト pH < 3.5）'
+    }
+  }
+};
+
+interface JsStatusDict {
+  telemetryTitle: string;
+  lblVicat: string;
+  lblDelta: string;
+  lblVapor: string;
+  lblPeelLoad: string;
+  vicatTag: string;
+  maxTag: string;
+  widthTag: string;
+  creepTag: string;
+  hoursUnit: string;
+  baselineUnit: string;
+  scale50: string;
+  scale70: string;
+  scale85: string;
+  scale95: string;
+  dur05: string;
+  dur4: string;
+  dur12: string;
+  dur24: string;
+  dur48: string;
+  deltaExceeded: string;
+  deltaNear: string;
+  deltaStable: string;
+  unitRupture: string;
+  unitParticles: string;
+  unitMigration: string;
+  unitStress: string;
+  statusDangerTitle: string;
+  statusDangerBadge: string;
+  statusCautionTitle: string;
+  statusCautionBadge: string;
+  statusSafeTitle: string;
+  statusSafeBadge: string;
+  compDangerTpl: string;
+  compCautionTpl: string;
+  compSafeTpl: string;
+  mechPlatinum: string;
+  guidePlatinum: string;
+  mechRetortTpl: string;
+  guideRetort: string;
+  mechPapeTpl: string;
+  guidePape: string;
+  mechLdpeTpl: string;
+  guideLdpe: string;
+  mechPvc: string;
+  guidePvc: string;
+  repTitle: string;
+  repTime: string;
+  repMat: string;
+  repTemp: string;
+  repDur: string;
+  repSeal: string;
+  repMatrix: string;
+  repOutcomes: string;
+  repCreep: string;
+  repMicro: string;
+  repMig: string;
+  repDeg: string;
+  repStatus: string;
+  repComp: string;
+  repProto: string;
+  repSrc: string;
+}
+
+const JS_STATUS_I18N: Record<SupportedLanguage, JsStatusDict> = {
+  en: {
+    telemetryTitle: 'Polymer Thermomechanical Telemetry',
+    lblVicat: 'Vicat Softening:',
+    lblDelta: 'Delta to Softening:',
+    lblVapor: 'Vapor Outgassing Pressure:',
+    lblPeelLoad: 'Seam Peel Load Factor:',
+    vicatTag: 'Vicat',
+    maxTag: 'Max',
+    widthTag: 'mm width',
+    creepTag: 'Creep',
+    hoursUnit: 'Hours',
+    baselineUnit: 'x baseline',
+    scale50: '50°C (Rare)',
+    scale70: '70°C (LDPE Limit)',
+    scale85: '85°C (Vegetables)',
+    scale95: '95°C (Starch Boil)',
+    dur05: '0.5h (Quick)',
+    dur4: '4h (Braise)',
+    dur12: '12h (Overnight)',
+    dur24: '24h (Confit)',
+    dur48: '48h (Max)',
+    deltaExceeded: '(Softening Exceeded)',
+    deltaNear: '(Near Softening)',
+    deltaStable: '(Stable)',
+    unitRupture: 'rupture prob.',
+    unitParticles: 'particles/dm²',
+    unitMigration: 'mg/dm² (EU <10)',
+    unitStress: 'stress index',
+    statusDangerTitle: 'CRITICAL SEAL CREEP & CHEMICAL MIGRATION RISK',
+    statusDangerBadge: '🚨 DANGER: NON-COMPLIANT',
+    statusCautionTitle: 'ELEVATED THERMAL CREEP & ADHESIVE VULNERABILITY',
+    statusCautionBadge: '⚠️ CAUTION: MONITOR DWELL',
+    statusSafeTitle: 'OPTIMAL STRUCTURAL INTEGRITY & FOOD-SAFE CONTACT',
+    statusSafeBadge: '✅ CERTIFIED SAFE',
+    compDangerTpl: 'EU 10/2011 Limit Exceeded: Migration is {mig} mg/dm² (Limit: 10.0 mg/dm²) • High Seam Rupture Risk',
+    compCautionTpl: 'EU 10/2011 Borderline: Migration is {mig} mg/dm² • Prolonged dwell may degrade tie-layer',
+    compSafeTpl: 'EU 10/2011 & FDA Compliant: Migration is {mig} mg/dm² (Below 10.0 mg/dm² OML) • Zero Seam Creep',
+    mechPlatinum: 'Platinum-cured cross-linked silicone consists of an inorganic siloxane (-Si-O-Si-) backbone with covalent bonds requiring over 450 kJ/mol to cleave. It experiences zero thermodynamic softening up to 200°C, zero seam creep, and leaves negligible chemical residues (<0.1 mg/kg) in water or dietary fats.',
+    guidePlatinum: 'Platinum silicone is the premier reusable solution for high-heat root vegetable braising (85°C–92°C). Ensure an airtight pinch seal and clean with food-grade neutral detergent between uses.',
+    mechRetortTpl: 'Cast polypropylene (CPP) possesses high crystalline isotacticity with a melting point of 165°C and Vicat softening point of 135°C. At {tempC}°C, polymer chains remain rigid in their semi-crystalline matrix, resisting hydrostatic steam pressure with near-zero microplastic shed.',
+    guideRetort: 'High-barrier retort polypropylene bags are the industrial gold standard for high-temperature sous vide. Pair with standard 3mm or 5mm impulse seals for foolproof seam integrity during long root vegetable cycles.',
+    mechPapeTpl: 'Multi-layer co-extruded PA/PE bags utilize biaxially oriented polyamide (Nylon 6) on the exterior and LLDPE inside. At {tempC}°C for {hours} hours, moisture gradually plasticizes the polyurethane tie-layer adhesive, especially with {matrix}.',
+    guidePape: 'For temperatures below 80°C, PA/PE pouches are robust. For vegetable braises exceeding 85°C with durations over 8 hours, switch to retort CPP or dual 5mm chamber seals to prevent seam fatigue.',
+    mechLdpeTpl: 'Standard LDPE has a low Vicat softening point of 88°C. At {tempC}°C, the polymer enters its rubbery plateau. Hydrostatic steam pressure ({vaporPressure} kPa) stresses the {seal}, causing high creep rupture risk ({creepRisk}%) and massive microplastic shed.',
+    guideLdpe: 'Cease using domestic LDPE zipper bags for cooking above 70°C. Upgrade immediately to retort polypropylene or platinum silicone bags to prevent seal rupture and microplastic ingestion.',
+    mechPvc: 'Plasticized PVC contains 20% to 35% low-molecular-weight phthalates (DEHP, DINP) unbound to the polymer backbone. At elevated temperatures and with dietary lipids, plasticizers rapidly diffuse into food, causing severe endocrine disruption and microplastic release.',
+    guidePvc: 'STRICTLY PROHIBITED: Never use plasticized PVC cling films or utility bags in sous vide cooking. Replace immediately with certified food-grade vacuum pouches complying with EU 10/2011.',
+    repTitle: '=== SOUS VIDE POUCH SEAM DELAMINATION & MICROPLASTIC REPORT ===',
+    repTime: 'Timestamp',
+    repMat: 'Pouch Material',
+    repTemp: 'Water Bath Temperature',
+    repDur: 'Immersion Duration',
+    repSeal: 'Seal Geometry',
+    repMatrix: 'Food Matrix',
+    repOutcomes: 'DIAGNOSTIC OUTCOMES:',
+    repCreep: 'Seam Creep Rupture Risk',
+    repMicro: 'Microplastic Shedding Density',
+    repMig: 'Chemical & Oligomer Migration',
+    repDeg: 'Thermal Matrix Degradation Index',
+    repStatus: 'Safety Status',
+    repComp: 'Compliance',
+    repProto: 'Corrective Protocol',
+    repSrc: 'Source: IsItKitchenSafe Autonomous Growth & Ops Engine (v2.0)'
+  },
+  es: {
+    telemetryTitle: 'Telemetría Termomecánica del Polímero',
+    lblVicat: 'Reblandecimiento Vicat:',
+    lblDelta: 'Margen al Reblandecimiento:',
+    lblVapor: 'Presión de Vapor Interno:',
+    lblPeelLoad: 'Factor de Carga de Pelado:',
+    vicatTag: 'Vicat',
+    maxTag: 'Máx',
+    widthTag: 'mm ancho',
+    creepTag: 'Fluencia',
+    hoursUnit: 'Horas',
+    baselineUnit: 'x base',
+    scale50: '50°C (Poco hecho)',
+    scale70: '70°C (Límite LDPE)',
+    scale85: '85°C (Verduras)',
+    scale95: '95°C (Hervor almidón)',
+    dur05: '0.5h (Rápido)',
+    dur4: '4h (Guiso)',
+    dur12: '12h (Nocturno)',
+    dur24: '24h (Confit)',
+    dur48: '48h (Máx)',
+    deltaExceeded: '(Reblandecimiento Superado)',
+    deltaNear: '(Cerca de Reblandecer)',
+    deltaStable: '(Estable)',
+    unitRupture: 'prob. rotura',
+    unitParticles: 'partículas/dm²',
+    unitMigration: 'mg/dm² (UE <10)',
+    unitStress: 'índice de estrés',
+    statusDangerTitle: 'RIESGO CRÍTICO DE FLUENCIA DE SELLADO Y MIGRACIÓN QUÍMICA',
+    statusDangerBadge: '🚨 PELIGRO: NO CONFORME',
+    statusCautionTitle: 'FLUENCIA TÉRMICA ELEVADA Y VULNERABILIDAD ADHESIVA',
+    statusCautionBadge: '⚠️ PRECAUCIÓN: VIGILAR TIEMPO',
+    statusSafeTitle: 'INTEGRIDAD ESTRUCTURAL ÓPTIMA Y CONTACTO ALIMENTARIO SEGURO',
+    statusSafeBadge: '✅ CERTIFICADO SEGURO',
+    compDangerTpl: 'Límite UE 10/2011 Superado: Migración de {mig} mg/dm² (Límite: 10,0 mg/dm²) • Alto Riesgo de Rotura',
+    compCautionTpl: 'Límite UE 10/2011 Ajustado: Migración de {mig} mg/dm² • Cocciones largas degradan la capa adhesiva',
+    compSafeTpl: 'Cumple UE 10/2011 y FDA: Migración de {mig} mg/dm² (<10,0 mg/dm² LMG) • Cero Fluencia de Sellado',
+    mechPlatinum: 'La silicona platino reticulada posee un esqueleto inorgánico siloxano (-Si-O-Si-) con enlaces covalentes que requieren >450 kJ/mol para romperse. No se ablanda hasta 200°C, tiene cero fluencia y residuos insignificantes (<0,1 mg/kg) en agua o grasas.',
+    guidePlatinum: 'La silicona platino es la mejor solución reutilizable para tubérculos a alta temperatura (85°C–92°C). Asegure el cierre hermético y lave con detergente neutro tras cada uso.',
+    mechRetortTpl: 'El polipropileno cast (CPP) posee alta cristalinidad isotáctica con punto de fusión de 165°C y Vicat de 135°C. A {tempC}°C, las cadenas poliméricas resisten la presión hidrostática del vapor con desprendimiento casi nulo de microplásticos.',
+    guideRetort: 'Las bolsas retort de polipropileno alta barrera son el estándar industrial para sous vide de alta temperatura. Combínelas con sellados de 3mm o 5mm para total seguridad.',
+    mechPapeTpl: 'Las bolsas multicapa PA/PE combinan poliamida exterior con LLDPE interior. A {tempC}°C durante {hours} horas, la humedad plastifica gradualmente el adhesivo de poliuretano, especialmente con {matrix}.',
+    guidePape: 'Por debajo de 80°C, las bolsas PA/PE son robustas. Para cocciones de verduras >85°C o más de 8 horas, cambie a bolsas retort CPP o sellado doble de 5mm en cámara.',
+    mechLdpeTpl: 'El LDPE doméstico tiene un punto Vicat bajo (88°C). A {tempC}°C entra en estado gomoso; el vapor interno ({vaporPressure} kPa) fuerza el {seal}, elevando la probabilidad de rotura ({creepRisk}%) y liberando cientos de miles de microplásticos.',
+    guideLdpe: 'Deje de usar bolsas zipper domésticas de LDPE por encima de 70°C. Cambie de inmediato a bolsas retort de polipropileno o silicona platino para evitar roturas y microplásticos.',
+    mechPvc: 'El PVC plastificado contiene entre 20% y 35% de ftalatos de bajo peso molecular (DEHP, DINP) no ligados al polímero. Con calor y lípidos se difunden rápidamente a la comida causando disrupción endocrina y microplásticos masivos.',
+    guidePvc: 'ESTRICTAMENTE PROHIBIDO: Nunca utilice film PVC plastificado en cocción sous vide. Reemplácelo por bolsas al vacío certificadas conformes con el Reglamento UE 10/2011.',
+    repTitle: '=== INFORME DE DELAMINACIÓN Y MICROPLÁSTICOS EN SOUS VIDE ===',
+    repTime: 'Fecha',
+    repMat: 'Material de la Bolsa',
+    repTemp: 'Temperatura del Baño',
+    repDur: 'Duración de Inmersión',
+    repSeal: 'Geometría del Sellado',
+    repMatrix: 'Matriz Alimentaria',
+    repOutcomes: 'RESULTADOS DEL DIAGNÓSTICO:',
+    repCreep: 'Riesgo de Rotura por Fluencia',
+    repMicro: 'Densidad de Microplásticos',
+    repMig: 'Migración Química y Oligómeros',
+    repDeg: 'Índice de Degradación Térmica',
+    repStatus: 'Estado de Seguridad',
+    repComp: 'Conformidad Normativa',
+    repProto: 'Protocolo Correctivo',
+    repSrc: 'Fuente: IsItKitchenSafe Autonomous Growth & Ops Engine (v2.0)'
+  },
+  pt: {
+    telemetryTitle: 'Telemetria Termomecânica do Polímero',
+    lblVicat: 'Amolecimento Vicat:',
+    lblDelta: 'Margem até Amolecimento:',
+    lblVapor: 'Pressão de Vapor Interno:',
+    lblPeelLoad: 'Fator de Carga de Pelamento:',
+    vicatTag: 'Vicat',
+    maxTag: 'Máx',
+    widthTag: 'mm largura',
+    creepTag: 'Fluência',
+    hoursUnit: 'Horas',
+    baselineUnit: 'x base',
+    scale50: '50°C (Mal passado)',
+    scale70: '70°C (Limite LDPE)',
+    scale85: '85°C (Vegetais)',
+    scale95: '95°C (Fervura amido)',
+    dur05: '0.5h (Rápido)',
+    dur4: '4h (Cocção)',
+    dur12: '12h (Noturno)',
+    dur24: '24h (Confit)',
+    dur48: '48h (Máx)',
+    deltaExceeded: '(Amolecimento Excedido)',
+    deltaNear: '(Próximo do Amolecimento)',
+    deltaStable: '(Estável)',
+    unitRupture: 'prob. ruptura',
+    unitParticles: 'partículas/dm²',
+    unitMigration: 'mg/dm² (UE <10)',
+    unitStress: 'índice de estresse',
+    statusDangerTitle: 'RISCO CRÍTICO DE FLUÊNCIA DA SELAGEM E MIGRAÇÃO QUÍMICA',
+    statusDangerBadge: '🚨 PERIGO: NÃO CONFORME',
+    statusCautionTitle: 'FLUÊNCIA TÉRMICA ELEVADA E VULNERABILIDADE ADESIVA',
+    statusCautionBadge: '⚠️ ATENÇÃO: MONITORAR TEMPO',
+    statusSafeTitle: 'INTEGRIDADE ESTRUTURAL IDEAL E CONTATO SEGURO',
+    statusSafeBadge: '✅ CERTIFICADO SEGURO',
+    compDangerTpl: 'Limite UE 10/2011 Excedido: Migração de {mig} mg/dm² (Limite: 10,0 mg/dm²) • Alto Risco de Rompimento',
+    compCautionTpl: 'Limite UE 10/2011 Limítrofe: Migração de {mig} mg/dm² • Longa exposição degrada o adesivo',
+    compSafeTpl: 'Conforme UE 10/2011 e FDA: Migração de {mig} mg/dm² (<10,0 mg/dm² LMG) • Zero Fluência',
+    mechPlatinum: 'O silicone de cura platina reticulado possui cadeia inorgânica siloxana (-Si-O-Si-) com ligações covalentes (>450 kJ/mol). Não amolece até 200°C, não sofre fluência de selagem e gera resíduos desprezíveis (<0,1 mg/kg) em água ou gorduras.',
+    guidePlatinum: 'Silicone platina é a melhor opção reutilizável para raízes e tubérculos em alta temperatura (85°C–92°C). Garanta fecho hermético e lave com detergente neutro.',
+    mechRetortTpl: 'O polipropileno fundido (CPP) possui alta cristalinidade com ponto de fusão de 165°C e Vicat de 135°C. A {tempC}°C, a matriz semicristalina resiste à pressão de vapor com liberação quase nula de microplásticos.',
+    guideRetort: 'Sacos retort de polipropileno alta barreira são o padrão industrial para sous vide de alta temperatura. Combine com selagem de 3mm ou 5mm.',
+    mechPapeTpl: 'Sacos multicamadas PA/PE unem poliamida externa e LLDPE interno. A {tempC}°C por {hours} horas, a umidade plastifica gradualmente o adesivo de poliuretano, especialmente com {matrix}.',
+    guidePape: 'Abaixo de 80°C, sacos PA/PE são seguros. Para cocção de vegetais >85°C ou mais de 8 horas, adote sacos retort CPP ou selagem dupla de 5mm.',
+    mechLdpeTpl: 'O LDPE doméstico tem ponto Vicat baixo (88°C). A {tempC}°C, entra em estado elastomérico; a pressão de vapor ({vaporPressure} kPa) força o {seal}, gerando risco de ruptura ({creepRisk}%) e intensa liberação de microplásticos.',
+    guideLdpe: 'Pare de usar sacos domésticos zipper de LDPE acima de 70°C. Migre para polipropileno retort ou silicone platina para evitar rompimentos e microplásticos.',
+    mechPvc: 'O PVC plastificado contém 20% a 35% de ftalatos (DEHP, DINP) não ligados quimicamente ao polímero. Com calor e gorduras, os plastificantes migram rapidamente causando disrupção endócrina severa.',
+    guidePvc: 'ESTRITAMENTE PROIBIDO: Nunca use filmes PVC plastificados em sous vide. Substitua imediatamente por sacos a vácuo certificados pela norma UE 10/2011.',
+    repTitle: '=== RELATÓRIO DE DELAMINAÇÃO E MICROPLÁSTICOS EM SOUS VIDE ===',
+    repTime: 'Data',
+    repMat: 'Material do Saco',
+    repTemp: 'Temperatura do Banho',
+    repDur: 'Duração da Imersão',
+    repSeal: 'Geometria da Selagem',
+    repMatrix: 'Matriz Alimentar',
+    repOutcomes: 'RESULTADOS DO DIAGNÓSTICO:',
+    repCreep: 'Risco de Ruptura da Selagem',
+    repMicro: 'Densidade de Microplásticos',
+    repMig: 'Migração Química e Oligômeros',
+    repDeg: 'Índice de Degradação Térmica',
+    repStatus: 'Status de Segurança',
+    repComp: 'Conformidade Normativa',
+    repProto: 'Protocolo Corretivo',
+    repSrc: 'Fonte: IsItKitchenSafe Autonomous Growth & Ops Engine (v2.0)'
+  },
+  'zh-cn': {
+    telemetryTitle: '高分子热机械性能实时遥测',
+    lblVicat: '维卡软化点:',
+    lblDelta: '距软化温差:',
+    lblVapor: '袋内水蒸气分压:',
+    lblPeelLoad: '接缝剥离载荷系数:',
+    vicatTag: '维卡软化',
+    maxTag: '耐温上限',
+    widthTag: 'mm 宽',
+    creepTag: '蠕变风险',
+    hoursUnit: '小时',
+    baselineUnit: '倍基准载荷',
+    scale50: '50°C (半熟)',
+    scale70: '70°C (LDPE红线)',
+    scale85: '85°C (根茎蔬菜)',
+    scale95: '95°C (淀粉糊化)',
+    dur05: '0.5h (快速)',
+    dur4: '4h (标准炖煮)',
+    dur12: '12h (过夜)',
+    dur24: '24h (油封)',
+    dur48: '48h (极限)',
+    deltaExceeded: '(已超过软化温度)',
+    deltaNear: '(临近软化点)',
+    deltaStable: '(结构稳定)',
+    unitRupture: '破袋概率',
+    unitParticles: '颗粒/dm²',
+    unitMigration: 'mg/dm² (欧盟 <10)',
+    unitStress: '热损伤指数',
+    statusDangerTitle: '严重接缝蠕变破袋与化学物质超标溶出风险',
+    statusDangerBadge: '🚨 危险：不符合食品安全标准',
+    statusCautionTitle: '热蠕变风险升高及层间粘合剂水解隐患',
+    statusCautionBadge: '⚠️ 警告：需严控加热时长',
+    statusSafeTitle: '结构完整性极佳，符合食品级安全接触规范',
+    statusSafeBadge: '✅ 认证安全合规',
+    compDangerTpl: '超出欧盟 EU 10/2011 限值：迁移量 {mig} mg/dm²（法定上限 10.0 mg/dm²）• 极高破袋风险',
+    compCautionTpl: '接近欧盟 EU 10/2011 临界值：迁移量 {mig} mg/dm² • 长时间浸泡易削弱层间粘合层',
+    compSafeTpl: '符合欧盟 EU 10/2011 与 FDA 标准：迁移量 {mig} mg/dm²（低于 10.0 mg/dm²）• 零接缝蠕变',
+    mechPlatinum: '铂金硫化交联硅胶由无机硅氧烷（-Si-O-Si-）主链构成，共价键键能超过 450 kJ/mol。在 200°C 以下不会热软化，零接缝蠕变，在水相与高脂油脂中迁移残留极微（<0.1 mg/kg）。',
+    guidePlatinum: '铂金硅胶袋是 85°C–92°C 高温慢煮根茎类蔬菜的首选可重复使用安全方案。请务必排尽空气并捏紧密封槽，每次使用后用中性食品级洗洁精洗净。',
+    mechRetortTpl: '流延聚丙烯（CPP）具有高度等规结晶度，熔点 165°C，维卡软化点 135°C。在 {tempC}°C 水浴中分子链保持刚性，能有效抵御水蒸气内压，微塑料脱落量接近于零。',
+    guideRetort: '高阻隔耐高温蒸煮级聚丙烯（CPP）袋是高温真空慢煮的工业黄金标准。配合 3mm 或 5mm 热封口条即可确保长时蔬菜炖煮万无一失。',
+    mechPapeTpl: '多层共挤 PA/PE 真空袋外层为双向拉伸尼龙（PA6），内层为 LLDPE。在 {tempC}°C 持续 {hours} 小时条件下，水汽渗透会逐步塑化水解聚氨酯粘合层，接触 {matrix} 时尤为明显。',
+    guidePape: '80°C 以下常规肉类慢煮使用 PA/PE 真空袋十分稳健；若烹饪超过 85°C 的蔬菜且时长超过 8 小时，建议改用 CPP 蒸煮袋或商用 5mm 双道真空舱封口。',
+    mechLdpeTpl: '普通低密度聚乙烯（LDPE）维卡软化点仅 88°C。当前 {tempC}°C 已使材料进入高弹软化区，蔬菜产生的水蒸气压力（{vaporPressure} kPa）持续冲击 {seal}，导致破袋概率达 {creepRisk}% 并向食物释放巨量微塑料。',
+    guideLdpe: '请立即停止在 70°C 以上水浴中使用普通 LDPE 拉链自封袋！务必升级至耐高温 CPP 蒸煮袋或铂金硅胶袋，避免接缝崩裂与微塑料摄入。',
+    mechPvc: '增塑 PVC 含有 20%–35% 未化学键合的小分子邻苯二甲酸酯（DEHP、DINP）。高温及油脂接触下，增塑剂会迅速渗入食物造成严重内分泌干扰与微塑料污染。',
+    guidePvc: '严禁使用：切勿在真空低温慢煮中使用任何增塑 PVC 保鲜膜或普通包装袋，必须更换为符合欧盟 EU 10/2011 认证的食品级真空烹饪袋。',
+    repTitle: '=== 真空低温烹饪袋热蠕变破损与微塑料诊断报告 ===',
+    repTime: '生成时间',
+    repMat: '烹饪袋材质',
+    repTemp: '水浴温度',
+    repDur: '持续浸泡时长',
+    repSeal: '封口几何规格',
+    repMatrix: '食材介质',
+    repOutcomes: '核心诊断结果：',
+    repCreep: '接缝蠕变破袋风险',
+    repMicro: '微塑料脱落密度',
+    repMig: '化学物质与低聚物迁移量',
+    repDeg: '聚合物热降解损伤指数',
+    repStatus: '安全合规状态',
+    repComp: '法规标准比对',
+    repProto: '工程纠偏操作建议',
+    repSrc: '数据来源：IsItKitchenSafe Autonomous Growth & Ops Engine (v2.0)'
+  },
+  ja: {
+    telemetryTitle: 'ポリマー熱機械特性テレメトリー',
+    lblVicat: 'ビカー軟化点:',
+    lblDelta: '軟化点までの余裕:',
+    lblVapor: '内部水蒸気圧:',
+    lblPeelLoad: 'シール剥離負荷倍率:',
+    vicatTag: '軟化点',
+    maxTag: '上限',
+    widthTag: 'mm幅',
+    creepTag: 'クリープ',
+    hoursUnit: '時間',
+    baselineUnit: '倍基準',
+    scale50: '50°C (レア肉)',
+    scale70: '70°C (LDPE限界)',
+    scale85: '85°C (根菜加熱)',
+    scale95: '95°C (澱粉糊化)',
+    dur05: '0.5h (短時間)',
+    dur4: '4h (標準煮)',
+    dur12: '12h (一晩)',
+    dur24: '24h (コンフィ)',
+    dur48: '48h (最大)',
+    deltaExceeded: '(軟化点超過)',
+    deltaNear: '(軟化点近接)',
+    deltaStable: '(構造安定)',
+    unitRupture: '破袋確率',
+    unitParticles: '粒子/dm²',
+    unitMigration: 'mg/dm² (EU <10)',
+    unitStress: '劣化指数',
+    statusDangerTitle: '重大な熱クリープ剥離・化学物質移行リスク',
+    statusDangerBadge: '🚨 危険：食品接触規格不適合',
+    statusCautionTitle: '熱クリープ上昇および中間接着層の加水分解注意',
+    statusCautionBadge: '⚠️ 注意：加熱時間を監視',
+    statusSafeTitle: '最適な構造健全性・食品接触安全性適合',
+    statusSafeBadge: '✅ 安全基準適合',
+    compDangerTpl: 'EU 10/2011 上限超過：総移行量 {mig} mg/dm²（基準 10.0 mg/dm²）• 高い破袋リスク',
+    compCautionTpl: 'EU 10/2011 境界域：総移行量 {mig} mg/dm² • 長時間加熱で接着層が低下する恐れ',
+    compSafeTpl: 'EU 10/2011・FDA適合：総移行量 {mig} mg/dm²（10.0 mg/dm²未満）• シールクリープゼロ',
+    mechPlatinum: 'プラチナ硬化架橋シリコーンは、結合解離エネルギー 450 kJ/mol 超のシロキサン（-Si-O-Si-）無機主鎖を持ちます。200°Cまで熱軟化もクリープも起きず、水や油脂への溶出残留は極微（<0.1 mg/kg）です。',
+    guidePlatinum: 'プラチナシリコーンは85°C〜92°Cの根菜低温調理における最高水準の再使用バッグです。空気を抜いて密閉し、使用後は中性洗剤で洗浄してください。',
+    mechRetortTpl: 'キャストポリプロピレン（CPP）は融点165°C・軟化点135°Cの高い結晶性を持ちます。{tempC}°Cの水浴中でも分子鎖が剛直に保たれ、内圧に耐えマイクロプラスチック放出をほぼゼロに抑えます。',
+    guideRetort: '高バリアレトルトCPP袋は高温真空調理の産業標準です。3mmまたは5mmのインパルスシールと併用することで長時間の根菜調理でも破袋を完全に防げます。',
+    mechPapeTpl: '多層共押出PA/PE袋は外層ナイロン・内層LLDPE構造です。{tempC}°C・{hours}時間の環境では水分透過によりポリウレタン接着層が徐々に可塑化・加水分解し、特に {matrix} で顕著になります。',
+    guidePape: '80°C以下の肉調理ではPA/PE袋は堅牢です。85°C超・8時間以上の根菜調理ではレトルトCPP袋または業務用5mmダブルチャンバー溶着へ切り替えてください。',
+    mechLdpeTpl: '家庭用LDPEのビカー軟化点はわずか88°Cです。現在水温 {tempC}°C ではポリマーがゴム状化し、水蒸気圧（{vaporPressure} kPa）が {seal} を押し広げて破袋リスク（{creepRisk}%）と大量のマイクロプラスチック剥離を引き起こします。',
+    guideLdpe: '70°C以上の加熱調理に家庭用LDPEジッパー袋を使用しないでください。直ちにレトルトCPP袋またはプラチナシリコーン袋へ切り替えてください。',
+    mechPvc: '可塑化PVCにはポリマー鎖に結合していない低分子フタル酸エステル（DEHP、DINP）が20〜35%含まれます。高温や油脂との接触で速やかに食品へ溶出し、内分泌撹乱や大量のマイクロプラスチック汚染を招きます。',
+    guidePvc: '厳禁：可塑化PVCラップや汎用ポリ袋を真空調理に絶対に使用しないでください。直ちにEU 10/2011適合の認定食品用真空パウチへ交換してください。',
+    repTitle: '=== 低温調理パウチ熱クリープ剥離・マイクロプラスチック診断レポート ===',
+    repTime: '診断日時',
+    repMat: 'パウチ材質',
+    repTemp: 'ウォーターバス水温',
+    repDur: '連続浸漬時間',
+    repSeal: 'シール形状',
+    repMatrix: '食材基質',
+    repOutcomes: '診断結果サマリー:',
+    repCreep: 'シール熱クリープ破袋リスク',
+    repMicro: 'マイクロプラスチック放出密度',
+    repMig: '化学物質・オリゴマー移行量',
+    repDeg: 'ポリマー熱劣化損傷指数',
+    repStatus: '安全判定ステータス',
+    repComp: '食品接触規格適合性',
+    repProto: '推奨対策プロトコル',
+    repSrc: '出典: IsItKitchenSafe Autonomous Growth & Ops Engine (v2.0)'
+  }
+};
+
+const itemLoc = ITEM_I18N[lang] || ITEM_I18N.en;
+const jsI18n = JS_STATUS_I18N[lang] || JS_STATUS_I18N.en;
+
+const materials = pouchData.pouchMaterials.map((m) => ({
+  ...m,
+  name: itemLoc.materials[m.id]?.name || m.name,
+  microplasticSheddingRate85C: itemLoc.materials[m.id]?.shedding85C || m.microplasticSheddingRate85C,
+  foodContactStandard: itemLoc.materials[m.id]?.standard || m.foodContactStandard
+}));
 const temps = pouchData.bathTemperatures;
 const durations = pouchData.cookDurations;
-const seals = pouchData.sealGeometries;
-const matrices = pouchData.foodMatrices;
+const seals = pouchData.sealGeometries.map((s) => ({
+  ...s,
+  name: itemLoc.seals[s.id]?.name || s.name,
+  creepVulnerability: itemLoc.seals[s.id]?.creepVuln || s.creepVulnerability
+}));
+const matrices = pouchData.foodMatrices.map((m) => ({
+  ...m,
+  name: itemLoc.matrices[m.id] || m.name
+}));
+const localizedData = {
+  ...pouchData,
+  pouchMaterials: materials,
+  sealGeometries: seals,
+  foodMatrices: matrices
+};
+const initMatBadge = materials[0].name.split('(')[0].trim();
+const initSealBadge = (seals.find((s) => s.id === 'zipper_mechanical') || seals[0]).name.split('(')[0].trim();
+const initMatrixBadge = matrices[0].name.split('(')[0].trim();
 ---
 
 <div class="sous-vide-pouch-modeler-wrapper space-y-10 my-8">
@@ -406,7 +1035,7 @@ const matrices = pouchData.foodMatrices;
               {d.materialLabel}
             </label>
             <span id="material-badge" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-surface-soft text-ink border border-hairline">
-              LDPE Zipper Bag
+              {initMatBadge}
             </span>
           </div>
           <select
@@ -415,7 +1044,7 @@ const matrices = pouchData.foodMatrices;
           >
             {materials.map((m) => (
               <option value={m.id} selected={m.id === 'ldpe_ziploc'}>
-                {m.name} (Vicat: {m.vicatSofteningPointC}°C | Max: {m.maxSafeImmersionTempC}°C)
+                {m.name} ({jsI18n.vicatTag}: {m.vicatSofteningPointC}°C | {jsI18n.maxTag}: {m.maxSafeImmersionTempC}°C)
               </option>
             ))}
           </select>
@@ -444,10 +1073,10 @@ const matrices = pouchData.foodMatrices;
             class="w-full accent-emerald-600 cursor-pointer"
           />
           <div class="flex justify-between text-[11px] text-muted font-mono">
-            <span>50°C (Rare)</span>
-            <span>70°C (LDPE Limit)</span>
-            <span>85°C (Vegetables)</span>
-            <span>95°C (Starch Boil)</span>
+            <span>{jsI18n.scale50}</span>
+            <span>{jsI18n.scale70}</span>
+            <span>{jsI18n.scale85}</span>
+            <span>{jsI18n.scale95}</span>
           </div>
           <p class="text-xs text-muted leading-relaxed">
             {d.tempHelp}
@@ -461,7 +1090,7 @@ const matrices = pouchData.foodMatrices;
               {d.durationLabel}
             </label>
             <span id="duration-display" class="text-sm font-bold font-mono text-emerald-600 dark:text-emerald-400">
-              4.0 Hours
+              4.0 {jsI18n.hoursUnit}
             </span>
           </div>
           <input
@@ -474,11 +1103,11 @@ const matrices = pouchData.foodMatrices;
             class="w-full accent-emerald-600 cursor-pointer"
           />
           <div class="flex justify-between text-[11px] text-muted font-mono">
-            <span>0.5h (Quick)</span>
-            <span>4h (Braise)</span>
-            <span>12h (Overnight)</span>
-            <span>24h (Confit)</span>
-            <span>48h (Max)</span>
+            <span>{jsI18n.dur05}</span>
+            <span>{jsI18n.dur4}</span>
+            <span>{jsI18n.dur12}</span>
+            <span>{jsI18n.dur24}</span>
+            <span>{jsI18n.dur48}</span>
           </div>
           <p class="text-xs text-muted leading-relaxed">
             {d.durationHelp}
@@ -498,7 +1127,7 @@ const matrices = pouchData.foodMatrices;
               {d.sealLabel}
             </label>
             <span id="seal-badge" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-surface-soft text-ink border border-hairline">
-              Mechanical Zipper
+              {initSealBadge}
             </span>
           </div>
           <select
@@ -507,7 +1136,7 @@ const matrices = pouchData.foodMatrices;
           >
             {seals.map((s) => (
               <option value={s.id} selected={s.id === 'zipper_mechanical'}>
-                {s.name} ({s.widthMm}mm width &bull; {s.creepVulnerability} Creep)
+                {s.name} ({s.widthMm}{jsI18n.widthTag} &bull; {s.creepVulnerability} {jsI18n.creepTag})
               </option>
             ))}
           </select>
@@ -523,7 +1152,7 @@ const matrices = pouchData.foodMatrices;
               {d.matrixLabel}
             </label>
             <span id="matrix-badge" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-surface-soft text-ink border border-hairline">
-              Aqueous Low-Acid
+              {initMatrixBadge}
             </span>
           </div>
           <select
@@ -544,24 +1173,24 @@ const matrices = pouchData.foodMatrices;
         <!-- Dynamic Real-Time Micro-Parameters -->
         <div class="p-4 bg-surface-soft/80 border border-hairline rounded-2xl space-y-3">
           <div class="text-xs font-bold text-ink uppercase tracking-wider">
-            📊 Polymer Thermomechanical Telemetry
+            📊 {jsI18n.telemetryTitle}
           </div>
           <div class="grid grid-cols-2 gap-3 text-xs font-mono">
             <div>
-              <span class="text-muted block">Vicat Softening:</span>
+              <span class="text-muted block">{jsI18n.lblVicat}</span>
               <span id="telemetry-vicat" class="font-bold text-ink">88°C</span>
             </div>
             <div>
-              <span class="text-muted block">Delta to Softening:</span>
-              <span id="telemetry-delta" class="font-bold text-amber-600 dark:text-amber-400">0.0°C (Exceeded)</span>
+              <span class="text-muted block">{jsI18n.lblDelta}</span>
+              <span id="telemetry-delta" class="font-bold text-amber-600 dark:text-amber-400">0.0°C {jsI18n.deltaExceeded}</span>
             </div>
             <div>
-              <span class="text-muted block">Vapor Outgassing Pressure:</span>
+              <span class="text-muted block">{jsI18n.lblVapor}</span>
               <span id="telemetry-vapor" class="font-bold text-ink">64.5 kPa</span>
             </div>
             <div>
-              <span class="text-muted block">Seam Peel Load Factor:</span>
-              <span id="telemetry-peelload" class="font-bold text-ink">3.8x baseline</span>
+              <span class="text-muted block">{jsI18n.lblPeelLoad}</span>
+              <span id="telemetry-peelload" class="font-bold text-ink">3.8{jsI18n.baselineUnit}</span>
             </div>
           </div>
         </div>
@@ -576,11 +1205,11 @@ const matrices = pouchData.foodMatrices;
             {d.diagnosticTitle}
           </span>
           <h4 id="status-title" class="text-2xl font-black text-ink">
-            CRITICAL SEAL CREEP &amp; MICROPLASTIC FAILURE HAZARD
+            {jsI18n.statusDangerTitle}
           </h4>
         </div>
         <div id="status-badge" class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-wider bg-red-500/10 text-red-700 dark:text-red-400 border border-red-500/20 whitespace-nowrap self-start sm:self-auto">
-          ⚠️ SEVERE CREEP RISK
+          {jsI18n.statusDangerBadge}
         </div>
       </div>
 
@@ -593,7 +1222,7 @@ const matrices = pouchData.foodMatrices;
             <span id="val-creep-risk" class="text-2xl font-extrabold font-mono text-red-600 dark:text-red-400">
               94%
             </span>
-            <span class="text-xs text-muted">rupture prob.</span>
+            <span class="text-xs text-muted">{jsI18n.unitRupture}</span>
           </div>
           <div class="w-full bg-surface-soft rounded-full h-2 mt-2 overflow-hidden border border-hairline/60">
             <div id="bar-creep-risk" class="bg-red-500 h-full rounded-full transition-all duration-300" style="width: 94%;"></div>
@@ -607,7 +1236,7 @@ const matrices = pouchData.foodMatrices;
             <span id="val-microplastics" class="text-2xl font-extrabold font-mono text-amber-600 dark:text-amber-400">
               315,000
             </span>
-            <span class="text-xs text-muted">particles/dm²</span>
+            <span class="text-xs text-muted">{jsI18n.unitParticles}</span>
           </div>
           <div class="w-full bg-surface-soft rounded-full h-2 mt-2 overflow-hidden border border-hairline/60">
             <div id="bar-microplastics" class="bg-amber-500 h-full rounded-full transition-all duration-300" style="width: 78%;"></div>
@@ -621,7 +1250,7 @@ const matrices = pouchData.foodMatrices;
             <span id="val-migration" class="text-2xl font-extrabold font-mono text-ink">
               18.4
             </span>
-            <span class="text-xs text-muted">mg/dm² (EU &lt;10)</span>
+            <span class="text-xs text-muted">{jsI18n.unitMigration}</span>
           </div>
           <div class="w-full bg-surface-soft rounded-full h-2 mt-2 overflow-hidden border border-hairline/60">
             <div id="bar-migration" class="bg-red-500 h-full rounded-full transition-all duration-300" style="width: 85%;"></div>
@@ -635,7 +1264,7 @@ const matrices = pouchData.foodMatrices;
             <span id="val-degradation" class="text-2xl font-extrabold font-mono text-ink">
               88 / 100
             </span>
-            <span class="text-xs text-muted">stress index</span>
+            <span class="text-xs text-muted">{jsI18n.unitStress}</span>
           </div>
           <div class="w-full bg-surface-soft rounded-full h-2 mt-2 overflow-hidden border border-hairline/60">
             <div id="bar-degradation" class="bg-red-500 h-full rounded-full transition-all duration-300" style="width: 88%;"></div>
@@ -650,7 +1279,7 @@ const matrices = pouchData.foodMatrices;
             🔬 {d.mechanismLabel}
           </span>
           <p id="mechanism-text" class="text-xs md:text-sm text-ink leading-relaxed">
-            At 88°C, the water bath temperature exceeds the Vicat softening point of low-density polyethylene (88°C). Amorphous tie-chains undergo rapid entropy relaxation and tensile creep under hydrostatic vegetable steam pressure. The single-point mechanical zipper or thin heat seal peels progressively along the stress vector, shedding sub-micron polymeric particles directly into the food matrix.
+            {jsI18n.mechLdpeTpl.replace('{tempC}', '88').replace('{vaporPressure}', '65.1').replace('{seal}', initSealBadge.toLowerCase()).replace('{creepRisk}', '94')}
           </p>
         </div>
         <div>
@@ -658,7 +1287,7 @@ const matrices = pouchData.foodMatrices;
             🛡️ {d.guidanceLabel}
           </span>
           <p id="guidance-text" class="text-xs md:text-sm text-ink leading-relaxed">
-            Immediately discontinue use of domestic LDPE zipper bags for vegetable cooking above 75°C. Upgrade to cast polypropylene (CPP/BOPA) retort vacuum bags or platinum-cured monolithic silicone pouches with a 5mm chamber impulse seal to eliminate seam peel creep and microplastic shedding.
+            {jsI18n.guideLdpe}
           </p>
         </div>
       </div>
@@ -666,7 +1295,7 @@ const matrices = pouchData.foodMatrices;
       <!-- Action Button -->
       <div class="mt-8 pt-6 border-t border-hairline flex flex-col sm:flex-row items-center justify-between gap-4">
         <div class="text-xs text-muted font-mono" id="compliance-summary">
-          EU Regulation (EU) No 10/2011: NON-COMPLIANT (Migration exceeds 10 mg/dm²) &bull; ASTM F88 Creep Failure
+          {jsI18n.compDangerTpl.replace('{mig}', '18.4')}
         </div>
         <button
           type="button"
@@ -725,7 +1354,7 @@ const matrices = pouchData.foodMatrices;
   <div class="bg-surface border border-hairline rounded-3xl p-6 md:p-10 shadow-xs">
     <div class="mb-8">
       <div class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-1">
-        Modernist Culinary Engineering Standard
+        ASTM F88 &bull; EU 10/2011 &bull; FDA 21 CFR 177.1520
       </div>
       <h3 class="text-xl md:text-2xl font-bold text-ink">
         {d.rulesTitle}
@@ -757,7 +1386,7 @@ const matrices = pouchData.foodMatrices;
 </div>
 
 <!-- Reactive Client-Side Engine -->
-<script define:vars={{ pouchData, feedbackMsg: d.copiedFeedback }}>
+<script define:vars={{ pouchData: localizedData, feedbackMsg: d.copiedFeedback, jsI18n }}>
   document.addEventListener('DOMContentLoaded', () => {
     const materialSelect = document.getElementById('pouch-material-select');
     const tempRange = document.getElementById('bath-temp-range');
@@ -808,7 +1437,7 @@ const matrices = pouchData.foodMatrices;
       // Update text displays
       const tempF = Math.round((tempC * 9/5) + 32);
       tempDisplay.textContent = `${tempC}°C (${tempF}°F)`;
-      durationDisplay.textContent = `${hours.toFixed(1)} Hours`;
+      durationDisplay.textContent = `${hours.toFixed(1)} ${jsI18n.hoursUnit}`;
 
       materialBadge.textContent = mat.name.split('(')[0].trim();
       sealBadge.textContent = seal.name.split('(')[0].trim();
@@ -821,19 +1450,19 @@ const matrices = pouchData.foodMatrices;
 
       const deltaVicat = mat.vicatSofteningPointC - tempC;
       if (deltaVicat <= 0) {
-        telemetryDelta.textContent = `${Math.abs(deltaVicat).toFixed(1)}°C (Softening Exceeded)`;
+        telemetryDelta.textContent = `${Math.abs(deltaVicat).toFixed(1)}°C ${jsI18n.deltaExceeded}`;
         telemetryDelta.className = 'font-bold text-red-600 dark:text-red-400';
       } else if (deltaVicat <= 10) {
-        telemetryDelta.textContent = `${deltaVicat.toFixed(1)}°C (Near Softening)`;
+        telemetryDelta.textContent = `${deltaVicat.toFixed(1)}°C ${jsI18n.deltaNear}`;
         telemetryDelta.className = 'font-bold text-amber-600 dark:text-amber-400';
       } else {
-        telemetryDelta.textContent = `+${deltaVicat.toFixed(1)}°C (Stable)`;
+        telemetryDelta.textContent = `+${deltaVicat.toFixed(1)}°C ${jsI18n.deltaStable}`;
         telemetryDelta.className = 'font-bold text-emerald-600 dark:text-emerald-400';
       }
 
       // Peel load multiplier based on internal vapor pressure and duration
       const peelMultiplier = (Math.max(0.5, (tempC / 60)) * (1 + Math.log10(Math.max(1, hours))) * (1 / seal.sealIntegrityFactor)).toFixed(2);
-      telemetryPeelLoad.textContent = `${peelMultiplier}x baseline`;
+      telemetryPeelLoad.textContent = `${peelMultiplier}${jsI18n.baselineUnit}`;
 
       // 1. Creep Rupture Risk Calculation
       let baseCreep = 0;
@@ -907,50 +1536,50 @@ const matrices = pouchData.foodMatrices;
 
       // Color coding & safety status
       if (creepRisk > 75 || parseFloat(baseMigration) > 10.0 || mat.id === 'plasticized_pvc') {
-        statusTitle.textContent = 'CRITICAL SEAL CREEP & CHEMICAL MIGRATION RISK';
+        statusTitle.textContent = jsI18n.statusDangerTitle;
         statusTitle.className = 'text-2xl font-black text-red-600 dark:text-red-400';
-        statusBadge.textContent = '🚨 DANGER: NON-COMPLIANT';
+        statusBadge.textContent = jsI18n.statusDangerBadge;
         statusBadge.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-wider bg-red-500/10 text-red-700 dark:text-red-400 border border-red-500/20';
         barCreepRisk.className = 'bg-red-500 h-full rounded-full transition-all duration-300';
         barMigration.className = 'bg-red-500 h-full rounded-full transition-all duration-300';
         barDegradation.className = 'bg-red-500 h-full rounded-full transition-all duration-300';
-        complianceSummary.textContent = `EU 10/2011 Limit Exceeded: Migration is ${baseMigration} mg/dm² (Limit: 10.0 mg/dm²) • High Seam Rupture Risk`;
+        complianceSummary.textContent = jsI18n.compDangerTpl.replace('{mig}', baseMigration);
       } else if (creepRisk > 35 || parseFloat(baseMigration) > 5.0) {
-        statusTitle.textContent = 'ELEVATED THERMAL CREEP & ADHESIVE VULNERABILITY';
+        statusTitle.textContent = jsI18n.statusCautionTitle;
         statusTitle.className = 'text-2xl font-black text-amber-600 dark:text-amber-400';
-        statusBadge.textContent = '⚠️ CAUTION: MONITOR DWELL';
+        statusBadge.textContent = jsI18n.statusCautionBadge;
         statusBadge.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-wider bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20';
         barCreepRisk.className = 'bg-amber-500 h-full rounded-full transition-all duration-300';
         barMigration.className = 'bg-amber-500 h-full rounded-full transition-all duration-300';
         barDegradation.className = 'bg-amber-500 h-full rounded-full transition-all duration-300';
-        complianceSummary.textContent = `EU 10/2011 Borderline: Migration is ${baseMigration} mg/dm² • Prolonged dwell may degrade tie-layer`;
+        complianceSummary.textContent = jsI18n.compCautionTpl.replace('{mig}', baseMigration);
       } else {
-        statusTitle.textContent = 'OPTIMAL STRUCTURAL INTEGRITY & FOOD-SAFE CONTACT';
+        statusTitle.textContent = jsI18n.statusSafeTitle;
         statusTitle.className = 'text-2xl font-black text-emerald-600 dark:text-emerald-400';
-        statusBadge.textContent = '✅ CERTIFIED SAFE';
+        statusBadge.textContent = jsI18n.statusSafeBadge;
         statusBadge.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20';
         barCreepRisk.className = 'bg-emerald-500 h-full rounded-full transition-all duration-300';
         barMigration.className = 'bg-emerald-500 h-full rounded-full transition-all duration-300';
         barDegradation.className = 'bg-emerald-500 h-full rounded-full transition-all duration-300';
-        complianceSummary.textContent = `EU 10/2011 & FDA Compliant: Migration is ${baseMigration} mg/dm² (Below 10.0 mg/dm² OML) • Zero Seam Creep`;
+        complianceSummary.textContent = jsI18n.compSafeTpl.replace('{mig}', baseMigration);
       }
 
       // Dynamic mechanisms
       if (mat.id === 'platinum_silicone') {
-        mechanismText.textContent = `Platinum-cured cross-linked silicone consists of an inorganic siloxane (-Si-O-Si-) backbone with covalent bonds requiring over 450 kJ/mol to cleave. It experiences zero thermodynamic softening up to 200°C, zero seam creep, and leaves negligible chemical residues (<0.1 mg/kg) in water or dietary fats.`;
-        guidanceText.textContent = `Platinum silicone is the premier reusable solution for high-heat root vegetable braising (85°C–92°C). Ensure an airtight pinch seal and clean with food-grade neutral detergent between uses.`;
+        mechanismText.textContent = jsI18n.mechPlatinum;
+        guidanceText.textContent = jsI18n.guidePlatinum;
       } else if (mat.id === 'boilable_pp_retort') {
-        mechanismText.textContent = `Cast polypropylene (CPP) possesses a high degree of crystalline isotacticity with a melting point of 165°C and Vicat softening point of 135°C. At water bath temperatures of ${tempC}°C, the polymer chains remain in their glassy/semi-crystalline matrix, resisting hydrostatic steam pressure with near-zero microplastic shed.`;
-        guidanceText.textContent = `High-barrier retort polypropylene bags are the industrial gold standard for high-temperature sous vide. Pair with standard 3mm or 5mm impulse seals for foolproof seal integrity during long root vegetable cycles.`;
+        mechanismText.textContent = jsI18n.mechRetortTpl.replace('{tempC}', String(tempC));
+        guidanceText.textContent = jsI18n.guideRetort;
       } else if (mat.id === 'pa_pe_multilayer') {
-        mechanismText.textContent = `Multi-layer co-extruded PA/PE bags utilize biaxially oriented polyamide (Nylon 6) on the exterior for oxygen barrier strength and LLDPE on the interior for heat fusion. At ${tempC}°C for ${hours} hours, moisture permeability gradually plasticizes the polyurethane tie-layer adhesive, especially when cooking ${matrix.name.toLowerCase()}.`;
-        guidanceText.textContent = `For temperatures below 80°C, PA/PE pouches are robust. For vegetable braises exceeding 85°C with durations over 8 hours, switch to retort CPP or dual 5mm chamber seals to prevent seam fatigue.`;
+        mechanismText.textContent = jsI18n.mechPapeTpl.replace('{tempC}', String(tempC)).replace('{hours}', String(hours)).replace('{matrix}', matrix.name.toLowerCase());
+        guidanceText.textContent = jsI18n.guidePape;
       } else if (mat.id === 'ldpe_ziploc') {
-        mechanismText.textContent = `Standard low-density polyethylene (LDPE) has a low Vicat softening point of 88°C. At current bath temperature (${tempC}°C), the polymer enters its rubbery state. Hydrostatic pressure from vegetable outgassing (${vaporPressure} kPa) creates high peel stress on the ${seal.name.toLowerCase()}, resulting in high creep rupture probability (${creepRisk}%) and massive microplastic shed.`;
-        guidanceText.textContent = `Cease using domestic LDPE zipper bags for cooking above 70°C. Upgrade immediately to retort polypropylene or platinum silicone bags to prevent seal rupture and microplastic ingestion.`;
+        mechanismText.textContent = jsI18n.mechLdpeTpl.replace('{tempC}', String(tempC)).replace('{vaporPressure}', String(vaporPressure)).replace('{seal}', seal.name.toLowerCase()).replace('{creepRisk}', String(creepRisk));
+        guidanceText.textContent = jsI18n.guideLdpe;
       } else if (mat.id === 'plasticized_pvc') {
-        mechanismText.textContent = `Plasticized PVC contains 20% to 35% low-molecular-weight phthalates (DEHP, DINP) that are not chemically bound to the polymer backbone. At elevated temperatures and in the presence of dietary lipids, plasticizers rapidly diffuse into food, causing severe endocrine disruption and massive microplastic fragmentation.`;
-        guidanceText.textContent = `STRICTLY PROHIBITED: Never use plasticized PVC cling films or utility bags in sous vide cooking. Replace immediately with certified food-grade vacuum pouches complying with EU 10/2011.`;
+        mechanismText.textContent = jsI18n.mechPvc;
+        guidanceText.textContent = jsI18n.guidePvc;
       }
     }
 
@@ -997,23 +1626,23 @@ const matrices = pouchData.foodMatrices;
     // Copy Telemetry
     if (copyBtn) {
       copyBtn.addEventListener('click', () => {
-        const report = `=== SOUS VIDE POUCH SEAM DELAMINATION & MICROPLASTIC REPORT ===
-Timestamp: ${new Date().toISOString()}
-Pouch Material: ${materialSelect.options[materialSelect.selectedIndex].text}
-Water Bath Temperature: ${tempRange.value}°C
-Immersion Duration: ${durationRange.value} Hours
-Seal Geometry: ${sealSelect.options[sealSelect.selectedIndex].text}
-Food Matrix: ${matrixSelect.options[matrixSelect.selectedIndex].text}
+        const report = `${jsI18n.repTitle}
+${jsI18n.repTime}: ${new Date().toISOString()}
+${jsI18n.repMat}: ${materialSelect.options[materialSelect.selectedIndex].text}
+${jsI18n.repTemp}: ${tempRange.value}°C
+${jsI18n.repDur}: ${durationRange.value} ${jsI18n.hoursUnit}
+${jsI18n.repSeal}: ${sealSelect.options[sealSelect.selectedIndex].text}
+${jsI18n.repMatrix}: ${matrixSelect.options[matrixSelect.selectedIndex].text}
 
-DIAGNOSTIC OUTCOMES:
-- Seam Creep Rupture Risk: ${valCreepRisk.textContent}
-- Microplastic Shedding Density: ${valMicroplastics.textContent} particles/dm²
-- Chemical & Oligomer Migration: ${valMigration.textContent} mg/dm² (EU Limit: 10.0 mg/dm²)
-- Thermal Matrix Degradation Index: ${valDegradation.textContent}
-- Safety Status: ${statusTitle.textContent} (${statusBadge.textContent})
-- Compliance: ${complianceSummary.textContent}
-- Corrective Protocol: ${guidanceText.textContent}
-Source: IsItKitchenSafe Autonomous Growth & Ops Engine (v2.0)
+${jsI18n.repOutcomes}
+- ${jsI18n.repCreep}: ${valCreepRisk.textContent}
+- ${jsI18n.repMicro}: ${valMicroplastics.textContent} ${jsI18n.unitParticles}
+- ${jsI18n.repMig}: ${valMigration.textContent} ${jsI18n.unitMigration}
+- ${jsI18n.repDeg}: ${valDegradation.textContent}
+- ${jsI18n.repStatus}: ${statusTitle.textContent} (${statusBadge.textContent})
+- ${jsI18n.repComp}: ${complianceSummary.textContent}
+- ${jsI18n.repProto}: ${guidanceText.textContent}
+${jsI18n.repSrc}
 ================================================================`;
 
         navigator.clipboard.writeText(report).then(() => {
