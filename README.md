@@ -4,7 +4,7 @@ A static kitchen safety reference platform and interactive consumer tool suite a
 
 ## Overview
 
-IsItKitchenSafe delivers **12532+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **210 interactive tools** (**1,050 localized tool pages**, including **91 Google-indexed Everyday Consumer Kitchen Safety Tools**), **143 evergreen guides × 5 languages = 715 localized articles**, **253 comparisons × 5 languages = 1,265 localized pages**, **1,307 item pages per language (6,535 localized reference pages)**, **WCAG 2.1 AA accessibility**, and transparent E-E-A-T verification standards.
+IsItKitchenSafe delivers **12547+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **210 interactive tools** (**1,050 localized tool pages**, including **92 Google-indexed Everyday Consumer Kitchen Safety Tools**), **146 evergreen guides × 5 languages = 730 localized articles**, **253 comparisons × 5 languages = 1,265 localized pages**, **1,307 item pages per language (6,535 localized reference pages)**, **WCAG 2.1 AA accessibility**, and transparent E-E-A-T verification standards.
 
 ## Tech Stack
 - **Framework**: Astro.js (MPA static generation)
@@ -14,8 +14,9 @@ IsItKitchenSafe delivers **12532+ static pages** across **11 verticals** and **5
 
 ## Consumer Growth, E-E-A-T & Retention Architecture
 
-### Everyday Consumer Kitchen Safety Tools (91 Google-Indexed Tools)
-All 210 interactive tools are split cleanly between everyday consumer utilities and specialized commercial/lab simulators (**92 Home Kitchen Safety** + **118 Commercial & Industrial Engineering Lab** = **1,050 localized tool pages** across 5 languages). **91 high-utility consumer tools** are explicitly allowlisted for search indexing in [`src/data/consumer-tools-allowlist.json`](src/data/consumer-tools-allowlist.json) across all 5 languages, including:
+### Everyday Consumer Kitchen Safety Tools (92 Google-Indexed Tools)
+All 210 interactive tools are split cleanly between everyday consumer utilities and specialized commercial/lab simulators (**92 Home Kitchen Safety** + **118 Commercial & Industrial Engineering Lab** = **1,050 localized tool pages** across 5 languages). **92 high-utility consumer tools** are explicitly allowlisted for search indexing in [`src/data/consumer-tools-allowlist.json`](src/data/consumer-tools-allowlist.json) across all 5 languages, including:
+- **Toaster & Convection Oven Nichrome Element Hexavalent Chromium & Acrylamide Risk Simulator** (`toaster-element-acrylamide-safety-simulator`)
 - **Sous Vide High-Temperature Pouch Seam Delamination & Microplastic Modeler** (`sous-vide-pouch-delamination-modeler`)
 - **Wooden Spoon Micro-Crack Bacterial Biofilm & Moisture Modeler** (`wooden-utensil-biofilm-modeler`)
 - **Refrigerator Raw Meat Cross-Contamination & Bio-Aerosol Modeler** (`refrigerator-cross-contamination-modeler`)
@@ -64,7 +65,7 @@ All 210 interactive tools are split cleanly between everyday consumer utilities 
 - Plus recall scanning, thermal shock, culinary oil smoke point, cookware brand transparency, and hazard triage tools.
 
 ### Content & Comparison Verticals
-- **143 Evergreen Multilingual Blog Guides** (**143 evergreen guides × 5 languages = 715 localized articles**) with **100% 5-language slug parity** across EN, ES, PT, ZH-CN, and JA.
+- **146 Evergreen Multilingual Blog Guides** (**146 evergreen guides × 5 languages = 730 localized articles**) with **100% 5-language slug parity** across EN, ES, PT, ZH-CN, and JA.
 - **253 High-Intent Brand & Material Comparisons** (`/compare/`, **253 comparisons × 5 languages = 1,265 localized pages**), covering popular cookware, drinkware, and kitchen material matchups across 5 languages.
 - **Original SVG Visual Safety Diagrams** embedded across all **7 appliance hubs** (Dishwasher, Microwave, Freezer, Oven, Dryer, Air Fryer, Refrigerator).
 
@@ -133,8 +134,8 @@ npm run ops:engine
 
 ## Scale & Metrics
 - **12,532+ Static Pages** across 11 verticals and 5 languages (EN, ES, PT, ZH-CN, JA)
-- **210 Interactive Tools** across 5 languages (**1,050 Localized Tool Pages**; 100% 5-language parity: **92 Home Kitchen Safety** + **118 Commercial Engineering**), including **91 Google-indexed Consumer Utilities** (`src/data/consumer-tools-allowlist.json`)
-- **143 Evergreen Guides × 5 Languages = 715 Articles** with 100% slug parity + **253 Comparisons × 5 Languages = 1,265 Pages**
+- **210 Interactive Tools** across 5 languages (**1,050 Localized Tool Pages**; 100% 5-language parity: **92 Home Kitchen Safety** + **118 Commercial Engineering**), including **92 Google-indexed Consumer Utilities** (`src/data/consumer-tools-allowlist.json`)
+- **146 Evergreen Guides × 5 Languages = 730 Articles** with 100% slug parity + **253 Comparisons × 5 Languages = 1,265 Pages**
 - **1,307 Items per Language (6,535 Localized Reference Pages)** with 100% slug parity including modern kitchenware (Le Creuset, Yeti Rambler, HexClad, Caraway, Owala FreeSip, Ninja Creami, Always Pan, Stasher, Instant Pot)
 - **WCAG 2.1 AA Accessibility** (`:focus-visible`, `prefers-reduced-motion`, ARIA landmarks) + **Live Instant Search** across `/tools/`, `/blog/`, `/how-long/`, `/refreeze/`, `/compare/`, `/material/`, and `/what-happens/`
 - **1,331,530+ Audited Links / 0 Broken Links** (100% internal href resolution verified)

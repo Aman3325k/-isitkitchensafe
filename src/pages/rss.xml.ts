@@ -44,6 +44,12 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/toaster-element-acrylamide-safety-simulator/',
+    title: 'Toaster & Convection Oven Nichrome Element Hexavalent Chromium & Acrylamide Risk Simulator',
+    description: 'Assess Nichrome 80/20 Cr₂O₃ passivation vs. oxide scale flaking, compare toast acrylamide levels against Regulation (EU) 2017/2158 benchmarks (50/100/350 ppb), and model sourdough fermentation reductions.',
+    date: '2026-11-27'
+  },
+  {
     path: '/tools/sous-vide-pouch-delamination-modeler/',
     title: 'Sous Vide High-Temperature Pouch Seam Delamination & Microplastic Modeler',
     description: 'Model LDPE/LLDPE pouch Vicat softening (85°C–88°C), ASTM F88 seal peel burst limits, Arrhenius microplastic shedding (up to 450,000 particles/dm²), and Fickian lipid migration against EU 10/2011 and FDA 21 CFR 177.1520.',
