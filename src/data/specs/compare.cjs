@@ -3966,5 +3966,85 @@ module.exports = {
       "parameter": "Prompt Takeout Glass Transfer, Microwave Glass Plating & Gasket Sanitization",
       "guideline": "Transfer hot takeout out of fiber bowls into glass within 1 hour; never microwave disposable fiberware; wash glass container lid gaskets weekly."
     }
+  },
+  "pa-pe-vacuum-pouch-vs-ldpe-zipper-bag-sous-vide": {
+    "materialThermal": {
+      "property": "LDPE Vicat Softening Point vs. PA/PE Seam Peel & Retort Thermal Envelope",
+      "threshold": "LDPE Zipper: Vicat 85°C–88°C (<28 kPa burst) | PA/PE: 85°C rated (65–140 kPa weld) | CPP Retort: 121°C",
+      "details": "Arrhenius viscoelastic seam creep accelerates 8–12x near 85°C–90°C in LDPE bags, driving delamination and elevated lipid migration compared to welded PA/PE and CPP retort laminates."
+    },
+    "safetyStandard": {
+      "organization": "US FDA / European Commission / ASTM",
+      "standard": "FDA 21 CFR § 177.1520 & § 177.1395 / EU 10/2011 (10 mg/dm² OML) / ASTM F88",
+      "citation": "Polyolefin and high-temperature retort laminate migration limits alongside standardized ASTM F88 seam tensile burst criteria."
+    },
+    "applianceSpecs": {
+      "parameter": "Temp-Tiered Pouch Selection & ≤3°C Vacuum Chill Protocol",
+      "guideline": "Cap LDPE freezer bags ≤65°C (<2h); use double-sealed PA/PE up to 80°C–85°C; upgrade to CPP retort or platinum silicone >85°C and chill vacuum pouches rapidly in ice water."
+    }
+  },
+  "pop-up-toaster-vs-toaster-oven": {
+    "materialThermal": {
+      "property": "Maillard Acrylamide Activation (>120°C) vs. Radiant Element Fire Hazard",
+      "threshold": "Golden Yellow Toast (<150°C surface) vs. Dark Char (>180°C acrylamide surge) | Open Nichrome Coils >600°C",
+      "details": "Visual glass-door monitoring in toaster ovens reduces accidental charring; UL 1026 requires jammed-carriage auto-shutoffs on pop-up units."
+    },
+    "safetyStandard": {
+      "organization": "UL 1026 / EFSA / European Commission / US FDA",
+      "standard": "UL 1026 Household Electric Cooking Appliances & Commission Regulation (EU) 2017/2158",
+      "citation": "Electrical fire-containment rules alongside EFSA acrylamide mitigation and FDA <20 ppm gluten allergen cross-contact thresholds."
+    },
+    "applianceSpecs": {
+      "parameter": "Weekly Crumb Clearing, Zero Utensil Insertion & Allergen Isolation",
+      "guideline": "Unplug before clearing jams; never toast buttered/frosted items in vertical slots; pull toast at golden yellow and isolate gluten-free items."
+    }
+  },
+  "immersion-blender-vs-countertop-blender-hot-soup": {
+    "materialThermal": {
+      "property": "Adiabatic Steam Expansion & Vortex Cavitation vs. Open-Pot Atmospheric Venting",
+      "threshold": "Sealed Jar + >60°C Liquid: Explosive Gauge Pressure | Immersion Open Pot: 0 PSI Overpressure",
+      "details": "20,000+ RPM blade tip cavitation entrains vapor bubbles that rapidly raise sealed pitcher pressure; stainless immersion wands avoid plastic hydrolysis and jar thermal shock."
+    },
+    "safetyStandard": {
+      "organization": "US CPSC / UL 982 / NSF H1",
+      "standard": "UL 982 Motor-Operated Food Preparing Machines, CPSC Hot-Liquid Advisories & NSF H1",
+      "citation": "Mandatory venting/fill-limit rules for hot-liquid countertop blending and NSF H1 food-grade bearing lubrication standards."
+    },
+    "applianceSpecs": {
+      "parameter": "Open-Pot Submersion, ≤1/2 Vented Pitcher Limit & Zero Hot Bullet Cup Rule",
+      "guideline": "Blend hot soup directly in pot with stainless immersion wand fully submerged, OR vent countertop pitcher cap under towel at ≤1/2 capacity starting on Speed 1."
+    }
+  },
+  "tempered-glass-microwave-cover-vs-plastic-dome": {
+    "materialThermal": {
+      "property": "Lipophilic Steam-Condensate Partitioning vs. Vitreous Glass Inertness",
+      "threshold": "PP #5 Dome: Grease drops >160°C pit & craze surface | Tempered/Borosilicate Glass: 0.00 mg/kg migration",
+      "details": "Fats dissolve polyolefin oligomers ~1,000x faster than water; aged cloudy PP increases migration rates up to 6x compared to non-reactive glass domes."
+    },
+    "safetyStandard": {
+      "organization": "US FDA / European Commission / ASTM",
+      "standard": "FDA 21 CFR § 177.1520 / EU Regulation 10/2011 / Microwave Steam-Venting Guidance",
+      "citation": "Food-contact polymer limits restricting fatty/high-heat migration and requiring unobstructed pressure venting."
+    },
+    "applianceSpecs": {
+      "parameter": "Open Steam Venting, Zero Grease-Pit Plastic & Away-From-Face Lift",
+      "guideline": "Use vented glass or inverted ceramic over fatty/acidic foods; retire clouded/pitted plastic covers immediately; tilt cover away from face when opening."
+    }
+  },
+  "silicone-cupcake-liners-vs-paper-baking-cups": {
+    "materialThermal": {
+      "property": "Cyclic Siloxane (D4–D6) Volatilization & Lipid Extraction vs. Cellulose Scorch Ceiling",
+      "threshold": "Platinum Silicone (BfR XV): 220°C–230°C max (pre-temper at 200°C) | Unbleached Parchment Cups: 220°C max",
+      "details": "EU REACH flags D4 (0.1% w/w threshold) as PBT/SVHC; fat-rich batters accelerate un-tempered siloxane extraction while pure PFAS-free paper avoids elastomer oligomer sinks."
+    },
+    "safetyStandard": {
+      "organization": "EFSA / ECHA REACH / German BfR / US FDA",
+      "standard": "German BfR Recommendation XV, FDA 21 CFR § 177.2600 & EU REACH D4–D6 Restrictions",
+      "citation": "Food-contact elastomer volatile residue limits (<0.5% extractables), addition-cure purity standards, and PFAS-free paper compliance."
+    },
+    "applianceSpecs": {
+      "parameter": "Pinch-Test Verification, 200°C Pre-Bake Tempering & Unscented Soap Wash",
+      "guideline": "Pinch-test cups for zero white filler streaks; bake new silicone empty 2h at 200°C with vent fan; wash with fragrance-free soap and keep ≤220°C."
+    }
   }
 };
