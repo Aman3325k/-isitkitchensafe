@@ -1,15 +1,15 @@
-# IsItKitchenSafe Autonomous Growth & Ops Report — Wave 92 (`TOOL-CONSUMER-119`)
+# IsItKitchenSafe Autonomous Growth & Ops Report — Wave 93 (`TOOL-CONSUMER-120`)
 
 **Date:** 2026-11-27 (`Asia/Kolkata`)
 **Engine:** Autonomous Growth & Ops Engine v2.0 (WIP=1, Zero-Defect Protocol)
-**Primary Wave Commit:** `920dd19` (`feat(growth-wave-92): elevate Wooden Utensil Biofilm Modeler (#90 / 5 langs), publish 3 safety guides (137->140) & sync link graph (12,467 pages)`)
+**Primary Wave Commit:** `36f2594` (`feat(growth-wave-93): expand comparisons to 248 (5 langs), wire E-E-A-T specs & contextual tools (12,492 pages)`)
 
 ---
 
 ## Track 1: Live Site Health, Security Headers & Dependency Audit
 - **Target:** `https://isitkitchensafe.com`
-- **Availability & Latency:** `HTTP/1.1 200 OK` (`status: 200`), SSL verify exit `0`, TTFB `0.379033s`, total `0.517585s`
-- **Edge & Caching:** `Server: cloudflare`, `cf-cache-status: DYNAMIC`, `x-region-cache-status: HIT`, `CF-RAY: a60e9bd5df7b44be-SIN`, `alt-svc: h3=":443"; ma=86400`
+- **Availability & Latency:** `HTTP/1.1 200 OK` (`HTTP:200`), SSL verify result `0`, TTFB `0.553283s`, total `0.553363s`
+- **Edge & Caching:** `Server: cloudflare`, `cf-cache-status: DYNAMIC`, `x-region-cache-status: MISS`, `CF-RAY: a60ef3809cf02eb3-SIN`, `alt-svc: h3=":443"; ma=86400`
 - **Security Headers Verified:**
   - `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload`
   - `x-content-type-options: nosniff`
@@ -19,30 +19,30 @@
 
 ---
 
-## Track 2–5: Wave 92 Scientific Verification, Content & Interactive Tool Delivery
-1. **Consumer Tool #90 Elevated (`src/data/consumer-tools-allowlist.json`, `89 -> 90`):**
-   - `wooden-utensil-biofilm-modeler` promoted to the Google-indexed Consumer Kitchen Safety catalog across all 5 locales (`en`, `es`, `pt`, `zh-cn`, `ja`) with localized `ITEM_I18N`, `JS_STATUS_I18N`, table/dropdown/slider/clipboard-report rendering (`src/components/WoodenUtensilBiofilmModeler.astro`), `WebApplication` / `FAQPage` / `BreadcrumbList` JSON-LD schemas (`src/pages/tools/wooden-utensil-biofilm-modeler.astro`, `src/pages/[lang]/tools/wooden-utensil-biofilm-modeler.astro`), raw LaTeX cleanup, and spotlight hub placement (`src/pages/tools/index.astro`, `src/pages/[lang]/tools/index.astro`).
-   - Grounded in Vega Gutierrez et al. (*MDPI Coatings*, 2023, DOI `10.3390/coatings13040752`) on mineral/linseed oil reduction of immediate capillary wicking of *Salmonella*/*Listeria* compared to unsealed wood, reconciled with Ak & Cliver (UC Davis) desiccation and oil crack-prevention kinetics.
-2. **3 Authoritative Guides Published Across 5 Languages (`137 -> 140` guides = `700` localized articles, 100% slug parity):**
-   - `bamboo-utensil-glue-mineral-oil-desiccation-biofilm-safety` -> routed to `/tools/wooden-utensil-biofilm-modeler/`
-   - `molded-fiber-takeout-bowls-eu-ppwr-pfas-ban-2026-safety` -> routed to `/tools/toxic-leaching-scorecard/` (grounded in Regulation (EU) 2025/40 PPWR Article 5(5), effective August 12, 2026: `25 ppb` single non-polymeric PFAS, `250 ppb` sum of targeted non-polymeric PFAS, `50 ppm` / `50 mg/kg` total PFAS including polymeric, and `100 mg/kg` combined heavy metals)
-   - `cooking-oil-smoke-point-myth-evoo-avocado-adulteration-safety` -> routed to `/tools/culinary-oil-smoke-point-simulator/` (grounded in De Alzaa, Guillaume & Ravetti, *Acta Scientific Nutritional Health*, May 2018 on EVOO vs. polyunsaturated seed oils / `4-HNE`, `MDA`, IARC Group 2A acrolein, and UC Davis Prof. Selina Wang Lab avocado oil testing: `82%` rancid/adulterated in 2020; nearly `70%` private-label failure in 2023)
-3. **Link Graph, Contextual Tool Routing, Feeds & Documentation:**
-   - Added `'culinaryOilSimulator'` and updated `'toxicScorecard'` / `'woodenUtensilBiofilm'` regex matchers in `src/pages/blog/[slug].astro` and `src/pages/[lang]/blog/[slug].astro`; added `'woodenUtensilBiofilm'` in `src/pages/compare/[slug].astro` and `src/pages/[lang]/compare/[slug].astro`; updated `src/pages/rss.xml.ts`, `public/llms.txt`, and `README.md`.
-   - Synchronized roadmap & growth telemetry in `logs/autonomous-growth-history.json`, `logs/website_growth_roadmap.json`, and `logs/autonomous_growth_v2_report.json` via `scripts/update-growth-wave92-logs.cjs`; next active objective queued is `TOOL-CONSUMER-120` (Wave 93: 5 material & appliance comparisons, `243 -> 248 / 5 langs`), followed by `TOOL-CONSUMER-121` (`sous-vide-pouch-delamination-modeler`, #91).
+## Track 2–5: Wave 93 Scientific Verification, Content & Contextual Tool Delivery
+1. **5 High-Intent Comparisons Published Across 5 Languages (`243 -> 248` comparisons = `1,240` localized `/compare/` pages, 100% slug parity):**
+   - `hardwood-wooden-spoon-vs-bamboo-spoon` (`container-material`, winner `item1`) -> routed to `/tools/wooden-utensil-biofilm-modeler/` (grounded in Vega Gutierrez et al., *MDPI Coatings* 2023 on mineral/linseed oil restriction of immediate capillary wicking of *Salmonella*/*Listeria*, Ak & Cliver UC Davis desiccation hygiene, laminated bamboo synthetic adhesive delamination, and biogenic `SiO2` phytolith coating abrasion)
+   - `stovetop-pressure-cooker-vs-electric-pressure-cooker` (`appliance-safety`, winner `depends`) -> routed to `/tools/instant-pot-pressure-release-checker/` (grounded in October 15, 2026 CPSC Safety Warning #27-030 on ~393,000 Tristar Power Quick Pot Model `Y6D-36` lid-blowout burn hazards where Tristar refused voluntary recall, UL 1026 `1/2` foaming vs. `2/3` MAX fill rules, and USDA/NCHFP `15 PSI / 121°C` low-acid home canning validation)
+   - `aluminum-foil-vs-glass-baking-dish-acidic-foods` (`container-material`, winner `item2`) -> routed to `/tools/aluminum-foil-acidic-leaching-simulator/` (grounded in Bassioni et al. 2012 & Fekete et al. amphoteric `Al2O3` dissolution below `pH 4.5` at `200°C–220°C` against EFSA `1 mg/kg bw/week` aluminum TWI, galvanic "lasagna battery" corrosion on stainless pans, and the dual-layer parchment barrier protocol)
+   - `cast-iron-vs-stainless-steel-glass-cooktop` (`appliance-safety`, winner `item2`) -> routed to `/tools/glass-cooktop-fracture-simulator/` (grounded in SCHOTT CERAN / EuroKera ~`700°C` thermal shock resistance vs. Hertzian point-impact drops from 6–12 lb cast iron, Griffith sand-cast/salt-grit abrasion flaws, molten sugar cooling spall craters, and `240V` cracked-top electrocution hazards)
+   - `molded-fiber-takeout-bowl-vs-glass-container` (`food-storage`, winner `item2`) -> routed to `/tools/toxic-leaching-scorecard/` (grounded in Regulation (EU) 2025/40 PPWR Article 5(5) effective August 12, 2026 capping single non-polymeric PFAS at `25 ppb`, targeted sum at `250 ppb`, total PFAS at `50 ppm`, and heavy metals at `100 mg/kg`, plus the 2024 US FDA PFAS paper/fiber phase-out)
+2. **E-E-A-T Specs, Schema Markup & Discovery Sync:**
+   - Populated `src/data/specs/compare.cjs` (`243 -> 248` specs) and localized comparison datasets (`src/data/comparisons*.json`) with `ItemList`, `Article`, `BreadcrumbList`, `FAQPage`, and `WebPage` JSON-LD schemas across all 5 languages.
+   - Added `aluminumFoilLeaching` and `glassCooktop` localized tool definitions and wired all 5 Wave 93 contextual tool matchers into `src/pages/compare/[slug].astro` and `src/pages/[lang]/compare/[slug].astro` (fixing a minor Portuguese `y -> e` typo in `woodenUtensilBiofilm`).
+   - Updated `public/llms.txt`, `README.md`, `logs/autonomous-growth-history.json`, `logs/website_growth_roadmap.json`, and `logs/autonomous_growth_v2_report.json` via `scripts/update-growth-wave93-logs.cjs`; next active objective queued is `TOOL-CONSUMER-121` (`sous-vide-pouch-delamination-modeler`, #91 + 3 safety guides `140 -> 143`).
 
 ---
 
-## Verified Final Build & QA Metrics (Wave 92)
+## Verified Final Build & QA Metrics (Wave 93)
 
 | Verification Gate | Verified Observed Result |
 | --- | --- |
-| Static Production Build (`npm run build`) | `12,467` pages built in `2m 28s` (`0` build errors) |
-| Multilingual Slug Parity (`check-broken-links.js`) | `1,907` items per language (`2,250 items × 3 = 6,750 total`, 100% symmetric) |
-| Internal Link Integrity Audit | `1,507,891` hrefs inspected across `12,467` HTML files (`0` dead links) |
-| Wave 92 Schema & Parity Suite (`scripts/test-wave92-schema.cjs --dist`) | `1,112` assertions passed across source + built HTML (`5` locales) |
-| i18n Health Suite (`scripts/test-i18n-health.mjs --all --allow-legacy-2-faqs`) | `203,635` checks passed (`0` errors; `764` legacy FAQ count warnings) |
+| Static Production Build (`npm run build`) | `12,492` pages built in `2m 29s` (`0` build errors) |
+| Multilingual Slug Parity (`check-broken-links.js`) | `2,255 items × 3 = 6,765 total`, 100% symmetric |
+| Internal Link Integrity Audit | `1,511,101` hrefs inspected across `12,492` HTML files (`0` dead links) |
+| Wave 93 Schema & Parity Suite (`scripts/test-wave93-schema.cjs --dist`) | `623` assertions passed (`0` failed) across source + built HTML (`5` locales) |
+| i18n Health Suite (`scripts/test-i18n-health.mjs --all --allow-legacy-2-faqs`) | `203,650` checks passed (`0` errors; `764` legacy warnings) |
 | Quick Ops Engine (`npm run ops:quick`) | `210 / 210` tools (`1,050 / 1,050` pages, `0` orphans), `214 / 214` critical data assets verified, CWV score `85 / 100` (`55` JS = `562.3 KB` [max `23.8 KB`], `3` CSS = `354.2 KB` [max `339.3 KB`]) |
 | Structured Data SEO Audit (`npm run ops:seo`) | `810 / 1,050` tool pages compliant (`77.1%`) |
-| Sitemap & IndexNow Dry-Run (`npm run ops:indexnow -- --dry-run`) | `10,684` canonical URLs (`7,072.6 KB`); `3,127` priority consumer URLs (`90/90` allowlisted tools, `14/14` core hubs); `10,772` deduplicated URLs across `11` batches (`660.9 KB`) |
+| Sitemap & IndexNow Dry-Run (`npm run ops:indexnow -- --dry-run`) | `10,709` canonical URLs (`dist\sitemap-0.xml`); `3,132` priority consumer URLs (`90/90` allowlisted tools, `14/14` core hubs, `248` comparisons); `10,797` deduplicated URLs across `11` batches (`663.0 KB`) |
 | Cloudflare Redirect Budget | `1,980 / 2,000` static `_redirects` lines (`20` headroom) + `1,427` Edge middleware entries (`functions/_redirects-map.js`) |
