@@ -4046,5 +4046,85 @@ module.exports = {
       "parameter": "Pinch-Test Verification, 200°C Pre-Bake Tempering & Unscented Soap Wash",
       "guideline": "Pinch-test cups for zero white filler streaks; bake new silicone empty 2h at 200°C with vent fan; wash with fragrance-free soap and keep ≤220°C."
     }
+  },
+  "sourdough-bread-vs-yeast-bread-toasting-acrylamide": {
+    "materialThermal": {
+      "property": "Maillard Acrylamide Threshold vs. Lactic pH & Asparagine Depletion",
+      "threshold": "Maillard Onset >120°C | EU 2017/2158 Benchmarks: 50 µg/kg (Wheat), 100 µg/kg (Rye), 350 µg/kg (Crispbread)",
+      "details": "Protonation of asparagine below pH 4.5 alongside microbial free-amino consumption cuts acrylamide formation by 40%–75% in long-fermented sourdough."
+    },
+    "safetyStandard": {
+      "organization": "European Commission / EFSA / USDA FSIS",
+      "standard": "Regulation (EU) 2017/2158 Annex IV & USDA FSIS Moldy Foods Chart",
+      "citation": "Enforces ALARA golden-yellow toasting benchmarks for acrylamide mitigation and mandates total discard of porous mold-contaminated loaves."
+    },
+    "applianceSpecs": {
+      "parameter": "Golden-Yellow Shade Stop & Frozen-Slice Resistant Starch Protocol",
+      "guideline": "Freeze fresh slices in airtight wraps; toast direct from frozen to light golden-yellow (never dark brown/black) and empty toaster crumb trays weekly."
+    }
+  },
+  "ceramic-nonstick-vs-ptfe-waffle-maker": {
+    "materialThermal": {
+      "property": "Sol-Gel Silica Thermal Stability vs. PTFE Fluoropolymer Pyrolysis",
+      "threshold": "Ceramic Sol-Gel: 0 PFAS (Micro-cracks 12–24 mo) | PTFE: FDA Safe ≤230°C, Pyrolysis >260°C–300°C",
+      "details": "Waffle grid ridges reach 215°C–245°C; aerosol lecithin caramelizes >175°C while exposed ADC12 aluminum beneath chips reacts with acidic batters."
+    },
+    "safetyStandard": {
+      "organization": "US FDA / AVMA / California AB 1200",
+      "standard": "FDA 21 CFR § 177.1550 (Perfluorocarbons) & AVMA Avian PTFE Toxicosis Guidance",
+      "citation": "Regulates virgin PTFE food contact integrity below pyrolysis thresholds and enforces cookware fluoropolymer chemical transparency."
+    },
+    "applianceSpecs": {
+      "parameter": "Brushed Oil Protocol, Medium-Heat Dial & Removable-Plate Inspection",
+      "guideline": "Skip aerosol lecithin sprays; use silicone utensils only; replace removable plates upon flaking and prefer cast iron or ceramic around pet birds."
+    }
+  },
+  "air-fryer-vs-shallow-pan-frying-lipid-oxidation": {
+    "materialThermal": {
+      "property": "Bis-Allylic Lipid Peroxidation (4-HNE / MDA) & Forced-Air Oxygen Transfer",
+      "threshold": "PUFA Ox Rate 40× > Oleic | EU TPM Discard Limit: 24%–25% | Fries Acrylamide Limit: 500 µg/kg",
+      "details": "Air fryer forced convection (3 m/s, 21% O₂) oxidizes thin 30–50 µm oil films faster per gram while slashing total dietary fat uptake by 70%–85%."
+    },
+    "safetyStandard": {
+      "organization": "European Commission / IARC / AOCS",
+      "standard": "EU Regulation 2017/2158 (500 µg/kg Fries) & EU 24%–25% TPM Frying Oil Ceiling",
+      "citation": "Establishes upper polar compound degradation thresholds for frying oils, IARC Group 2A acrolein fume controls, and starchy food acrylamide limits."
+    },
+    "applianceSpecs": {
+      "parameter": "Single-Use High-Oleic Oil, ≤185°C Air Fry Cap & Post-Cook Degreasing",
+      "guideline": "Toss potatoes/proteins in fresh EVOO or avocado oil (never reuse dark pan oil or aerosol lecithin); keep air fryer ≤185°C–190°C and degrease baskets immediately."
+    }
+  },
+  "tin-can-storage-vs-glass-container-opened-leftovers": {
+    "materialThermal": {
+      "property": "Oxygen-Driven Tinplate Corrosion (Sn / Fe) & Epoxy Liner Hydrolysis vs. Inert Borosilicate",
+      "threshold": "Codex / EU Tin Limit: 200 mg/kg (Canned Food), 100 mg/kg (Beverages) | EU 2024/3190 BPA Ban (2026 Cutoffs)",
+      "details": "Atmospheric O₂ turns acidic opened cans (pH < 4.5) into active corrosion cells leaching tin/iron ions; borosilicate glass exhibits zero ion transfer."
+    },
+    "safetyStandard": {
+      "organization": "USDA FSIS / European Commission / Codex Alimentarius",
+      "standard": "Regulation (EU) 2024/3190 (BPA Ban) / Regulation (EU) 2023/915 (Sn Limits) & USDA FoodKeeper",
+      "citation": "Governs maximum inorganic tin thresholds in canned goods, phase-out of BPA food contact coatings, and 3–4 day ≤4°C leftover safety."
+    },
+    "applianceSpecs": {
+      "parameter": "Immediate Glass Transfer, ≤4°C Chilling & Zero Can-Heating Protocol",
+      "guideline": "Decant opened canned goods (especially tomatoes/fruit) into airtight glass at ≤4°C immediately; never heat or microwave food inside metal cans."
+    }
+  },
+  "raw-cast-iron-vs-stainless-steel-acidic-tomato-sauce": {
+    "materialThermal": {
+      "property": "Polymerized Lipid Acid Hydrolysis vs. Molybdenum-Passivated Cr₂O₃ (PREN)",
+      "threshold": "Raw Cast Iron: Acid Hydrolysis <pH 4.5 | Grade 304 PREN ~19 (0% Mo) vs. Grade 316Ti PREN ~25 (2%–3% Mo)",
+      "details": "Organic acids strip raw iron patina while Kamerud et al. (2013) recorded 6.8× Ni / 8.5× Cr initial-use spikes in brand-new 304 pans before passivation settles."
+    },
+    "safetyStandard": {
+      "organization": "Council of Europe / EDQM / UC Davis / ASTM",
+      "standard": "CoE Resolution CM/Res(2013)9 (SRL: 0.14 mg/kg Ni, 0.25 mg/kg Cr) & ASTM A240",
+      "citation": "Defines Specific Release Limits for food-contact metals and establishes corrosion resistance testing for austenitic 304 and molybdenum-alloyed 316 stainless cookware."
+    },
+    "applianceSpecs": {
+      "parameter": "Acidic Simmer Material Selection, Pre-Passivation & Boiling-Salt Rule",
+      "guideline": "Reserve raw cast iron for low-acid searing (≤15 min brief pan sauces); boil 304/316 stainless for long tomato/wine sauces, salt only at a boil, and store leftovers in glass."
+    }
   }
 };
