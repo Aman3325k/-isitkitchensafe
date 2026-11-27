@@ -3806,5 +3806,85 @@ module.exports = {
       "parameter": "3-Second Magnet Check, Zero Boost-on-Disc & Lift-Not-Slide Rule",
       "guideline": "Upgrade to ferromagnetic 430-clad stainless, carbon steel, or cast iron; never run an adapter disc dry or on Boost; always match base diameter to coil rings."
     }
+  },
+  "glass-shelf-vs-wire-shelf-refrigerator": {
+    "materialThermal": {
+      "property": "Liquid Capillary Containment vs. Cold-Glass ΔT Thermal Shock",
+      "threshold": "Glass SpillGuard: 200–350 mL retention (Zero drip) vs. Wire Rack (>15 mm gap): 100% gravity cascade",
+      "details": "Raw poultry purge fluid (~4.5×10⁵ CFU/mL Salmonella) breaks capillary bridges across wire bars immediately; tempered glass prevents drip cascade and fan bio-aerosols but must warm to ambient before washing."
+    },
+    "safetyStandard": {
+      "organization": "USDA FSIS / FDA Food Code / EPA",
+      "standard": "USDA Cold-Zone Vertical Shelf Hierarchy & 200 ppm NaOCl Disinfection (≤4°C / 40°F)",
+      "citation": "Federal food safety protocols preventing raw protein drip cross-contamination and 4°C Listeria acid-tolerance survival."
+    },
+    "applianceSpecs": {
+      "parameter": "Bottom-Shelf Rimmed Tray & 1-Minute 200 ppm Bleach Contact",
+      "guideline": "Store raw meats exclusively on the bottom shelf inside a rimmed tray; disinfect spills with warm detergent followed by 200 ppm bleach solution after tempered glass warms gently."
+    }
+  },
+  "stainless-steel-thermos-vs-glass-lunch-container": {
+    "materialThermal": {
+      "property": "Vacuum Hot-Hold Thermal Retention vs. Microwave Dielectric Inertness",
+      "threshold": "Pre-Warmed Steel Jar: >140°F (60°C) for 4–6h | Borosilicate 3.3 Glass: ΔT ~165°C, 0.00% leaching, microwave safe",
+      "details": "Stainless vacuum chambers halt convective heat loss to hold soups past 140°F, whereas non-vented stoppers risk steam pressurization; borosilicate withstands direct microwave heating safely."
+    },
+    "safetyStandard": {
+      "organization": "USDA FSIS / US CPSC",
+      "standard": "USDA 40°F–140°F Danger Zone (2-Hour Rule) & CPSC Recall #26-444 Pressure Ejection Warning",
+      "citation": "Federal cold/hot-holding foodborne pathogen thresholds paired with consumer recall engineering data on insulated stopper pressure buildup."
+    },
+    "applianceSpecs": {
+      "parameter": "5-Min Boiling Prime, 1-Inch Headspace & Gasket Sanitization",
+      "guideline": "Prime steel jars 5 min with boiling water before hot fills; leave 1 in. headspace and check CPSC recalls; pull glass container silicone gaskets weekly to scrub biofilm."
+    }
+  },
+  "wooden-cutting-board-vs-stainless-steel-cutting-board": {
+    "materialThermal": {
+      "property": "Edge Deformation Metallurgy & Capillary Xylem Desiccation",
+      "threshold": "End-Grain Maple: Janka ~1,450 lbf (0.00 g plastic) vs. SUS304 Board: ~150–200 HV rigid metal (rapid 58 HRC dulling)",
+      "details": "Wood yields microscopically under steel bevels while pulling moisture into vertical pores (99.9% bacterial die-off per UC Davis); steel boards roll/chip edges and increase wet-cut slip hazards."
+    },
+    "safetyStandard": {
+      "organization": "FDA Food Code / USDA FSIS / ACS ES&T",
+      "standard": "FDA § 4-101.17 Hardwood Exemption & ACS ES&T / EHP (2025) Zero-Microplastic Prep",
+      "citation": "Regulatory approval of close-grained hardwood prep surfaces alongside 2023–2025 evidence linking PE/PP boards to 7.4–50.7 g/yr shedding and gut dysbiosis."
+    },
+    "applianceSpecs": {
+      "parameter": "No-Dishwasher Wood Care, 3% H2O2 Sanitizing & Raw-Meat Segregation",
+      "guideline": "Wash wood immediately with hot soap, sanitize with 3% hydrogen peroxide or 200 ppm bleach, dry upright, oil monthly with food-grade mineral oil, and keep a separate meat board."
+    }
+  },
+  "aerosol-cooking-spray-vs-oil-mister": {
+    "materialThermal": {
+      "property": "Soy Lecithin Varnish Polymerization vs. Propellant Flash Hazard",
+      "threshold": "Aerosol Lecithin Polymerizes >175°C (350°F) + Hydrocarbon Flash | Pure Oil Mister: Zero Propellant / Zero Emulsifier",
+      "details": "Phosphatidylcholine (lecithin) phospholipids undergo thermal crosslinking far below smoke point, glazing PTFE and sol-gel silica pores while liquefied propane/isobutane raises flash-ignition risk."
+    },
+    "safetyStandard": {
+      "organization": "US CPSC / NFPA / Cookware OEM Manuals",
+      "standard": "21 CFR § 184.1400 / Flammable Aerosol Pressurized Storage & OEM Nonstick Warranty Rules",
+      "citation": "Safety standards governing flammable aerosol propellants near open ignition sources and manufacturer prohibitions on propellant sprays in air fryers/ceramic pans."
+    },
+    "applianceSpecs": {
+      "parameter": "Off-Flame Oil Misting, <49°C Can Storage & Baking Soda Varnish Strip",
+      "guideline": "Mist cold pans or baskets away from live flames using a UV-protected glass/steel pump mister; never store pressurized cans over stoves; clean old lecithin buildup gently with baking soda paste."
+    }
+  },
+  "olive-oil-vs-avocado-oil-high-heat-frying": {
+    "materialThermal": {
+      "property": "Smoke Point Thermal Ceiling vs. Polyphenol Oxidative Stability (TPM / 4-HNE)",
+      "threshold": "EVOO: ~190°C–210°C smoke (lowest TPM/4-HNE <210°C) | Refined Avocado Oil: ~249°C–271°C smoke (~70%+ MUFA)",
+      "details": "De Alzaa et al. (2018) showed EVOO polyphenols keep Total Polar Materials well below EU 24%–27% discard thresholds, while pure avocado oil handles >215°C searing without acrolein cracking."
+    },
+    "safetyStandard": {
+      "organization": "IARC / EU Fry-Oil Standards / UC Davis",
+      "standard": "EU ≤24%–27% TPM Limit, IARC Group 2A Acrolein Smoke Avoidance & UC Davis Oil Purity Benchmarks",
+      "citation": "Biochemical oxidation limits protecting against cytotoxic 4-HNE alkenals, malondialdehyde (MDA), and respiratory acrolein smoke."
+    },
+    "applianceSpecs": {
+      "parameter": "Dark-Cabinet UV Storage, Exhaust Hood Venting & Fresh Harvest Dates",
+      "guideline": "Store dark-glass bottles away from stove heat; match EVOO to ≤400°F sautés and verified avocado oil to 425°F–500°F searing with a ducted hood running."
+    }
   }
 };
