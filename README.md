@@ -4,7 +4,7 @@ A static kitchen safety reference platform and interactive consumer tool suite a
 
 ## Overview
 
-IsItKitchenSafe delivers **12452+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **210 interactive tools** (**1,050 localized tool pages**, including **89 Google-indexed Everyday Consumer Kitchen Safety Tools**), **137 evergreen guides × 5 languages = 685 localized articles**, **243 comparisons × 5 languages = 1,215 localized pages**, **1,307 item pages per language (6,535 localized reference pages)**, **WCAG 2.1 AA accessibility**, and transparent E-E-A-T verification standards.
+IsItKitchenSafe delivers **12467+ static pages** across **11 verticals** and **5 languages** (**EN, ES, PT, ZH-CN, JA**), pairing fast appliance-safety verdicts with **210 interactive tools** (**1,050 localized tool pages**, including **90 Google-indexed Everyday Consumer Kitchen Safety Tools**), **140 evergreen guides × 5 languages = 700 localized articles**, **243 comparisons × 5 languages = 1,215 localized pages**, **1,307 item pages per language (6,535 localized reference pages)**, **WCAG 2.1 AA accessibility**, and transparent E-E-A-T verification standards.
 
 ## Tech Stack
 - **Framework**: Astro.js (MPA static generation)
@@ -14,8 +14,9 @@ IsItKitchenSafe delivers **12452+ static pages** across **11 verticals** and **5
 
 ## Consumer Growth, E-E-A-T & Retention Architecture
 
-### Everyday Consumer Kitchen Safety Tools (89 Google-Indexed Tools)
-All 210 interactive tools are split cleanly between everyday consumer utilities and specialized commercial/lab simulators (**92 Home Kitchen Safety** + **118 Commercial & Industrial Engineering Lab** = **1,050 localized tool pages** across 5 languages). **89 high-utility consumer tools** are explicitly allowlisted for search indexing in [`src/data/consumer-tools-allowlist.json`](src/data/consumer-tools-allowlist.json) across all 5 languages, including:
+### Everyday Consumer Kitchen Safety Tools (90 Google-Indexed Tools)
+All 210 interactive tools are split cleanly between everyday consumer utilities and specialized commercial/lab simulators (**92 Home Kitchen Safety** + **118 Commercial & Industrial Engineering Lab** = **1,050 localized tool pages** across 5 languages). **90 high-utility consumer tools** are explicitly allowlisted for search indexing in [`src/data/consumer-tools-allowlist.json`](src/data/consumer-tools-allowlist.json) across all 5 languages, including:
+- **Wooden Spoon Micro-Crack Bacterial Biofilm & Moisture Modeler** (`wooden-utensil-biofilm-modeler`)
 - **Refrigerator Raw Meat Cross-Contamination & Bio-Aerosol Modeler** (`refrigerator-cross-contamination-modeler`)
 - **Refrigerator Warm / Freezer Cold Defrost Failure & Pathogen Modeler** (`refrigerator-defrost-safety-modeler`)
 - **Kitchen Exhaust Range Hood VOC, NO2 & PM2.5 Extraction Efficiency Modeler** (`range-hood-extraction-efficiency-modeler`)

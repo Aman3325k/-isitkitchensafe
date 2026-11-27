@@ -44,6 +44,12 @@ const curatedTools: Array<{
   date: string;
 }> = [
   {
+    path: '/tools/wooden-utensil-biofilm-modeler/',
+    title: 'Wooden Spoon & Utensil Micro-Crack Bacterial Biofilm & Moisture Modeler',
+    description: 'Model hardwood grain porosity, dishwasher hygroscopic stress cracking, laminated bamboo glue hydrolysis, USP mineral oil vs. rancid cooking oils, Staph Enterotoxin A survival, and the 1-mm retirement rule.',
+    date: '2026-11-27'
+  },
+  {
     path: '/tools/refrigerator-cross-contamination-modeler/',
     title: 'Refrigerator Raw Meat Cross-Contamination & Bio-Aerosol Modeler',
     description: 'Model raw meat drip capillarity, wire shelf liquid cascade, convection fan airborne bio-aerosol dispersal, 4°C psychrotrophic Listeria proliferation, and 200 ppm NaOCl vs. 5% vinegar sanitization kinetics.',
