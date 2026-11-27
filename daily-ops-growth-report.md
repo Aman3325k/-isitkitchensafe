@@ -4,7 +4,7 @@
 **Target Domain:** `https://isitkitchensafe.com`
 **Workspace:** `E:\Desktop\isitkitchensafe.com\safecheck`
 **Workflow Execution Policy:** Strict Single-Task Focus (`WIP = 1`) & Zero-Defect Gate
-**Wave Status:** **Wave 97 (`TOOL-CONSUMER-124`) — COMPLETED & VERIFIED**
+**Wave Status:** **Wave 97 (`TOOL-CONSUMER-124`) — COMPLETED & PUSHED TO `origin/main`**
 
 ---
 
@@ -52,6 +52,7 @@
 | **SEO / Schema Audit (`npm run ops:seo`)** | **810 / 1,050 compliant (77.1%)** | Automated JSON-LD & canonical/hreflang scan |
 | **IndexNow Dry-Run (`npm run ops:indexnow -- --dry-run`)** | **10,887 URLs ready (exit 0)** | **3,182** consumer URLs (`92/92` tools, `258` comparisons), 11 batches, `0` HTTP sent |
 | **Comparisons Indexed (`/compare/`)** | **258 per lang (1,290 pages)** | Across `en`, `es`, `pt`, `zh-cn`, `ja` |
+| **Git Commit Hash (Wave 97)** | **`bffb8d4`** | Primary Wave 97 commit on `main`, pushed to `origin/main` |
 
 ---
 
