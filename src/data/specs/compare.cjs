@@ -3886,5 +3886,85 @@ module.exports = {
       "parameter": "Dark-Cabinet UV Storage, Exhaust Hood Venting & Fresh Harvest Dates",
       "guideline": "Store dark-glass bottles away from stove heat; match EVOO to ≤400°F sautés and verified avocado oil to 425°F–500°F searing with a ducted hood running."
     }
+  },
+  "hardwood-wooden-spoon-vs-bamboo-spoon": {
+    "materialThermal": {
+      "property": "Hygroscopic Capillary Wicking vs. Laminated Adhesive Hydrolysis",
+      "threshold": "Solid Hardwood (0 glue seams; USP mineral oil barrier) vs. Laminated Bamboo (resin delamination + abrasive SiO2 phytoliths)",
+      "details": "Vega Gutierrez et al. (2023) demonstrated mineral/linseed oil sealing slows immediate Salmonella/Listeria wicking in wood, while solid billets eliminate bamboo adhesive joint splitting."
+    },
+    "safetyStandard": {
+      "organization": "FDA Food Code / MDPI Coatings (2023) / UC Davis",
+      "standard": "FDA § 4-101.17 Hardwood Exemption & Capillary Desiccation Hygiene Protocols",
+      "citation": "Food-contact wood hygiene guidelines requiring smooth close-grained surfaces, zero dishwasher hydrolysis, and upright air drying."
+    },
+    "applianceSpecs": {
+      "parameter": "Handwash Only, Upright Drying & 1-mm Crack Retirement Rule",
+      "guideline": "Wash promptly in hot soapy water without soaking; condition monthly with USP mineral oil; retire any spoon showing splinters, glue-line separation, or ≥1 mm cracks."
+    }
+  },
+  "stovetop-pressure-cooker-vs-electric-pressure-cooker": {
+    "materialThermal": {
+      "property": "Steam Pressure Thermal Lethality (11.6 PSI vs. 15 PSI) & Interlock Integrity",
+      "threshold": "Electric UL 1026: ~11.6 PSI / 116°C (240°F) | Stovetop 15 PSI: 121°C (250°F) for USDA low-acid spore kill",
+      "details": "True 15 PSI stovetop pressure canners deliver validated botulinum thermal lethality; electric units rely on intact float pins and silicone gaskets (inspect recalls like CPSC #27-030)."
+    },
+    "safetyStandard": {
+      "organization": "UL 1026 / US CPSC / USDA NCHFP",
+      "standard": "UL 1026 Pressure-Cooker Interlock Safety, CPSC Warning #27-030 & NCHFP Canning Code",
+      "citation": "Mandatory 1/2 foaming vs. 2/3 soup fill-line ceilings, mechanical/electronic lid lock validation, and C. botulinum 121°C canning rules."
+    },
+    "applianceSpecs": {
+      "parameter": "Minimum Thin Liquid (1–2 Cups), 1/2 Foaming Rule & Gasket Replacement",
+      "guideline": "Use at least 1 cup (6-qt) or 1.5–2 cups (8-qt) thin liquid; keep foaming foods ≤1/2 pot; inspect silicone seal rings and float valves before every lock."
+    }
+  },
+  "aluminum-foil-vs-glass-baking-dish-acidic-foods": {
+    "materialThermal": {
+      "property": "Amphoteric Al2O3 Dissolution & Galvanic Cell vs. Vitreous Inertness",
+      "threshold": "Bare Foil <pH 4.5 + 220°C: Exponential Al3+ chelation | Borosilicate 3.3 Glass: 0.00 mg/kg leaching",
+      "details": "Citric, malic, and acetic acids complex aluminum ions above 180°C and pit stainless-steel galvanic interfaces; ISO 3585 borosilicate remains chemically inert."
+    },
+    "safetyStandard": {
+      "organization": "EFSA / Council of Europe / FDA",
+      "standard": "EFSA 1 mg/kg bw/week Aluminum TWI & CoE Resolution CM/Res(2013)9",
+      "citation": "European toxicological intake limits and peer-reviewed electrochemistry thresholds restricting bare aluminum contact with acidic/salty foods."
+    },
+    "applianceSpecs": {
+      "parameter": "Parchment Barrier Protocol, -25°F Glass Adjustment & Zero Oven-Floor Foil",
+      "guideline": "Bake acidic dishes in inert glass at -25°F; insert parchment between acidic food and foil lids; never line oven floors with aluminum foil."
+    }
+  },
+  "cast-iron-vs-stainless-steel-glass-cooktop": {
+    "materialThermal": {
+      "property": "Hertzian Point-Impact Fracture & Griffith Abrasion vs. Thermal Shock",
+      "threshold": "Glass-Ceramic ΔT ~700°C (heat safe) | Cast Iron 6–12 lb Drop/Grit Abrasion vs. Smooth Tri-Ply Steel (~50% lighter)",
+      "details": "Lithium aluminosilicate cooktops fail mechanically via dropped mass impact and grit-scratched Griffith surface flaws rather than steady cooking temperatures."
+    },
+    "safetyStandard": {
+      "organization": "SCHOTT CERAN / UL 858 / Cooktop OEM Manuals",
+      "standard": "UL 858 Household Electric Range Safety & OEM Glass-Ceramic Flat-Base Limits",
+      "citation": "Manufacturer engineering constraints prohibiting dragged rough iron, oversized heat-trapping bases, and continued operation of cracked 240V glass tops."
+    },
+    "applianceSpecs": {
+      "parameter": "Two-Hand Lift Rule, Smooth Base Inspection & Warm Sugar Scraping",
+      "guideline": "Wipe cooktop grit clean before placing pans; always lift cast iron with two hands instead of sliding; unplug and replace any cracked glass top before cooking."
+    }
+  },
+  "molded-fiber-takeout-bowl-vs-glass-container": {
+    "materialThermal": {
+      "property": "PFAS / Dispersion-Barrier Grease Migration vs. Vitreous Silicate Inertness",
+      "threshold": "Molded Fiber: EU PPWR ≤25 ppb / ≤250 ppb / ≤50 ppm PFAS + ≤100 mg/kg Heavy Metals | Glass 3.3: 0.00% leaching",
+      "details": "Hot lipid and steam contact extracts surfactants and barrier monomers from wet cellulose pulp above 85°C, whereas borosilicate glass remains totally inert."
+    },
+    "safetyStandard": {
+      "organization": "European Union (PPWR) / US FDA",
+      "standard": "Regulation (EU) 2025/40 Article 5(5) (Effective Aug 12, 2026) & US FDA PFAS Phase-Out",
+      "citation": "Mandatory food-contact packaging ceilings capping non-polymeric PFAS (25/250 ppb), total fluorine PFAS (50 ppm), and heavy metals (100 mg/kg)."
+    },
+    "applianceSpecs": {
+      "parameter": "Prompt Takeout Glass Transfer, Microwave Glass Plating & Gasket Sanitization",
+      "guideline": "Transfer hot takeout out of fiber bowls into glass within 1 hour; never microwave disposable fiberware; wash glass container lid gaskets weekly."
+    }
   }
 };
